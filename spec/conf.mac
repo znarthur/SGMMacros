@@ -1,0 +1,1337 @@
+#
+# Setup Macro Motors for Slits
+# macro_motor.mac
+#
+#
+
+
+##Set hexapod velocity directly
+def hex_speed '{
+        local velo
+
+	velo = $1*10000       	
+	### Just do it for one motor and the rest will update velocities 
+	motor_par("hex_x", "velocity", velo)
+
+}'
+def hex_stop '{
+	sock_put("192.168.0.5:50000", "STP\n")
+
+}'
+def hex_reset '{
+	sock_par("192.168.0.5:50000", "flush")
+	sock_put("192.168.0.5:50000", "MOV X 0 Y 0 Z 0\n")	
+
+}'
+
+global FIRST
+
+def mac_mot_par(mne, key, get_set, p1) '{
+	local setvelo, getvelo
+	local x
+
+	if (key == "velocity") {            ### do not set position with spec
+		if ((mne == hex_x) | (mne == hex_y) | (mne == hex_z)){
+			byte array barr[2]
+			barr[0] = asc("5") 
+			barr[0] = barr[0] - 0x30
+			barr[1] = 0x0a
+			sock_put("192.168.0.5:50000", barr)
+			x = sock_get("192.168.0.5:50000")
+			while(x != 0){
+				sock_put("192.168.0.5:50000", barr)
+				sleep(0.01)
+				x = sock_get("192.168.0.5:50000")
+			}
+			setvelo = p1/10000 #turn steps/s into mm/s for hexapod
+			velo_string = sprintf("VLS %s\n", setvelo)
+			sock_put("192.168.0.5:50000", velo_string)
+			
+			### Now have to update all hexapod velocities in spec -- dont know how
+			if (FIRST == 0){
+				FIRST = 1
+				motor_par(hex_x, "velocity", p1)
+				motor_par(hex_y, "velocity", p1)
+				motor_par(hex_z, "velocity", p1)
+				motor_par(hex_xp, "velocity", p1)
+				motor_par(hex_yp, "velocity", p1)
+				motor_par(hex_zp, "velocity", p1)
+				FIRST = 0
+			}		
+		}
+		if (mne == en) {
+			### Want to use time instead of velocity for energy motion
+			###printf("P1:%i\n", p1) 
+			epics_put("AM1611-4-I10:energy:trajectory:time:s", p1)
+		}
+	}
+}'
+
+#global hexread_ret
+
+#def read_hexapod '{
+#	local ans
+#	local ret
+#	local pdg
+#	while(1) {
+#		ans = sock_get("192.168.0.5:50000","\n")
+#		ret = sprintf("%s%s", ret, ans)
+#		#sleep(0.01)
+#		pdg = sock_par("192.168.0.5:50000","queue")
+#		if(pdg == 0) {
+#			break
+#		}
+#	}
+#	hexread_ret = ret
+#	return(ret)
+#}'
+
+global hex_set_x
+global hex_set_y
+global hex_set_z
+
+def mac_mot_cmd(mne, key, p1) '{
+        local en_setp
+	local xpsx, xpsy, xpsz, xpsr
+	local kbvp, kbhp
+	local hex_lines
+	local hex_x_pos, hex_y_pos, hex_z_pos, hex_u_pos, hex_v_pos, hex_w_pos
+		
+	if (key == "set_position") {            ### do not set position with spec
+                return
+        }
+        if (key == "position") {                ### read position of macro motor
+                
+		if (mne == hex_x) {
+			sock_par("192.168.0.5:50000", "flush")
+			sock_put("192.168.0.5:50000", "POS? X\n")
+			hex_xline = sock_get("192.168.0.5:50000", "\n")
+			sscanf(hex_xline, "X=%s\n", hex_x_pos)
+			return (hex_x_pos)
+                }
+                if (mne == hex_y) {
+			sock_par("192.168.0.5:50000", "flush")
+			sock_put("192.168.0.5:50000", "POS? Y\n")
+			hex_yline = sock_get("192.168.0.5:50000", "\n")
+			sscanf(hex_yline, "Y=%s\n", hex_y_pos)
+			return (hex_y_pos)
+                }
+                if (mne == hex_z) {
+			sock_par("192.168.0.5:50000", "flush")
+			sock_put("192.168.0.5:50000", "POS? Z\n")
+			hex_zline = sock_get("192.168.0.5:50000", "\n")
+			sscanf(hex_zline, "Z=%s\n", hex_z_pos)
+			return (hex_z_pos)
+                }
+                if (mne == en) {
+                	en_setp = epics_get("AM1611-4-I10:energy:eV:fbk")
+                	return (en_setp)
+		}
+		if (mne == xps_x) {
+			xpsx = epics_get("SMTR16114I1022:mm:fbk")
+			return(xpsx)
+		}
+		if (mne == xps_y) { 
+			xpsy = epics_get("SMTR16114I1023:mm:fbk")
+			return(xpsy)
+		}
+		if (mne == xps_z) {
+			xpsz = epics_get("SMTR16114I1024:mm:fbk")
+			return(xpsz)
+		}
+		if (mne == xps_r) {
+			xpsr =  epics_get("SMTR16114I1025:mm:sp")
+			return(xpsr)
+		}
+		if (mne == kbv_p) {
+                        kbvp =  epics_get("SMTR16114I1036:step:sp")
+                        return(kbvp)
+		}
+		if (mne == kbh_p) {
+                        kbhp =  epics_get("SMTR16114I1037:step:sp")
+                        return(kbhp)
+		}
+                else{
+                	return(0)
+                }
+        }
+        if (key == "start_one") {  ### move macro motor
+                if (mne == hex_x) {
+			hex_set_x = p1
+		}
+	        if (mne == hex_y) {
+			hex_set_y = p1
+                }
+                if (mne == hex_z) {
+			hex_set_z = p1
+                }
+                if (mne == en) {
+                        epics_put("AM1611-4-I10:energy:eV", p1)
+		}
+		if (mne == xps_x) { 
+			epics_put("SMTR16114I1022:mm", p1)
+                	sleep(.01)                       ### optional, but may help
+		}
+		if (mne == xps_y) {
+			epics_put("SMTR16114I1023:mm", p1)
+                	sleep(.01)                       ### optional, but may help
+		}
+		if (mne == xps_z) {
+			epics_put("SMTR16114I1024:mm", p1)
+                	sleep(.01)                       ### optional, but may help
+		}
+		if (mne == xps_r) {
+			epics_put("SMTR16114I1025:mm", p1)
+                	sleep(.01)                       ### optional, but may help
+		}
+		if (mne == kbv_p) {
+                        epics_put("SMTR16114I1036:step", p1)
+                        sleep(.01)                       ### optional, but may help
+                }
+		if (mne == kbh_p) {
+                        epics_put("SMTR16114I1037:step", p1)
+                        sleep(.01)                       ### optional, but may help
+                }
+
+	}
+	
+	if (key == "stop") {
+		if (mne == hex_x) {
+			sock_put("192.168.0.5:50000", "STP\n")
+                }
+
+	}
+
+	if (key == "start_all") {
+		local hex_position
+		hex_position = sprintf("MOV X %s Y %s Z %s\n", hex_set_x, hex_set_y, hex_set_z)
+		sock_put("192.168.0.5:50000", hex_position)
+	}
+
+	if (key == "get_status") {
+		local movx, movy, movz, moven
+		local x
+
+		if (mne == hex_x | mne == hex_y | mne == hex_z) {
+			byte array barr[2]
+			barr[0] = asc("5") 
+			barr[0] = barr[0] - 0x30
+			barr[1] = 0x0a
+			sock_put("192.168.0.5:50000", barr)
+			x = sock_get("192.168.0.5:50000")
+			if (x  != 0) {
+				return(2)
+			}
+			else{
+				return(0)
+			}
+		}
+
+		if (mne == en) {
+			sleep(0.1)
+			if(epics_get("AM1611-4-I10:energy:status") == "MOVE DONE")
+				return(0)
+			else
+				return(2)
+				#print "Energy motors moving."
+		}
+
+		if (mne == xps_x | mne == xps_y | mne == xps_z | mne == xps_r) {
+			if((epics_get("SMTR16114I1022:status") == "MOVE DONE") & (epics_get("SMTR16114I1023:status") == "MOVE DONE") & (epics_get("SMTR16114I1024:status") == "MOVE DONE") & (epics_get("SMTR16114I1025:status") == "MOVE DONE"))
+				return(0)
+			else
+				return(2)
+				#print "XPS Endstation motors moving."
+		}
+		
+		if (mne == kbv_p | mne == kbh_p) {
+			if((epics_get("SMTR16114I1036:status") == "MOVE DONE") & (epics_get("SMTR16114I1037:status") == "MOVE DONE"))
+				return(0)
+			else
+				return(2)
+				#print "KB rotation motors moving."
+		}
+
+	}
+	if (key == "preread_all")  return
+}'
+
+########################################
+#
+# Use macro scaler as timer
+# delayT.mac
+#
+def delayT_cmd(mne, key, p1) '{
+        if(key == "prestart_all") {     ### set scan time by changing PV
+		sleep(0.01)
+                epics_put("BL1611-ID-1:mcs:continuous",0) # turn off continuous counting
+                epics_put("BL1611-ID-1:mcs:delay",COUNT_TIME*1000) # time in msec unit
+		sleep(0.01)
+        }
+        if ( key == "start_one") {      ### start scan by set the start bit to 1
+		
+		while( ( epics_get("BL1611-ID-1:mcs:startScan") ) == "Scanning") {
+			sleep(0.01)
+		}
+
+                epics_put("BL1611-ID-1:mcs:startScan",1, 0.5)
+        }
+
+        if ( key == "get_status" ) {    ### wait until the start bit changed to zero    
+	
+	        if( ( epics_get("BL1611-ID-1:mcs:startScan") ) == "Scanning") {
+        #	       	printf("Scaler Busy\n")
+			return(1)
+                }
+               	
+	#	printf("Scaler DONE\n")
+                return(0)
+        }
+}'
+
+################################
+#
+# Setup XEOL macro mca
+#
+################################
+def xeol_cmd(mne, key, p1, p2, data) '{
+	if (key == "run") {
+		local microsecs
+		epics_put("SA0000-03:AcquisitionMode", 0)
+		microsecs= COUNT_TIME*1000000
+		epics_put("SA0000-03:SetIntegration", microsecs)
+		epics_put("SA0000-03:Acquire", 1)
+	}
+	if (key == "read") {
+		data = epics_get("SA0000-03:DarkCorrectedSpectra")
+		sleep(0.1) #This is necessary!!!
+	}
+}'
+def xeol_config(num, mca) '{
+	print "Setup XEOL"
+	return "1024 long"
+}'
+
+################################
+#
+# Setup Multi-Channel Scaler Counters
+# macro_mcs.mac
+#
+def mcs_cnt_cmd(mne, key) '{
+        if (key == "counts") {
+                local t1, pd1, tey, io, roi1, roi2, roi3, roi4, gr_up, gr_dn
+		local ocr1_mcs, icr1_mcs, ocr2_mcs, icr2_mcs, ocr3_mcs, icr3_mcs, ocr4_mcs, icr4_mcs
+                if (mne == t1_r) {
+                	t1 = epics_get("BL1611-ID-1:mcs00:fbk")
+                        return t1
+                        }
+                if (mne == pd1_r) {
+                        pd1 = epics_get("BL1611-ID-1:mcs01:fbk")
+                        return pd1
+                        }
+                if (mne == tey_r) {
+                        tey = epics_get("BL1611-ID-1:mcs02:fbk")
+                        return tey
+                        }
+                if (mne == io_r) {
+                        io = epics_get("BL1611-ID-1:mcs03:fbk")
+                        return io
+                        }
+                if (mne == roi1_r) {
+                        roi1 = epics_get("BL1611-ID-1:mcs06:fbk")
+                        return roi1
+                        }
+		if (mne == roi2_r) {
+                        roi2 = epics_get("BL1611-ID-1:mcs07:fbk")
+                        return roi2
+                        }
+		if (mne == roi3_r) {
+                        roi3 = epics_get("BL1611-ID-1:mcs08:fbk")
+                        return roi3
+                        }
+		if (mne == roi4_r) {
+                        roi4 = epics_get("BL1611-ID-1:mcs09:fbk")
+                        return roi4
+                        }
+		if (mne == gr_up_r) {
+                        gr_up = epics_get("BL1611-ID-1:mcs14:fbk")
+                        return gr_up
+                        }
+		if (mne == gr_dn_r) {
+                        gr_dn = epics_get("BL1611-ID-1:mcs15:fbk")
+                        return gr_dn
+                        }
+		if (mne == ocr1) {
+                        ocr1_mcs = epics_get("BL1611-ID-1:mcs24:fbk")
+                        return ocr1_mcs
+                        }
+		if (mne == icr1) {
+                        icr1_mcs = epics_get("BL1611-ID-1:mcs25:fbk")
+                        return icr1_mcs
+                        }
+		if (mne == ocr2) {
+                        ocr2_mcs = epics_get("BL1611-ID-1:mcs26:fbk")
+                        return ocr2_mcs
+                        }
+		if (mne == icr2) {
+                        icr2_mcs = epics_get("BL1611-ID-1:mcs27:fbk")
+                        return icr2_mcs
+                        }
+		if (mne == ocr3) {
+                        ocr3_mcs = epics_get("BL1611-ID-1:mcs28:fbk")
+                        return ocr3_mcs
+                        }
+		if (mne == icr3) {
+                        icr3_mcs = epics_get("BL1611-ID-1:mcs29:fbk")
+                        return icr3_mcs
+                        }
+		if (mne == ocr4) {
+                        ocr4_mcs = epics_get("BL1611-ID-1:mcs30:fbk")
+                        return ocr4_mcs
+                        }
+		if (mne == icr4) {
+                        icr4_mcs = epics_get("BL1611-ID-1:mcs31:fbk")
+                        return icr4_mcs
+                        }
+		if (mne == grup) {
+                        grup_mcs = epics_get("BL1611-ID-1:mcs06:fbk")
+                        return grup_mcs
+                        }
+		if (mne == grdown) {
+                        grdown_mcs = epics_get("BL1611-ID-1:mcs07:fbk")
+                        return grdown_mcs
+                        }
+
+                }
+        if (key == "start_all") return
+	if ( key == "get_status" ) return
+	if (key == "halt_all") return
+        if (key == "halt_one") return
+        if (key == "prestart_all") return
+        if (key == "prestart_one") return
+}'
+
+
+#################################
+#
+# Hexapod macro motors for motion in measurement plane
+#
+#
+
+def hex_p_par(mne, key, get_set, p1) '{
+	local setvelo
+	local x
+	byte array barr[2]
+
+	if (key == "velocity") {            ### do not set position with spec
+		barr[0] = asc("5") 
+		barr[0] = barr[0] - 0x30
+		barr[1] = 0x0a
+		sock_put("192.168.0.5:50000", barr)
+		x = sock_get("192.168.0.5:50000")
+		while(x != 0){
+			sock_put("192.168.0.5:50000", barr)
+			sleep(0.01)
+			x = sock_get("192.168.0.5:50000")
+		}
+		setvelo = p1/10000 #turn steps/s into mm/s for hexapod
+		velo_string = sprintf("VLS %s\n", setvelo)
+		sock_put("192.168.0.5:50000", velo_string)
+			
+		if (FIRST==0){
+                	FIRST = 1
+                        motor_par(hex_x, "velocity", p1)
+                        motor_par(hex_y, "velocity", p1)
+                        motor_par(hex_z, "velocity", p1)
+                        motor_par(hex_xp, "velocity", p1)
+                        motor_par(hex_yp, "velocity", p1)
+                        motor_par(hex_zp, "velocity", p1)
+                        FIRST = 0
+                        }
+                return
+	}
+
+	if (key == "get_status") {
+                local movx, movy, movz
+
+		barr[0] = asc("5") 
+		barr[0] = barr[0] - 0x30
+		barr[1] = 0x0a
+		sock_put("192.168.0.5:50000", barr)
+		x = sock_get("192.168.0.5:50000")
+		if (x  != 0) {
+			return(2)
+		}
+		else{
+			return(0)
+		}
+
+        }
+
+
+}'
+
+def hex_p_config(mne, type, unit, module, chan) '{
+	if (type == "mot")
+		return "hex_x hex_y hex_z"
+}'
+def hex_p_calc(mne, mode) '{
+
+	if (mode == 0) {
+			A[hex_xp] = A[hex_x]*-0.258819 + A[hex_y]*-0.965926
+			A[hex_yp] = A[hex_x]*0.683013 + A[hex_y]*-0.183013 - A[hex_z]*0.707107
+			A[hex_zp] = A[hex_x]*0.683013 + A[hex_y]*-0.183013 + A[hex_z]*0.707107
+	} else {
+			A[hex_x] = A[hex_xp]*-0.258819+A[hex_yp]*+0.683013+A[hex_zp]*0.683013
+			hex_set_x = A[hex_x]
+			A[hex_y] = A[hex_xp]*-0.965926+A[hex_yp]*-0.183013+A[hex_zp]*-0.183013
+			hex_set_y = A[hex_y]
+			A[hex_z] = A[hex_yp]*-0.707107+A[hex_zp]*0.707107
+			hex_set_z = A[hex_z]
+	}
+}'
+###########################################
+def lights_on '{
+	epics_put("ILC1611-4-I10-02", 100)
+}'
+def lights_off '{
+	epics_put("ILC1611-4-I10-02", 0)
+}'
+def lights '{
+	epics_put("ILC1611-4-I10-02", $1)
+}'
+
+def beam_on '{
+
+	print ("Turning beam on.")
+	if (epics_get("AM1611-4-I10:beam:status") != "BEAM ON"){
+		epics_put("AM1611-4-I10:beam:opr:on", 1, 2)
+		sleep(2)
+                print ("Waiting for beam...")
+        }
+	else if (epics_get("AM1611-4-I10:beam:status") == "BEAM ON"){
+		print "Beam was already on!"
+		
+	}
+	while (epics_get("AM1611-4-I10:beam:status") != "BEAM ON") {
+                sleep(5)        ### Simple beam on
+		#epics_put("AM1611-4-I10:beam:opr:on", 1)
+        }
+        print ("Beam is on.")
+
+}'
+
+def beam_off '{
+	epics_put("AM1611-4-I10:beam:opr:off", 1)
+}'
+
+def turbos_on '{
+        epics_put("TMP1611-4-I10-05:Start", 1)
+        epics_put("TMP1611-4-I10-06:Start", 1)
+}'
+
+def turbos_off '{
+	epics_put("TMP1611-4-I10-05:Start", 0)
+        epics_put("TMP1611-4-I10-06:Start", 0)
+}'
+
+def rp_on '{
+        epics_put("PVP1611-4-I10-03:opr:start", 1)
+}'
+
+def rp_off '{
+        epics_put("PVP1611-4-I10-03:opr:stop", 1)
+}'
+
+def es_open '{
+	epics_put("VVR1611-4-I10-11:opr:open", 1)
+}'
+	
+def es_close '{
+	epics_put("VVR1611-4-I10-11:opr:close", 1)
+}'
+
+def leakvalve_open '{
+	epics_put("VVR1611-4-I10-11:valveSpeed", 1000)
+	epics_put("VVR1611-4-I10-11:ctrl:posn", 58000)
+	sleep(3)
+	epics_put("VVR1611-4-I10-11:valveSpeed", 3)
+	epics_put("VVR1611-4-I10-11:ctrl:posn", 73000)
+}'
+
+def leakvalve_close '{
+	epics_put("VVR1611-4-I10-11:close", 1)
+}'
+
+global WINDOW_INSTALLED
+
+def prep_vent '{
+	print "Preparing the endstation for venting."
+	leakvalve_close
+	sleep(1)
+	if (WINDOW_INSTALLED == 0) {
+		print "Snout window not present.  Closing endstation valve."
+		es_close
+	}
+	else {
+		print "Snout window present. Not closing endstation valve."
+	}
+	sleep(1)
+	turbos_off
+	sleep(1)
+	rp_off
+	sleep(1)
+	print "Endstation prepared for venting.  Please prepare the manifold with purge gas."
+}'
+def vent '{
+	print "Opening the leak valve.  Please wait until pressure reached 760 Torr before trying to open chamber."
+	leakvalve_open
+}'
+def pump_down '{
+	print "Closing leak valve."
+	leakvalve_close
+	print "Please prepare manifold vacuum"
+	sleep(10)
+	print "Opening leak valve."
+	leakvalve_open
+	while (epics_get("TCG1611-4-I10-13:pressure:fbk") > 25) {
+		print "Waiting for pump down."
+		sleep (5)
+	}
+	print "Starting roughing pumps."
+	rp_on
+	sleep(5)
+	turbos_on
+	print "Waiting for turbo pumping."
+	while (epics_get("TCG1611-4-I10-13:pressure:fbk") > 0.01) {
+		sleep (1)
+	}
+	print "Vacuum ready."
+	leakvalve_close
+}'
+
+
+	
+
+
+
+def vac_status '{
+
+	printf("VACUUM STATUS:\n")
+
+	if(epics_get("VVR1611-4-I10-11:position") > 60000)
+		printf("Leak valve is open.\n")
+	else
+		printf("Leak valve is closed.\n")
+
+	if((epics_get("TMP1611-4-I10-06:Status") == "Normal") & (epics_get("TMP1611-4-I10-06:Status") == "Normal"))
+		printf("Turbos are running.\n")
+	else
+		printf("Turbos not running.\n")
+	
+	if(epics_get("PVP1611-4-I10-03:ctl") == "STARTED")
+		printf("Roughing pump is running.\n")
+	else
+		printf("Roughing pump is stopped.\n")
+
+	if(epics_get("AM1611-4-I10:beam:status") == "BEAM ON")
+		printf("Beam is on.\n")
+	else
+		printf("Beam is not on.\n")
+}'
+
+def close_exs '{
+	epics_put("PSL16114I1004:Y:mm:encsp", $1)
+	print "Moving exit slit to set point."
+}'
+
+def set_exs '{
+	local backlash
+
+	if($# != 2) {
+		backlash = 0
+	}
+	else {
+		backlash = $1+$2
+	}
+
+	epics_put("PSL16114I1004:Y:mm:encsp", backlash)
+	print "Moving exit slit to set point. Please wait."
+	sleep(0.1)
+	
+	while(epics_get("SMTR16114I1017:status") != "MOVE DONE")
+		sleep(0.1)
+
+	epics_put("PSL16114I1004:Y:mm:encsp", $1)
+	sleep(0.1)
+	
+	while(epics_get("SMTR16114I1017:status") != "MOVE DONE")
+		sleep(0.1)
+}'
+
+def grating '{
+		printf("Current grating: ")
+		print epics_get("AM1611-4-I10:energy:grating:translation:fbk")
+		if (epics_get("AM1611-4-I10:energy:grating:translation:status") == "MOVE DONE")
+			printf("Grating selection motor is not moving.\n")
+		else
+			printf("Grating selection motor is not ready.\n")
+}'	
+def leg '{
+		printf("Moving to the Low Energy Grating.\n")
+		epics_put("AM1611-4-I10:energy:grating:translation", "Low Energy")
+}'
+def meg '{
+		printf("Moving to the Medium Energy Grating.\n")
+		epics_put("AM1611-4-I10:energy:grating:translation", "Medium Energy")
+}'
+def heg '{
+		printf("Moving to the High Energy Grating.\n")
+		epics_put("AM1611-4-I10:energy:grating:translation", "High Energy")
+}'
+def harmonic '{	
+	if ($# == 0) {
+		printf("Currently selected undulator harmonic: ")
+		print epics_get("AM1611-4-I10:energy:undulator:harmonic:fbk")
+	}
+	else if ($1 == 1) {
+		printf("Moving to the First Harmonic.\n")
+		epics_put("AM1611-4-I10:energy:undulator:harmonic", "First Harmonic")
+	}
+	else if ($1 == 3) {
+		printf("Moving to the Third Harmonic.\n")
+		epics_put("AM1611-4-I10:energy:undulator:harmonic", "Third Harmonic")
+	}	
+	else {
+		printf ("Usage: harmonic number.\n")
+		printf ("Options for number are 1 and 3.\n")
+	}
+}'
+def check_stripe '{
+		if (epics_get("BL1611-ID-1:stripe:fbk") == 2)
+			printf("Stripe is changing. Please wait.\n")
+		else
+			stripe = epics_get("BL1611-ID-1:stripe")
+			printf("Current stripe: %s\n", stripe)
+}'
+def si_stripe '{
+		if (epics_get("BL1611-ID-1:stripe:fbk") == 2)
+                        printf("Stripe is changing. Please wait.\n")
+		else if (epics_get("BL1611-ID-1:stripe:fbk") == 1)
+			printf("Already on the Silicon stripe.")
+		else
+			printf("Setting to Silicon stripe. This process can take several minutes.")
+			epics_put("BL1611-ID-1:stripe:si_fanout", 10000)
+}'
+
+def c_stripe '{
+		if (epics_get("BL1611-ID-1:stripe:fbk") == 2)
+                        printf("Stripe is changing. Please wait.\n")
+		else if (epics_get("BL1611-ID-1:stripe:fbk") == 0)
+			printf("Already on the Carbon stripe.")
+		else
+			printf("Setting to Carbon stripe. This process can take several minutes.")
+			epics_put("BL1611-ID-1:stripe:c_fanout", 300000)
+}'
+
+def energy_status '{
+
+	printf("ENERGY:\n")
+	if (epics_get("AM1611-4-I10:energy:status") != "MOVE DONE")
+		printf("Energy motors in motion.\n")
+	else
+		printf("Energy motors are stopped.\n")
+	if (epics_get("SMTR16114I1002:status") != "MOVE DONE")
+		printf("Grating rotation motor moving.\n")
+	if (epics_get("SMTR16114I1003:status") != "MOVE DONE")
+		printf("Exit slit position motor moving.\n")
+	if (epics_get("SMTR1411-01:status") != "MOVE DONE")
+		printf("Undulator gap motor moving.\n")
+	grating
+	harmonic
+	exs = epics_get("PSL16114I1004:Y:mm:fbk")
+	printf("Exit Slit: %g mm\n", exs)
+}'
+
+def status '{
+
+	energy_status
+	printf("\n")
+	vac_status
+	printf("\n")
+	listROI
+	printf("\n")
+	getGain
+	printf("\n")
+	printf("OTHER:\n")
+	check_stripe
+	ladder1
+	ladder2
+	
+}'	
+		
+def ladder1 '{
+	local commentflag
+
+	commentflag = 0
+	if (($# == 1) & ($1 == 1)){
+		commentflag = 1
+	}
+	else
+		commentflag = 0
+
+	if (($# != 1) | ($1 == 1)) {
+		pos = epics_get("SMTR16114I1012:step")
+		if (epics_get("SMTR16114I1012:state") != "IDLE") {
+			print "Ladder1 is moving."
+			if (commentflag == 1) {
+				qcomment "Ladder is moving"
+			}
+		}
+		else if (pos > 26000) {
+			print "Ladder 1 is retracted."
+			if (commentflag == 1) {
+				qcomment "Ladder 1 is retracted"
+			}
+		}
+		else if (pos > 18000 && pos < 24000) {
+			print "Ladder 1 is in the Au mesh position."
+			if (commentflag == 1) {
+				qcomment "Ladder 1 is in the Au mesh position"
+			}
+		}
+		else if (pos > 10000 && pos < 14000) {
+			print "Ladder 1 is in the vanadium filter position."
+			if (commentflag == 1) {
+				qcomment "Ladder 1 is in the vanadium filter position"
+			}
+		}
+		else if (pos < 3600) {
+			print "Ladder 1 is in the photodiode position."
+			if (commentflag == 1) {
+				qcomment "Ladder 1 is in the photodiode position"
+			}
+		}
+		else {
+			print "Ladder 1 is in an intermediate position."
+			if (commentflag == 1) {
+				qcomment "Ladder 1 is in an intermediate position"
+			}
+		}
+		
+	}
+	else {
+		if ("$1" == "Diode") {
+			print "Moving ladder 1 to the photodiode position"
+			epics_put("SMTR16114I1012:step", 0)
+		}
+		if ("$1" == "Filter") {
+			print "Moving ladder 1 to the vanadium filter position"
+			epics_put("SMTR16114I1012:step", 12000)
+		}
+		if ("$1" == "Mesh") {
+			print "Moving ladder 1 to the Au mesh position"
+			epics_put("SMTR16114I1012:step", 22000)
+		}
+		if ("$1" == "Out") {
+			print "Retracting Ladder 1"
+			epics_put("SMTR16114I1012:step", 28000)
+		}
+		else {
+			print "Options: Diode Filter Mesh Out"	
+		}
+	}
+}'
+	
+########################################
+
+def ladder2 '{
+	local commentflag
+
+	commentflag = 0
+	if (($# == 1) & ($1 == 1)){
+		commentflag = 1
+	}
+	else
+		commentflag = 0
+
+	if (($# != 1) | ($1 == 1)) {
+		pos = epics_get("SMTR16114I1014:step")
+		if (epics_get("SMTR16114I1014:state") != "IDLE") {
+			print "Ladder2 is moving."
+			if (commentflag == 1) {
+				qcomment "Ladder 2 is moving"
+			}
+		}
+		else if (pos > 75000) {
+			print "Ladder 2 is retracted."
+			if (commentflag == 1) {
+				qcomment "Ladder 2 is retracted"
+			}
+		}
+		else if (pos > 64000 && pos < 72000) {
+			print "Ladder 2 is in the phosphor position."
+			if (commentflag == 1) {
+				qcomment "Ladder 2 is in the phosphor position"
+			}
+		}
+		else if (pos > 43000 && pos < 50000) {
+			print "Ladder 2 is in the pass-through position."
+			if (commentflag == 1) {
+				qcomment "Ladder 2 is in the pass-through position"
+			}
+		}
+		else if (pos > 31000 && pos < 38000) {
+			print "Ladder 2 is in the pinhole position."
+			if (commentflag == 1) {
+				qcomment "Ladder 2 is in the pinhole position"
+			}
+		}
+		else if (pos > 17000 && pos < 24000) {
+			print "Ladder 2 is in the mesh position."
+			if (commentflag == 1) {
+				qcomment "Ladder 2 is in the Au mesh position"
+			}
+		}
+		else if (pos > 6000 && pos < 15000) {
+			print "Ladder 2 is in the photo-diode position."
+			if (commentflag == 1) {
+				qcomment "Ladder 2 is in the photo-diode position"
+			}
+		}
+	        else if (pos < 3600) {
+			print "Ladder 2 is in the vanadium filter position."
+			if (commentflag == 1) {
+				qcomment "Ladder 2 is in the vanadium filter position"
+			}
+		}
+		else {
+			print "Ladder 2 is in an intermediate position."
+			if (commentflag == 1) {
+				qcomment "Ladder 2 is in an intermediate position"
+			}
+		}
+		
+	}
+	else {
+		if (("$1" == "Diode") | ("$1" == "diode")) {
+			print "Moving ladder 2 to the photodiode position"
+			epics_put("SMTR16114I1014:step", 10500)
+		}
+		else if (("$1" == "Filter") | ("$1" == "filter")) {
+			print "Moving ladder 2 to the vanadium filter position"
+			epics_put("SMTR16114I1014:step", 0)
+		}
+		else if (("$1" == "Au_Mesh") | (("$1" == "au_mesh") | (("$1" == "Au_mesh") | ("$1" == "Mesh")))) {
+			print "Moving ladder 2 to the Au mesh position"
+			epics_put("SMTR16114I1014:step", 20000)
+		}
+		else if (("$1" == "Phosphor") | ("$1" == "phosphor")) {
+			print "Moving ladder 2 to the phosphor position"
+			epics_put("SMTR16114I1014:step", 68000)
+		}
+		else if (("$1" == "Through") | ("$1" == "through")) {
+			print "Moving ladder 2 to the pass-through position"
+			epics_put("SMTR16114I1014:step", 46250)
+		}
+		else if (("$1" == "Pinhole") | ("$1" == "pinhole")) {
+			print "Moving ladder 2 to the pinhole position"
+			epics_put("SMTR16114I1014:step", 34200)
+		}
+		else {
+			print "Options: Diode Filter Au_Mesh Through Pinhole Phosphor"	
+		}
+	}
+}'
+########################################
+#
+# Check shutter status
+# To record EPU status and sample temperature in data file
+# user_prescan_head.mac
+#
+
+def user_prescan_head '{
+
+	comments 	### Fills the comments at the start of the scan
+
+	print ("Turning chamber lights off.")
+	lights_off
+	print ("Turning beam on.")
+	beam_on
+
+}'
+
+def comments '{
+
+	p1temp = epics_get("AM1611-4-I10:energy:eV:fbk")
+	p2temp = epics_get("AM1611-4-I10:energy:grating:translation:fbk")
+	p3temp = epics_get("PSL16114I1004:Y:mm:fbk")
+	p4temp = epics_get("BL1611-ID-1:stripe:fbk")
+
+	fprintf(DATAFILE,"\n")
+	qcomment "Photon Energy: %g, Grating: %s" p1temp,p2temp
+
+	qcomment "Exit Slit: %s, Stripe: %s" p3temp,p4temp
+	
+	getGain 1
+	listROI 1
+	ladder1 1
+	ladder2 1
+
+}'
+
+global CHKSRSTAT 
+CHKSRSTAT = 1
+
+def chk_sr1_on'{
+	CHKSRSTAT = 1
+}'
+
+def chk_sr1_off '{
+	CHKSRSTAT = 0
+}'
+
+### Check ring and open shutters if needed
+def chk_sr1_stat'{
+	local TIME_OUT
+	TIME_OUT = time()
+        if (CHKSRSTAT){
+		# Check for electron beam current dropout
+                if (epics_get("PCT1402-01:mA:fbk")<10) {
+			comment "No stored beam. Waiting for injection"
+			while (epics_get("PCT1402-01:mA:fbk") < 150) {
+                        	sleep(60)
+                        }
+                }
+		#Check for stored beam
+                if (epics_get("PSH1411-I00-02:state") == "CLOSED") {
+			comment "Photon Shutter closed.  Waiting for injection"
+			while (epics_get("PCT1402-01:mA:fbk") < 190) {
+				sleep(60)
+                	}
+		}
+		#Make sure that beam is not on, before spending any time here.
+		#Then check for SR stored status, if good then try opening shutters once.
+		#Time out search for SR1 STORED after 24hrs.
+		if (epics_get("AM1611-4-I10:beam:status") != "BEAM ON"){
+			 while (TIME_OUT - time() < 24*3600) {
+				comment "Beam off status detected,  will try to turn beam on in 2 min..."
+				if(epics_get("SYSTEM:mode") == "SR1 STORED"){
+					sleep(120)
+					beam_on
+					break
+				}
+				sleep(30)
+                	}
+		}
+        }
+}'
+
+
+def user_scan_tail '{
+
+qcomment "Scan done. Turning off beam."
+epics_put("AM1611-4-I10:beam:opr:off", 1)
+
+### Setup scaler for Acquaman data server
+#epics_put("BL1611-ID-1:mcs:delay", 1)
+#sleep(0.5)
+#epics_put("BL1611-ID-1:mcs:nscan", 100)
+#sleep(0.5)
+#epics_put("BL1611-ID-1:mcs:scanCount", 0)
+#sleep(0.5)
+#epics_put("BL1611-ID-1:mcs:startScan", 1)
+}'
+
+
+
+##########################
+#
+# User wait count and wait move were required to ensure scans
+# don't race.  The 0.1s sleep was also needed.  Checks of EPICs PVs should
+# be removed from the scan loop if possible
+#
+def user_waitcount '{
+#
+        #sleep(0.1) 
+#	while( ( epics_get("BL1611-ID-1:mcs:startScan") ) == "Scanning") {
+#                        sleep(0.01)
+#        }
+}'
+
+#  user_postcoune.mac
+#  To wait for the Scaler counting
+#
+
+def user_postcount '{
+#        sleep(COUNT_TIME)
+#        sleep(0.05)
+#        if (epics_get("BL1611-ID-1:mcs:startScan") == "Scanning") {
+#                printf("Waiting for Scaler counting\n")
+#                }
+#        while (epics_get("BL1611-ID-1:mcs:startScan") == "Scanning") {
+#                sleep(0.05)
+#                }
+}'
+
+def user_postmove ''
+
+
+def user_waitmove '{
+
+#	sleep(0.1)
+#	while (epics_get("HXPD1611-4-I10-01:X:status") != "MOVE DONE") {
+#               sleep(0.1)
+#        }
+#        while (epics_get("HXPD1611-4-I10-01:Y:status") != "MOVE DONE") {
+#                sleep(0.1)
+#        }
+#        while (epics_get("HXPD1611-4-I10-01:Z:status") != "MOVE DONE") {
+#                sleep(0.1)
+#      	} 
+#	while (epics_get("AM1611-4-I10:energy:status") != "MOVE DONE") {
+#                sleep(0.1)
+#        }
+
+}'
+
+def user_chkmove() '{
+
+	local x_stat, y_stat, z_stat
+	local x
+	byte array barr[2]
+	barr[0] = asc("5") 
+	barr[0] = barr[0] - 0x30
+	barr[1] = 0x0a
+	sock_put("192.168.0.5:50000", barr)
+	x = sock_get("192.168.0.5:50000")
+	if(x != 0){
+		return(1)	
+	}
+
+	if (epics_get("AM1611-4-I10:energy:status") == "MOVE ACTIVE") {
+		#printf("Energy is changing.\n")
+                return(1)
+        }
+	else 
+		return(0)
+
+}'
+
+def user_prect '{
+	
+	epics_put("PSH16114I1001:V", 0)
+	print ("Opening fast shutter")
+}'
+
+def user_ct '{
+	print("Closing fast shutter.")
+	beam_off
+}'
+
+def c_count '{
+	#local time_c
+
+	#time_c = $1*1000 #Convert from ms to s
+	
+        #if (epics_get("BL1611-ID-1:mcs:startScan") == "Scanning") {
+        #	epics_put("BL1611-ID-1:mcs:startScan", 0)
+	#}
+	if ($1 <= 0){
+		printf("Turn off continuous counting.\n")
+	        #epics_put("BL1611-ID-1:mcs:scanCount", 1)
+        	#epics_put("BL1611-ID-1:mcs:nscan", 1)
+	
+		mca_single
+	}
+	else {
+		printf("Turn on continuous counting.\n")
+		#epics_put("BL1611-ID-1:mcs:delay", time_c)
+		#epics_put("BL1611-ID-1:mcs:scanCount", 0)
+		#epics_put("BL1611-ID-1:mcs:nscan", 1) 
+		#epics_put("BL1611-ID-1:mcs:startScan", 1)
+
+		mca_cont
+	}
+}'
+
+def setROI1 '{
+	
+	mca_spar(0, "scaler1", "lower", $1)
+	mca_spar(1, "scaler1", "lower", $1)
+	mca_spar(2, "scaler1", "lower", $1)
+	mca_spar(3, "scaler1", "lower", $1)
+	mca_spar(0, "scaler1", "upper", $2)
+	mca_spar(1, "scaler1", "upper", $2)
+	mca_spar(2, "scaler1", "upper", $2)
+	mca_spar(3, "scaler1", "upper", $2)
+
+}'
+
+def setROI2 '{
+	
+	mca_spar(0, "scaler2", "lower", $1)
+	mca_spar(1, "scaler2", "lower", $1)
+	mca_spar(2, "scaler2", "lower", $1)
+	mca_spar(3, "scaler2", "lower", $1)
+	mca_spar(0, "scaler2", "upper", $2)
+	mca_spar(1, "scaler2", "upper", $2)
+	mca_spar(2, "scaler2", "upper", $2)
+	mca_spar(3, "scaler2", "upper", $2)
+
+}'
+
+def listROI '{
+
+	roi1_up = mca_spar(0, "scaler1", "upper")
+	roi1_down = mca_spar(0, "scaler1", "lower")
+	roi2_up = mca_spar(0, "scaler2", "upper")
+	roi2_down = mca_spar(0, "scaler2", "lower")
+	printf("ROI SETTINGS:\n")
+	printf("ROI1: %i to %i\n", roi1_down, roi1_up)
+	printf("ROI2: %i to %i\n", roi2_down, roi2_up)
+
+	if ($1 ==1) {
+		qcomment "ROI1: %g to %g" roi1_down,roi1_up
+		qcomment "ROI2: %g to %g" roi2_down,roi2_up
+	}
+}'
+
+def getGain '{
+	
+	gPD_n = epics_get("Amp1611-4-22:sens_num")	
+	gTEY_n = epics_get("Amp1611-4-23:sens_num")
+	gIo_n = epics_get("Amp1611-4-24:sens_num")
+	gPD_u = epics_get("Amp1611-4-22:sens_unit")	
+	gTEY_u = epics_get("Amp1611-4-23:sens_unit")
+	gIo_u = epics_get("Amp1611-4-24:sens_unit")
+	printf("AMPLIFIER GAINS:\n")
+	printf("PD: %i %s\n", gPD_n, gPD_u)
+	printf("TEY: %i %s\n", gTEY_n, gTEY_u)
+	printf("I0: %i %s\n", gIo_n, gIo_u)
+
+	if ($1 == 1) {
+		qcomment "Gain PD: %g %s" gPD_n,gPD_u
+		qcomment "Gain TEY: %g %s" gTEY_n,gTEY_u
+		qcomment "Gain I0: %g %s" gIo_n,gIo_u
+	}
+
+}'
+
+def gainDown '{
+	
+	if ("$1" == "PD") {
+		amp = "Amp1611-4-22:gain"
+	}
+	if ("$1" == "TEY") {
+		amp = "Amp1611-4-23:gain"
+	}
+	if ("$1" == "I0") {
+		amp = "Amp1611-4-24:gain"
+	}
+
+	currentG = epics_get(amp)
+	newG = currentG-1
+	epics_put(amp, newG)
+}'
+
+def gainUp '{
+	
+	if ("$1" == "PD") {
+		amp = "Amp1611-4-22:gain"
+	}
+	if ("$1" == "TEY") {
+		amp = "Amp1611-4-23:gain"
+	}
+	if ("$1" == "I0") {
+		amp = "Amp1611-4-24:gain"
+	}
+
+	currentG = epics_get(amp)
+	newG = currentG+1
+	epics_put(amp, newG)
+}'
+
+def bct '{
+	print ("Doing background count.")
+	beam_off
+        cdef("cleanup_once", "show_cnts; user_ct;", "ct")
+        waitmove
+        count_em $*
+        waitcount
+        cdef("cleanup_once", "", "ct", "delete")
+        show_cnts
+        user_ct
+}'
+
+def cleanup '{
+
+	print "Scan cancelled. Running cleanup."
+	mca_single
+	beam_off
+}'
+
+def setuser '{
+	global SYNC_STRING
+	SYNC_STRING = sprintf("/home/sgm/Scripts/push_sync.sh %s", "$1")
+	print SYNC_STRING
+}'
+
+def push_data '{
+	unix(SYNC_STRING)
+}'
+
+def bend_v '{
+	epics_put("SMTR16114I1030:step:rel", $1)
+	epics_put("SMTR16114I1031:step:rel", $1)
+}'
+
+def bend_h '{
+	epics_put("SMTR16114I1032:step:rel", $1)
+	epics_put("SMTR16114I1033:step:rel", $1)
+}'
+
+def bend_h_diff '{
+	local bnd_up, bnd_dn
+	bnd_up = $1
+	bnd_dn = -1*($1)
+	epics_put("SMTR16114I1032:step:rel", bnd_up)
+	epics_put("SMTR16114I1033:step:rel", bnd_dn)
+}'
+
+def bend_v_diff '{
+	local bnd_up, bnd_dn
+	bnd_up = $1
+	bnd_dn = -1*($1)
+	epics_put("SMTR16114I1030:step:rel", bnd_up)
+	epics_put("SMTR16114I1031:step:rel", bnd_dn)
+}'
+
+
+def zero_order '{
+	if (epics_get("AM1611-4-I10:energy:grating:translation:status") != "MOVE DONE"){
+			print("Grating selection motor is currently moving..")
+	}
+	else if(epics_get("AM1611-4-I10:energy:grating:translation:fbk") == "Low Energy"){
+		epics_put("SMTR16114I1002:encTarget",300)
+	}
+        else if(epics_get("AM1611-4-I10:energy:grating:translation:fbk") == "Medium Energy"){
+		epics_put("SMTR16114I1002:encTarget",300)
+	}
+	else if(epics_get("AM1611-4-I10:energy:grating:translation:fbk") == "High Energy"){
+		epics_put("SMTR16114I1002:encTarget",-2500)
+	}
+}'
+def M4_pitch '{
+
+        pos = epics_get("SMTR16114I1005:step")
+	printf("M4 Pitch: %s\n", pos)
+
+        if (epics_get("SMTR16114I1005:state") != "IDLE") {
+        	print "M4 pitch is moving."
+        }
+
+	if ($# == 1){
+		epics_put("SMTR16114I1005:step", $1)
+	}
+}'
