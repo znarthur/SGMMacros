@@ -513,11 +513,15 @@ def beam_on '{
 		print "Beam was already on!"
 		
 	}
-	while (epics_get("AM1611-4-I10:beam:status") != "BEAM ON") {
-                sleep(5)        ### Simple beam on
-		#epics_put("AM1611-4-I10:beam:opr:on", 1)
-        }
-        print ("Beam is on.")
+	#while (epics_get("AM1611-4-I10:beam:status") != "BEAM ON") {
+        #       sleep(5)      
+	#       epics_put("AM1611-4-I10:beam:opr:on", 1)
+        #}
+	sleep(5)
+	if (epics_get("AM1611-4-I10:beam:status") == "BEAM ON"){
+		print "Beam is on!"
+		
+	}
 
 }'
 
@@ -997,34 +1001,95 @@ def chk_sr1_stat'{
 	TIME_OUT = time()
         if (CHKSRSTAT){
 		# Check for electron beam current dropout
-                if (epics_get("PCT1402-01:mA:fbk")<10) {
+                if (epics_get("PCT1402-01:mA:fbk")<20) {
 			comment "No stored beam. Waiting for injection"
 			while (epics_get("PCT1402-01:mA:fbk") < 150) {
                         	sleep(60)
                         }
                 }
 		#Check for stored beam
-                if (epics_get("PSH1411-I00-02:state") == "CLOSED") {
-			comment "Photon Shutter closed.  Waiting for injection"
+		get_shutter_status
+                if (shutter_status == 0) {
+			comment "Photon Shutter(s) closed.  Waiting for injection"
 			while (epics_get("PCT1402-01:mA:fbk") < 190) {
 				sleep(60)
                 	}
+
 		}
+		get_valve_status
 		#Make sure that beam is not on, before spending any time here.
 		#Then check for SR stored status, if good then try opening shutters once.
-		#Time out search for SR1 STORED after 24hrs.
-		if (epics_get("AM1611-4-I10:beam:status") != "BEAM ON"){
-			 while (TIME_OUT - time() < 24*3600) {
-				comment "Beam off status detected,  will try to turn beam on in 2 min..."
-				if(epics_get("SYSTEM:mode") == "SR1 STORED"){
-					sleep(120)
-					beam_on
-					break
-				}
-				sleep(30)
-                	}
-		}
+		#Time out search for SR1 STORED after 2hr.
+	 	while (((valve_status != 1) | (shutter_status != 1)) & (TIME_OUT - time() < 2*3600)) {
+			comment "Beam off status detected,  will try to turn beam on in 30 sec..."
+			sleep(30)
+			if(epics_get("SYSTEM:mode") == "SR1 STORED"){
+				#sleep(120)
+				epics_put("BL1611-ID-1:beam:turnon", 1)
+				break
+			}
+			get_shutter_status
+                }
         }
+}'
+
+global shutter_status
+shutter_status = 0
+
+def get_shutter_status '{
+	if ((epics_get("PSH1411-I00-01:state") == "OPEN") & (epics_get("PSH1411-I00-02:state") == "OPEN") & (epics_get("PSH1611-3-I10-01:state") == "OPEN") & (epics_get("SSH1411-I00-01") == "OPEN")){
+		shutter_status = 1
+
+	}
+	else {
+		shutter_status = 0
+	}
+
+}'
+
+global valve_status
+valve_status = 0
+
+def get_valve_status '{
+	global fevalve_status, htvalve_status, mnvalve_status, envalve_status
+	if((epics_get("VVR1411-I00-01:state") == "OPEN") & (epics_get("VVR1611-3-I00-01") == "OPEN") & (epics_get("VVR1611-3-I00-02") == "OPEN") & (epics_get("VVR1611-3-I00-03") == "OPEN")){
+		valve_status = 1
+		fevalve_status = 1
+	}
+	else {
+		valve_status = 0
+		fevalve_status = 0
+	}
+	if((epics_get("VVR1611-3-I10-01") == "OPEN") & (epics_get("VVR1611-3-I10-02") == "OPEN") & (epics_get("VVR1611-3-I10-03") == "OPEN") & (epics_get("VVR1611-3-I10-04") == "OPEN")){
+		if(valve_status){
+			valve_status = 1
+		}
+		htvalve_status = 1
+	}
+	else {
+		valve_status = 0
+		htvalve_status = 0
+	}
+	if((epics_get("VVR1611-4-I10-01") == "OPEN") & (epics_get("VVR1611-4-I10-02") == "OPEN") & (epics_get("VVR1611-4-I10-03") == "OPEN") & (epics_get("VVR1611-4-I10-04") == "OPEN")){
+		if(valve_status){
+			valve_status = 1
+		}	
+		mnvalve_status = 1
+	}
+	else {
+		valve_status = 0
+		mnvalve_status = 0
+	}
+	if((epics_get("VVR1611-4-I10-05") == "OPEN") & (epics_get("VVR1611-4-I10-05") == "OPEN") & (epics_get("VVR1611-4-I10-07") == "OPEN") & (epics_get("VVR1611-4-I10-08") == "OPEN")){
+		if(valve_status){
+			valve_status = 1
+		}	
+		envalve_status = 1
+	}
+	else {
+		valve_status = 0
+		envalve_status = 0
+	}
 }'
 
 
