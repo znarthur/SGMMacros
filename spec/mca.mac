@@ -1,0 +1,6235 @@
+#%TITLE% MCA.MAC 
+#%NAME%
+#  Multi Channel Analyser.
+#%DESCRIPTION%
+#  These macros provide users with basic MCA commands, i.e. start, stop, init, read memory, etc..., as well as with more sophisticated features such as ROIs, channel calibration, peak search, data saving and recovering, etc...%BR%
+#  MCA control is inserted in SPEC internal code, making it possible to automatically operate the MCA, from standard SPEC counting and scanning commands, e.g. acquire, plot out, save spectrum for each point of a scan. A Graphical User Interface is also available. 
+#%ATTENTION%
+#About the usage of the Graphical User Interface (GUI) :
+# it is at the moment only capable of monitoring the data acquired, as there is no connection between SPEC and that GUI, appart from the spectrum data itself and its calibration parameters, both stored in shared memory. For instance, the ROIs defined from SPEC or from the GUI are not connected together. 
+#They are two seperate sets of ROI definitions. The GUI is not capable of sending control commands to the hardware. Be more particularly aware that the acquisition times are not known by the GUI, so if you save the spectrum from the GUI, they wont be included in the file. rather use SPEC for saving your data. The GUI is a display.
+#%SETUP%
+#%BR%Hardware supported :
+#%DL%
+#%DT% SILENA Memory Buffer.
+#%DD% remote controlled through GPIB. SPEC can address it in 3 different ways:
+#%DL%
+#%DT% Direct from SPEC.
+#%DD% In SPEC config, select MCA TYPE Silena 73XX MCA (GPIB), TCP MODE.
+#%BR%The GPIB interface can be any of those supported by SPEC.
+#%DT% Device server McaSICL.
+#%DD% In SPEC config, select MCA TYPE ESRF MCA, TCP MODE. 
+#%BR%The GPIB is addressed by the device server, so you do not necessarily need to declare it in SPEC, but only HP E2050 LAN/HPIB controller is supported; McaSICL server runs on HP-UX machines only.
+#%DT% Device server McaMB.
+#%DD% In SPEC config, select MCA TYPE ESRF MCA, TCP MODE. 
+#%BR%The GPIB is addressed by the device server, so you do not necessarily need to declare it in SPEC, but only Themis T409 VME Board is supported; McaMB server runs on OS9 crates.
+#%XDL%
+#%DT% CANBERRA A.I.M. 
+#%DD% It is remote controlled via Ethernet LAN. SPEC addresses it through a device server, called %B%McaAIM%B% that runs on HP-UX machines. In SPEC config, select MCA TYPE ESRF MCA, TCP MODE.
+#%XDL%
+#MCA macros are able to detect that a MCA has been configured. If it happens that it is taken out, the macros disable themselves automatically, as well as they enable back in case of a MCA is configured again. 
+#%BR%%BR%Some Particular settings:
+#%DL%%DT%MCAON / MCAOFF
+#%DD%Both COUNTERS and MCA are operated simultaneously from %B%ct%B% and %B%scans%B% commands if %B%mcaon%B% is set. %B%mcaoff%B% disables the MCA to be addressed from those commands. 
+#%BR%%BR%On the other hand, %B%mcaacq%B% always run the MCA, but never run the counters, whatever mcaon or mcaoff is set. 
+#%B%mcasetup%B% AUTO-RUN option (toggling enabled /disabled) does the same as mcaon / mcaoff.%BR%
+#%PRE%
+#------------------------------------------------------------
+# command		%B%mcaon%B%		%B%mcaoff%B%
+#------------------------------------------------------------
+#%B%mcaacq%B%		MCA			MCA
+#%B%ct%B%/%B%scans%B%	MCA + COUNTERS		COUNTERS
+#============================================================
+#
+#%PRE%
+#%BR%%BR%
+#%DT%REAL TIME / LIVE TIME / EXTERNAL SYNCHRO
+#%DD%The %B%real%B% time is the clock time. The %B%live%B% time is the real time substracted the electronics %B%dead%B% time. 
+#%PRE%
+#	%B%real = live + dead%B%
+#%PRE%
+#In%B%internal synchro%B%mode, MCA acquisitions terminate when the amount of time elapsed, either %B%real%B% or %B%live%B% in respect of %B%mcasetup%B% time mode settings, matches the time the MCA internal timer was %B%preset%B% with.
+#%BR%%BR%In %B%external%B% %B%synchro%B% mode, MCA acquisitions from %B%ct%B% and %B%scans%B%, are externally (hardware) gated by the SPEC timer (vct6 or whatever timer has a gate output). The real or live time modes are not relevant in those cases . Nevertheless, the external synchro mode never affects %B%mcaacq%B%, which still presets MCA timer, in %B%real%B% or %B%live%B% time mode regarding %B%mcasetup%B% settings.
+#%BR%%BR%In any case, SPEC always waits for an acquisition to terminate before 	going to the next step.
+#%PRE%
+#------------------------------------------------------------------------------
+#	MCA setup		MCA elapsed times		SPEC timer 
+#
+#  Synchro	Time mode	real		live
+#------------------------------------------------------------------------------
+#  internal	%B%real%B%	preset		preset-dead	preset
+#  internal	%B%live%B%	preset+dead	preset 		preset
+#%B%external%B%	not relevant	~preset		~preset-dead	preset
+#==============================================================================
+#%PRE%
+#%XDL%
+
+
+#%OVERVIEW%
+#%DL% 
+#%DT% mcasetup %DD% Hardware and software initialisation and setup.
+#%DT% mcainit %DD% The same but without any input; default/current values are set.
+#%DT% mcastat %DD% Display MCA configuration and status.
+#%DT% mcastart %DD% Start an acquisition. 
+#%DT% mcastop %DD% Stop an acquisition.
+#%DT% mcaread %DD% Read the MCA memory.
+#%DT% mcatimes %DD% Report the MCA elapsed times.
+#%DT% mcaclear %DD% Clear the MCA memory.  
+#%DT% mcaacq %DD% MCA acquisition. 
+#%DT% mcaoff %DD% Disable MCA control from scans and ct.
+#%DT% mcaon %DD% Enable back MCA control from scans and ct.
+#%DT% mcasave %DD% Save spectrum to disk file. 
+#%DT% mcaload %DD% Load back spectrum from disk file.
+#%DT% mcaroi %DD% define ROIs.
+#%DT% mcacal, mcacalm %DD% Computer aided and manual calibration of the MCA.
+#%BR% Better use the GUI if it is installed.
+#%DT% mcapar %DD% Show calibration fit parameters or input new parameters.
+#%DT% mcaE %DD% Toggle between channel (uncalib) and calibrated mode.
+#%DT% mcaguioff %DD% Switch the GUI off.
+#%DT% mcaguion %DD% Switch the GUI on. 
+#%DT% mcasplot %DD% Plot the current MCA data when GUI is off. 
+#%DT% mcacplot %DD% A screen plot of the current MCA data in cplot format.
+#%DT% mcapplot %DD% A printer plot of the current MCA data in cplot format.
+#%XDL%
+#%EXAMPLE%
+#%DL%
+#%DT% mcaroi roi1 %DD%
+#%PRE%
+#ROI       |   Channels    | Energy                      | ROI  | Roi 
+#names     | first | last  | min          | max          |ACTIVE| numbers
+#---------------------------------------------------------------------
+#roi       | 0     | 8191  | 0.0000       | 0.0000       |  -   | 0
+#roi1      | 0     | 511   | 0.0000       | 0.0000       |  X   | 1
+#%PRE%
+# Sets ROI number 1 as the one active.%BR%%BR%
+# Counters %B%roi1%B% and %B%roi%B% are declared in %B%config%B%.
+#%BR%
+#%DT% ct %DD%
+#%PRE%
+#Fri Dec  1 10:41:57 1995
+#
+#     Seconds = 1
+#         MCA = 5340 (5340/s)
+#       MCA 1 = 292 (292/s)
+#%PRE%
+# The MCA acquires data on the wider range over the counter-assigned-ROIs plus the active ROI. The eventually saved spectrum is limited to the active ROI, while each counter-assigned-ROIs reports integrated counts value over the particular ROI they are assigned to. 
+#%BR%
+#%DT% ascan m0 0 10 5 1 %DD%
+#%PRE%
+#Total 11 points, 11 seconds
+#
+#Scan  37   Fri Dec  1 10:56:08 1995   file = ./data/test  mcl  user = lagier
+#ascan  m0 0 10  10 1
+#
+#   Motor 0 MCA 1  MCA    Seconds 
+#  0    0.0000       292      5340     	    1
+#  1    2.0000       328      5363          1 
+#  2    4.0000       299      5400          1 
+#  3    6.0000       299      5333          1 
+#  4    8.0000       328      5398          1 
+#  5   10.0000       328      5400          1 
+#%PRE%
+# A spectrum is accumulated at each scan step.
+#%XDL%
+#%END%
+
+#====================================================================== GLOBALS
+
+global MCA_DEVNAME MCA_AROFF MCA_DEVOK 
+global MCA_SAVED MCA_old_channel 
+global MCA_ADCNO MCA_MEMGRPSIZE MCA_MEMGRP MCA_TMODE 
+global MCA_DISP_SEC MCA_CP_XLBL MCA_CP_XUNT MCA_GRP MCA_GUI
+global MCA_LINES MCA_DOTS MCA_EBARS MCA_LOG MCA_PLOTATTR MCA_PLOTERASE
+global MCA_REDUCTION MCA_SAVEBUFFER MCA_FLAG 
+global MCA_SYNCHRO MCA_BACKSUB 
+global MCA_ROI_GCH_MIN MCA_ROI_GCH_MAX
+global MCA_ROI_CH_MIN MCA_ROI_CH_MAX MCA_ROI_EN_MIN MCA_ROI_EN_MAX 
+global MCA_ROI_COUNTER 
+global PS_WA PS_WB PS_WC MCA_ENERGY PS_EA PS_EB PS_EC PS_NOPEAKS
+global MCA_ROI_ACH_MIN MCA_ROI_ACH_MAX
+
+#======================================================================== SETUP
+#%IU%
+#%MDESC% Setup file service.
+def mcaunsetup '{
+  mcaoff
+  cdef("","","_mca0","delete")
+}'
+
+#%UU% [adc] [tmode] [gsz] [g] [cal] [Xlbl] [Xun] [nclr] [sleep] [bgnd] [gui] [log] [dots] [lines] [ebars] [flag] [red] [synchr]
+#%MDESC% Sets the MCA hardware and software up. 
+# You can either give all the parameters on the command line or use the menu that shows up when typing "mcasetup" alone. 
+#%UL% Input arguments description. [variable name, default value]
+#%LI% %B%adc%B%: active adc number (1 or 2). [MCA_ADCNO, 1]       
+#%LI% %B%tmode%B%: 1 if live time, 2 if real time. [MCA_TMODE, 2]
+#%LI% %B%gsz%B%: MCA memory group size in channels. [MCA_MEMGRPSIZE, 8192]
+#%LI% %B%g%B%: MCA selected memory group. [MCA_MEMGRP[1] , 0]          
+#%LI% %B%cal%B%: 1 if spectrum is calibrated, 0 otherwise. [MCA_ENERGY, 0]
+#%LI% %B%Xlbl%B%: X plot label for calibrated spectrum. [MCA_CP_XLBL, "Energy"]
+#%LI% %B%Xun%B%: X unit for calibrated spectrum.        [MCA_CP_XUNT, "KeV"]  
+#%LI% %B%nclr%B%: 0 for memory clearing prior to acquisition, 1 otherwise. [MCA_SAVEBUFFER, 0]
+#%LI% %B%sleep%B%: number of  sec. sleeping between run plot updates. [MCA_DISP_SEC, 0]
+#%LI% %B%bgnd%B%: 1 if you want background substraction in ROIs counts. [MCA_BACKSUB, 0]
+#%LI% %B%gui%B%: 1 for gui plot.                   [MCA_GUI, 0]
+#%LI% %B%log%B%: 1 for log plot.                   [MCA_LOG, 0]
+#%LI% %B%dots%B%: 1 for large dots in plot.        [MCA_DOTS, 0]
+#%LI% %B%lines%B%: 1 for lines plotting.           [MCA_LINES, 0]
+#%LI% %B%ebars%B%: 1 for error bars plotting.      [MCA_EBARS, 0]
+#%LI% %B%flag%B%: data saving flag		   [MCA_FLAG, 0]
+#%UL%
+#%LI% 0x01 save spectrum during scans to a file.
+#%LI% 0x02 save spectrum after each other acquisition to a file.
+#%LI% 0x04 save to specific MCA file, otherwise use scans file [DATAFILE]. 
+#%XUL%
+#%LI% %B%red%B%: data reduction coefficient, to be applied at saving.[MCA_REDUCTION, 1] 
+#%LI% %B%synchr%B%: MCA acquisition is hard-synchronized with SPEC configured timer. [MCA_SYNCHRO, 0]
+#%XUL%
+#%BR%
+#%B% NB : %B%
+#%BR%
+# It is possible to have the last acquisition elapsed times values reported in counters by simply configuring the counters you need out of %B%mcaLt%B%, %B%mcaRt%B% and %B%mcaDt%B% mnemonics, respectively standing for Live, Real and Dead times.
+#%BR%
+#%BR%
+
+def mcasetup '{
+
+  setup_tail ("mca")
+  cdef("config_mac","mca_config; ","_mca0",0)
+
+  mca_defaults
+  mca_device
+  mca_state () 
+
+  if ($#) {
+    local st1 st2
+    st1="$6";st2="$7"
+    mca_setup($1,$2,$3,$4,$5,st1,st2,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+
+  } else {
+    MCA_MENULVL=0
+    menu("\n  M U L T I   C H A N N E L   A N A L Y S E R   S E T U P",\
+            "mca_setupmenu","mca_setupchk","mca_dosetup ()")
+  } 
+}'
+
+#%IU% [mask]
+#%MDESC% Sets default values to some global variables.
+def mca_defaults '{
+  local mask hardware_defaults software_defaults
+
+  mask = $#?$1:3
+  hardware_defaults = mask&1
+  software_defaults = mask&2
+
+  if (hardware_defaults) {
+    if (MCA_ADCNO <= 0) MCA_ADCNO = 1
+    if (MCA_MEMGRPSIZE <= 0) {
+      MCA_MEMGRPSIZE = mca_max_channels (8192)
+      MCA_MEMGRP[1]=0
+    }
+  } 
+
+  if (software_defaults) {
+    MCA_REDUCTION = MCA_REDUCTION>0?MCA_REDUCTION:1
+    PS_EB = PS_EB?PS_EB:1
+  }
+}'
+
+#%IU% (size) 
+#%MDESC% Returns installed device full memory size. 
+# If the device is disconneted, the size specified as input is returned, so that simulation mode or loaded data analysis are possible.
+
+def mca_max_channels (wish) '{
+  local ret
+  ret = mca_io("max_channels")
+  if (ret>0) return(ret)
+  else if (wish>0) return(wish)
+}'
+
+#%IU%
+#%MDESC% Checks wether a MCA is configured and reads in its device server name or its device type. If it appears that no device is configured, it makes that the mca macros detach themselves from the SPEC standard ones.
+
+def mca_device '{
+  local _fil _lin _fid _old
+ 
+  _old=MCA_DEVNAME ; MCA_DEVNAME=""
+  _fil=sprintf("%s/%s/config",SPECD,SPEC)
+  getline(_fil,"open")
+  while ((_lin=getline(_fil))!=-1) {
+    split(_lin,_fid)
+    if (index(_fid[0],"VM_MCA")) {
+      MCA_DEVNAME=_fid[2]
+      break
+    } else if (index(_lin,"@mca")) {
+      MCA_DEVNAME=_fid[0]
+      break
+    }
+  }
+  getline(_fil,"close")
+
+  if (MCA_DEVNAME == "") mca_deldef()
+}'
+
+#%IU% ()
+#%MDESC% Checks MCA State. (acquiring, idle, disconnected or not configured)
+def mca_state () '{
+
+  if (MCA_DEVNAME != "") \
+    MCA_DEVOK = mca_par("max_channels")>0?(wait(0x24)?DEVRUN:DEVON):0
+  else  MCA_DEVOK = -1
+}'
+
+#%IU% (adc,tm,sz,g,cal,lbl,un,nclr,slp,bgd,lg,dt,ln,eb,flag,red,syn) 
+#%MDESC% Reads in setup parameters and do the setup. see "mcasetup" for details
+
+def mca_setup (adc,tm,sz,g,cal,lbl,un,nclr,slp,bgd,gui,lg,dt,ln,eb,flag,red,syn) '{
+
+  MCA_ADCNO 	= adc
+  MCA_MEMGRPSIZE= sz
+  MCA_TMODE 	= tm
+  MCA_MEMGRP[1] = g
+  MCA_ENERGY	= cal
+  MCA_CP_XLBL   = lbl  
+  MCA_CP_XUNT   = un
+  MCA_SAVEBUFFER= nclr
+  MCA_DISP_SEC  = slp
+  MCA_BACKSUB   = bgd
+  MCA_GUI       = gui
+  MCA_LOG=lg;  MCA_DOTS=dt;  MCA_LINES=ln;  MCA_EBARS=eb ; 
+  MCA_REDUCTION = red  
+  MCA_SYNCHRO   = syn
+
+  if ((flag&3) && !(MCA_SL)) {
+    MCA_FLAG&=~3
+    printf("MCA: Macros set \"saveload.mac\" not loaded.                              \n     Cannot save any data. \n")
+  } else {
+    MCA_FLAG=flag
+  }
+
+  if (cal && !(MCA_PS)) {
+      MCA_ENERGY= 0
+      printf("MCA: Energy mode not available.                                              \n     Macro set \"psearch.mac\" not loaded.\n")
+  } else MCA_ENERGY = cal
+
+  mca_dosetup ()
+}'
+
+#%IU% ()
+#%MDESC% Does the actual setup, i.e. hardware setup, general operation setup and subsequent software setup.
+def mca_dosetup () '{
+  
+#HDW
+  mca_hdwsetup ()
+
+#SOFT
+  mca_defaults 2
+  mca_cdef ()
+  if (!whatis("MCA_DATA_PARAM")) mca_firstinit ()
+  mca_softsetup()
+
+#GUI
+  if (MCA_GUI) { 
+    mcaguion 
+  } else { 
+    mcaguioff 
+  }
+
+  print "MCA:",MCA_DEVNAME,MCA_DEVSTATE[MCA_DEVOK]
+}'
+
+#%IU%
+#%MDESC% hardware setup, i.e. Adc selection, Memory initialisation, and operation setup, i.e. time mode and soft preset. 
+def mca_hdwsetup () '{
+
+  local maxi
+
+  mca_wait()  
+  MCA_ADCNO = mca_io("adc",MCA_ADCNO) 
+
+  if ((MCA_MEMGRPSIZE != mca_io("group_size")) ||\
+      (MCA_MEMGRP[1]  != mca_io("select_group"))) {
+
+    maxi = mca_max_channels (MCA_MEMGRPSIZE)
+    if (MCA_MEMGRPSIZE > maxi) \
+      MCA_MEMGRPSIZE = mca_io("group_size",maxi)
+    else MCA_MEMGRPSIZE = mca_io("group_size", MCA_MEMGRPSIZE)
+
+    if (MCA_MEMGRPSIZE > 0) {
+      MCA_MEMGRP[0]  = maxi/MCA_MEMGRPSIZE
+      if ((MCA_MEMGRP[1]<0) || (MCA_MEMGRP[1]>=MCA_MEMGRP[0])) {
+        MCA_MEMGRP[1] = 0
+      }
+
+      MCA_MEMGRP[1] = mca_io("select_group", MCA_MEMGRP[1])
+    }
+  }
+
+  if (MCA_TMODE == 1) mca_io("live")
+  else mca_io("real")
+  if (MCA_SYNCHRO) mca_io("soft_preset",0)
+  else mca_io("soft_preset",1)
+}'
+
+#%IU% () 
+#%MDESC% loops printing a message till the acquisition is finished.
+def mca_wait () '{
+
+if (wait(0x24)) {
+  while (wait(0x24)) {
+    tty_move (0,-3,"waiting for MCA to stop ...")
+    tty_move (0,-2,sprintf("MCA  Preset time:   %g sec.\n",COUNT_TIME))
+    mcatimes
+  }
+  print;print
+}
+}'
+
+
+#%IU%
+#%MDESC% Does things that must or need only to be done once at startup. 
+#%BR% Loads roi from file, Reset|Declare shared memory ...
+def mca_firstinit () '{
+    printf("MCA: Initialization ...\n")
+    mcaloadroi
+    MCA_old_channel[0] = MCA_old_channel[1] = -1
+    shared double array MCA_DATA_PARAM [3]
+    MCA_DATA_PARAM[1]=1
+}'
+
+
+#%IU%
+#%MDESC% software setup, i.e. inits memory and assign newly set up parameters to the relevant globals.  
+def mca_softsetup () '{
+  local _type _oldsize _toks
+
+  if (MCA_MEMGRPSIZE>0) {
+    
+    _type = whatis("MCA_DATA","string_output")
+    _oldsize = _toks[split(substr(_type,0,index(_type,"-row")-1),_toks)-1]
+    
+    if (_oldsize != MCA_MEMGRPSIZE) {
+      shared ulong array MCA_DATA [MCA_MEMGRPSIZE][2]
+
+#      if ((MCA_GRP = groupinit (MCA_GRP, MCA_MEMGRPSIZE, 2)) < 0) { 
+#        printf("MCA error: no data group memory left \n") 
+#      }
+    }
+
+    MCA_REDUCTION = MCA_REDUCTION>0?MCA_REDUCTION:1
+    ulong array MCA_DATARED[int(MCA_MEMGRPSIZE/MCA_REDUCTION)][2]
+
+    array_op("fill",MCA_DATA[][0],1)
+    array_op("fill",MCA_DATARED[][0], MCA_REDUCTION)
+    MCA_DATARED[][0] += int(MCA_REDUCTION/2)
+
+  }
+
+  MCA_ROI_CH_MIN[0]=0; MCA_ROI_CH_MAX[0]=MCA_MEMGRPSIZE-1
+  MCA_ROI_EN_MIN[0] = mca_calcE (MCA_ROI_CH_MIN[0])
+  MCA_ROI_EN_MAX[0] = mca_calcE (MCA_ROI_CH_MAX[0])
+
+  MCA_PLOTERASE = 1
+  MCA_PLOTATTR=sprintf("%sylog %slines %sdots %sebars",                              MCA_LOG?"+":"-",MCA_LINES?"+":"-",MCA_DOTS?"+":"-",MCA_EBARS?"+":"-")
+}'
+
+
+#%UU%
+#%MDESC% Disables the MCA.
+#%BR% The MCA is no longer addressed during standard SPEC operation ("ct", scans ..), but still from "mcaacq".
+def mcaoff '{
+  mca_deldef () 
+  mca_par ("auto_run",0) 
+  MCA_AROFF = 1
+
+# mca_io is wrong here as it returns 0 if no dev is connected.
+}' 
+
+#%UU%
+#%MDESC% Enables back the MCA. 
+def mcaon '{
+  mca_par("auto_run",1)
+  MCA_AROFF = 0
+  mca_cdef()
+}' 
+
+#%IU%
+#%MDESC% Un-hooks MCA operation from the standard macros.
+def mca_deldef () '{
+    cdef("","","_mca1","delete")
+    cdef ("","","mcaLt","delete")
+    cdef ("","","mcaRt","delete")
+    cdef ("","","mcaDt","delete")
+    mca_roideldef()
+}'
+
+#%IU% ()  
+#%MDESC% Un-hooks ROI operation from the standard macros.
+def mca_roideldef () '{
+
+   local roi 
+
+   for (roi=0;roi<=MCA_ROI_NO;roi++) {
+     cdef ("","",MCA_ROI_COUNTER[roi],"delete")
+   }
+   MCA_ROI_GCH_MIN = MCA_ROI_ACH_MIN
+   MCA_ROI_GCH_MAX = MCA_ROI_ACH_MAX
+}'
+
+#%IU%
+#%MDESC% Hooks MCA operation to the standard macros.
+def mca_cdef () '{
+
+local _hook
+
+if ((MCA_DEVNAME != "") && !MCA_AROFF) {
+
+  cdef("user_countersrun","if(wait(0x24)) return(1);;","_mca1")
+
+  cdef("user_getcounts", "mca_readbuffer;",     "_mca1",0x10)
+  cdef("user_getcounts", "S[mcaLt]=MCA_LIVE_T;","mcaLt",2)
+  cdef("user_getcounts", "S[mcaRt]=MCA_REAL_T;","mcaRt",2)
+  cdef("user_getcounts", "S[mcaDt]=MCA_DEAD_T;","mcaDt",2)
+
+  if (!MCA_SAVEBUFFER) \
+    cdef("user_prepcount","mcaclear;","_mca1",0)
+  else \
+    cdef("user_prepcount","","_mca1","delete")
+
+  if (MCA_FLAG&1) {
+    cdef("measure2","mca_savescanhead (MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX);",                                                                           "_mca1")
+    cdef("user_scan_loop","mca_savescandata(MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX);"                                                                      ,"_mca1")
+  } else {
+    cdef("Fheader","mca_saveroihead;","_mca1")
+#    cdef("measure2","if (!NPTS) mca_saveroihead;","_mca1")
+#    cdef("measure2","","_mca1","delete")
+    cdef("user_scan_loop","","_mca1","delete")
+  }
+
+  if (MCA_FLAG&2) {
+    cdef("user_handlecounts","mca_savectdata(MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX);                                                                     ","_mca1")
+  } else {
+    cdef("user_handlecounts","","_mca1","delete")
+  }
+  mca_roicdef() 
+}
+}'
+
+#%IU%
+#%MDESC% Saves to DATAFILE MCA ROIS description. 
+def mca_saveroihead '{
+  for (j=0; j<=MCA_ROI_NO ;j++) {
+    if ((MCA_ROI_COUNTER[j]!="") && (-1!=cnt_num(MCA_ROI_COUNTER[j]))) {
+      savemcaroi(DATAFILE,MCA_ROI_CH_MIN[j],MCA_ROI_CH_MAX[j],cnt_name(cnt_num(MCA_ROI_COUNTER[j])))
+    }
+  }
+}'
+
+#%IU% ()  
+#%MDESC% Hooks ROI operation to the standard macros.
+def mca_roicdef () '{
+
+local roi cmd mne
+
+MCA_ROI_GCH_MIN = MCA_ROI_CH_MAX[0]
+MCA_ROI_GCH_MAX = 0
+
+for (roi=0;roi<=MCA_ROI_NO;roi++) {
+  if ((mne = MCA_ROI_COUNTER[roi])!="") {
+    if (-1 != cnt_num(mne)) {
+
+      if (MCA_ROI_GCH_MIN > MCA_ROI_CH_MIN[roi]) \
+        MCA_ROI_GCH_MIN=MCA_ROI_CH_MIN[roi]
+      if (MCA_ROI_GCH_MAX < MCA_ROI_CH_MAX[roi]) \
+        MCA_ROI_GCH_MAX=MCA_ROI_CH_MAX[roi]
+
+      cmd = sprintf("mca_getcounts %s %d %d;",mne,MCA_ROI_CH_MIN[roi],\
+                                                MCA_ROI_CH_MAX[roi])
+      cdef("user_getcounts",cmd,mne,2)
+    }
+  }
+}
+
+if (MCA_ROI_GCH_MIN > MCA_ROI_CH_MIN[MCA_ROIACTIVE]) \
+  MCA_ROI_GCH_MIN = MCA_ROI_CH_MIN[MCA_ROIACTIVE]
+if (MCA_ROI_GCH_MAX < MCA_ROI_CH_MAX[MCA_ROIACTIVE]) \
+   MCA_ROI_GCH_MAX = MCA_ROI_CH_MAX[MCA_ROIACTIVE]
+
+MCA_ROI_ACH_MIN = MCA_ROI_CH_MIN[MCA_ROIACTIVE]
+MCA_ROI_ACH_MAX = MCA_ROI_CH_MAX[MCA_ROIACTIVE]
+
+mca_resize_to_roi 0 MCA_ROI_ACH_MIN  MCA_ROI_ACH_MAX 
+mca_resize_to_roi 0 MCA_ROI_GCH_MIN  MCA_ROI_GCH_MAX 
+}'
+
+
+#%UU%
+#%MDESC% Initialises the MCA macros and hardware.
+#Can be called at startup to re-setup things without giving any parameter, nor calling any menu. The current or default parameters are then set. Default are mensionned together with %B%mcasetup%B% description.
+
+def mcainit '{
+
+  setup_tail("mca")
+  cdef("config_mac","mca_config; ","_mca0",0)
+
+  mca_defaults
+  mca_device
+  mca_state ()
+
+  if ((flag&3) && !(MCA_SL)) {
+    MCA_FLAG&=~3
+    printf("MCA: Macros set \"saveload.mac\" not loaded.                              \n     Cannot save any data. \n")
+  } else {
+    MCA_FLAG=flag
+  }
+
+  mca_hdwsetup()
+  mca_cdef ()
+  mca_firstinit() 
+  mca_softsetup()
+
+  if (MCA_ENERGY && !(MCA_PS)) {
+      MCA_ENERGY = 0
+      printf("MCA: Energy mode not available.                                              \n     Macro set \"psearch.mac\" not loaded.\n")
+  } 
+
+  if (MCA_GUI) { 
+    mcaguion 
+  } else { 
+    mcaguioff 
+  }
+
+  print "MCA:",MCA_DEVNAME,MCA_DEVSTATE[MCA_DEVOK]
+
+}'
+
+#%IU%
+#%MDESC% "config" / "reconfig" service.
+#Hooked to "config_mac".
+def mca_config '{
+
+  if (MCA_AROFF) { mcaoff }  
+
+  mca_defaults
+  mca_device
+  mca_state ()
+  mca_hdwsetup ()
+  mca_cdef ()
+
+  if (!whatis("MCA_DATA_PARAM")) mca_firstinit()
+  mca_softsetup()
+  print "MCA:",MCA_DEVNAME,MCA_DEVSTATE[MCA_DEVOK]
+}'
+
+#=================================================================== SETUP MENU
+
+
+#%IU%
+#%MDESC% MCA menu.
+def mca_setupmenu '{
+
+  global MCA_MENULVL
+
+  if (MCA_MENULVL) {
+    mca_cpmenu
+  } else {
+    mca_menu
+  }
+}'
+
+
+#%IU%
+#%MDESC% Display MCA General menu. (page 1)
+def mca_menu '{
+
+  menuprint(0,MCA_DEVSTATE[MCA_DEVOK],"DEVICE",MCA_DEVNAME);print;print
+
+  menuoptval(-35,"|\n","ADC",MCA_ADCNO,"A") 
+  menuvargetv("MCA_ADCNO") 
+  menuaction("if (MCA_ADCNO <= 0) MCA_ADCNO = 1")
+
+  menuoptval(-35,"| ","GROUP size",MCA_MEMGRPSIZE,"G")
+  menuaction("mca_calgrp")
+  menuprint(-36,"\n","active",MCA_MEMGRP[1]+1)
+
+  menuoptval(-35,"| ","TIME mode",MCA_TMODE==1?"Live":"Real","T")
+  menuvartogg("MCA_TMODE",2,1)
+
+  menuoptval(-36,"\n","SYNCHRO",MCA_SYNCHRO?"External":"Internal","S")
+  menuvartogg("MCA_SYNCHRO")
+
+  print
+  menuoptval(-35,"| ","AUTO-RUN in ct/scan",MCA_AROFF?"disabled":"enabled","R")
+  menuaction("if (MCA_AROFF) { mcaon } else { mcaoff }")
+  
+  menuoptval(-36,"\n","BACKGROUND substraction",MCA_BACKSUB?"ON":"OFF","B")
+  menuvartogg("MCA_BACKSUB")
+
+  menuoptval(-35,"| ","AUTO-MEMORY-CLEAR",MCA_SAVEBUFFER?"OFF":"ON","M")
+  menuvartogg("MCA_SAVEBUFFER")
+
+  menuoptval(-36,"\n","PLOT update interval in sec.",MCA_DISP_SEC,"P")
+  menuvargetv("MCA_DISP_SEC")
+
+  print 
+  menuoptval(-35,"| ","SAVE spectrum during scans",MCA_FLAG&1?"YES":"NO","sc")
+  menuvarbitw("MCA_FLAG",1)
+
+  menuoptval(-36,"\n","after ct or mcaacq",MCA_FLAG&2?"YES":"NO","ct")
+  menuvarbitw("MCA_FLAG",2)
+
+  menuoptval(-35,"| ","     binning factor",MCA_REDUCTION,"bi")
+  menuvargetv("MCA_REDUCTION")
+  menuaction ("MCA_REDUCTION=MCA_REDUCTION>0?MCA_REDUCTION:1")
+  
+  menuoptval(-36,"\n","data format",MCA_FMT,"da")
+  menuvargetv("MCA_FMT")
+
+  if (MCA_FLAG&4) {
+    menuoptval(0,0,"SAVE to",mca_filename(MCA_PREFIX1,MCA_N,MCA_SUFFIX),"to")
+    menuprint (0,"(mca files types)\n","and",mca_filename(MCA_PREFIX2,0,MCA_SUFFIX))
+  } else {
+    menuoptval(0,"(standard scan file)\n","SAVE to",DATAFILE,"to")
+  }
+  menuvarbitw("MCA_FLAG",4)
+  menuaction ("if (MCA_FLAG&4) {\
+           print \"The alternative saves one spectrum per MCA private file.\";          \nprintf(\"Enter here the \");mcanewfile }")
+
+  print
+  menuoptval (0,0,"GUI",MCA_GUI?"ON":"OFF","GUI")
+  menuvartogg("MCA_GUI")
+
+  if (!MCA_GUI) {
+    printf(", ")
+    menuoptval(0,", ","PLOT: log",(MCA_LOG)?"YES":"NO","l")
+    menuvartogg("MCA_LOG")
+
+    menuoptval(0,", ","dots",(MCA_DOTS)?"YES":"NO","d")
+    menuvartogg("MCA_DOTS")
+
+    menuoptval(0,"\n","lines",(MCA_LINES)?"YES":"NO","n")
+    menuvartogg("MCA_LINES")
+
+#    menuoptval(0,0,"err bars",(MCA_EBARS)?"YES":"NO","e")
+#    menuvartogg("MCA_EBARS")
+  } 
+  menusep
+  menuoptbutton (70,"\n","go to cplot menu","cp")
+  menuvartogg ("MCA_MENULVL")
+}'
+
+#%IU%
+#%MDESC% Prepares MCA memory group setting.
+def mca_calgrp '{
+
+  local maxi 
+  
+  maxi = mca_max_channels (8192)
+
+  MCA_MEMGRPSIZE = getval(sprintf("Channels per memory group (%d - %d)",                                                             512,maxi),MCA_MEMGRPSIZE)
+
+  if (MCA_MEMGRPSIZE > maxi)  MCA_MEMGRPSIZE = maxi
+  if (MCA_MEMGRPSIZE < 512)  MCA_MEMGRPSIZE = 512
+
+  MCA_MEMGRP[0] = maxi/MCA_MEMGRPSIZE
+
+  for (i=0.75;i<=32;i*=2) {
+    if (MCA_MEMGRP[0]<i) {
+      MCA_MEMGRP[0]=i-i/3
+      break
+    }
+  }
+
+  MCA_MEMGRPSIZE = maxi/MCA_MEMGRP[0]
+  MCA_MEMGRP[1]=getval(sprintf("Memory group active (max %d):",                                            MCA_MEMGRP[0]) ,MCA_MEMGRP[1]+1)-1
+
+  if ((MCA_MEMGRP[1]<0) || (MCA_MEMGRP[1]>=MCA_MEMGRP[0])) MCA_MEMGRP[1] = 0
+}'
+
+#%IU%
+#%MDESC% Display MCA CPLOT menu. (page 2)
+def mca_cpmenu '{
+
+  global MCA_CP
+
+#  menuoptval (-40,"\n","plot from file",MCA_CP["FROMF"]?"YES":"NO","pl")
+#  menuvartogg ("MCA_CP[\"FROMF\"]")
+#  menuaction ("menuwarning(\"Plot from file to be implemented soon...\")") 
+#  print
+
+  menuoptval (-50,0,"global title",MCA_CP["GLOBTITLE"],"gl")
+  menuvargetv("MCA_CP[\"GLOBTITLE\"]")
+  menuoptval (-30,"\n","get cpsetup:",substr(CP_PAR["GLOBTITLE"],1,15),"g")
+  menuaction ("MCA_CP[\"GLOBTITLE\"]=CP_PAR[\"GLOBTITLE\"]")
+  menuoptval (-50,0,"title",MCA_CP["PTITLE"],"ti")
+  menuvargetv("MCA_CP[\"PTITLE\"]")
+  menuoptval (-30,"\n","get cpsetup:",substr(CP_PAR["PTITLE"],1,15),"e")
+  menuaction ("MCA_CP[\"PTITLE\"]=CP_PAR[\"PTITLE\"]")
+  menuoptval (-50,0,"comment",MCA_CP["COMMENT"],"co")
+  menuvargetv("MCA_CP[\"COMMENT\"]")
+  menuoptval (-30,"\n","get cpsetup:",substr(CP_PAR["COMMENT"],1,15),"t")
+  menuaction ("MCA_CP[\"COMMENT\"]=CP_PAR[\"COMMENT\"]")
+  print
+  menuoptval (-40,"\n","fwhm etc.. on plot",MCA_CP["FLAGS"]&0x10000?"YES":"NO","fw")
+  menuvarbitw ("MCA_CP[\"FLAGS\"]",0x10000)
+  if (MCA_GUI) {
+    menuoptval (-40,"\n","log Y",MCA_LOG?"YES":"NO","l")
+    menuvartogg ("MCA_LOG")
+    menuoptval (-40,"\n","lines",MCA_LINES?"YES":"NO","n")
+    menuvartogg ("MCA_LINES")
+    menuoptval (-40,"\n","dots",MCA_DOTS?"YES":"NO","d")
+    menuvartogg ("MCA_DOTS")
+    menuoptval (-40,"\n","point size",MCA_CP["PSIZE"],"po")
+#    menuprint (-40,"\n"," cpsetup:",CP_PAR["PSIZE"])
+    menuvargetv ("MCA_CP[\"PSIZE\"]")
+  }
+
+ menusep
+ menuoptbutton (70,"\n","back to mca menu","mca")
+ menuvartogg ("MCA_MENULVL")
+}'
+
+#%IU%
+#%MDESC% Checks availability of some menu options.
+def mca_setupchk '{
+  if (MCA_FLAG&0x3 && !(MCA_SL)) {
+    MCA_FLAG&=~0x3
+    menuerror("MCA: Macros set \"saveload.mac\" not loaded.                                 \n     Cannot save any data. ")
+  }
+}'
+
+
+#========================================================================== I/O
+
+#%IU% (command,argument,flag) 
+#%MDESC% Management of input/output to the MCA. %BR%
+# flag 0: returns what mca_par() returns or argument if error occured (cheat a bit)%BR%
+# flag 1: returns really what mca_par() returns.
+def mca_io (command,argument,flag) '{
+
+  local ret 
+  
+  if (MCA_DEVOK>0) {
+
+    if (length(argument)) {
+      ret = mca_par(command,argument)
+      if (ret<0) ret = mca_par(command)
+    } else ret = mca_par(command)
+
+    if (-1 == ret) {
+      mca_state() 
+    } 
+  } else ret = -1
+  
+  if (!flag && (ret<0)) ret = argument
+
+  return(ret)
+}'
+
+#=========================================================== BASIC ACQUISITION
+
+#%UU% [preset_seconds] [roi | first] [last] 
+#%MDESC% Acquires data with the MCA only. The rest of counters configured in SPEC are not addressed by this command. If you need it, use standard %B%ct%B% command. (don't forgot, %B%mcasetup%B% set %B%AUTO-RUN mode <ON>%B%, or %B%mcaon%B%).
+#%BR% %B%mcaacq%B%consists in the following sequence:
+#%UL%
+#%LI% %B%stopping%B% any already running acquisition.
+#%LI% %B%clearing%B% (if setup) the active MCA memory group.
+#%LI% %B%preseting%B% the time. 
+#%LI% %B%starting%B% the acquisition.
+#%LI% %B%polling%B% the device till time is over.
+#%UL% meanwhile:
+#%LI% %B%reading%B% the MCA buffer.
+#%LI% %B%plotting%B% the data spectrum.
+#%XUL%
+#%LI% %B%saving%B% (if setup) the acquired spectrum to disk file.
+#%XUL%
+#%BR% The MCA memory is read within the range specified, or if none, the active ROI .
+#%BR%If the requested preset time is 0 or un-specified, the acquisition is started "for ever"; press "control-C" or "s" or "q" to stop it. 
+#%BR% Pressing "c" would clear the memory on the fly. If the GUI is not active, you can also change the plot update intervals (press "u"), change the plot x or y ranges (press "x" or "y"), integrate counts on region (press "i"), toggles plot attributes such as lines (press "l"), large dots ("d") and log y("g"). Meanwhile, the acquisition goes on.
+
+def mcaacq '{ 
+
+  if (!(whatis("MCA_DATA")&0x10004)) {
+    printf ("MCA: You MUST run ")
+    tty_cntl("so");printf("mcasetup ")
+    tty_cntl("se");printf("or ")
+    tty_cntl("so");printf("mcainit ")
+    tty_cntl("se");print "first." 
+    exit
+  }
+}
+{
+   local xmin xmax ymin ymax chmin chmax roi 
+
+   ymin = ymax = MCA_AUTO
+   MCA_PLOTERASE=1
+   COUNT_TIME = $1 
+
+   if ($# == 3) {
+     xmin = chmin = $2
+     xmax = chmax = $3
+     if (MCA_ENERGY) {   
+       chmin = mca_calcch(xmin)
+       chmax = mca_calcch(xmax)
+     }
+   } else {
+     if ($#==2) roi = $2
+     else       roi = MCA_ROIACTIVE
+     xmin = chmin = MCA_ROI_CH_MIN [roi]
+     xmax = chmax = MCA_ROI_CH_MAX [roi] 
+     if (MCA_ENERGY) {
+       xmin = MCA_ROI_EN_MIN [roi]
+       xmax = MCA_ROI_EN_MAX [roi]
+     }
+   } 
+
+   mcastop
+   if (!MCA_SAVEBUFFER) {
+      mcaclear 
+   }
+   mcastart COUNT_TIME 
+   mca_waitcounts 
+   mca_read chmin chmax
+
+   mca_plotit xmin xmax ymin ymax
+
+   mcatimes 
+   print
+
+   if (MCA_FLAG&2 && (MCA_DEVNAME != "")) {
+     waitmove ; get_angles
+     mca_saveacqdata(chmin, chmax, "$0 $*") 
+   }
+}'
+
+
+#%IU%  
+#%MDESC% Plots and prints out times while waiting for the acquisition to complete. This is used by "mcaacq" macro.
+def mca_waitcounts '{
+  local disp key 
+  local min max
+  
+  if (COUNT_TIME>0) 
+    disp=(MCA_DISP_SEC<COUNT_TIME)?MCA_DISP_SEC:COUNT_TIME
+  else disp=MCA_DISP_SEC
+
+  while (wait(0x24)) {
+    mcatimes 
+    mca_read chmin chmax
+    mca_plotit xmin xmax ymin ymax
+
+    mca_user_waitcounts
+
+    key=input(0)
+    if (key!="" && key != "\004") { mca_key key }
+    mca_user_key
+
+    sleep(disp) 
+  }  
+}'
+
+#%IU% <key>   
+#%MDESC% Manages a menu which is callable using input keys. see "mcaacq".
+def mca_key '{
+
+  local cy
+
+  if ($1=="s" || $1=="q") {
+    mcastop
+    print "\nMCA  STOPPED"
+  } else {
+ 
+    tty_cntl("cl")
+
+    cy = -18
+    tty_move (0,cy++,"MCA MENU")
+    tty_move (5,cy++,"   s: Stop acquisition")
+    tty_move (5,cy++,"   c: Clear Memory and restart acquisition")
+    if (!MCA_GUI) {
+      tty_move (5,cy++,"   u: Modify plot Update Intervals" )
+      tty_move (5,cy++,"   x: Modify X-range" )
+      tty_move (5,cy++,"   y: Modify Y-range")
+      tty_move (5,cy++,"   i: Integrate counts on region")
+      tty_move (5,cy++,sprintf("   l:%s Connect points with Lines\n",                                                               (MCA_LINES)?" do not":""))
+      tty_move (5,cy++,sprintf("   d:%s Draw large Dots\n",                                                                        (MCA_DOTS)?" do not":"") )
+      tty_move (5,cy++,sprintf("   g:%s Plot in loG scale\n",                                                                     (MCA_LOG)?" do not":" do") )
+      tty_move (5,cy++,"   r: Refresh plot")
+    }
+    tty_move(0,-1)
+
+    if ($1=="c") {
+      if (yesno("Really clear memory",1)) {
+        mcastop; mcaclear; mcastart COUNT_TIME
+        t0=time()
+        tty_move (0,-3, "MCA MEMORY CLEARED - ACQ RESTARTED")
+        tty_move(0,-1)
+      }
+
+    } else if (!MCA_GUI) {
+      if ($1=="x") {
+        tty_move(0,-5,"MCA New X-range:\n")
+        xmin = getval("Min",xmin)
+        xmax = getval("Max",xmax)
+        tty_move(0,-1)
+
+      } else if ($1=="y") {
+        tty_move(0,-5,"MCA New Y-range:\n")
+        ymin=getval("Min",ymin)
+        ymax=getval("Max",ymax)
+        tty_move(0,-1)
+
+      } else if ($1=="u") {
+        tty_move(0,-4)
+        MCA_DISP_SEC=getval("\nNew update intervals in second",MCA_DISP_SEC)
+        disp=MCA_DISP_SEC
+        tty_move(0,-1)
+
+      } else if ($1=="r") {
+        MCA_PLOTERASE=1
+        mca_plotit chmin chmax ymin ymax
+        tty_move(0,-3,"MCA PLOT REFRESHED")
+        tty_move(0,-1)
+
+      } else if ($1=="i") {
+        local integral xmn xmx cmn cmx no st
+        tty_move(0,-6,"Integrate counts on range :\n")
+        xmn = getval(" Min",min)
+        xmx = getval(" Max",min)
+        if (!MCA_ENERGY) {
+         cmn = xmn ; cmx = xmx
+        } else {
+         cmn = mca_calcch(xmn)
+         cmx = mca_calcch(xmx)
+        }
+        st = mca_getoffset( MCA_DATA, 0, cmn)
+        no = mca_getnpts  ( MCA_DATA, 0, cmn, cmx)
+        if (no) {
+         integral=mca_integrate(st,no+st-1)
+         printf("MCA counts from %s %g to %g (%s):  [ %d ]",                                                      MCA_ENERGY?MCA_CP_XLBL:"Channel",xmn,xmx,                                      MCA_ENERGY?MCA_CP_XUNT:"",integral)
+        } else  printf("Sorry, no acquisition was made in that range")
+        tty_move(0,-1)
+
+      } else if ($1=="l") {
+        MCA_LINES=!MCA_LINES
+        tty_move (5,-10);tty_cntl("ce")
+        printf("   l:%s Connect points with Lines\n",(MCA_LINES)?" do not":"")
+        tty_move(0,-1)
+
+      } else if ($1=="d") {
+        MCA_DOTS=!MCA_DOTS
+        tty_move (5,-9);tty_cntl("ce")
+        printf("   d:%s Draw large Dots\n",(MCA_DOTS)?" do not":"") 
+        tty_move(0,-1)
+
+      } else if ($1=="g") {
+        MCA_LOG=!MCA_LOG
+        tty_move (5,-8);tty_cntl("ce")
+        printf("   g:%s Plot in loG scale\n",(MCA_LOG)?" do not":" do") 
+        tty_move(0,-1)
+      }
+      MCA_PLOTATTR=sprintf("%sylog %slines %sdots %sebars",                            MCA_LOG?"+":"-",MCA_LINES?"+":"-",MCA_DOTS?"+":"-",MCA_EBARS?"+":"-")
+    }
+    MCA_PLOTERASE=1
+  }
+}'
+
+#%UU%  
+#%MDESC% Clears the active MCA memory group.  
+def mcaclear '{
+
+  mca_io("clear")
+  if (whatis("MCA_DATA")&0x10000) MCA_DATA[][1] = 0
+}'
+
+#%UU% [preset_seconds]
+#%MDESC% Presets and starts an acquisition.
+def mcastart '{
+  if (mca_preset($1)<0) {
+    printf("!! MCA STATUS : %s; could not start.\n\n",MCA_DEVSTATE[MCA_DEVOK])
+    exit
+  }
+  mca_io("run")
+  mca_user_start
+  printf("MCA STATUS : %s\n\n",MCA_DEVSTATE[DEVRUN])
+}'
+
+#%IU% (seconds)
+#%MDESC% Sets the preset time value for the next acquisition.
+def mca_preset (_preset) '{
+  if (mca_io("preset",_preset,1)<0) return -1
+  COUNT_TIME = fabs(_preset)
+  return COUNT_TIME
+}'
+
+#%UU%  
+#%MDESC% Stops acquisition if running.
+def mcastop '{if (wait(0x24)) mca_io("halt")}'
+
+#%UU%  
+#%MDESC% Send "stop acquisition" signal whatever is the status of the device. It might happen that the device server gives a meaningless error message, if the status is already "IDLE".
+def mcahalt 'esrf_io(MCA_DEVNAME,"DevMcaStopAcq")'
+
+#%UU%  [roi|first] [last]
+#%MDESC% Reads the MCA memory within the range specified.
+def mcaread '{
+  local ch0 ch1 
+
+  if (!(whatis("MCA_DATA")&0x10004)) {
+    printf ("MCA: You MUST run ")
+    tty_cntl("so");printf("mcasetup ")
+    tty_cntl("se");printf("or ")
+    tty_cntl("so");printf("mcainit ")
+    tty_cntl("se");print "first."
+    exit
+  }
+}
+{
+  if ($# == 0) {
+    ch0 = MCA_ROI_CH_MIN[MCA_ROIACTIVE]
+    ch1 = MCA_ROI_CH_MAX[MCA_ROIACTIVE]
+  } else if ($# == 1) {
+    mca_getroi $1 0 ch0 ch1
+  } else { 
+    if (MCA_ENERGY) {   
+      ch0 = mca_calcch($1)
+      ch1 = mca_calcch($2)
+    } else { 
+      ch0 = $1
+      ch1 = $2 
+    }
+  } 
+
+  mca_read ch0 ch1
+}'
+
+#%IU%  [first_ch] [last_ch]
+#%MDESC% Read the MCA memory within the channel range specified. Default reads the whole memory.
+def mca_read '{
+
+   global MCA_old_channel 
+   local channel0 channel1
+
+   channel0=$1 ; channel1=$2
+   mca_resize_to_roi 0 channel0 channel1
+
+   MCA_FRED[0]=0
+
+   if (MCA_DEVOK>0) {
+     mca_get(MCA_DATA[channel0:channel1][1],channel0,channel1)
+     mca_times()
+     MCA_IN_GROUP = 0
+#     if (MCA_DATA[MCA_ROI_CH_MAX[0]][0]!=MCA_ROI_CH_MAX[0]) {
+#       array_op("fill",MCA_DATA[][0],1)
+#     }
+     if ((MCA_old_channel[0]!=channel0)||(MCA_old_channel[1]!=channel1)) {
+       MCA_PLOTERASE=1
+       MCA_old_channel[0]=channel0  ; MCA_old_channel[1]=channel1
+     }
+  }
+}'
+
+#%UU% 
+#%MDESC% Reports the MCA elapsed live , real and dead times.
+def mcatimes '
+  mca_times()
+  printf("\rMCA  Elapsed times: live %4.2f real %4.2f sec. dead time %3.2f %%",            MCA_LIVE_T,MCA_REAL_T,MCA_DEAD_T)
+'
+
+#%IU% ()
+#%MDESC% Reads in times elapsed. (Live, Real and Dead time).
+def mca_times () '{
+  global MCA_LIVE_T MCA_REAL_T MCA_DEAD_T
+
+  MCA_LIVE_T = mca_io("elapsed_live")
+  MCA_REAL_T = mca_io("elapsed_real")
+  MCA_DEAD_T = mca_io("dead")
+}'
+
+#%UU% 
+#%MDESC% Prints out a detailed status of the SPEC MCA registers.
+
+def mcastat '{
+   mca_state()
+   printf("MCA STATUS : %s\n\n",MCA_DEVSTATE[MCA_DEVOK])
+   printf("Current ADC             : %d\n", mca_io("adc"))
+   printf("Group size              : %d K \n", mca_io("group_size"))
+   printf("Group selected          : %d \n", mca_io("select_group")+1)
+   printf("Elapsed live time       : %.2f s \n", mca_io("elapsed_live"))
+   printf("Elapsed real time       : %.2f s \n", mca_io("elapsed_real"))
+}'
+
+#============================================================= AUTO RUN
+
+#%IU% 
+#%MDESC% Reads in MCA spectrum and plots it. 
+#That macro is hooked to "user_getcounts".
+
+def mca_readbuffer '{
+  local armin armax
+
+  mca_read MCA_ROI_GCH_MIN MCA_ROI_GCH_MAX
+
+  if (!chk_count) MCA_PLOTERASE = 1
+
+  if (MCA_ENERGY) {
+    armin = MCA_ROI_EN_MIN[MCA_ROIACTIVE]
+    armax = MCA_ROI_EN_MAX[MCA_ROIACTIVE]
+  } else {
+    armin = MCA_ROI_CH_MIN[MCA_ROIACTIVE]
+    armax = MCA_ROI_CH_MAX[MCA_ROIACTIVE]
+  }
+
+  mca_plotit armin armax MCA_AUTO MCA_AUTO
+}'
+
+#%IU%  <ROI_counter_mnemonic> <channel_min> <channel_max>
+#%MDESC% Integrates counts on ROIs and updates SPEC counters register.
+# This is hooked to "user_getcounts", one hook per counter-assigned ROI.
+
+def mca_getcounts ' S[$1] = mca_integrate ($2, $3) '
+
+#%IU%  (channel_min,channel_max) 
+#%MDESC% Integrates counts on channels region.
+#This is called by "mca_getcounts". Does a backgroung substraction if that option is turned on in "mcasetup".
+
+def mca_integrate (channel_min,channel_max) '{
+
+  local integral nopt
+
+  mca_resize_to_last_read channel_min channel_max
+  integral = array_op("sum",MCA_DATA[channel_min:channel_max][1])
+
+  if (MCA_BACKSUB) { 
+    nopt = channel_max-channel_min+1
+    integral-=(MCA_DATA[channel_min][1]+MCA_DATA[channel_max][1])/2*nopt
+  }
+  return(integral)
+}'
+
+#======================================================================= R.O.I.
+#%UU% [no|name] [<first> <last>] [name]
+#%MDESC% ROIs definition.
+#%DL% detail of usage: 
+#%DT% mcaroi no first last counter 
+#%DD% modifies ROI number "no".
+#%DT% mcaroi no                    
+#%DD% sets ROI "no" as the active one.
+#%DT% mcaroi no counter            
+#%DD% associates name "counter", which is eventually a counter mnemonic in config, with ROI number "no".
+#%DT% mcaroi
+#%DD% calls the ROI menu.
+#%XDL%
+# Each ROI is referrenced to by a number that is set by the software. You can use the ROI names to referrence them as well.
+# The active ROI is used as the default operation range when no other range is specified. ROIs which names are configured counter mnemonics are automatically set as pseudo counters to report integrated counts value over the corresponding ROI.
+
+def mcaroi '{
+
+  global MCA_ROI_NO MCA_ROIACTIVE 
+
+  local errmsg no
+
+  errmsg=""
+
+  if (!whatis("MCA_DATA_PARAM")) mca_firstinit ()
+  mca_roideldef()
+
+  if ($#) {
+
+    no = mca_roinum("$1")
+
+    if ((no>=0) && (no <= MCA_ROI_NO)) {
+
+      if (1==$#) {
+        MCA_ROIACTIVE = no 
+      
+      } else if (2==$#) {
+        errmsg = mca_roisetname(no,"$2")
+
+      } else if (no>0) {
+        if (3==$#) {
+          errmsg = mca_roisetrange(no,$2,$3)
+
+        } else if (4==$#) {
+          errmsg = mca_roisetrange(no,$2,$3)
+          errmsg = errmsg "\n" mca_roisetname(no,"$4")
+        }
+      } else {
+        errmsg = "cannot modify Roi 0 range\n" 
+      }
+    } else {
+      errmsg = "Roi $1 unknown\n"
+    }
+
+    mca_roidisp()
+
+    if (errmsg!="") { 
+      beep 
+      print "MCA:",errmsg 
+    }
+
+    if ((MCA_DEVNAME != "") && !MCA_AROFF) {
+      mca_roicdef()
+    } 
+
+    mcasaveroi
+
+  } else {
+
+    local menuend menuupd
+    menuupd = ""
+    menuend = "if ((MCA_DEVNAME != \"\") && (!MCA_AROFF)) { mca_roicdef() }"
+    menuend = menuend ";mcasaveroi"  
+
+    menu("\n R O I - MCA Region Of Interests .","mca_roimenu",menuupd,menuend)
+  }
+}'
+
+
+#%IU%
+#%MDESC% re-loads ROI definition from disk.
+def mcaloadroi '{
+
+global MCA_ROI_NO 
+
+if (!unix(sprintf("test -r %s",MCA_ROI_DEFAULT_FILE))) {
+
+   local line tok 
+   for (i=0, line=getline (MCA_ROI_DEFAULT_FILE); line != -1; line = getline (MCA_ROI_DEFAULT_FILE)) {
+     split (line,tok)
+     if (tok[0] == "") continue
+     else if (tok[0] == "#N") MCA_ROI_NO = tok[1]
+     else if ((substr(tok[0],1,1) != "#") && (i <= MCA_ROI_NO)) {
+       if (i>0) {
+         MCA_ROI_CH_MIN[i] = tok[1]
+         MCA_ROI_CH_MAX[i] = tok[2]
+         MCA_ROI_EN_MIN[i] = mca_calcE (MCA_ROI_CH_MIN[i])
+         MCA_ROI_EN_MAX[i] = mca_calcE (MCA_ROI_CH_MAX[i])
+       }
+       MCA_ROI_COUNTER[i] = tok[3] 
+       i++
+     }
+   }
+   getline(MCA_ROI_DEFAULT_FILE,"close")
+ }
+}'
+
+
+#%IU%
+#%MDESC% saves ROI definition to disk.
+def mcasaveroi '{
+
+if (0 == unix(sprintf("test -w %s/%s/userfiles",SPECD,SPEC))) {
+  
+  if (0 == unix(sprintf("test -w %s",MCA_ROI_DEFAULT_FILE))) \
+         unix(sprintf("rm -f %s",MCA_ROI_DEFAULT_FILE))
+
+  on (MCA_ROI_DEFAULT_FILE) ; offt
+  
+  printf ("#F mcaroifile\n")
+  printf ("#D %s\n",date())
+  printf ("#C %s User = %s\n",SPEC,USER)
+  printf ("#S 1 $0\n")
+  printf ("#N %d\n",MCA_ROI_NO)
+  printf ("#L roi no  ch min  ch max  counter\n")
+
+  for (i=0;i<=MCA_ROI_NO;i++) {
+    printf ("%d  %d  %d  %s \n",                                                             i,MCA_ROI_CH_MIN[i],MCA_ROI_CH_MAX[i],MCA_ROI_COUNTER[i])
+  }
+  
+  ont ; close (MCA_ROI_DEFAULT_FILE)
+}
+}'
+
+#%IU% (roi_id)
+#%MDESC% Returns ROI number, or -1 if not found. "roi_id" is a ROI name or a ROI number.
+def mca_roinum(rid) '{
+  local rn num
+
+  for (rn=0;rn<=MCA_ROI_NO;rn++) 
+    if (rid == MCA_ROI_COUNTER[rn]) {
+      return rn
+    }   
+
+  num = rid + 0
+  if ((num==rid) && (num<=MCA_ROI_NO)) return rid
+
+  return -1
+}'
+
+#%IU% ()  
+#%MDESC% Prints out ROI definition table.
+
+def mca_roidisp () '{
+
+  local roi
+
+  printf("\nROI       |   Channels    | %-27s | ROI  | Roi ",                                                  (MCA_CP_XLBL!="")?MCA_CP_XLBL:"calibration   ")
+  printf("\nnames     | first | last  | min          | max          |ACTIVE| numbers\n")
+  print "---------------------------------------------------------------------"
+
+  for (roi=0;roi<=MCA_ROI_NO;roi++) {
+    if (roi==MCA_ROIACTIVE) tty_cntl("so")
+    printf("%-10s| %-5d | %-5d | %-12.4f | %-12.4f | %-4s | %d\n",\
+          MCA_ROI_COUNTER[roi],\
+          MCA_ROI_CH_MIN[roi],MCA_ROI_CH_MAX[roi],MCA_ROI_EN_MIN[roi],\
+          MCA_ROI_EN_MAX[roi],(MCA_ROIACTIVE==roi)?" X":" -",roi)
+    tty_cntl("se")
+  }
+  print
+}'
+
+
+#%IU% (no,name)
+#%MDESC% Assigns ROI number <no> with name <name>.
+def mca_roisetname (no,name) '{
+  local roi err
+
+  err = ""
+
+  if (no<=MCA_ROI_NO) {
+    if (name!="") MCA_ROI_COUNTER[no]=name
+    if (MCA_ROI_COUNTER[no] != "" && (MCA_ROI_COUNTER[no] != "n")) {
+      for (roi=0;roi<=MCA_ROI_NO;roi++) 
+        if ((roi != no) && (MCA_ROI_COUNTER[no] == MCA_ROI_COUNTER[roi])) {
+          MCA_ROI_COUNTER[roi]=""
+          err=sprintf("%s     roi %d was taken off name %s\n",                                                 err,roi,MCA_ROI_COUNTER[no])
+          break
+        }
+    }
+    MCA_ROIACTIVE=no
+  }
+  return(err)
+}'
+
+
+#%IU% (no,min,max)
+#%MDESC% Assigns ROI number <no> with specified range.
+def mca_roisetrange (no,min,max) '{
+
+  global MCA_ROI_EN_MIN MCA_ROI_EN_MAX
+  local roi err
+
+  err = ""
+
+  if (no<=MCA_ROI_NO) {
+    if (MCA_ENERGY) {
+      MCA_ROI_EN_MIN[no]=min
+      MCA_ROI_EN_MAX[no]=max
+    } else {
+      MCA_ROI_CH_MIN[no]=min
+      MCA_ROI_CH_MAX[no]=max
+    }
+    mca_Ech MCA_ENERGY MCA_ROI_EN_MIN[no] MCA_ROI_CH_MIN[no]
+    mca_Ech MCA_ENERGY MCA_ROI_EN_MAX[no] MCA_ROI_CH_MAX[no]
+    MCA_ROIACTIVE=no
+  }
+  return(err)
+}'
+
+
+#%IU%  
+#%MDESC% ROI edition menu.
+def mca_roimenu '{
+
+  mca_roidisp()
+
+  menupru("keys:\n")
+  menuoptbutton(0,", ","  add","a")
+  menuaction ("_mca_roiadd")
+  if (MCA_ROI_NO) {
+    menuoptbutton(0,", ","delete","d")
+    menuaction ("_mca_roidel")
+  }
+  printf("or modify:  ")
+  for (i=0;i<=MCA_ROI_NO;i++) {
+    if (MCA_ROI_COUNTER[i]!="") {
+      if (i>0) {
+        menuoptbutton(0,"| ","",i)
+        menuaction(sprintf("_mca_roichange %d",i))
+      }
+      menuoptbutton(0,"| ","",MCA_ROI_COUNTER[i])
+    } else {
+      menuoptbutton(0,"| ","",i)
+    }
+    menuaction(sprintf("_mca_roichange %d",i))
+  }
+  print;  print
+}'
+
+
+#%IU%
+#%MDESC% New ROI input.
+def _mca_roiadd '{
+  MCA_ROI_NO++
+  _mca_roiname MCA_ROI_NO
+  _mca_roirange MCA_ROI_NO
+}'
+
+#%IU%
+#%MDESC% ROI name input.
+def _mca_roiname '{
+  local no asw err
+
+  err=""
+  no = $1
+  asw = getval("Name",MCA_ROI_COUNTER[no])
+  if ((err = mca_roisetname(no,asw))!="") menuerror(err)
+}'
+
+#%IU%
+#%MDESC% ROI range input.
+def _mca_roirange '{
+  local asw arr err min max
+
+  asw = $1
+  err = ""
+
+  if (MCA_ENERGY) {
+    min=getval(sprintf("From %s: ",MCA_CP_XLBL),MCA_ROI_EN_MIN[asw])
+    if (1==split (min,arr)) {
+      max=getval(sprintf("To   %s: ",MCA_CP_XLBL),MCA_ROI_EN_MAX[asw])
+    } else {
+      min = arr[0]
+      max = arr[1]
+    }
+  } else {
+    min=getval("From channel: ",MCA_ROI_CH_MIN[asw])
+    if (1==split(min,arr)) {
+      max=getval("To   channel: ",MCA_ROI_CH_MAX[asw])
+    } else {
+      min = arr[0]
+      max = arr[1]
+    }
+  }
+  err = mca_roisetrange(asw, min, max)
+  if (err!="") menuerror(err)
+}'
+ 
+#%IU%
+#%MDESC% ROI deletion.
+
+def _mca_roidel '{
+
+   local rqs nn arr no_str na_str ii jj
+   
+   rqs = getval("which one(s)",MCA_ROI_COUNTER[MCA_ROIACTIVE])
+
+   nn = split (rqs,arr)
+
+   for (no_str=na_str="",ii=0;ii<nn;ii++) {
+     if ((jj = mca_roinum (arr[ii])) < 0) \
+        menuwarning (sprintf("%s: %s unknown",rqs,arr[ii]))
+     else if (index(no_str,jj)) \
+        menuwarning (sprintf("%s: %s and %d were the same",rqs,MCA_ROI_COUNTER[jj],jj))
+     else {
+       no_str = jj " " no_str
+       na_str = MCA_ROI_COUNTER[jj] " " na_str
+     }
+   }
+
+   nn = split (na_str,arr)
+
+   for (ii=0;ii<nn;ii++) {
+
+      jj = mca_roinum (arr[ii])
+
+      if (jj > 0) {
+
+        MCA_ROI_EN_MIN[jj] = MCA_ROI_EN_MIN[MCA_ROI_NO]
+        MCA_ROI_EN_MAX[jj] = MCA_ROI_EN_MAX[MCA_ROI_NO]
+        MCA_ROI_CH_MIN[jj] = MCA_ROI_CH_MIN[MCA_ROI_NO]
+        MCA_ROI_CH_MAX[jj] = MCA_ROI_CH_MAX[MCA_ROI_NO]
+        MCA_ROI_COUNTER[jj]= MCA_ROI_COUNTER[MCA_ROI_NO]
+
+        if (MCA_ROIACTIVE == jj) MCA_ROIACTIVE=0
+        else if (MCA_ROI_NO == MCA_ROIACTIVE) MCA_ROIACTIVE=jj
+
+        MCA_ROI_NO--
+
+      } else if (0==jj) {
+        menuerror("cannot delete roi 0")
+
+      } 
+   }
+}'
+
+#%IU%
+#%MDESC% ROI modification.
+def _mca_roichange '{
+
+  if ($1) {
+    _mca_roirange $1
+  }
+  _mca_roiname $1
+}'
+
+#==================================================================== SAVE/LOAD
+
+#%UI% ()
+#%MDESC% Opens next MCA private file, and writes header on it.
+
+def mca_fileheader (file) '{
+# ?? mca_fileheader (file) sh be repl by a call to savefileheader(file) !!
+# ??                       in mcasave and mca_save_data funcs.
+# ??                       pb is EPOCH .
+
+  local i j
+
+  if (file == "" || file == "0" || open(file)) return -1
+  fprintf(file,"#F %s\n", file)
+  fprintf(file,"#E %d\n",EPOCH)
+  fprintf(file,"#D %s\n",date())
+  fprintf(file,"#C %s  User = %s\n",TITLE,USER)
+
+  for (i = 0; i < MOTORS; i += 8) {
+    fprintf(file,"#O%d ", i/8)
+    for (j = i; j < i + 8 && j < MOTORS; j++)
+      if (motor_name(mA[j])!="unused") fprintf(file,"%8s  ", motor_name(mA[j]))
+    fprintf(file,"\n")
+  }
+  return 0
+}'
+
+#%UU% [file_name]
+#%MDESC% Sets a new file prefix and initialises the spectrum run number, which appears in the file name as e.g. PREFIX_001.mca. But when spectrum was taken during a scan, the file name changes for PREFIX_001_000.mca, where first number is the scan number (SCAN_N) and second one the point number in the scan. 
+def mcanewfile '{
+
+  global MCA_PREFIX MCA_PREFIX1 MCA_PREFIX2 MCA_N MCA_SUFFIX 
+  local tmpfile a1 a2
+
+  if ($# > 0)  
+    MCA_PREFIX = "$1"
+  else 
+    MCA_PREFIX = getval("MCA File Prefix",MCA_PREFIX)
+
+  MCA_SUFFIX = ".mca"
+
+  if ($# > 1) 
+    MCA_N = $2
+  else
+    MCA_N = 0
+
+  if (MCA_PREFIX == "0")    MCA_PREFIX=""
+  if (MCA_PREFIX == "null") MCA_PREFIX="/dev/null"
+  if (MCA_PREFIX == "tty")  MCA_PREFIX="/dev/tty"
+
+  if ((MCA_PREFIX != "") && (MCA_PREFIX != "/dev/null") && \
+    (MCA_PREFIX != "/dev/tty") ) {
+
+    if (!index(MCA_PREFIX, "/") && !unix(sprintf("test -d %s",DATA_DIR)))\
+      MCA_PREFIX = sprintf("%s/%s",DATA_DIR,MCA_PREFIX)
+    
+    if ($# < 2) {
+      tmpfile = sprintf("/tmp/mcatmp_%s_%s",SPEC,USER)
+      unix(sprintf("/bin/ls -r %s*%s 2>/dev/null > %s",MCA_PREFIX,\
+				MCA_SUFFIX,tmpfile))
+      if ((line=getline(tmpfile))!=-1) {
+        sscanf(line,sprintf("%s%%d%s",MCA_PREFIX,MCA_SUFFIX),MCA_N)
+        getline(tmpfile,"close") 
+      }  
+      unix(sprintf("/bin/rm -f %s",tmpfile))  
+
+      MCA_N = getval("Last run number",MCA_N)
+    }
+  }
+
+  MCA_PREFIX1 = MCA_PREFIX "_#r3"
+  MCA_PREFIX2 = MCA_PREFIX "_#n3_#p3"
+
+  a1 = mca_filename(MCA_PREFIX1,MCA_N+1,MCA_SUFFIX)
+  a2 = mca_filename(MCA_PREFIX2,MCA_N+1,MCA_SUFFIX)
+  if (a1!="" || a2!="") {
+    printf("Using prefix \"%s\". Next run number is %d. Next scan is %d\n\n",\
+                                MCA_PREFIX,MCA_N+1,SCAN_N+1)
+    printf("-> single acquisition to files of type: \"%s\"\n",a1)
+    printf("-> scans to files of type: \"%s\"\n",a2)
+  } else {
+    printf("Not a valid MCA prefix\n")
+  }
+}'
+
+#%IU% (prefix, number, suffix)
+#%MDESC% Returns MCA private file name.
+def mca_filename (prefix, number, suffix) '{
+  local ch dig fname fmt ix
+
+  if ((MCA_PREFIX=="/dev/null") || (MCA_PREFIX=="/dev/tty")) return MCA_PREFIX
+  if ((MCA_PREFIX == "") || (MCA_PREFIX == "0")) return 0
+
+  fname = prefix suffix
+
+  if (index(fname,"#") == 0) {
+    fname = sprintf("%s%04d%s", prefix, number, suffix)
+    return (fname)
+  }
+
+  while (ix = index(fname,"#")) {
+    sscanf(fname,"%*[^#]#%1s%d",ch,dig)
+    if (dig == 0) 
+      fmt = substr (fname,1,ix-1) "%03d" substr (fname,ix+2)
+    else  
+      fmt = substr (fname,1,ix-1) sprintf("%%0%dd",dig) substr (fname,ix+3)
+
+    if (ch == "p")
+      fname = sprintf(fmt,NPTS)
+    else if (ch == "n")
+      fname = sprintf(fmt,SCAN_N)
+    else if (ch == "r")
+      fname = sprintf(fmt,number)
+    else 
+      fname = substr (fname,1,ix-1) substr (fname,ix+1)
+  }    
+
+  return (fname)
+}'
+
+
+#%IU%
+#%MDESC% Returns true when the saveload package macros are loaded.
+def MCA_SL '((whatis("savemcadata")&2)&&(whatis("savemcadata")>>16>3))'
+
+#%IU% [string]
+#%MDESC% Checks if saveload macro package is loaded.
+
+def mca_sl_test '{
+
+if (!(MCA_SL)) {
+  printf("MCA: Macros set \"saveload.mac\" not loaded.\n")
+  print "     (..Typing \"jdo savelaod.mac\" may help..)"
+
+  if ($#) {
+    printf("     For now, cannot execute %s\n","$*")
+    exit
+  }     
+}
+}'  
+
+#%UI% ()
+#%MDESC% Applies data reduction on data in SPEC memory. 
+#%BR% The reduction consists of:
+#%UL%
+#%LI% averaging counts every "factor" points.
+#%LI% multiplying by "factor" each integer average to get an integrated value.
+#%XUL%
+def mca_data_red () '{
+  MCA_DATARED[][1] = MCA_REDUCTION*array_op("contract",MCA_DATA[][1],MCA_REDUCTION)
+}'
+ 
+ 
+#%UU% [roi|min] [max] [-silent]
+#%MDESC% Saves acquired data to disk file.
+#%BR% If a range is specified, the data are saved within that range, otherwise the whole spectrum is dumped to the file. The file is either the standard scanfile or a private MCA file, depending on "mcasetup" entries. %BR%
+# If standard scanfile is used, each spectrum originated from out of a scan (ct or mcaacq) is nevertheless referenced to a "scan number". (SCAN_N is incremented).%BR%
+# If a private file is used, it must have been set a prefix using "mcanewfile" command. Then each spectrum is saved to a different file. The file name extensions gives the information on its origin. see%B% mcanewfile%B%.
+#%BR% The file syntax is standard and MCA mixed. MCA syntax is described below:
+#%BR% Each MCA related line holds the character "@".
+#%DL% MCA file syntax:
+#%DT% #@MCA %%16C 
+#%DD% Format string passed to data_dump() function. This format string is held by the global variable "MCA_FMT" and can then been adapted to particular needs. "%%16C" is the default. It dumps data on 1 line, cut every 16 points:
+#%PRE%
+#@A 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\
+# 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\
+# 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\
+# 0 0 0 0 0 0 0 0 0 0 0 ...
+#%PRE% 
+# "%%16" would do the same without any backslash, "1" would dump 1 point per line, ...
+#%DT% #@CHANN 1024 0 1023 1 
+#%DD% number of data points, first MCA channel, last one, reduction factor.
+#%DT% #@CTIME 1 17 17 
+#%DD% Time preset, MCA elapsed live time, MCA elapsed real time.
+#%DT% #@CALIB  0 1 0
+#%DD% Calibration parameters as "a b c", in "E = a + b*ch + c*ch^2".
+#%DT% @A 0 0 0....
+#%DD% MCA data. Each value is the content of one channel, or an integrated value over several channels if a reduction was applied. 
+#%XDL%
+# Data reduction is useful in some cases to minimize file sizes, which might grow very fast and eventually fill up the disk.
+#%BR% It consists of:
+#%UL%
+#%LI% averaging counts every "factor" points.
+#%LI% multiplying by "factor" each integer average to get an integrated value.
+#%XUL%
+#When "-silent" the macro does not ask for a user comment.
+def mcasave '
+mca_sl_test "$0"  
+{
+
+  local file cmin cmax 
+  local reduc rnpts first k
+
+  _cols = 0
+  if (MCA_FLAG&4) {
+    file = mca_filename (MCA_PREFIX1,MCA_N+1,MCA_SUFFIX)
+  } else {
+    file = DATAFILE
+  }
+
+  FPRNT = ""
+  HEADING = "$0 $*"
+  DATE = date()
+
+  if ($2) {
+    if (MCA_ENERGY) {   
+      cmin = mca_calcch($1)
+      cmax = mca_calcch($2)
+    } else { cmin=$1; cmax=$2 }
+  } else {
+     mca_getroi $1 0 cmin cmax
+  } 
+  mca_resize_to_last_read cmin cmax
+
+  if (cmin<=cmax)  { 
+    if (MCA_REDUCTION>1) {
+      reduc = MCA_REDUCTION
+      if (MCA_FRED[0]>1) {
+        printf("MCA: Those data were already reduced by a factor of %g\n",                       MCA_FRED[0])
+        if (yesno(sprintf("     Do you want to apply factor %g again",                                           MCA_REDUCTION),0)) {
+          reduc *= MCA_FRED[0]
+          mca_data_red()
+        } else reduc = MCA_FRED[0]
+        rnpts = int((cmax-cmin  )/reduc) + 1
+      } else {
+        rnpts = int((cmax-cmin+1)/reduc)
+        mca_data_red()
+      }
+    } else {
+      reduc = (MCA_FRED[0]>1)?MCA_FRED[0]:1
+      rnpts = int((cmax-cmin  )/reduc) + 1
+    }
+    
+    if (rnpts>0) {
+      if (MCA_FLAG&4) {
+        if (mca_fileheader(file)<0) exit
+        MCA_N += savestdheader( file, 3, 0)      # 3 means save motor pos.
+      } else {
+        SCAN_N = savestdheader( file, 3, SCAN_N)
+        if (SCAN_N<0) {
+          SCAN_N=-SCAN_N
+          exit
+        }
+      }
+      savemcaheader(file,MCA_FMT,rnpts,cmin,cmax,reduc,COUNT_TIME,MCA_LIVE_T,MCA_REAL_T)
+      mca_tops
+      savemcacalib(file,PS_EA,PS_EB,PS_EC)
+
+      for (k=0 ; k<=MCA_ROI_NO ; k++) {
+        if ((MCA_ROI_COUNTER[k]!="0") && (-1!=cnt_num(MCA_ROI_COUNTER[k]))) {
+          savemcaroi(file, MCA_ROI_CH_MIN[k],MCA_ROI_CH_MAX[k],cnt_name(cnt_num(MCA_ROI_COUNTER[k])))
+        }
+      }
+      savecntheader(file)
+
+      if (!index("$*","-silent")) {
+        local comment
+        comment = getval ("Comment","")
+        if (comment!="") fprintf(file,"#@C %s.  \n", comment)
+      }
+
+      savecounters(file)
+
+      if (MCA_REDUCTION>1) {
+        first = mca_getoffset( MCA_DATARED, 0, cmin)
+        savemcadata (file,MCA_DATARED[first:first+rnpts-1][1],rnpts, MCA_FMT)
+      } else {
+        first = mca_getoffset( MCA_DATA, 0, cmin)
+        savemcadata (file,MCA_DATA[first:first+rnpts-1][1],rnpts, MCA_FMT)
+      }
+
+      printf("MCA: %d datapoints written to file %s\n",rnpts,file)
+      if (MCA_FLAG&4) {
+        close(file)
+        printf("     spectrum number %d\n",MCA_N)
+      } else printf("     scan number %d\n",SCAN_N)
+      
+    } else {
+      printf("MCA ERROR: 0 datapoints saved. Binning too large.\n")
+      if (MCA_FLAG&4) printf("     spectrum number %d\n",MCA_N)
+      else printf("     scan number %d\n",SCAN_N)
+    }
+  } else {
+    printf("MCA ERROR: 0 datapoints saved. Wrong data range\n")
+    if (MCA_FLAG&4) printf("     spectrum number %d\n",MCA_N)
+    else printf("     scan number %d\n",SCAN_N)
+  }
+}'
+
+
+#%UU%  <file> <scan_no> [scanpt_no] [0|1] 
+#%MDESC% Loads spectrum from a file.
+#%BR%The loaded spectrum is stored into WS memory as if it would have just been acquired. 
+#If file is a standard scan file, spectra are referrenced to by their "scan" number, and eventually their "scan_point" number. 
+#Both numbers must be 0 when loading data from private MCA files. 4th argument to 1 means that the calibration parameters are to be loaded from the file as well. In that case any other current calibration is overwritten. 
+#To avoid it, "mcasave" it with the current spectrum, before "mcaload"ing. %BR%
+#Reduced data channel numbering starts from the first channel value (prior to reduction) added integer part of half the "factor", every next point incremented by "factor" .....
+
+def mcaload '
+
+mca_sl_test "$0"
+
+{
+  global MCA_SNO MCA_SPNO MCA_LOADF MCA_CALFF
+
+  global MCA_FRED MCA_old_channel
+  local calpar dsize doffset 
+  local ulong array tmpdata [16384][1]
+
+  if (!$#) {
+    MCA_LOADF = getval("file to load data from",MCA_LOADF)
+    MCA_SNO = getval("scan number",MCA_SNO?MCA_SNO:1)
+    MCA_SPNO = getval("scan point",MCA_SPNO?MCA_SPNO:1)
+    MCA_CALFF = yesno("load calibration parameters",MCA_CALFF)
+  } else {
+    MCA_LOADF = "$1"
+    MCA_SNO = $2?$2:1
+    MCA_SPNO = $3?$3:1
+    MCA_CALFF = $4
+  }
+
+  if (MCA_CALFF && !(MCA_PS)) {
+    printf("MCA: Energy mode not available. Macro set psearch.mac not loaded.\n")
+    MCA_CALFF = 0
+  }
+
+  loadmcadata \'"MCA_LOADF"\' tmpdata 0 MCA_SNO MCA_SPNO MCA_CALFF MCA_old_channel[0] MCA_old_channel[1] MCA_FRED[0] calpar
+
+  if (MCA_FRED[0]<1) MCA_FRED[0]=1
+  MCA_FRED[1]=MCA_SNO
+
+  dsize = int ((MCA_old_channel[1]+1)/MCA_FRED[0])
+  doffset = int (MCA_old_channel[0]/MCA_FRED[0])
+
+  if (dsize > MCA_MEMGRPSIZE) {
+    shared ulong array MCA_DATA [dsize][2]
+#    if (MCA_GRP) data_grp(MCA_GRP,dsize,2)
+  }
+  if ((dsize > MCA_MEMGRPSIZE)||(MCA_FRED[0] > 1)) {
+    ulong array MCA_DATARED [int(dsize/MCA_REDUCTION/MCA_FRED[0])][2]
+    array_op("fill",MCA_DATARED[][0],MCA_REDUCTION*MCA_FRED[0])
+    MCA_DATARED[][0]+=int( MCA_REDUCTION*MCA_FRED[0]/2 )
+  }
+
+  MCA_DATA[doffset:][1] = tmpdata
+  array_op ("fill", MCA_DATA[][0], MCA_FRED[0])
+  MCA_DATA[][0] +=int(MCA_FRED[0]/2)
+
+  MCA_IN_GROUP = 0
+
+  MCA_EA=MCA_EC=PS_WA=PS_WB=PS_WC=0
+  MCA_EB=1
+
+  if (MCA_CALFF) {
+    local calarr
+    split (calpar,calarr)
+    MCA_EA=calarr[0]
+    MCA_EB=calarr[1]
+    MCA_EC=calarr[2]
+  } else if (MCA_ENERGY) { 
+    MCA_ENERGY=0
+    MCA_PLOTERASE=1
+  }
+  printf ("      Now in %s mode\n",MCA_ENERGY? "ENERGY": "CHANNEL")
+  mca_roi_Ech
+}'
+
+#%IU% (ch_min,ch_max)
+#%MDESC% Save file header during scans. Hooked to "measure2".
+def mca_savescanhead (ch_min,ch_max) '{
+
+  local npts saveit file privfile
+
+  saveit   = (MCA_FLAG&1)
+  privfile = (MCA_FLAG&4)
+
+  if (!saveit) return(-1)
+
+  mca_resize_to_last_read ch_min ch_max
+  npts     = int( (ch_max-ch_min+1) / (MCA_REDUCTION>0?MCA_REDUCTION:1) )
+  if (npts<=0) return (-1)
+
+  if (privfile) {
+    file = mca_filename (MCA_PREFIX2,0,MCA_SUFFIX)
+    if (mca_fileheader(file)<0) return(-1)
+  } else file = DATAFILE
+
+#  if (privfile) MCA_N += savestdheader ( file, 3, 0)
+  if (privfile) savestdheader ( file, 3, 0)
+
+  if (privfile || !NPTS) {
+    savemcaheader(file,MCA_FMT,npts,ch_min,ch_max,MCA_REDUCTION,COUNT_TIME,MCA_LIVE_T,MCA_REAL_T)
+    mca_tops
+    savemcacalib(file,PS_EA,PS_EB,PS_EC)
+    for (j=0; j<=MCA_ROI_NO ;j++) {
+      if ((MCA_ROI_COUNTER[j]!="") &&                                                    (-1!=cnt_num(MCA_ROI_COUNTER[j]))) {
+        savemcaroi(file,MCA_ROI_CH_MIN[j],MCA_ROI_CH_MAX[j],cnt_name(cnt_num(MCA_ROI_COUNTER[j])))
+      }
+    }
+  }
+}'
+
+#printf("MCA file: ") 
+#print ccdfilename (MCA_PREFIX "_#n3",SCAN_N,"_*" MCA_SUFFIX) 
+
+#%IU% (ch_min,ch_max)
+#%MDESC% Save MCA data during scans. Hooked to "user_scan_loop".
+
+def mca_savescandata (ch_min,ch_max) '{
+
+  local npts first saveit file privfile
+
+  saveit   = (MCA_FLAG&1)
+  privfile = (MCA_FLAG&4)
+
+  if (!saveit) return(-1)
+
+  mca_resize_to_last_read ch_min ch_max
+  npts     = int( (ch_max-ch_min+1) / (MCA_REDUCTION>0?MCA_REDUCTION:1) )
+  if (npts<=0) return (-1)
+
+  if (privfile) file = mca_filename (MCA_PREFIX2,0,MCA_SUFFIX)
+  else          file = DATAFILE
+
+  if (MCA_REDUCTION>1) {
+    mca_data_red()
+    first = mca_getoffset( MCA_DATARED, 0, ch_min)
+    savemcadata (file, MCA_DATARED[first:first+npts-1][1],npts, MCA_FMT)
+  } else {
+    savemcadata (file, MCA_DATA[ch_min:ch_max][1],npts, MCA_FMT)
+  }
+
+  if (privfile) close(file)
+}'
+
+#%IU% (ch_min,ch_max)
+#%MDESC% Save header and data to file after a "ct". Hooked to "user_handlecounts".
+def mca_savectdata (ch_min,ch_max) '{
+
+  local npts first file privfile saveit
+
+  saveit   = (MCA_FLAG&2) 
+  privfile = (MCA_FLAG&4)
+
+  if (!saveit) return(-1)
+
+  mca_resize_to_last_read ch_min ch_max
+  npts     = int( (ch_max-ch_min+1) / (MCA_REDUCTION>0?MCA_REDUCTION:1) )
+
+  if (npts<=0) return (-1)
+
+  if (privfile) {
+    file = mca_filename(MCA_PREFIX1,MCA_N+1,MCA_SUFFIX)
+    if (mca_fileheader(file)<0) return(-1)
+  } else file = DATAFILE
+
+  HEADING = sprintf("ct %g",COUNT_TIME)
+  DATE = date()
+  if (privfile) {
+    MCA_N += savestdheader( file, 1, 0)
+  } else {
+    SCAN_N = savestdheader( file, 1, SCAN_N)
+    if (SCAN_N<0) {
+      SCAN_N=-SCAN_N
+      return(-1)
+    }
+  }
+
+  savemcaheader(file,MCA_FMT,npts,ch_min,ch_max,MCA_REDUCTION,COUNT_TIME,MCA_LIVE_T,MCA_REAL_T)
+  mca_tops
+  savemcacalib(file,PS_EA,PS_EB,PS_EC)
+  for (j=0; j<=MCA_ROI_NO ;j++) {
+    if ((MCA_ROI_COUNTER[j]!="") &&                                                    (-1!=cnt_num(MCA_ROI_COUNTER[j]))) {
+      savemcaroi(file,MCA_ROI_CH_MIN[j],MCA_ROI_CH_MAX[j],cnt_name(cnt_num(MCA_ROI_COUNTER[j])))
+    }
+  }
+  
+  FPRNT=""
+  savecntheader(file)
+  savecounters(file)
+
+  if (MCA_REDUCTION>1) {
+    mca_data_red()
+    first = mca_getoffset( MCA_DATARED, 0, ch_min)
+    savemcadata (file, MCA_DATARED[first:first+npts-1][1],npts, MCA_FMT)
+  } else {
+    savemcadata (file, MCA_DATA[ch_min:ch_max][1],npts, MCA_FMT)
+  }
+
+  printf("MCA: %d datapoints written to file %s\n",npts,file)
+  if (privfile) printf("     spectrum number %d\n",MCA_N)
+  else printf("     scan number %d\n",SCAN_N)
+
+  if (privfile) close(file)
+}'
+
+#%IU% (ch_min, ch_max, headline)
+#%MDESC% Save header and data to file after a "mcaacq". Called from "mcaacq".
+
+def mca_saveacqdata (ch_min, ch_max, headline) '{
+
+  local npts first file privfile
+
+  privfile = (MCA_FLAG&4)
+
+  mca_resize_to_last_read ch_min ch_max
+  npts     = int( (ch_max-ch_min+1) / (MCA_REDUCTION>0?MCA_REDUCTION:1) )
+  if (npts<=0) return (-1)
+
+  if (privfile) {
+    file = mca_filename(MCA_PREFIX1,MCA_N+1,MCA_SUFFIX)
+    if (mca_fileheader(file)<0) return(-1)
+  } else file = DATAFILE
+
+  if (length(headline)) HEADING = headline
+  DATE = date()
+  if (privfile) {
+    MCA_N += savestdheader( file, 3, 0)
+  } else {
+    SCAN_N = savestdheader( file, 3, SCAN_N)
+    if (SCAN_N<0) {
+      SCAN_N=-SCAN_N
+      return(-1)
+    }
+  }
+
+  savemcaheader(file,MCA_FMT,npts,ch_min,ch_max,MCA_REDUCTION,COUNT_TIME,MCA_LIVE_T,MCA_REAL_T)
+  mca_tops
+  savemcacalib(file,PS_EA,PS_EB,PS_EC)
+
+  if (MCA_REDUCTION>1) {
+    mca_data_red()
+    first = mca_getoffset( MCA_DATARED, 0, ch_min)
+    savemcadata (file, MCA_DATARED[first:first+npts-1][1],npts, MCA_FMT)
+  } else {
+    savemcadata (file, MCA_DATA[ch_min:ch_max][1],npts, MCA_FMT)
+  }
+
+  printf("MCA: %d datapoints written to file %s\n",npts,file)
+  if (privfile) printf("     spectrum number %d\n",MCA_N)
+  else printf("     scan number %d\n",SCAN_N)
+
+  if (privfile) close(file)
+}'
+
+
+
+
+
+#=========================================================== ENERGY CALIBRATION
+
+#%IU% <array1> <col1> <array2> <col2>
+#%MDESC% Same as ps_chtoE from psearch.mac package. i.e., converts all the channels in array1[][col1] to energies and puts these values into destination array2[][col2]. The calibration function  E=a+b ch + c ch^2 is used.
+
+def mca_chtoE '{
+  mca_tops
+  ps_chtoE ($1[][$2],$3[][$4])
+  MCA_IN_GROUP = 0
+}'
+
+#%IU%
+#%MDESC% Reads in parameters from shared memory (GUI).
+def mca_tops '
+  if (MCA_EB==0) MCA_EB=1
+  PS_EA = MCA_EA ; PS_EB = MCA_EB ; PS_EC = MCA_EC
+'
+
+
+#%IU%
+#%MDESC% calibration parameter A.(Shared memory)
+def MCA_EA 'MCA_DATA_PARAM[0]'
+#%IU%
+#%MDESC% calibration parameter B.(Shared memory)
+def MCA_EB 'MCA_DATA_PARAM[1]'
+#%IU%
+#%MDESC% calibration parameter C.(Shared memory)
+def MCA_EC 'MCA_DATA_PARAM[2]'
+
+#%IU% <mode> <energy> <channel>
+#%MDESC% Converts calibrated value into channels (mode 1) or reverse (mode 0)
+#and returns the result.
+def mca_Ech '{
+
+  if ($1) { 
+    $3 = mca_calcch($2)
+  } else { 
+    $2 = mca_calcE ($3)
+  }
+}'
+
+
+#%IU% 
+#%MDESC% Calculated the channel from the given Energy
+def mca_calcE (x) '{
+  mca_tops
+  return ps_calcE (x)
+}'
+
+#%IU% 
+#%MDESC% Calculated the channel from the given Energy
+def mca_calcch (en) '{
+  mca_tops
+  return ps_calcch (en)
+}'
+  
+
+#%UU% 
+#%MDESC% Shows calibration fit parameters or inputs new parameters. 
+def mcapar '
+mca_ps_test "$0"
+{
+   mca_tops
+   ps_parinput
+   mca_fromps
+   mca_roi_Ech
+   MCA_IN_GROUP = 0
+}'
+  
+
+#%IU%
+#%MDESC% Writes out parameters to shared memory (GUI).
+def mca_fromps '
+   if (PS_EB==0) PS_EB=1
+   MCA_EA = PS_EA ; MCA_EB = PS_EB ; MCA_EC = PS_EC ; 
+'
+
+
+#%UU%
+#%MDESC% Toggles between channel (uncalib) and calibrated mode.
+def mcaE '{
+global MCA_ENERGY
+
+MCA_ENERGY=!MCA_ENERGY
+
+if (MCA_ENERGY && !(MCA_PS)) {
+  printf("MCA: Energy mode not available.                                              \n     Macro set \"psearch.mac\" not loaded. \n")
+  MCA_ENERGY = 0
+} else {
+  MCA_PLOTERASE=1
+  MCA_IN_GROUP =0
+  printf ("MCA: Now in %s mode\n",MCA_ENERGY? "ENERGY": "CHANNEL")
+  if (MCA_ENERGY) {	
+    MCA_CP_XLBL=getval("X Label",(MCA_CP_XLBL!="")?MCA_CP_XLBL:"Energy")
+    MCA_CP_XUNT=getval("X Units",(MCA_CP_XUNT!="")?MCA_CP_XUNT:"KeV")
+  }
+}
+}'
+
+
+#%IU% 
+#%MDESC% Returns non 0 value if psearch macro package is loaded.
+def MCA_PS 'whatis("ps_dump")&2'
+
+#%IU% [string]
+#%MDESC% Check if psearch macro package is loaded.
+
+def mca_ps_test '{
+
+if (!(MCA_PS)) {
+  printf("MCA: Macros set \"psearch.mac\" not loaded.  \n")
+  print "      (..Typing \"jdo psearch.mac\" may help..)"
+
+  if ($#) {
+    printf("     For now, cannot execute %s\n","$*")
+    exit
+  }     
+}
+}'  
+
+#%UU%  
+#%MDESC% Computer aided energy calibration of the MCA. 
+def mcacal '
+mca_ps_test "$0"
+{
+   mca_tops
+   ps_calib(MCA_DATA[][1],0,MCA_MEMGRPSIZE)
+   mca_fromps
+   mca_roi_Ech
+   MCA_IN_GROUP=0
+}'
+
+#%UU%
+#%MDESC% Manual calibration of the MCA.
+def mcacalm '
+mca_ps_test "$0"
+{
+  global PS_NOPEAKS 
+  array PS_PEAKS[200][7]
+  local ii
+
+  PS_NOPEAKS = getval("Enter number of peaks",PS_NOPEAKS)
+  for (ii=0;ii<PS_NOPEAKS;ii++) {
+    PS_PEAKS[ii][1] = getval(sprintf("Peak pos. in ch for peak %d",ii+1),                                            PS_PEAKS[ii][1])
+    PS_PEAKS[ii][0] = ii+1
+  }
+  mca_tops
+  ps_dump
+  ps_calibration
+  mca_fromps
+  mca_roi_Ech
+  MCA_IN_GROUP = 0
+}'
+
+
+#%UU% 
+#%MDESC% Peak search on the current spectrum.
+def mcapeak '
+mca_ps_test "$0"
+{
+   mca_tops
+   pssearch (MCA_DATA[][1],0,MCA_MEMGRPSIZE)
+}'
+
+#%UU%  
+#%MDESC% Shows peaks found.
+def mcashow '
+mca_ps_test "$0"
+{
+   mca_tops
+   ps_show
+}'
+
+
+#==================================================================== PLOT
+
+#---------------------------------------------------------------- CPLOT
+
+#%UU%  [first|roi] [last]
+#%MDESC% A screen plot of the current MCA data in cplot format.
+#Part of the plot parameters are taken from "mcasetup", rest from "cpsetup" settings.
+def mcacplot '
+if (0==(whatis("cpsetup")&2)) {
+  print "MCA: Macros set \"cplot.mac\" not loaded."
+  print "     (..Typing \"jdo cplot.mac\" may help..)"
+  print "     For now, cannot execute $0"
+  exit
+}
+ 
+cp_setx11   
+mca_cplot $*
+'
+
+#%UU%  [first|roi] [last]
+#%MDESC% A printer plot of the current MCA data in cplot format.
+# That follows the same rules as "mcacplot" macro.
+def mcapplot '
+if (0==(whatis("cpsetup")&2)) {
+  print "MCA: Macros set \"cplot.mac\" not loaded."
+  print "     (..Typing \"jdo cplot.mac\" may help..)"
+  print "     For now, cannot execute $0"
+  exit
+}
+cp_setprinter
+mca_cplot $*
+'
+
+#%IU%
+#%MDESC% Decides between data in memory or in files for cplot.
+def mca_cplot '{
+  if (MCA_CP["FROMF"]) {
+    mca_fplot $*
+  } else {
+    mca_mplot $*
+  }
+}'
+
+
+#%UI% [first|roi] [last]
+#%MDESC% Arranges cplot parameters for MCA private needs and calls cplot program. 
+#Recover previous cpsetup settings when finished.
+
+def mca_mplot '{
+
+  local oldpar 
+
+  for (i in CP_PAR)   oldpar[i]=CP_PAR[i]
+
+  if ((CP_PAR["GLOBTITLE"] = getval ("Global title",MCA_CP["GLOBTITLE"]))!="")\
+       CP_PAR["FLAGS"] |= 0x20000
+  else CP_PAR["FLAGS"] &= ~0x20000
+
+  CP_PAR["PTITLE"] = getval ("Title",MCA_CP["PTITLE"])
+
+  if ((CP_PAR["COMMENT"] = getval ("Comment",MCA_CP["COMMENT"]))!="") \
+       CP_PAR["FLAGS"] |= 0x80000
+  else CP_PAR["FLAGS"] &= ~0x80000
+
+#  CP_PAR["LINES"]=CP_PAR["COLS"]=1			# 1 per page
+
+  CP_PAR["FLAGS"] &= ~0x10				# landscape
+
+  if (!MCA_LOG) CP_PAR["FLAGS"] &= ~0x1000		# y dec
+  else CP_PAR["FLAGS"] |= 0x1000			# y log
+
+  if (!MCA_LINES) {
+    CP_PAR["FLAGS"] &= ~1				# no lines
+    CP_PAR["FLAGS"] |= 2				# points
+    if (!MCA_DOTS) CP_PAR["PSIZE"]=1			# small ones
+  } else {
+    CP_PAR["FLAGS"] |= 1				# lines
+    if (!MCA_DOTS) CP_PAR["FLAGS"] &= ~2		# no points	
+    else CP_PAR["FLAGS"] |= 2				# points
+  }
+
+  if (MCA_ENERGY) {
+    CP_PAR["PXLABEL"]=MCA_CP_XLBL			# X labelling
+    CP_PAR["PXUNITS"]=MCA_CP_XUNT
+  } else {
+    CP_PAR["PXLABEL"]="Channel "
+    CP_PAR["PXUNITS"]=""  
+  }  
+  CP_PAR["PYLABEL"]="Intensity"  			# Y labelling
+  CP_PAR["PYUNITS"]="Counts"
+
+  if ($#) {
+    local roi y _xmin _xmax _ymin _ymax
+    
+    roi = (($#==1)||($#==3))
+    y = (($#==3)||($#==4))
+    _ymin = _ymax = MCA_AUTO
+    if (roi) {
+      mca_getroi $1 MCA_ENERGY _xmin _xmax
+      if (y) { _ymin = $2 ; _ymax = $3 }
+    } else {
+      _xmin=$1;_xmax=$2
+      if (y) { _ymin = $3 ; _ymax = $4 }
+    } 
+
+    CP_PAR["FLAGS"] &= ~0xc
+    CP_PAR["MINX"]=_xmin ; CP_PAR["MAXX"]=_xmax ; 
+    CP_PAR["MINY"]=_ymin ; CP_PAR["MAXY"]=_ymax ;
+
+  } else if ((MCA_XMIN||MCA_XMAX) && (MCA_YMIN||MCA_YMAX)) {
+
+    CP_PAR["MINX"]=MCA_XMIN ; CP_PAR["MAXX"]=MCA_XMAX ; 
+    CP_PAR["MINY"]=MCA_YMIN ; CP_PAR["MAXY"]=MCA_YMAX ;
+
+    CP_PAR["FLAGS"] &= ~0xc
+
+  } else {
+    CP_PAR["FLAGS"] |= 12  
+  }
+
+  if (MCA_AUTO==CP_PAR["MINX"]) CP_PAR["FLAGS"] |= 4
+  if (MCA_AUTO==CP_PAR["MAXX"]) CP_PAR["FLAGS"] |= 4 
+  if (MCA_AUTO==CP_PAR["MINY"]) CP_PAR["FLAGS"] |= 8
+  if (MCA_AUTO==CP_PAR["MAXY"]) CP_PAR["FLAGS"] |= 8 
+  
+#########################################################
+
+#  if (!MCA_IN_GROUP) { mca_sharedarray_to_group }
+  cp_mplot MCA_DATA 0 1 
+
+  for (i in CP_PAR) CP_PAR[i]=oldpar[i]
+}'
+
+
+#%IU%
+#%MDESC% not implemented yet. foreseen for c-plotting MCA data from a file.
+def mca_fplot '{
+#$*
+}'
+
+
+
+#---------------------------------------------------------------- SCREEN PLOT
+#%UU%
+#%MDESC% Turns MCA Graphical Interface on.
+def mcaguion '{
+  global MCA_GUI
+  MCA_GUI=1
+  mca_guirun
+}'
+
+#%UU% 
+#%MDESC% Turns MCA Graphical Interface off.
+def mcaguioff '{
+
+local file pid
+file = sprintf("/tmp/mcagui_%s_%s.pid",SPEC,USER)
+
+if (MCA_PID) unix(sprintf("kill -9 %d 2>/dev/null",MCA_PID)) 
+if (!unix(sprintf("test -r %s", file))) {
+  pid = getline(file)
+  getline(file,"close")  
+  if (pid!=MCA_PID) unix(sprintf("kill -9 %d 2>/dev/null",pid))
+  unix(sprintf("/bin/rm -f %s",file))
+}
+MCA_GUI=0
+MCA_PID=0
+}'
+
+#%IU%
+#%MDESC% Checks wether the GUI is running, otherwise starts it.
+def mca_guirun '{
+  global MCA_PID
+
+  if (!MCA_PID || unix(sprintf("kill -0 %d 2>/dev/null",MCA_PID))) {
+    MCA_PID =  mca_guistart()
+  }
+}'
+
+#%IU% ()
+#%MDESC% Starts the Graphical Interface and returns its PID number.
+def mca_guistart () '{
+  local pid file guicmd
+
+  file = sprintf("/tmp/mcagui_%s_%s.pid",SPEC,USER)
+  if (ostype() == "linux"){
+    #guicmd = sprintf("newplot -s %s --shm=MCA_DATA -display %s",SPEC, DISPLAY)
+    guicmd = sprintf("PyMca --spec=%s --shm=MCA_DATA",SPEC)
+  }else{
+    guicmd = sprintf("mcatcl -ver %s -shm MCA_DATA -display %s",SPEC, DISPLAY)
+  }
+  if (!unix(sprintf("test -r %s", file))) {
+    pid = getline(file)
+    getline(file,"close")  
+    if (pid && !unix(sprintf("kill -0 %d 2>/dev/null",pid))) {
+      return(pid)
+    }
+  }
+  unix(sprintf("/bin/rm -f %s",file))
+  unix(sprintf("%s >/dev/null 2>&1 & echo \$! > %s",guicmd,file))
+  pid = getline(file)
+  getline(file,"close")  
+  return (pid)
+}'
+
+
+#%IU% 
+#%MDESC% Just an indirection for mca_plot1 for the sake of the GUI.
+def mca_plotit '{
+
+if (MCA_GUI) {
+  mca_guirun
+} else {
+#  if (!MCA_IN_GROUP) { mca_sharedarray_to_group } 
+  mca_plot1 (MCA_DATA, 0, 1, $1, $2, $3, $4)
+}
+}'
+
+#%IU% (group,xelem,yelem,xmin,xmax,ymin,ymax)
+#%MDESC% MCA running plot.
+
+def mca_plot1 (group,xelem,yelem,xmin,xmax,ymin,ymax) '{
+
+plot_cntl("filter2")
+
+if (PLOT_MODE&128) {
+  plot_cntl(sprintf("colors=%s",splot_col))
+  plot_cntl("open")
+  plot_cntl(MCA_PLOTATTR)
+}
+
+if (MCA_PLOTERASE) {
+  plot_cntl("erase")
+  plot_move(0,1,sprintf("MCA ACQ SPECTRUM %s",MCA_FLAG?(MCA_FRED[0]?MCA_FRED[1]:(MCA_FLAG&4?MCA_N:SCAN_N)):""))
+  plot_move(0,2,"Counts")
+  if (MCA_ENERGY) plot_move(0,-1,sprintf("%.8s", MCA_CP_XLBL)) 
+  else plot_move(0,-1,sprintf("%.8s", "Channels")) 
+  MCA_PLOTERASE=0
+}
+
+plot_range(xmin,xmax,ymin,ymax)
+
+{
+  local n1 nn res1 res2
+
+#  _pl_arg group xelem yelem
+  
+  pl_a="MCA_DATA"
+  pl_x=xelem
+  pl_y=yelem
+
+  plot_cntl("mca") 
+  array_plot(MCA_DATA[][0], MCA_DATA[][1])
+
+  n1 = mca_getoffset( MCA_DATA, xelem, xmin)
+  nn = mca_getnpts  ( MCA_DATA, xelem, xmin, xmax)
+
+  if (nn>1) {
+    res1 = sprintf("Peak at %.5g is %.5g.  COM at %.5g.   ",                            MCA_DATA[array_op("row_at_max",MCA_DATA[n1:nn+n1-1][1])][xelem],                  array_op("max",MCA_DATA[n1:nn+n1-1][1]),                                      array_op("com",MCA_DATA[n1:nn-1+n1][xelem],MCA_DATA[n1:nn-1+n1][1]))
+    res2 = sprintf("FWHM is %.5g at %.5g.  Total counts are %g",                      array_op("fwhm",MCA_DATA[n1:nn-1+n1][xelem],MCA_DATA[n1:nn-1+n1][1]),            array_op("cfwhm",MCA_DATA[n1:nn-1+n1][xelem],MCA_DATA[n1:nn-1+n1][1]),            array_op("sum",MCA_DATA[n1:n1+nn-1][1]))
+  }
+
+  plot_move(-50,0,res1)
+  plot_move(-50,1,res2)
+}
+
+plot_cntl("filter1")
+}'
+  
+#%UU%  [xmin] [xmax] [ymin] [ymax]
+#%MDESC% Plots the current MCA data spectrum. Does nothing when using GUI.
+#%DL% Detail of usage:
+#%DT%  mcasplot first last [ymin ymax]
+#%DD%  plots acquired spectrum between the limits specified.
+#	Eventually, "ymin" and "ymax" are Y limits values so that you may 
+#	Y-rescale your plot.
+#%DT%  mcasplot roino [ymin ymax]
+#%DD%  plots acquired spectrum within ROI specified.
+#%DT%  mcasplot
+#%DD%  plots the whole acquired spectrum
+#%XDL%
+def mcasplot '{
+
+global MCA_XMIN MCA_XMAX MCA_YMIN MCA_YMAX
+
+  local _xmin _xmax _ymin _ymax roi y 
+
+  MCA_PLOTERASE=1
+  
+  roi = (($#==0)||($#==1)||($#==3))
+  y = (($#==3)||($#==4))
+  _ymin = _ymax = MCA_AUTO
+  if (roi) {
+    mca_getroi $1 MCA_ENERGY _xmin _xmax
+    if (y) { _ymin = $2 ; _ymax = $3 }
+  } else {
+    _xmin=$1;_xmax=$2
+    if (y) { _ymin = $3 ; _ymax = $4 }
+  } 
+
+  MCA_XMIN=_xmin ; MCA_XMAX=_xmax ; MCA_YMIN=_ymin ; MCA_YMAX=_ymax ;
+
+  mca_plotit _xmin _xmax _ymin _ymax
+}'
+
+
+#=============================================================== MISCELLANEOUS 
+
+#%IU% <roi> <channel_min> <channel_max>
+#%MDESC% Resises specified range to the specified roi. (in channels)
+def mca_resize_to_roi '
+  $2=($2<MCA_ROI_CH_MIN[$1])?MCA_ROI_CH_MIN[$1]:$2
+  $3=($3>MCA_ROI_CH_MAX[$1])?MCA_ROI_CH_MAX[$1]:$3
+'
+
+#%IU% <channel_min> <channel_max>
+#%MDESC% Resises specified range to the last read spectrum range. (in channels)
+def mca_resize_to_last_read '
+  $1=($1<MCA_old_channel[0])?MCA_old_channel[0]:$1
+  $2=($2>MCA_old_channel[1])?MCA_old_channel[1]:$2
+'
+
+#%IU% 
+#%MDESC% Transfers data spectrum held in the shared memory into SPEC data group.
+def mca_sharedarray_to_group '{
+  global MCA_IN_GROUP MCA_CALIBRATED
+  data_read(MCA_DATA,MCA_GRP,0,0)
+  if (MCA_ENERGY) {
+    float array MCA_CALIBRATED [MCA_MEMGRPSIZE][1]
+    mca_chtoE MCA_DATA 0 MCA_CALIBRATED 0
+    data_read(MCA_CALIBRATED,MCA_GRP,0,0)
+  } 
+  MCA_IN_GROUP = 1
+}'
+
+
+#%IU% (seconds)
+#%MDESC% loops printing dots for the specified time (sec.).
+def mca_msgw (seconds)'{
+local tps
+for (tps=time();time()<tps+seconds;) {
+  sleep(seconds/10);
+  printf(".")
+}
+}'
+
+
+#%IU% (name,column,xmin) 
+#%MDESC% Returns array row number of first "xmin" value occurence in the specified array column.
+def mca_getoffset (name,column,xmin) '{
+
+  local offset fch 
+
+  if (column==2) {
+    fch = mca_calcch(xmin)
+  } else fch=xmin
+
+  offset = array_op("i_<=_value",name[][column],xmin)
+  offset -= ((offset*MCA_FRED[0]-fch>0)?1:0)
+
+  return(offset)
+}'
+
+#%IU% (name,column,xmin,xmax) 
+#%MDESC% Returns number of points between first occurences of "xmin" and "xmax" in the specified array column.
+def mca_getnpts (name,column,xmin,xmax) '{
+
+  local npt 
+
+  npt = array_op("i_<=_value",name[][column],xmax) -                                  mca_getoffset(name,column,xmin) + 1
+
+  if (npt<0) npt=0
+
+  return(npt)
+}'
+
+#%IU%
+#%MDESC% Macro which is run once at mca.mac file loading to prepare things up.
+def mca_const_utils_and_rdef '{
+
+#======================================================================= CONST
+
+global DEVRUN DEVON DEVFAULT MCA_DEVSTATE
+global MCA_ROI_DEFAULT_FILE MCA_AUTO MCA_FMT 
+
+DEVRUN=14; DEVON=2; DEVFAULT=23
+MCA_DEVSTATE[-1] = "none configured"
+MCA_DEVSTATE[0] = "disconnected"
+MCA_DEVSTATE[-2] = "simulation (idle)"
+MCA_DEVSTATE[-14] = "simulation (acquiring)"
+MCA_DEVSTATE[2] = "idle"
+MCA_DEVSTATE[14] = "acquiring"
+MCA_DEVSTATE[23] = "FAULT"
+MCA_DEVOK=0
+
+MCA_AUTO = "auto"
+if (MCA_FMT=="") MCA_FMT = "%16C"
+MCA_ROI_DEFAULT_FILE = sprintf("%s/%s/userfiles/mcaroi.def.%s",SPECD,SPEC,USER) 
+
+PLOT_MODE|=128
+GTERM="x11"
+
+if (!(MCA_PS)) {
+   rdef ps_chtoE () \'{ }\'
+}
+if (!(whatis("mca_user_waitcounts")&2)) {
+  rdef mca_user_waitcounts \'\'
+  rdef mca_user_start \'\'
+}
+if (!(whatis("mca_user_key")&2)) {
+  rdef mca_user_key \'\'
+}
+
+#if (whatis("MCA_LIVE_T")&2) { undef MCA_LIVE_T }
+#if (whatis("MCA_REAL_T")&2) { undef MCA_REAL_T }
+#if (whatis("MCA_DEAD_T")&2) { undef MCA_DEAD_T }
+
+}'
+mca_const_utils_and_rdef
+
+#%MACROS%
+#%IMACROS%
+#%INTERNALS%
+#%B%MCA macro user hook: %BR%%B%
+#Users can hook their own macro to those macros, using "cdef()".
+#%DL% 
+#%DT% mca_user_waitcounts
+#%DD% called when looping in "mca_waitcounts", i.e. "mcaacq".
+#%DT% mca_user_start
+#%DD% called at the end of "mcastart", i.e. just after device startup.
+#%DT% mca_user_key
+#%DD% called from "mcaacq", while waiting for the acquisition is over, and after keyboard input ("mca_key").
+#%XDL% 
+#%DEPENDENCIES%
+#%UL% those macros use: 
+#%LI% the binary %B%psearch%B%, that must be in PATH
+#%LI% the macros:
+#%UL%
+#%LI% 		%B%psearch.mac%B%   for spectrum calibration
+#%LI%		%B%cplot.mac%B%	    for cplot
+#%LI%		%B%saveload.mac%B%  for data saving	
+#%LI%		%B%stlocal.mac%B%   for crying and various things
+#%LI%		%B%pseudo.mac%B%    for pseudo counting
+#%LI%		%B%menu.mac%B%      for menu handling
+#%XUL% that must be loaded together with the %B%mca.mac%B% file.
+#%XUL%
+#%AUTHOR%
+#  MCA.MAC - Marie Claire LAGIER 21/02/94 changed by Elke RAABE 04/01/95%BR%
+#%PRE%
+#         - last modified  03/96: to use macros functions, shared arrays, GUI.
+#         -                01/96: to use mca_par() and saveload.mac.        
+#%PRE%
+#%TOC%
+
+
+##############################################################################
+
+def mcatcp '{
+
+if (MCA_DEVOK>0) {
+  esrf_io( MCA_DEVNAME, "tcp")
+  esrf_io( MCA_DEVNAME, "timeout", 10)
+}
+}'
+  
+  
+def mcadsstat '{
+   local curstat curtime _txt stret
+
+#   mcaiotest
+   if (MCA_DEVOK>0) {
+
+       esrf_io(MCA_DEVNAME, "DevMcaGetStatus", curstat)
+       esrf_io(MCA_DEVNAME, "DevMcaGetAdcInfo", curtime)
+        
+       if (ESRF_ERR==0) {
+          if (curstat[1]==1) _txt="stopped due to preset live time elapsed"
+          else if (curstat[1]==2) \
+            _txt="stopped due to preset real time elapsed"
+          else if (curstat[1]==3) \
+            _txt="stopped due to total preset number of counts reached"
+          else if (curstat[1]==4) _txt="stopped by command DevMcaStopAcq"
+          else _txt=""
+          printf("DEVICE STATUS : %s\n",curstat[0]?"acquiring data":"idle")
+          printf("                %s\n",_txt)
+          printf("Current ADC             : %d\n", curtime[0])
+          printf("First channel           : %d \n", curtime[1])
+          printf("Last channel            : %d \n", curtime[2])
+          printf("Preset live time        : %.2f \n", curtime[3])
+          printf("Preset real time        : %.2f \n", curtime[4])
+          printf("Preset number of counts : %d \n", curtime[5])
+          printf("Elapsed live time       : %.2f s \n", curtime[6])
+          printf("Elapsed real time       : %.2f s \n", curtime[7])
+        }
+   }
+}'
+
+def mcacry '{
+  local separat descr 
+  global MCA_CRYLAST MCA_OTHER
+
+  separat="\n-------------------------------------------------------\n"
+
+  if ((time()/60-MCA_CRYLAST)<CRYMAXFREQ) {
+    printf("A little patience, please - You cried only %d Minutes ago\n",	time()/60-MCA_CRYLAST)
+    printf("Retry in %d minutes\n",1+CRYMAXFREQ-(time()/60-MCA_CRYLAST))
+    exit
+  }
+
+  print "This macro mails a cry for help to Marie Claire."
+  MCA_OTHER=getval("others addresses",(MCA_OTHER!="")?MCA_OTHER:"")
+  descr=getval("Tell here why you are crying","")
+  if (descr == "") {
+    if (!yesno("Really send cry for help with no description",0)) {
+      exit
+    }
+  }
+  if (!CRYBL) { crysetup }
+  if ("0"==MCA_OTHER) MCA_OTHER=""
+  unix("echo MCA CRY FOR HELP >/tmp/,xx")
+  fprintf("/tmp/,xx","\nfrom %s (%s,%s) on %s at %s\n%suser message:\n%s%s\n",USER,SPEC,TERM,CRYBL,date(),separat,descr,separat)
+  
+  fprintf ("/tmp/,xx","Tel: %s\n\n",CRYTEL)
+  unix("echo hostname: `hostname` >>/tmp/,xx")
+  unix("echo id: `id` >>/tmp/,xx")
+  on("/tmp/,xx");offt
+  mca_dump
+  close("/tmp/,xx");ont
+  if (unix(sprintf("cat /tmp/,xx | rmail -t %s %s","lagier@esrf.fr",MCA_OTHER))) {
+    print "Something went wrong, could not send mail"
+  } else {
+    print "I will try to get some help for you"
+    MCA_CRYLAST=time()/60
+  }
+}
+'
+
+def mca_dump '{
+  print "------------------------------------------------------------------"
+  print date(),"running",SPEC,"revision",VERSION
+  print "------ status mca_par() ------------------"
+  mcastat
+  print "------ status esrf_io() ------------------"
+  mcadsstat 
+  print "------ data groups ------------------"
+  data_grp(-1,0,0)
+  print "------ VARIABLES -----------------"
+  print "------ device settings ------------------" 
+  print "device server:		",MCA_DEVNAME    
+  print "adc active:		",MCA_ADCNO
+  print "time mode:		",MCA_TMODE==1?"Live":"Real"
+  print "memory group size:	",MCA_MEMGRPSIZE	
+  print "memory group active:	",MCA_MEMGRP[0]	
+  print "memory groups:		",MCA_MEMGRP[1]	
+  print "device status:		",MCA_DEVSTATE[MCA_DEVOK]
+  print "hard synchro:		",MCA_SYNCHRO
+  print "------ data files ----------------"
+  print "saving mode flag:	",MCA_FLAG
+  print "Scan file:		",DATAFILE
+  print "Scan number:		",SCAN_N
+  print "Mca file:		",MCA_PREFIX
+  print "Spectrum number:	",MCA_N
+  print "Roi file:		",MCA_ROI_DEFAULT_FILE	
+  print "data dump format:	",MCA_FMT		
+  print "binning factor:        ",MCA_REDUCTION
+  print "Loaded spectrum file:	",MCA_LOADF	
+  print "its binning factor:	",MCA_FRED[0]
+  print "its scan number:	",MCA_FRED[1]
+  print "                 req:	",MCA_SNO 
+  print "its scan point number: ",MCA_SPNO 
+  print "load calib from file:	",MCA_CALFF
+  print "------ plot settings ------------------"
+  print "plot attributes: 	",MCA_PLOTATTR,MCA_LOG,MCA_LINES,MCA_DOTS,MCA_EBARS
+  print "calib X label:		",MCA_CP_XLBL     
+  print "calib X unit:		",MCA_CP_XUNT
+  print "sleep time:		",MCA_DISP_SEC	
+  print "cplot xmin:		",MCA_XMIN
+  print "cplot xmax:		",MCA_XMAX
+  print "cplot ymin:		",MCA_YMIN
+  print "cplot ymax:		",MCA_YMAX
+  print "use GUI:		",MCA_GUI
+  print "GUI process id:        ",MCA_PID
+  print "data group		",MCA_GRP
+  print "------ roi ------------------"
+  mca_roidisp()
+  print "number:		",MCA_ROI_NO
+  print "active:		",MCA_ROIACTIVE
+  print "------ calibration ------------------"
+  print "fit a parameter:	",MCA_EA
+  print "fit b parameter:	",MCA_EB
+  print "fit c parameter:	",MCA_EC
+  print "peaks found number:	",PS_NOPEAKS
+  print "fit order:		",PS_NOFIT
+  print "------ exec ------------------"
+  print "last read chan range:	",MCA_old_channel [0],MCA_old_channel[1]
+  print "data group up to date:	",MCA_IN_GROUP
+  print "mca auto run off:	",MCA_AROFF
+  print "last esrf_err:		",ESRF_ERR 
+  print "global channel range:	",MCA_ROI_GCH_MIN,MCA_ROI_GCH_MAX 
+  print "calibration:		",MCA_ENERGY 
+  print "live time:		",MCA_LIVE_T 
+  print "real time:		",MCA_REAL_T
+  print "dead time: 		",MCA_DEAD_T,"%"
+  print "plot erase flag:       ",MCA_PLOTERASE
+  print "data has been saved    ",MCA_SAVED
+  print "------ others settings ------------------"
+  print "save buffer:		",MCA_SAVEBUFFER
+  print "substracts background:	",MCA_BACKSUB
+  print "simulation:		",(MCA_DEVOK<-1)
+  print "auto string:           ",MCA_AUTO
+  print "other receivers:       ",MCA_OTHER
+}'
+
+
+
+
+def mcasimon '{
+  
+global MCA_SIMCUR_T MCA_SIMOLD_T MCA_SIMDATA
+global MCA_SIM
+
+MCA_SIM["spec_onsim"] = set_sim(-1)
+MCA_SIM["devname"] = MCA_DEVNAME
+
+MCA_DEVNAME = "Simulation of "MCA_DEVNAME
+
+printf("MCA Simulate was %s, is now ON\nGEN ",(MCA_DEVOK<-1)?"on":"off")
+onsim; 
+
+MCA_DEVOK=-2 
+
+cdef("user_prepcount","mcastart;","mcasim")
+cdef("user_postcount","mcastop ;","mcasim")
+cdef("user_countersrun","if (mca_simuwait()) return(1);;","mcasim")
+cdef("user_cleanup2","mcastop; ","mcasim")
+
+savmac mca_state "/tmp/mca_simu"
+savmac mcastat "/tmp/mca_simu"
+savmac mca_times "/tmp/mca_simu"
+savmac mcastart "/tmp/mca_simu"
+savmac mcaclear "/tmp/mca_simu"
+savmac mcastop "/tmp/mca_simu"
+savmac mca_waitcounts "/tmp/mca_simu"
+savmac mca_read "/tmp/mca_simu"
+
+rdef mcastat \'{
+   printf("MCA STATUS : %s\n\n",MCA_DEVSTATE[MCA_DEVOK])
+   printf("Current ADC             : %d\n", MCA_ADCNO)
+   printf("Group size              : %d \n", MCA_MEMGRPSIZE)
+   printf("Group selected          : %d \n", MCA_MEMGRP[1])
+   printf("Elapsed live time       : %.2f s \n", MCA_LIVE_T)
+   printf("Elapsed real time       : %.2f s \n", MCA_REAL_T)
+}\'
+
+def mca_simuwait () \'{
+  if (COUNT_TIME<=0) return 0
+  if ((time()-MCA_SIMOACQ_T)<=COUNT_TIME) return 1
+  return 0
+}\'
+
+
+def mca_state () \'{ }\'
+
+def mca_times () \'{
+
+ global MCA_LIVE_T MCA_REAL_T MCA_DEAD_T
+
+  MCA_LIVE_T=(MCA_DEVOK==-14)?(MCA_SIMCUR_T=time()-MCA_SIMOLD_T):MCA_SIMCUR_T
+  MCA_REAL_T=MCA_LIVE_T 
+  MCA_DEAD_T=0
+}\'
+
+rdef mcaclear \'
+  global MCA_NEWDATA
+  MCA_DATA[][1] = 0
+  MCA_SIMOLD_T=0
+  MCA_NEWDATA=0
+\'
+  
+rdef mcastart \'
+  #\$*
+  global MCA_SIMOLD_T MCA_SIMCUR_T
+  if (MCA_DEVOK==-2) { 
+    MCA_DEVOK=-14
+    MCA_SIMOACQ_T=time()
+    if (!MCA_SIMOLD_T) MCA_SIMOLD_T=MCA_SIMOACQ_T
+    else MCA_SIMOLD_T = MCA_SIMOACQ_T-MCA_SIMCUR_T
+    COUNT_TIME=\$1
+  } else {
+    print "Cannot start MCA; it is",MCA_DEVSTATE[MCA_DEVOK]
+    exit
+  }
+\'
+
+rdef mcastop \'
+  if (MCA_DEVOK==-14) {
+    MCA_SIMCUR_T=time()-MCA_SIMOLD_T
+  }
+  MCA_DEVOK=-2
+\'
+
+rdef mca_waitcounts \'{
+
+  local disp key ptime iold
+ 
+  iold=time()
+   
+  if (COUNT_TIME<=0) ptime=999999
+  else ptime=COUNT_TIME
+  disp=(MCA_DISP_SEC<ptime)?MCA_DISP_SEC:ptime
+
+  while ((MCA_DEVOK==-14) && (time()-iold)<=ptime) {
+    mcatimes 
+    key=input(0)
+    if (key!="") { mca_key key }
+    mca_read chmin chmax
+    mca_plotit xmin xmax ymin ymax
+    mca_user_waitcounts
+    sleep(disp) 
+  }
+  MCA_DEVOK=-2  
+  MCA_SIMCUR_T=time()-MCA_SIMOLD_T
+}\'
+
+rdef mca_read \'{
+  global MCA_old_channel 
+  local channel0 channel1
+
+   channel0=\$1 ; channel1=\$2
+   mca_resize_to_roi 0 channel0 channel1
+
+   MCA_FRED[0]=0
+
+   if (MCA_NEWDATA) MCA_DATA[][1] *= MCA_SIMCOEFF
+   else {
+     MCA_NEWDATA = -1
+     MCA_DATA[][1] = MCA_SIMDATA
+   }
+
+   MCA_IN_GROUP = 0
+##   if (MCA_DATA[MCA_ROI_CH_MAX[0]][0]!=MCA_ROI_CH_MAX[0]) {
+#     array_op("fill",MCA_DATA[][0],1)
+#   }
+   mca_times()
+   if ((MCA_old_channel[0]!=channel0)||(MCA_old_channel[1]!=channel1)) {
+     MCA_PLOTERASE=1
+     MCA_old_channel[0]=channel0  ; MCA_old_channel[1]=channel1
+   }
+}\'
+
+
+global MCA_SIMCOEFF
+ulong array MCA_SIMDATA [MCA_MEMGRPSIZE][1]
+
+MCA_NEWDATA  = 0
+MCA_IN_GROUP = 0
+if ($#) {
+  loadmcadata "$1" MCA_SIMDATA 0 $2?$2:1 $3?$3:1 0 junk junk junk junk
+} else {
+  for (i=0;i<MCA_MEMGRPSIZE;i+=256) MCA_SIMDATA [i] = 100
+}
+
+MCA_SIMCOEFF = array_op("max",MCA_SIMDATA)
+MCA_SIMCOEFF = MCA_SIMCOEFF ? (1 + 1 / MCA_SIMCOEFF) : 1
+}'
+
+def mcasimoff '{
+ 
+  printf("MCA Simulate was %s, is now OFF\n",(MCA_DEVOK<-1)?"on":"off")
+
+  if (!MCA_SIM["spec_onsim"]) { printf("GEN ");offsim }
+
+  if (MCA_DEVOK<-1) {
+    qdo "/tmp/mca_simu"
+    sleep(1)
+    cdef("","","mcasim","delete")
+    reconfig
+  }
+}'
+
+
+## DATE Fri May 30 09:50:42 METDST 1997 REV 5.7;
+#%IU%  <roi_number|roi_name> <mode> <first> <last>
+#%MDESC% Converts ROI into <first> and <last> range limit.
+def mca_getroi '{
+local rn
+rn = mca_roinum ("$1")
+
+if ($2) {
+  $3 = MCA_ROI_EN_MIN [rn]
+  $4 = MCA_ROI_EN_MAX [rn]
+} else {
+  $3 = MCA_ROI_CH_MIN [rn]
+  $4 = MCA_ROI_CH_MAX [rn]
+}
+}'
+
+#%IU%  
+#%MDESC% Converts channels into calibrated value all over the defined ROI.
+def  mca_roi_Ech '{
+
+  local _roi 
+  for (_roi=0;_roi<=MCA_ROI_NO;_roi++) {
+    MCA_ROI_EN_MIN[_roi] = mca_calcE(MCA_ROI_CH_MIN[_roi]) 
+    MCA_ROI_EN_MAX[_roi] = mca_calcE(MCA_ROI_CH_MAX[_roi])
+  }
+}'
+
+
+## DATE Wed Jun  4 08:59:31 METDST 1997 REV 5.8;
+## DATE Tue Dec  2 09:22:34 MET 1997 REV 5.10;
+
+
+#cleanup mcaacq
+#        ------
+#   mca_read chmin chmax
+#   mca_plotit xmin xmax ymin ymax
+#   mcatimes 
+#   print
+#   if (MCA_FLAG&2 && MCA_DEVNAME) {
+#     mca_saveacqdata(chmin, chmax, "$0 $*") 
+#   }
+#
+#cleanup ct/scan
+#        -------
+#  "user_getcounts"
+#  "measure2","mca_savescanhead (MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX);"
+#  "user_scan_loop","mca_savescandata(MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX)"
+#  ou "measure2","mca_saveroihead;","_mca1")
+#  "user_handlecounts","mca_savectdata(MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX)
+#%TITLE% MCA.MAC 
+#%NAME%
+#  Multi Channel Analyser.
+#%DESCRIPTION%
+#  These macros provide users with basic MCA commands, i.e. start, stop, init, read memory, etc..., as well as with more sophisticated features such as ROIs, channel calibration, peak search, data saving and recovering, etc...%BR%
+#  MCA control is inserted in SPEC internal code, making it possible to automatically operate the MCA, from standard SPEC counting and scanning commands, e.g. acquire, plot out, save spectrum for each point of a scan. A Graphical User Interface is also available. 
+#%ATTENTION%
+#About the usage of the Graphical User Interface (GUI) :
+# it is at the moment only capable of monitoring the data acquired, as there is no connection between SPEC and that GUI, appart from the spectrum data itself and its calibration parameters, both stored in shared memory. For instance, the ROIs defined from SPEC or from the GUI are not connected together. 
+#They are two seperate sets of ROI definitions. The GUI is not capable of sending control commands to the hardware. Be more particularly aware that the acquisition times are not known by the GUI, so if you save the spectrum from the GUI, they wont be included in the file. rather use SPEC for saving your data. The GUI is a display.
+#%SETUP%
+#%BR%Hardware supported :
+#%DL%
+#%DT% SILENA Memory Buffer.
+#%DD% remote controlled through GPIB. SPEC can address it in 3 different ways:
+#%DL%
+#%DT% Direct from SPEC.
+#%DD% In SPEC config, select MCA TYPE Silena 73XX MCA (GPIB), TCP MODE.
+#%BR%The GPIB interface can be any of those supported by SPEC.
+#%DT% Device server McaSICL.
+#%DD% In SPEC config, select MCA TYPE ESRF MCA, TCP MODE. 
+#%BR%The GPIB is addressed by the device server, so you do not necessarily need to declare it in SPEC, but only HP E2050 LAN/HPIB controller is supported; McaSICL server runs on HP-UX machines only.
+#%DT% Device server McaMB.
+#%DD% In SPEC config, select MCA TYPE ESRF MCA, TCP MODE. 
+#%BR%The GPIB is addressed by the device server, so you do not necessarily need to declare it in SPEC, but only Themis T409 VME Board is supported; McaMB server runs on OS9 crates.
+#%XDL%
+#%DT% CANBERRA A.I.M. 
+#%DD% It is remote controlled via Ethernet LAN. SPEC addresses it through a device server, called %B%McaAIM%B% that runs on HP-UX machines. In SPEC config, select MCA TYPE ESRF MCA, TCP MODE.
+#%XDL%
+#MCA macros are able to detect that a MCA has been configured. If it happens that it is taken out, the macros disable themselves automatically, as well as they enable back in case of a MCA is configured again. 
+#%BR%%BR%Some Particular settings:
+#%DL%%DT%MCAON / MCAOFF
+#%DD%Both COUNTERS and MCA are operated simultaneously from %B%ct%B% and %B%scans%B% commands if %B%mcaon%B% is set. %B%mcaoff%B% disables the MCA to be addressed from those commands. 
+#%BR%%BR%On the other hand, %B%mcaacq%B% always run the MCA, but never run the counters, whatever mcaon or mcaoff is set. 
+#%B%mcasetup%B% AUTO-RUN option (toggling enabled /disabled) does the same as mcaon / mcaoff.%BR%
+#%PRE%
+#------------------------------------------------------------
+# command		%B%mcaon%B%		%B%mcaoff%B%
+#------------------------------------------------------------
+#%B%mcaacq%B%		MCA			MCA
+#%B%ct%B%/%B%scans%B%	MCA + COUNTERS		COUNTERS
+#============================================================
+#
+#%PRE%
+#%BR%%BR%
+#%DT%REAL TIME / LIVE TIME / EXTERNAL SYNCHRO
+#%DD%The %B%real%B% time is the clock time. The %B%live%B% time is the real time substracted the electronics %B%dead%B% time. 
+#%PRE%
+#	%B%real = live + dead%B%
+#%PRE%
+#In%B%internal synchro%B%mode, MCA acquisitions terminate when the amount of time elapsed, either %B%real%B% or %B%live%B% in respect of %B%mcasetup%B% time mode settings, matches the time the MCA internal timer was %B%preset%B% with.
+#%BR%%BR%In %B%external%B% %B%synchro%B% mode, MCA acquisitions from %B%ct%B% and %B%scans%B%, are externally (hardware) gated by the SPEC timer (vct6 or whatever timer has a gate output). The real or live time modes are not relevant in those cases . Nevertheless, the external synchro mode never affects %B%mcaacq%B%, which still presets MCA timer, in %B%real%B% or %B%live%B% time mode regarding %B%mcasetup%B% settings.
+#%BR%%BR%In any case, SPEC always waits for an acquisition to terminate before 	going to the next step.
+#%PRE%
+#------------------------------------------------------------------------------
+#	MCA setup		MCA elapsed times		SPEC timer 
+#
+#  Synchro	Time mode	real		live
+#------------------------------------------------------------------------------
+#  internal	%B%real%B%	preset		preset-dead	preset
+#  internal	%B%live%B%	preset+dead	preset 		preset
+#%B%external%B%	not relevant	~preset		~preset-dead	preset
+#==============================================================================
+#%PRE%
+#%XDL%
+
+
+#%OVERVIEW%
+#%DL% 
+#%DT% mcasetup %DD% Hardware and software initialisation and setup.
+#%DT% mcainit %DD% The same but without any input; default/current values are set.
+#%DT% mcastat %DD% Display MCA configuration and status.
+#%DT% mcastart %DD% Start an acquisition. 
+#%DT% mcastop %DD% Stop an acquisition.
+#%DT% mcaread %DD% Read the MCA memory.
+#%DT% mcatimes %DD% Report the MCA elapsed times.
+#%DT% mcaclear %DD% Clear the MCA memory.  
+#%DT% mcaacq %DD% MCA acquisition. 
+#%DT% mcaoff %DD% Disable MCA control from scans and ct.
+#%DT% mcaon %DD% Enable back MCA control from scans and ct.
+#%DT% mcasave %DD% Save spectrum to disk file. 
+#%DT% mcaload %DD% Load back spectrum from disk file.
+#%DT% mcaroi %DD% define ROIs.
+#%DT% mcacal, mcacalm %DD% Computer aided and manual calibration of the MCA.
+#%BR% Better use the GUI if it is installed.
+#%DT% mcapar %DD% Show calibration fit parameters or input new parameters.
+#%DT% mcaE %DD% Toggle between channel (uncalib) and calibrated mode.
+#%DT% mcaguioff %DD% Switch the GUI off.
+#%DT% mcaguion %DD% Switch the GUI on. 
+#%DT% mcasplot %DD% Plot the current MCA data when GUI is off. 
+#%DT% mcacplot %DD% A screen plot of the current MCA data in cplot format.
+#%DT% mcapplot %DD% A printer plot of the current MCA data in cplot format.
+#%XDL%
+#%EXAMPLE%
+#%DL%
+#%DT% mcaroi roi1 %DD%
+#%PRE%
+#ROI       |   Channels    | Energy                      | ROI  | Roi 
+#names     | first | last  | min          | max          |ACTIVE| numbers
+#---------------------------------------------------------------------
+#roi       | 0     | 8191  | 0.0000       | 0.0000       |  -   | 0
+#roi1      | 0     | 511   | 0.0000       | 0.0000       |  X   | 1
+#%PRE%
+# Sets ROI number 1 as the one active.%BR%%BR%
+# Counters %B%roi1%B% and %B%roi%B% are declared in %B%config%B%.
+#%BR%
+#%DT% ct %DD%
+#%PRE%
+#Fri Dec  1 10:41:57 1995
+#
+#     Seconds = 1
+#         MCA = 5340 (5340/s)
+#       MCA 1 = 292 (292/s)
+#%PRE%
+# The MCA acquires data on the wider range over the counter-assigned-ROIs plus the active ROI. The eventually saved spectrum is limited to the active ROI, while each counter-assigned-ROIs reports integrated counts value over the particular ROI they are assigned to. 
+#%BR%
+#%DT% ascan m0 0 10 5 1 %DD%
+#%PRE%
+#Total 11 points, 11 seconds
+#
+#Scan  37   Fri Dec  1 10:56:08 1995   file = ./data/test  mcl  user = lagier
+#ascan  m0 0 10  10 1
+#
+#   Motor 0 MCA 1  MCA    Seconds 
+#  0    0.0000       292      5340     	    1
+#  1    2.0000       328      5363          1 
+#  2    4.0000       299      5400          1 
+#  3    6.0000       299      5333          1 
+#  4    8.0000       328      5398          1 
+#  5   10.0000       328      5400          1 
+#%PRE%
+# A spectrum is accumulated at each scan step.
+#%XDL%
+#%END%
+
+#====================================================================== GLOBALS
+
+global MCA_DEVNAME MCA_AROFF MCA_DEVOK 
+global MCA_SAVED MCA_old_channel 
+global MCA_ADCNO MCA_MEMGRPSIZE MCA_MEMGRP MCA_TMODE 
+global MCA_DISP_SEC MCA_CP_XLBL MCA_CP_XUNT MCA_GRP MCA_GUI
+global MCA_LINES MCA_DOTS MCA_EBARS MCA_LOG MCA_PLOTATTR MCA_PLOTERASE
+global MCA_REDUCTION MCA_SAVEBUFFER MCA_FLAG 
+global MCA_SYNCHRO MCA_BACKSUB 
+global MCA_ROI_GCH_MIN MCA_ROI_GCH_MAX
+global MCA_ROI_CH_MIN MCA_ROI_CH_MAX MCA_ROI_EN_MIN MCA_ROI_EN_MAX 
+global MCA_ROI_COUNTER 
+global PS_WA PS_WB PS_WC MCA_ENERGY PS_EA PS_EB PS_EC PS_NOPEAKS
+global MCA_ROI_ACH_MIN MCA_ROI_ACH_MAX
+
+#======================================================================== SETUP
+#%IU%
+#%MDESC% Setup file service.
+def mcaunsetup '{
+  mcaoff
+  cdef("","","_mca0","delete")
+}'
+
+#%UU% [adc] [tmode] [gsz] [g] [cal] [Xlbl] [Xun] [nclr] [sleep] [bgnd] [gui] [log] [dots] [lines] [ebars] [flag] [red] [synchr]
+#%MDESC% Sets the MCA hardware and software up. 
+# You can either give all the parameters on the command line or use the menu that shows up when typing "mcasetup" alone. 
+#%UL% Input arguments description. [variable name, default value]
+#%LI% %B%adc%B%: active adc number (1 or 2). [MCA_ADCNO, 1]       
+#%LI% %B%tmode%B%: 1 if live time, 2 if real time. [MCA_TMODE, 2]
+#%LI% %B%gsz%B%: MCA memory group size in channels. [MCA_MEMGRPSIZE, 8192]
+#%LI% %B%g%B%: MCA selected memory group. [MCA_MEMGRP[1] , 0]          
+#%LI% %B%cal%B%: 1 if spectrum is calibrated, 0 otherwise. [MCA_ENERGY, 0]
+#%LI% %B%Xlbl%B%: X plot label for calibrated spectrum. [MCA_CP_XLBL, "Energy"]
+#%LI% %B%Xun%B%: X unit for calibrated spectrum.        [MCA_CP_XUNT, "KeV"]  
+#%LI% %B%nclr%B%: 0 for memory clearing prior to acquisition, 1 otherwise. [MCA_SAVEBUFFER, 0]
+#%LI% %B%sleep%B%: number of  sec. sleeping between run plot updates. [MCA_DISP_SEC, 0]
+#%LI% %B%bgnd%B%: 1 if you want background substraction in ROIs counts. [MCA_BACKSUB, 0]
+#%LI% %B%gui%B%: 1 for gui plot.                   [MCA_GUI, 0]
+#%LI% %B%log%B%: 1 for log plot.                   [MCA_LOG, 0]
+#%LI% %B%dots%B%: 1 for large dots in plot.        [MCA_DOTS, 0]
+#%LI% %B%lines%B%: 1 for lines plotting.           [MCA_LINES, 0]
+#%LI% %B%ebars%B%: 1 for error bars plotting.      [MCA_EBARS, 0]
+#%LI% %B%flag%B%: data saving flag		   [MCA_FLAG, 0]
+#%UL%
+#%LI% 0x01 save spectrum during scans to a file.
+#%LI% 0x02 save spectrum after each other acquisition to a file.
+#%LI% 0x04 save to specific MCA file, otherwise use scans file [DATAFILE]. 
+#%XUL%
+#%LI% %B%red%B%: data reduction coefficient, to be applied at saving.[MCA_REDUCTION, 1] 
+#%LI% %B%synchr%B%: MCA acquisition is hard-synchronized with SPEC configured timer. [MCA_SYNCHRO, 0]
+#%XUL%
+#%BR%
+#%B% NB : %B%
+#%BR%
+# It is possible to have the last acquisition elapsed times values reported in counters by simply configuring the counters you need out of %B%mcaLt%B%, %B%mcaRt%B% and %B%mcaDt%B% mnemonics, respectively standing for Live, Real and Dead times.
+#%BR%
+#%BR%
+
+def mcasetup '{
+
+  setup_tail ("mca")
+  cdef("config_mac","mca_config; ","_mca0",0)
+
+  mca_defaults
+  mca_device
+  mca_state () 
+
+  if ($#) {
+    local st1 st2
+    st1="$6";st2="$7"
+    mca_setup($1,$2,$3,$4,$5,st1,st2,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+
+  } else {
+    MCA_MENULVL=0
+    menu("\n  M U L T I   C H A N N E L   A N A L Y S E R   S E T U P",\
+            "mca_setupmenu","mca_setupchk","mca_dosetup ()")
+  } 
+}'
+
+#%IU% [mask]
+#%MDESC% Sets default values to some global variables.
+def mca_defaults '{
+  local mask hardware_defaults software_defaults
+
+  mask = $#?$1:3
+  hardware_defaults = mask&1
+  software_defaults = mask&2
+
+  if (hardware_defaults) {
+    if (MCA_ADCNO <= 0) MCA_ADCNO = 1
+    if (MCA_MEMGRPSIZE <= 0) {
+      MCA_MEMGRPSIZE = mca_max_channels (8192)
+      MCA_MEMGRP[1]=0
+    }
+  } 
+
+  if (software_defaults) {
+    MCA_REDUCTION = MCA_REDUCTION>0?MCA_REDUCTION:1
+    PS_EB = PS_EB?PS_EB:1
+  }
+}'
+
+#%IU% (size) 
+#%MDESC% Returns installed device full memory size. 
+# If the device is disconneted, the size specified as input is returned, so that simulation mode or loaded data analysis are possible.
+
+def mca_max_channels (wish) '{
+  local ret
+  ret = mca_io("max_channels")
+  if (ret>0) return(ret)
+  else if (wish>0) return(wish)
+}'
+
+#%IU%
+#%MDESC% Checks wether a MCA is configured and reads in its device server name or its device type. If it appears that no device is configured, it makes that the mca macros detach themselves from the SPEC standard ones.
+
+def mca_device '{
+  local _fil _lin _fid _old
+ 
+  _old=MCA_DEVNAME ; MCA_DEVNAME=""
+  _fil=sprintf("%s/%s/config",SPECD,SPEC)
+  getline(_fil,"open")
+  while ((_lin=getline(_fil))!=-1) {
+    split(_lin,_fid)
+    if (index(_fid[0],"VM_MCA")) {
+      MCA_DEVNAME=_fid[2]
+      break
+    } else if (index(_lin,"@mca")) {
+      MCA_DEVNAME=_fid[0]
+      break
+    }
+  }
+  getline(_fil,"close")
+
+  if (MCA_DEVNAME == "") mca_deldef()
+}'
+
+#%IU% ()
+#%MDESC% Checks MCA State. (acquiring, idle, disconnected or not configured)
+def mca_state () '{
+
+  if (MCA_DEVNAME != "") \
+    MCA_DEVOK = mca_par("max_channels")>0?(wait(0x24)?DEVRUN:DEVON):0
+  else  MCA_DEVOK = -1
+}'
+
+#%IU% (adc,tm,sz,g,cal,lbl,un,nclr,slp,bgd,lg,dt,ln,eb,flag,red,syn) 
+#%MDESC% Reads in setup parameters and do the setup. see "mcasetup" for details
+
+def mca_setup (adc,tm,sz,g,cal,lbl,un,nclr,slp,bgd,gui,lg,dt,ln,eb,flag,red,syn) '{
+
+  MCA_ADCNO 	= adc
+  MCA_MEMGRPSIZE= sz
+  MCA_TMODE 	= tm
+  MCA_MEMGRP[1] = g
+  MCA_ENERGY	= cal
+  MCA_CP_XLBL   = lbl  
+  MCA_CP_XUNT   = un
+  MCA_SAVEBUFFER= nclr
+  MCA_DISP_SEC  = slp
+  MCA_BACKSUB   = bgd
+  MCA_GUI       = gui
+  MCA_LOG=lg;  MCA_DOTS=dt;  MCA_LINES=ln;  MCA_EBARS=eb ; 
+  MCA_REDUCTION = red  
+  MCA_SYNCHRO   = syn
+
+  if ((flag&3) && !(MCA_SL)) {
+    MCA_FLAG&=~3
+    printf("MCA: Macros set \"saveload.mac\" not loaded.                              \n     Cannot save any data. \n")
+  } else {
+    MCA_FLAG=flag
+  }
+
+  if (cal && !(MCA_PS)) {
+      MCA_ENERGY= 0
+      printf("MCA: Energy mode not available.                                              \n     Macro set \"psearch.mac\" not loaded.\n")
+  } else MCA_ENERGY = cal
+
+  mca_dosetup ()
+}'
+
+#%IU% ()
+#%MDESC% Does the actual setup, i.e. hardware setup, general operation setup and subsequent software setup.
+def mca_dosetup () '{
+  
+#HDW
+  mca_hdwsetup ()
+
+#SOFT
+  mca_defaults 2
+  mca_cdef ()
+  if (!whatis("MCA_DATA_PARAM")) mca_firstinit ()
+  mca_softsetup()
+
+#GUI
+  if (MCA_GUI) { 
+    mcaguion 
+  } else { 
+    mcaguioff 
+  }
+
+  print "MCA:",MCA_DEVNAME,MCA_DEVSTATE[MCA_DEVOK]
+}'
+
+#%IU%
+#%MDESC% hardware setup, i.e. Adc selection, Memory initialisation, and operation setup, i.e. time mode and soft preset. 
+def mca_hdwsetup () '{
+
+  local maxi
+
+  mca_wait()  
+  MCA_ADCNO = mca_io("adc",MCA_ADCNO) 
+
+  if ((MCA_MEMGRPSIZE != mca_io("group_size")) ||\
+      (MCA_MEMGRP[1]  != mca_io("select_group"))) {
+
+    maxi = mca_max_channels (MCA_MEMGRPSIZE)
+    if (MCA_MEMGRPSIZE > maxi) \
+      MCA_MEMGRPSIZE = mca_io("group_size",maxi)
+    else MCA_MEMGRPSIZE = mca_io("group_size", MCA_MEMGRPSIZE)
+
+    if (MCA_MEMGRPSIZE > 0) {
+      MCA_MEMGRP[0]  = maxi/MCA_MEMGRPSIZE
+      if ((MCA_MEMGRP[1]<0) || (MCA_MEMGRP[1]>=MCA_MEMGRP[0])) {
+        MCA_MEMGRP[1] = 0
+      }
+
+      MCA_MEMGRP[1] = mca_io("select_group", MCA_MEMGRP[1])
+    }
+  }
+
+  if (MCA_TMODE == 1) mca_io("live")
+  else mca_io("real")
+  if (MCA_SYNCHRO) mca_io("soft_preset",0)
+  else mca_io("soft_preset",1)
+}'
+
+#%IU% () 
+#%MDESC% loops printing a message till the acquisition is finished.
+def mca_wait () '{
+
+if (wait(0x24)) {
+  while (wait(0x24)) {
+    tty_move (0,-3,"waiting for MCA to stop ...")
+    tty_move (0,-2,sprintf("MCA  Preset time:   %g sec.\n",COUNT_TIME))
+    mcatimes
+  }
+  print;print
+}
+}'
+
+
+#%IU%
+#%MDESC% Does things that must or need only to be done once at startup. 
+#%BR% Loads roi from file, Reset|Declare shared memory ...
+def mca_firstinit () '{
+    printf("MCA: Initialization ...\n")
+    mcaloadroi
+    MCA_old_channel[0] = MCA_old_channel[1] = -1
+    shared double array MCA_DATA_PARAM [3]
+    MCA_DATA_PARAM[1]=1
+}'
+
+
+#%IU%
+#%MDESC% software setup, i.e. inits memory and assign newly set up parameters to the relevant globals.  
+def mca_softsetup () '{
+  local _type _oldsize _toks
+
+  if (MCA_MEMGRPSIZE>0) {
+    
+    _type = whatis("MCA_DATA","string_output")
+    _oldsize = _toks[split(substr(_type,0,index(_type,"-row")-1),_toks)-1]
+    
+    if (_oldsize != MCA_MEMGRPSIZE) {
+      shared ulong array MCA_DATA [MCA_MEMGRPSIZE][2]
+
+#      if ((MCA_GRP = groupinit (MCA_GRP, MCA_MEMGRPSIZE, 2)) < 0) { 
+#        printf("MCA error: no data group memory left \n") 
+#      }
+    }
+
+    MCA_REDUCTION = MCA_REDUCTION>0?MCA_REDUCTION:1
+    ulong array MCA_DATARED[int(MCA_MEMGRPSIZE/MCA_REDUCTION)][2]
+
+    array_op("fill",MCA_DATA[][0],1)
+    array_op("fill",MCA_DATARED[][0], MCA_REDUCTION)
+    MCA_DATARED[][0] += int(MCA_REDUCTION/2)
+
+  }
+
+  MCA_ROI_CH_MIN[0]=0; MCA_ROI_CH_MAX[0]=MCA_MEMGRPSIZE-1
+  MCA_ROI_EN_MIN[0] = mca_calcE (MCA_ROI_CH_MIN[0])
+  MCA_ROI_EN_MAX[0] = mca_calcE (MCA_ROI_CH_MAX[0])
+
+  MCA_PLOTERASE = 1
+  MCA_PLOTATTR=sprintf("%sylog %slines %sdots %sebars",                              MCA_LOG?"+":"-",MCA_LINES?"+":"-",MCA_DOTS?"+":"-",MCA_EBARS?"+":"-")
+}'
+
+
+#%UU%
+#%MDESC% Disables the MCA.
+#%BR% The MCA is no longer addressed during standard SPEC operation ("ct", scans ..), but still from "mcaacq".
+def mcaoff '{
+  mca_deldef () 
+  mca_par ("auto_run",0) 
+  MCA_AROFF = 1
+
+# mca_io is wrong here as it returns 0 if no dev is connected.
+}' 
+
+#%UU%
+#%MDESC% Enables back the MCA. 
+def mcaon '{
+  mca_par("auto_run",1)
+  MCA_AROFF = 0
+  mca_cdef()
+}' 
+
+#%IU%
+#%MDESC% Un-hooks MCA operation from the standard macros.
+def mca_deldef () '{
+    cdef("","","_mca1","delete")
+    cdef ("","","mcaLt","delete")
+    cdef ("","","mcaRt","delete")
+    cdef ("","","mcaDt","delete")
+    mca_roideldef()
+}'
+
+#%IU% ()  
+#%MDESC% Un-hooks ROI operation from the standard macros.
+def mca_roideldef () '{
+
+   local roi 
+
+   for (roi=0;roi<=MCA_ROI_NO;roi++) {
+     cdef ("","",MCA_ROI_COUNTER[roi],"delete")
+   }
+   MCA_ROI_GCH_MIN = MCA_ROI_ACH_MIN
+   MCA_ROI_GCH_MAX = MCA_ROI_ACH_MAX
+}'
+
+#%IU%
+#%MDESC% Hooks MCA operation to the standard macros.
+def mca_cdef () '{
+
+local _hook
+
+if ((MCA_DEVNAME != "") && !MCA_AROFF) {
+
+  cdef("user_countersrun","if(wait(0x24)) return(1);;","_mca1")
+
+  cdef("user_getcounts", "mca_readbuffer;",     "_mca1",0x10)
+  cdef("user_getcounts", "S[mcaLt]=MCA_LIVE_T;","mcaLt",2)
+  cdef("user_getcounts", "S[mcaRt]=MCA_REAL_T;","mcaRt",2)
+  cdef("user_getcounts", "S[mcaDt]=MCA_DEAD_T;","mcaDt",2)
+
+  if (!MCA_SAVEBUFFER) \
+    cdef("user_prepcount","mcaclear;","_mca1",0)
+  else \
+    cdef("user_prepcount","","_mca1","delete")
+
+  if (MCA_FLAG&1) {
+    cdef("measure2","mca_savescanhead (MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX);",                                                                           "_mca1")
+    cdef("user_scan_loop","mca_savescandata(MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX);"                                                                      ,"_mca1")
+  } else {
+    cdef("Fheader","mca_saveroihead;","_mca1")
+#    cdef("measure2","if (!NPTS) mca_saveroihead;","_mca1")
+#    cdef("measure2","","_mca1","delete")
+    cdef("user_scan_loop","","_mca1","delete")
+  }
+
+  if (MCA_FLAG&2) {
+    cdef("user_handlecounts","mca_savectdata(MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX);                                                                     ","_mca1")
+  } else {
+    cdef("user_handlecounts","","_mca1","delete")
+  }
+  mca_roicdef() 
+}
+}'
+
+#%IU%
+#%MDESC% Saves to DATAFILE MCA ROIS description. 
+def mca_saveroihead '{
+  for (j=0; j<=MCA_ROI_NO ;j++) {
+    if ((MCA_ROI_COUNTER[j]!="") && (-1!=cnt_num(MCA_ROI_COUNTER[j]))) {
+      savemcaroi(DATAFILE,MCA_ROI_CH_MIN[j],MCA_ROI_CH_MAX[j],cnt_name(cnt_num(MCA_ROI_COUNTER[j])))
+    }
+  }
+}'
+
+#%IU% ()  
+#%MDESC% Hooks ROI operation to the standard macros.
+def mca_roicdef () '{
+
+local roi cmd mne
+
+MCA_ROI_GCH_MIN = MCA_ROI_CH_MAX[0]
+MCA_ROI_GCH_MAX = 0
+
+for (roi=0;roi<=MCA_ROI_NO;roi++) {
+  if ((mne = MCA_ROI_COUNTER[roi])!="") {
+    if (-1 != cnt_num(mne)) {
+
+      if (MCA_ROI_GCH_MIN > MCA_ROI_CH_MIN[roi]) \
+        MCA_ROI_GCH_MIN=MCA_ROI_CH_MIN[roi]
+      if (MCA_ROI_GCH_MAX < MCA_ROI_CH_MAX[roi]) \
+        MCA_ROI_GCH_MAX=MCA_ROI_CH_MAX[roi]
+
+      cmd = sprintf("mca_getcounts %s %d %d;",mne,MCA_ROI_CH_MIN[roi],\
+                                                MCA_ROI_CH_MAX[roi])
+      cdef("user_getcounts",cmd,mne,2)
+    }
+  }
+}
+
+if (MCA_ROI_GCH_MIN > MCA_ROI_CH_MIN[MCA_ROIACTIVE]) \
+  MCA_ROI_GCH_MIN = MCA_ROI_CH_MIN[MCA_ROIACTIVE]
+if (MCA_ROI_GCH_MAX < MCA_ROI_CH_MAX[MCA_ROIACTIVE]) \
+   MCA_ROI_GCH_MAX = MCA_ROI_CH_MAX[MCA_ROIACTIVE]
+
+MCA_ROI_ACH_MIN = MCA_ROI_CH_MIN[MCA_ROIACTIVE]
+MCA_ROI_ACH_MAX = MCA_ROI_CH_MAX[MCA_ROIACTIVE]
+
+mca_resize_to_roi 0 MCA_ROI_ACH_MIN  MCA_ROI_ACH_MAX 
+mca_resize_to_roi 0 MCA_ROI_GCH_MIN  MCA_ROI_GCH_MAX 
+}'
+
+
+#%UU%
+#%MDESC% Initialises the MCA macros and hardware.
+#Can be called at startup to re-setup things without giving any parameter, nor calling any menu. The current or default parameters are then set. Default are mensionned together with %B%mcasetup%B% description.
+
+def mcainit '{
+
+  setup_tail("mca")
+  cdef("config_mac","mca_config; ","_mca0",0)
+
+  mca_defaults
+  mca_device
+  mca_state ()
+
+  if ((flag&3) && !(MCA_SL)) {
+    MCA_FLAG&=~3
+    printf("MCA: Macros set \"saveload.mac\" not loaded.                              \n     Cannot save any data. \n")
+  } else {
+    MCA_FLAG=flag
+  }
+
+  mca_hdwsetup()
+  mca_cdef ()
+  mca_firstinit() 
+  mca_softsetup()
+
+  if (MCA_ENERGY && !(MCA_PS)) {
+      MCA_ENERGY = 0
+      printf("MCA: Energy mode not available.                                              \n     Macro set \"psearch.mac\" not loaded.\n")
+  } 
+
+  if (MCA_GUI) { 
+    mcaguion 
+  } else { 
+    mcaguioff 
+  }
+
+  print "MCA:",MCA_DEVNAME,MCA_DEVSTATE[MCA_DEVOK]
+
+}'
+
+#%IU%
+#%MDESC% "config" / "reconfig" service.
+#Hooked to "config_mac".
+def mca_config '{
+
+  if (MCA_AROFF) { mcaoff }  
+
+  mca_defaults
+  mca_device
+  mca_state ()
+  mca_hdwsetup ()
+  mca_cdef ()
+
+  if (!whatis("MCA_DATA_PARAM")) mca_firstinit()
+  mca_softsetup()
+  print "MCA:",MCA_DEVNAME,MCA_DEVSTATE[MCA_DEVOK]
+}'
+
+#=================================================================== SETUP MENU
+
+
+#%IU%
+#%MDESC% MCA menu.
+def mca_setupmenu '{
+
+  global MCA_MENULVL
+
+  if (MCA_MENULVL) {
+    mca_cpmenu
+  } else {
+    mca_menu
+  }
+}'
+
+
+#%IU%
+#%MDESC% Display MCA General menu. (page 1)
+def mca_menu '{
+
+  menuprint(0,MCA_DEVSTATE[MCA_DEVOK],"DEVICE",MCA_DEVNAME);print;print
+
+  menuoptval(-35,"|\n","ADC",MCA_ADCNO,"A") 
+  menuvargetv("MCA_ADCNO") 
+  menuaction("if (MCA_ADCNO <= 0) MCA_ADCNO = 1")
+
+  menuoptval(-35,"| ","GROUP size",MCA_MEMGRPSIZE,"G")
+  menuaction("mca_calgrp")
+  menuprint(-36,"\n","active",MCA_MEMGRP[1]+1)
+
+  menuoptval(-35,"| ","TIME mode",MCA_TMODE==1?"Live":"Real","T")
+  menuvartogg("MCA_TMODE",2,1)
+
+  menuoptval(-36,"\n","SYNCHRO",MCA_SYNCHRO?"External":"Internal","S")
+  menuvartogg("MCA_SYNCHRO")
+
+  print
+  menuoptval(-35,"| ","AUTO-RUN in ct/scan",MCA_AROFF?"disabled":"enabled","R")
+  menuaction("if (MCA_AROFF) { mcaon } else { mcaoff }")
+  
+  menuoptval(-36,"\n","BACKGROUND substraction",MCA_BACKSUB?"ON":"OFF","B")
+  menuvartogg("MCA_BACKSUB")
+
+  menuoptval(-35,"| ","AUTO-MEMORY-CLEAR",MCA_SAVEBUFFER?"OFF":"ON","M")
+  menuvartogg("MCA_SAVEBUFFER")
+
+  menuoptval(-36,"\n","PLOT update interval in sec.",MCA_DISP_SEC,"P")
+  menuvargetv("MCA_DISP_SEC")
+
+  print 
+  menuoptval(-35,"| ","SAVE spectrum during scans",MCA_FLAG&1?"YES":"NO","sc")
+  menuvarbitw("MCA_FLAG",1)
+
+  menuoptval(-36,"\n","after ct or mcaacq",MCA_FLAG&2?"YES":"NO","ct")
+  menuvarbitw("MCA_FLAG",2)
+
+  menuoptval(-35,"| ","     binning factor",MCA_REDUCTION,"bi")
+  menuvargetv("MCA_REDUCTION")
+  menuaction ("MCA_REDUCTION=MCA_REDUCTION>0?MCA_REDUCTION:1")
+  
+  menuoptval(-36,"\n","data format",MCA_FMT,"da")
+  menuvargetv("MCA_FMT")
+
+  if (MCA_FLAG&4) {
+    menuoptval(0,0,"SAVE to",mca_filename(MCA_PREFIX1,MCA_N,MCA_SUFFIX),"to")
+    menuprint (0,"(mca files types)\n","and",mca_filename(MCA_PREFIX2,0,MCA_SUFFIX))
+  } else {
+    menuoptval(0,"(standard scan file)\n","SAVE to",DATAFILE,"to")
+  }
+  menuvarbitw("MCA_FLAG",4)
+  menuaction ("if (MCA_FLAG&4) {\
+           print \"The alternative saves one spectrum per MCA private file.\";          \nprintf(\"Enter here the \");mcanewfile }")
+
+  print
+  menuoptval (0,0,"GUI",MCA_GUI?"ON":"OFF","GUI")
+  menuvartogg("MCA_GUI")
+
+  if (!MCA_GUI) {
+    printf(", ")
+    menuoptval(0,", ","PLOT: log",(MCA_LOG)?"YES":"NO","l")
+    menuvartogg("MCA_LOG")
+
+    menuoptval(0,", ","dots",(MCA_DOTS)?"YES":"NO","d")
+    menuvartogg("MCA_DOTS")
+
+    menuoptval(0,"\n","lines",(MCA_LINES)?"YES":"NO","n")
+    menuvartogg("MCA_LINES")
+
+#    menuoptval(0,0,"err bars",(MCA_EBARS)?"YES":"NO","e")
+#    menuvartogg("MCA_EBARS")
+  } 
+  menusep
+  menuoptbutton (70,"\n","go to cplot menu","cp")
+  menuvartogg ("MCA_MENULVL")
+}'
+
+#%IU%
+#%MDESC% Prepares MCA memory group setting.
+def mca_calgrp '{
+
+  local maxi 
+  
+  maxi = mca_max_channels (8192)
+
+  MCA_MEMGRPSIZE = getval(sprintf("Channels per memory group (%d - %d)",                                                             512,maxi),MCA_MEMGRPSIZE)
+
+  if (MCA_MEMGRPSIZE > maxi)  MCA_MEMGRPSIZE = maxi
+  if (MCA_MEMGRPSIZE < 512)  MCA_MEMGRPSIZE = 512
+
+  MCA_MEMGRP[0] = maxi/MCA_MEMGRPSIZE
+
+  for (i=0.75;i<=32;i*=2) {
+    if (MCA_MEMGRP[0]<i) {
+      MCA_MEMGRP[0]=i-i/3
+      break
+    }
+  }
+
+  MCA_MEMGRPSIZE = maxi/MCA_MEMGRP[0]
+  MCA_MEMGRP[1]=getval(sprintf("Memory group active (max %d):",                                            MCA_MEMGRP[0]) ,MCA_MEMGRP[1]+1)-1
+
+  if ((MCA_MEMGRP[1]<0) || (MCA_MEMGRP[1]>=MCA_MEMGRP[0])) MCA_MEMGRP[1] = 0
+}'
+
+#%IU%
+#%MDESC% Display MCA CPLOT menu. (page 2)
+def mca_cpmenu '{
+
+  global MCA_CP
+
+#  menuoptval (-40,"\n","plot from file",MCA_CP["FROMF"]?"YES":"NO","pl")
+#  menuvartogg ("MCA_CP[\"FROMF\"]")
+#  menuaction ("menuwarning(\"Plot from file to be implemented soon...\")") 
+#  print
+
+  menuoptval (-50,0,"global title",MCA_CP["GLOBTITLE"],"gl")
+  menuvargetv("MCA_CP[\"GLOBTITLE\"]")
+  menuoptval (-30,"\n","get cpsetup:",substr(CP_PAR["GLOBTITLE"],1,15),"g")
+  menuaction ("MCA_CP[\"GLOBTITLE\"]=CP_PAR[\"GLOBTITLE\"]")
+  menuoptval (-50,0,"title",MCA_CP["PTITLE"],"ti")
+  menuvargetv("MCA_CP[\"PTITLE\"]")
+  menuoptval (-30,"\n","get cpsetup:",substr(CP_PAR["PTITLE"],1,15),"e")
+  menuaction ("MCA_CP[\"PTITLE\"]=CP_PAR[\"PTITLE\"]")
+  menuoptval (-50,0,"comment",MCA_CP["COMMENT"],"co")
+  menuvargetv("MCA_CP[\"COMMENT\"]")
+  menuoptval (-30,"\n","get cpsetup:",substr(CP_PAR["COMMENT"],1,15),"t")
+  menuaction ("MCA_CP[\"COMMENT\"]=CP_PAR[\"COMMENT\"]")
+  print
+  menuoptval (-40,"\n","fwhm etc.. on plot",MCA_CP["FLAGS"]&0x10000?"YES":"NO","fw")
+  menuvarbitw ("MCA_CP[\"FLAGS\"]",0x10000)
+  if (MCA_GUI) {
+    menuoptval (-40,"\n","log Y",MCA_LOG?"YES":"NO","l")
+    menuvartogg ("MCA_LOG")
+    menuoptval (-40,"\n","lines",MCA_LINES?"YES":"NO","n")
+    menuvartogg ("MCA_LINES")
+    menuoptval (-40,"\n","dots",MCA_DOTS?"YES":"NO","d")
+    menuvartogg ("MCA_DOTS")
+    menuoptval (-40,"\n","point size",MCA_CP["PSIZE"],"po")
+#    menuprint (-40,"\n"," cpsetup:",CP_PAR["PSIZE"])
+    menuvargetv ("MCA_CP[\"PSIZE\"]")
+  }
+
+ menusep
+ menuoptbutton (70,"\n","back to mca menu","mca")
+ menuvartogg ("MCA_MENULVL")
+}'
+
+#%IU%
+#%MDESC% Checks availability of some menu options.
+def mca_setupchk '{
+  if (MCA_FLAG&0x3 && !(MCA_SL)) {
+    MCA_FLAG&=~0x3
+    menuerror("MCA: Macros set \"saveload.mac\" not loaded.                                 \n     Cannot save any data. ")
+  }
+}'
+
+
+#========================================================================== I/O
+
+#%IU% (command,argument,flag) 
+#%MDESC% Management of input/output to the MCA. %BR%
+# flag 0: returns what mca_par() returns or argument if error occured (cheat a bit)%BR%
+# flag 1: returns really what mca_par() returns.
+def mca_io (command,argument,flag) '{
+
+  local ret 
+  
+  if (MCA_DEVOK>0) {
+
+    if (length(argument)) {
+      ret = mca_par(command,argument)
+      if (ret<0) ret = mca_par(command)
+    } else ret = mca_par(command)
+
+    if (-1 == ret) {
+      mca_state() 
+    } 
+  } else ret = -1
+  
+  if (!flag && (ret<0)) ret = argument
+
+  return(ret)
+}'
+
+#=========================================================== BASIC ACQUISITION
+
+#%UU% [preset_seconds] [roi | first] [last] 
+#%MDESC% Acquires data with the MCA only. The rest of counters configured in SPEC are not addressed by this command. If you need it, use standard %B%ct%B% command. (don't forgot, %B%mcasetup%B% set %B%AUTO-RUN mode <ON>%B%, or %B%mcaon%B%).
+#%BR% %B%mcaacq%B%consists in the following sequence:
+#%UL%
+#%LI% %B%stopping%B% any already running acquisition.
+#%LI% %B%clearing%B% (if setup) the active MCA memory group.
+#%LI% %B%preseting%B% the time. 
+#%LI% %B%starting%B% the acquisition.
+#%LI% %B%polling%B% the device till time is over.
+#%UL% meanwhile:
+#%LI% %B%reading%B% the MCA buffer.
+#%LI% %B%plotting%B% the data spectrum.
+#%XUL%
+#%LI% %B%saving%B% (if setup) the acquired spectrum to disk file.
+#%XUL%
+#%BR% The MCA memory is read within the range specified, or if none, the active ROI .
+#%BR%If the requested preset time is 0 or un-specified, the acquisition is started "for ever"; press "control-C" or "s" or "q" to stop it. 
+#%BR% Pressing "c" would clear the memory on the fly. If the GUI is not active, you can also change the plot update intervals (press "u"), change the plot x or y ranges (press "x" or "y"), integrate counts on region (press "i"), toggles plot attributes such as lines (press "l"), large dots ("d") and log y("g"). Meanwhile, the acquisition goes on.
+
+def mcaacq '{ 
+
+  if (!(whatis("MCA_DATA")&0x10004)) {
+    printf ("MCA: You MUST run ")
+    tty_cntl("so");printf("mcasetup ")
+    tty_cntl("se");printf("or ")
+    tty_cntl("so");printf("mcainit ")
+    tty_cntl("se");print "first." 
+    exit
+  }
+}
+{
+   local xmin xmax ymin ymax chmin chmax roi 
+
+   ymin = ymax = MCA_AUTO
+   MCA_PLOTERASE=1
+   COUNT_TIME = $1 
+
+   if ($# == 3) {
+     xmin = chmin = $2
+     xmax = chmax = $3
+     if (MCA_ENERGY) {   
+       chmin = mca_calcch(xmin)
+       chmax = mca_calcch(xmax)
+     }
+   } else {
+     if ($#==2) roi = $2
+     else       roi = MCA_ROIACTIVE
+     xmin = chmin = MCA_ROI_CH_MIN [roi]
+     xmax = chmax = MCA_ROI_CH_MAX [roi] 
+     if (MCA_ENERGY) {
+       xmin = MCA_ROI_EN_MIN [roi]
+       xmax = MCA_ROI_EN_MAX [roi]
+     }
+   } 
+
+   mcastop
+   if (!MCA_SAVEBUFFER) {
+      mcaclear 
+   }
+   mcastart COUNT_TIME 
+   mca_waitcounts 
+   mca_read chmin chmax
+
+   mca_plotit xmin xmax ymin ymax
+
+   mcatimes 
+   print
+
+   if (MCA_FLAG&2 && (MCA_DEVNAME != "")) {
+     waitmove ; get_angles
+     mca_saveacqdata(chmin, chmax, "$0 $*") 
+   }
+}'
+
+
+#%IU%  
+#%MDESC% Plots and prints out times while waiting for the acquisition to complete. This is used by "mcaacq" macro.
+def mca_waitcounts '{
+  local disp key 
+  local min max
+  
+  if (COUNT_TIME>0) 
+    disp=(MCA_DISP_SEC<COUNT_TIME)?MCA_DISP_SEC:COUNT_TIME
+  else disp=MCA_DISP_SEC
+
+  while (wait(0x24)) {
+    mcatimes 
+    mca_read chmin chmax
+    mca_plotit xmin xmax ymin ymax
+
+    mca_user_waitcounts
+
+    key=input(0)
+    if (key!="" && key != "\004") { mca_key key }
+    mca_user_key
+
+    sleep(disp) 
+  }  
+}'
+
+#%IU% <key>   
+#%MDESC% Manages a menu which is callable using input keys. see "mcaacq".
+def mca_key '{
+
+  local cy
+
+  if ($1=="s" || $1=="q") {
+    mcastop
+    print "\nMCA  STOPPED"
+  } else {
+ 
+    tty_cntl("cl")
+
+    cy = -18
+    tty_move (0,cy++,"MCA MENU")
+    tty_move (5,cy++,"   s: Stop acquisition")
+    tty_move (5,cy++,"   c: Clear Memory and restart acquisition")
+    if (!MCA_GUI) {
+      tty_move (5,cy++,"   u: Modify plot Update Intervals" )
+      tty_move (5,cy++,"   x: Modify X-range" )
+      tty_move (5,cy++,"   y: Modify Y-range")
+      tty_move (5,cy++,"   i: Integrate counts on region")
+      tty_move (5,cy++,sprintf("   l:%s Connect points with Lines\n",                                                               (MCA_LINES)?" do not":""))
+      tty_move (5,cy++,sprintf("   d:%s Draw large Dots\n",                                                                        (MCA_DOTS)?" do not":"") )
+      tty_move (5,cy++,sprintf("   g:%s Plot in loG scale\n",                                                                     (MCA_LOG)?" do not":" do") )
+      tty_move (5,cy++,"   r: Refresh plot")
+    }
+    tty_move(0,-1)
+
+    if ($1=="c") {
+      if (yesno("Really clear memory",1)) {
+        mcastop; mcaclear; mcastart COUNT_TIME
+        t0=time()
+        tty_move (0,-3, "MCA MEMORY CLEARED - ACQ RESTARTED")
+        tty_move(0,-1)
+      }
+
+    } else if (!MCA_GUI) {
+      if ($1=="x") {
+        tty_move(0,-5,"MCA New X-range:\n")
+        xmin = getval("Min",xmin)
+        xmax = getval("Max",xmax)
+        tty_move(0,-1)
+
+      } else if ($1=="y") {
+        tty_move(0,-5,"MCA New Y-range:\n")
+        ymin=getval("Min",ymin)
+        ymax=getval("Max",ymax)
+        tty_move(0,-1)
+
+      } else if ($1=="u") {
+        tty_move(0,-4)
+        MCA_DISP_SEC=getval("\nNew update intervals in second",MCA_DISP_SEC)
+        disp=MCA_DISP_SEC
+        tty_move(0,-1)
+
+      } else if ($1=="r") {
+        MCA_PLOTERASE=1
+        mca_plotit chmin chmax ymin ymax
+        tty_move(0,-3,"MCA PLOT REFRESHED")
+        tty_move(0,-1)
+
+      } else if ($1=="i") {
+        local integral xmn xmx cmn cmx no st
+        tty_move(0,-6,"Integrate counts on range :\n")
+        xmn = getval(" Min",min)
+        xmx = getval(" Max",min)
+        if (!MCA_ENERGY) {
+         cmn = xmn ; cmx = xmx
+        } else {
+         cmn = mca_calcch(xmn)
+         cmx = mca_calcch(xmx)
+        }
+        st = mca_getoffset( MCA_DATA, 0, cmn)
+        no = mca_getnpts  ( MCA_DATA, 0, cmn, cmx)
+        if (no) {
+         integral=mca_integrate(st,no+st-1)
+         printf("MCA counts from %s %g to %g (%s):  [ %d ]",                                                      MCA_ENERGY?MCA_CP_XLBL:"Channel",xmn,xmx,                                      MCA_ENERGY?MCA_CP_XUNT:"",integral)
+        } else  printf("Sorry, no acquisition was made in that range")
+        tty_move(0,-1)
+
+      } else if ($1=="l") {
+        MCA_LINES=!MCA_LINES
+        tty_move (5,-10);tty_cntl("ce")
+        printf("   l:%s Connect points with Lines\n",(MCA_LINES)?" do not":"")
+        tty_move(0,-1)
+
+      } else if ($1=="d") {
+        MCA_DOTS=!MCA_DOTS
+        tty_move (5,-9);tty_cntl("ce")
+        printf("   d:%s Draw large Dots\n",(MCA_DOTS)?" do not":"") 
+        tty_move(0,-1)
+
+      } else if ($1=="g") {
+        MCA_LOG=!MCA_LOG
+        tty_move (5,-8);tty_cntl("ce")
+        printf("   g:%s Plot in loG scale\n",(MCA_LOG)?" do not":" do") 
+        tty_move(0,-1)
+      }
+      MCA_PLOTATTR=sprintf("%sylog %slines %sdots %sebars",                            MCA_LOG?"+":"-",MCA_LINES?"+":"-",MCA_DOTS?"+":"-",MCA_EBARS?"+":"-")
+    }
+    MCA_PLOTERASE=1
+  }
+}'
+
+#%UU%  
+#%MDESC% Clears the active MCA memory group.  
+def mcaclear '{
+
+  mca_io("clear")
+  if (whatis("MCA_DATA")&0x10000) MCA_DATA[][1] = 0
+}'
+
+#%UU% [preset_seconds]
+#%MDESC% Presets and starts an acquisition.
+def mcastart '{
+  if (mca_preset($1)<0) {
+    printf("!! MCA STATUS : %s; could not start.\n\n",MCA_DEVSTATE[MCA_DEVOK])
+    exit
+  }
+  mca_io("run")
+  mca_user_start
+  printf("MCA STATUS : %s\n\n",MCA_DEVSTATE[DEVRUN])
+}'
+
+#%IU% (seconds)
+#%MDESC% Sets the preset time value for the next acquisition.
+def mca_preset (_preset) '{
+  if (mca_io("preset",_preset,1)<0) return -1
+  COUNT_TIME = fabs(_preset)
+  return COUNT_TIME
+}'
+
+#%UU%  
+#%MDESC% Stops acquisition if running.
+def mcastop '{if (wait(0x24)) mca_io("halt")}'
+
+#%UU%  
+#%MDESC% Send "stop acquisition" signal whatever is the status of the device. It might happen that the device server gives a meaningless error message, if the status is already "IDLE".
+def mcahalt 'esrf_io(MCA_DEVNAME,"DevMcaStopAcq")'
+
+#%UU%  [roi|first] [last]
+#%MDESC% Reads the MCA memory within the range specified.
+def mcaread '{
+  local ch0 ch1 
+
+  if (!(whatis("MCA_DATA")&0x10004)) {
+    printf ("MCA: You MUST run ")
+    tty_cntl("so");printf("mcasetup ")
+    tty_cntl("se");printf("or ")
+    tty_cntl("so");printf("mcainit ")
+    tty_cntl("se");print "first."
+    exit
+  }
+}
+{
+  if ($# == 0) {
+    ch0 = MCA_ROI_CH_MIN[MCA_ROIACTIVE]
+    ch1 = MCA_ROI_CH_MAX[MCA_ROIACTIVE]
+  } else if ($# == 1) {
+    mca_getroi $1 0 ch0 ch1
+  } else { 
+    if (MCA_ENERGY) {   
+      ch0 = mca_calcch($1)
+      ch1 = mca_calcch($2)
+    } else { 
+      ch0 = $1
+      ch1 = $2 
+    }
+  } 
+
+  mca_read ch0 ch1
+}'
+
+#%IU%  [first_ch] [last_ch]
+#%MDESC% Read the MCA memory within the channel range specified. Default reads the whole memory.
+def mca_read '{
+
+   global MCA_old_channel 
+   local channel0 channel1
+
+   channel0=$1 ; channel1=$2
+   mca_resize_to_roi 0 channel0 channel1
+
+   MCA_FRED[0]=0
+
+   if (MCA_DEVOK>0) {
+     mca_get(MCA_DATA[channel0:channel1][1],channel0,channel1)
+     mca_times()
+     MCA_IN_GROUP = 0
+#     if (MCA_DATA[MCA_ROI_CH_MAX[0]][0]!=MCA_ROI_CH_MAX[0]) {
+#       array_op("fill",MCA_DATA[][0],1)
+#     }
+     if ((MCA_old_channel[0]!=channel0)||(MCA_old_channel[1]!=channel1)) {
+       MCA_PLOTERASE=1
+       MCA_old_channel[0]=channel0  ; MCA_old_channel[1]=channel1
+     }
+  }
+}'
+
+#%UU% 
+#%MDESC% Reports the MCA elapsed live , real and dead times.
+def mcatimes '
+  mca_times()
+  printf("\rMCA  Elapsed times: live %4.2f real %4.2f sec. dead time %3.2f %%",            MCA_LIVE_T,MCA_REAL_T,MCA_DEAD_T)
+'
+
+#%IU% ()
+#%MDESC% Reads in times elapsed. (Live, Real and Dead time).
+def mca_times () '{
+  global MCA_LIVE_T MCA_REAL_T MCA_DEAD_T
+
+  MCA_LIVE_T = mca_io("elapsed_live")
+  MCA_REAL_T = mca_io("elapsed_real")
+  MCA_DEAD_T = mca_io("dead")
+}'
+
+#%UU% 
+#%MDESC% Prints out a detailed status of the SPEC MCA registers.
+
+def mcastat '{
+   mca_state()
+   printf("MCA STATUS : %s\n\n",MCA_DEVSTATE[MCA_DEVOK])
+   printf("Current ADC             : %d\n", mca_io("adc"))
+   printf("Group size              : %d K \n", mca_io("group_size"))
+   printf("Group selected          : %d \n", mca_io("select_group")+1)
+   printf("Elapsed live time       : %.2f s \n", mca_io("elapsed_live"))
+   printf("Elapsed real time       : %.2f s \n", mca_io("elapsed_real"))
+}'
+
+#============================================================= AUTO RUN
+
+#%IU% 
+#%MDESC% Reads in MCA spectrum and plots it. 
+#That macro is hooked to "user_getcounts".
+
+def mca_readbuffer '{
+  local armin armax
+
+  mca_read MCA_ROI_GCH_MIN MCA_ROI_GCH_MAX
+
+  if (!chk_count) MCA_PLOTERASE = 1
+
+  if (MCA_ENERGY) {
+    armin = MCA_ROI_EN_MIN[MCA_ROIACTIVE]
+    armax = MCA_ROI_EN_MAX[MCA_ROIACTIVE]
+  } else {
+    armin = MCA_ROI_CH_MIN[MCA_ROIACTIVE]
+    armax = MCA_ROI_CH_MAX[MCA_ROIACTIVE]
+  }
+
+  mca_plotit armin armax MCA_AUTO MCA_AUTO
+}'
+
+#%IU%  <ROI_counter_mnemonic> <channel_min> <channel_max>
+#%MDESC% Integrates counts on ROIs and updates SPEC counters register.
+# This is hooked to "user_getcounts", one hook per counter-assigned ROI.
+
+def mca_getcounts ' S[$1] = mca_integrate ($2, $3) '
+
+#%IU%  (channel_min,channel_max) 
+#%MDESC% Integrates counts on channels region.
+#This is called by "mca_getcounts". Does a backgroung substraction if that option is turned on in "mcasetup".
+
+def mca_integrate (channel_min,channel_max) '{
+
+  local integral nopt
+
+  mca_resize_to_last_read channel_min channel_max
+  integral = array_op("sum",MCA_DATA[channel_min:channel_max][1])
+
+  if (MCA_BACKSUB) { 
+    nopt = channel_max-channel_min+1
+    integral-=(MCA_DATA[channel_min][1]+MCA_DATA[channel_max][1])/2*nopt
+  }
+  return(integral)
+}'
+
+#======================================================================= R.O.I.
+#%UU% [no|name] [<first> <last>] [name]
+#%MDESC% ROIs definition.
+#%DL% detail of usage: 
+#%DT% mcaroi no first last counter 
+#%DD% modifies ROI number "no".
+#%DT% mcaroi no                    
+#%DD% sets ROI "no" as the active one.
+#%DT% mcaroi no counter            
+#%DD% associates name "counter", which is eventually a counter mnemonic in config, with ROI number "no".
+#%DT% mcaroi
+#%DD% calls the ROI menu.
+#%XDL%
+# Each ROI is referrenced to by a number that is set by the software. You can use the ROI names to referrence them as well.
+# The active ROI is used as the default operation range when no other range is specified. ROIs which names are configured counter mnemonics are automatically set as pseudo counters to report integrated counts value over the corresponding ROI.
+
+def mcaroi '{
+
+  global MCA_ROI_NO MCA_ROIACTIVE 
+
+  local errmsg no
+
+  errmsg=""
+
+  if (!whatis("MCA_DATA_PARAM")) mca_firstinit ()
+  mca_roideldef()
+
+  if ($#) {
+
+    no = mca_roinum("$1")
+
+    if ((no>=0) && (no <= MCA_ROI_NO)) {
+
+      if (1==$#) {
+        MCA_ROIACTIVE = no 
+      
+      } else if (2==$#) {
+        errmsg = mca_roisetname(no,"$2")
+
+      } else if (no>0) {
+        if (3==$#) {
+          errmsg = mca_roisetrange(no,$2,$3)
+
+        } else if (4==$#) {
+          errmsg = mca_roisetrange(no,$2,$3)
+          errmsg = errmsg "\n" mca_roisetname(no,"$4")
+        }
+      } else {
+        errmsg = "cannot modify Roi 0 range\n" 
+      }
+    } else {
+      errmsg = "Roi $1 unknown\n"
+    }
+
+    mca_roidisp()
+
+    if (errmsg!="") { 
+      beep 
+      print "MCA:",errmsg 
+    }
+
+    if ((MCA_DEVNAME != "") && !MCA_AROFF) {
+      mca_roicdef()
+    } 
+
+    mcasaveroi
+
+  } else {
+
+    local menuend menuupd
+    menuupd = ""
+    menuend = "if ((MCA_DEVNAME != \"\") && (!MCA_AROFF)) { mca_roicdef() }"
+    menuend = menuend ";mcasaveroi"  
+
+    menu("\n R O I - MCA Region Of Interests .","mca_roimenu",menuupd,menuend)
+  }
+}'
+
+
+#%IU%
+#%MDESC% re-loads ROI definition from disk.
+def mcaloadroi '{
+
+global MCA_ROI_NO 
+
+if (!unix(sprintf("test -r %s",MCA_ROI_DEFAULT_FILE))) {
+
+   local line tok 
+   for (i=0, line=getline (MCA_ROI_DEFAULT_FILE); line != -1; line = getline (MCA_ROI_DEFAULT_FILE)) {
+     split (line,tok)
+     if (tok[0] == "") continue
+     else if (tok[0] == "#N") MCA_ROI_NO = tok[1]
+     else if ((substr(tok[0],1,1) != "#") && (i <= MCA_ROI_NO)) {
+       if (i>0) {
+         MCA_ROI_CH_MIN[i] = tok[1]
+         MCA_ROI_CH_MAX[i] = tok[2]
+         MCA_ROI_EN_MIN[i] = mca_calcE (MCA_ROI_CH_MIN[i])
+         MCA_ROI_EN_MAX[i] = mca_calcE (MCA_ROI_CH_MAX[i])
+       }
+       MCA_ROI_COUNTER[i] = tok[3] 
+       i++
+     }
+   }
+   getline(MCA_ROI_DEFAULT_FILE,"close")
+ }
+}'
+
+
+#%IU%
+#%MDESC% saves ROI definition to disk.
+def mcasaveroi '{
+
+if (0 == unix(sprintf("test -w %s/%s/userfiles",SPECD,SPEC))) {
+  
+  if (0 == unix(sprintf("test -w %s",MCA_ROI_DEFAULT_FILE))) \
+         unix(sprintf("rm -f %s",MCA_ROI_DEFAULT_FILE))
+
+  on (MCA_ROI_DEFAULT_FILE) ; offt
+  
+  printf ("#F mcaroifile\n")
+  printf ("#D %s\n",date())
+  printf ("#C %s User = %s\n",SPEC,USER)
+  printf ("#S 1 $0\n")
+  printf ("#N %d\n",MCA_ROI_NO)
+  printf ("#L roi no  ch min  ch max  counter\n")
+
+  for (i=0;i<=MCA_ROI_NO;i++) {
+    printf ("%d  %d  %d  %s \n",                                                             i,MCA_ROI_CH_MIN[i],MCA_ROI_CH_MAX[i],MCA_ROI_COUNTER[i])
+  }
+  
+  ont ; close (MCA_ROI_DEFAULT_FILE)
+}
+}'
+
+#%IU% (roi_id)
+#%MDESC% Returns ROI number, or -1 if not found. "roi_id" is a ROI name or a ROI number.
+def mca_roinum(rid) '{
+  local rn num
+
+  for (rn=0;rn<=MCA_ROI_NO;rn++) 
+    if (rid == MCA_ROI_COUNTER[rn]) {
+      return rn
+    }   
+
+  num = rid + 0
+  if ((num==rid) && (num<=MCA_ROI_NO)) return rid
+
+  return -1
+}'
+
+#%IU% ()  
+#%MDESC% Prints out ROI definition table.
+
+def mca_roidisp () '{
+
+  local roi
+
+  printf("\nROI       |   Channels    | %-27s | ROI  | Roi ",                                                  (MCA_CP_XLBL!="")?MCA_CP_XLBL:"calibration   ")
+  printf("\nnames     | first | last  | min          | max          |ACTIVE| numbers\n")
+  print "---------------------------------------------------------------------"
+
+  for (roi=0;roi<=MCA_ROI_NO;roi++) {
+    if (roi==MCA_ROIACTIVE) tty_cntl("so")
+    printf("%-10s| %-5d | %-5d | %-12.4f | %-12.4f | %-4s | %d\n",\
+          MCA_ROI_COUNTER[roi],\
+          MCA_ROI_CH_MIN[roi],MCA_ROI_CH_MAX[roi],MCA_ROI_EN_MIN[roi],\
+          MCA_ROI_EN_MAX[roi],(MCA_ROIACTIVE==roi)?" X":" -",roi)
+    tty_cntl("se")
+  }
+  print
+}'
+
+
+#%IU% (no,name)
+#%MDESC% Assigns ROI number <no> with name <name>.
+def mca_roisetname (no,name) '{
+  local roi err
+
+  err = ""
+
+  if (no<=MCA_ROI_NO) {
+    if (name!="") MCA_ROI_COUNTER[no]=name
+    if (MCA_ROI_COUNTER[no] != "" && (MCA_ROI_COUNTER[no] != "n")) {
+      for (roi=0;roi<=MCA_ROI_NO;roi++) 
+        if ((roi != no) && (MCA_ROI_COUNTER[no] == MCA_ROI_COUNTER[roi])) {
+          MCA_ROI_COUNTER[roi]=""
+          err=sprintf("%s     roi %d was taken off name %s\n",                                                 err,roi,MCA_ROI_COUNTER[no])
+          break
+        }
+    }
+    MCA_ROIACTIVE=no
+  }
+  return(err)
+}'
+
+
+#%IU% (no,min,max)
+#%MDESC% Assigns ROI number <no> with specified range.
+def mca_roisetrange (no,min,max) '{
+
+  global MCA_ROI_EN_MIN MCA_ROI_EN_MAX
+  local roi err
+
+  err = ""
+
+  if (no<=MCA_ROI_NO) {
+    if (MCA_ENERGY) {
+      MCA_ROI_EN_MIN[no]=min
+      MCA_ROI_EN_MAX[no]=max
+    } else {
+      MCA_ROI_CH_MIN[no]=min
+      MCA_ROI_CH_MAX[no]=max
+    }
+    mca_Ech MCA_ENERGY MCA_ROI_EN_MIN[no] MCA_ROI_CH_MIN[no]
+    mca_Ech MCA_ENERGY MCA_ROI_EN_MAX[no] MCA_ROI_CH_MAX[no]
+    MCA_ROIACTIVE=no
+  }
+  return(err)
+}'
+
+
+#%IU%  
+#%MDESC% ROI edition menu.
+def mca_roimenu '{
+
+  mca_roidisp()
+
+  menupru("keys:\n")
+  menuoptbutton(0,", ","  add","a")
+  menuaction ("_mca_roiadd")
+  if (MCA_ROI_NO) {
+    menuoptbutton(0,", ","delete","d")
+    menuaction ("_mca_roidel")
+  }
+  printf("or modify:  ")
+  for (i=0;i<=MCA_ROI_NO;i++) {
+    if (MCA_ROI_COUNTER[i]!="") {
+      if (i>0) {
+        menuoptbutton(0,"| ","",i)
+        menuaction(sprintf("_mca_roichange %d",i))
+      }
+      menuoptbutton(0,"| ","",MCA_ROI_COUNTER[i])
+    } else {
+      menuoptbutton(0,"| ","",i)
+    }
+    menuaction(sprintf("_mca_roichange %d",i))
+  }
+  print;  print
+}'
+
+
+#%IU%
+#%MDESC% New ROI input.
+def _mca_roiadd '{
+  MCA_ROI_NO++
+  _mca_roiname MCA_ROI_NO
+  _mca_roirange MCA_ROI_NO
+}'
+
+#%IU%
+#%MDESC% ROI name input.
+def _mca_roiname '{
+  local no asw err
+
+  err=""
+  no = $1
+  asw = getval("Name",MCA_ROI_COUNTER[no])
+  if ((err = mca_roisetname(no,asw))!="") menuerror(err)
+}'
+
+#%IU%
+#%MDESC% ROI range input.
+def _mca_roirange '{
+  local asw arr err min max
+
+  asw = $1
+  err = ""
+
+  if (MCA_ENERGY) {
+    min=getval(sprintf("From %s: ",MCA_CP_XLBL),MCA_ROI_EN_MIN[asw])
+    if (1==split (min,arr)) {
+      max=getval(sprintf("To   %s: ",MCA_CP_XLBL),MCA_ROI_EN_MAX[asw])
+    } else {
+      min = arr[0]
+      max = arr[1]
+    }
+  } else {
+    min=getval("From channel: ",MCA_ROI_CH_MIN[asw])
+    if (1==split(min,arr)) {
+      max=getval("To   channel: ",MCA_ROI_CH_MAX[asw])
+    } else {
+      min = arr[0]
+      max = arr[1]
+    }
+  }
+  err = mca_roisetrange(asw, min, max)
+  if (err!="") menuerror(err)
+}'
+ 
+#%IU%
+#%MDESC% ROI deletion.
+
+def _mca_roidel '{
+
+   local rqs nn arr no_str na_str ii jj
+   
+   rqs = getval("which one(s)",MCA_ROI_COUNTER[MCA_ROIACTIVE])
+
+   nn = split (rqs,arr)
+
+   for (no_str=na_str="",ii=0;ii<nn;ii++) {
+     if ((jj = mca_roinum (arr[ii])) < 0) \
+        menuwarning (sprintf("%s: %s unknown",rqs,arr[ii]))
+     else if (index(no_str,jj)) \
+        menuwarning (sprintf("%s: %s and %d were the same",rqs,MCA_ROI_COUNTER[jj],jj))
+     else {
+       no_str = jj " " no_str
+       na_str = MCA_ROI_COUNTER[jj] " " na_str
+     }
+   }
+
+   nn = split (na_str,arr)
+
+   for (ii=0;ii<nn;ii++) {
+
+      jj = mca_roinum (arr[ii])
+
+      if (jj > 0) {
+
+        MCA_ROI_EN_MIN[jj] = MCA_ROI_EN_MIN[MCA_ROI_NO]
+        MCA_ROI_EN_MAX[jj] = MCA_ROI_EN_MAX[MCA_ROI_NO]
+        MCA_ROI_CH_MIN[jj] = MCA_ROI_CH_MIN[MCA_ROI_NO]
+        MCA_ROI_CH_MAX[jj] = MCA_ROI_CH_MAX[MCA_ROI_NO]
+        MCA_ROI_COUNTER[jj]= MCA_ROI_COUNTER[MCA_ROI_NO]
+
+        if (MCA_ROIACTIVE == jj) MCA_ROIACTIVE=0
+        else if (MCA_ROI_NO == MCA_ROIACTIVE) MCA_ROIACTIVE=jj
+
+        MCA_ROI_NO--
+
+      } else if (0==jj) {
+        menuerror("cannot delete roi 0")
+
+      } 
+   }
+}'
+
+#%IU%
+#%MDESC% ROI modification.
+def _mca_roichange '{
+
+  if ($1) {
+    _mca_roirange $1
+  }
+  _mca_roiname $1
+}'
+
+#==================================================================== SAVE/LOAD
+
+#%UI% ()
+#%MDESC% Opens next MCA private file, and writes header on it.
+
+def mca_fileheader (file) '{
+# ?? mca_fileheader (file) sh be repl by a call to savefileheader(file) !!
+# ??                       in mcasave and mca_save_data funcs.
+# ??                       pb is EPOCH .
+
+  local i j
+
+  if (file == "" || file == "0" || open(file)) return -1
+  fprintf(file,"#F %s\n", file)
+  fprintf(file,"#E %d\n",EPOCH)
+  fprintf(file,"#D %s\n",date())
+  fprintf(file,"#C %s  User = %s\n",TITLE,USER)
+
+  for (i = 0; i < MOTORS; i += 8) {
+    fprintf(file,"#O%d ", i/8)
+    for (j = i; j < i + 8 && j < MOTORS; j++)
+      if (motor_name(mA[j])!="unused") fprintf(file,"%8s  ", motor_name(mA[j]))
+    fprintf(file,"\n")
+  }
+  return 0
+}'
+
+#%UU% [file_name]
+#%MDESC% Sets a new file prefix and initialises the spectrum run number, which appears in the file name as e.g. PREFIX_001.mca. But when spectrum was taken during a scan, the file name changes for PREFIX_001_000.mca, where first number is the scan number (SCAN_N) and second one the point number in the scan. 
+def mcanewfile '{
+
+  global MCA_PREFIX MCA_PREFIX1 MCA_PREFIX2 MCA_N MCA_SUFFIX 
+  local tmpfile a1 a2
+
+  if ($# > 0)  
+    MCA_PREFIX = "$1"
+  else 
+    MCA_PREFIX = getval("MCA File Prefix",MCA_PREFIX)
+
+  MCA_SUFFIX = ".mca"
+
+  if ($# > 1) 
+    MCA_N = $2
+  else
+    MCA_N = 0
+
+  if (MCA_PREFIX == "0")    MCA_PREFIX=""
+  if (MCA_PREFIX == "null") MCA_PREFIX="/dev/null"
+  if (MCA_PREFIX == "tty")  MCA_PREFIX="/dev/tty"
+
+  if ((MCA_PREFIX != "") && (MCA_PREFIX != "/dev/null") && \
+    (MCA_PREFIX != "/dev/tty") ) {
+
+    if (!index(MCA_PREFIX, "/") && !unix(sprintf("test -d %s",DATA_DIR)))\
+      MCA_PREFIX = sprintf("%s/%s",DATA_DIR,MCA_PREFIX)
+    
+    if ($# < 2) {
+      tmpfile = sprintf("/tmp/mcatmp_%s_%s",SPEC,USER)
+      unix(sprintf("/bin/ls -r %s*%s 2>/dev/null > %s",MCA_PREFIX,\
+				MCA_SUFFIX,tmpfile))
+      if ((line=getline(tmpfile))!=-1) {
+        sscanf(line,sprintf("%s%%d%s",MCA_PREFIX,MCA_SUFFIX),MCA_N)
+        getline(tmpfile,"close") 
+      }  
+      unix(sprintf("/bin/rm -f %s",tmpfile))  
+
+      MCA_N = getval("Last run number",MCA_N)
+    }
+  }
+
+  MCA_PREFIX1 = MCA_PREFIX "_#r3"
+  MCA_PREFIX2 = MCA_PREFIX "_#n3_#p3"
+
+  a1 = mca_filename(MCA_PREFIX1,MCA_N+1,MCA_SUFFIX)
+  a2 = mca_filename(MCA_PREFIX2,MCA_N+1,MCA_SUFFIX)
+  if (a1!="" || a2!="") {
+    printf("Using prefix \"%s\". Next run number is %d. Next scan is %d\n\n",\
+                                MCA_PREFIX,MCA_N+1,SCAN_N+1)
+    printf("-> single acquisition to files of type: \"%s\"\n",a1)
+    printf("-> scans to files of type: \"%s\"\n",a2)
+  } else {
+    printf("Not a valid MCA prefix\n")
+  }
+}'
+
+#%IU% (prefix, number, suffix)
+#%MDESC% Returns MCA private file name.
+def mca_filename (prefix, number, suffix) '{
+  local ch dig fname fmt ix
+
+  if ((MCA_PREFIX=="/dev/null") || (MCA_PREFIX=="/dev/tty")) return MCA_PREFIX
+  if ((MCA_PREFIX == "") || (MCA_PREFIX == "0")) return 0
+
+  fname = prefix suffix
+
+  if (index(fname,"#") == 0) {
+    fname = sprintf("%s%04d%s", prefix, number, suffix)
+    return (fname)
+  }
+
+  while (ix = index(fname,"#")) {
+    sscanf(fname,"%*[^#]#%1s%d",ch,dig)
+    if (dig == 0) 
+      fmt = substr (fname,1,ix-1) "%03d" substr (fname,ix+2)
+    else  
+      fmt = substr (fname,1,ix-1) sprintf("%%0%dd",dig) substr (fname,ix+3)
+
+    if (ch == "p")
+      fname = sprintf(fmt,NPTS)
+    else if (ch == "n")
+      fname = sprintf(fmt,SCAN_N)
+    else if (ch == "r")
+      fname = sprintf(fmt,number)
+    else 
+      fname = substr (fname,1,ix-1) substr (fname,ix+1)
+  }    
+
+  return (fname)
+}'
+
+
+#%IU%
+#%MDESC% Returns true when the saveload package macros are loaded.
+def MCA_SL '((whatis("savemcadata")&2)&&(whatis("savemcadata")>>16>3))'
+
+#%IU% [string]
+#%MDESC% Checks if saveload macro package is loaded.
+
+def mca_sl_test '{
+
+if (!(MCA_SL)) {
+  printf("MCA: Macros set \"saveload.mac\" not loaded.\n")
+  print "     (..Typing \"jdo savelaod.mac\" may help..)"
+
+  if ($#) {
+    printf("     For now, cannot execute %s\n","$*")
+    exit
+  }     
+}
+}'  
+
+#%UI% ()
+#%MDESC% Applies data reduction on data in SPEC memory. 
+#%BR% The reduction consists of:
+#%UL%
+#%LI% averaging counts every "factor" points.
+#%LI% multiplying by "factor" each integer average to get an integrated value.
+#%XUL%
+def mca_data_red () '{
+  MCA_DATARED[][1] = MCA_REDUCTION*array_op("contract",MCA_DATA[][1],MCA_REDUCTION)
+}'
+ 
+ 
+#%UU% [roi|min] [max] [-silent]
+#%MDESC% Saves acquired data to disk file.
+#%BR% If a range is specified, the data are saved within that range, otherwise the whole spectrum is dumped to the file. The file is either the standard scanfile or a private MCA file, depending on "mcasetup" entries. %BR%
+# If standard scanfile is used, each spectrum originated from out of a scan (ct or mcaacq) is nevertheless referenced to a "scan number". (SCAN_N is incremented).%BR%
+# If a private file is used, it must have been set a prefix using "mcanewfile" command. Then each spectrum is saved to a different file. The file name extensions gives the information on its origin. see%B% mcanewfile%B%.
+#%BR% The file syntax is standard and MCA mixed. MCA syntax is described below:
+#%BR% Each MCA related line holds the character "@".
+#%DL% MCA file syntax:
+#%DT% #@MCA %%16C 
+#%DD% Format string passed to data_dump() function. This format string is held by the global variable "MCA_FMT" and can then been adapted to particular needs. "%%16C" is the default. It dumps data on 1 line, cut every 16 points:
+#%PRE%
+#@A 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\
+# 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\
+# 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0\
+# 0 0 0 0 0 0 0 0 0 0 0 ...
+#%PRE% 
+# "%%16" would do the same without any backslash, "1" would dump 1 point per line, ...
+#%DT% #@CHANN 1024 0 1023 1 
+#%DD% number of data points, first MCA channel, last one, reduction factor.
+#%DT% #@CTIME 1 17 17 
+#%DD% Time preset, MCA elapsed live time, MCA elapsed real time.
+#%DT% #@CALIB  0 1 0
+#%DD% Calibration parameters as "a b c", in "E = a + b*ch + c*ch^2".
+#%DT% @A 0 0 0....
+#%DD% MCA data. Each value is the content of one channel, or an integrated value over several channels if a reduction was applied. 
+#%XDL%
+# Data reduction is useful in some cases to minimize file sizes, which might grow very fast and eventually fill up the disk.
+#%BR% It consists of:
+#%UL%
+#%LI% averaging counts every "factor" points.
+#%LI% multiplying by "factor" each integer average to get an integrated value.
+#%XUL%
+#When "-silent" the macro does not ask for a user comment.
+def mcasave '
+mca_sl_test "$0"  
+{
+
+  local file cmin cmax 
+  local reduc rnpts first k
+
+  _cols = 0
+  if (MCA_FLAG&4) {
+    file = mca_filename (MCA_PREFIX1,MCA_N+1,MCA_SUFFIX)
+  } else {
+    file = DATAFILE
+  }
+
+  FPRNT = ""
+  HEADING = "$0 $*"
+  DATE = date()
+
+  if ($2) {
+    if (MCA_ENERGY) {   
+      cmin = mca_calcch($1)
+      cmax = mca_calcch($2)
+    } else { cmin=$1; cmax=$2 }
+  } else {
+     mca_getroi $1 0 cmin cmax
+  } 
+  mca_resize_to_last_read cmin cmax
+
+  if (cmin<=cmax)  { 
+    if (MCA_REDUCTION>1) {
+      reduc = MCA_REDUCTION
+      if (MCA_FRED[0]>1) {
+        printf("MCA: Those data were already reduced by a factor of %g\n",                       MCA_FRED[0])
+        if (yesno(sprintf("     Do you want to apply factor %g again",                                           MCA_REDUCTION),0)) {
+          reduc *= MCA_FRED[0]
+          mca_data_red()
+        } else reduc = MCA_FRED[0]
+        rnpts = int((cmax-cmin  )/reduc) + 1
+      } else {
+        rnpts = int((cmax-cmin+1)/reduc)
+        mca_data_red()
+      }
+    } else {
+      reduc = (MCA_FRED[0]>1)?MCA_FRED[0]:1
+      rnpts = int((cmax-cmin  )/reduc) + 1
+    }
+    
+    if (rnpts>0) {
+      if (MCA_FLAG&4) {
+        if (mca_fileheader(file)<0) exit
+        MCA_N += savestdheader( file, 3, 0)      # 3 means save motor pos.
+      } else {
+        SCAN_N = savestdheader( file, 3, SCAN_N)
+        if (SCAN_N<0) {
+          SCAN_N=-SCAN_N
+          exit
+        }
+      }
+      savemcaheader(file,MCA_FMT,rnpts,cmin,cmax,reduc,COUNT_TIME,MCA_LIVE_T,MCA_REAL_T)
+      mca_tops
+      savemcacalib(file,PS_EA,PS_EB,PS_EC)
+
+      for (k=0 ; k<=MCA_ROI_NO ; k++) {
+        if ((MCA_ROI_COUNTER[k]!="0") && (-1!=cnt_num(MCA_ROI_COUNTER[k]))) {
+          savemcaroi(file, MCA_ROI_CH_MIN[k],MCA_ROI_CH_MAX[k],cnt_name(cnt_num(MCA_ROI_COUNTER[k])))
+        }
+      }
+      savecntheader(file)
+
+      if (!index("$*","-silent")) {
+        local comment
+        comment = getval ("Comment","")
+        if (comment!="") fprintf(file,"#@C %s.  \n", comment)
+      }
+
+      savecounters(file)
+
+      if (MCA_REDUCTION>1) {
+        first = mca_getoffset( MCA_DATARED, 0, cmin)
+        savemcadata (file,MCA_DATARED[first:first+rnpts-1][1],rnpts, MCA_FMT)
+      } else {
+        first = mca_getoffset( MCA_DATA, 0, cmin)
+        savemcadata (file,MCA_DATA[first:first+rnpts-1][1],rnpts, MCA_FMT)
+      }
+
+      printf("MCA: %d datapoints written to file %s\n",rnpts,file)
+      if (MCA_FLAG&4) {
+        close(file)
+        printf("     spectrum number %d\n",MCA_N)
+      } else printf("     scan number %d\n",SCAN_N)
+      
+    } else {
+      printf("MCA ERROR: 0 datapoints saved. Binning too large.\n")
+      if (MCA_FLAG&4) printf("     spectrum number %d\n",MCA_N)
+      else printf("     scan number %d\n",SCAN_N)
+    }
+  } else {
+    printf("MCA ERROR: 0 datapoints saved. Wrong data range\n")
+    if (MCA_FLAG&4) printf("     spectrum number %d\n",MCA_N)
+    else printf("     scan number %d\n",SCAN_N)
+  }
+}'
+
+
+#%UU%  <file> <scan_no> [scanpt_no] [0|1] 
+#%MDESC% Loads spectrum from a file.
+#%BR%The loaded spectrum is stored into WS memory as if it would have just been acquired. 
+#If file is a standard scan file, spectra are referrenced to by their "scan" number, and eventually their "scan_point" number. 
+#Both numbers must be 0 when loading data from private MCA files. 4th argument to 1 means that the calibration parameters are to be loaded from the file as well. In that case any other current calibration is overwritten. 
+#To avoid it, "mcasave" it with the current spectrum, before "mcaload"ing. %BR%
+#Reduced data channel numbering starts from the first channel value (prior to reduction) added integer part of half the "factor", every next point incremented by "factor" .....
+
+def mcaload '
+
+mca_sl_test "$0"
+
+{
+  global MCA_SNO MCA_SPNO MCA_LOADF MCA_CALFF
+
+  global MCA_FRED MCA_old_channel
+  local calpar dsize doffset 
+  local ulong array tmpdata [16384][1]
+
+  if (!$#) {
+    MCA_LOADF = getval("file to load data from",MCA_LOADF)
+    MCA_SNO = getval("scan number",MCA_SNO?MCA_SNO:1)
+    MCA_SPNO = getval("scan point",MCA_SPNO?MCA_SPNO:1)
+    MCA_CALFF = yesno("load calibration parameters",MCA_CALFF)
+  } else {
+    MCA_LOADF = "$1"
+    MCA_SNO = $2?$2:1
+    MCA_SPNO = $3?$3:1
+    MCA_CALFF = $4
+  }
+
+  if (MCA_CALFF && !(MCA_PS)) {
+    printf("MCA: Energy mode not available. Macro set psearch.mac not loaded.\n")
+    MCA_CALFF = 0
+  }
+
+  loadmcadata \'"MCA_LOADF"\' tmpdata 0 MCA_SNO MCA_SPNO MCA_CALFF MCA_old_channel[0] MCA_old_channel[1] MCA_FRED[0] calpar
+
+  if (MCA_FRED[0]<1) MCA_FRED[0]=1
+  MCA_FRED[1]=MCA_SNO
+
+  dsize = int ((MCA_old_channel[1]+1)/MCA_FRED[0])
+  doffset = int (MCA_old_channel[0]/MCA_FRED[0])
+
+  if (dsize > MCA_MEMGRPSIZE) {
+    shared ulong array MCA_DATA [dsize][2]
+#    if (MCA_GRP) data_grp(MCA_GRP,dsize,2)
+  }
+  if ((dsize > MCA_MEMGRPSIZE)||(MCA_FRED[0] > 1)) {
+    ulong array MCA_DATARED [int(dsize/MCA_REDUCTION/MCA_FRED[0])][2]
+    array_op("fill",MCA_DATARED[][0],MCA_REDUCTION*MCA_FRED[0])
+    MCA_DATARED[][0]+=int( MCA_REDUCTION*MCA_FRED[0]/2 )
+  }
+
+  MCA_DATA[doffset:][1] = tmpdata
+  array_op ("fill", MCA_DATA[][0], MCA_FRED[0])
+  MCA_DATA[][0] +=int(MCA_FRED[0]/2)
+
+  MCA_IN_GROUP = 0
+
+  MCA_EA=MCA_EC=PS_WA=PS_WB=PS_WC=0
+  MCA_EB=1
+
+  if (MCA_CALFF) {
+    local calarr
+    split (calpar,calarr)
+    MCA_EA=calarr[0]
+    MCA_EB=calarr[1]
+    MCA_EC=calarr[2]
+  } else if (MCA_ENERGY) { 
+    MCA_ENERGY=0
+    MCA_PLOTERASE=1
+  }
+  printf ("      Now in %s mode\n",MCA_ENERGY? "ENERGY": "CHANNEL")
+  mca_roi_Ech
+}'
+
+#%IU% (ch_min,ch_max)
+#%MDESC% Save file header during scans. Hooked to "measure2".
+def mca_savescanhead (ch_min,ch_max) '{
+
+  local npts saveit file privfile
+
+  saveit   = (MCA_FLAG&1)
+  privfile = (MCA_FLAG&4)
+
+  if (!saveit) return(-1)
+
+  mca_resize_to_last_read ch_min ch_max
+  npts     = int( (ch_max-ch_min+1) / (MCA_REDUCTION>0?MCA_REDUCTION:1) )
+  if (npts<=0) return (-1)
+
+  if (privfile) {
+    file = mca_filename (MCA_PREFIX2,0,MCA_SUFFIX)
+    if (mca_fileheader(file)<0) return(-1)
+  } else file = DATAFILE
+
+#  if (privfile) MCA_N += savestdheader ( file, 3, 0)
+  if (privfile) savestdheader ( file, 3, 0)
+
+  if (privfile || !NPTS) {
+    savemcaheader(file,MCA_FMT,npts,ch_min,ch_max,MCA_REDUCTION,COUNT_TIME,MCA_LIVE_T,MCA_REAL_T)
+    mca_tops
+    savemcacalib(file,PS_EA,PS_EB,PS_EC)
+    for (j=0; j<=MCA_ROI_NO ;j++) {
+      if ((MCA_ROI_COUNTER[j]!="") &&                                                    (-1!=cnt_num(MCA_ROI_COUNTER[j]))) {
+        savemcaroi(file,MCA_ROI_CH_MIN[j],MCA_ROI_CH_MAX[j],cnt_name(cnt_num(MCA_ROI_COUNTER[j])))
+      }
+    }
+  }
+}'
+
+#printf("MCA file: ") 
+#print ccdfilename (MCA_PREFIX "_#n3",SCAN_N,"_*" MCA_SUFFIX) 
+
+#%IU% (ch_min,ch_max)
+#%MDESC% Save MCA data during scans. Hooked to "user_scan_loop".
+
+def mca_savescandata (ch_min,ch_max) '{
+
+  local npts first saveit file privfile
+
+  saveit   = (MCA_FLAG&1)
+  privfile = (MCA_FLAG&4)
+
+  if (!saveit) return(-1)
+
+  mca_resize_to_last_read ch_min ch_max
+  npts     = int( (ch_max-ch_min+1) / (MCA_REDUCTION>0?MCA_REDUCTION:1) )
+  if (npts<=0) return (-1)
+
+  if (privfile) file = mca_filename (MCA_PREFIX2,0,MCA_SUFFIX)
+  else          file = DATAFILE
+
+  if (MCA_REDUCTION>1) {
+    mca_data_red()
+    first = mca_getoffset( MCA_DATARED, 0, ch_min)
+    savemcadata (file, MCA_DATARED[first:first+npts-1][1],npts, MCA_FMT)
+  } else {
+    savemcadata (file, MCA_DATA[ch_min:ch_max][1],npts, MCA_FMT)
+  }
+
+  if (privfile) close(file)
+}'
+
+#%IU% (ch_min,ch_max)
+#%MDESC% Save header and data to file after a "ct". Hooked to "user_handlecounts".
+def mca_savectdata (ch_min,ch_max) '{
+
+  local npts first file privfile saveit
+
+  saveit   = (MCA_FLAG&2) 
+  privfile = (MCA_FLAG&4)
+
+  if (!saveit) return(-1)
+
+  mca_resize_to_last_read ch_min ch_max
+  npts     = int( (ch_max-ch_min+1) / (MCA_REDUCTION>0?MCA_REDUCTION:1) )
+
+  if (npts<=0) return (-1)
+
+  if (privfile) {
+    file = mca_filename(MCA_PREFIX1,MCA_N+1,MCA_SUFFIX)
+    if (mca_fileheader(file)<0) return(-1)
+  } else file = DATAFILE
+
+  HEADING = sprintf("ct %g",COUNT_TIME)
+  DATE = date()
+  if (privfile) {
+    MCA_N += savestdheader( file, 1, 0)
+  } else {
+    SCAN_N = savestdheader( file, 1, SCAN_N)
+    if (SCAN_N<0) {
+      SCAN_N=-SCAN_N
+      return(-1)
+    }
+  }
+
+  savemcaheader(file,MCA_FMT,npts,ch_min,ch_max,MCA_REDUCTION,COUNT_TIME,MCA_LIVE_T,MCA_REAL_T)
+  mca_tops
+  savemcacalib(file,PS_EA,PS_EB,PS_EC)
+  for (j=0; j<=MCA_ROI_NO ;j++) {
+    if ((MCA_ROI_COUNTER[j]!="") &&                                                    (-1!=cnt_num(MCA_ROI_COUNTER[j]))) {
+      savemcaroi(file,MCA_ROI_CH_MIN[j],MCA_ROI_CH_MAX[j],cnt_name(cnt_num(MCA_ROI_COUNTER[j])))
+    }
+  }
+  
+  FPRNT=""
+  savecntheader(file)
+  savecounters(file)
+
+  if (MCA_REDUCTION>1) {
+    mca_data_red()
+    first = mca_getoffset( MCA_DATARED, 0, ch_min)
+    savemcadata (file, MCA_DATARED[first:first+npts-1][1],npts, MCA_FMT)
+  } else {
+    savemcadata (file, MCA_DATA[ch_min:ch_max][1],npts, MCA_FMT)
+  }
+
+  printf("MCA: %d datapoints written to file %s\n",npts,file)
+  if (privfile) printf("     spectrum number %d\n",MCA_N)
+  else printf("     scan number %d\n",SCAN_N)
+
+  if (privfile) close(file)
+}'
+
+#%IU% (ch_min, ch_max, headline)
+#%MDESC% Save header and data to file after a "mcaacq". Called from "mcaacq".
+
+def mca_saveacqdata (ch_min, ch_max, headline) '{
+
+  local npts first file privfile
+
+  privfile = (MCA_FLAG&4)
+
+  mca_resize_to_last_read ch_min ch_max
+  npts     = int( (ch_max-ch_min+1) / (MCA_REDUCTION>0?MCA_REDUCTION:1) )
+  if (npts<=0) return (-1)
+
+  if (privfile) {
+    file = mca_filename(MCA_PREFIX1,MCA_N+1,MCA_SUFFIX)
+    if (mca_fileheader(file)<0) return(-1)
+  } else file = DATAFILE
+
+  if (length(headline)) HEADING = headline
+  DATE = date()
+  if (privfile) {
+    MCA_N += savestdheader( file, 3, 0)
+  } else {
+    SCAN_N = savestdheader( file, 3, SCAN_N)
+    if (SCAN_N<0) {
+      SCAN_N=-SCAN_N
+      return(-1)
+    }
+  }
+
+  savemcaheader(file,MCA_FMT,npts,ch_min,ch_max,MCA_REDUCTION,COUNT_TIME,MCA_LIVE_T,MCA_REAL_T)
+  mca_tops
+  savemcacalib(file,PS_EA,PS_EB,PS_EC)
+
+  if (MCA_REDUCTION>1) {
+    mca_data_red()
+    first = mca_getoffset( MCA_DATARED, 0, ch_min)
+    savemcadata (file, MCA_DATARED[first:first+npts-1][1],npts, MCA_FMT)
+  } else {
+    savemcadata (file, MCA_DATA[ch_min:ch_max][1],npts, MCA_FMT)
+  }
+
+  printf("MCA: %d datapoints written to file %s\n",npts,file)
+  if (privfile) printf("     spectrum number %d\n",MCA_N)
+  else printf("     scan number %d\n",SCAN_N)
+
+  if (privfile) close(file)
+}'
+
+
+
+
+
+#=========================================================== ENERGY CALIBRATION
+
+#%IU% <array1> <col1> <array2> <col2>
+#%MDESC% Same as ps_chtoE from psearch.mac package. i.e., converts all the channels in array1[][col1] to energies and puts these values into destination array2[][col2]. The calibration function  E=a+b ch + c ch^2 is used.
+
+def mca_chtoE '{
+  mca_tops
+  ps_chtoE ($1[][$2],$3[][$4])
+  MCA_IN_GROUP = 0
+}'
+
+#%IU%
+#%MDESC% Reads in parameters from shared memory (GUI).
+def mca_tops '
+  if (MCA_EB==0) MCA_EB=1
+  PS_EA = MCA_EA ; PS_EB = MCA_EB ; PS_EC = MCA_EC
+'
+
+
+#%IU%
+#%MDESC% calibration parameter A.(Shared memory)
+def MCA_EA 'MCA_DATA_PARAM[0]'
+#%IU%
+#%MDESC% calibration parameter B.(Shared memory)
+def MCA_EB 'MCA_DATA_PARAM[1]'
+#%IU%
+#%MDESC% calibration parameter C.(Shared memory)
+def MCA_EC 'MCA_DATA_PARAM[2]'
+
+#%IU% <mode> <energy> <channel>
+#%MDESC% Converts calibrated value into channels (mode 1) or reverse (mode 0)
+#and returns the result.
+def mca_Ech '{
+
+  if ($1) { 
+    $3 = mca_calcch($2)
+  } else { 
+    $2 = mca_calcE ($3)
+  }
+}'
+
+
+#%IU% 
+#%MDESC% Calculated the channel from the given Energy
+def mca_calcE (x) '{
+  mca_tops
+  return ps_calcE (x)
+}'
+
+#%IU% 
+#%MDESC% Calculated the channel from the given Energy
+def mca_calcch (en) '{
+  mca_tops
+  return ps_calcch (en)
+}'
+  
+
+#%UU% 
+#%MDESC% Shows calibration fit parameters or inputs new parameters. 
+def mcapar '
+mca_ps_test "$0"
+{
+   mca_tops
+   ps_parinput
+   mca_fromps
+   mca_roi_Ech
+   MCA_IN_GROUP = 0
+}'
+  
+
+#%IU%
+#%MDESC% Writes out parameters to shared memory (GUI).
+def mca_fromps '
+   if (PS_EB==0) PS_EB=1
+   MCA_EA = PS_EA ; MCA_EB = PS_EB ; MCA_EC = PS_EC ; 
+'
+
+
+#%UU%
+#%MDESC% Toggles between channel (uncalib) and calibrated mode.
+def mcaE '{
+global MCA_ENERGY
+
+MCA_ENERGY=!MCA_ENERGY
+
+if (MCA_ENERGY && !(MCA_PS)) {
+  printf("MCA: Energy mode not available.                                              \n     Macro set \"psearch.mac\" not loaded. \n")
+  MCA_ENERGY = 0
+} else {
+  MCA_PLOTERASE=1
+  MCA_IN_GROUP =0
+  printf ("MCA: Now in %s mode\n",MCA_ENERGY? "ENERGY": "CHANNEL")
+  if (MCA_ENERGY) {	
+    MCA_CP_XLBL=getval("X Label",(MCA_CP_XLBL!="")?MCA_CP_XLBL:"Energy")
+    MCA_CP_XUNT=getval("X Units",(MCA_CP_XUNT!="")?MCA_CP_XUNT:"KeV")
+  }
+}
+}'
+
+
+#%IU% 
+#%MDESC% Returns non 0 value if psearch macro package is loaded.
+def MCA_PS 'whatis("ps_dump")&2'
+
+#%IU% [string]
+#%MDESC% Check if psearch macro package is loaded.
+
+def mca_ps_test '{
+
+if (!(MCA_PS)) {
+  printf("MCA: Macros set \"psearch.mac\" not loaded.  \n")
+  print "      (..Typing \"jdo psearch.mac\" may help..)"
+
+  if ($#) {
+    printf("     For now, cannot execute %s\n","$*")
+    exit
+  }     
+}
+}'  
+
+#%UU%  
+#%MDESC% Computer aided energy calibration of the MCA. 
+def mcacal '
+mca_ps_test "$0"
+{
+   mca_tops
+   ps_calib(MCA_DATA[][1],0,MCA_MEMGRPSIZE)
+   mca_fromps
+   mca_roi_Ech
+   MCA_IN_GROUP=0
+}'
+
+#%UU%
+#%MDESC% Manual calibration of the MCA.
+def mcacalm '
+mca_ps_test "$0"
+{
+  global PS_NOPEAKS 
+  array PS_PEAKS[200][7]
+  local ii
+
+  PS_NOPEAKS = getval("Enter number of peaks",PS_NOPEAKS)
+  for (ii=0;ii<PS_NOPEAKS;ii++) {
+    PS_PEAKS[ii][1] = getval(sprintf("Peak pos. in ch for peak %d",ii+1),                                            PS_PEAKS[ii][1])
+    PS_PEAKS[ii][0] = ii+1
+  }
+  mca_tops
+  ps_dump
+  ps_calibration
+  mca_fromps
+  mca_roi_Ech
+  MCA_IN_GROUP = 0
+}'
+
+
+#%UU% 
+#%MDESC% Peak search on the current spectrum.
+def mcapeak '
+mca_ps_test "$0"
+{
+   mca_tops
+   pssearch (MCA_DATA[][1],0,MCA_MEMGRPSIZE)
+}'
+
+#%UU%  
+#%MDESC% Shows peaks found.
+def mcashow '
+mca_ps_test "$0"
+{
+   mca_tops
+   ps_show
+}'
+
+
+#==================================================================== PLOT
+
+#---------------------------------------------------------------- CPLOT
+
+#%UU%  [first|roi] [last]
+#%MDESC% A screen plot of the current MCA data in cplot format.
+#Part of the plot parameters are taken from "mcasetup", rest from "cpsetup" settings.
+def mcacplot '
+if (0==(whatis("cpsetup")&2)) {
+  print "MCA: Macros set \"cplot.mac\" not loaded."
+  print "     (..Typing \"jdo cplot.mac\" may help..)"
+  print "     For now, cannot execute $0"
+  exit
+}
+ 
+cp_setx11   
+mca_cplot $*
+'
+
+#%UU%  [first|roi] [last]
+#%MDESC% A printer plot of the current MCA data in cplot format.
+# That follows the same rules as "mcacplot" macro.
+def mcapplot '
+if (0==(whatis("cpsetup")&2)) {
+  print "MCA: Macros set \"cplot.mac\" not loaded."
+  print "     (..Typing \"jdo cplot.mac\" may help..)"
+  print "     For now, cannot execute $0"
+  exit
+}
+cp_setprinter
+mca_cplot $*
+'
+
+#%IU%
+#%MDESC% Decides between data in memory or in files for cplot.
+def mca_cplot '{
+  if (MCA_CP["FROMF"]) {
+    mca_fplot $*
+  } else {
+    mca_mplot $*
+  }
+}'
+
+
+#%UI% [first|roi] [last]
+#%MDESC% Arranges cplot parameters for MCA private needs and calls cplot program. 
+#Recover previous cpsetup settings when finished.
+
+def mca_mplot '{
+
+  local oldpar 
+
+  for (i in CP_PAR)   oldpar[i]=CP_PAR[i]
+
+  if ((CP_PAR["GLOBTITLE"] = getval ("Global title",MCA_CP["GLOBTITLE"]))!="")\
+       CP_PAR["FLAGS"] |= 0x20000
+  else CP_PAR["FLAGS"] &= ~0x20000
+
+  CP_PAR["PTITLE"] = getval ("Title",MCA_CP["PTITLE"])
+
+  if ((CP_PAR["COMMENT"] = getval ("Comment",MCA_CP["COMMENT"]))!="") \
+       CP_PAR["FLAGS"] |= 0x80000
+  else CP_PAR["FLAGS"] &= ~0x80000
+
+#  CP_PAR["LINES"]=CP_PAR["COLS"]=1			# 1 per page
+
+  CP_PAR["FLAGS"] &= ~0x10				# landscape
+
+  if (!MCA_LOG) CP_PAR["FLAGS"] &= ~0x1000		# y dec
+  else CP_PAR["FLAGS"] |= 0x1000			# y log
+
+  if (!MCA_LINES) {
+    CP_PAR["FLAGS"] &= ~1				# no lines
+    CP_PAR["FLAGS"] |= 2				# points
+    if (!MCA_DOTS) CP_PAR["PSIZE"]=1			# small ones
+  } else {
+    CP_PAR["FLAGS"] |= 1				# lines
+    if (!MCA_DOTS) CP_PAR["FLAGS"] &= ~2		# no points	
+    else CP_PAR["FLAGS"] |= 2				# points
+  }
+
+  if (MCA_ENERGY) {
+    CP_PAR["PXLABEL"]=MCA_CP_XLBL			# X labelling
+    CP_PAR["PXUNITS"]=MCA_CP_XUNT
+  } else {
+    CP_PAR["PXLABEL"]="Channel "
+    CP_PAR["PXUNITS"]=""  
+  }  
+  CP_PAR["PYLABEL"]="Intensity"  			# Y labelling
+  CP_PAR["PYUNITS"]="Counts"
+
+  if ($#) {
+    local roi y _xmin _xmax _ymin _ymax
+    
+    roi = (($#==1)||($#==3))
+    y = (($#==3)||($#==4))
+    _ymin = _ymax = MCA_AUTO
+    if (roi) {
+      mca_getroi $1 MCA_ENERGY _xmin _xmax
+      if (y) { _ymin = $2 ; _ymax = $3 }
+    } else {
+      _xmin=$1;_xmax=$2
+      if (y) { _ymin = $3 ; _ymax = $4 }
+    } 
+
+    CP_PAR["FLAGS"] &= ~0xc
+    CP_PAR["MINX"]=_xmin ; CP_PAR["MAXX"]=_xmax ; 
+    CP_PAR["MINY"]=_ymin ; CP_PAR["MAXY"]=_ymax ;
+
+  } else if ((MCA_XMIN||MCA_XMAX) && (MCA_YMIN||MCA_YMAX)) {
+
+    CP_PAR["MINX"]=MCA_XMIN ; CP_PAR["MAXX"]=MCA_XMAX ; 
+    CP_PAR["MINY"]=MCA_YMIN ; CP_PAR["MAXY"]=MCA_YMAX ;
+
+    CP_PAR["FLAGS"] &= ~0xc
+
+  } else {
+    CP_PAR["FLAGS"] |= 12  
+  }
+
+  if (MCA_AUTO==CP_PAR["MINX"]) CP_PAR["FLAGS"] |= 4
+  if (MCA_AUTO==CP_PAR["MAXX"]) CP_PAR["FLAGS"] |= 4 
+  if (MCA_AUTO==CP_PAR["MINY"]) CP_PAR["FLAGS"] |= 8
+  if (MCA_AUTO==CP_PAR["MAXY"]) CP_PAR["FLAGS"] |= 8 
+  
+#########################################################
+
+#  if (!MCA_IN_GROUP) { mca_sharedarray_to_group }
+  cp_mplot MCA_DATA 0 1 
+
+  for (i in CP_PAR) CP_PAR[i]=oldpar[i]
+}'
+
+
+#%IU%
+#%MDESC% not implemented yet. foreseen for c-plotting MCA data from a file.
+def mca_fplot '{
+#$*
+}'
+
+
+
+#---------------------------------------------------------------- SCREEN PLOT
+#%UU%
+#%MDESC% Turns MCA Graphical Interface on.
+def mcaguion '{
+  global MCA_GUI
+  MCA_GUI=1
+  mca_guirun
+}'
+
+#%UU% 
+#%MDESC% Turns MCA Graphical Interface off.
+def mcaguioff '{
+
+local file pid
+file = sprintf("/tmp/mcagui_%s_%s.pid",SPEC,USER)
+
+if (MCA_PID) unix(sprintf("kill -9 %d 2>/dev/null",MCA_PID)) 
+if (!unix(sprintf("test -r %s", file))) {
+  pid = getline(file)
+  getline(file,"close")  
+  if (pid!=MCA_PID) unix(sprintf("kill -9 %d 2>/dev/null",pid))
+  unix(sprintf("/bin/rm -f %s",file))
+}
+MCA_GUI=0
+MCA_PID=0
+}'
+
+#%IU%
+#%MDESC% Checks wether the GUI is running, otherwise starts it.
+def mca_guirun '{
+  global MCA_PID
+
+  if (!MCA_PID || unix(sprintf("kill -0 %d 2>/dev/null",MCA_PID))) {
+    MCA_PID =  mca_guistart()
+  }
+}'
+
+#%IU% ()
+#%MDESC% Starts the Graphical Interface and returns its PID number.
+def mca_guistart () '{
+  local pid file guicmd
+
+  file = sprintf("/tmp/mcagui_%s_%s.pid",SPEC,USER)
+  if (ostype() == "linux"){
+    #guicmd = sprintf("newplot -s %s --shm=MCA_DATA -display %s",SPEC, DISPLAY)
+    guicmd = sprintf("PyMca --spec=%s --shm=MCA_DATA",SPEC)
+  }else{
+    guicmd = sprintf("mcatcl -ver %s -shm MCA_DATA -display %s",SPEC, DISPLAY)
+  }
+  if (!unix(sprintf("test -r %s", file))) {
+    pid = getline(file)
+    getline(file,"close")  
+    if (pid && !unix(sprintf("kill -0 %d 2>/dev/null",pid))) {
+      return(pid)
+    }
+  }
+  unix(sprintf("/bin/rm -f %s",file))
+  unix(sprintf("%s >/dev/null 2>&1 & echo \$! > %s",guicmd,file))
+  pid = getline(file)
+  getline(file,"close")  
+  return (pid)
+}'
+
+
+#%IU% 
+#%MDESC% Just an indirection for mca_plot1 for the sake of the GUI.
+def mca_plotit '{
+
+if (MCA_GUI) {
+  mca_guirun
+} else {
+#  if (!MCA_IN_GROUP) { mca_sharedarray_to_group } 
+  mca_plot1 (MCA_DATA, 0, 1, $1, $2, $3, $4)
+}
+}'
+
+#%IU% (group,xelem,yelem,xmin,xmax,ymin,ymax)
+#%MDESC% MCA running plot.
+
+def mca_plot1 (group,xelem,yelem,xmin,xmax,ymin,ymax) '{
+
+plot_cntl("filter2")
+
+if (PLOT_MODE&128) {
+  plot_cntl(sprintf("colors=%s",splot_col))
+  plot_cntl("open")
+  plot_cntl(MCA_PLOTATTR)
+}
+
+if (MCA_PLOTERASE) {
+  plot_cntl("erase")
+  plot_move(0,1,sprintf("MCA ACQ SPECTRUM %s",MCA_FLAG?(MCA_FRED[0]?MCA_FRED[1]:(MCA_FLAG&4?MCA_N:SCAN_N)):""))
+  plot_move(0,2,"Counts")
+  if (MCA_ENERGY) plot_move(0,-1,sprintf("%.8s", MCA_CP_XLBL)) 
+  else plot_move(0,-1,sprintf("%.8s", "Channels")) 
+  MCA_PLOTERASE=0
+}
+
+plot_range(xmin,xmax,ymin,ymax)
+
+{
+  local n1 nn res1 res2
+
+#  _pl_arg group xelem yelem
+  
+  pl_a="MCA_DATA"
+  pl_x=xelem
+  pl_y=yelem
+
+  plot_cntl("mca") 
+  array_plot(MCA_DATA[][0], MCA_DATA[][1])
+
+  n1 = mca_getoffset( MCA_DATA, xelem, xmin)
+  nn = mca_getnpts  ( MCA_DATA, xelem, xmin, xmax)
+
+  if (nn>1) {
+    res1 = sprintf("Peak at %.5g is %.5g.  COM at %.5g.   ",                            MCA_DATA[array_op("row_at_max",MCA_DATA[n1:nn+n1-1][1])][xelem],                  array_op("max",MCA_DATA[n1:nn+n1-1][1]),                                      array_op("com",MCA_DATA[n1:nn-1+n1][xelem],MCA_DATA[n1:nn-1+n1][1]))
+    res2 = sprintf("FWHM is %.5g at %.5g.  Total counts are %g",                      array_op("fwhm",MCA_DATA[n1:nn-1+n1][xelem],MCA_DATA[n1:nn-1+n1][1]),            array_op("cfwhm",MCA_DATA[n1:nn-1+n1][xelem],MCA_DATA[n1:nn-1+n1][1]),            array_op("sum",MCA_DATA[n1:n1+nn-1][1]))
+  }
+
+  plot_move(-50,0,res1)
+  plot_move(-50,1,res2)
+}
+
+plot_cntl("filter1")
+}'
+  
+#%UU%  [xmin] [xmax] [ymin] [ymax]
+#%MDESC% Plots the current MCA data spectrum. Does nothing when using GUI.
+#%DL% Detail of usage:
+#%DT%  mcasplot first last [ymin ymax]
+#%DD%  plots acquired spectrum between the limits specified.
+#	Eventually, "ymin" and "ymax" are Y limits values so that you may 
+#	Y-rescale your plot.
+#%DT%  mcasplot roino [ymin ymax]
+#%DD%  plots acquired spectrum within ROI specified.
+#%DT%  mcasplot
+#%DD%  plots the whole acquired spectrum
+#%XDL%
+def mcasplot '{
+
+global MCA_XMIN MCA_XMAX MCA_YMIN MCA_YMAX
+
+  local _xmin _xmax _ymin _ymax roi y 
+
+  MCA_PLOTERASE=1
+  
+  roi = (($#==0)||($#==1)||($#==3))
+  y = (($#==3)||($#==4))
+  _ymin = _ymax = MCA_AUTO
+  if (roi) {
+    mca_getroi $1 MCA_ENERGY _xmin _xmax
+    if (y) { _ymin = $2 ; _ymax = $3 }
+  } else {
+    _xmin=$1;_xmax=$2
+    if (y) { _ymin = $3 ; _ymax = $4 }
+  } 
+
+  MCA_XMIN=_xmin ; MCA_XMAX=_xmax ; MCA_YMIN=_ymin ; MCA_YMAX=_ymax ;
+
+  mca_plotit _xmin _xmax _ymin _ymax
+}'
+
+
+#=============================================================== MISCELLANEOUS 
+
+#%IU% <roi> <channel_min> <channel_max>
+#%MDESC% Resises specified range to the specified roi. (in channels)
+def mca_resize_to_roi '
+  $2=($2<MCA_ROI_CH_MIN[$1])?MCA_ROI_CH_MIN[$1]:$2
+  $3=($3>MCA_ROI_CH_MAX[$1])?MCA_ROI_CH_MAX[$1]:$3
+'
+
+#%IU% <channel_min> <channel_max>
+#%MDESC% Resises specified range to the last read spectrum range. (in channels)
+def mca_resize_to_last_read '
+  $1=($1<MCA_old_channel[0])?MCA_old_channel[0]:$1
+  $2=($2>MCA_old_channel[1])?MCA_old_channel[1]:$2
+'
+
+#%IU% 
+#%MDESC% Transfers data spectrum held in the shared memory into SPEC data group.
+def mca_sharedarray_to_group '{
+  global MCA_IN_GROUP MCA_CALIBRATED
+  data_read(MCA_DATA,MCA_GRP,0,0)
+  if (MCA_ENERGY) {
+    float array MCA_CALIBRATED [MCA_MEMGRPSIZE][1]
+    mca_chtoE MCA_DATA 0 MCA_CALIBRATED 0
+    data_read(MCA_CALIBRATED,MCA_GRP,0,0)
+  } 
+  MCA_IN_GROUP = 1
+}'
+
+
+#%IU% (seconds)
+#%MDESC% loops printing dots for the specified time (sec.).
+def mca_msgw (seconds)'{
+local tps
+for (tps=time();time()<tps+seconds;) {
+  sleep(seconds/10);
+  printf(".")
+}
+}'
+
+
+#%IU% (name,column,xmin) 
+#%MDESC% Returns array row number of first "xmin" value occurence in the specified array column.
+def mca_getoffset (name,column,xmin) '{
+
+  local offset fch 
+
+  if (column==2) {
+    fch = mca_calcch(xmin)
+  } else fch=xmin
+
+  offset = array_op("i_<=_value",name[][column],xmin)
+  offset -= ((offset*MCA_FRED[0]-fch>0)?1:0)
+
+  return(offset)
+}'
+
+#%IU% (name,column,xmin,xmax) 
+#%MDESC% Returns number of points between first occurences of "xmin" and "xmax" in the specified array column.
+def mca_getnpts (name,column,xmin,xmax) '{
+
+  local npt 
+
+  npt = array_op("i_<=_value",name[][column],xmax) -                                  mca_getoffset(name,column,xmin) + 1
+
+  if (npt<0) npt=0
+
+  return(npt)
+}'
+
+#%IU%
+#%MDESC% Macro which is run once at mca.mac file loading to prepare things up.
+def mca_const_utils_and_rdef '{
+
+#======================================================================= CONST
+
+global DEVRUN DEVON DEVFAULT MCA_DEVSTATE
+global MCA_ROI_DEFAULT_FILE MCA_AUTO MCA_FMT 
+
+DEVRUN=14; DEVON=2; DEVFAULT=23
+MCA_DEVSTATE[-1] = "none configured"
+MCA_DEVSTATE[0] = "disconnected"
+MCA_DEVSTATE[-2] = "simulation (idle)"
+MCA_DEVSTATE[-14] = "simulation (acquiring)"
+MCA_DEVSTATE[2] = "idle"
+MCA_DEVSTATE[14] = "acquiring"
+MCA_DEVSTATE[23] = "FAULT"
+MCA_DEVOK=0
+
+MCA_AUTO = "auto"
+if (MCA_FMT=="") MCA_FMT = "%16C"
+MCA_ROI_DEFAULT_FILE = sprintf("%s/%s/userfiles/mcaroi.def.%s",SPECD,SPEC,USER) 
+
+PLOT_MODE|=128
+GTERM="x11"
+
+if (!(MCA_PS)) {
+   rdef ps_chtoE () \'{ }\'
+}
+if (!(whatis("mca_user_waitcounts")&2)) {
+  rdef mca_user_waitcounts \'\'
+  rdef mca_user_start \'\'
+}
+if (!(whatis("mca_user_key")&2)) {
+  rdef mca_user_key \'\'
+}
+
+#if (whatis("MCA_LIVE_T")&2) { undef MCA_LIVE_T }
+#if (whatis("MCA_REAL_T")&2) { undef MCA_REAL_T }
+#if (whatis("MCA_DEAD_T")&2) { undef MCA_DEAD_T }
+
+}'
+mca_const_utils_and_rdef
+
+#%MACROS%
+#%IMACROS%
+#%INTERNALS%
+#%B%MCA macro user hook: %BR%%B%
+#Users can hook their own macro to those macros, using "cdef()".
+#%DL% 
+#%DT% mca_user_waitcounts
+#%DD% called when looping in "mca_waitcounts", i.e. "mcaacq".
+#%DT% mca_user_start
+#%DD% called at the end of "mcastart", i.e. just after device startup.
+#%DT% mca_user_key
+#%DD% called from "mcaacq", while waiting for the acquisition is over, and after keyboard input ("mca_key").
+#%XDL% 
+#%DEPENDENCIES%
+#%UL% those macros use: 
+#%LI% the binary %B%psearch%B%, that must be in PATH
+#%LI% the macros:
+#%UL%
+#%LI% 		%B%psearch.mac%B%   for spectrum calibration
+#%LI%		%B%cplot.mac%B%	    for cplot
+#%LI%		%B%saveload.mac%B%  for data saving	
+#%LI%		%B%stlocal.mac%B%   for crying and various things
+#%LI%		%B%pseudo.mac%B%    for pseudo counting
+#%LI%		%B%menu.mac%B%      for menu handling
+#%XUL% that must be loaded together with the %B%mca.mac%B% file.
+#%XUL%
+#%AUTHOR%
+#  MCA.MAC - Marie Claire LAGIER 21/02/94 changed by Elke RAABE 04/01/95%BR%
+#%PRE%
+#         - last modified  03/96: to use macros functions, shared arrays, GUI.
+#         -                01/96: to use mca_par() and saveload.mac.        
+#%PRE%
+#%TOC%
+
+
+##############################################################################
+
+def mcatcp '{
+
+if (MCA_DEVOK>0) {
+  esrf_io( MCA_DEVNAME, "tcp")
+  esrf_io( MCA_DEVNAME, "timeout", 10)
+}
+}'
+  
+  
+def mcadsstat '{
+   local curstat curtime _txt stret
+
+#   mcaiotest
+   if (MCA_DEVOK>0) {
+
+       esrf_io(MCA_DEVNAME, "DevMcaGetStatus", curstat)
+       esrf_io(MCA_DEVNAME, "DevMcaGetAdcInfo", curtime)
+        
+       if (ESRF_ERR==0) {
+          if (curstat[1]==1) _txt="stopped due to preset live time elapsed"
+          else if (curstat[1]==2) \
+            _txt="stopped due to preset real time elapsed"
+          else if (curstat[1]==3) \
+            _txt="stopped due to total preset number of counts reached"
+          else if (curstat[1]==4) _txt="stopped by command DevMcaStopAcq"
+          else _txt=""
+          printf("DEVICE STATUS : %s\n",curstat[0]?"acquiring data":"idle")
+          printf("                %s\n",_txt)
+          printf("Current ADC             : %d\n", curtime[0])
+          printf("First channel           : %d \n", curtime[1])
+          printf("Last channel            : %d \n", curtime[2])
+          printf("Preset live time        : %.2f \n", curtime[3])
+          printf("Preset real time        : %.2f \n", curtime[4])
+          printf("Preset number of counts : %d \n", curtime[5])
+          printf("Elapsed live time       : %.2f s \n", curtime[6])
+          printf("Elapsed real time       : %.2f s \n", curtime[7])
+        }
+   }
+}'
+
+def mcacry '{
+  local separat descr 
+  global MCA_CRYLAST MCA_OTHER
+
+  separat="\n-------------------------------------------------------\n"
+
+  if ((time()/60-MCA_CRYLAST)<CRYMAXFREQ) {
+    printf("A little patience, please - You cried only %d Minutes ago\n",	time()/60-MCA_CRYLAST)
+    printf("Retry in %d minutes\n",1+CRYMAXFREQ-(time()/60-MCA_CRYLAST))
+    exit
+  }
+
+  print "This macro mails a cry for help to Marie Claire."
+  MCA_OTHER=getval("others addresses",(MCA_OTHER!="")?MCA_OTHER:"")
+  descr=getval("Tell here why you are crying","")
+  if (descr == "") {
+    if (!yesno("Really send cry for help with no description",0)) {
+      exit
+    }
+  }
+  if (!CRYBL) { crysetup }
+  if ("0"==MCA_OTHER) MCA_OTHER=""
+  unix("echo MCA CRY FOR HELP >/tmp/,xx")
+  fprintf("/tmp/,xx","\nfrom %s (%s,%s) on %s at %s\n%suser message:\n%s%s\n",USER,SPEC,TERM,CRYBL,date(),separat,descr,separat)
+  
+  fprintf ("/tmp/,xx","Tel: %s\n\n",CRYTEL)
+  unix("echo hostname: `hostname` >>/tmp/,xx")
+  unix("echo id: `id` >>/tmp/,xx")
+  on("/tmp/,xx");offt
+  mca_dump
+  close("/tmp/,xx");ont
+  if (unix(sprintf("cat /tmp/,xx | rmail -t %s %s","lagier@esrf.fr",MCA_OTHER))) {
+    print "Something went wrong, could not send mail"
+  } else {
+    print "I will try to get some help for you"
+    MCA_CRYLAST=time()/60
+  }
+}
+'
+
+def mca_dump '{
+  print "------------------------------------------------------------------"
+  print date(),"running",SPEC,"revision",VERSION
+  print "------ status mca_par() ------------------"
+  mcastat
+  print "------ status esrf_io() ------------------"
+  mcadsstat 
+  print "------ data groups ------------------"
+  data_grp(-1,0,0)
+  print "------ VARIABLES -----------------"
+  print "------ device settings ------------------" 
+  print "device server:		",MCA_DEVNAME    
+  print "adc active:		",MCA_ADCNO
+  print "time mode:		",MCA_TMODE==1?"Live":"Real"
+  print "memory group size:	",MCA_MEMGRPSIZE	
+  print "memory group active:	",MCA_MEMGRP[0]	
+  print "memory groups:		",MCA_MEMGRP[1]	
+  print "device status:		",MCA_DEVSTATE[MCA_DEVOK]
+  print "hard synchro:		",MCA_SYNCHRO
+  print "------ data files ----------------"
+  print "saving mode flag:	",MCA_FLAG
+  print "Scan file:		",DATAFILE
+  print "Scan number:		",SCAN_N
+  print "Mca file:		",MCA_PREFIX
+  print "Spectrum number:	",MCA_N
+  print "Roi file:		",MCA_ROI_DEFAULT_FILE	
+  print "data dump format:	",MCA_FMT		
+  print "binning factor:        ",MCA_REDUCTION
+  print "Loaded spectrum file:	",MCA_LOADF	
+  print "its binning factor:	",MCA_FRED[0]
+  print "its scan number:	",MCA_FRED[1]
+  print "                 req:	",MCA_SNO 
+  print "its scan point number: ",MCA_SPNO 
+  print "load calib from file:	",MCA_CALFF
+  print "------ plot settings ------------------"
+  print "plot attributes: 	",MCA_PLOTATTR,MCA_LOG,MCA_LINES,MCA_DOTS,MCA_EBARS
+  print "calib X label:		",MCA_CP_XLBL     
+  print "calib X unit:		",MCA_CP_XUNT
+  print "sleep time:		",MCA_DISP_SEC	
+  print "cplot xmin:		",MCA_XMIN
+  print "cplot xmax:		",MCA_XMAX
+  print "cplot ymin:		",MCA_YMIN
+  print "cplot ymax:		",MCA_YMAX
+  print "use GUI:		",MCA_GUI
+  print "GUI process id:        ",MCA_PID
+  print "data group		",MCA_GRP
+  print "------ roi ------------------"
+  mca_roidisp()
+  print "number:		",MCA_ROI_NO
+  print "active:		",MCA_ROIACTIVE
+  print "------ calibration ------------------"
+  print "fit a parameter:	",MCA_EA
+  print "fit b parameter:	",MCA_EB
+  print "fit c parameter:	",MCA_EC
+  print "peaks found number:	",PS_NOPEAKS
+  print "fit order:		",PS_NOFIT
+  print "------ exec ------------------"
+  print "last read chan range:	",MCA_old_channel [0],MCA_old_channel[1]
+  print "data group up to date:	",MCA_IN_GROUP
+  print "mca auto run off:	",MCA_AROFF
+  print "last esrf_err:		",ESRF_ERR 
+  print "global channel range:	",MCA_ROI_GCH_MIN,MCA_ROI_GCH_MAX 
+  print "calibration:		",MCA_ENERGY 
+  print "live time:		",MCA_LIVE_T 
+  print "real time:		",MCA_REAL_T
+  print "dead time: 		",MCA_DEAD_T,"%"
+  print "plot erase flag:       ",MCA_PLOTERASE
+  print "data has been saved    ",MCA_SAVED
+  print "------ others settings ------------------"
+  print "save buffer:		",MCA_SAVEBUFFER
+  print "substracts background:	",MCA_BACKSUB
+  print "simulation:		",(MCA_DEVOK<-1)
+  print "auto string:           ",MCA_AUTO
+  print "other receivers:       ",MCA_OTHER
+}'
+
+
+
+
+def mcasimon '{
+  
+global MCA_SIMCUR_T MCA_SIMOLD_T MCA_SIMDATA
+global MCA_SIM
+
+MCA_SIM["spec_onsim"] = set_sim(-1)
+MCA_SIM["devname"] = MCA_DEVNAME
+
+MCA_DEVNAME = "Simulation of "MCA_DEVNAME
+
+printf("MCA Simulate was %s, is now ON\nGEN ",(MCA_DEVOK<-1)?"on":"off")
+onsim; 
+
+MCA_DEVOK=-2 
+
+cdef("user_prepcount","mcastart;","mcasim")
+cdef("user_postcount","mcastop ;","mcasim")
+cdef("user_countersrun","if (mca_simuwait()) return(1);;","mcasim")
+cdef("user_cleanup2","mcastop; ","mcasim")
+
+savmac mca_state "/tmp/mca_simu"
+savmac mcastat "/tmp/mca_simu"
+savmac mca_times "/tmp/mca_simu"
+savmac mcastart "/tmp/mca_simu"
+savmac mcaclear "/tmp/mca_simu"
+savmac mcastop "/tmp/mca_simu"
+savmac mca_waitcounts "/tmp/mca_simu"
+savmac mca_read "/tmp/mca_simu"
+
+rdef mcastat \'{
+   printf("MCA STATUS : %s\n\n",MCA_DEVSTATE[MCA_DEVOK])
+   printf("Current ADC             : %d\n", MCA_ADCNO)
+   printf("Group size              : %d \n", MCA_MEMGRPSIZE)
+   printf("Group selected          : %d \n", MCA_MEMGRP[1])
+   printf("Elapsed live time       : %.2f s \n", MCA_LIVE_T)
+   printf("Elapsed real time       : %.2f s \n", MCA_REAL_T)
+}\'
+
+def mca_simuwait () \'{
+  if (COUNT_TIME<=0) return 0
+  if ((time()-MCA_SIMOACQ_T)<=COUNT_TIME) return 1
+  return 0
+}\'
+
+
+def mca_state () \'{ }\'
+
+def mca_times () \'{
+
+ global MCA_LIVE_T MCA_REAL_T MCA_DEAD_T
+
+  MCA_LIVE_T=(MCA_DEVOK==-14)?(MCA_SIMCUR_T=time()-MCA_SIMOLD_T):MCA_SIMCUR_T
+  MCA_REAL_T=MCA_LIVE_T 
+  MCA_DEAD_T=0
+}\'
+
+rdef mcaclear \'
+  global MCA_NEWDATA
+  MCA_DATA[][1] = 0
+  MCA_SIMOLD_T=0
+  MCA_NEWDATA=0
+\'
+  
+rdef mcastart \'
+  #\$*
+  global MCA_SIMOLD_T MCA_SIMCUR_T
+  if (MCA_DEVOK==-2) { 
+    MCA_DEVOK=-14
+    MCA_SIMOACQ_T=time()
+    if (!MCA_SIMOLD_T) MCA_SIMOLD_T=MCA_SIMOACQ_T
+    else MCA_SIMOLD_T = MCA_SIMOACQ_T-MCA_SIMCUR_T
+    COUNT_TIME=\$1
+  } else {
+    print "Cannot start MCA; it is",MCA_DEVSTATE[MCA_DEVOK]
+    exit
+  }
+\'
+
+rdef mcastop \'
+  if (MCA_DEVOK==-14) {
+    MCA_SIMCUR_T=time()-MCA_SIMOLD_T
+  }
+  MCA_DEVOK=-2
+\'
+
+rdef mca_waitcounts \'{
+
+  local disp key ptime iold
+ 
+  iold=time()
+   
+  if (COUNT_TIME<=0) ptime=999999
+  else ptime=COUNT_TIME
+  disp=(MCA_DISP_SEC<ptime)?MCA_DISP_SEC:ptime
+
+  while ((MCA_DEVOK==-14) && (time()-iold)<=ptime) {
+    mcatimes 
+    key=input(0)
+    if (key!="") { mca_key key }
+    mca_read chmin chmax
+    mca_plotit xmin xmax ymin ymax
+    mca_user_waitcounts
+    sleep(disp) 
+  }
+  MCA_DEVOK=-2  
+  MCA_SIMCUR_T=time()-MCA_SIMOLD_T
+}\'
+
+rdef mca_read \'{
+  global MCA_old_channel 
+  local channel0 channel1
+
+   channel0=\$1 ; channel1=\$2
+   mca_resize_to_roi 0 channel0 channel1
+
+   MCA_FRED[0]=0
+
+   if (MCA_NEWDATA) MCA_DATA[][1] *= MCA_SIMCOEFF
+   else {
+     MCA_NEWDATA = -1
+     MCA_DATA[][1] = MCA_SIMDATA
+   }
+
+   MCA_IN_GROUP = 0
+##   if (MCA_DATA[MCA_ROI_CH_MAX[0]][0]!=MCA_ROI_CH_MAX[0]) {
+#     array_op("fill",MCA_DATA[][0],1)
+#   }
+   mca_times()
+   if ((MCA_old_channel[0]!=channel0)||(MCA_old_channel[1]!=channel1)) {
+     MCA_PLOTERASE=1
+     MCA_old_channel[0]=channel0  ; MCA_old_channel[1]=channel1
+   }
+}\'
+
+
+global MCA_SIMCOEFF
+ulong array MCA_SIMDATA [MCA_MEMGRPSIZE][1]
+
+MCA_NEWDATA  = 0
+MCA_IN_GROUP = 0
+if ($#) {
+  loadmcadata "$1" MCA_SIMDATA 0 $2?$2:1 $3?$3:1 0 junk junk junk junk
+} else {
+  for (i=0;i<MCA_MEMGRPSIZE;i+=256) MCA_SIMDATA [i] = 100
+}
+
+MCA_SIMCOEFF = array_op("max",MCA_SIMDATA)
+MCA_SIMCOEFF = MCA_SIMCOEFF ? (1 + 1 / MCA_SIMCOEFF) : 1
+}'
+
+def mcasimoff '{
+ 
+  printf("MCA Simulate was %s, is now OFF\n",(MCA_DEVOK<-1)?"on":"off")
+
+  if (!MCA_SIM["spec_onsim"]) { printf("GEN ");offsim }
+
+  if (MCA_DEVOK<-1) {
+    qdo "/tmp/mca_simu"
+    sleep(1)
+    cdef("","","mcasim","delete")
+    reconfig
+  }
+}'
+
+
+## DATE Fri May 30 09:50:42 METDST 1997 REV 5.7;
+#%IU%  <roi_number|roi_name> <mode> <first> <last>
+#%MDESC% Converts ROI into <first> and <last> range limit.
+def mca_getroi '{
+local rn
+rn = mca_roinum ("$1")
+
+if ($2) {
+  $3 = MCA_ROI_EN_MIN [rn]
+  $4 = MCA_ROI_EN_MAX [rn]
+} else {
+  $3 = MCA_ROI_CH_MIN [rn]
+  $4 = MCA_ROI_CH_MAX [rn]
+}
+}'
+
+#%IU%  
+#%MDESC% Converts channels into calibrated value all over the defined ROI.
+def  mca_roi_Ech '{
+
+  local _roi 
+  for (_roi=0;_roi<=MCA_ROI_NO;_roi++) {
+    MCA_ROI_EN_MIN[_roi] = mca_calcE(MCA_ROI_CH_MIN[_roi]) 
+    MCA_ROI_EN_MAX[_roi] = mca_calcE(MCA_ROI_CH_MAX[_roi])
+  }
+}'
+
+
+## DATE Wed Jun  4 08:59:31 METDST 1997 REV 5.8;
+## DATE Tue Dec  2 09:22:34 MET 1997 REV 5.10;
+
+
+#cleanup mcaacq
+#        ------
+#   mca_read chmin chmax
+#   mca_plotit xmin xmax ymin ymax
+#   mcatimes 
+#   print
+#   if (MCA_FLAG&2 && MCA_DEVNAME) {
+#     mca_saveacqdata(chmin, chmax, "$0 $*") 
+#   }
+#
+#cleanup ct/scan
+#        -------
+#  "user_getcounts"
+#  "measure2","mca_savescanhead (MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX);"
+#  "user_scan_loop","mca_savescandata(MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX)"
+#  ou "measure2","mca_saveroihead;","_mca1")
+#  "user_handlecounts","mca_savectdata(MCA_ROI_ACH_MIN,MCA_ROI_ACH_MAX)
+
