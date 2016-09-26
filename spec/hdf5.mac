@@ -1,0 +1,172 @@
+#
+
+def newhdf5 '{
+	
+	global HDF5_FILE
+
+	prev = HDF5_FILE
+
+	HDF5_FILE = "$1"
+	
+	h5_file(HDF5_FILE, "open", "cache=10000000")
+
+	return(HDF5_FILE)
+}'
+
+def hdf5_on '{
+
+	HDF5_ON = 1
+
+	cdef("user_postscan_head", "writehdf5_head sprintf(HDF5_FILE, SCAN_N); ", "_hdf5.output_")
+
+	cdef("user_scan_loop", "writehdf5_points sprintf(MCA_FMT, HDF5_FILE, SCAN_N); ", "_hdf5.output_")
+
+}'
+
+def hdf5_off '{
+
+	cdef("", "", "_hdf5.output_", "delete")
+
+	HDF5_ON = 0
+
+}'
+
+def writehdf5_head '{
+	global HDF5_COUNT
+
+	scan_string = sprintf("S%s", SCAN_N)
+
+	h5_attr(scan_string)
+
+	h5_data(".", "command", HEADING)
+	h5_data(".", "date", DATE)
+
+	#Determine grating, exit slit and stripe values and write to header
+	p2temp = epics_get("AM1611-4-I10:energy:grating:translation:fbk")
+        p3temp = epics_get("PSL16114I1004:Y:mm:fbk")
+        p4temp = epics_get("BL1611-ID-1:stripe:fbk")
+
+	h5_data(".", "grating", p2temp)
+	h5_data(".", "exit slit", p3temp)
+	h5_data(".", "stripe", p4temp)
+	  
+	#Determine SR570 gains and write to header
+	gPD_n = epics_get("Amp1611-4-22:sens_num")
+        gTEY_n = epics_get("Amp1611-4-23:sens_num")
+        gIo_n = epics_get("Amp1611-4-24:sens_num")
+        gPD_u = epics_get("Amp1611-4-22:sens_unit")
+        gTEY_u = epics_get("Amp1611-4-23:sens_unit")
+        gIo_u = epics_get("Amp1611-4-24:sens_unit")
+
+	TEYstring = sprintf("%s %s", gTEY_n, gTEY_u)
+	Iostring = sprintf("%s %s", gIo_n, gIo_u)
+	PDstring = sprintf("%s %s", gPD_n, gPD_u)
+
+	h5_data(".", "TEY Gain", TEYstring)
+	h5_data(".", "Io Gain", Iostring)
+	h5_data(".", "PD Gain", PDstring)
+
+	#Determine SDD hardware ROI values and write to header
+	roi1_up = mca_spar(0, "scaler1", "upper")
+        roi1_down = mca_spar(0, "scaler1", "lower")
+        roi2_up = mca_spar(0, "scaler2", "upper")
+        roi2_down = mca_spar(0, "scaler2", "lower")
+
+	roi1 = sprintf("%s to %s", roi1_up, roi1_down)
+	roi2 = sprintf("%s to %s", roi2_up, roi2_down)
+	
+	h5_data(".", "ROI1", roi1)
+	h5_data(".", "ROI2", roi2)
+
+	#Determine position of XPS diagnostic ladder and write to header
+	pos = epics_get("SMTR16114I1012:step")
+        if (epics_get("SMTR16114I1012:state") != "IDLE") {
+		h5_data(".", "Ladder1", "Moving")
+        }
+        else if (pos > 26000) {
+		h5_data(".", "Ladder1", "Retracted")
+        }
+        else if (pos > 18000 && pos < 24000) {
+		h5_data(".", "Ladder1", "Au Mesh")
+        }
+        else if (pos > 10000 && pos < 14000) {
+		h5_data(".", "Ladder1", "Vanadium Filter")
+        }
+        else if (pos < 3600) {
+		h5_data(".", "Ladder1", "Photodiode")
+        }
+        else {
+		intPos = sprintf("Intermediate Position: %i", pos)
+		h5_data(".", "Ladder1", intPos)
+        }
+
+	h5_data("./positioner_labels")
+	for (i = 0; i < MOTORS; i++) {
+		h5_data(".", motor_name(i), motor_mne(i))
+	}
+	h5_data("..")
+	h5_data("./counter_labels")
+	for (i = 0; i < COUNTERS; i++) {
+		h5_data(".", cnt_name(i), cnt_mne(i))
+	}
+	h5_data("..")
+
+	HDF5_COUNT = 0
+				
+}'
+
+def writehdf5_points '{
+
+	pointstring = sprintf("./data/P%s", HDF5_COUNT)
+	h5_data(pointstring)
+	h5_data(".", "Positions", A)
+	h5_data(".", "Counters", S)
+	h5_data(".", "SDD1", MCA1_DATA)
+	h5_data(".", "SDD2", MCA2_DATA)
+	h5_data(".", "SDD3", MCA3_DATA)
+	h5_data(".", "SDD4", MCA4_DATA)
+	h5_data("../../")
+	HDF5_COUNT = HDF5_COUNT+1
+}'
+
+def writehdf5_nexus '{
+
+	array tempCounter[1]
+	array tempPositioner[1]
+	array tempMCA2[256]
+
+	for (i = 0; i < MOTORS; i++) {
+		if (HDF5_COUNT == 0){
+                	h5_data("./data", motor_name(i), tempPositioner, "dims=-1")
+			h5_data("..")
+		}
+		h5_data("./data", motor_name(i), A[i], frame=HDF5_COUNT)
+		h5_data("..")
+        }
+	for (i = 0; i < COUNTERS; i++) {
+		if (HDF5_COUNT == 0){
+                	h5_data("./data", cnt_name(i), tempCounter, "dims=-1")
+			h5_data("..")
+		}
+		h5_data("./data", cnt_name(i), S[i], frame=HDF5_COUNT)
+		h5_data("..")
+        }
+	if (HDF5_COUNT == 0) {
+		array tempMCA[256]
+		h5_data("./data", "SDD1", tempMCA, "dims=-1:256")
+		h5_data(".", "SDD2", tempMCA, "dims=-1:256")
+		h5_data(".", "SDD3", tempMCA, "dims=-1:256")
+		h5_data(".", "SDD4", tempMCA, "dims=-1:256")
+		h5_data("..")
+	}
+	tempMCA2 = MCA1_DATA
+	h5_data("./data", "SDD1", tempMCA2, frame=HDF5_COUNT) 
+	tempMCA2 = MCA2_DATA
+	h5_data(".", "SDD2", tempMCA2, frame=HDF5_COUNT) 
+	tempMCA2 = MCA3_DATA
+	h5_data(".", "SDD3", tempMCA2, frame=HDF5_COUNT) 
+	tempMCA2 = MCA4_DATA
+	h5_data(".", "SDD4", tempMCA2, frame=HDF5_COUNT) 
+	h5_data("..")
+	HDF5_COUNT = HDF5_COUNT + 1
+}'
