@@ -1,0 +1,231 @@
+global BUFFER_SIZE 
+BUFFER_SIZE = 128
+
+#Initilize the required shared memory arrays.
+shared string array core_shm[6][255]
+shared string array string_shm[15][255]
+shared double array float_shm[6]
+shared double array roi_shm[2][2]
+shared double array motor_shm[BUFFER_SIZE][13]
+shared long64 array counter_shm[BUFFER_SIZE][12]
+shared long64 array mca1_shm[BUFFER_SIZE][256]
+shared long64 array mca2_shm[BUFFER_SIZE][256]
+shared long64 array mca3_shm[BUFFER_SIZE][256]
+shared long64 array mca4_shm[BUFFER_SIZE][256]
+
+def init_dr'{
+	local name
+	core_shm[0] = sprintf("scan=%d", SCAN_N)
+	core_shm[1] = sprintf("filename=%s", HDF5_FILE)
+	name = cnt_mne(det)
+	core_shm[2] = sprintf("signal=%s", name)
+	for (i = 0; i < _nm; i++) {
+		if(i == 0){ 
+			name = sprintf("%s", motor_mne(_m[i]))
+		}
+		else{
+			name = sprintf("%s,%s",name, motor_mne(_m[i]))
+		}
+	}
+	core_shm[3] = sprintf("axes=%s", name)
+	core_shm[4] = sprintf("status=10")
+	core_shm[5] = sprintf("status=%d", BUFFER_SIZE)
+}'
+#Control modes for data_recorder: 
+# 0: Create HDF5_FILE
+# 1: Re-open HDF5_FILE
+# 2: Close HDF5_FILE
+# 3: Write Header
+# 4: Write/Add Data
+def dr_stat '{
+	global DR_STAT
+	DR_STAT = "$1" 
+	core_shm[4] = sprintf("status=%d", DR_STAT)
+
+}'
+
+def newHDF5'{
+	global HDF5_FILE
+
+	if(HDF5_ON){
+		prev = HDF5_FILE
+		HDF5_FILE = "$1"
+		newfile /dev/null		
+		core_shm[0] = sprintf("scan=%d", SCAN_N)
+		core_shm[1] = sprintf("filename=%s", HDF5_FILE)
+		dr_stat 0
+		
+
+		return(HDF5_FILE)
+	}
+	else{
+		print "hdf5 is not currently enabled, to enable use hdf5_on."
+	}
+}'
+
+def whoami'{
+	return(unix("whoami"))
+}'
+
+def hdf5_on '{
+
+	HDF5_ON = 1
+
+	init_datrec
+
+	unix("/home/zarthur/Development/Data_Recorder/data_recorder NXsgm.nxdl.xml &")
+
+	cdef("user_postscan_head", "writehdf5_head sprintf(HDF5_FILE, SCAN_N); ", "_hdf5.output_")
+
+	cdef("user_scan_loop", "writehdf5_nexus sprintf(MCA_FMT, HDF5_FILE, SCAN_N); ", "_hdf5.output_")
+	
+	cdef("user_scan_tail", "tailhdf5 sprintf(MCA_FMT, HDF5_FILE, SCAN_N); ", "_hdf5.output_")
+
+}'
+
+def hdf5_off '{
+
+	closehdf5
+	
+	cdef("", "", "_hdf5.output_", "delete")
+
+	dr_stat 100
+
+	HDF5_ON = 0
+
+}'
+
+def tailhdf5'{
+	local temp
+	temp = BUFFER_SIZE
+	BUFFER_SIZE = HDF5_COUNT + 1
+	writehdf5
+	BUFFER_SIZE = temp
+	closehdf5
+
+}'
+
+
+
+
+def closehdf5 '{
+
+	dr_stat 2
+}'
+
+def sample '{
+	global SAMPLE_DESC
+
+	SAMPLE_DESC = "$*"
+
+	string_shm[11] = SAMPLE_DESC
+}'
+
+
+
+def writehdf5_head '{
+	global HDF5_COUNT
+	
+
+	local entry, title, UTCdate
+	local current, energy, en_err, grating, coating
+	local exs_pos, stripe_M
+	array temparray[1]
+
+	#Setup (default) instrument values for scan header.
+	current = epics_get("PCT1402-01:mA:fbk")
+	en_err = 5000 
+	float_shm[3] = current
+	
+
+	#Determine line density from grating
+	grating = epics_get("AM1611-4-I10:energy:grating:translation:fbk")
+	if (grating == "Low Energy"){
+		period = 600
+		coating = "Ni"
+	}
+	else if (grating == "Medium Energy"){
+		period = 1100
+		coating = "Au"
+	}
+	else {
+		period = 1700
+		coating = "Au"
+	}
+	float_shm[2] = period
+	string_shm[0] = coating
+	string_shm[1] = "10"
+	string_shm[2] = "2000"
+	string_shm[3] = "vacuum"
+	string_shm[4] = "nxsphere"
+	string_shm[5] = "fused silica"
+	string_shm[7] = USER
+	string_shm[8] = HEADING
+
+	#Determine exit slit and stripe values
+        stripe_M = epics_get("BL1611-ID-1:stripe:fbk")
+	string_shm[6] = stripe_M
+	exs_pos = epics_get("PSL16114I1004:Y:mm:fbk")
+	float_shm[1] = exs_pos
+	float_shm[0] = 5
+
+
+	#Get an appropriately formatted date.
+	UTCdate = sprintf("%s", date(+"%Y-%m-%dT%H:%M:%S%z"))
+	string_shm[10] = UTCdate
+	#Required by NXxas format.
+	title = sprintf("SGM XAS Scan %s of %s", SCAN_N, HDF5_FILE)
+	string_shm[9] = title
+
+	#Determine SR570 gains and write to header
+	gPD_n = epics_get("Amp1611-4-22:sens_num")
+        gTEY_n = epics_get("Amp1611-4-23:sens_num")
+        gIo_n = epics_get("Amp1611-4-24:sens_num")
+        gPD_u = epics_get("Amp1611-4-22:sens_unit")
+        gTEY_u = epics_get("Amp1611-4-23:sens_unit")
+        gIo_u = epics_get("Amp1611-4-24:sens_unit")
+	TEYstring = sprintf("%s %s", gTEY_n, gTEY_u)
+	I0string = sprintf("%s %s", gIo_n, gIo_u)
+	PDstring = sprintf("%s %s", gPD_n, gPD_u)
+	string_shm[12] = TEYstring
+	string_shm[13] = I0string
+	string_shm[14] = PDstring 
+
+
+	#Determine SDD hardware ROI values and write to header
+	roi1_up = mca_spar(0, "scaler1", "upper")
+        roi1_down = mca_spar(0, "scaler1", "lower")
+        roi2_up = mca_spar(0, "scaler2", "upper")
+        roi2_down = mca_spar(0, "scaler2", "lower")
+	roi_shm[0][0] = roi1_down
+	roi_shm[1][0] = roi1_up
+	roi_shm[0][1] = roi2_down
+	roi_shm[1][1] = roi2_up
+
+
+	dr_stat 3
+
+	HDF5_COUNT = 0
+}'
+
+
+def writehdf5_nexus '{
+	local tempMCA
+	
+	array_copy(motor_shm[HDF5_COUNT], A)
+	array_copy(counter_shm[HDF5_COUNT], S)
+	tempMCA = MCA1_DATA
+	array_copy(mca1_shm[HDF5_COUNT], tempMCA)
+	tempMCA = MCA2_DATA
+	array_copy(mca2_shm[HDF5_COUNT], tempMCA) 
+	tempMCA = MCA3_DATA
+	array_copy(mca3_shm[HDF5_COUNT], tempMCA)
+	tempMCA = MCA3_DATA
+	array_copy(mca3_shm[HDF5_COUNT], tempMCA) 
+
+	if(HDF5_COUNT == (BUFFER_SIZE - 1)){
+		dr_stat 4
+		HDF5_COUNT == 0
+	}
+	HDF5_COUNT = HDF5_COUNT + 1
+}'
