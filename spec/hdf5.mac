@@ -46,12 +46,14 @@ def closehdf5 '{
 
 }'
 
-def writehdf5_head '{
+def writehdf5_head '
 	global HDF5_COUNT
 	local entry, title, UTCdate
-	local current, energy, en_err, grating, coating
+	local current, en_err, grating1, coating
 	local exs_pos, stripe_M
+	array tempMCA2[256]
 	array temparray[1]
+	string array pos_motor_name[_nm]
 
 	if(!h5_file(HDF5_FILE, "open")){
 		print "There was an error opening the data file."
@@ -59,17 +61,17 @@ def writehdf5_head '{
 		_scanabort
 	}
 
-	#Setup (default) instrument values for scan header.
+	#Setup default instrument values for scan header.
 	current = epics_get("PCT1402-01:mA:fbk")
 	en_err = 5000 
 
 	#Determine line density from grating
-	grating = epics_get("AM1611-4-I10:energy:grating:translation:fbk")
-	if (grating == "Low Energy"){
+	grating1 = epics_get("AM1611-4-I10:energy:grating:translation:fbk")
+	if (grating1 == "Low Energy"){
 		period = 600
 		coating = "Ni"
 	}
-	else if (grating == "Medium Energy"){
+	else if (grating1 == "Medium Energy"){
 		period = 1100
 		coating = "Au"
 	}
@@ -77,10 +79,52 @@ def writehdf5_head '{
 		period = 1700
 		coating = "Au"
 	}
-	
+	pos = epics_get("SMTR16114I1014:step")
+	if (pos > 75000) {
+		ladder2_temp = "Ladder 2 is retracted."
+	}
+	else if (pos > 64000 && pos < 72000) {
+		ladder2_temp = "Ladder 2 is in the phosphor position."
+	}
+	else if (pos > 43000 && pos < 50000) {
+		ladder2_temp = "Ladder 2 is in the pass-through position."
+	}
+	else if (pos > 31000 && pos < 38000) {
+		ladder2_temp = "Ladder 2 is in the pinhole position."
+	}
+	else if (pos > 17000 && pos < 24000) {
+		ladder2_temp = "Ladder 2 is in the mesh position."
+	}
+	else if (pos > 6000 && pos < 15000) {
+		ladder2_temp = "Ladder 2 is in the photo-diode position."
+	}
+        else if (pos < 3600) {
+		ladder2_temp = "Ladder 2 is in the vanadium filter position."
+	}
+	else {
+		ladder2_temp = "Ladder 2 is in an intermediate position."
+	}
+	pos = epics_get("SMTR16114I1012:step")
+	if (pos > 26000) {
+		ladder1_temp = "Ladder 1 is retracted."
+	}
+	else if (pos > 18000 && pos < 24000) {
+		ladder1_temp = "Ladder 1 is in the mesh position."
+	}
+	else if (pos > 10000 && pos < 14000) {
+		ladder1_temp = "Ladder 1 is in the vanadium filter position."
+	}
+	else if (pos < 3600) {
+		ladder1_temp = "Ladder 1 is in the photodiode position."
+	}
+	else {
+		ladder1_temp = "Ladder 1 is in an intermediate position."
+	}
 	#Determine exit slit and stripe values
         stripe_M = epics_get("BL1611-ID-1:stripe:fbk")
 	exs_pos = epics_get("PSL16114I1004:Y:mm:fbk")
+	kb_v_pitch = A[11]
+	kb_h_pitch = A[12]	
 
 	#Get an appropriately formatted date.
 	UTCdate = sprintf("%s", date(+"%Y-%m-%dT%H:%M:%S%z"))
@@ -112,10 +156,11 @@ def writehdf5_head '{
 	scan_string = sprintf("/%s", entry)	
 	 h5_attr(scan_string,"NX_Class", "NXentry", "string")
 		h5_attr("./", "entry", entry, "string")
+		h5_attr(".","scan_type", HEADING)
 		h5_data(".", "title", title, "string")
 		h5_data(".", "start_time", UTCdate, "string")
 		#h5_link(".", "definition", "NXxas.nxdl.xml")
-		h5_data(".", "definition", "NXxas", "string") 
+		h5_attr(".", "definition", "NXxas", "string") 
 		scan_string = sprintf("/%s/instrument", entry)
 		h5_data(scan_string)
 		 h5_attr(scan_string,"NX_Class", "NXinstrument", "string")
@@ -127,11 +172,20 @@ def writehdf5_head '{
 			 	 h5_attr("./name", "short_name", "CLS-SGM", "string") 
 				h5_data(scan_string, "type", "Synchrotron X-ray Source", "string")
 				h5_data(scan_string, "probe", "x-ray", "string")
-				h5_data(scan_string, "energy", 2.9)
+				h5_data(scan_string, "sr_energy", 2.9)
 			 	 h5_attr("./energy", "units", "GeV", "string")
 				h5_data(scan_string, "current", current, "double")
-			 	 h5_attr("./current", "units", "mA", "string")
+			 	 h5_attr("./current", "units", "milli-ampere", "string")
 				h5_data(scan_string, "top_up", 0, "byte")
+			#Mirror configuration. So far just stripe, but can add a lot more.
+			scan_string = sprintf("/%s/instrument/mirror", entry)
+			h5_data(scan_string)
+			  h5_attr(scan_string, "NX_Class", "NXmirror", "string")
+				h5_data(".", "stripe", stripe_M, "string")
+				h5_data(".", "kb_v_pitch", kb_v_pitch)
+				 h5_attr("./kb_v_pitch", "units", "steps", "string")
+				h5_data("..", "kb_h_pitch", kb_h_pitch)
+				 h5_attr("./kb_h_pitch", "units", "steps", "string")
 			#Monochromator information, NX_Class = NXmonochromator
 			scan_string = sprintf("/%s/instrument/monochromator",entry)
 			h5_data(scan_string)
@@ -141,7 +195,9 @@ def writehdf5_head '{
 				scan_string = sprintf("/%s/instrument/monochromator/grating", entry)
 				h5_data(scan_string)
 				 h5_data(".","period", period)
-				 h5_data(".", "deflection_angle", "5")
+				 h5_data(".","exit_slit", exs_pos)
+				  h5_attr("./exit_slit", "units", "millimetres", "string")
+				 h5_data("..", "deflection_angle", "5")
 				  h5_attr("./deflection_angle", "units", "degrees", "string")
 				 h5_data("..", "interior_atmosphere", "vacuum", "string")
 				 h5_data(".", "substrate_material", "Fused Silica", "string")
@@ -156,10 +212,8 @@ def writehdf5_head '{
 			scan_string = sprintf("/%s/instrument/incoming_beam", entry)
 			h5_data(scan_string)
 			 h5_attr(scan_string, "NX_Class", "NXdetector", "string")
-				ladder_temp = sprintf("%s", ladder1)
-				 h5_attr(".", "ladder1", ladder_temp, "string") 
-				ladder_temp = sprintf("%s", ladder2)
-				 h5_attr(".", "ladder2", ladder_temp, "string")
+				 h5_attr(".", "ladder1", ladder1_temp, "string") 
+				 h5_attr(".", "ladder2", ladder2_temp, "string")
 			scan_string = sprintf("/%s/instrument/absorbed_beam", entry)
 			h5_data(scan_string)
 			  h5_attr(scan_string, "NX_Class", "NXdetector", "string")
@@ -194,7 +248,7 @@ def writehdf5_head '{
 			#Gain Record I0
 			scan_string = sprintf("/%s/instrument/incoming_beam", entry)
 			h5_data(scan_string, cnt_name(i),temparray,"dims=-1")
-			 scan_string = sprintf("/%s/instrument/absorbed_beam/%s", entry, cnt_name(i))
+			 scan_string = sprintf("/%s/instrument/incoming_beam/%s", entry, cnt_name(i))
 	 		h5_attr(scan_string, "gain_setting", I0string, "string")
 		}
 		else if(cnt_name(i) == "SDD1_ROI1"){
@@ -245,11 +299,22 @@ def writehdf5_head '{
 			 scan_string = sprintf("/%s/instrument/absorbed_beam/%s", entry, cnt_name(i))
 		 	 h5_attr(scan_string, "ROI2", roi2, "string")
 		}
-		else {
-			scan_string = sprintf("/%s/instrument/absorbed_beam/", entry)
+		else if(cnt_name(i) == "GratingUp"){
+			scan_string = sprintf("/%s/instrument/monochromator", entry)
 			h5_data(scan_string, cnt_name(i),temparray,"dims=-1")
-
-			 scan_string = sprintf("/%s/instrument/absorbed_beam/%s", entry, cnt_name(i))
+			 scan_string = sprintf("/%s/instrument/monochromator/%s", entry, cnt_name(i))
+		 	 h5_attr(scan_string, "GratingUp", grup, "string")
+		}
+		else if(cnt_name(i) == "GratingDown"){
+			scan_string = sprintf("/%s/instrument/monochromator", entry)
+			h5_data(scan_string, cnt_name(i),temparray,"dims=-1")
+			 scan_string = sprintf("/%s/instrument/monochromator/%s", entry, cnt_name(i))
+		 	 h5_attr(scan_string, "GratingDown", grdown, "string")
+		}
+		else {
+			scan_string = sprintf("/%s/instrument/misc_counters", entry)
+			h5_data(scan_string)
+			h5_data(scan_string, cnt_name(i),temparray,"dims=-1")
 		}
 		
 
@@ -258,85 +323,110 @@ def writehdf5_head '{
 	h5_data(data_string)
 	#Initialize storage for motors/positioners.
 	for (i = 0; i < MOTORS; i++){
-		if(i == 0){
-			pos_motor_string = motor_name(i)
-		}
-		else{
-			pos_motor_string = sprintf("%s:%s",pos_motor_string, motor_name(i))
-		}
-		if(motor_name(i) == "en"){
+		if(motor_name(i) == "Energy"){
 			scan_string = sprintf("/%s/instrument/monochromator",entry)
 			h5_data(scan_string, motor_name(i), temparray, "dims=-1")
 			 scan_string = sprintf("%s/%s", scan_string, motor_name(i))
-			 h5_data(data_string, motor_name(i), scan_string, "link")	
-			 h5_attr(scan_string, "units", "electron-volt", "string")
+			 h5_attr(scan_string, "units", "electron-volts", "string")
 		}		
-		else {
+		else if(motor_name(i) == "Hex_XP" | motor_name(i) == "Hex_YP" | motor_name(i) == "Hex_ZP" | motor_name(i) == "Hex_X" | motor_name(i) == "Hex_Y" | motor_name(i) == "Hex_Z" | motor_name(i) == "XPS_X"| motor_name(i) == "XPS_Y" | motor_name(i) == "XPS_Z" | motor_name(i) == "XPS_R" ){
 			scan_string = sprintf("/%s/sample/positioner", entry)
 			h5_data(scan_string, motor_name(i), temparray, "dims=-1")
 			 scan_string = sprintf("/%s/sample/positioner/%s", entry, motor_name(i))
-			 h5_data(data_string, motor_name(i), scan_string, "link")	
+			 h5_attr(scan_string, "units", "millimetres", "string")
+		}
+		else if(motor_name(i) != "KBV_PITCH" & motor_name(i) != "KBH_PITCH"){
+			scan_string = sprintf("/%s/instrument/misc_motors", entry)
+			h5_data(scan_string)
+			h5_data(scan_string, motor_name(i), temparray, "dims=-1")
+			 scan_string = sprintf("/%s/instrument/misc_motors/%s", entry, motor_name(i))
 			 h5_attr(scan_string, "units", "millimetres", "string")
 		}
 	}
 	#Initialize storage for the SDD mcas.
-	for (i=1; i<5;i++){
+	for (i = 1; i < 5; i++){
 		sddname = sprintf("SDD%s", i)
 		scan_string = sprintf("/%s/instrument/fluorescence", entry )
 		h5_data(scan_string, sddname, tempMCA2, "dims=-1:256")
 	}
-
 	#Link to the pertinent data for an XAS scan.
+	 #First link the motors involved in the active scan to the /entry#/data group.
+	for(i=0;i<_nm;i++){
+		scn_mtr = motor_name(_m[i])
+		pos_motor_name[i] = scn_mtr
+		if(scn_mtr == "Energy"){
+			scan_string = sprintf("/%s/instrument/monochromator/%s",entry, scn_mtr)
+			h5_data(data_string, scn_mtr, scan_string, "link")
+		}
+		else if(scn_mtr == "Hex_XP" | scn_mtr == "Hex_YP" | scn_mtr == "Hex_ZP" | scn_mtr == "Hex_X" | scn_mtr == "Hex_Y" | scn_mtr == "Hex_Z" | scn_mtr == "XPS_X"| scn_mtr == "XPS_Y" | scn_mtr == "XPS_Z" | scn_mtr == "XPS_R" ){
+			scan_string = sprintf("/%s/sample/positioner/%s",entry, scn_mtr)
+			h5_data(data_string, scn_mtr, scan_string, "link")
+		}
+		else if(scn_mtr != "KBV_PITCH" & scn_mtr != "KBH_PITCH"){
+			scan_string = sprintf("/%s/instrument/misc_motors/%s", entry, scn_mtr)
+			h5_data(data_string, scn_mtr, scan_string, "link")
+		}
+	}
+	#Set the signal flag to S(det) data, and axes to the array of motors from scan.
 	scan_string = sprintf("/%s/data", entry)
-	data_string = sprintf("/%s/instrument/absorbed_beam/%s", entry, cnt_name(det))
-	if(h5_data(scan_string, "absorbed_beam", data_string, "link")){
-		h5_attr(data_string, "signal", 1, "byte")
-		h5_attr(data_string, "axes", pos_motor_string, "string")
+	data_string = sprintf("/%s/instrument/absorbed_beam/%s", entry, cnt_name(DET))
+	if(h5_data(scan_string, "S(DET)", data_string, "link")){
+		h5_attr(scan_string, "signal", cnt_name(DET), "string")
+		h5_attr(scan_string, "axes", pos_motor_string)
 	}
 
 	HDF5_COUNT = 0
 				
-}'
+'
 
 
-def writehdf5_nexus '{
-	local tempMCA2
+def writehdf5_nexus '
 	local en_loc, pos_loc
 	local in_loc, ab_loc, mca_loc
+	array tempMCA[256]
 	in_loc = sprintf("/entry%s/instrument/incoming_beam",SCAN_N)
 	ab_loc = sprintf("/entry%s/instrument/absorbed_beam",SCAN_N)
 	mca_loc = sprintf("/entry%s/instrument/fluorescence", SCAN_N)
 	en_loc = sprintf("/entry%s/instrument/monochromator",SCAN_N)	
 	pos_loc = sprintf("/entry%s/sample/positioner",SCAN_N)
+	misc_loc = sprintf("/entry%s/instrument/misc_motors", SCAN_N)
+	misc_cnt_loc = sprintf("/entry%s/instrument/misc_counters", SCAN_N)
 
 	for(i = 0; i < MOTORS; i++){
-		if(m_name == "en"){
+		if(motor_name(i) == "Energy"){
 			location = en_loc
+			h5_data(location, motor_name(i), A[i], frame=HDF5_COUNT)
 		}
-		else {
+		else if(motor_name(i) == "Hex_XP" | motor_name(i) == "Hex_YP" | motor_name(i) == "Hex_ZP" | motor_name(i) == "Hex_X" | motor_name(i) == "Hex_Y" | motor_name(i) == "Hex_Z" | motor_name(i) == "XPS_X"| motor_name(i) == "XPS_Y" | motor_name(i) == "XPS_Z" | motor_name(i) == "XPS_R"){
 			location = pos_loc
+			h5_data(location, motor_name(i), A[i], frame=HDF5_COUNT)
 		}
-		h5_data(location, motor_name(i), A[i], frame=HDF5_COUNT)
+		else if(motor_name(i) != "KBV_PITCH" & motor_name(i) != "KBH_PITCH"){
+			location = misc_loc
+			h5_data(location, motor_name(i), A[i], frame=HDF5_COUNT)
+		}
 	}
 
 	for(i = 0; i < COUNTERS; i++){	
-		if (ct_name == "I0") {
+		if (cnt_name(i) == "I0") {
 			location = in_loc	
 		}
-		else {
+		else if(cnt_name(i) == "TEY" | cnt_name(i) == "Diode" | cnt_name(i) == "SDD1_ROI1" | cnt_name(i) == "SDD1_ROI2" | cnt_name(i) == "SDD2_ROI1" | cnt_name(i) == "SDD2_ROI2" | cnt_name(i) == "SDD3_ROI1" | cnt_name(i) == "SDD3_ROI2" | cnt_name(i) == "SDD4_ROI1" | cnt_name(i) == "SDD4_ROI2" | cnt_name(i) == "GratingUp" | cnt_name(i) == "GratingDown"){
 			location = ab_loc
+		}
+		else{
+			location = misc_cnt_loc
 		}
 		h5_data(location, cnt_name(i), S[i], frame=HDF5_COUNT)
 	}
-	
-	tempMCA22 = MCA1_DATA
-	h5_data(mca_loc, "SDD1", tempMCA2, frame=HDF5_COUNT)
-	tempMCA2 = MCA2_DATA
-	h5_data(".", "SDD2", tempMCA2, frame=HDF5_COUNT) 
-	tempMCA2 = MCA3_DATA
-	h5_data(".", "SDD3", tempMCA2, frame=HDF5_COUNT) 
-	tempMCA2 = MCA4_DATA
-	h5_data(".", "SDD4", tempMCA2, frame=HDF5_COUNT) 
+	tempMCA = MCA1_DATA
+	h5_data(mca_loc, "SDD1", tempMCA, frame=HDF5_COUNT)
+	tempMCA = MCA2_DATA
+	h5_data(".", "SDD2", tempMCA, frame=HDF5_COUNT) 
+	tempMCA = MCA3_DATA
+	h5_data(".", "SDD3", tempMCA, frame=HDF5_COUNT)
+	tempMCA = MCA4_DATA 
+	h5_data(".", "SDD4", tempMCA, frame=HDF5_COUNT) 
 
 	HDF5_COUNT = HDF5_COUNT + 1
-}'
+'

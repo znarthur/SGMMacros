@@ -9,16 +9,19 @@
  * copy: GNU General Public License
  */
 #include <stdio.h>
+#include <assert.h>
 #include <stdint.h>
-#include <libxml/xpath.h>
+#include <libxml2/libxml/xpath.h>
 #include <libxml2/libxml/parser.h>
 #include <libxml2/libxml/tree.h>
 #include <string.h>
 #include <time.h>
 #include "sps.h"
 #include "napi.h"
+#include "hdf5.h"
 
 #define STRMAX 255
+#define NX5SIGNATURE 959695 
 #ifdef LIBXML_TREE_ENABLED
 
 
@@ -42,12 +45,15 @@ typedef struct {
 */
 char *getGroupPath(char *spec_version, xmlNode *group_node);
 void *getNexusNodeProp(char *spec_version, xmlNode *group_node);
-int writeNexusHead(xmlDocPtr doc, char *spec_name, NXhandle fileid);
+int writeNexusHead(xmlDocPtr doc, char *spec_name, NXhandle *fileid);
 int writeNexusData(xmlDocPtr xmlDoc, char *spec_name, NXhandle fileid);
 int specDataWrite(char *spec_version, sgm_ndAttr *var_name, NXhandle *file_id, int mode);
 xmlXPathObjectPtr getnodeset (xmlDocPtr doc, xmlChar *xpath);
 void freeSGMnode(sgm_ndAttr *node_prop);
 int updateBuffer(char *spec_version);
+NXhandle setAxes(NXhandle *fileid, char *NXaxespath, char **ax_strs, int axis_ct);
+
+
 
 /*
 * Function below takes in a group/field node, reads in the properties list and populates
@@ -243,6 +249,12 @@ char *getGroupPath(char *spec_version, xmlNode *group_node){
 	return pathName;
 }
 
+/*
+ * Function to determine if the current data field is 
+ * assigned as the signal.  
+ * Returns: 0 if not signal
+ *	    1 if it is.
+ */
 int isSignal(char *spec_version, sgm_ndAttr *nd_prop){
 	char *signal;
 	signal = (char *)malloc(STRMAX*sizeof(char));
@@ -261,6 +273,12 @@ int isSignal(char *spec_version, sgm_ndAttr *nd_prop){
 	}
 }
 
+/*
+ * Function to determine if the current data field is 
+ * assigned as an axes.  
+ * Returns: 0 if not an axis
+ *	    1 if it is.
+ */
 int isAxes (char *spec_version, sgm_ndAttr *nd_prop){
 	char *axes;
 	char delim[2] = ",";
@@ -285,13 +303,21 @@ int isAxes (char *spec_version, sgm_ndAttr *nd_prop){
 	return 0;
 }
 
+/*
+ * Function to traverse XML tree from NXsgm.xml, and search for groups
+ * These are then initialized, as the first part of the header writing process.
+ * Returns:  1 on error
+ * 	     0 on success.
+ */
 int createNexusGroups(xmlDocPtr xmlDoc,char *spec, NXhandle fileid){
 	xmlNode *cur_node;
         xmlNodeSetPtr nodeset;
         xmlXPathObjectPtr result;	
 	sgm_ndAttr *nodeprop = (sgm_ndAttr*)malloc(sizeof(sgm_ndAttr));
 	int i;
-	
+	if(NXopengrouppath(fileid, "/") != NX_OK) return 1;
+	if(NXputattr(fileid, "default", "entry1", strlen("entry1"), NX_CHAR) != NX_OK) return 1;
+ 
 	result = getnodeset(xmlDoc, "//group");
 	if(result){
 		nodeset = result->nodesetval;
@@ -316,7 +342,15 @@ int createNexusGroups(xmlDocPtr xmlDoc,char *spec, NXhandle fileid){
 return 0;
 }
 
-int createNexusData(xmlDocPtr xmlDoc, char *spec, NXhandle fileid){
+/*
+ * Function to traverse XML tree from NXsgm.xml, and search for data fields
+ * These are then initialized, as second part of the header writing process.
+ * Function also calls isAxes and isSignal to determine NXdata fields and
+ * sets the signal and axes attributes accordingly. 
+ * Returns:  1 on error
+ * 	     0 on success.
+ */
+int createNexusData(xmlDocPtr xmlDoc, char *spec, NXhandle *fileid){
 	xmlNode *cur_node;
         xmlNodeSetPtr nodeset;
         xmlXPathObjectPtr result;	
@@ -328,7 +362,8 @@ int createNexusData(xmlDocPtr xmlDoc, char *spec, NXhandle fileid){
 	double *tempdouble;
 	char *NX_data_path = (char*)malloc(STRMAX*sizeof(char));
 	char *scan = (char*)malloc(10*sizeof(char));
-
+	char NXsignalpath[STRMAX];
+	
 	//Initialize filename and NXdata path variables.	
 	if(strncpy(scan, (SPS_GetEnvStr(spec, "core_shm", "scan")), 10) > 0){
 		strncpy(NX_data_path,"/entry", STRMAX);
@@ -347,32 +382,32 @@ int createNexusData(xmlDocPtr xmlDoc, char *spec, NXhandle fileid){
 			cur_node = nodeset->nodeTab[i];
 			nd_prop = getNexusNodeProp(spec,cur_node);	
 			if(*(nd_prop->error) !=1){
-				if (NXopengrouppath (fileid, nd_prop->path) != NX_OK) return 1;
+				if (NXopengrouppath (*fileid, nd_prop->path) != NX_OK) return 1;
 				// Place header information for XML nodes which contain the value flag.
 				if((strcmp(nd_prop->spec, "\0") == 0) && (strcmp(nd_prop->value, "\0") > 0) &&(*(nd_prop->rank) < 0)){
 					// Save method for values with type "NX_BOOLEAN".
 					if(strcmp(nd_prop->type, "NX_BOOLEAN") == 0){
 						if(strcmp(nd_prop->value, "TRUE") == 0) bool = 1;
-						if (NXmakedata(fileid, nd_prop->name, NX_UINT32, one, &one) != NX_OK) return 1;
-     						if (NXopendata(fileid, nd_prop->name) != NX_OK)return 1;
-        					if (NXputdata(fileid, &bool) != NX_OK)return 1;
-						if (NXclosedata (fileid) != NX_OK) return 1;
+						if (NXmakedata(*fileid, nd_prop->name, NX_UINT32, one, &one) != NX_OK) return 1;
+     						if (NXopendata(*fileid, nd_prop->name) != NX_OK)return 1;
+        					if (NXputdata(*fileid, &bool) != NX_OK)return 1;
+						if (NXclosedata (*fileid) != NX_OK) return 1;
 					} 
 						// Save method for values with type "NX_CHAR".
 					else if(strcmp(nd_prop->type, "NX_CHAR") == 0){
 						var_ln = strlen(nd_prop->value);
-						if(NXmakedata(fileid, nd_prop->name, NX_CHAR, one, &var_ln) != NX_OK) return 1;
-						if(NXopendata(fileid, nd_prop->name) != NX_OK)return 1;
-						if(NXputdata(fileid, nd_prop->value) != NX_OK)return 1;
-						if (NXclosedata (fileid) != NX_OK) return 1;
+						if(NXmakedata(*fileid, nd_prop->name, NX_CHAR, one, &var_ln) != NX_OK) return 1;
+						if(NXopendata(*fileid, nd_prop->name) != NX_OK)return 1;
+						if(NXputdata(*fileid, nd_prop->value) != NX_OK)return 1;
+						if (NXclosedata (*fileid) != NX_OK) return 1;
 					} 
 					else if(strcmp(nd_prop->type, "NX_FLOAT") == 0) {
-						if(NXmakedata(fileid, nd_prop->name, NX_FLOAT64, one, &one) != NX_OK) return 1;
-						if(NXopendata(fileid, nd_prop->name) != NX_OK) return 1;
+						if(NXmakedata(*fileid, nd_prop->name, NX_FLOAT64, one, &one) != NX_OK) return 1;
+						if(NXopendata(*fileid, nd_prop->name) != NX_OK) return 1;
 							tempdouble = (double*)malloc(sizeof(double));
 							*tempdouble = atof(nd_prop->value);
-							if(NXputdata(fileid, tempdouble) != NX_OK) return 1;
-						if (NXclosedata (fileid) != NX_OK) return 1;
+							if(NXputdata(*fileid, tempdouble) != NX_OK) return 1;
+						if (NXclosedata (*fileid) != NX_OK) return 1;
 						if(tempdouble != NULL)free(tempdouble);
 					}
 					else if(strcmp(nd_prop->type, "NX_INT") == 0){
@@ -380,52 +415,54 @@ int createNexusData(xmlDocPtr xmlDoc, char *spec, NXhandle fileid){
 						strncpy(tempstring, nd_prop->value, 100);
 						tempint = atoi(tempstring);
 						free(tempstring);
-						if(NXmakedata(fileid, nd_prop->name, NX_INT32, one, &one) != NX_OK) return 1;
-						if(NXopendata(fileid, nd_prop->name) != NX_OK) return 1;
-							if(NXputdata(fileid, &tempint) != NX_OK)return 1;
-						if (NXclosedata (fileid) != NX_OK) return 1;
+						if(NXmakedata(*fileid, nd_prop->name, NX_INT32, one, &one) != NX_OK) return 1;
+						if(NXopendata(*fileid, nd_prop->name) != NX_OK) return 1;
+							if(NXputdata(*fileid, &tempint) != NX_OK)return 1;
+						if (NXclosedata (*fileid) != NX_OK) return 1;
 					} 
 				}
 			// Place header information for XML nodes which rely upon spec shared memory. 
 			// Also link in fields with the signal/axis settings from spec shared memory. 
-				else if((strcmp(nd_prop->spec, "\0") >= 0) && (*(nd_prop->rank) < 0)){
+				else if((strcmp(nd_prop->spec, "\0") > 0) && (*(nd_prop->rank) < 0)){
 					//Write the static spec data from shared memory array.
-					if(specDataWrite(spec, nd_prop, &fileid, 0)){
+					if(specDataWrite(spec, nd_prop, fileid, 0)){
 						fprintf(stderr, "Trouble writing static spec field: %s.\n", nd_prop->path);
 					//	return 1;
 					}
 				}
-				else if ((strcmp(nd_prop->spec, "\0") >= 0) && (*(nd_prop->rank) > 0)){
+				else if ((strcmp(nd_prop->spec, "\0") > 0) && (*(nd_prop->rank) > 0)){
 				//Allocate unlimited NXdata of rank nd_prop->rank. 
-					if(!specDataWrite(spec, nd_prop, &fileid, 1)){
+					if(!specDataWrite(spec, nd_prop, fileid, 1)){
 						if(isSignal(spec, nd_prop)){
 							//link field to /entry/data
 							tempint = 1;
-							if (NXopendata(fileid, nd_prop->name) != NX_OK) return 1;
-							
-							if (NXgetdataID (fileid, &dlink) != NX_OK) return 1; 
-					//		if (NXputattr(fileid, "signal", &tempint, 1, NX_INT32) != NX_OK) return 1;
-							if (NXclosedata(fileid) != NX_OK) return 1;
-							if(NXclosegroup(fileid) != NX_OK) return 1;
+							if (NXopendata(*fileid, nd_prop->name) != NX_OK) return 1;
+							strncpy(NXsignalpath, nd_prop->name, STRMAX);
+							if (NXgetdataID (*fileid, &dlink) != NX_OK) return 1; 
+							if (NXputattr(*fileid, "signal", &tempint, 1, NX_INT32) != NX_OK) return 1;
+							if (NXclosedata(*fileid) != NX_OK) return 1;
+							if(NXclosegroup(*fileid) != NX_OK) return 1;
 							//add attribute to /entry/data
-							if(NXopengrouppath(fileid, NX_data_path) != NX_OK)return 1;
-							if(NXmakelink(fileid, &dlink) != NX_OK) return 1;
-							if(NXputattr(fileid, "signal", nd_prop->name, strlen(nd_prop->name), NX_CHAR) != NX_OK) return 1;
+							if(NXopengrouppath(*fileid, NX_data_path) != NX_OK)return 1;
+							if(NXmakelink(*fileid, &dlink) != NX_OK) return 1;
+							if(NXputattr(*fileid, "signal", nd_prop->name, strlen(nd_prop->name), NX_CHAR) != NX_OK) return 1;
 						
 						}
 						else if(isAxes(spec, nd_prop)){
 							//link filed to /entry/data/
-							if (NXopendata(fileid, nd_prop->name) != NX_OK) return 1;
-							if (NXgetdataID (fileid, &dlink) != NX_OK) return 1; 
-							if(NXclosedata(fileid) != NX_OK) return 1;							
-							if(NXclosegroup(fileid) != NX_OK) return 1;
-							if(NXopengrouppath(fileid, NX_data_path) != NX_OK) return 1;
-							if(NXmakelink(fileid, &dlink) != NX_OK) return 1;
-							//Record axis name for future writing of axes attribute.
 							axis_ct++;
+							if (NXopendata(*fileid, nd_prop->name) != NX_OK) return 1;
+							if (NXgetdataID (*fileid, &dlink) != NX_OK) return 1; 
+							if (NXputattr(*fileid, "axis", &axis_ct, 1, NX_INT32) != NX_OK) return 1;
+							if(NXclosedata(*fileid) != NX_OK) return 1;							
+							if(NXclosegroup(*fileid) != NX_OK) return 1;
+							if(NXopengrouppath(*fileid, NX_data_path) != NX_OK) return 1;
+							if(NXmakelink(*fileid, &dlink) != NX_OK) return 1;
+							//Record axis name for future writing of axes attribute.
 							NX_axes = realloc(NX_axes, axis_ct*sizeof(char*));
-							NX_axes[axis_ct-1] = malloc(STRMAX*sizeof(char));
-							strncpy(NX_axes[axis_ct -1], nd_prop->name, STRMAX);
+							NX_axes[axis_ct-1] = malloc(20*sizeof(char));
+							strncpy(NX_axes[axis_ct-1], "\0", 20);
+							strncpy(NX_axes[axis_ct -1], nd_prop->name, 20);
 						}
 					}
 					else{
@@ -433,28 +470,82 @@ int createNexusData(xmlDocPtr xmlDoc, char *spec, NXhandle fileid){
 					//	return 1;
 					}
 				}
-			NXclosegroup(fileid);
+			NXclosegroup(*fileid);
 			freeSGMnode(nd_prop);	
 			}
 		}	
 		//Write the axes and signal attributes to /entry/data/
 		char *tempchar = (char*)malloc(STRMAX*sizeof(char));
-		char strings[axis_ct][STRMAX];	
-		if(NXopengrouppath(fileid, NX_data_path) != NX_OK) return 1;
+		if(NXopengrouppath(*fileid, NX_data_path) != NX_OK) return 1;
 		for(i=0; i < axis_ct; i++){
-			one += i;
-			strncpy(strings[i], NX_axes[i], STRMAX);
-			strncpy(tempchar, NX_axes[i], STRMAX);
+			strncpy(tempchar, NX_axes[i], 20);
 			strcat(tempchar, "_indices");
-			if(NXputattr(fileid, tempchar, &one, 1, NX_INT32) != NX_OK) return 1;
-			if(NX_axes[i] != NULL) free(NX_axes[i]);
+			if(NXputattr(*fileid, tempchar, &i, 1, NX_INT32) != NX_OK) return 1;
+		//	if(NX_axes[i] != NULL) free(NX_axes[i]);
 		}
 		if(tempchar != NULL) free(tempchar);
-		if(NXputattr(fileid, "axes", &strings, sizeof(strings), NX_CHAR) != NX_OK)return 1;
-		if(NXclosegroup(fileid) != NX_OK) return 1;
+		if(NXclosegroup(*fileid) != NX_OK) return 1;
+		if((*fileid = setAxes(fileid, NX_data_path, NX_axes, axis_ct)) == NULL){
+			fprintf(stderr, "WARNING: There was a problem setting the axes attribute to /NXentry/NXdata.\n");
+			return 1;
+		}
+		for(i=0; i<axis_ct; i++){
+			if(NX_axes[i] != NULL) free(NX_axes[i]);
+		}
+		if(NX_axes != NULL) free(NX_axes);
 	}
 
 return 0;
+}
+
+/*
+ * The NeXus API doesn't allow string array's of rank > 1
+ * for attributes.  The axes attribute needs to be set via
+ * the core HDF5 file i/o (Next time just write everything 
+ * using the HDF5 base functions for everything). 
+ */
+
+NXhandle setAxes(NXhandle *fileid, char *NXaxespath, char **ax_strs, int axis_ct){
+	int i;
+	NXhandle newID;
+	hid_t file, group;
+	hid_t aid, atype;
+	hid_t attr_axes;
+	hsize_t adim[] = {axis_ct};
+	char *string[axis_ct];
+	char *filename = (char*)malloc(STRMAX*sizeof(char));
+	
+	NXinquirefile(*fileid, filename, STRMAX);
+	NXclose(fileid);
+	//Initialize string dimensions.
+	for(i=0; i<axis_ct; i++){
+		string[i] = (char*)malloc(20*sizeof(char));
+		strncpy(string[i], ax_strs[i], 20);
+	}
+	if((file = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0) fprintf(stderr, "WARNING: Could not create axes attribute");
+	if((group = H5Gopen(file, NXaxespath, H5P_DEFAULT)) <0) fprintf(stderr, "WARNING: Could not create axes attribute");
+	//Write the axes attribute ax_strs
+	if((aid = H5Screate_simple(1, adim, NULL)) < 0) fprintf(stderr, "WARNING: Could not create axes attribute");
+	if((atype = H5Tcopy(H5T_C_S1)) < 0) fprintf(stderr, "WARNING: Could not create axes attribute");
+	if(H5Tset_size(atype, H5T_VARIABLE) < 0) fprintf(stderr, "WARNING: Could not create axes attribute");
+	if((attr_axes = H5Acreate(group, "axes", atype, aid, H5P_DEFAULT, H5P_DEFAULT)) < 0) fprintf(stderr, "WARNING: Could not create axes attribute");
+	if(H5Awrite(attr_axes, atype, string) < 0) fprintf(stderr, "WARNING: Could not create axes attribute");
+	
+	//Close the attribute/data/group access handles.
+	H5Aclose(attr_axes);
+	H5Gclose(group);
+	H5Tclose(atype);
+	H5Sclose(aid);
+	if(H5Fclose(file) < 0){
+		fprintf(stderr, "ERROR: Trouble closing the file on axes. \n");
+		return NULL;
+	}
+	for (i=0; i<axis_ct; i++){
+		if(string[i] != NULL)free(string[i]);
+	}
+	if((NXopen(filename, NXACC_RDWR, &newID)) != NX_OK) return NULL;
+	if(filename != NULL) free(filename);
+return newID;
 }
 
 
@@ -502,7 +593,7 @@ int createNexusAttr(xmlDocPtr xmlDoc,char *spec, NXhandle fileid){
 						if(NXputattr(fileid, nodeprop->name, &tempint, sizeof(int), NX_INT32) != NX_OK) return 1;
 						} 
 				}
-				else if(strcmp(nodeprop->spec, "\0") >= 0){
+				else if(strcmp(nodeprop->spec, "\0") > 0){
 					if(specDataWrite(spec, nodeprop, &fileid, 2)){
 						fprintf(stderr, "Trouble adding attribute to %s.\n", nodeprop->path);			
 					//	return 1;
@@ -522,12 +613,13 @@ return 0;
  * Prints the names of the all the xml elements
  * that are siblings or children of a given xml node.
  */
-int writeNexusHead(xmlDocPtr xmlDoc, char *spec_name, NXhandle fileid){
+int writeNexusHead(xmlDocPtr xmlDoc, char *spec_name, NXhandle *fileid){
 		
-	if(createNexusGroups(xmlDoc, spec_name, fileid) == 1) return 1;
+	if(createNexusGroups(xmlDoc, spec_name, *fileid) == 1) return 1;
 	if(createNexusData(xmlDoc, spec_name, fileid) == 1) return 1;
-	if(createNexusAttr(xmlDoc, spec_name, fileid) == 1) return 1;
-	printf("Done writing header. \n");
+	if(createNexusAttr(xmlDoc, spec_name, *fileid) == 1) return 1;
+	if(NXflush(fileid) != NX_OK) return 1;
+//	printf("Done writing header. \n");
 	
 	return 0;
 }
@@ -656,29 +748,19 @@ void *getSpecCol(char *spec, sgm_ndAttr *nodeprop, int rows, int cols, int type,
  *	   NULL on error
  */
 void *getSpec2D(char *spec, sgm_ndAttr *nodeprop, int rows, int cols, int type){
-	void *temp;
+	int i, j;
+	int copied;
 	int size;
-	size = cols*rows;
-	if(type == 0) temp = (double*)malloc(size*sizeof(double));
-	if(type == 1) temp = (float*)malloc(size*sizeof(double));
-	if(type == 2) temp = (int*)malloc(size*sizeof(int));
-	if(type == 3) temp = (unsigned int*)malloc(size*sizeof(int));
-	if(type == 4) temp = (short*)malloc(size*sizeof(short));
-	if(type == 5) temp = (unsigned short*)malloc(size*sizeof(short));
-	if(type == 6) temp = (char*)malloc(size*sizeof(char));
-	if(type == 7) temp = (unsigned char*)malloc(size*sizeof(char));
-	if(type == 8){
-		 temp = (char*)malloc(size*sizeof(char));
-		 strcpy(temp, "\0");
+	size = rows*cols;
+	void *temp;
+	int nxt = nxType(type);
+	temp = malloc(size*SPS_Size(type));
+	for(j=0; j<rows; j++){
+		if(SPS_CopyRowFromShared(spec, nodeprop->spec, (temp + j*(SPS_Size(2))*cols), type, j, cols, &copied)){
+			return NULL;
+		}
 	}
-	if(type == 9) temp = (long*)malloc(size*sizeof(long));
-	if(type == 10) temp = (unsigned long*)malloc(size*sizeof(long));
-	if(type == 11) temp = (long long*)malloc(size*sizeof(long long));
-	if(type == 12) temp = (unsigned long long*)malloc(size*sizeof(long long));
-
-	if(!SPS_CopyFromShared(spec, nodeprop->spec, temp, type, sizeof(temp))){
-		return NULL;
-	}
+	//printf("Type: %d, Copied: %d \n", type, copied);
 	return temp;	
 }
 /*
@@ -699,8 +781,8 @@ int nxType(int type){
 	if(type == 6) nxt = NX_CHAR;
 	if(type == 7) nxt = NX_CHAR;
 	if(type == 8) nxt = NX_CHAR;
-	if(type == 9) nxt = NX_INT32;
-	if(type == 10) nxt = NX_UINT32;
+	if(type == 9) nxt = NX_INT64;
+	if(type == 10) nxt = NX_UINT64;
 	if(type == 11) nxt = NX_INT64;
 	if(type == 12) nxt = NX_UINT64;
 
@@ -725,12 +807,11 @@ int nxType(int type){
  *	Returns: 0 on success
  * 		 1 on error.
  */
-int firstUpdate = 0;
-
 int specDataWrite(char *spec_version, sgm_ndAttr *var_name, NXhandle *file_id, int mode){
 	int nxt, i, buf, one = 1;
 	int rows, cols, flag, size, type;
-	void *temparray;
+	void *temparray = NULL;
+	void *temp2Darray = NULL;
 	int slab_start[2]={2,2}; 
 	int slab_size[2]={2,2}; 
 	int NXrank, NXtype;
@@ -754,8 +835,9 @@ int specDataWrite(char *spec_version, sgm_ndAttr *var_name, NXhandle *file_id, i
 		if(temparray == NULL) return 1;
 	}
 	else if(*(var_name->rank) > 1){
-		temparray = getSpec2D(spec_version, var_name, buf, cols, type);
-		if(temparray == NULL) return 1;
+		//printf("Cols: %d\n", cols);
+		temp2Darray = getSpec2D(spec_version, var_name, buf, cols, type);
+		if(temp2Darray == NULL) return 1;
 	}
 	if(mode == 0){
 		if(type != 8){
@@ -769,12 +851,27 @@ int specDataWrite(char *spec_version, sgm_ndAttr *var_name, NXhandle *file_id, i
 	}
 	else if(mode == 1){
 		if(*(var_name->rank) <= 1){
+			slab_start[0] = 0;
+			slab_start[1] = 0;
+			slab_size[0] = 1;
+			slab_size[1] = 1; 
 			if(NXmakedata (*(file_id), var_name->name, nxt, 1, unlimited_dim) != NX_OK) return 1;
+			if(NXopendata(*(file_id), var_name->name) != NX_OK) return 1;
+			if(NXputslab(*(file_id), temparray, slab_start, slab_size) != NX_OK) return 1;
+			if(NXclosedata(*(file_id)) != NX_OK) return 1;
 		}
 		else if (*(var_name->rank) > 1){
 			unlimited_dims[0] = NX_UNLIMITED;
-			unlimited_dims[1] = *(var_name->rank);
-			if(NXmakedata (*(file_id), var_name->name, nxt, 2, unlimited_dims) != NX_OK) return 1;
+			unlimited_dims[1] = cols;
+			slab_start[0] = 0;
+			slab_start[1] = 0;
+			slab_size[0] = 1;
+			slab_size[1] = cols;
+		
+			if(NXmakedata (*(file_id), var_name->name, NX_INT32, 2, unlimited_dims) != NX_OK) return 1;
+			if(NXopendata(*(file_id), var_name->name) != NX_OK) return 1;
+			if(NXputslab(*(file_id), temp2Darray, slab_start, slab_size) != NX_OK) return 1;  
+			if(NXclosedata(*(file_id)) != NX_OK) return 1;
 		}
 	}
 	else if(mode == 2){
@@ -796,27 +893,25 @@ int specDataWrite(char *spec_version, sgm_ndAttr *var_name, NXhandle *file_id, i
 			slab_start[1] = 0;
 			slab_size[0] = *(copied);
 			slab_size[1] = 1;
-			if(firstUpdate == 0 && NXdim[1] == 1){
-				 slab_start[0] = 0;
-				 firstUpdate == 1;
-			}
-			else if(firstUpdate == 1 && NXdim[1] == 1) firstUpdate = 0;
 			if(NXputslab(*(file_id), temparray, slab_start, slab_size) != NX_OK) return 1;
+			if(NXflush(file_id) != NX_OK) return 1;
 		}
 		else if (*(var_name->rank) > 1){
+			//printf("Write %d points to file, content MCA[18]=%lld. \n", buf, (long long)temp2Darray[10][50]);
 			slab_start[0] = NXdim[0];
 			slab_start[1] = 0;
 			slab_size[0] = buf;
 			slab_size[1] = cols;
-			if(firstUpdate == 0 && NXdim[1] == 1){
-				 slab_start[0] = 0;
-				 firstUpdate == 1;
-			}
-			else if(firstUpdate == 1 && NXdim[1] == 1) firstUpdate = 0;
-			if(NXputslab(*(file_id), temparray, slab_start, slab_size) != NX_OK) return 1;
+			if(NXputslab(*(file_id), temp2Darray, slab_start, slab_size) != NX_OK) return 1;
+			if(NXflush(file_id) != NX_OK) return 1;
 		}
 	}
-	
+	if(temp2Darray != NULL){
+	//	for(i=0; i<cols; i++){
+	//		if(temp2Darray[i] != NULL) free(temp2Darray[i]);
+	//	}
+		if(temp2Darray != NULL)free(temp2Darray);
+	}
 	if(temparray != NULL) free(temparray);
 	return 0;
 }
@@ -852,19 +947,37 @@ xmlXPathObjectPtr getnodeset (xmlDocPtr doc, xmlChar *xpath){
         return result;
 }
 
+/*
+ * Function reads a buffer length from core_shm,
+ * "buffer" this value is the number of frames to be written
+ * to disk for any give write. i.e. the row length of the 
+ * data array to be written. 
+ * Input: spec name
+ * Output: buffer size
+ */
 int updateBuffer(char *spec_name){
 	int buffer;
-	char *buf = (char*)malloc(STRMAX*sizeof(char));
-	if(strncpy(buf, (SPS_GetEnvStr(spec_name, "core_shm", "buffer")), STRMAX) != NULL){
+	char *buf = SPS_GetEnvStr(spec_name, "core_shm", "buffer");
+	if(buf != NULL){
 		buffer = atoi(buf);
 	}
 	else{
 		buffer = 1;
 	}
-	if(buf != NULL) free(buf);
 	return buffer;
 }
-
+/*
+ * If an error occurs while making opening a file, 
+ * a new file is required.  This function alters a
+ * path file string to be *_1.nxs
+ */ 
+void changeFileName(char *filename){
+	char *pFile = strrchr(filename, '/');
+	pFile = pFile == NULL ? filename : pFile+1;
+	char *pExt = strrchr(pFile, '.');
+	if (pExt != NULL) strcpy(pExt, "_1.nxs");
+	else strcat(pFile, "_1.nxs");
+}
 /**
  * Simple switch controlled by core_shm status register. 
  * Program reads in XML template from argv[2] which contains 
@@ -888,9 +1001,10 @@ int main(int argc, char **argv){
 	char *spec_name = NULL;
 	char *specStat = NULL;
 	char *filename = NULL;
-	int ok, buf=0;
+	int ok = 0;
+	int reopen = 0;
 	NXhandle fileid, rw_id;
-
+	char tempfile[4096];
 	filename = (char*)malloc(4096*sizeof(char));
 	if(argc < 2){
 		fprintf(stderr, "Usage: sgmDataRecorder NXdefintion.xml \n");
@@ -913,10 +1027,10 @@ int main(int argc, char **argv){
 		return -1; 
 	}
 	sleep_dur.tv_sec = 0;
-	sleep_dur.tv_nsec = 5000;
+	sleep_dur.tv_nsec = 1000;
 	for(;;){
                 nanosleep(&sleep_dur, NULL);
-		if(SPS_IsUpdated(spec_name, "core_shm")){
+		if(SPS_IsUpdated(spec_name, "core_shm") == 1){
 			specStat = SPS_GetEnvStr(spec_name, "core_shm", "status");
 			if(strcmp(specStat, "0") == 0) sw = 0;
 			else if(strcmp(specStat, "1") == 0) sw = 1;
@@ -927,36 +1041,75 @@ int main(int argc, char **argv){
 			else sw = 20;
 			switch(sw){
 				case 0: 
-                        	      if(filename != NULL){
-					if(strncpy(filename, (SPS_GetEnvStr(spec_name, "core_shm", "filename")), STRMAX) != NULL){
+                        	      if(filename != NULL && ok == 0){
+						if(strncpy(filename, (SPS_GetEnvStr(spec_name, "core_shm", "filename")), STRMAX) != NULL){
 							if(NXopen (filename, NXACC_CREATE5, &fileid) != NX_OK){
-							 	fprintf(stderr, "Trouble opening new NeXuS file.\n");
+							 	fprintf(stderr, "\n ERROR: There was a problem creating a new NeXuS file. Shutting down.\n");
+								sw = 100;
   							}
 							else{
 								ok = 1;
+								if (reopen == 3){
+									SPS_PutEnvStr(spec_name, "core_shm", "status", "3");
+									reopen = 0;
+								}
+								else if (reopen == 4){
+									SPS_PutEnvStr(spec_name, "core_shm", "status", "4");
+									reopen = 0;
+								}
+								else{
+									SPS_PutEnvStr(spec_name, "core_shm", "status", "10");
+								}
 							}
-					}
+						}
                         	      }
                         	      else{
-                                		fprintf(stderr, "Couldn't initiliaze filename. \n");
+                                		if(filename == NULL){
+							fprintf(stderr, "\n ERROR: Couldn't initiliaze filename. Shutting down. \n");
+							sw=100;
+						}
+						else if (ok != 0){
+							fprintf(stderr, "\n WARNING: Attempted to create NeXuS file when one is already open.\n");
+							SPS_PutEnvStr(spec_name, "core_shm", "status", "10");
+						}
                         	      }
                         	      break;
 
 
 				case 1:
-					if(filename != NULL){
+					if(filename != NULL && ok == 0){
 						if(strncpy(filename, (SPS_GetEnvStr(spec_name, "core_shm", "filename")), STRMAX) != 0){
 							if(NXopen (filename, NXACC_RDWR, &fileid) != NX_OK){
-								fprintf(stderr, "There was a problem opening the NeXuS file.\n");
+								fprintf(stderr, "\n ERROR: There was a problem re-opening the NeXuS file.\n");
+								changeFileName(filename);
+								fprintf(stderr, "...	Opening new file %s.\n", filename);
+								SPS_PutEnvStr(spec_name, "core_shm", "status", "0");
 							}
 							else{
 								ok = 1;
-						
+								if (reopen == 3){
+									SPS_PutEnvStr(spec_name, "core_shm", "status", "3");
+									reopen = 0;
+								}
+								else if (reopen == 4){
+									SPS_PutEnvStr(spec_name, "core_shm", "status", "4");
+									reopen = 0;
+								}
+								else{
+									SPS_PutEnvStr(spec_name, "core_shm", "status", "10");
+								}
 							}
 						}
 					}
 					else{
-                                		fprintf(stderr, "Couldn't initiliaze filename. \n");
+                                		if(filename == NULL){
+							fprintf(stderr, "\n ERROR: Couldn't initiliaze filename. Shutting down. \n");
+							sw = 100;
+						}
+						else{
+							fprintf(stderr, "\n WARNING: Attempted to open a NeXuS file handle when one is already active. \n");
+							SPS_PutEnvStr(spec_name, "core_shm", "status", "10");
+						}
 					}
 					break;		
 	
@@ -965,39 +1118,81 @@ int main(int argc, char **argv){
 						if(ok && !wN_stat){
 							wN_stat2 = writeNexusData(doc, spec_name, fileid);
 						}
+						else{
+							wN_stat2 = 1;
+						}
 						if(wN_stat2){
 							fprintf(stderr, 
-							"There was an error writing data slab to the NeXuS file. \n");
+							"\nERROR: There was an error writing data slab to the NeXuS file. Shutting down. \n");
+							sw = 100;
 						}
-                        		}
+						else{
+							SPS_PutEnvStr(spec_name, "core_shm", "status", "10");
+                        			}
+					}
 					else{
-                                		fprintf(stderr, "Trouble connecting to SPEC or NeXus file pipe. \n");
-                        		}
+                        			if(fileid == NULL){ 
+							SPS_PutEnvStr(spec_name, "core_shm", "status", "1");
+                                			fprintf(stderr, "\nWARNING: NeXus file pipe closed. Reopening. \n");
+							reopen = 2;
+						}
+						else if (spec_name == NULL){
+                                			fprintf(stderr, "\nERROR: Spec instance closed. Shutting down. \n");
+							sw = 100;
+						}
+						else if (doc == NULL){
+							fprintf(stderr, "\nERROR: SGM XML file pipe has been closed.  Shutting down.\n");
+							sw = 100;
+						}
+					}
                         		break;
                 		case 3:
                         		if((spec_name != NULL) && (fileid != NULL) && (doc != NULL)){
 						if(ok){
-							wN_stat = writeNexusHead(doc, spec_name, fileid);
+							wN_stat = writeNexusHead(doc, spec_name, &fileid);
 						}
 						else{
 							wN_stat = 1;
 						}
 						if (wN_stat){ 
-							fprintf(stderr,"There was an error writing header to the NeXuS file. \n");
+							fprintf(stderr,"\nERROR: There was an error writing header to the NeXuS file. Shutting down \n");
+							sw = 100;
 						}
+						else{
+							SPS_PutEnvStr(spec_name, "core_shm", "status", "10");
+                        			}
 					}
                         		else{
-                                		fprintf(stderr, "Trouble connecting to SPEC shared memory. \n");
+                        			if(fileid == NULL){ 
+							SPS_PutEnvStr(spec_name, "core_shm", "status", "1");
+                                			fprintf(stderr, "\nWARNING: NeXus file pipe closed. Reopening. \n");
+							reopen = 3;
+						}
+						else if (spec_name == NULL){
+                                			fprintf(stderr, "\nERROR: Spec instance closed. Shutting down. \n");
+							sw = 100;
+						}
+						else if (doc == NULL){
+							fprintf(stderr, "\nERROR: SGM XML file pipe has been closed.  Shutting down.\n");
+							sw = 100;
+						}
                         		}
                         		break;
 	
 				case 2:
 					if(fileid != NULL){	
-						if(NXclose(&fileid) != NX_OK) printf("Couldn't close the file. \n");
-						ok = 0;
+						if(NXclose(&fileid) != NX_OK){
+							fprintf(stderr, "\nERROR: Couldn't close the file. \n");
+							
+						}
+						else{
+							ok = 0;
+							SPS_PutEnvStr(spec_name, "core_shm", "status", "10");
+						}
 					}
 					else{
-						fprintf(stderr, "There is no file to close.\n");
+						fprintf(stderr, "\nWARNING: Attempt to close non-existent NeXus file handle.\n");
+						SPS_PutEnvStr(spec_name, "core_shm", "status", "10");
 					}
 					break;
         		}       
@@ -1021,6 +1216,6 @@ int main(int argc, char **argv){
 #else
 int main(void) {
     fprintf(stderr, "Tree support not compiled in\n");
-    exit(1);
+    return(1);
 }
 #endif

@@ -483,11 +483,11 @@ def hex_p_calc(mne, mode) '{
 			A[hex_zp] = A[hex_x]*0.683013 + A[hex_y]*-0.183013 + A[hex_z]*0.707107
 	} else {
 			A[hex_x] = A[hex_xp]*-0.258819+A[hex_yp]*+0.683013+A[hex_zp]*0.683013
-			hex_set_x = A[hex_x]
+		#	hex_set_x = A[hex_x]
 			A[hex_y] = A[hex_xp]*-0.965926+A[hex_yp]*-0.183013+A[hex_zp]*-0.183013
-			hex_set_y = A[hex_y]
+		#	hex_set_y = A[hex_y]
 			A[hex_z] = A[hex_yp]*-0.707107+A[hex_zp]*0.707107
-			hex_set_z = A[hex_z]
+		#	hex_set_z = A[hex_z]
 	}
 }'
 ###########################################
@@ -502,25 +502,21 @@ def lights '{
 }'
 
 def beam_on '{
-
+	local onalready
+	onalready = 0
 	print ("Turning beam on.")
 	if (epics_get("AM1611-4-I10:beam:status") != "BEAM ON"){
 		epics_put("AM1611-4-I10:beam:opr:on", 1, 2)
 		sleep(2)
-                print ("Waiting for beam...")
-        }
+		print ("Waiting for beam...")
+		sleep(5)
+       }
 	else if (epics_get("AM1611-4-I10:beam:status") == "BEAM ON"){
-		print "Beam was already on!"
-		
+		print "Beam was already on."
+		onalready = 1
 	}
-	#while (epics_get("AM1611-4-I10:beam:status") != "BEAM ON") {
-        #       sleep(5)      
-	#       epics_put("AM1611-4-I10:beam:opr:on", 1)
-        #}
-	sleep(5)
-	if (epics_get("AM1611-4-I10:beam:status") == "BEAM ON"){
+	if ((epics_get("AM1611-4-I10:beam:status") == "BEAM ON") && (onalready != 1)){
 		print "Beam is on!"
-		
 	}
 
 }'
@@ -1018,17 +1014,19 @@ def chk_sr1_stat'{
 		}
 		get_valve_status
 		#Make sure that beam is not on, before spending any time here.
-		#Then check for SR stored status, if good then try opening shutters once.
+		#Then check for SR stored status, if good then try opening shutters until max time or they open.
 		#Time out search for SR1 STORED after 2hr.
 	 	while (((valve_status != 1) | (shutter_status != 1)) & (TIME_OUT - time() < 2*3600)) {
-			comment "Beam off status detected,  will try to turn beam on in 30 sec..."
-			sleep(30)
+			comment "Beam off status detected,  will try to turn beam on in 60 sec..."
+			sleep(60)
 			if(epics_get("SYSTEM:mode") == "SR1 STORED"){
 				#sleep(120)
-				epics_put("BL1611-ID-1:beam:turnon", 1)
-				break
+				#epics_put("BL1611-ID-1:beam:turnon", 1)
+				beam_on
+				#break
 			}
 			get_shutter_status
+			get_valve_status
                 }
         }
 }'
@@ -1037,7 +1035,7 @@ global shutter_status
 shutter_status = 0
 
 def get_shutter_status '{
-	if ((epics_get("PSH1411-I00-01:state") == "OPEN") & (epics_get("PSH1411-I00-02:state") == "OPEN") & (epics_get("PSH1611-3-I10-01:state") == "OPEN") & (epics_get("SSH1411-I00-01") == "OPEN")){
+	if ((epics_get("PSH1411-I00-01:state") == "OPEN") & (epics_get("PSH1411-I00-02:state") == "OPEN") & (epics_get("PSH1611-3-I10-01:state") == "OPEN") & (epics_get("SSH1411-I00-01:state") == "OPEN")){
 		shutter_status = 1
 
 	}
@@ -1052,7 +1050,7 @@ valve_status = 0
 
 def get_valve_status '{
 	global fevalve_status, htvalve_status, mnvalve_status, envalve_status
-	if((epics_get("VVR1411-I00-01:state") == "OPEN") & (epics_get("VVR1611-3-I00-01") == "OPEN") & (epics_get("VVR1611-3-I00-02") == "OPEN") & (epics_get("VVR1611-3-I00-03") == "OPEN")){
+	if((epics_get("VVR1411-I00-01:state") == "OPEN") & (epics_get("VVR1611-3-I00-01:state") == "OPEN") & (epics_get("VVR1611-3-I00-02:state") == "OPEN") & (epics_get("VVR1611-3-I00-03:state") == "OPEN")){
 		valve_status = 1
 		fevalve_status = 1
 	}
@@ -1060,7 +1058,7 @@ def get_valve_status '{
 		valve_status = 0
 		fevalve_status = 0
 	}
-	if((epics_get("VVR1611-3-I10-01") == "OPEN") & (epics_get("VVR1611-3-I10-02") == "OPEN") & (epics_get("VVR1611-3-I10-03") == "OPEN") & (epics_get("VVR1611-3-I10-04") == "OPEN")){
+	if((epics_get("VVR1611-3-I10-01:state") == "OPEN") & (epics_get("VVR1611-3-I10-02:state") == "OPEN") & (epics_get("VVR1611-3-I10-03:state") == "OPEN") & (epics_get("VVR1611-3-I10-04:state") == "OPEN")){
 		if(valve_status){
 			valve_status = 1
 		}
@@ -1070,7 +1068,7 @@ def get_valve_status '{
 		valve_status = 0
 		htvalve_status = 0
 	}
-	if((epics_get("VVR1611-4-I10-01") == "OPEN") & (epics_get("VVR1611-4-I10-02") == "OPEN") & (epics_get("VVR1611-4-I10-03") == "OPEN") & (epics_get("VVR1611-4-I10-04") == "OPEN")){
+	if((epics_get("VVR1611-4-I10-01:state") == "OPEN") & (epics_get("VVR1611-4-I10-02:state") == "OPEN") & (epics_get("VVR1611-4-I10-03:state") == "OPEN") & (epics_get("VVR1611-4-I10-04:state") == "OPEN")){
 		if(valve_status){
 			valve_status = 1
 		}	
@@ -1080,7 +1078,7 @@ def get_valve_status '{
 		valve_status = 0
 		mnvalve_status = 0
 	}
-	if((epics_get("VVR1611-4-I10-05") == "OPEN") & (epics_get("VVR1611-4-I10-05") == "OPEN") & (epics_get("VVR1611-4-I10-07") == "OPEN") & (epics_get("VVR1611-4-I10-08") == "OPEN")){
+	if((epics_get("VVR1611-4-I10-05:state") == "OPEN") & (epics_get("VVR1611-4-I10-05:state") == "OPEN") & (epics_get("VVR1611-4-I10-07:state") == "OPEN") & (epics_get("VVR1611-4-I10-08:state") == "OPEN")){
 		if(valve_status){
 			valve_status = 1
 		}	
@@ -1093,19 +1091,14 @@ def get_valve_status '{
 }'
 
 
-def user_scan_tail '{
+#def user_scan_tail '{
+#
+#	qcomment "Scan done. Turning off beam."
+#	beam_off
+#}'
 
-qcomment "Scan done. Turning off beam."
-epics_put("AM1611-4-I10:beam:opr:off", 1)
-
-### Setup scaler for Acquaman data server
-#epics_put("BL1611-ID-1:mcs:delay", 1)
-#sleep(0.5)
-#epics_put("BL1611-ID-1:mcs:nscan", 100)
-#sleep(0.5)
-#epics_put("BL1611-ID-1:mcs:scanCount", 0)
-#sleep(0.5)
-#epics_put("BL1611-ID-1:mcs:startScan", 1)
+def beam_off_after_scan '{
+	cdef("user_scan_tail", "mca_single; beam_off; ", "_beamoff.after_")
 }'
 
 
@@ -1329,15 +1322,20 @@ def bct '{
         user_ct
 }'
 
-def cleanup '{
+def cleanup1 '{
 
 	print "Scan cancelled. Running cleanup."
+	if (HDF5_ON == 1){
+		tailhdf5
+	}
 	mca_single
 	beam_off
 }'
 
 def setuser '{
+	global SPEC_USER
 	global SYNC_STRING
+	SPEC_USER = "$1"
 	SYNC_STRING = sprintf("/home/sgm/Scripts/push_sync.sh %s", "$1")
 	print SYNC_STRING
 }'
@@ -1374,6 +1372,10 @@ def bend_v_diff '{
 
 
 def zero_order '{
+	
+	epics_put("SMTR16114I1002:encMoveType", "Increase")
+	epics_put("SMTR16114I1002:velo", 5000)
+
 	if (epics_get("AM1611-4-I10:energy:grating:translation:status") != "MOVE DONE"){
 			print("Grating selection motor is currently moving..")
 	}
@@ -1399,4 +1401,9 @@ def M4_pitch '{
 	if ($# == 1){
 		epics_put("SMTR16114I1005:step", $1)
 	}
+}'
+def current_file '{
+
+        print HDF5_FILE
+
 }'

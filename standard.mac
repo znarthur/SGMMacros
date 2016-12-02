@@ -1367,6 +1367,7 @@ cdef("user_postscan_head")
 cdef("user_scan_loop")
 cdef("user_scan_plot")
 cdef("user_scan_tail")
+cdef("user_scan_write")
 
 cdef("spec_scan_tail")  # Used by special scans, such as powder scans
 
@@ -1380,7 +1381,10 @@ cdef("user_Pheader")
 def _head '
 	user_prescan_head
 	_scan_time
-	waitall; get_angles; calcHKL
+	printf("AA")
+	#waitall; get_angles; calcHKL
+	printf("BB")
+	
 	NPTS = T_AV = MT_AV = 0
 	DATE = date()
 	TIME = TIME_END = time()
@@ -1440,13 +1444,14 @@ def _head '
 	} else
 		SCAN_N++
 	T_L = sprintf("Scan %d", SCAN_N)
-
 	# TTY HEADER
 	{
 		local i, n, s
 
-		if (DATAFILE == "/dev/null" || DATAFILE == "null")
-			s = "**NO DATA FILE**"
+		if (DATAFILE == "/dev/null" || DATAFILE == "null"){
+			if(!HDF5_ON)	
+				s = "**NO DATA FILE**"
+		}
 		else
 			s = sprintf("file = %s", DATAFILE)
 		printf("\nScan %3d   %s   %s  %s  user = %s\n%s\n\n",\
@@ -1467,13 +1472,15 @@ def _head '
 				n--
 			}
 		}
-		printf("%s%s\n",s,Plabel)
+		if(HDF5_ON != 1) printf("%s%s\n",s,Plabel)
 	}
+	
 	user_postscan_head
 '
 # Used by head to print-out the total scan time
 def _scan_time '{
 	local t, n
+	global npts_est
 
 	if (_stype&scanType_Continuous) {
 		n = _n1
@@ -1504,6 +1511,7 @@ def _scan_time '{
 		if (h || m)
 			printf(" (%d:%2.2d:%2.2d)",h,m,s)
 	}
+	npts_est = n
 	printf("\n")
 }'
 # Used by head to save various geometry parameters to DATAFILE
@@ -5038,8 +5046,8 @@ def _cscan(is_mesh) '{
 		gnplt_out[5] = _f[0]
 		gnplt_out[6] = _s[1]
 		gnplt_out[7] = _f[1]
-		unix("pkill -x gnuplot_x11")
-		unix("/home/sgm/spec/spec_gnplt/spec_gnplt 500000 &")
+	#	unix("pkill -x gnuplot_x11")
+	#	unix("/home/sgm/spec/spec_gnplt/spec_gnplt 500000 &")
 	}
 	else {
 		s = _nm>1? sprintf("c%dscan ", _nm):"cscan "
@@ -5098,7 +5106,6 @@ def _cscan(is_mesh) '{
 	if (flag)
 		printf("Moving to start position ...\n")
 	move_em
-	#printf("Waiting 1 second\n")
 	sleep(0.1)
 
 	# Get an estimate of overhead time for reading hardware while moving to start
@@ -5112,6 +5119,7 @@ def _cscan(is_mesh) '{
 	_update(m, 0)
 	waitmove
 
+	#printf("Waiting 1 second\n")
 	if (flag)
 		print
 
@@ -5158,7 +5166,7 @@ def _cscan(is_mesh) '{
 	}
 	FPRNT=sprintf("%s%s  ",FPRNT,_hkl_sym1)
 	scan_head
-
+	
 	VFMT=sprintf("%%s%%9.%df ",UP)
 
 	rdef _scan_on \'\'
@@ -5184,7 +5192,10 @@ def _cscan(is_mesh) '{
 			### If outside loop is the hexapod then speed it up
 			if (motor_mne(_m[1]) == "hex_xp" | \
 				motor_mne(_m[1]) == "hex_yp" | \
-				motor_mne(_m[1]) == "hex_zp") {
+				motor_mne(_m[1]) == "hex_zp" | \
+				motor_mne(_m[1]) == "hex_x" | \
+				motor_mne(_m[1]) == "hex_y" | \
+				motor_mne(_m[1]) == "hex_z") {
 				
 				temp_v = _cscan_velocity_save[1]
 				motor_par(_m[1], "velocity", temp_v)
@@ -5192,18 +5203,21 @@ def _cscan(is_mesh) '{
 			}
 
 			move_em
-			sleep(0.1)
+			sleep(0.05)
 			while (chk_move) {
 			#	printf("Moving outside loop.\n")
-				sleep(0.1)
+				sleep(0.05)
 			}
 
 			### Back to slew speed
 			if (motor_mne(_m[1]) == "hex_xp" | \
-                                motor_mne(_m[1]) == "hex_yp" | \
-                                motor_mne(_m[1]) == "hex_zp") {
+                               motor_mne(_m[1]) == "hex_yp" | \
+                                motor_mne(_m[1]) == "hex_zp" | \
+                                motor_mne(_m[1]) == "hex_x" | \
+                                motor_mne(_m[1]) == "hex_y" | \
+                                motor_mne(_m[1]) == "hex_z") {
 
-                                motor_par(_m[1], "velocity", speed)
+                               motor_par(_m[1], "velocity", speed)
 
                         }
 	
@@ -5228,12 +5242,12 @@ def _cscan(is_mesh) '{
 				epics_put("AM1611-4-I10:energy:trajectory:target:eV", _s[0])
 			epics_put("AM1611-4-I10:energy:trajectory:start", 1)
 			while (epics_get("AM1611-4-I10:energy:status") != "MOVE ACTIVE"){
-				sleep(0.1)
+				sleep(0.05)
 			}
 		}
 		else {
 			move_em
-			sleep(0.1)
+			sleep(0.05)
 		}
 		while (chk_move) {
 			if (_stime)
@@ -5263,6 +5277,7 @@ def _cscan(is_mesh) '{
 				continue
 			}
 			FPRNT=VPRNT=""
+			if(!HDF5_ON){
 			for (i = 0; i < _nm; i++) {
 				FPRNT = sprintf("%s%.8g ",FPRNT,A[_m[i]])
 				gnplt_out[i] = A[_m[i]]
@@ -5292,7 +5307,7 @@ def _cscan(is_mesh) '{
 			}
 
 			printf("%s%s\n",s,Pout)
-
+			
 			if (DATAFILE != "") {
 				TIME_END = time()
 				fprintf(DATAFILE, "%s%s%d", FPRNT, Fout, TIME_END - EPOCH)
@@ -5303,6 +5318,7 @@ def _cscan(is_mesh) '{
 					fprintf(DATAFILE, " %.8g", S[MON])
 				fprintf(DATAFILE, " %.8g\n", S[DET])
 			}
+			}
 			user_scan_loop
 
 			scan_data(_g1, A[_m[0]])
@@ -5312,9 +5328,9 @@ def _cscan(is_mesh) '{
 		}
 		####Need to stop the SDDs at the end of a line
 		chk_sr1_stat
-		sleep(0.1)
-		mca_single
-
+		#sleep(0.1)
+		#mca_single
+		user_scan_write
 	}
 	cdef("cleanup_once", "", "cscan", "delete")
 	cscan_cleanup(is_mesh)
