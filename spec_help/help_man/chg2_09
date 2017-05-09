@@ -1,0 +1,123 @@
+.TH "changes" "spec 2.9 Release Notes" "08/01/12" "chg2_09.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.9
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_09.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.9 Release Notes" "08/01/12" "chg2_09.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes summarize the modifications made for \fBspec\fP release 2.9,
+as finalized on October 10, 1988.
+.SH "CHANGES"
+.rs
+.sp
+Invoking \fBspec\fP with
+\fB\-y\fP
+will force
+the motor registers to be changed to agree with the settings file
+when the program starts up.
+If you are confident the settings file is okay, and know the
+motor registers have been wiped out, say by shutting off
+crate power, then this option ought to be just the thing.
+.sp
+The message noting the discrepancy between motor\-controller registers
+and program memory now shows the values of each in user units (angles)
+in addition to steps.
+.sp
+Hitting a hard motor limit will cause the program to reset to
+command level, whether in a scan or in a command file.
+Previously, although motor motion was aborted on a hard limit,
+command execution continued.
+.sp
+The
+\fBprdef\fP
+command now shows backslashes associated with
+escaped delimiter characters within a macro definition,
+as in:
+.RS 3m
+.sp
+.nf
+.ft CB
+def silly \(aqprint "Who\e\(aqs on first?"\(aq
+.ft P
+.fi
+.RE
+.sp
+Previously, these backslashes were not shown.
+.sp
+All instances of the command
+\fBmove_all\fP
+in the standard macros
+have been replaced by the macro
+\fBmove_em\fP.
+The default definition of
+\fBmove_em\fP
+is simply
+\fBmove_all\fP.
+The purpose of
+\fBmove_em\fP
+is to make it easy for the user
+to
+include limit checks of moves
+that involve more than one motor by redefining
+\fBmove_em\fP.
+.sp
+A new macro
+\fBmesh\fP
+that performs a mesh scan of any two motors
+is included.
+.sp
+The
+\fBwm\fP
+and
+\fBuwm\fP
+macros now check that their arguments are valid
+motor names.
+.sp
+A new built\-in command
+\fBlocal\fP
+(with the same syntax as the
+\fBglobal\fP
+command) can be used to reuse a preexisting variable name
+and give the new instance of that name scope only within
+and below the curly\-bracketed block in which it is defined.
+A known bug with the current implementation is that you cannot use
+the
+\fBglobal\fP
+keyword at the same level or lower to
+\fBunlocalize\fP
+use
+of a previously local\-declared variable name.
+.sp
+The motor screen for the
+\fBedconf\fP
+configuration and settings editor now
+wraps around when changing motor columns instead of sticking at motor 0
+or at the last motor.
+.sp
+The CAMAC drivers can be optionally compiled either to allow only the
+super user to issue a
+\fBZ\fP
+or to allow any user to issue a
+\fBZ\fP.
+Previously, it was only super\-user only.
+.sp
+This release supports the 386/ix operating system on 80386\-based
+machines.
+See the
+\fB386\fP
+help file.
+

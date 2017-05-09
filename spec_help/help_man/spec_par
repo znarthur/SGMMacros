@@ -1,0 +1,362 @@
+.TH "spec_par" "function" "08/01/12" "spec_par.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+spec_par() \- sets internal parameters
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)spec_par.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1997,1998,1999,2003,2005,2009,2010,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "spec_par" "function" "08/01/12" "spec_par.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBspec_par()\fP function allows access to certain
+internal parameters of \fBspec\fP as described below.
+Most parameters can be set using the \fB\-o\fP start\-up option
+(see the \fI\%spec\fP help file).
+Some parameters can only be set using the start\-up option.
+As of \fBspec\fP release 5.03.01, some hardware\-related parameters
+can also be set in the \fBconfig\fP file, using the following syntax:
+.sp
+.RS 4m
+\fBSPEC_PAR: epics_timeout = 2\fP
+.RE
+.sp
+The declarations have to be entered manually, but will be maintained
+by the \fBedconf\fP configuration editor.
+The declaration can be located anywhere in the file.
+.RS 0m
+.HP 5m
+."
+\fBspec_par("?")\fP
+\- 
+Displays all the parameters and their values.
+If the current value differs from the default value,
+the default value is displayed in parenthesis (as of release 5.08.02\-8).
+.HP 5m
+."
+\fBspec_par("set_defaults")\fP
+\- 
+Sets all parameters to their default values.
+.HP 5m
+."
+\fBspec_par(par\fP)
+\- 
+Returns the current value of the parameter \fBpar\fP.
+.HP 5m
+."
+\fBspec_par(par, value\fP)
+\- 
+Sets the internal parameter \fBpar\fP to \fBvalue\fP.
+.RE
+.sp
+The \fBspec_par()\fP parameters are:
+.RS 0m
+.HP 5m
+."
+\fB"anka_remote_host"\fP, \fB"anka_remote_node"\fP, \fB"anka_locate_node"\fP
+\- 
+This parameters are only visible when
+the ANKA RST Gamma hardware is configured.
+See the \fI\%anka\fP help file for an explanation of what they mean.
+These parameters can be set in the \fBconfig\fP file.
+.RE
+.HP 5m
+."
+\fB"auto_file_close"\fP
+\- 
+The auto\-file\-close option is available to automatically close output files
+that haven\(aqt been accessed for some interval of time.
+The parameter units are hours,
+and the parameter can have nonintegral values.
+When the auto\-close option is enabled, each time an
+\fBon()\fP, \fBoff()\fP, \fBopen()\fP, \fBclose()\fP
+or \fBfprintf()\fP function is called,
+\fBspec\fP will check its list of opened output files.
+Any files which have not been written to for the length of time given by
+\fBvalue\fP hours will be closed.
+Enabling this option can help prevent errors when your macros or commands
+do not close files when appropriate, resulting
+in \fBspec\fP running out of resources to open additional files.
+.sp
+As files are opened automatically when sent output,
+auto\-close mode operates transparently for the most part.
+However, if you change to a different working
+directory between the time the file is first
+opened and subsequently automatically closed,
+and if the file is not opened by an
+absolute path name, the next time you refer to the file,
+\fBspec\fP will reopen it using a relative path based
+on the current directory.
+.sp
+If \fBvalue\fP is zero, the mode is disabled.
+By default, the mode is initially disabled.
+.HP 5m
+."
+\fB"auto_hdw_poll"\fP
+\- 
+When automatic hardware polling is turned on,
+\fBspec\fP will automatically poll busy motor controllers, timers and
+acquisition devices to determine when they are finished.
+For some polled devices, \fBspec\fP needs to perform an action, such as
+starting a motor backlash move,
+when the device is finished with its current business.
+Without automatic hardware polling, a call to the
+\fBwait()\fP function is necessary.
+The default is for this mode to be on.
+A reason to turn it off may be to reduce the amount of debugging output
+during hardware debugging.
+Early versions of \fBspec\fP made more frequent use of
+interrupt\-driven devices (certain motor controllers and timers),
+for which this mode is irrelevant.
+.HP 5m
+."
+\fB"check_file_names"\fP
+\- 
+The check\-file\-names option can prevent you from (accidentally)
+creating files
+with names containing nonstandard characters.
+When enabled, if a file name passed to the
+\fBon()\fP, \fBopen()\fP or \fBfprintf()\fP functions contains
+any of the characters
+\fB()[]{}|$\(aq\(ga*?;!&<>\e\e@\fP, the space character, any
+control characters or any characters with the eighth bit set,
+and the file doesn\(aqt already exist,
+\fBspec\fP will print a error messages and reset to command level.
+By default, this mode is on.
+.HP 5m
+."
+\fB"confirm_quit"\fP
+\- 
+If set, \fBspec\fP prompts with a "Really quit?" message when the
+\fBquit\fP or \fB^D\fP commands are entered.
+The question must be answered in the affirmative to exit the program.
+The value for \fB"confirm_quit"\fP is not saved in the state file.
+The option must be set again on each \fBspec\fP invocation.
+.HP 5m
+."
+\fB"elog_level"\fP
+\- 
+The level at which commands are saved to the
+\fBelog\fP error files is set using this option.
+At level 1, the default, only commands typed at the keyboard are logged.
+At level 2, the commands read from command files are also logged.
+.HP 5m
+."
+\fB"elog_timestamp"\fP
+\- 
+The time interval for the optional time stamps for the
+\fBelog\fP error file capability is set using this option.
+The units of the \fB"elog_timestamp"\fP parameter are minutes.
+The default value is 5 minutes.  Note, time stamps are only added
+before a command or error message is logged, so that the interval
+between time stamps can be greater than that specified if no commands
+are being typed or errors generated.
+However, for time\-stamp intervals less
+than 1 second (or 0.1666 min), every command and
+error message will be preceded by a time stamp, and the time stamp
+will include fractional seconds in the epoch value.
+.HP 5m
+."
+\fB"epics_timeout"\fP
+\- 
+Sets the default timeout for channel access
+\fBca_pend_io()\fP calls on EPICS.  The default value is 0.5 seconds.
+This option appears only when \fBspec\fP is linked with the
+EPICS channel access libraries.
+Timeout values for individual process variables can still be
+changed with the \fBepics_par()\fP function.
+This parameter can be set in the \fBconfig\fP file.
+.HP 5m
+."
+\fB"fast_hdw_checks"\fP
+\- 
+When in server\-mode, if set, the \fBspec\fP server
+will use an adaptive algorithm for
+polling hardware status.
+If the interval between client messages is less than one second, the server
+will use a faster polling frequency for checking
+for both hardware status and
+the next client message, thus providing a client
+with faster notifications of changes in hardware state.
+This parameter can be set in the \fBconfig\fP file.
+With its (documented) introduction
+in \fBspec\fP release 5.08.06\-2, the mode is off by default.
+.HP 5m
+."
+\fB"flush_interval"\fP
+\- 
+The flush\-interval parameter controls how often \fBspec\fP flushes output
+to the hard disk or other output devices.
+Traditionally, \fBspec\fP flushed output after each print command.
+However, as some users report that this frequent
+flushing introduces considerable delays
+when the output device is to an NFS\-mounted file system,
+the flushing interval can now be controlled.
+The \fB"flush_interval"\fP parameter
+specifies how many seconds to allow between output buffer flushing.
+The default value is 0.5 seconds.
+If the interval is set to zero, the traditional frequent\-flushing behavior
+will be restored.
+Output to the screen is still flushed immediately.
+Output is also flushed each time the main \fBspec\fP prompt is issued.
+.HP 5m
+."
+\fB"HKL_rounding"\fP
+\- 
+Traditionally, \fBspec\fP rounded values for \fBH\fP, \fBK\fP and
+\fBL\fP (and other geometry values derived from motor positions)
+to five significant digits for configurations using reciprocal space
+calculations.
+As of release 4.03.01, the rounding is now turned off by default.
+It can be turned on using the command \fBspec_par("HKL_rounding", 1e5)\fP
+where the argument indicates the magnitude of the rounding, i.e.,
+one part in 1e5, for example.
+Note, values with an absolute value less than 1e\-10 are still
+rounded to zero whether or not the optional rounding is turned on.
+.HP 5m
+."
+\fB"hdw_poll_interval"\fP
+\- 
+When the \fBwait()\fP function is called to
+wait for polled motors, timers or other acquisition devices to finish,
+\fBspec\fP sleeps for a small interval between each check of the hardware.
+Use this \fBspec_par()\fP option to change that interval.
+The units of the parameter are milliseconds, and
+the default sleep time is 10msec.
+A value of zero is allowed, though
+not recommended if the computer is being used for anything else.
+.HP 5m
+."
+\fB"keep_going"\fP
+\- 
+Normally, when taking commands from a command file, \fBspec\fP resets
+to command level and the main interactive prompt when there
+are syntax errors in the file, certain floating point exceptions,
+references to unconfigured hardware, hardware access errors, along
+with a number of other errors.
+When the \fB"keep_going"\fP option is set,
+\fBspec\fP will keep reading and executing commands from
+a command file no matter what errors occur.
+When there is an error,
+the next line from the current command file will be read.
+Note, depending on where the error is in a file, reading subsequent
+lines may generate more errors, particularly if the error occurs
+inside a statement block.
+.HP 5m
+."
+\fB"modify_step_size"\fP
+\- 
+Normally, \fBspec\fP doesn\(aqt allow users to
+modify the motor step\-size parameter
+with the \fBmotor_par()\fP function, as the consequences
+are generally undesirable.
+However, in the rare circumstance that it is necessary, this
+parameter allows you to enable such modifications.
+.HP 5m
+."
+\fB"old_shared"\fP
+\- 
+With \fBspec\fP release 5.02.01, the structure of the shared array header was
+changed so that the data portion of the array
+would lie on a memory page boundary.
+To allow compatibility with applications built with the old header
+structure, the \fB"old_shared"\fP option can be set.
+However, this option can only be set as a \fB\-o\fP
+command line start\-up option, and
+the parameter is not saved in the state file.
+It must be set each time \fBspec\fP is invoked.
+.HP 5m
+."
+\fB"parse_units"\fP
+\- 
+When parsing of units is turned on, numbers typed
+as input to \fBspec\fP\(aqs parser
+with one of the following suffixes appended will automatically
+be multiplied by the corresponding factor.
+.TS
+;
+l l .
+\fB1r  = 57.2958\fP	\fBradian\fP
+\fB1mr = 0.0572958\fP	\fBmilliradian\fP
+\fB1d  = 1\fP	\fBdegree\fP
+\fB1md = 0.001\fP	\fBmillidegree\fP
+\fB1mm = 1\fP	\fBmillimeter\fP
+\fB1um = 0.001\fP	\fBmicrometer\fP
+\fB1m  = 0.0166667\fP	\fBminute\fP
+\fB1s  = 0.000277778\fP	\fBsecond\fP
+.TE
+.sp
+Note, however, suffixes on numbers converted from strings
+or entered using the \fBgetval()\fP function are not parsed.
+The only known use for unit\-suffix parsing is with
+the user\-contributed macros in the file \fBmacros/units.mac\fP. These macros
+require that unit suffixes be supplied
+for all motor position arguments in the standard \fBspec\fP macros.
+The default is for this mode to be off.
+.HP 5m
+."
+\fB"show_prdef_files"\fP
+\- 
+When this mode is on, the source file for each macro definition is
+displayed with the \fBprdef\fP command.
+The default is for this mode to be on.
+.HP 5m
+."
+\fB"specwiz"\fP
+\- 
+Allows \fBspec\fP administrators to gain access to motors
+locked out in the \fBconfig\fP file to ordinary users.
+This feature allows the administrator to position the motors
+without having first to go into the configuration
+editor to change access modes.
+Entering \fBspec_par("specwiz", 1)\fP causes \fBspec\fP to prompt for the
+"Wizard\(aqs password". If entered correctly, the characters
+\fB_WIZ\fP are appended to the \fBspec\fP
+prompt to remind the administrator of the special powers,
+and motors configured with protected status can be moved.
+Entering \fBspec_par("specwiz", 0)\fP disables the special mode.
+.sp
+\fBspec\fP looks for the encrypted password belonging to the
+spec_wiz (or specwiz) user in the files
+\fBSPECD\fP\fB/passwd\fP, \fB/etc/shadow\fP, and \fB/etc/passwd\fP in turn.
+If a shadow password file is used, ordinary users won\(aqt be able to
+read it, and the normal password file won\(aqt contain the encrypted password.
+The \fBspec\fP distribution includes
+a \fBwiz_passwd\fP utility (as of release 4.03.07)
+the can be used to create a
+\fBpasswd\fP file in the \fBspec\fP auxiliary file directory
+that contains just the entry for the spec_wiz user.
+The \fBSPECD\fP\fB/passwd\fP file should probably be
+owned and writable only by root or the \fBspec\fP administrator.
+.sp
+Note, the standard macros \fBonwiz\fP and
+\fBoffwiz\fP are convenient wrappers for the spec_wiz feature.
+.HP 5m
+."
+\fB"use_sem_undo"\fP
+\- 
+This flag relates to whether the
+\fBSEM_UNDO\fP flag is set when semaphores are used.
+It exists to get around a memory leak bug observed with
+some releases of the Solaris 2 operating system.
+The flag should be ignored unless you are instructed otherwise by CSS.
+.HP 5m
+."
+\fB"warn_not_at_pos"\fP
+\- 
+When enabled, \fBspec\fP prints a warning message whenever a motor
+doesn\(aqt reach its final position (as of release 5.08.02\-8).
+.RE
+

@@ -1,0 +1,63 @@
+setpowder                             macro                            setpowder
+
+NAME
+     setpowder - configure powder-averaged scans
+
+DESCRIPTION
+
+     The sseettppoowwddeerr macro is used to turn the powder-average mode on or off.  Its
+     usage is:
+
+     sseettppoowwddeerr mmoottoorr ffuullll__wwiiddtthh - turns powder mode on, sets parameters.
+
+     sseettppoowwddeerr ooffff - turns powder mode off.
+
+     sseettppoowwddeerr uunnii - turns unidirectional scanning on.
+
+     sseettppoowwddeerr --uunnii - turns bidirectional scanning on.
+
+     sseettppoowwddeerr - turns powder mode on, asks for parameters.
+
+     When powder mode is on, the powder motor will be rocked the full width
+     specified at each point in a scan.  Counts will be accumulated while the
+     motor is moving.  Powder mode works with all the angle scans and the HHKKLL
+     scans.
+
+     The syntax for invoking scans remains unchanged.  You must still give the
+     count-time parameter, although its value is only used to select the order
+     in which the time and monitor counts are recorded for each data point in
+     the data file.  (In the future, the count-time parameter may be used to set
+     the motor velocity.)
+
+     By default, the motors are rocked at the base rate as configured in the
+     ccoonnffiigg file.  To accommodate a faster rocking speed that requires
+     accelerating from a base rate or a powder speed different from the base
+     rate, the following mmoottoorr__ppaarr(()) motor parameters are available (as of ssppeecc
+     release 5.05.05-1): ""ppoowwddeerr__bbaassee"", ""ppoowwddeerr__sslleeww"" and ""ppoowwddeerr__aacccceelleerraattiioonn"".
+     The values for the first two parameters are set to the motor base rate and
+     the last to the motor acceleration when ssppeecc starts up and on every
+     rreeccoonnffiigg command (or ccoonnffiigg macro invocation).  If the ""ppoowwddeerr__sslleeww"" value
+     is less than the ""ppoowwddeerr__bbaassee"" value both the base and slew rates are set
+     to the ""ppoowwddeerr__sslleeww"" value.
+
+     (Certain motor controllers, namely the 18011, CM3000, CM4000, E500, ES_OMS,
+     ES_VPAP, HUB9000, IP28, MC4, MCB, SIX19, SMC and XRGCI_M, do not recognize
+     the above parameters.  Contact CSS to discuss the feasibility of adding
+     support for the parameters for any of these controllers.)
+
+     By default, the powder mode moves the rocked motor in opposite directions
+     at successive points to save time.  If unidirectional mode is selected, the
+     motor is scanned in the same direction for each point with the direction
+     determined by the sign of the ffuullll__wwiiddtthh parameter.  The motor movements do
+     not include backlash corrections in either case.  At the end of the scan,
+     or if the scan is aborted, the rocked motor will be returned to its
+     position at the start of the scan, correcting for backlash, as of the
+     powder-mode macros included in ssppeecc release 5.06.01-4.  Prior to that, the
+     rocked motor would be left at its last position without a backlash
+     correction.
+
+     Powder mode works by redefining the macros ssccaann__mmoovvee and ssccaann__ccoouunntt that
+     are called at each point in a scan.  The return to starting position of the
+     rocked motor is accomplished using the cclleeaannuupp__oonnccee and ssppeecc__ssccaann__ttaaiill
+     macros.
+

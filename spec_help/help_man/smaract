@@ -1,0 +1,405 @@
+.TH "smaract" "hardware" "05/06/14" "smaract.rst 6.4  05/06/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+SmarAct \- SmarAct GmbH SCU and MCS controllers for micro\- and nanopositioning
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)smaract.rst      6.4  05/06/14  CSS
+.
+.\" Copyright (c) 2011,2012,2013,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "smaract" "hardware" "05/06/14" "smaract.rst 6.4  05/06/14 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP supports the SmarAct SCU and MCS
+controller modules
+over a serial interface.
+See
+\fI\%www.smaract.de\fP for details on the hardware.
+.SH "CONFIGURATION"
+.rs
+.sp
+\fBspec\fP supports
+the SmarAct SCU and MCS controller in both open\-loop and closed\-loop modes.
+The
+closed\-loop mode requires the optional
+sensor module hardware is installed.
+Such channels should be configured with controller type
+\fBSMARACT_E\fP
+in the configuration editor.
+The open\-loop configuration can be used with or without sensor module hardware and is configured
+with controller type
+\fBSMARACT\fP.
+.sp
+When a sensor is installed and detected,
+the controller requires
+different commands for rotary versus linear sensors.
+The controller cannot detect the sensor type, although the sensor type
+can be saved in non\-volatile memory on the controller.
+The sensor type information can be set in \fBspec\fP\(aqs hardware
+\fBconfig\fP
+file.
+If the sensor type in the \fBconfig\fP file differs from the sensor type as reported
+by the controller\(aqs non\-volatile memory,
+\fBspec\fP will set the controller to the type
+in the \fBconfig\fP file.
+.sp
+One can specify the sensor type in the \fBconfig\fP file by either of
+two methods.
+The first method is to set the standard optional motor parameter
+\fB"rotary"\fP
+to a non\-zero value to indicate a rotary positioner or zero to indicate a linear
+positioner.
+The second method is to create a
+non\-standard optional motor parameter called
+\fB"sensor_type"\fP
+and set its value to the sensor type as specified in
+the SmarAct documentation.
+\fBspec\fP recognizes the defined codes and will send the commands
+appropriate to the configured sensor type.
+.sp
+The linear sensors are available in micrometer and nanometer resolution.
+The rotary sensors have micro\-degree resolution.
+In the \fBspec\fP configuration editor,
+choose a value for the steps\-per\-unit parameter as appropriate.
+For example, if the sensor resolution is in nanometers,
+a value of 1e6 will allow the positions to be specified in millimeters.
+.sp
+The MCS models allow setting the
+steady\-state rate (speed) parameter.  The units are microns per second
+for linear positioners and microdegrees per second for rotary positioners.
+The base rate and acceleration parameters are not used with any of the SmarAct controllers.
+.sp
+When operating in open\-loop mode,
+the move commands send a value for the number of steps to take.
+The steps are conditioned by an amplitude and a step frequency.
+The amplitude defaults to 50 Volts, but can be set by creating
+the non\-standard
+optional motor parameter
+\fB"amplitude"\fP
+in the
+\fBconfig\fP
+file.
+The step frequency is the steady\-state rate in Hz from the
+\fBconfig\fP
+file.
+.sp
+Note, the
+\fB"non\-standard optional"\fP
+parameters are set in the configuration editor using the
+\fBp\fP
+command from the
+\fBD\fPevices
+screen for controller parameters or from the
+\fBM\fPotor
+screen for motor parameters.
+\fB"Standard"\fP
+optional motor parameters are found using the
+\fBm\fP
+command once or twice from the
+\fBM\fPotor
+screen of the configuration editor.
+.sp
+For actuators that have no sensor, there are no commands available to read the
+actual position or even the commanded position from the controller.
+\fBspec\fP will estimate the position during moves based on the configured
+step frequency (stead\-state rate) and the elapsed time.
+That estimated position will be displayed during updated moves.
+If a move is aborted, the estimated position at the time of interruption
+will be used as the current position.
+.SH "PARAMETERS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "sensor_mode")\fP
+\- 
+MCS only.
+Returns the default value for the power mode of the sensors for the controller
+associated with motor channel
+\fBmne\fP.
+A value of 1 is normal mode.
+A value of 2 is power\-save mode.
+If unset, normal mode is used.
+Should only be set in the
+\fBconfig\fP
+file as a non\-standard optional parameter associated with the
+controller entry on the
+\fBD\fPevices
+screen.
+Setting the parameter for an individual motor channel will be ineffective.
+.HP 5m
+."
+\fBmotor_par(mne, "sensors" [, arg])\fP
+\- 
+MCS only.
+Sets or returns the current power mode for the sensors for the controller
+associated with motor channel \fBmne\fP.
+If
+\fBarg\fP
+is zero or the string
+\fB"off"\fP,
+disables the sensors.
+Otherwise, the
+sensors are enabled using either normal mode or the value contained in the
+\fB"sensor_mode"\fP
+parameter if that is set.
+This parameter should not be set in the
+\fBconfig\fP
+file.
+Note, the power mode affects all the channels on a controller.
+.HP 5m
+."
+\fBmotor_par(mne, "dump")\fP
+\- 
+Displays parameters for channel \fBmne\fP in the following format (for an MCS channel):
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+SmarAct motor "sx", unit 0 channel 3:
+ Emergency stop mode:  normal
+         Sensor mode:  enabled
+         Sensor type:  linear positioner with nanosensor
+            Position:  100.001 mm
+     Software limits:  none
+   Closed loop speed:  50 um/sec
+      Safe direction:  backward (1)
+             Voltage:  63.6963 (2609)
+.ft P
+.fi
+.RE
+.sp
+If no sensor is detected, fewer parameters are available:
+.RS 3m
+.sp
+.nf
+.ft CB
+SmarAct motor "m0", unit 0 channel 0:
+ Emergency stop mode:  normal
+         Sensor mode:  disabled
+            Position:  unknown \- no sensor detected
+             Voltage:  49.9756 (2047)
+.ft P
+.fi
+.RE
+.sp
+The display for an SCU channels has much less information.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "calibrate_sensor")\fP
+\- 
+Sends a command to run the calibrate sequence for the indicated
+channel.
+The
+\fBwait()\fP
+command can be used to wait for the sequence to finish.
+.HP 5m
+."
+\fBmotor_par(mne, "amplitude" [, arg])\fP
+\- 
+Sets or returns the voltage amplitude for the indicated channel
+used for moves for channels that lack a position sensor.
+Such channels are configured
+as
+\fBSMARACT\fP
+rather than
+\fBSMARACT_E\fP
+(with encoder).
+If unset, a value of 50 Volts is used.
+Allowed values are from 0 to 100 for MCS models and 15 to 100 for SCU models.
+This parameter will only exist if created as a non\-standard optional parameter in the
+\fBconfig\fP
+file.
+.HP 5m
+."
+\fBmotor_par(mne, "hold_time" [, arg])\fP
+\- 
+Sets or returns the hold\-time parameter for the indicated channel.
+The units are milliseconds.
+The parameter defines how long the controller will actively hold
+the position after reaching the target for sensor\-enabled positioners.
+If unset, a value of zero will be used.
+See the SmarAct documentation for additional details.
+This parameter will only exist if created as a non\-standard optional parameter in the
+\fBconfig\fP
+file.
+.HP 5m
+."
+\fBmotor_par(mne, "rotary")\fP
+\- 
+This standard optional parameter can be set to a non\-zero value
+in the
+\fBconfig\fP
+file
+to indicate a rotary sensor is in used.
+.HP 5m
+."
+\fBmotor_par(mne, "sensor_type")\fP
+\- 
+Sets or returns the configured sensor type according to these values from the
+SmarAct documentation.  For MCS models, the types are:
+.sp
+.RS 5m
+.RS 4m
+.nf
+ 1 \- linear with nanosensor
+ 2 \- rotary with nanosensor
+ 4 \- rotary with microsensor
+ 5 \- linear with nanosensor, large actuator
+ 6 \- linear with nanosensor, reference marks
+ 7 \- rotary with microsensor
+ 8 \- rotary with nanosensor
+ 9 \- linear with microsensor
+10 \- rotary with microsensor, no reference marks, end stops
+11 \- goniometer with 60.5mm radius
+12 \- goniometer with 77.5mm radius
+13 \- rotary with absolute sensors
+14 \- rotary with microsensor
+15 \- rotary with microsensor, no reference marks, no end stops
+.fi
+.sp
+.RE
+.sp
+For SCU models, the types are:
+.sp
+.RS 4m
+.nf
+ 1 \- Linear positioner with microsensor, end stops
+ 4 \- Rotary positioner with microsensor, no ref mark, end stops
+ 5 \- Rotary positioner with 60.5mm radius, end stops
+ 6 \- Rotary positioner with 77.5mm radius, end stops
+ 7 \- Rotary positioner with absolute sensor
+ 8 \- Rotary positioner with microsensor, end stops
+ 9 \- Rotary positioner with microsensor, no ref mark, no end stops
+10 \- Rotary positioner
+11 \- Rotary positioner with end stops
+12 \- Rotary positioner
+13 \- Rotary positioner with end stops
+14 \- Linear positioner with magnetic encoder, end stops
+15 \- Rotary positioner with 93.5mm radius, end stops
+16 \- Linear positioner with microsensor, double piezo, end stops
+17 \- Tip tilt positioner with 25.4mm diameter
+.fi
+.sp
+.RE
+.sp
+The sensor type can be used instead of the
+\fB"rotary"\fP
+parameter to differentiate a linear stage from a rotary stage.
+This parameter will only exist if created as a non\-standard optional parameter in the
+\fBconfig\fP
+file.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "safe_direction" [, arg])\fP
+\- 
+For actuators without a physical reference mark, sets the
+safe direction for performing a limit search.
+Zero is forward and one is backward.
+This parameter will only exist if created as a non\-standard optional parameter in the
+\fBconfig\fP
+file.
+.HP 5m
+."
+\fBmotor_par(mne, "send", cmd)\fP
+\- 
+Sends the string
+\fBcmd\fP
+to the SmarAct channel assigned to motor
+\fBmne\fP.
+Note, \fBspec\fP will add the motor number and other command delimiters as needed, although
+for certain commands on the SCU, use a zero as a place holder for the channel number.
+For example, to set the positioner alignment
+parameters for a motor on an SCU controller, one could use:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+motor_par(mne, "send", "SPA0A1F200B150")
+.ft P
+.fi
+.RE
+.sp
+The first zero after \fBSPA\fP will be replaced with the motor channel.
+To set the closed\-loop maximum frequency with the MCS controller, the following would work:
+.RS 3m
+.sp
+.nf
+.ft CB
+motor_par(mne, "send", "SCLF,3000")
+.ft P
+.fi
+.RE
+.sp
+\fBspec\fP will automatically insert the channel number before the comma.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "read", cmd)\fP
+\- 
+Sends the string
+\fBcmd\fP
+to the SmarAct channel assigned to motor
+\fBmne\fP,
+and returns the reply.
+Note, \fBspec\fP will add the motor number to the command.
+For example, the following can be used to read the closed\-loop maximum frequency
+for a particular channel:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+p motor_par(sz, "read", "GCLF")
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "usend", cmd)\fP
+\- 
+Sends the string
+\fBcmd\fP
+to the SmarAct controller unit associated with motor
+\fBmne\fP.
+Use this option for commands that are not associated with a specific
+channel.
+.HP 5m
+."
+\fBmotor_par(mne, "uread", cmd)\fP
+\- 
+Sends the string
+\fBcmd\fP
+to the SmarAct controller unit assigned with motor
+\fBmne\fP,
+and returns the reply.
+Use this option for commands that are not associated with a specific
+channel.
+For example, the following can be used to read the system ID number on an MCS
+controller:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+p motor_par(sz, "uread", "GSI")
+.ft P
+.fi
+.RE
+.RE
+.RE
+

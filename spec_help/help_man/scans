@@ -1,0 +1,491 @@
+.TH "scans.4" "user function" "08/01/12" "scans.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBscans.4\fP \- read data from ASCII scan files
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)scans.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1994,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "scans.4" "user function" "08/01/12" "scans.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBfn scans.4 [options scan_numbers]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The
+\fBscans.4\fP
+function reads in files of
+ASCII data according to a modest set of conventions.
+.sp
+When used with
+X\-ray scattering data,
+\fBscans.4\fP
+can perform scan averaging, background subtraction,
+data normalization and error\-bar calculation.
+However,
+\fBscans.4\fP
+works well with any kind of data file that follows the conventions
+described below.
+.sp
+COMMAND LINE OPTIONS
+.sp
+.RS 4m
+.nf
+\fB.\fP         Use same options as last time
+\fB\-i\fP        Initialize, used to start function and return
+\fB\-f  file\fP   Select scan file name
+\fB\-p\fP        Print scan\-file contents
+\fB+d\fP or \fB\-d\fP  Collect (or don\(aqt) 3 columns of data
+\fB+e\fP or \fB\-e\fP  Calculate (or don\(aqt) error bars from statistics
+\fB+M\fP or \fB\-M\fP  Use (or don\(aqt) special MCA data convention
+\fB+n\fP or \fB\-n\fP  Normalize (or don\(aqt) data points
+\fB+o\fP or \fB\-o\fP  Sort (or don\(aqt) data points
+\fB+q\fP or \fB\-q\fP  Don\(aqt (or do) print messages (quiet)
+\fB+r\fP or \fB\-r\fP  Rerange (or don\(aqt) plot axes for each new data set
+\fB+s\fP or \fB\-s\fP  Sort and merge (or don\(aqt) data by \fBx\fP values
+\fB+v\fP or \fB\-v\fP  Print (or don\(aqt) each line of scan file (verbose)
+\fB+I\fP or \fB\-I\fP  Use (or don\(aqt) \fB#I\fP intensity normalization
+\fB+S\fP or \fB\-S\fP  Retrieve scans by scan (or file) number
+\fBx=#\fP       Set column for \fBx\fP values
+\fBy=#\fP       Set column for \fBy\fP values
+\fBz=#\fP       Set column for \fBz\fP values, turn on \fB+d\fP flag
+\fBm=#\fP       Set col for monitor normalization, turn on \fB+n\fP flag
+\fBt=#\fP       Set col for time normalization, turn on \fB+n\fP flag
+\fBx=M\fP       Stuff MCA channel numbers in \fBx\fP in 3D mode
+\fBy=M\fP       Stuff MCA channel numbers in \fBy\fP in 3D mode
+.fi
+.sp
+.RE
+.sp
+The default settings correspond to the following options in 2D \fBC\-PLOT\fP mode
+.RS 3m
+.sp
+.nf
+.ft CB
+\-f data  +eosSn  \-drvIqM  x=1  y=\-1
+.ft P
+.fi
+.RE
+.sp
+and
+.RS 3m
+.sp
+.nf
+.ft CB
+\-f data  +deosSn  \-rvIqM  x=1  y=2  z=\-1  x=M
+.ft P
+.fi
+.RE
+.sp
+in 3D \fBC\-PLOT\fP mode.
+.sp
+SPECIFYING SCANS
+.sp
+Scans can be retrieved by entering either the scan number
+(option
+\fB+S\fP,
+the default) or the file position number (option
+\fB\-S\fP).
+Scan numbers are determined by the
+\fB#S\fP
+lines in the file.
+The file position number is the sequence position
+of the scan in the file, irrespective of scan number.
+.sp
+When selecting by scan numbers, if there is more than one
+scan with the same number, the last of them is retrieved.
+You can
+specify which instance of a repeated scan number to retrieve by
+appending a decimal point and an index number to the scan number.
+For example, selecting scan number
+\fB10.3\fP
+retrieves the third scan from the start of the file that has scan number 10.
+.sp
+Negative numbers count back from the end of the file and
+are always considered to be file\-position numbers.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+fn . \-1
+.ft P
+.fi
+.RE
+.sp
+will always return the last scan in the file.
+.sp
+You can enter multiple scan numbers to select the scans
+you are interested in.
+Scan numbers that end with
+\fBb\fP
+are used as background scans.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+fn . 12b 13 14b 15b 16 17b
+.ft P
+.fi
+.RE
+.sp
+Data in the background scans will be subtracted from the data in
+the non\-background scans that has corresponding
+\fBx\fP
+values.
+Choosing a background scan will force the data to be sorted by
+\fBx\fP
+values.
+.sp
+You can read in a group of consecutive scans with
+.RS 3m
+.sp
+.nf
+.ft CB
+fn . 3\-7 10\-14
+.ft P
+.fi
+.RE
+.sp
+This command would read in scans 3 through 7 and 10 through 14.
+.sp
+FILE CONVENTIONS
+.sp
+The scan files contain control lines, data lines and blank lines.
+Control lines contain a
+\fB#\fP
+character
+in
+the first column followed by a command word.
+Data lines generally contain a row of numbers.
+Special data lines containing MCA data begin with an
+\fB@\fP
+character followed by a row of numbers.
+These data lines are ignored unless the use MCA data option
+\fB+M\fP
+is selected.
+.sp
+The control conventions used by
+\fBscans.4\fP
+are as follows:
+.RS 0m
+.HP 5m
+."
+\fB#S N\fP
+\- 
+starts a new scan.
+Here,
+\fBN\fP
+is the user\(aqs numbering
+scheme and is the number used when retrieving
+by scan number
+(\fB+S\fP).
+Most often the scan number is the position of the scan in the file.
+.HP 5m
+."
+\fB#M N\fP
+\- 
+indicates data was taken counting to
+\fBnumber\fP
+monitor counts.
+.HP 5m
+."
+\fB#T N\fP
+\- 
+indicates data was taken counting for
+\fBN\fP
+seconds.
+.HP 5m
+."
+\fB#N N [M]\fP
+\- 
+indicates there are
+\fBN\fP
+columns of data.
+If
+\fBM\fP
+is present, it indicates there are
+\fBM\fP
+sets of data
+columns on each line.
+When collecting data from a multi\-channel analyzer, for example,
+the data might be arranged with 16 points per line in the file to make
+the file easier to scan by eye.
+In such a case, the control line would be
+\fB#N 1 16\fP.
+.HP 5m
+."
+\fB#I N\fP
+\- 
+is for an optional multiplicative intensity\-normalization factor.
+.HP 5m
+."
+\fB#@MCA\fP
+\- 
+indicates the scan contains MCA data.
+If the
+\fB+M\fP
+option is selected,
+\fBx\fP
+(2D or 3D)
+or
+\fBy\fP
+(3D only)
+values will be calculated automatically.
+In three\-column mode, whether it is
+\fBx\fP
+or
+\fBy\fP
+depends on whether the
+\fBx=M\fP
+or
+\fBy=M\fP
+command line option is selected or on which interactive response was given.
+Data in the lines starting
+with
+\fB@A\fP
+will be stuffed into the
+\fBy\fP
+(2D)
+or
+\fBz\fP
+(3D)
+data array.
+.HP 5m
+."
+\fB#@CALIB a b c\fP
+\- 
+gives calibration factors for MCA data.
+The
+\fBx\fP
+(2D or 3D)
+or
+\fBy\fP
+(3D only)
+values will be calculated using the formula
+.sp
+.RS 5m
+.RS 4m
+.nf
+x[i] = a + b * i + c * i * i
+.fi
+.sp
+.RE
+.sp
+where
+\fBi\fP
+is the point number, starting from zero.
+Calibration factors can be changed within the data portion of a scan for
+subsequent MCA data by
+the line
+.sp
+.RS 4m
+\fB@CALIB a b c\fP
+.RE
+.sp
+Before each scan is read by
+\fBscans.4\fP,
+the calibration parameters are initialized to
+zero.
+.RE
+.RE
+.sp
+The following control lines are not commands but are printed out as
+they are encountered while reading a scan:
+.RS 0m
+.HP 5m
+."
+\fB#C\fP
+\- 
+is a comment line.
+.RE
+.HP 5m
+."
+\fB#D\fP
+\- 
+is followed by the date and time the scan was taken.
+.HP 5m
+."
+\fB#L label1  label2\fP
+\- 
+is the data\-column labels, with each label
+separated from the next by
+\fBtwo\fP
+spaces.
+.RE
+.sp
+For example, a very simple file might have:
+.RS 3m
+.sp
+.nf
+.ft CB
+#S 1
+#N 3
+#L Temperature  Voltage  Counts
+23.4 1.01 30456
+23.6 1.015 24000
+
+#S 2
+etc.
+.ft P
+.fi
+.RE
+.sp
+DATA COLUMNS
+.sp
+When running \fBC\-PLOT\fP in 2D mode, the default behavior is to take
+\fBx\fP
+values from the first column and
+\fBy\fP
+values
+from the last column.
+If in 3D mode,
+\fBx\fP
+values are taken from the first column,
+\fBy\fP
+values from the second and
+\fBz\fP
+values from the last column.
+If normalizing the data, the default behavior is to use
+the
+\fB#T\fP
+or
+\fB#M\fP
+values.
+If neither appear, you must enter a column number for the normalization
+values.
+.sp
+When entering column numbers, a negative number counts backward
+from the last column.
+If the column for
+\fBx\fP
+is zero, the value
+put in for
+\fBx\fP
+is just the index number of the point.
+.sp
+ENTERING OPTIONS
+.sp
+If you give a dot
+\fB.\fP
+as the command\-line argument or in response
+to
+\fB"Scans/options"\fP,
+the same argument or option string will be used
+as last time.
+That is, the string is remembered, not the options
+chosen interactively using
+\fB"Change modes?"\fP.
+For instance, if
+you enter a long sequence of scan numbers and read in the scans,
+then change something via
+\fB"Change modes?"\fP,
+you can simply enter
+a dot in response to
+\fB"Scans/options"\fP
+and recover the previous
+sequence of scan numbers.
+.sp
+When you do enter a string of flags and scan numbers, the modes
+set by the flags only apply to the scans that follow the flags,
+not the preceding scans.
+.sp
+THE INDEX FILE
+.sp
+Reading a long ASCII data file takes time.
+When
+\fBscans.4\fP
+first opens a file, it scans the whole file and
+saves a directory of the scans in a binary\-format
+index
+file.
+The name of the index file is formed
+by appending
+\fB.I\fP
+to the original data\-file name.
+.sp
+As long as the index file is more recent than the data
+file,
+\fBscans.4\fP
+will use the information in the index
+file.
+.sp
+NORMALIZATION AND ERROR BARS
+.sp
+Data can be normalized to either monitor counts or time.
+When normalizing to monitor counts, the error bars will
+include the uncertainty in the counting statistics of the
+monitor counts.
+Otherwise there is no difference between specifying time or
+monitor counts.
+.sp
+By default,
+\fBscans.4\fP
+normalizes data to monitor counts,
+with the second to last data column used
+for the monitor count values.
+Use the
+\fB\-n\fP
+flag to turn off normalization.
+If a column number is selected using the
+.BI m= col
+or
+.BI t= col
+arguments,
+normalization is set to monitor or time mode,
+respectively,
+using the column number specified.
+If the column number in either case is given as zero,
+the normalization mode and value given by the
+\fB#M\fP
+or
+\fB#T\fP
+directives for a particular scan in the data file are used.
+It is an error for normalization mode to be on, for
+the normalization column to be
+set to zero and for no
+normalization directives to be present for a scan.
+.sp
+The normalization modes selected remain in effect for subsequent scans.
+.sp
+The values returned as error bars are those due to counting
+statistics (the square root of the number of counts).
+When the counts are derived from the algebraic combination
+of detector, background and monitor counts, the error bars
+are calculated using the appropriate "propagation of errors"
+formalism.  See the source code for details.
+.sp
+If the
+\fB+I\fP
+option is selected, the counts for each point
+are multiplied by the value given by the
+\fB#I\fP
+control line
+in the scan header.  If the
+\fB+I\fP
+option is selected and the
+scan header doesn\(aqt contain a
+\fB#I\fP
+control line, the counts
+are not changed.
+.sp
+NUMBER OF POINTS AND SCANS
+.sp
+Earlier version of
+\fBscans.4.c\fP
+had built\-in limits to the number of scans or raw data points that could be
+handled.
+Those limits no longer exist.
+

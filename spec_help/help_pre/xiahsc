@@ -1,0 +1,186 @@
+xiahsc                              hardware                              xiahsc
+
+NAME
+     XIA HSC-1 - XIA Huber Slit Controller
+
+DESCRIPTION
+
+     The X-Ray Instrumentation Associates Huber Slit Controller Model HSC-1 is a
+     specialized device only used to control Huber slits.  The HSC-1
+     communicates through a serial port, and several HSC-1 modules can be
+     daisy-chained together and run off a single serial port.
+
+     The controller is selected on the eeddccoonnff devices screen along the lines of:
+
+        MMOOTTOORRSS        DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE  NNUUMM                  <<>>TTYYPPEE
+           YYEESS    //ddeevv//ttttyySS00     <<>>    99660000    22      XXIIAA HHSSCC--11 ((SSeerriiaall))
+
+     The NNUUMM field is set to the number of HSC-1 modules on the serial port.
+
+     The ccoonnffiigg file will have:
+
+         RRSS__XXIIAAHHSSCC == ddeevviiccee__nnaammee bbaauudd__rraattee nnuummbbeerr__ooff__sslliittss
+
+     A sample eeddccoonnff motor screen for a complete set of slits would begin as
+     follows:
+
+        NNuummbbeerr:: <<>>CCoonnttrroolllleerr 00::  XXIIAAHHSSCC 11::  XXIIAAHHSSCC 22::  XXIIAAHHSSCC 33::  XXIIAAHHSSCC
+        UUnniitt//CChhaannnneell                00//00        00//11        00//22        00//33
+        NNaammee                    SSlliitt11 AA    SSlliitt11 BB  SSlliitt11 GGaapp  SSlliitt11 CCeenn
+        MMnneemmoonniicc                    ss11aa        ss11bb        ss11gg        ss11cc
+        SStteeppss ppeerr ddeeggrreeee//mmmm         440000        440000        440000        440000
+
+     The HSC-1 module needs to be sent a calibration command before the HSC-1
+     motors can be moved with the normal move commands.  The HSC-1 manual
+     describes a manual calibration procedure.  It is also possible to set the
+     controller to the calibrated state by sending the ""ccaalliibbrraattee"" command with
+     mmoottoorr__ppaarr(()) as described below.
+
+     Each HSC-1 contains two motors that control the slit blades.  Each blade
+     can be moved independently.  The HSC-1 also implements commands to move
+     both blades simultaneously to change either the gap or the
+     center-of-the-gap position.  ssppeecc can be configured to control just the two
+     blades, just the gap and the center position, or all four motions.  When
+     all four motions are configured, moving either blade changes the positions
+     reported for gap and center, and moving either the gap or the center causes
+     the positions reported for each blade to change.
+
+     Configuration for the HSC-1 requires the unit/channel field on the second
+     line of the motor screen of the configuration editor to be filled in
+     according to the following special format.  The unit number corresponds to
+     successive entries on the devices screen - each unit is associated with a
+     different serial port.  Unit numbers start with zero for the first HSC-1
+     entry.  The channel number combines two values.  Each HSC-1 module requires
+     an arbitrary module number NN (see below).  This number is multiplied by 10
+     and added to the channel number that identifies the motion, as follows: For
+     motor controller NN, channel NN*10 + 0 corresponds to blade A, channel NN*10 +
+     1 corresponds to blade B, channel NN*10 + 2 corresponds to the gap and
+     channel NN*10 + 3 corresponds to the center of the gap.  Channel numbers
+     ending in 4 through 9 are invalid.
+
+ENTERING THE SERIAL NUMBER
+
+     The module number NN (see above) is used only for internal bookkeeping and
+     does not designate a particular HSC-1 module.  Each module is identified by
+     a thirteen-character unique serial number of the form XXIIAAHHSSCC--BB--00001144.  The
+     serial number needs to be entered as a string in the field ggeenneerriicc
+     ppaarraammeetteerr 11 on the optional motor-parameter screen of the configuration
+     editor.  Use the mm command twice from the motor screen of the configuration
+     editor to reach the screen where you can enter ggeenneerriicc ppaarraammeetteerr 11.  Type
+     an initial single quote '' to enter a string.  Note, the serial number can
+     also be entered as BB--00001144, 00001144 or 1144 if such a string is sufficient to
+     distinguish among modules.  Also note, the serial number should be entered
+     for just one of the motors associated with module NN.
+
+     If the alias feature of the HSC-1 is used, and bit 6 of the ccoonnttrrooll wwoorrdd
+     (see below) is set for "use alias as ID", enter the alias rather than the
+     serial number as ggeenneerriicc ppaarraammeetteerr 11.  Note, ssppeecc requires there be no
+     space characters in the alias.  Setting and changing aliases requires
+     establishing serial communication with the modules, which may be difficult
+     for novice ssppeecc administrators, so CSS recommends simply using the serial
+     numbers as they exist in the factory configuration.
+
+     Note, some users have reported that the serial numbers burned into the
+     firmware don't quite match those stamped on the casing, and also are
+     sometimes less than 13 characters.  When ssppeecc does the hardware
+     configuration on start up or on a rreeccoonnffiigg, serial numbers found on the
+     connected slit controllers, but not entered in the ccoonnffiigg file will be
+     listed (as of release 5.05.02-7).  (On earlier ssppeecc releases, setting the
+     debug level to 128 will display messages from the slit controllers showing
+     all the serial numbers.)
+
+MOTOR PARAMETERS
+
+     The sstteeppss ppeerr ddeegg//mmmm parameter should be set to 400 for the HSC-1 modules.
+
+     Normally, the positions for each blade become more positive as the blade is
+     opened.  However, if the ssiiggnn ooff uusseerr ** ddiiaall parameter is negative for
+     either blade (or both), the motor position will become more negative as the
+     blade opens.  The sense of the center-of-the-gap motion can also be changed
+     by changing the sign of the ssiiggnn ooff uusseerr ** ddiiaall parameter.  The gap motion
+     is always positive as the gap increases, though.
+
+     The backlash, speed and acceleration parameters in the ccoonnffiigg file are
+     ignored.
+
+     CSS recommends using the calibration feature of the HSC modules to set the
+     zero positions, rather than using the sseett macro to set the user ooffffsseett
+     parameter.  That is, it is best to keep the user and dial positions the
+     same.  The cchhgg__ddiiaall(()) function will, in fact, send the "immediate
+     calibration" command to the controller, but only when setting the position
+     to zero.  Note, the gap should be physically at zero before using sseett__ddiiaall.
+     Use of the standard sseett__ddiiaall macro should be followed by the sseett macro to
+     set the user-dial offset back to zero.
+
+     The HSC-1 controller stores a number of parameters in nonvolatile memory.
+     ssppeecc will read and display them with the command mmoottoorr__ppaarr((mmoottoorr,, ""dduummpp"")),
+     where mmoottoorr is the mnemonic for any of the motions on the particular HSC-1
+     module.  The display format is as follows:
+
+        11    OOuutteerr mmoottiioonn lliimmiitt ((rrww)) == 44440000 ((1111 mmmm))
+        22       OOrriiggiinn ppoossiittiioonn ((rrww)) == 440000 ((11 mmmm))
+        33      MMoottoorr AA ppoossiittiioonn ((rroo)) == 990000 ((22..2255 mmmm))
+        44      MMoottoorr BB ppoossiittiioonn ((rroo)) == 990000 ((22..2255 mmmm))
+        55      MMoottoorr sstteepp ddeellaayy ((rrww)) == 220000 ((rroouugghhllyy 00..227722 mmmm//sseecc))
+        66         GGeeaarr bbaacckkllaasshh ((rrww)) == 1100 ((00..2255 mmmm))
+        77          CCoonnttrrooll wwoorrdd ((rrww)) == 114422 ((00xx88ee))
+        88      EEssccaappee cchhaarraacctteerr ((rrww)) == 3333
+        99  AArrbbiittrraattiioonn pprriioorriittyy ((rrww)) == 88
+        1100        MMoottoorr AA pphhaassee ((rroo)) == 00
+        1111        MMoottoorr BB pphhaassee ((rroo)) == 00
+        1122 CCaalliibbrraattiioonn ccoommpplleettee ((rroo)) == 115500
+        1133     EEEEPPRROOMM ssiiggnnaattuurree ((rroo)) == 2233220055
+        1144       EEEEPPRROOMM vveerrssiioonn ((rroo)) == 44
+
+     These parameters can be modified using a command such as
+
+         mmoottoorr__ppaarr((mmoottoorr,, ""sseenndd"",, ""WW 66 2200""))
+
+     which changes memory location 6 (gear backlash) to 20.
+
+SPECIAL COMMANDS
+
+     The mmoottoorr__ppaarr(()) options implemented for the HSC-1 are as follows:
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ccaalliibbrraattee"")) - Sends the "immediate calibration" command
+          to the unit.  The effect is to set the current position of each blade
+          in the controller to the oorriiggiinn parameter.  It also sets ssppeecc's
+          positions for the gap, center and blades to zero.  Thus the gap should
+          physically be at zero before sending this command.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""oorriiggiinn"" [[,, vvaalluuee]])) - Sets the controller's oorriiggiinn
+          parameter (parameter 2 of the controller's memory map) to vvaalluuee. The
+          units of vvaalluuee are steps, where 400 steps corresponds to 1 mm.  The
+          origin parameter determines how far beyond the zero position each slit
+          blade can be moved.  Note, changing the origin parameter will change
+          the setting of the current position of the blades.  The blades should
+          thus be both at zero before sending the ""oorriiggiinn"" command, and a
+          ""ccaalliibbrraattee"" command should be sent immediately afterwards.  The
+          factory default value for oorriiggiinn is 400.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""rraannggee"" [[,, vvaalluuee]])) - Sets the controller's "outer limit"
+          parameter (parameter 1 of the controller's memory map) to vvaalluuee, where
+          the units of vvaalluuee are steps.  This parameter controls how far each
+          blade can be moved.  The factory default value for this parameter is
+          4400.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""sstteepp++"")) or mmoottoorr__ppaarr((mmoottoorr,, ""sstteepp--"")) - Moves blade A or
+          blade B one step in the specified direction.  This command can be used
+          to position the slits whether or not they have been calibrated.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the HSC-1 unit
+          associated with mmoottoorr.  The module serial number will be included
+          automatically.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the HSC-1 unit
+          associated with mmoottoorr, as above, and returns a string containing the
+          response.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""uusseenndd"",, ccmmdd)) - Sends the string ccmmdd to the serial port
+          connected to the HSC-1 unit associated with mmoottoorr. The ccmmdd must
+          include the full HSC-1 command syntax.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""uurreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the serial port
+          connected to the HSC-1 unit associated with mmoottoorr, as above, and
+          returns a string containing the response.
+

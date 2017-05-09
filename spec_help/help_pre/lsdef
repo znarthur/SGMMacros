@@ -1,0 +1,24 @@
+lsdef                                command                               lsdef
+
+NAME
+     llssddeeff - list current macros
+
+SYNOPSIS
+
+     llssddeeff [[ppaatttteerrnn__nnaammee ...... ]]
+
+DESCRIPTION
+
+     The command llssddeeff is used to list the names of the defined macros as well
+     as their sizes in bytes.  With no arguments, all the macro names are
+     listed.  Otherwise, only the macros specified as arguments are printed.
+     Arguments may contain the ** and ?? metacharacters.
+
+EXAMPLE
+
+     llssddeeff **ssccaann
+
+SEE ALSO
+
+     _l_s_c_m_d _s_y_m_s _d_e_f _u_n_d_e_f _w_h_a_t_s
+

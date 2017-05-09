@@ -1,0 +1,28 @@
+a4scan                                macro                               a4scan
+
+NAME
+     aa44ssccaann - four-motor scan
+
+SYNOPSIS
+
+     aa44ssccaann mm11 ssttaarrtt11 eenndd11 mm22 ssttaarrtt22 eenndd22 mm33 ssttaarrtt33 eenndd33 ssttaarrtt44 eenndd44 iinntteerrvvaallss
+     ttiimmee
+
+DESCRIPTION
+
+     aa44ssccaann scans four motors, as specified by mm11, mm22, mm33 and mm44.  Each motor
+     moves the same number of intervals with starting and ending positions given
+     by ssttaarrtt11 and eenndd11, ssttaarrtt22 and eenndd22, ssttaarrtt33 and eenndd33, ssttaarrtt44 and eenndd44,
+     respectively.  The step size for each motor is ((ssttaarrtt--eenndd))//iinntteerrvvaallss.  The
+     number of data points collected will be iinntteerrvvaallss++11.  Count time is given
+     by ttiimmee, which if positive, specifies seconds and if negative, specifies
+     monitor counts.
+
+EXAMPLE
+
+     aa44ssccaann eell11 00 1100 eell22 00 1100 eell33 00 1100 eell44 00 1100 2200 1100
+
+SEE ALSO
+
+     _m_o_t_o_r_s _a_s_c_a_n _a_2_s_c_a_n _a_3_s_c_a_n _d_s_c_a_n _d_2_s_c_a_n _d_3_s_c_a_n _m_e_s_h
+

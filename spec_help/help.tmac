@@ -1,0 +1,366 @@
+'\" @(#)help.tmac	6.3  07/18/13 CSS
+.if !\n(.g .ab These man macros work only with groff.
+.
+.nr _C \n(.C
+.cp 0
+.
+.if (\n[.x]\n[.y]\n[.Y] < 1171) \
+.  ab You need GNU troff version 1.17.1 or higher to run this version of man!
+.
+.if !r S .nr S 10
+.
+.de set-an-margin
+.  nr an-margin \\n[IN]
+..
+.
+.\" .TH title section extra1 extra2 extra3
+.de1 TH
+.  de an-init \" We have to do it like this to get multiple man pages right.
+.    ds an-title "\\$1
+.    ds an-section "\\$2
+.    ds an-extra1 "\\$3
+.    ds an-extra2 "\\$4
+.    ds an-extra3 "\\$5
+.    ds an-init
+.\". rm TH      \" We only do one file at a time, do okay to keep
+\\..
+.
+.  DT
+.
+.  nr PS    10z \" default point size
+.  nr PS-SS 10z
+.  nr PS-SH 10.95z
+.  nr VS    12p
+.
+.  ps \\n[PS]u
+.  vs \\n[VS]u
+.
+.  nr IN 7.2n
+.  nr IN 5n
+.  PD
+.  nr SN 3n \" the indentation of sub-sub-headings relative to sub-headings
+.  nr an-level 1
+.  set-an-margin
+.  nr an-prevailing-indent \\n[IN]
+.  nr an-tag-sep 1n
+.
+.  nr an-no-space-flag 0
+.  nr an-break-flag 0
+.  nr an-div? 0
+.
+.  if !'\\$1'' .an-header       \" No header if no arguments
+..
+.
+.de1 DT
+.  ta T .5i \" This sets tabs every .5 inches
+..
+.
+.de1 PD
+.  ie \\n[.$] .nr PD (v;\\$1)
+.  el         .nr PD (.4v >? \n[.V])
+..
+.
+.de1 an-header
+.  an-init
+.  ev 1
+.  ps \\n[PS]u
+.  vs \\n[VS]u
+.\".  tl '\\*[an-title](\\*[an-section])'\\*[an-extra3]'\\*[an-title](\\*[an-section])'
+.  lt \\n[LL]u
+.  tl '\\*[an-title]'\\*[an-section]'\\*[an-title]'
+.  sp .5i
+.  ev
+.  ns
+..
+.
+.de1 an-footer
+'  bp
+..
+.
+.de1 an-p-footer
+.  ev 1
+.  ps \\n[PS]u
+.  vs \\n[VS]u
+.  ds an-page-string "\\*[an-title](\\*[an-section])
+.  tl '\\*[an-extra2]'\\*[an-extra1]'\\*[an-page-string]'
+.  ev
+..
+.
+.de1 an-end
+.  nr % 1
+.  pl +3v
+.  fl
+.  sp 3
+.\".  an-p-footer
+.  pl \\n[nl]u
+..
+.
+.em an-end
+.
+.de1 SH
+.  sp \\n[PD]u
+.  nr an-level 1
+.  set-an-margin
+.  nr an-prevailing-indent \\n[IN]
+.  fi
+.  in \\n[an-margin]u
+.  ti 0
+.  it 1 an-trap
+.  nr an-no-space-flag 1
+.  nr an-break-flag 1
+.  ps \\n[PS-SH]u
+.  ft R
+.  if \\n[.$] \&\\$*
+..
+.
+.de1 SS
+.  sp \\n[PD]u
+.  nr an-level 1
+.  set-an-margin
+.  nr an-prevailing-indent \\n[IN]
+.  fi
+.  in \\n[IN]u
+.  ti \\n[SN]u
+.  it 1 an-trap
+.  nr an-no-space-flag 1
+.  nr an-break-flag 1
+.  ps \\n[PS-SS]u
+.  ft R
+.  if \\n[.$] \&\\$*
+..
+.
+.de1 B
+.  it 1 an-trap
+.  ft B
+.  if \\n[.$] \&\\$*
+..
+.
+.de1 I
+.  it 1 an-trap
+.  ft I
+.  if \\n[.$] \&\\$*
+..
+.
+.de1 C
+.  it 1 an-trap
+.  ft C
+.  if \\n[.$] \&\\$*
+..
+.
+.de1 SM
+.  it 1 an-trap
+.  ps -1
+.  if \\n[.$] \&\\$*
+..
+.
+.de1 SB
+.  it 1 an-trap
+.  ps -1
+.  ft B
+.  if \\n[.$] \&\\$*
+..
+.
+.de1 TP
+.  sp \\n[PD]u
+.  if \\n[.$] .nr an-prevailing-indent (n;\\$1)
+.  it 1 an-trap
+.  if !\\n[an-div?] .di an-div
+.  in 0
+.  ll -\\n[an-margin]u
+.  nr an-div? 1
+..
+.
+.de1 an-trap
+.  ft R
+.  ps \\n[PS]u
+.  vs \\n[VS]u
+.  if \\n[an-break-flag] \{\
+.    br
+.    nr an-break-flag 0
+.  \}
+.  if \\n[an-no-space-flag] \{\
+.    ns
+.    nr an-no-space-flag 0
+.  \}
+.  if \\n[an-div?] .an-do-tag
+..
+.
+.de an-do-tag
+.  nr an-div? 0
+.  br
+.  ll
+.  di
+.  ie (\\n[dl] + \\n[an-tag-sep] > \\n[an-prevailing-indent]) \{\
+.    in \\n[an-margin]u
+.    an-div
+.    br
+.    in (\\n[an-margin]u + \\n[an-prevailing-indent]u)
+.  \}
+.  el \{\
+.    in (\\n[an-margin]u + \\n[an-prevailing-indent]u)
+.    ti -\\n[an-prevailing-indent]u
+.    chop an-div
+\\*[an-div]\\h'|\\n[an-prevailing-indent]u'\c
+.  \}
+..
+.
+.de1 LP
+.  br
+.  sp \\n[PD]u
+.  ps \\n[PS]u
+.  vs \\n[VS]u
+.  ft R
+.  in \\n[an-margin]u
+.  nr an-prevailing-indent \\n[IN]
+..
+.
+.als PP LP
+.als P LP
+.
+.de1 IP
+.  ie !\\n[.$] \{\
+.    ps \\n[PS]u
+.    vs \\n[VS]u
+.    ft R
+.    sp \\n[PD]u
+.    in (\\n[an-margin]u + \\n[an-prevailing-indent]u)
+.  \}
+.  el \{\
+.    ie (\\n[.$] - 1) .TP "\\$2"
+.    el               .TP
+\&\\$1
+.  \}
+..
+.
+.de1 HP
+.  ps \\n[PS]u
+.  vs \\n[VS]u
+.  ft R
+.  sp \\n[PD]u
+.  if \\n[.$] .nr an-prevailing-indent (n;\\$1)
+.  in (\\n[an-margin]u + \\n[an-prevailing-indent]u)
+.  ti \\n[an-margin]u
+..
+.
+.ds an-empty \" this is referenced to avoid looping on eg .RB ( \\ )
+.
+.de1 RI
+.  if \\n[.$] \{\
+.    ds an-result \&\\$1
+.    shift
+.    while (\\n[.$] >= 2) \{\
+.      as an-result \,\f[I]\\$1\f[R]\/\\$2\\*[an-empty]
+.      shift 2
+.    \}
+.    if \\n[.$] .as an-result \,\f[I]\\$1\f[R]
+\\*[an-result]
+.  \}
+..
+.
+.de1 IR
+.  if \\n[.$] \{\
+.    ds an-result \&\f[I]\\$1\f[R]
+.    shift
+.    while (\\n[.$] >= 2) \{\
+.      as an-result \/\\$1\f[I]\,\\$2\f[R]
+.      shift 2
+.    \}
+.    if \\n[.$] .as an-result \/\\$1
+\\*[an-result]
+.  \}
+..
+.
+.de1 IB
+.  if \\n[.$] \{\
+.    ds an-result \&\f[I]\\$1
+.    shift
+.    while (\\n[.$] >= 2) \{\
+.      as an-result \/\f[B]\\$1\f[I]\,\\$2\\*[an-empty]
+.      shift 2
+.    \}
+.    if \\n[.$] .as an-result \/\f[B]\\$1
+\\*[an-result]
+.    ft R
+.  \}
+..
+.
+.de1 BI
+.  if \\n[.$] \{\
+.    ds an-result \&\f[B]\\$1
+.    shift
+.    while (\\n[.$] >= 2) \{\
+.      as an-result \,\f[I]\\$1\f[B]\/\\$2\\*[an-empty]
+.      shift 2
+.    \}
+.    if \\n[.$] .as an-result \,\f[I]\\$1
+\\*[an-result]
+.    ft R
+.  \}
+..
+.
+.de1 RB
+.  ds an-result \&
+.  while (\\n[.$] >= 2) \{\
+.    as an-result \f[R]\\$1\f[B]\\$2\\*[an-empty]
+.    shift 2
+.  \}
+.  if \\n[.$] .as an-result \f[R]\\$1
+\\*[an-result]
+.  ft R
+..
+.
+.de1 BR
+.  ds an-result \&
+.  while (\\n[.$] >= 2) \{\
+.    as an-result \f[B]\\$1\f[R]\\$2\\*[an-empty]
+.    shift 2
+.  \}
+.  if \\n[.$] .as an-result \f[B]\\$1
+\\*[an-result]
+.  ft R
+..
+.
+.de1 RS
+.  br
+.  nr an-saved-margin\\n[an-level] \\n[an-margin]
+.  nr an-saved-prevailing-indent\\n[an-level] \\n[an-prevailing-indent]
+.  ie \\n[.$] .nr an-margin +(n;\\$1)
+.  el         .nr an-margin +\\n[an-prevailing-indent]
+.  in \\n[an-margin]u
+.  nr an-prevailing-indent \\n[IN]
+.  nr an-level +1
+..
+.
+.de1 RE
+.  br
+.  ie \\n[.$] .nr an-level ((;\\$1) <? \\n[an-level])
+.  el         .nr an-level -1
+.  nr an-level (1 >? \\n[an-level])
+.  nr an-margin \\n[an-saved-margin\\n[an-level]]
+.  nr an-prevailing-indent \\n[an-saved-prevailing-indent\\n[an-level]]
+.  in \\n[an-margin]u
+..
+.
+.\" these strings must work in compatibility mode also
+.
+.ds S \s(\\n(PS
+.ie c\[rg] .ds R \(rg
+.el        .ds R (Reg.)
+.ie c\[tm] .ds Tm \(tm
+.el        .ds Tm (TM)
+.ds lq \(lq
+.ds rq \(rq
+.ds CP \f3C-PLOT\fP
+.ds SP \f3spec\fP
+.ds UN UNIX
+.ds #C 3
+.ds #O 3
+.ds #B 3
+.ftr C B
+.
+.hy 14
+.
+.cp \n[_C]
+.ftr CB  B
+.ftr CO  I
+.

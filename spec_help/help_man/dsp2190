@@ -1,0 +1,120 @@
+.TH "dsp2190" "hardware" "08/01/12" "dsp2190.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+dsp2190 \- DSP Technology 2190 CAMAC MCS Averager
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)dsp2190.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "dsp2190" "hardware" "08/01/12" "dsp2190.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The DSP Technology 2190 Multichannel Scaling Averager consists of a
+pair of CAMAC modules: the 2090S Multichannel Scaling module
+and the 4101 Averaging Memory module.
+These two modules must occupy consecutive slots in the CAMAC crate,
+with the 2090S in the lower\-numbered slot.
+The averager is selected in the \fBconfig\fP file as
+.sp
+.RS 4m
+\fBCA_DSP2190 = slot_number\fP
+.RE
+.sp
+where the slot number is that of the 2090S module.
+.SH "FUNCTIONS"
+.rs
+.sp
+The \fBmca_par()\fP function controls the modules\(aq behavior as follows:
+.RS 0m
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+programs the MCS for the number of bins and sweeps set with the
+functions described below, then enables any other counters and starts the
+averaging process.  When the programmed number of sweeps is completed,
+the MCS will generate
+a CAMAC LAM, which will cause the other counters to be disabled.  Use the
+\fBwait()\fP function to determine
+when the programmed number of sweeps are complete.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+halts the MCS and disables the other counters.
+.HP 5m
+."
+\fBmca_par("bins")\fP
+\- 
+returns the number of bins in each sweep.
+(Referred to in the module documentation as "record length").
+.HP 5m
+."
+\fBmca_par("bins", value)\fP
+\- 
+sets the number of bins in each sweep to \fBvalue\fP.
+The number of bins can range from 8 to 32,767.
+.HP 5m
+."
+\fBmca_par("sweeps")\fP
+\- 
+returns the number of sweeps to be summed.
+.HP 5m
+."
+\fBmca_par("sweeps", value)\fP
+\- 
+sets the number of sweeps to be summed in the next scan to \fBvalue\fP.
+The number of sweeps can range from 1 to 65,536.
+.HP 5m
+."
+\fBmca_par("sweeps_comp")\fP
+\- 
+returns the number of sweeps completed in the previous scan.
+An error message is printed if this function
+is called while a scan is in progress.
+.HP 5m
+."
+\fBmca_par("first_ch")\fP
+\- 
+returns the first channel to be read out using \fBmca_get()\fP.
+.HP 5m
+."
+\fBmca_par("first_ch", value)\fP
+\- 
+sets the first channel to be read out using \fBmca_get()\fP to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("npts")\fP
+\- 
+returns the number of channels to be read out using \fBmca_get()\fP.
+.HP 5m
+."
+\fBmca_par("npts", value)\fP
+\- 
+sets the number of channels to be read out using \fBmca_get()\fP to
+\fBvalue\fP.
+.RE
+.sp
+Note that the \fBmca_get()\fP function cannot be used
+while the MCS module is taking data.
+.sp
+Note that the 4101 doesn\(aqt actually average the sweeps,
+but only accumulates sums in each channel.
+To obtain an average, you must divide the data in each channel
+by the number of sweeps.
+The averaging scan will halt before the programmed number of sweeps is
+completed if any of the channels overflow.
+.sp
+The module expects an external trigger and the external trigger
+is required to begin each sweep.
+

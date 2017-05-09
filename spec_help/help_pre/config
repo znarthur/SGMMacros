@@ -1,0 +1,54 @@
+config                                macro                               config
+
+NAME
+     ccoonnffiigg - edit the hardware configuration
+
+SYNOPSIS
+
+     ccoonnffiigg
+
+DESCRIPTION
+
+     The ccoonnffiigg macro runs the configuration editor program eeddccoonnff for the
+     current spectrometer geometry.  This program displays several configuration
+     screens.  The mmoottoorr screen presents all the motor related parameters
+     (step-size, stepping rate, limits, etc.)  as well as the current positions
+     of all motors.  The ssccaalleerr screen allows you to configure the scaler
+     (counter) names and mnemonics and also which hardware channel is associated
+     with which name.  The ddeevviiccee screen lets you select non-CAMAC motor
+     controllers, timer/counters and MCA-type devices.  The iinntteerrffaaccee screen is
+     used to select a CAMAC controller, a GPIB controller, and ports for
+     user-level serial devices and user-level PC I/O ports.  If a CAMAC device
+     is defined, the CCAAMMAACC screen that shows the slot configuration will become
+     accessible.
+
+     Help is available while running the configuration editor using the commands
+     ?? and HH.
+
+     When you exit eeddccoonnff, ssppeecc rereads the modified configuration and
+     re-initializes the hardware devices.
+
+     On some installations, only authorized users are able to modify the
+     hardware configuration.
+
+FILES
+
+     ssppeecc..dd//ssppeeccttrroo//ccoonnffiigg
+     ssppeecc..dd//ssppeeccttrroo//sseettttiinnggss
+
+DEFINITION
+
+        ddeeff ccoonnffiigg ''
+           wwaaiitt((--11))
+           ssyynncc
+           uunniixx((sspprriinnttff((""%%ss//eeddccoonnff %%ss %%ss//%%ss"",,\\
+             SSPPEECCDD,, sseett__ssiimm((--11))?? ""--ss""::"""",, SSPPEECCDD,, SSPPEECC))))
+           rreeccoonnffiigg
+           __aassssiiggnn
+        ''
+
+SEE ALSO
+
+       _c_o_n_f_i_g___a_d_m
+       ssppeecc AAddmmiinniissttrraattoorr''ss GGuuiiddee
+

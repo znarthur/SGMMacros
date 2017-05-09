@@ -1,0 +1,48 @@
+.TH "less" "macro" "08/01/12" "less.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+less \- file perusal program
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)less.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "less" "macro" "08/01/12" "less.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBless  file_name [file_name ...]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBless\fP macro runs the handy file\-perusal utility program
+of the same name in a sub\-shell.
+.sp
+The program \fBless\fP is public domain software available through
+\fBusenet\fP or by request from Certified Scientific Software.
+Help for \fBless\fP is available while it is running by typing
+\fBh\fP, \fBH\fP or \fBz\fP, depending on the version.
+.SH "DEFINITION"
+.rs
+.sp
+\fBdef less \(aqunix("less $*")\(aq\fP
+.SH "EXAMPLE"
+.rs
+.sp
+\fBless datafile\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%u\fP
+\fI\%cat\fP
+\fI\%vi\fP
+\fI\%ned\fP
+

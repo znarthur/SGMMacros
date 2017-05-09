@@ -1,0 +1,78 @@
+install                             reference                            install
+
+NAME
+     install - ssppeecc installation procedure
+
+DESCRIPTION
+
+     These notes describe how to download and install ssppeecc.
+
+PREPARATION
+
+     To helps keep the files associated with ssppeecc organized, CSS recommends
+     creating a user account on your machine named ssppeeccaaddmm that will own the
+     ssppeecc files.  We also recommend that the distribution files associated with
+     each version of ssppeecc be placed in a subdirectory named after the release
+     number in the home directory of ssppeeccaaddmm.  For example, if installing ssppeecc
+     release 5.09.02-2 and if the home directory of ssppeeccaaddmm is //hhoommee//ssppeeccaaddmm,
+     then the ssppeecc distribution might be placed in a directory named
+     //hhoommee//ssppeeccaaddmm//ssppeecc55..0099..0022. The downloaded distribution "tarball" files
+     might be stored in a separate directory, such as //hhoommee//ssppeeccaaddmm//ddiisstt//.
+
+DOWNLOADING
+
+     ssppeecc is distributed as a ttaarr format file, usually retrieved from the
+     certif.com server using http.  One generally receives emailed instructions
+     on the exact path name to access a particular ssppeecc distribution from the
+     http server.  Distributions can only be retrieved by name, as the contents
+     of the distribution directory are hidden.
+
+     Assuming the recommended locations, the usual procedure for downloading the
+     ssppeecc distribution is as follows:
+
+         ccdd //hhoommee//ssppeeccaaddmm//ddiisstt
+         wwggeett hhttttpp::////cceerrttiiff..ccoomm//ccssss__ddiisstt//ssppeecc__ddiissttvveerr..ttaarr
+
+     The ddiissttvveerr part of the file name will be unique to each download and will
+     include the release version number.  If you don't have the wwggeett utility,
+     you can try to save the file from a web browser.
+
+EXTRACTING
+
+     Use commands along the following lines to extract the ssppeecc distribution
+     from the ttaarr file:
+
+        ccdd //hhoommee//ssppeeccaaddmm
+        mmkkddiirr ssppeecc55..0099..0022             ((ffoorr rreelleeaassee 55..0099..0022))
+        ccdd ssppeecc55..0099..0022
+        ttaarr xxvvff ....//ddiisstt//ssppeecc__ddiissttvveerr..ttaarr
+
+INSTALLING
+
+     When updating a previous installation of ssppeecc, copy the iinnssttaallll__ddaattaa file
+     from the previous distribution directory to the current distribution
+     directory.  That will save having to retype the same responses to the
+     configuration questions.
+
+     On a PC, with a hardware configuration that uses ISA or PCI cards, the
+     IInnssttaallll program needs to be run as the super user (root).  In other cases,
+     it isn't necessary to run as root, but the user running the script needs to
+     have permission to write files in the target directories.
+
+     Some of the following IInnssttaallll options may be of interest.
+
+         --dd   Use the default parameters from iinnssttaallll__ddaattaa
+         --pp   Do a partial installation (geometry-dependent stuff)
+         --ss   Just compile the geometry target
+         --SS   Do not require root access to install
+
+     To run the script, type IInnssttaallll [[ooppttiioonnss]] (or ..//IInnssttaallll [[ooppttiioonnss]] if the
+     current directory isn't in your path).
+
+     The _c_o_n_f_i_g___a_d_m help file explains how to setup up the site configuration.
+     In particular, sections at the end of the help file describe how to set up
+     special lliinnkkeedd ccoonnffiigguurraattiioonnss and eexxttrraa pprrootteeccttiioonn features.
+
+     You should also check the RREEAADDMMEE files in the ssppeecc distribution directory
+     and the aauuxx subdirectory for additional information.
+

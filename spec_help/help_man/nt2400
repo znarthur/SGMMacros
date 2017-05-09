@@ -1,0 +1,150 @@
+.TH "nt2400" "hardware" "08/01/12" "nt2400.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+nt2400 \- Laboratory Equipment Corporation NT\-2400 Ethernet Hardware
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)nt2400.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1998,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "nt2400" "hardware" "08/01/12" "nt2400.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The NT\-2400 from Laboratory Equipment Corporation is an
+ethernet\-based instrument providing motor control, timer/counter functions
+and MCA capability.
+.sp
+Note, as there is a 20\-character limit to the device names
+entered using \fBspec\fP\(aqs hardware configuration editor,
+it will be helpful to have a short name in the
+\fB/etc/hosts\fP file to identify the NT\-2400 host, such as
+.sp
+.RS 4m
+\fB192.42.172.13   nt2400.localnet.edu nt2400\fP
+.RE
+.sp
+To configure \fBspec\fP for the NT\-2400 hardware, either run the
+\fBconfig\fP macro from \fBspec\fP or the configuration editor
+\fBedconf\fP directly.  Change to the \fBD\fPevices
+screen to configure the hostname and port number
+of the motor controllers and counter/timers.
+The selections will look something like the following, with the
+\fBNUM\fP
+field specifying the total number of motors/counters at the specified host.
+(Note, type the single quote \fB\(aq\fP to begin string\-entry mode to enter the
+DEVICE name.
+Use the \fB<\fP and \fB>\fP characters to select from the TYPE menu.)
+.RS 3m
+.sp
+.nf
+.ft CB
+Motor and Counter Device Configuration (Not CAMAC)
+
+ MOTORS      DEVICE ADDR <>MODE NUM                           <>TYPE
+    YES nt2400:6051               6         Labo NT\-2400 Motor (UDP)
+
+SCALERS      DEVICE ADDR <>MODE NUM                           <>TYPE
+    YES nt2400:6051               8 Labo NT\-2400 Counter/Timer (UDP)
+    YES nt2400:6051               8      Labo NT\-2400 Counters (UDP)
+.ft P
+.fi
+.RE
+.sp
+For the scaler configuration, the first example is for when one of
+the scaler channels is to be used as master timer.
+With the second example, all the scalers are used only as counters.
+.sp
+The MCA devices are configured on the \fBA\fPcquisition\-type
+device screen of the configuration editor.
+For two MCA modules on the same NT\-2400 host,
+the screen would look something like:
+.RS 3m
+.sp
+.nf
+.ft CB
+MCA\- and CCD\-Acquisition Type Device Configuration
+
+MCA\-like     DEVICE ADDR <>MODE                               <>TYPE
+ 0  YES nt2400:6051                           Labo NT\-2400 MCA (UDP)
+ 1  YES nt2400:6051                           Labo NT\-2400 MCA (UDP)
+.ft P
+.fi
+.RE
+.sp
+Configure individual motor channels on the \fBM\fPotor screen.
+Select the NT2400 controller type for each motor channel.
+.RS 3m
+.sp
+.nf
+.ft CB
+Number: <>Controller  0:  NT2400  1:  NT2400  2:  NT2400  3:  NT2400
+Unit/Channel                 0/1         0/2         0/3         0/4
+Name                   Two Theta       Theta         Chi         Phi
+Mnemonic                     tth          th         chi         phi
+.ft P
+.fi
+.RE
+.sp
+Unit numbers are assigned in the order in which the NT\-2400 motor
+controller units are specified on the Devices screen, and start at zero.
+Channel numbers start at one to match the NT\-2400 numbering convention.
+It is not necessary for the motors to be consecutively ordered in
+the configuration.
+.sp
+The \fBpulse\-mode\fP parameter (100 or 200)
+can optionally be entered on the second optional motor parameter screen
+(accessed by typing \fBm\fP twice from the main motor screen).
+Enter values for the pulse mode in the field for Generic parameter 1.
+If no value is entered, the default value of 100 is used.
+In addition, the limit and home switch polarity can be optionally
+configured by entering a value for Generic parameter 2.
+The coding for switch polarities is as follows:
+.sp
+.RS 4m
+.nf
+Bit 0 set: ccw limit positive
+Bit 1 set: home switch positive
+Bit 2 set: cw limit positive
+.fi
+.sp
+.RE
+.sp
+Configure the NT\-2400 scaler channels on the
+\fBS\fPcaler screen to look something like the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+Scaler (Counter) Configuration
+
+Number      Name  Mnemonic  <>Device  Unit  Chan   <>Use As  Scale
+     0   Seconds       sec    NT2400     0     2   timebase   1000
+     1   Monitor       mon    NT2400     0     1    monitor      1
+     2  Detector       det    NT2400     0     3    counter      1
+.ft P
+.fi
+.RE
+.sp
+For the NT\-2400, only channel 2 can be used as the time base channel
+and only channel 1 can be used for the monitor preset counter.
+If there is no monitor\-type preset counter, and there are only two
+counter channels, then channel 1 should be configured as the ordinary
+counter detector channel.
+.sp
+With such a configuration, all the standard commands for moving motors,
+counting and accessing the MCA are available.
+.sp
+Note, setting \fBspec\fP\(aqs debug level to 128 (using the
+\fBdebug\fP macro or by assigning a value to the
+\fBDEBUG\fP built\-in variable) will have \fBspec\fP display the commands sent and
+data returned from the NT\-2400 in a semi\-readable form.
+

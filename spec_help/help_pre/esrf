@@ -1,0 +1,232 @@
+esrf                                hardware                                esrf
+
+NAME
+     taco/esrf - TACO (ESRF) specific functions
+
+DESCRIPTION
+
+     ssppeecc provides three specialized functions to communicate with the TACO
+     system of distributed servers and drivers developed at the ESRF for
+     hardware control.  The function ttaaccoo__iioo(()) provides generalized access to
+     any control hardware that is supported by an ESRF driver.  The function
+     ttaaccoo__ddcc(()) provides access to the ESRF data collector facility.  The
+     function ttaaccoo__ddbb(()) allows read/write access to the TACO static resource
+     database.  (The original function names eessrrff__iioo(()), eessrrff__ddcc(()) and eessrrff__ddbb(())
+     are now deprecated, but will continue to be recognized.)
+
+     Support for specific TACO motor controllers (MAXE, VPAP) and counters
+     (VCT6, VDL, CAEN 462, CAEN V560, LeCroy 1151) is built in to ssppeecc.  These
+     devices are normally accessed through ssppeecc's basic commands for moving and
+     counting.  ssppeecc also provides support for the TACO MCA and CCD device
+     servers through the standard mmccaa__xxxxxx(()) and iimmaaggee__xxxxxx(()) functions.
+
+HARDWARE ACCESS
+
+     ttaaccoo__iioo((ddeevv,, ccmmdd [[,, aarrgg11__iinn [[,, aarrgg22__iinn]]]] [[,, aarrrraayy__oouutt]]||[[,, ggrrpp,, eell]])) -
+          Allows general access to ESRF hardware device servers.  The argument
+          ddeevv is the (case-insensitive) string name of the hardware device as
+          specified in the corresponding device server documentation.  The name
+          might represent an entire VME module or it might represent an
+          individual channel on a module.  The argument ccmmdd is the string name
+          of a valid command for the device.  Each command has associated
+          specific input and output data types.  At present, the following data
+          types are supported.
+
+              DD__VVOOIIDD__TTYYPPEE               void
+              DD__BBOOOOLLEEAANN__TTYYPPEE            Boolean
+              DD__SSHHOORRTT__TTYYPPEE              short
+              DD__UUSSHHOORRTT__TTYYPPEE             unsigned short
+              DD__LLOONNGG__TTYYPPEE               long
+              DD__UULLOONNGG__TTYYPPEE              unsigned long
+              DD__FFLLOOAATT__TTYYPPEE              float
+              DD__DDOOUUBBLLEE__TTYYPPEE             double
+              DD__SSTTRRIINNGG__TTYYPPEE             string
+              DD__VVAARR__CCHHAARRAARRRR             char array
+              DD__VVAARR__SSHHOORRTTAARRRR            short array
+              DD__VVAARR__LLOONNGGAARRRR             long array
+              DD__VVAARR__UULLOONNGGAARRRR            unsigned-long array
+              DD__VVAARR__FFLLOOAATTAARRRR            float array
+              DD__VVAARR__DDOOUUBBLLEEAARRRR           double array
+              DD__VVAARR__SSTTRRIINNGGAARRRR           string array
+              DD__IINNTT__FFLLOOAATT__TTYYPPEE          one long, one float
+              DD__MMOOTTOORR__FFLLOOAATT             one long, one float
+              DD__AATTTTEE__TTYYPPEE               two shorts
+              DD__LLOONNGG__RREEAADDPPOOIINNTT          two longs
+              DD__MMOOTTOORR__LLOONNGG              two longs
+              DD__FFLLOOAATT__RREEAADDPPOOIINNTT         two floats
+              DD__DDOOUUBBLLEE__RREEAADDPPOOIINNTT        two doubles
+              DD__SSTTAATTEE__FFLLOOAATT__RREEAADDPPOOIINNTT   one short, two floats
+              DD__VVAARR__GGRRPPFFPPAARRRR            array of DevGrpFramePair objects
+
+          The DD__VVOOIIDD__TTYYPPEE data type means no data value is to be passed.  For
+          scalar values, ssppeecc treats all data types as a double - the necessary
+          conversions are automatic.  The argument aarrgg11__iinn is necessary if the
+          command requires an input value.  For the two-element composite types,
+          aarrgg22__iinn must also be provided.  For array input types, aarrgg11__iinn is the
+          name of the array.  For the DD__VVAARR__ array types (except for
+          DD__VVAARR__SSTTRRIINNGGAARRRR), aarrgg11__iinn can be an associative array or a data array
+          type.  For commands that produce an output array or composite values,
+          aarrrraayy__oouutt is the name of an array to receive the values.  Data arrays
+          can only be used for DD__VVAARR__ array types (except for DD__VVAARR__SSTTRRIINNGGAARRRR).
+          For commands that produce an output array of numbers (not strings or
+          composite data types), a data group and element can be specified as
+          ggrrpp and eell, and the received data will be placed there.
+
+     ttaaccoo__iioo((""??"" [[,, ffiilltteerr]])) - A single ""??"" lists all the devices available on
+          the current NNEETTHHOOSSTT. The optional filter argument can be used to limit
+          the contents of the returned list and is in the usual
+          DOMAIN/FAMILY/MEMBER format, where the ** character can be used to
+          match patterns in any of the three fields.  See the TACO ddbb__ggeettddeevveexxpp
+          man page for more information.
+
+     ttaaccoo__iioo((ddeevv,, ""??""))  - Lists the valid commands for the named device, along
+          with the data types of any input and/or output arguments.
+
+     ttaaccoo__iioo((ddeevv,, ""ttiimmeeoouutt"",, ttiimmee)) - Sets the remote procedure call (RPC)
+          timeout for the indicated device.  The value of ttiimmee is in seconds.
+          If ttiimmee is zero, the timeout is set to its original value.  The
+          function returns the timeout value.
+
+     ttaaccoo__iioo((ddeevv,, ""uuddpp""||""ttccpp"")) - Sets the ethernet protocol for the named
+          device.
+
+     If there is an error in sending a command to the device, ttaaccoo__iioo(()) returns
+     -1.  In addition, the variable TTAACCOO__EERRRR (and EESSRRFF__EERRRR, if it exists) will
+     be assigned the device server error number (or zero if there is no error).
+     If TTAACCOO__EERRRR (or EESSRRFF__EERRRR) has the value -1 before the call of ttaaccoo__iioo(()), no
+     error message will be printed, but the error message will be assigned to
+     the variable TTAACCOO__EERRRR__MMSSGG (and EESSRRFF__EERRRR__MMSSGG, if it exists).  If no output
+     argument is generated by the command, the function returns zero.  If the
+     output data type is an array or composite value, the number of elements in
+     the array or composite value is returned.  Otherwise the value generated by
+     the command is returned.
+
+     The first time ttaaccoo__iioo(()) is called with a particular device name, the
+     device is "imported" from the server.  The connection remains open until
+     ssppeecc exits or executes the rreeccoonnffiigg command.  (The rreeccoonnffiigg command is
+     called by the ccoonnffiigg macro.)  The rreeccoonnffiigg command frees all server
+     connections, so the next time ttaaccoo__iioo(()) is called the device will be
+     "imported" again.
+
+     The complex data type DD__VVAARR__GGRRPPFFPPAARRRR is described as follows:
+
+        ssttrruucctt FFrraammee {{
+                ddoouubbllee  vvaalluuee;;
+                sshhoorrtt   oouuttppuutt,, ppaauussee;;
+        }};;
+        ssttrruucctt FFrraammeePPaaiirr {{
+                FFrraammee   ddeeaadd,, lliivvee;;
+        }};;
+        ssttrruucctt DDeevvGGrrppFFrraammeePPaaiirr {{
+                uu__iinntt           nnbb__ffrraammeeppaaiirr;;
+                FFrraammeePPaaiirr       ffrraammeeppaaiirr;;
+        }};;
+        ssttrruucctt DDeevvGGrrppFFrraammeePPaaiirrAArrrraayy {{
+                uu__iinntt           lleennggtthh;;
+                DDeevvGGrrppFFrraammeePPaaiirr **sseeqquueennccee;;
+        }};;
+
+     with the ssppeecc array values assigned from the input array or to the output
+     array in the order:
+
+        eelleemmeenntt[[00]] :: sseeqquueennccee-->>nnmm__ffrraammeeppaaiirr
+        eelleemmeenntt[[11]] :: sseeqquueennccee-->>ffrraammeeppaaiirr..ddeeaadd..vvaalluuee
+        eelleemmeenntt[[22]] :: sseeqquueennccee-->>ffrraammeeppaaiirr..ddeeaadd..oouuttppuutt
+        eelleemmeenntt[[33]] :: sseeqquueennccee-->>ffrraammeeppaaiirr..ddeeaadd..ppaauussee
+        eelleemmeenntt[[44]] :: sseeqquueennccee-->>ffrraammeeppaaiirr..lliivvee..vvaalluuee
+        eelleemmeenntt[[55]] :: sseeqquueennccee-->>ffrraammeeppaaiirr..lliivvee..oouuttppuutt
+        eelleemmeenntt[[66]] :: sseeqquueennccee-->>ffrraammeeppaaiirr..lliivvee..ppaauussee
+
+     ESRF devices named in the ccoonnffiigg file that are imported for motor, timer or
+     counter control or for GPIB access can be accessed using ttaaccoo__iioo(()),
+     although that is generally not recommended, as the user-level commands
+     might conflict with the internal code.
+
+     The string error message associated with any errors (either from ttaaccoo__iioo(())
+     or from the built-in C code that accesses the device servers) will be
+     assigned to the built-in variable TTAACCOO__EERRRR__MMSSGG (and EESSRRFF__EERRRR__MMSSGG, if it
+     exists).
+
+DATA COLLECTOR
+
+     The ESRF data collector system can be accessed using the following
+     functions.  All devices must reside on NNEETTHHOOSSTT.
+
+     ttaaccoo__ddcc((ddeevv,, ""ccrreeaattee"",, ccmmdd,, ddaattaa__ttyyppee)) - Creates a new pseudodevice for the
+          data collector named ddeevv having data accessed using the command ccmmdd
+          having data type ddaattaa__ttyyppee.  The parameters ddeevv, ccmmdd and ddaattaa__ttyyppee are
+          all strings.  ssppeecc requires data collector devices it creates to have
+          only one command.  If the device already exists with a different
+          command or with more than one command, the function fails.  The ccmmdd
+          argument must be one of the commands recognized by the data collector.
+          ssppeecc supports the following data types:
+
+              DD__BBOOOOLLEEAANN__TTYYPPEE
+              DD__SSHHOORRTT__TTYYPPEE
+              DD__LLOONNGG__TTYYPPEE
+              DD__FFLLOOAATT__TTYYPPEE
+              DD__DDOOUUBBLLEE__TTYYPPEE
+              DD__SSTTRRIINNGG__TTYYPPEE
+              DD__VVAARR__CCHHAARRAARRRR
+              DD__VVAARR__SSHHOORRTTAARRRR
+              DD__VVAARR__LLOONNGGAARRRR
+              DD__VVAARR__UULLOONNGGAARRRR
+              DD__VVAARR__FFLLOOAATTAARRRR
+              DD__VVAARR__DDOOUUBBLLEEAARRRR
+              DD__VVAARR__SSTTRRIINNGGAARRRR
+
+          ssppeecc treats all data as either a string or a double.  The necessary
+          type conversions will be made on the data passed through ttaaccoo__ddcc(()).
+
+     ttaaccoo__ddcc((ddeevv,, ""ddeelleettee"")) - Deletes the device ddeevv from the data collector.
+
+     ttaaccoo__ddcc((ddeevv,, ""ppuutt"",, ddaattaa)) - Writes data to the device ddeevv.  The device must
+          exist in the data collector and must only have one command.  The ddaattaa
+          argument will be converted to the appropriate string or number data
+          type, according to the data type required by the device's command.  If
+          the command uses an array data type, ddaattaa should be an array name.
+
+     ttaaccoo__ddcc((ddeevv,, ccmmdd)) - Returns the string or number value associated with the
+          command ccmmdd for device ddeevv.
+
+     ttaaccoo__ddcc((ddeevv,, ccmmdd,, aarrrraayy__nnaammee)) - If the command ccmmdd for device ddeevv returns
+          an array data type, aarrrraayy__nnaammee is the name of a ssppeecc array that will
+          receive the string or number data.  The function returns the number of
+          elements in the array.
+
+     ttaaccoo__ddcc((ddeevv,, ccmmdd,, ggrrpp,, eell)) - If the command ccmmdd for device ddeevv returns an
+          array data type containing number values, the arguments ggrrpp and eell
+          specify a ssppeecc data group and element number to receive the values.
+          The function returns the number of elements in the array.
+
+     ttaaccoo__ddcc((ddeevv,, ""??""))  - Lists the commands and data types available for the
+          device ddeevv.
+
+     ttaaccoo__ddcc((""??""))  - Lists all the devices, commands and data types in the data
+          collector for NNEETTHHOOSSTT.
+
+     If there is an error while executing ttaaccoo__ddcc(()), the function returns -1.
+     In addition, if the error is associated with the data collector server, the
+     data collector server error number will be assigned to the built-in
+     variable TTAACCOO__EERRRR (and EESSRRFF__EERRRR, if it exists).  If no output value is
+     generated by the function, it returns zero.  If the output argument is an
+     array, the return value is the number of elements in the array.
+
+RESOURCE DATABASE
+
+     ttaaccoo__ddbb((ddeevv,, rreess)) - Returns a string containing the value of the resource
+          rreess for the database item ddeevv. The string ddeevv is of the form
+          ////ffaacciilliittyy//ddoommaaiinn//ffaammiillyy//mmeemmbbeerr or ddoommaaiinn//ffaammiillyy//mmeemmbbeerr, with the
+          default ffaacciilliittyy taken from the NNEETTHHOOSSTT environment variable.  If
+          there are multiple elements in the resource value, they are returned
+          in a comma-separated list.
+
+     ttaaccoo__ddbb((ddeevv,, rreess,, vvaalluuee)) - The first two arguments are as above, with the
+          resource rreess associated with ddeevv being set to vvaalluuee.  If multiple
+          elements are required, the argument vvaalluuee should be a string in a
+          comma-separated list.
+
+     If there is an error while executing ttaaccoo__ddbb(()), the functions return -1.
+     In addition, the variable TTAACCOO__EERRRR (and EESSRRFF__EERRRR, if it exists), will be
+     assigned the error number returned by the TACO library routines.
+

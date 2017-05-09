@@ -1,0 +1,717 @@
+.TH "changes" "spec 5.04 Release Notes" "08/01/12" "chg5_04.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 5.04
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg5_04.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2003,2004,2006 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 5.04 Release Notes" "08/01/12" "chg5_04.rst 6.1  08/01/12 CSS"
+.
+.SH "January 21, 2004 \- RELEASE 5.04.04\-10"
+.rs
+.SH "Workaround For New Focus 8750/53 Firmware Bug"
+.sp
+A workaround for a bug in the recent
+firmware for the New Focus 8750/53 motor controllers that
+prevented the existing \fBspec\fP code
+from working with these controllers is included in this \fBspec\fP release.
+Motor controller firmware release 1.0.13 did not have the bug.
+Firmware releases 1.3.1 and 1.5.3 are known to have the bug, and
+\fBspec\fP assumes all releases in between do, too.
+.SH "January 15, 2004 \- RELEASE 5.04.04\-9"
+.rs
+.SH "Fix For New Unit/Module/Channel Motor Numbering"
+.sp
+The optional module numbering for motors that was introduced in
+release 5.04.03\-2 didn\(aqt allow
+motors to have the same unit and channel numbers but
+different module (crate) numbers.
+That problem is now fixed.
+.SH "\fBunix()\fP Will Strip Initial Null Bytes From Output"
+.sp
+When the
+\fBunix()\fP
+function is used to assign the output from the command given by the
+first argument into the string variable given by the
+second argument, initial null bytes in
+the command output will now be stripped away.
+.SH "Support For MEN M97 Counter/Timer Modules"
+.sp
+\fBspec\fP now supports the MEN Mikro Electronik GmbH M\-Bus model
+M97 timer/counters.
+The current support is based on the M97 module being installed
+in an MEN A201S 6U VMEbus Carrier Board.
+.SH "January 12, 2004 \- RELEASE 5.04.04\-8"
+.rs
+.SH "Support For MEN M8 VME To GPIB Controller"
+.sp
+\fBspec\fP now supports the MEN Mikro Electronik GmbH M\-Bus model
+M8 GPIB controller.
+The current support is based on the M8 module being installed
+in an MEN A201S 6U VMEbus Carrier Board.
+Multiple M8 controllers can be used.
+.SH "January 9, 2004 \- RELEASE 5.04.04\-7"
+.rs
+.SH "Update For Struck SIS3820 Multi\-Channel Scaler Update"
+.sp
+\fBspec\fP now works with updated firmware version 1.02 for the
+Struck
+SIS3820 multichannel
+scaler.
+These updated modules now have all the functionality
+required to use them as
+a timer/counters with \fBspec\fP.
+Firmware 1.01 is no longer supported.
+\fBspec\fP now automatically routes the internal 50 MHz time base to channel
+zero, if that channel is configured as the time base.
+Also, \fBspec\fP now keeps track of unlimited overflows in all channels
+and will restart the timer as necessary
+to accommodate arbitrarily long count times, whether counting to time
+or to monitor counts.
+.SH "More Robust Code For Tsuji PM16C Over Ethernet"
+.sp
+\fBspec\fP now includes code to retry read commands when using the Tsuji
+PM16C motor controllers over the Ethernet interface.
+\fBspec\fP will resend commands to read values up to four times
+if there are timeouts when waiting for a response from the
+motor controller.
+In addition the Ethernet timeout value has been reduced from
+five to two seconds.
+The reason for the change is due to reported timeouts when the controller
+is used on a busy network.
+.SH "Another Fix For Mclennan PM608 Motor Controllers"
+.sp
+A bug, where the Mclennan PM608
+motor positions were not
+tested for
+synchronization with positions stored on the computer,
+has been fixed.
+(The fix in release 5.04.04\-2 was not completely effective.)
+.SH "January 7, 2004 \- RELEASE 5.04.04\-6"
+.rs
+.SH "Fix For Recently Introduced CAMAC SMC Bug"
+.sp
+A bug (introduced in release
+5.02.02\-7
+and associated with changes
+made to accommodate server mode), that caused bogus motor positions
+to be returned for the CAMAC Joerger
+SMC motor controllers when used without associated counters,
+has been fixed.
+.SH "January 7, 2004 \- RELEASE 5.04.04\-5"
+.rs
+.SH "Real Fix For Catching Signals In Server Mode"
+.sp
+A bug in server mode only, where \fBspec\fP
+inappropriately blocked several signals
+(including the hang\-up signal
+generated when a window running
+\fBspec\fP is closed),
+and which was reported to be fixed in release 5.04.04\-2, but wasn\(aqt,
+is now really fixed.
+.SH "January 6, 2004 \- RELEASE 5.04.04\-4"
+.rs
+.SH "Fix For Struck SIS1100/3100 VME Controller"
+.sp
+A bug, where \fBspec\fP would crash after repeated
+\fBreconfig\fP
+commands with the message
+\fB"No more room for VME memory maps"\fP
+when using the Struck SIS1100/3100 VME Controller,
+has been fixed.
+.SH "January 5, 2004 \- RELEASE 5.04.04\-3"
+.rs
+.SH "\fB\(dqpgm\(dq\fP Format Now Accepts 16\-Bit Data"
+.sp
+The
+\fB"pgm"\fP
+file format for the
+\fBfmt_write()\fP
+and
+\fBfmt_read()\fP
+functions now supports 16\-bit data, in addition to the existing
+support for 8\-bit data.
+.SH "Update to PC\-DIG Frame Grabber Support"
+.sp
+The support for the
+Coreco Imaging (formerly ITI) PC\-DIG frame grabber has been revised.
+It is no longer necessary to configure a camera type in the
+\fBADDR\fP
+field of the configuration editor.
+\fBspec\fP will now obtain the needed configuration parameters from the
+initialized
+\fBitifg\fP
+driver module.
+.SH "January 4, 2004 \- RELEASE 5.04.04\-2"
+.rs
+.SH "Fix For Catching Signals In Server Mode"
+.sp
+A bug in server mode only, where \fBspec\fP
+inappropriately blocked several signals
+(including the hang\-up signal
+generated when a window running
+\fBspec\fP is closed),
+has been fixed.
+.SH "Language Dependence Removed For External Shared Arrays On \fBLinux\fP"
+.sp
+\fBspec\fP now uses a different method for finding available existing shared
+arrays (needed for the
+\fBextern shared\fP
+usage)
+that doesn\(aqt depend on the locale\-dependent output of the
+\fBipcs\fP
+command.
+The new method is only available on
+\fBLinux\fP
+platforms, however.
+.sp
+When using utilities built with prior versions of the
+\fBsps\fP
+shared\-array library or when running on
+non\-\fBLinux\fP
+platforms, the language locale can be set to English for a single
+command as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+shell> LANG=en onze &
+.ft P
+.fi
+.RE
+.sp
+The above starts the
+\fBonze\fP
+2D\-image display utility as a background process with the
+\fBLANG\fP
+environment variable set to English.
+.SH "Homing Implemented For IMS MDrive Motor Controllers"
+.sp
+\fBspec\fP now implements home searches for the IMS
+MDrive motor controllers.
+\fBspec\fP uses MDrive input pin three as the default home input.
+.SH "Support For Tsuji CT16\-01B Counter/Timer"
+.sp
+\fBspec\fP now supports the Tsuji Electronics Model CT16\-01B 16\-channel
+counter/timer over GPIB and RS\-232C interfaces.
+.SH "Support For Hasylab MCA 8701 VME Module"
+.sp
+\fBspec\fP now supports the Hasylab home\-grown VME MCA known as model 8701.
+.SH "Fix For Mclennan PM608 Motor Controllers"
+.sp
+A bug, where only the first channel of each Mclennan PM608
+motor controller was
+tested for
+synchronization with positions stored on the computer,
+has been fixed.
+.SH "Fix For Amptek Pocket MCA"
+.sp
+\fBspec\fP now automatically disables the security
+locking feature of the Amptek
+\fB"Pocket"\fP
+MCA 8000/8000A on startup.
+Otherwise, if the security locking had been turned on elsewhere,
+\fBspec\fP would be unable to modify the device parameters or control the
+device.
+.SH "November 20, 2003 \- RELEASE 5.04.04\-1"
+.rs
+.SH "Tilde Expansion Now A Built\-In Feature"
+.sp
+The tilde expansion feature for path names, where
+\fB~\fP
+is expanded to the \fBspec\fP user\(aqs home directory path, and
+\fB~name\fP
+is expanded into
+\fBname\fP\(aqs
+home directory path, is now included in the base \fBspec\fP code.
+Previously, the feature was only available when an optional
+command\-line editing package (such as GNU readline) was linked in.
+.SH "Increased Maximum Number of Motors"
+.sp
+A \fBspec\fP installation (at ESRF) has finally run up against
+the compiled\-in limit of
+160 motors.
+To accommodate them,
+the maximum number of motors has been increased to 200.
+(The next time the limit is reached, the \fBspec\fP code will
+be modified to allow an unlimited number of motors.)
+.SH "New \fBmotor_par(\(dqmodule\(dq)\fP Option"
+.sp
+A new
+\fB"module"\fP
+option to the
+\fBmotor_par()\fP
+function returns the configured module number of a motor.
+Optional module numbers were introduced into the motor configuration
+in \fBspec\fP release 5.04.03\-2.
+.SH "New Home\-Position Optional Motor Parameter"
+.sp
+A new parameter is available
+on the first optional motor\-parameter configuration screen to
+configure the home position (in dial units) of the motor.
+\fBspec\fP will use this parameter, if set, to assign the dial position
+automatically on home searches.
+Motor controllers that currently have this feature implemented are the
+OMS models, the Newport MM4000/5/6 models, the Mclennan PM600/8 models
+and the ANKA Gamma RST driver.
+The parameter is accessible via the
+\fB"home_position"\fP
+option to the
+\fBmotor_par()\fP
+function.
+If the home\-position argument is given to the standard
+\fBhome\fP
+macro or in the
+\fBchg_dial()\fP
+function, that value will take precedence over the value in the
+\fBconfig\fP
+file.
+.SH "Fix For Tsuji PM16C Ethernet Interface"
+.sp
+A timing issue with the Tsuji PMC16C motor controllers when used with
+the Ethernet interface, where the controller wouldn\(aqt respond quickly enough
+between closing and opening the connection (as occurs during
+\fBreconfig\fP)
+has been accommodated by inserting a small delay in the \fBspec\fP code
+before the connection is reopened.
+.SH "Updates To Mclennan Motor Support"
+.sp
+A number of updates to the Mclennan motor controller
+have been made, including the following:
+The PM608 model, which is a multiplexed version of the PM600, is
+now supported.
+Home searches are now implemented for the PM600 series.
+Also, the \fBspec\fP code should now work in both
+\fB"quiet"\fP
+and
+\fB"verbose"\fP
+modes (as set by configuration switches on the motor controller).
+Finally, the new unit/module/channel configuration can be used for the
+multiplexed PM381 and PM608 motors, where the module number
+corresponds to the
+controller address.
+.SH "Updates To IMS MDrive Motor Support"
+.sp
+New \fBspec\fP code addresses the latest non\-backwards compatible
+firmware (version 1.043) from IMS for their MDrive motor controllers.
+Also, the commands for doing home and limit searches
+with the MDrive controllers are now included in this \fBspec\fP release.
+Finally, the error messages returned by the controller when
+\fBspec\fP attempts to set already configured input switches
+to the convention for limit assignments (switch 1 for plus limit,
+switch 2 for negative limit) are suppressed.
+\fBspec\fP sends the commands to ensure the limit switches are available,
+although the software will still detect limits if the switches have
+already been programmed to another convention.
+.SH "Data Group Fix"
+.sp
+An old bug that affected use of data groups in the functions
+\fBdata_dump()\fP,
+\fBdata_fit()\fP,
+\fBdata_plot()\fP
+and
+\fBdata_pipe()\fP,
+where \fBspec\fP could experience a segmentation fault if the starting
+point argument was greater than zero, has been fixed.
+.SH "Bug Fix For \fBchelp\fP Utility On OSX"
+.sp
+A bug, where
+\fBspec\fP\(aqs stand\-alone help formating utility,
+\fBchelp\fP,
+inappropriately ran in interactive mode on Mac OSX platforms
+when its output had been
+redirected through through a pipe, has been fixed.
+.SH "Fix For ANKA RST Gamma Simulate Mode"
+.sp
+Missing checks on whether \fBspec\fP was operating in simulate mode in
+calls of the
+\fBanka_par()\fP
+function have been added.
+.SH "Fix For Detecting ESRF TACO Maxe Controller Failure"
+.sp
+\fBspec\fP now includes a check for for ESRF TACO Maxe controller failure.
+If there are three consecutive failures of the
+\fBdev_putget()\fP
+calls for a particular motor, \fBspec\fP will mark the motor channel as
+unusable.
+The user must perform a
+\fBreconfig\fP
+to reenable the motor (after fixing whatever caused the hardware failure).
+.SH "ESRF Warning Message Restored"
+.sp
+A warning that motors did not reach the final position, which
+disappeared from \fBspec\fP when the Maxe support was modernized in release
+5.02.03\-4, has been restored.
+Also, the warning can now appear for non\-Maxe motors,
+but only for TACO\-enabled \fBspec\fP installations.
+.SH "October 26, 2003 \- RELEASE 5.04.03\-8"
+.rs
+.SH "Bug Fix For \fBread_motors()\fP Flags"
+.sp
+A bug, where setting bit 2 of the
+\fBflags\fP
+argument to
+\fBread_motors()\fP
+was supposed to indicate that position discrepancies should be resolved
+silently in favor of the hardware but didn\(aqt, has been fixed.
+.SH "October 5, 2003 \- RELEASE 5.04.03\-7"
+.rs
+.SH "Fix For Nested \fBeval()\fP Calls With Macro Functions"
+.sp
+A bug, where the return values of macro functions in nested calls of
+\fBeval()\fP
+were
+sometimes lost, has been fixed.
+This bug was discovered when a macro hardware
+\fB_par()\fP
+function was called from inside a macro hardware
+\fB_cmd()\fP
+function.
+.SH "Improved Error Handling When Opening Socket Connections"
+.sp
+\fBspec\fP now uses a more sophisticated technique for opening socket connections.
+Previously, if a host specified by IP address was unreachable, the
+internal
+\fBconnect()\fP
+call would hang until interrupted with a
+\fB^C\fP.
+The new algorithm will time out after a default interval (currently four seconds)
+if the host cannot be reached.
+.SH "Improved Testing Of Connections To \fBspec\fP Server"
+.sp
+When a \fBspec\fP client opens a connection to a \fBspec\fP server on startup
+or on a
+\fBreconfig\fP,
+errors such as an unresolvable host name or an unreachable host will
+now generally
+produce an immediate error message, with no more attempts made
+to connect to that server until the next
+\fBreconfig\fP.
+If the host is up and reachable, but there is no \fBspec\fP server available at the
+designated port, the \fBspec\fP client will keep trying, as in previous versions.
+However, now a warning message will be printed on the first try.
+.SH "Fix For Crash in \fBspec\fP Clients When One Server Platform Was Down"
+.sp
+A bug that could result in a crash during hardware initialization
+when a \fBspec\fP client was configured for
+\fBspec\fP servers on multiple platforms
+where the computer running one of the servers was down has been fixed.
+.SH "Another Motor Position Rounding Fix"
+.sp
+The fixes in releases 5.02.03\-5 and 5.03.01\-3 that dealt
+with an obscure rounding bug
+and then with the unintended consequences of the first fix
+require one more fix.
+Now, motor positions near zero can again
+be set as small as the step size, even if
+the step size is less than 1e\-10.
+.SH "Fix For a Particular Am9513 Counter/Timer"
+.sp
+Although \fBspec\fP doesn\(aqt officially support the Measurement Computing
+PCI CTR\-05/10 Am9513 compatible counter/timer modules (because they contain
+a flaw which prevents counting to monitor to work), the cards can still
+be used with \fBspec\fP for counting to time.
+For the CTR\-10 model that contains two counter chips, \fBspec\fP now probes the correct
+addresses for the second counter chip.
+Previously, the registers associated with the digital I/O were probed, which would
+disturb the contents of those registers.
+.SH "Modifications Related To Command\-Line Editing Link Options"
+.sp
+Internal names in \fBspec\fP that conflict with names used in some
+optional third\-party external command\-line editing
+packages have been changed to remove the conflicts.
+Also, \fBspec\fP\(aqs built\-in command\-line history has been updated
+to handle automatic hardware polling during typing.
+.SH "September 24, 2003 \- RELEASE 5.04.03\-6"
+.rs
+.SH "New \fBcounter_par()\fP Option"
+.sp
+The command
+\fBcounter_par(mne, "monitor?")\fP
+returns nonzero if the hardware counter channel associated with
+\fBmne\fP
+can be assigned as the monitor preset channel
+using the command
+\fBcounter(mne, "monitor")\fP.
+Currently, counter/timers with such a capability are the
+Kinetic Systems 3640 (CAMAC),
+the Joerger VSC16/8 (VME),
+the Struck SIS3820 (VME),
+the National Instruments 6601/2 (PCI), the
+MURR device (GPIB) and the EPICS scaler record.
+.SH "Updated \fBcounters\fP Macro"
+.sp
+The
+\fBcounters\fP
+macro, used to assign the channels associated with the main detector
+counter and the monitor counter,
+will now use the
+\fBcounter_par()\fP
+function to change the counter hardware monitor assignment for hardware
+that supports monitor channel assignment via software.
+.SH "Support For Munich BR\-tronik IPS Motor Controller"
+.sp
+\fBspec\fP now includes support for a motor controller called the BR\-tronik IPS,
+designed, built and used at LMU Munich.
+.SH "September 4, 2003 \- RELEASE 5.04.03\-5"
+.rs
+.SH "Motor Offset Rounding Bug Revisited"
+.sp
+The fix of an obscure motor rounding bug in \fBspec\fP release 5.02.03\-5
+created another bug that was partially fixed in release 5.03.01\-3, but
+not entirely.
+The bug would, under certain circumstances,
+cause nonzero user angles with nonzero offsets
+to print with decimal parts on the
+order of 1e\-9 and angles at zero to print with decimal parts on the
+order of 1e\-16.
+This release should complete the fix begun in the 5.03.01\-3 release,
+.SH "Support For SBS Model 946 Version 2 Driver on Sun"
+.sp
+The SBS 946 version 2 driver for Sun platforms for
+the SBS model 61x/62x VME controllers
+is now supported.
+.SH "September 1, 2003 \- RELEASE 5.04.03\-4"
+.rs
+.SH "Portability Issues Addressed"
+.sp
+Several code changes were needed to allow \fBspec\fP to compile
+using gcc version 3.3.
+Also, problems with state\- and settings\-file locking over NFS
+have been addressed.
+.SH "August 27, 2003 \- RELEASE 5.04.03\-3"
+.rs
+.SH "New \fBremote_stat()\fP Client Function"
+.sp
+A new
+\fBremote_stat()\fP
+function is available on the \fBspec\fP client
+to check whether
+a particular server is currently connected.
+See the
+\fI\%server\fP help file for additional information.
+.SH "New \fBstatus/ready\fP Server Property"
+.sp
+A new
+\fB"status/ready"\fP
+property is available on the \fBspec\fP server that will return a
+value that indicates whether
+the server is ready to execute the next client command.
+See the
+\fI\%server\fP help file for additional information.
+.SH "Bug Fix For Watched Variables in Server"
+.sp
+A bug introduced just before the server/client code was
+put into the official release, where
+\fB"watched"\fP
+variables became unregistered in the server
+the first time they were modified,
+has been fixed.
+.SH "Improved Hex Dump For Socket Debugging"
+.sp
+The optional hexadecimal debug format for socket I/O (selected with
+\fBDEBUG\fP
+bits 0x400040) will now also show offsets and printable ASCII
+representations of the data, along the lines of conventional
+hex\-dump utilities.
+.SH "\fBshow_state\fP Utility Checks New Checksum"
+.sp
+The
+\fBshow_state\fP
+utility, available to display the contents of a user\(aqs state file,
+will now also
+do a test on the state\-file checksum that was
+introduced in the previous \fBspec\fP release.
+.SH "Improved Error Messages On Array Allocation Failure"
+.sp
+\fBspec\fP will now print the name and requested dimensions of arrays
+that are too big for the memory allocation calls.
+.SH "Initial Support For Struck SIS3820 Scalers"
+.sp
+\fBspec\fP now includes support for the Struck SIS3820 multichannel
+scaler (MCS) VME module.
+The initial support only covers use of the device as regular preset
+counters (of which there are 32 channels).
+MCS support will come later.
+The current SIS3820 firmware does not allow the counters to be read
+back while counting, but that feature is expected to become available
+in a forthcoming SIS3820 firmware update.
+.SH "Support For Compumotor OEM750 Motor Controllers"
+.sp
+The code that supports the Compumotor AX motor controller
+has been modified to allow it also to
+work with the Compumotor models OEM750, OEM650,
+OEM350 and OEM010 motor controllers.
+Select
+\fBCMAX\fP
+as the controller type and
+\fB"Compumotor AX (Serial)"\fP
+as the device type for all such motors.
+.SH "August 18, 2003 \- RELEASE 5.04.03\-2"
+.rs
+.SH "Server/Client Updates"
+.sp
+A number of updates are included for the new server/client features
+introduced in release 5.04.03:
+.IP \(bu 2
+Server port number assignment is now flexible.
+A server can be assigned a single port number, a range of port numbers
+or left to use a built\-in default port number range (6510\-6530).
+The \fBspec\fP invocation argument syntax for server mode has changed to
+reflect the new options.
+.IP \(bu 2
+New
+\fBhello\fP
+commands are available for clients to discover servers.
+.IP \(bu 2
+\fBspec\fP clients can specify a server on a particular
+host by either a port number or
+by a \fBspec\fP process name.
+.IP \(bu 2
+A better job is done reestablishing input stream alignment on both
+server and client
+in the event
+nonconforming data is received.
+.IP \(bu 2
+Improvements have been made to the locking among threads in the server,
+fixing some race conditions.
+.IP \(bu 2
+The handling of associative arrays when passed to and from the
+server works better.
+.IP \(bu 2
+Problems with byte swapping (when needed) in the server are fixed.
+.sp
+See the revised \fI\%server\fP help file for further information.
+.SH "New Optional Module Number For Motor Unit/Channel"
+.sp
+To accommodate motor controllers that require more than two
+parameters (unit and channel) to specify motors, the
+\fBedconf\fP
+configuration editor now allows either two or three
+slash\-separated numbers.
+If three numbers are given, the first is unit, the last is channel
+and the middle is the new parameter, which \fBspec\fP will refer to as
+module number.
+The motor controllers in \fBspec\fP that currently require a module (or crate or
+rack or sub\-unit) number
+(ACS SPI\-8,
+DCX serial,
+ECB in multiplexed mode,
+Mclennan PM381,
+New Focus 8732/8750/8753
+and XIA HSC) still
+use the overloaded
+channel number to pass the
+information, but will be modified
+to recognize the new module number feature in future releases.
+.SH "Argument Change For Macro Hardware \fB_config()\fP Macros"
+.sp
+The arguments for the macro hardware
+\fB_config()\fP
+macros, when called for the individual motor and counter channels,
+have been changed to accommodate the new
+\fBmodule\fP
+number option.
+The calling sequence is now
+\fBprefix_config(mne, type, unit, module, chan)\fP.
+See the
+\fI\%mac_hdw\fP help file for details.
+.SH "Fix For \fBedconf\fP Default VME Addresses"
+.sp
+The hardware configuration editor
+\fBedconf\fP
+now correctly shows the default address when VME modules are
+selected on the
+\fBD\fPevices
+screen.
+.SH "Fixes For Socket\-To\-Serial Support"
+.sp
+The socket\-to\-serial support in \fBspec\fP, which
+allows any supported serial device to be used via
+compatible Ethernet\-to\-serial adapters, was missing some internal
+code which could prevent
+certain motor controllers
+(Compumotor AX and 3000,
+MAC Science MXC,
+Mclennan PM301,
+Newport MM2000/3000 in daisy\-chain mode,
+PMC DCX\-100,
+Rigaku RINT\-2000 and XIA HSC)
+from working
+properly in socket\-to\-serial mode.
+The missing code has been added.
+.SH "Improved Detection of Corrupted State Files"
+.sp
+This \fBspec\fP release attempts to do a better job of detecting corrupted
+user state files, automatically doing a fresh start rather than
+crashing or quitting with an error message.
+The state file is now written out with a checksum, which will be
+recalculated and compared before the file is used to restore the state.
+Also, additional checks are done on
+the sanity of parameters as the file is read.
+State files from prior \fBspec\fP releases will still be recognized,
+but state files saved
+with this version will not be usable by older \fBspec\fP releases.
+.SH "\fBprdef\fP Source\-File Comment Fixed"
+.sp
+An old bug, where the comment
+printed by
+\fBprdef\fP
+to show the source file for the macro
+incorrectly eliminated embedded
+\fB/../\fP
+strings, has been fixed.
+Unnecessary
+\fB./\fP,
+\fB/./\fP,
+and
+\fB/../\fP
+are still eliminated and
+\fBSPECD\fP
+is still substituted for the path of the \fBspec\fP auxiliary file directory,
+but all should now be done correctly.
+.SH "Help Formatter Bug Fix"
+.sp
+A bug introduced in \fBspec\fP release 5.01.03,
+where the help formatter would break lines containing
+highlighted text before they were full, has been fixed.
+.SH "New \fBsuv\fP Geometry for ESRF D32 Beamline"
+.sp
+The initial adaptation in \fBspec\fP of a geometry called
+\fBsuv\fP
+is included for the
+surface ultrahigh vacuum instrument at the ESRF D32 beamline.
+.SH "July 22, 2003 \- RELEASE 5.04.03\-1"
+.rs
+.SH "New Encoder Option for Mclennan PM600"
+.sp
+If the
+\fBPM600_E\fP
+controller type is selected in the
+\fBconfig\fP
+file
+for the Mclennan PM600 motor controller, \fBspec\fP will read the encoder
+position rather than the commanded position from the controller.
+.SH "July 20, 2003 \- RELEASE 5.04.03"
+.rs
+.SH "New Server/Client Feature"
+.sp
+The \fBspec\fP server/client features, long in development,
+are now included with the standard \fBspec\fP release.
+See the
+\fI\%server\fP help file for details on the implementation.
+Although the server/client features work well in many situations,
+there are probably still flaws that need further development to correct.
+Please start gently with the current release.
+Keep CSS appraised
+of any anomalies noticed or features that seem lacking.
+

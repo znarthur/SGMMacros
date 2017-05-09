@@ -1,0 +1,976 @@
+functions                           reference                          functions
+
+NAME
+     functions - built-in functions
+
+Operating System Utility Functions
+
+     cchhddiirr(()) - Changes ssppeecc's current working directory to user's home directory
+          as obtained from the environment variable HHOOMMEE. Returns ttrruuee or ffaallssee
+          as the command was successful or not.  Updates the value of the
+          built-in variable CCWWDD.
+
+     cchhddiirr((dd)) - As above but changes to the directory dd.
+
+     uunniixx(()) - Spawns an interactive subshell using the program obtained from the
+          user's environment variable SSHHEELLLL or sshheellll. Uses //bbiinn//sshh if the
+          environment variable is unset.  Returns exit status of shell.
+
+     uunniixx((ccmmdd)) - As above, but uses //bbiinn//sshh to execute the one-line command ccmmdd
+
+     uunniixx((ccmmdd,, vvaarr [[,, lleenn]])) - As above, but the second argument vvaarr is the name
+          of a variable in which to place the string output of ccmmdd.  The maximum
+          length of the string is 4096 bytes (including a null byte).  The
+          optional third argument lleenn can be used to specify a larger size.
+          This feature available since ssppeecc Release 4.03.01.
+
+     ttiimmee(()) - Returns the current epoch in seconds.  The UNIX epoch is the
+          number of seconds from January 1, 1970, 00:00:00 GMT.  The value
+          returned includes a fractional part with the resolution dependent on
+          the host platform.  Millisecond resolution is standard, although on
+          80X86 systems only hundredth of a second resolution is returned.
+
+     ddaattee(()) - Returns a string containing the current date as ""MMoonn FFeebb 88
+          2211::0044::0044 EESSTT 11998888""
+
+     ddaattee((ffmmtt)) - As above, but the output string is formatted according to the
+          specifications in the string ffmmtt.  The format is passed to the
+          standard C library ssttrrffttiimmee(()) function (see the ssttrrffttiimmee man page)
+          with one addition: ssppeecc fills in the format options ""%%..11"" through
+          ""%%..99"" with the fractional seconds, where the single digit specifies
+          the number of decimal digits.  For example,
+
+              pp ddaattee((""%%mm--%%dd--%%YY %%TT..%%..66""))
+
+          would display
+
+              0011--1144--22000055 2222::5599::3300..114488006677
+
+     ddaattee((tt [[,, ffmmtt]])) - As above, but from the epoch given by tt. See ttiimmee(())
+          above.
+
+     ffiillee__iinnffoo((ff [[,, ccmmdd]])) - Returns information on the file or device named ff.
+          With just the one ff argument, ffiillee__iinnffoo(()) returns nonzero if the file
+          or device exists and zero otherwise.  If ff is the string ""??"", the
+          possible values for ccmmdd are listed.  If ff is the string "".."", ssppeecc uses
+          the information from the last ssttaatt(()) system call, avoiding the
+          overhead associated with an additional system call.  The values for
+          ccmmdd and the information returned follow.  Note that the first set of
+          values essentially mimic the contents of the data structure returned
+          by the ssttaatt(()) system call, while the second set of values have the
+          same meaning as arguments to the tteesstt utility invoked from the shell.
+
+          ""ddeevv"" - the device number on which ff resides.
+          ""iinnoo"" - the inode number of ff.
+          ""mmooddee"" - number coding the access modes and file attributes.
+          ""nnlliinnkk"" - number of hard links for ff.
+          ""uuiidd"" - user id of the owner.
+          ""ggiidd"" - group id of the owner.
+          ""rrddeevv"" - device id if ff is a block or character device.
+          ""ssiizzee"" - size in bytes of ff.
+          ""lliinneess"" - number of newline characters in the file (as of ssppeecc
+               6.03.04).  If the file does not end with a newline, the count is
+               increased by one.
+          ""aattiimmee"" - time when ff's data was last accessed.
+          ""mmttiimmee"" - time when ff's data was last modified.
+          ""ccttiimmee"" - time when ff's attributes were last modified.
+          ""iissrreegg"" or ""--ff"" - whether ff is a regular file.
+          ""iissddiirr"" or ""--dd"" - whether ff is a directory.
+          ""iisscchhrr"" or ""--cc"" - whether ff is a character device.
+          ""iissbbllkk"" or ""--bb"" - whether ff is a block device.
+          ""iissllnnkk"" or ""--hh"" or ""--LL"" - whether ff is a symbolic link.
+          ""iissffiiffoo"" or ""--pp"" - whether ff is a named pipe (fifo).
+          ""iissssoocckk"" or ""--SS"" - whether ff is a socket.
+          ""--ee"" - whether ff exists.
+          ""--ss"" - whether the size of ff is greater than zero.
+          ""--rr"" - whether ff is readable.
+          ""--ww"" - whether ff is writable.
+          ""--xx"" - whether ff is executable.
+          ""--oo"" - whether ff is owned by you.
+          ""--GG"" - whether ff is owned by your group.
+          ""--uu"" - whether ff is setuid mode.
+          ""--gg"" - whether ff is setguid mode.
+          ""--kk"" - whether ff has its sticky bit set.
+
+     ffiillee__iinnffoo((ppiidd,, ""aalliivvee"")) - Returns nonzero if the process associated with
+          the process ID ppiidd exists and zero otherwise.
+
+     ggeetteennvv((ss)) - Returns the string value of the environment variable ss.
+
+Evaluation Functions
+
+     eevvaall((ss)) - Parses and executes the string ss.  If the string is an
+          expression, its value is returned.  If the string is a statement or
+          statement list, eevvaall(()) returns ttrruuee (nonzero) if there were no errors
+          executing the statement(s).  The type of errors that normally cause
+          ssppeecc to reset to command level (syntax errors, for example) will only
+          cause eevvaall(()) to return ffaallssee.  Local symbols defined in the statement
+          block in which eevvaall(()) is used are not visible to the statements in the
+          string ss.
+
+     eevvaall22((ss)) - Similar to eevvaall(()), but local symbols in the statement blocks
+          surrounding the eevvaall22(()) function call are visible and can be read or
+          modified.  To use local variables within the eevvaall22(()) string that won't
+          be associated with local variables of the same name outside the
+          eevvaall22(()) call, use curly brackets to enclose the statements with the
+          llooccaall declaration within the string ss.
+
+Command Files
+
+     ddooffiillee((ff [[,, ssttaarrtt]])) - Queues the file ff for reading commands.  Returns
+          nonzero if the file cannot be opened.  If the optional argument ssttaarrtt
+          is an integer, the number specifies at which line to start reading the
+          file.  (Currently, only positive integers are allowed.)  If the
+          argument is anything else, it is considered a search string, and text
+          is read from the file starting at the first line containing that
+          search string.  The metacharacters **, which matches any string, and ??,
+          which matches any single character, are allowed in the search string.
+          Initial and trailing white space is ignored when searching for a
+          match.
+
+     qqddooffiillee((ff [[,, ssttaarrtt]])) - As above, but doesn't echo the contents of the file
+          to the screen.
+
+Help Functions
+
+     ggeetthheellpp((ff [[,, ffllaaggss]])) - Prints the paginated help file ff on the screen.  If
+          ff contains a //, the argument is treated as an absolute or relative
+          pathname.  Otherwise, the argument refers to a file in the ssppeecc__hheellpp
+          (or hheellpp) subdirectory of the SSPPEECCDD directory.
+
+          Prior to ssppeecc release 6, ssppeecc contained an internal help file parser
+          and formatter.  With release 6, help files are formatted using the
+          standard ggrrooffff utility and paginated using the standard lleessss utility.
+
+          If the argument ff is a pathname and the optional ffllaaggss argument has
+          bit 0x02 set, ssppeecc will use ggrrooffff formatting macros appropriate for
+          help files written using pre-release 6 conventions.
+
+          Returns non-zero if the file couldn't be opened.
+
+     wwhhaattiiss((ss,, [[""iinnffoo""]])) - With one argument, returns a number that indicates
+          what the string argument ss is.  With two arguments, returns a string
+          containing a text description of what ss is.  The number is a two-word
+          (32-bit) integer, with the low word containing a code for the type of
+          object and the high word containing more information for certain
+          objects.
+
+              Low Word   High Word   Meaning
+              0          0           Not a command, macro or keyword
+              0          1           Command or keyword
+              2          Length      Macro name (length is in bytes)
+              4          0x0001      New-style data array
+              4          0x0010      Number-valued
+              4          0x0020      String-valued
+              4          0x0040      Constant-valued
+              4          0x0100      Associative array
+              4          0x0200      Built-in
+              4          0x0400      Global
+              4          0x0800      Unset
+              4          0x2000      Immutable
+              4          0x4000      Local
+              4          0x8000      Associative array element
+
+          Most type-4 symbols have more than one of the high-word bits set.
+
+Controlling Output Files
+
+     ooppeenn(()) - Lists all open files.  Returns zero.
+
+     ooppeenn((ffiillee__nnaammee)) - Makes ffiillee__nnaammee, which is a string constant or
+          expression, available for output.  Files are opened to append.
+          Returns zero for success, -1 if the file can not be opened or if there
+          are too many open files.
+
+     cclloossee((ffiillee__nnaammee)) - Closes ffiillee__nnaammee and removes it from the table of files
+          available for output.  Returns zero for success, -1 if the file wasn't
+          open.  Any open file should be closed before attempting to modify the
+          file with other UNIX utilities.  Otherwise the file may be corrupted
+          if two processes are writing to the file.
+
+     oonn(()) - Lists all open files and indicates which ones are currently turned
+          on for output.
+
+     oonn((ffiillee__nnaammee)) - Turns on ffiillee__nnaammee for output.  All messages, except for
+          some error and debugging messages, but including all pprriinntt and
+          pprriinnttff(()) output, are sent to all turned-on devices.  If ffiillee__nnaammee has
+          not been made available for output with the ooppeenn(()) function, it will
+          be opened.  Returns zero for success, -1 if the file can't be opened
+          or if there are too many open files.
+
+     ooffff((ffiillee__nnaammee)) - Turns off output to ffiillee__nnaammee, but keeps it in the list of
+          files available for output.  If this was the last turned-on file or
+          device, ttttyy is turned back on automatically.  Returns zero for
+          success, -1 if the file wasn't open.
+
+Macro-Related Functions
+
+     ccddeeff((nnaammee,, ss,, [[kkeeyy,, [[ffllaaggss]]]])) - The function ccddeeff(()) is used to define
+          chained macros.  The function can be used to maintain a macro
+          definition in pieces that can be selectively included into a complete
+          macro definition.  The argument nnaammee is the name of the macro.  The
+          argument ss contains a piece to add to the macro.
+
+          The chained macro can have three parts:  a front, a middle and a back.
+          Pieces included in each of the parts of the macros are sorted
+          lexicographically by the keys.  Pieces without a key are placed in the
+          middle, in the order in which they were added, but after any middle
+          pieces that include a key.
+
+          With the optional kkeeyy argument, the pieces can be selectively replaced
+          or deleted.  The ffllaaggss argument controls whether the pieces are added
+          to the front or to the back of the macro or whether the pieces should
+          be selectively included in the definition based on whether kkeeyy is a
+          currently configured motor or counter mnemonic.
+
+          The bit meanings for ffllaaggss are as follows:
+
+          00xx0011 - only include if key is a motor mnemonic and the motor is not
+               disabled.
+          00xx0022 - only include if key is a counter mnemonic and the counter is
+               not disabled.
+          00xx1100 - place in the front part of the macro.
+          00xx2200 - place in the back part of the macro.
+
+          If ffllaagg is the string ""ddeelleettee"", the piece associated with kkeeyy is
+          deleted from the named macro, or if the name is the null string, from
+          all the chained macros.
+
+          If ffllaagg is the string ""eennaabbllee"", the parts of the named macro
+          associated with kkeeyy are enabled, and if ffllaagg is the string ""ddiissaabbllee"",
+          the associated parts are disabled.  If nnaammee is the null string """",
+          then all chained macros that have parts associated with kkeeyy will have
+          those parts enabled or disabled.
+
+          If kkeeyy is the null string, the ffllaaggss have no effect.
+
+          The ccddeeff(()) function will remove any existing macro defined using ddeeff
+          or rrddeeff. Likewise, ddeeff and rrddeeff will removed an existing ccddeeff(()) macro
+          with the same name.  However, the commands llssddeeff, pprrddeeff and uunnddeeff do
+          work with chained macros.  When ssppeecc starts, when the rreeccoonnffiigg command
+          is run (or the ccoonnffiigg macro is invoked) or when individual motors or
+          counters are enabled or disabled, all the chained macros are adjusted
+          for the currently configured and enabled motors and counters.
+
+     ccddeeff((""??""))  - Lists all the pieces of all the chained macros.
+
+     ccddeeff((nnaammee,, ""??""))  - Lists the pieces of the macro named nnaammee, as will a ""??""
+          as the third or fourth argument.
+
+     cclloonnee((ddeesstt,, ssrrcc)) - Duplicates the macro ssrrcc as a new macro named ddeesstt.
+          Currently a clone of a ccddeeff chained macro becomes an ordinary macro.
+
+     ssttrrddeeff((ss)) - Returns a string containing the macro definition of ss. If ss is
+          not a defined macro, returns the string ss itself.  (Available as of
+          ssppeecc release 5.08.02-6.)
+
+     ssttrrddeeff((ss,, kkeeyy)) - If ss is a chained macro, returns a string containing only
+          the definition segment associated with kkeeyy.  If ss is not a defined
+          macro, returns the string ss itself.  If ss is a macro, but not a
+          chained macro, returns the definition.  If ss is a chained macro, but
+          doesn't contain a segment associated with kkeeyy, returns the null
+          string.  (Available as of ssppeecc release 6.03.04.)
+
+User Input and Output
+
+     iinnppuutt(()) - Reads a line of input from the keyboard.  Removes leading white
+          space and trailing newline and returns the string.  Returns the null
+          string """" if only white space was entered.
+
+     iinnppuutt((ss)) - As above, but prompts with the string ss.
+
+     iinnppuutt((nn)) - This function behaves differently depending on whether the input
+          source is the keyboard (the normal case)  or a pipe from another
+          program (as when ssppeecc is invoked with the --pp ffdd ppiidd option with
+          nonzero ffdd.)
+
+          In the normal case, if nn is less than or equal to zero, the tty state
+          is set to ccbbrreeaakk mode and input echo is turned off.  Then iinnppuutt(())
+          checks to see if the user has typed a character and immediately
+          returns a null string if nothing has been typed.  Otherwise, it
+          returns a string containing the single (or first) character the user
+          typed.  If nn is less than zero, the cbreak, no-echo mode remains in
+          effect when iinnppuutt(()) returns.  If nn is greater than zero, the normal
+          tty state is restored (as it is also if there is an error, if the user
+          types ^^CC or if the user enters the eexxiitt command).  Also, no characters
+          are read and the null string is returned.  The normal tty state will
+          always be restored before the next main prompt is issued, whether due
+          to an error, a ^^CC, or through the normal flow of the program.
+
+          If nn is -2 or less, there is an added feature where iinnppuutt(()) will
+          return special codes for particular special key sequences.  Currently,
+          the arrow-key and forward delete key sequences are recognized, with
+          return codes of 0xE8, 0xEA, 0xEB, 0xEC and 0xFF for left, up, down,
+          right and forward delete, respectively.  (As of ssppeecc release 6.01.)
+
+          When ssppeecc is invoked with the --pp ffdd ppiidd option with nonzero ffdd,
+          iinnppuutt(()) reads nothing but does return the number of characters
+          available to be read.  If nn is nonzero, iinnppuutt(()) simply reads and
+          returns a line of text, as if it had been invoked with no argument.
+
+     yyeessnnoo(([[ss,, ]] xx)) - Prompts the user with the optional string ss, then waits
+          for a yes or no response.  The function returns 1 if the user answers
+          with a string beginning with YY, yy or 11. The value of xx is returned if
+          the user simply enters return.  Otherwise the function returns 0.  If
+          the prompt string ss is present, the characters "" ((YYEESS))?? "" or "" ((NNOO))?? ""
+          are appended depending on the value of xx.
+
+     ggeettvvaall(([[ss,, ]] xx [[,, uu]])) - Prompts the user with the string ss, if present,
+          then waits for a user response.  If the user enters a value, that
+          value is returned.  The value of xx is returned if the user simply
+          enters return.  If the prompt string ss is present, the string is
+          printed followed by the current value of xx and the string uu, if
+          present, in parenthesis, a question mark and a space.  The function
+          works with both number and string values.  The optional third argument
+          is intended to be used for a unit string (available as of ssppeecc release
+          5.08.02-6).
+
+     ggeettssvvaall(([[ss,, ]] xx)) - Like ggeettvvaall(()) above, prompts the user with the string ss,
+          if present, then waits for a user response.  The value of xx is
+          returned if the user simply enters return.  If the prompt string ss is
+          present, the string is printed followed by the current value of xx in
+          parenthesis, a question mark and a space.  Unlike ggeettvvaall(()), this
+          function does not convert hexadecimal or octal input (number strings
+          that begin with 0, 0x or 0X) to the corresponding decimal value.
+          Rather, the ggeettssvvaall(()) function returns the literal string as entered.
+
+     ggeettlliinnee((ff [[,, aarrgg]])) - This function reads the ASCII file given by the string
+          ff a line at a time and returns the string so obtained, including the
+          trailing newline.  If aarrgg is the string ""ooppeenn"", the function returns
+          zero if the file can be opened for reading, otherwise -1 is returned.
+          If aarrgg is ""cclloossee"", the file is closed and zero is returned.  If aarrgg is
+          zero, the first line of the file is returned.  If only the first
+          argument is present, the next line of the file is read and returned.
+          At the end of the file, a -1 is returned.  The previous file, if any,
+          is closed and the new file is opened automatically when the filename
+          argument changes (at least in this preliminary implementation).
+
+     ssssccaannff((ss,, ffmmtt,, aarrgg [[,, ...... ]])) - Scans the literal string or string variable
+          ss for data, where ffmmtt contains a format specification in the same
+          style as the C language ssccaannff(()) function.  Each aarrgg is a variable name
+          or array element that will be assigned the values scanned for.  The
+          function returns the number of items found in the string.
+
+     pprriinnttff((ffmmtt [[,, aa,, ......]]))  - Does formatted printing on the turned-on output
+          devices.  See pprriinnttff(()) in a C-manual.  Returns ttrruuee.
+
+     ffpprriinnttff((ffiillee__nnaammee,, ffmmtt [[,, aa,, ......]]))  - Does formatted printing on ffiillee__nnaammee.
+          All other devices (except log files) are turned off while the string
+          is printed.
+
+     eepprriinnttff((ffmmtt [[,, aa,, ......]]))  - Same behavior as pprriinnttff(()), above, except that if
+          an error-log file is open, the generated output will also be written
+          to that file, in addition to any other files or device turned on for
+          output.  The first line of any strings written to the error-log files
+          will be prefixed with the ##EE characters.
+
+     ttttyy__ccnnttll((ss)) - Sends terminal-specific escape sequences to the display.  The
+          sequences are only written to the ""ttttyy"" device and only if it is
+          turned on for output.  The sequences are obtained from the system
+          terminal-capability data base using the value of the environmental
+          variable TTEERRMM. The following values for ss are recognized:
+
+          ""hhoo"" - move the cursor to the home position (upper left corner).
+          ""ccll"" - clear the screen.
+          ""ccee"" - clear to the end of the line.
+          ""ccdd"" - clear from current position to the end of the screen.
+          ""ssoo"" - start text stand-out mode.
+          ""ssee"" - end text stand-out mode.
+          ""mmdd"" - start bold (intensified) mode.
+          ""mmee"" - end bold mode.
+          ""uuss"" - start underline mode.
+          ""uuee"" - end underline mode.
+          ""mmbb"" - start blink mode.  (Note, xterms don't blink.)
+          ""mmhh"" - start half-bright mode.
+          ""mmrr"" - start reverse video mode.
+          ""uupp"" - move up one row.
+          ""ddoo"" - move down one row.
+          ""llee"" - move left one column.
+          ""nndd"" - move right one column (non-destructive space).
+
+     ttttyy__ccnnttll((""rreessiizzeedd??""))  - Updates the RROOWWSS and CCOOLLSS variables in the event
+          the window size has changed and returns a nonzero value if the window
+          size has changed since the last call to ttttyy__ccnnttll((""rreessiizzeedd??"")).
+
+     ttttyy__ffmmtt((xx,, yy,, ww,, ss)) - Writes the string ss to the screen starting at column
+          xx and row yy, where column 0, row 0 is the upper left corner of the
+          screen.  The string is only written to the ""ttttyy"" device and only if it
+          is turned on for output.  If ss is longer than the width given by ww,
+          the string is split at space characters such that no line is longer
+          then ww. Newlines in the string are retained, however.  The function
+          will truncate words that are wider than ww and drop lines that would go
+          off the bottom of the screen.  Negative xx or yy position the cursor
+          relative to the left or bottom edges of the screen, respectively.  The
+          function returns the number of lines written.
+
+          The two-letter control sequences listed above for the ttttyy__ccnnttll(())
+          function can be included in the string ss by using the special string
+          ""\\[[xxxx]]"", where xxxx is the two-letter sequence.  Note, though, the
+          formatting code may fail if the sequence changes the current position
+          of the output text.
+
+     ttttyy__mmoovvee((xx,, yy [[,, ss]) - Moves the cursor to column xx and row yy, where column
+          0, row 0 is the upper left corner of the screen.  If the third
+          argument ss is present, it is written as a label at the given position.
+          The two-letter control sequences listed above for the ttttyy__ccnnttll(())
+          function can be included in the string ss by using the special string
+          ""\\[[xxxx]]"", where xxxx is the two-letter sequence.  The sequences and
+          string are only written to the ""ttttyy"" device and only if it is turned
+          on for output.
+
+          Negative xx or yy position the cursor relative to the left or bottom
+          edges of the screen, respectively.
+
+          Relative moves are specified by adding +/-1000 to xx or yy. Both
+          arguments must specify either relative or absolute moves.  If one
+          coordinate specifies a relative move, the absolute move in the other
+          coordinate will be ignored.  Note, not all terminal types support
+          relative moves.
+
+Counting and Moving
+
+     sslleeeepp((tt)) - Suspends execution for tt seconds, where tt may be non-integral.
+          In old versions, a negative tt indicated sleep was for clock ticks
+          (1/60 second each).  Returns ttrruuee.
+
+     mmccoouunntt((tt)) - Begins counting for tt monitor counts.  Returns ttrruuee.
+
+     ttccoouunntt((tt)) - Begins counting for tt seconds.  Returns ttrruuee.
+
+     ccnntt__mmnnee((ii)) - Returns the string mnemonic of counter ii as given in the
+          configuration file.
+
+     ccnntt__nnaammee((ii)) - Returns the string name of counter ii as given in the
+          configuration file.
+
+     ccnntt__nnuumm((mmnnee)) - Returns the counter number corresponding to the counter
+          mnemonic mmnnee, or -1 if there is no such counter configured.
+
+     ccoouunntteerr__ppaarr((ii,, ss [[,, vv]])) - Returns or sets configuration parameters for
+          counter ii. See the _c_o_u_n_t_i_n_g help file for more information.
+
+     mmccaa__sseell((nn)) - Selects which MCA-type device to use for subsequent calls of
+          the mmccaa__ggeett(()), mmccaa__ppuutt(()) and mmccaa__ppaarr(()) functions.  The MCA device
+          numbering is set in the ccoonnffiigg file with the string @@mmccaa__NN, where NN is
+          the device number (from 0 to 31).  Returns -1 if not configured for
+          device nn, otherwise returns zero.  It is not necessary to use
+          mmccaa__sseell(()) if only one MCA-type device is configured and is configured
+          as device 0.
+
+     mmccaa__sseell((""??""))  - Lists the configured MCA devices and indicates which device
+          is currently selected for the mmccaa__ggeett(()), mmccaa__ppuutt(()) and mmccaa__ppaarr(())
+          functions with an asterisk.  Also displays the MCA device number for
+          use with the mmccaa__ssggeett(()), mmccaa__ssppuutt(()) and mmccaa__ssppaarr(()) functions and
+          displays whether the presence test found the unit unresponsive or if
+          the user has disabled the unit.  Returns the total number of MCA
+          devices recognized in the ccoonnffiigg file.  Note, the value of the
+          built-in global variable MMCCAASS is always set to the number of MCA
+          devices.
+
+     mmccaa__sseell((nn,, ""??""))  - Returns a string containing one line of information
+          about MCA device nn, or 0 if ssppeecc isn't configured for device nn.
+
+     mmccaa__ggeett((aarrrr [[,, rrooii__bbeegg [[,, rrooii__eenndd]]]])) - Gets data from the currently
+          selected MCA-type device, and transfers it to the array aarrrr.  If the
+          optional starting channel and ending channel are given, the data is
+          read from those hardware channels and placed starting at the beginning
+          of the array.  For example,
+
+             SSPPEECC..11>> uulloonngg aarrrraayy ddaattaa[[11002244]]
+             SSPPEECC..22>> mmccaa__ggeett((ddaattaa))
+             SSPPEECC..33>> mmccaa__ggeett((ddaattaa,, 3322,, 112288))
+             SSPPEECC..44>> mmccaa__ggeett((ddaattaa[[3322::112288]],, 3322,, 112288))
+
+          The last example uses subarray syntax to position the data in array
+          elements corresponding to the MCA channel positions.
+
+     mmccaa__ggeett((gg,, ee [[,, rrooii__bbeegg [[,, rrooii__eenndd]]]])) - As above, but transfers the data to
+          element ee of data group gg instead of an array.  Returns the number of
+          points transferred.
+
+     mmccaa__ssggeett((sseell,, ......))  - Like the above functions, but uses the MCA device
+          numbered sseell in the ccoonnffiigg file.
+
+     mmccaa__ppuutt((......)) and mmccaa__ssppuutt((sseell,, ......))  - These functions have the same syntax
+          as the above, but transfer data to the MCA device (for devices that
+          support transfer in that direction).
+
+     mmccaa__ppaarr((ccmmdd [[,, aarrgg]])) - A function to access various features and parameters
+          of the currently selected MCA device.  The string ccmmdd selects an
+          option.  The argument aarrgg contains an optional value.  Some values for
+          ccmmdd apply to all MCA devices, while some apply only to certain
+          devices.  See the _m_c_a help file for additional information.
+
+     mmccaa__ssppaarr((sseell,, ccmmdd [[,, aarrgg]])) - Like the above, but uses the MCA device
+          numbered sseell in the ccoonnffiigg file.
+
+     iimmaaggee__ggeett((sseell,, aarrrr)) - Reads image data from the 2D acquisition device
+          numbered sseell into the data array aarrrr.
+
+     iimmaaggee__ppuutt((sseell,, aarrrr)) - Writes image data from the data array aarrrr to the 2D
+          acquisition device numbered sseell (for devices that support transfer in
+          that direction).
+
+     iimmaaggee__ppaarr((sseell [[,, vv]])) - Returns or sets configuration parameters for 2D
+          acquisition devices.
+
+     wwaaiitt(()) - Wait for all asynchronous activity to complete.  Returns ttrruuee.
+
+     wwaaiitt((ww)) - Wait for moving (ww=1), counting (ww=2), other data acquisition
+          (MCAs, CCDs, etc.)  (ww=4) or remote connections and remote
+          asynchronous events (ww= 8), to complete.  If bit 5 of ww is set,
+          returns ttrruuee if activities flagged by bits 0, 1, 2 or 3 are active.
+          Returns ffaallssee otherwise.  See the _w_a_i_t help file for details.
+
+     ssttoopp((ww)) - Stop moving (ww=1), or counting and other asynchronous data
+          acquisition (ww=2).  If ww is zero or missing all asynchronous activity
+          is halted.  Returns ttrruuee.
+
+     sseett__ssiimm((ii)) - Turns simulate mode on (ii=1), off (ii=0), or only reports state
+          (ii=-1), The first two return the value of the previous state as ttrruuee
+          (on) or ffaallssee (off) and do a wwaaiitt(()) before changing state.  sseett__ssiimm((00))
+          reads in the motor settings file to restore motor positions.  See the
+          _s_e_t___s_i_m help file for details.
+
+     mmoottoorr__mmnnee((ii)) - Returns the string mnemonic of motor ii as given in the
+          configuration file.
+
+     mmoottoorr__nnaammee((ii)) - Returns the string name of motor ii as given in the
+          configuration file.
+
+     mmoottoorr__nnuumm((mmnnee)) - Returns the motor number corresponding to the motor
+          mnemonic mmnnee, or -1 if there is no such motor configured.
+
+     mmoottoorr__ppaarr((ii,, ss [[,, vv]])) - Returns or sets configuration parameters for motor
+          ii.  Values for the string ss include ""aacccceelleerraattiioonn"", ""bbaassee__rraattee"",
+          ""sstteepp__ssiizzee"", ""vveelloocciittyy"" or ""bbaacckkllaasshh"".  The values may be modified by
+          giving a value for vv, although modifications to ""sstteepp__ssiizzee"" must be
+          enabled using
+
+              ssppeecc__ppaarr((""mmooddiiffyy__sstteepp__ssiizzee"",, 11))
+
+          first.  See the _m_o_t_o_r_s help file and the help file for particular
+          motor controllers for more information on possible parameters.
+          Rereading the ccoonnffiigg file resets the values of the motor parameters to
+          the values in the ccoonnffiigg file.  Little consistency checking is done by
+          ssppeecc on the values programmed with mmoottoorr__ppaarr(()).  Be sure to use values
+          meaningful to your particular motor controller.
+
+     ggeett__lliimm((ii,, ww)) - Returns the dial limit of motor ii. If ww > 0, returns high
+          limit.  If ww < 0, returns low limit.  If ww > 1, returns high limit
+          corrected for configured backlash.  If ww < 1, returns low limit
+          corrected for configured backlash.
+
+     sseett__lliimm((ii,, uu,, vv)) - Sets the low and high dial limits of motor ii.  It
+          doesn't matter which order the limits, uu and vv, are given.  Returns -1
+          if not configured for motor ii or if the motor is protected, unusable
+          or moving, else returns 0.
+
+     ddiiaall((ii,, uu)) - Returns the motor dial position for motor ii corresponding to
+          user angle uu.
+
+     uusseerr((ii,, dd)) - Returns the user angle for motor ii corresponding to dial
+          position uu.
+
+     cchhgg__ddiiaall((ii,, uu)) - Sets the dial position of motor ii to uu by changing the
+          contents of the controller registers.  Returns -1 if not configured
+          for motor ii or if the motor is protected, unusable or moving, else
+          returns 0.
+
+     cchhgg__ddiiaall((ii,, ss [[,, uu]])) - Starts motor ii on a home or limit search, according
+          to the value of ss, as follows:
+
+          ""hhoommee++"" - move to home switch in positive direction.
+          ""hhoommee--"" - move to home switch in negative direction.
+          ""hhoommee"" - move to home switch in positive direction if current dial
+               position is less than zero, otherwise move to home switch in
+               negative direction.
+          ""lliimm++"" - move to limit switch in positive direction.
+          ""lliimm--"" - move to limit switch in negative direction.
+
+          Positive and negative direction are with respect to the dial position
+          of the motor.  (Not all motor controllers implement the home or limit
+          search feature.)  If present, the value of the third argument is used
+          to set the motor's dial position when the home or limit position is
+          reached (as of ssppeecc release 4.05.10-3).  Returns -1 if not configured
+          for motor ii or if the motor is protected, unusable or moving, else
+          returns 0.
+
+     cchhgg__ooffffsseett((ii,, uu)) - Sets offset (determining user angle) of motor ii to uu.
+          Returns -1 if not configured for motor ii or if the motor is unusable
+          or moving, else returns 0.
+
+     rreeaadd__mmoottoorrss((mmooddee [[,, wwhhiicchh]])) - Reads the motors and places the motor
+          positions in the AA[[]] array with options set by mmooddee, as follows:
+
+          Bit 0 (0x01) - If clear, user positions are put into AA[[]].  If set,
+               dial positions are put into the motor array.
+          Bit 1 (0x02) - If set, forces reading the hardware.  For many motor
+               controllers, ssppeecc doesn't necessarily read the hardware if the
+               position hasn't been changed by ssppeecc since the controller was
+               last read.
+          Bit 2 (0x04) - If set, position discrepancies between ssppeecc and the
+               motor hardware will be silently resolved in favor of the
+               hardware.  Otherwise, ssppeecc will prompt the user as to whether the
+               software or hardware positions should be considered correct.
+          Bit 3 (0x08) - If set, the hardware is read, but the contents of the
+               AA[[]] array are not modified.
+          Bit 4 (0x10) - If set, the "commanded" positions are placed in AA[[]].
+               The hardware is not accessed.  If the optional argument wwhhiicchh is
+               set to a particular motor number or mnemonic, AA[[]] is not
+               modified, and the return value will be the commanded position for
+               the specified motor.
+
+Plotting and Analysis
+
+     ddaattaa__ggrrpp((gg,, nn,, ww)) - Configures data group gg.  The group will have nn points,
+          each having ww elements.  If nn and ww match the previous values for the
+          group, the data in the group is unchanged.  Otherwise, the data values
+          of the reconfigured group are set to zero.  If ww is zero, the group is
+          eliminated.
+
+     ddaattaa__iinnffoo((gg,, ss)) - Returns a number representing a parameter of the data
+          group gg according to the string ss as follows:
+
+          ""eelleemm"" - number of elements (width).
+          ""nnppttss"" - number of points.
+          ""llaasstt"" - last modified (added) point.
+
+          Returns -1 if the group or command is invalid.
+
+     ddaattaa__ppuutt((gg,, nn,, ee,, vv)) - Assigns the value vv to element ee of point nn in group
+          gg.
+
+     ddaattaa__ggeett((gg,, nn,, ee)) - Returns the value of element ee of point nn in group gg.
+
+     ddaattaa__nnppuutt((gg,, nn,, vv00 [[,, vv11 ...... ]])) - Assigns values to point nn of group gg.
+          Element 0 is assigned vv00, element 1 is assigned vv11, etc.  Not all
+          elements need be given, although elements are assigned successively,
+          starting at element 0.
+
+     ddaattaa__uuoopp((ggss,, eess,, ggdd,, eedd,, uuoopp [[,, aarrgg]])) - Performs the unary operation
+          specified by the string uuoopp on element eess for all points in group ggss.
+          The results are put in element eedd of the corresponding points in group
+          ggdd.  The source and destination groups and/or elements may be the
+          same.  If the number of points in the groups differ, the operation is
+          carried out on up to the smallest number of points among the groups.
+          See the _d_a_t_a help file for possible values for uuoopp.
+
+     ddaattaa__bboopp((ggss00,, eess00,, ggss11,, eess11,, ggdd,, eedd,, bboopp)) - Performs the binary operation
+          specified by the string bboopp on elements eess00 and eess11 for all points in
+          the groups ggss00 and ggss11.  The results are put in element eedd for the
+          corresponding points of group ggdd.  The source and destination groups
+          and/or elements may be the same.  If the number of points in the
+          groups differ, the operation is carried out on up to the smallest
+          number of points among the groups.  See the _d_a_t_a help file for
+          possible values for bboopp.
+
+     ddaattaa__aannaall((gg,, ss,, nn,, ee00,, ee11,, oopp)) - Performs the operations indicated by oopp on
+          nn points in group gg, starting at point ss.  The operations use the
+          values in element ee00 (if applicable) and ee11.  If nn is zero, the
+          operations are performed on points from ss to the last point added
+          using ddaattaa__nnppuutt(()) or ddaattaa__ppuutt(()). See the _d_a_t_a help file for possible
+          values for oopp.
+
+     ddaattaa__dduummpp((gg,, ss,, nn,, ee00 [[,, ee11 ......]] [[,, ffmmtt11]] [[,, ffmmtt22]])) - Efficiently writes
+          elements from group gg to turned on output devices.  The starting point
+          is ss and the number of points is nn.  The elements specified by ee00, ee11,
+          etc., are printed.  If ee00 is the string ""aallll"", all the elements for
+          each point are printed.  If nn is zero, only the points from ss to the
+          last point added using ddaattaa__nnppuutt(()) or ddaattaa__ppuutt(()) are printed.  The
+          optional argument ffmmtt11 is a string, having the format ""%%##"", that
+          specifies how many data points (specified by the number ##) to be
+          printed on each line.  The optional argument ffmmtt22 is a string that
+          specifies an alternate pprriinnttff(())-style format for the values.  Only ee,
+          gg and ff formats are recognized.  For example, ""%%1155..88ff"" uses
+          fixed-point format with eight digits after the decimal point and a
+          fifteen-character-wide field.  The default output format is ""%%gg"". See
+          pprriinnttff(()) in a C manual for more information.  Note that in the default
+          installation, the internal data arrays use single-precision floating
+          values, which contain only about 8 decimal digits of significance.
+
+     ddaattaa__rreeaadd((ffiillee__nnaammee,, gg,, ss,, nn)) - reads data from the ASCII file ffiillee__nnaammee,
+          and stuffs the data into group gg starting at point ss, reading up to nn
+          points.  If nn is zero, all the points in the file are read.  The
+          values on each line of the file are assigned into successive elements
+          for each point in the group.  If there are more elements on a line in
+          the file than fit in the group, or if there are more points in the
+          file than in the group, the extra values are ignored.  Returns -1 if
+          the file can't be opened, otherwise returns the number of points read.
+
+     ddaattaa__pplloott((gg,, ss,, nn,, ee00,, ee11 [[,, ee22 ......]]))  - Plots the current data in group gg
+          starting at point ss and plotting nn points.  Element ee00 is used for xx.
+          Elements given by the subsequent arguments (up to a maximum of 64) are
+          plotted along the yy axis.  If nn is zero, only the points from ss to the
+          last point added using ddaattaa__nnppuutt(()) or ddaattaa__ppuutt(()) are plotted.  If
+          proceeded by a call of pplloott__ccnnttll((""aaddddppooiinntt"")) and the ranges have not
+          changed, only point ss ++ nn -- 11 is drawn.  If proceed by a call of
+          pplloott__ccnnttll((""aaddddlliinnee"")) the current plot will not be erased, and the plot
+          ranges will not be changed.  The plotting area is not automatically
+          erased by a call of ddaattaa__pplloott(())-use pplloott__ccnnttll((""eerraassee"")) for that.  The
+          axis ranges are set using the pplloott__rraannggee(()) function.  See pplloott__ccnnttll(())
+          for other options that affect drawing the plot.
+
+     ddaattaa__pplloott((gg,, ss,, nn,, ""aallll"")) - As above, but uses element zero for xx and the
+          remaining elements (up to a maximum of 64) for yy values.  The number
+          of elements is set with the ddaattaa__ggrrpp(()) function.
+
+     ddaattaa__ffiitt((ppaarrss,, gg,, ss,, nn,, eeddaattaa,, eeppaarrss [[,, ......]]))  - Performs a linear fit of
+          the data in element eeddaattaa to the terms in the elements specified by
+          eeppaarrss.  The fitted parameters are returned in the array ppaarrss supplied
+          by the user.  The function returns the cchhii--ssqquuaarreedd value of the fit,
+          if the fit was successful.  A -1 is returned if there are insufficient
+          arguments or the covariance matrix is singular.  The fit algorithm is
+          along the same lines as the llffiitt(()) routine in NNuummeerriiccaall RReecciippeess (W.H.
+          Press, et al., Cambridge University Press, 1986, page 512).
+
+     pplloott__ccnnttll((ss)) - Selects built-in plotting features.  The argument ss is a
+          string of comma- or space-delimited options.  See the _p_l_o_t___c_n_t_l help
+          file for descriptions of the many options.
+
+     pplloott__mmoovvee((xx,, yy [[,, ss [[,, cc]]]])) - Moves the current position to column xx and
+          row yy, where column 0, row 0 is the upper left corner of the screen.
+          The range of values is 0 <= xx < 80 and 0 <= yy < 25.  Fractional values
+          are allowed (as of ssppeecc release 6.00.04).  If the third argument ss is
+          present, it is written as a label at the given position.  If using
+          color high-resolution graphics, the fourth argument, if present, is
+          the color to use to draw the label.  (See the _c_o_l_o_r_s help file.)  The
+          background color for the entire label will be the background color at
+          the starting position.  If graphics mode is not on, pplloott__mmoovvee(()) works
+          just as ttttyy__mmoovvee(()).
+
+     pplloott__rraannggee((xxmmiinn,, xxmmaaxx,, yymmiinn,, yymmaaxx)) - Sets the ranges of the internally
+          generated plots.  If any of the arguments is the string ""aauuttoo"", the
+          corresponding range limit is determined automatically from the data at
+          the time the plot is drawn.  If any of the arguments is the string
+          ""eexxtteenndd"", the corresponding range limit is only changed if the current
+          data decrease the minimum or increase the maximum.  Returns ttrruuee.
+
+CAMAC Hardware
+
+     ccaa__ggeett((ii,, aa)) - Returns the 24-bit value read (using F = 0) from the ii-th (ii
+          = 0, 1, ... ) CAMAC I/O device (from the ccoonnffiigg file) using subaddress
+          aa.
+
+     ccaa__ppuutt((xx,, ii,, aa)) - Writes the 24-bit value xx (using F = 16) to the ii-th (ii =
+          0, 1, ... ) CAMAC I/O device (from the ccoonnffiigg file) using subaddress
+          aa. Returns the value written.
+
+     ccaa__ffnnaa((ff,, nn,, aa [[,, vv]])) - Sends the arbitrary FNA command to the module in
+          slot nn. If the dataway command given by ff is a write function, the
+          24-bit value to be written is contained in vv. If the dataway command
+          given by ff is a read command, the function returns the 24-bit value
+          obtained from the module.  The user should avoid issuing commands that
+          would cause a LAM and should certainly avoid issuing commands to slots
+          that are being used for motor or counter control by ssppeecc's internal
+          hardware code.
+
+     ccaa__ccnnttll((ccmmdd [[,, aarrgg]])) - Performs a CAMAC crate initialize if ccmmdd is ""ZZ"" or
+          ""iinniitt"", performs a crate clear if ccmmdd is ""CC"" or ""cclleeaarr"", sets crate
+          inhibit if ccmmdd is ""iinnhhiibbiitt"" and aarrgg is 1, and clears crate inhibit if
+          ccmmdd is ""iinnhhiibbiitt"" and aarrgg is 0.  During normal operation, you should
+          not need to issue these commands.  You should probably issue a
+          rreeccoonnffiigg after sending a crate initialize or clear.
+
+User Level Access To Hardware Interfaces
+
+     ggppiibb__ccnnttll(()), ggppiibb__ggeett(()), ggppiibb__ppuutt(()), ggppiibb__ppoollll(()) - See the _g_p_i_b help file
+          for detailed usage.
+
+     sseerr__ggeett(()), sseerr__ppuutt(()), sseerr__ppaarr(()) - See the _s_e_r_i_a_l help file for detailed
+          usage.
+
+     ssoocckk__ggeett(()), ssoocckk__ppuutt(()), ssoocckk__ppaarr(()) - See the _s_o_c_k_e_t_s help file for detailed
+          usage.
+
+     vvmmee__ggeett(()), vvmmee__ggeett3322(()), vvmmee__mmoovvee(()), vvmmee__ppuutt(()), vvmmee__ppuutt3322(()) - See the _v_m_e
+          help file for detailed usage.
+
+     The following functions are for generic access to ssppeecc's built-in support
+     for fieldbus devices.  Fieldbus refers to a family of industrial computer
+     network protocols.  Currently, the only supported protocol is a limited
+     implementation of CANbus.
+
+     ffbbuuss__ppuutt((uunniitt,, dd00 [[,, dd11,, ......]]))  - Sends a message to the fieldbus device
+          specified as controller number uunniitt in the hardware ccoonnffiigg file.  The
+          message is made up of the no more than 16 following arguments.
+
+          For CANbus, bit 31 of dd00 indicates whether to set CAN RTR (the Remote
+          Transmission Request bit).  Bits 0 through 28 of dd00 hold the CAN ID
+          when in PeliCAN mode.  Bits 0 through 10 of dd00 hold the CAN ID when in
+          BasiCAN mode.  The CAN message is contained in dd11 through dd88, which
+          are interpreted as 8-bit byte values.  Any missing values are
+          interpreted as zero.
+
+     ffbbuuss__ggeett((uunniitt)) - Reads a message from the field-bus device specified as
+          controller number uunniitt in the hardware ccoonnffiigg file.  Returns an eight
+          element data array of long (32-bit) integers
+
+          For CANbus, only the low order byte of each element of the returned
+          array contains data.
+
+PC Port Hardware
+
+     ppoorrtt__ggeett((aa)) - Reads one byte from the PC I/O port with the address aa. Ports
+          must be selected in the ccoonnffiigg file.
+
+     ppoorrtt__ggeettww((aa)) - As above, but reads a 16-bit word.
+
+     ppoorrtt__ppuutt((aa,, bb)) - Write the byte bb to the PC I/O port with the address aa.
+          Writable ports must be selected in the ccoonnffiigg file.
+
+     ppoorrtt__ppuuttww((aa,, bb)) - As above, but writes a 16-bit word.
+
+Hooks To User-Added C-Code Functions
+
+     ccaallcc((ii)) - Calls user-added function having code ii. Returns user supplied
+          value.
+
+     ccaallcc((ii,, xx)) - As above, but passes argument xx to the function.
+
+String Handling
+
+     aasscc((ss)) - Returns the ASCII value of the first character of the string value
+          of the argument ss.
+
+     lleennggtthh((ss)) - Returns length of string ss.
+
+     iinnddeexx((ss11,, ss22)) - Returns an integer indicating the position of the first
+          occurrence of string ss22 in string ss11, counted from 1, or zero if ss11
+          does not contain ss22.
+
+     sspplliitt((ss,, aa)) - splits the string ss at space characters and assigns the
+          resulting substrings to successive elements of the array aa, starting
+          with element 0.  The space characters are eliminated.  The functions
+          returns the number of elements assigned.
+
+     sspplliitt((ss,, aa,, tt)) - splits the string ss into the elements that are delimited
+          by the string tt and assigns the resulting substrings to successive
+          elements of the array aa, starting with element 0.  The delimiting
+          characters are eliminated.  Returns the number of elements assigned.
+
+     ssuubbssttrr((ss,, mm)) - Returns the portion of string ss that begins at mm, counted
+          from 1.
+
+     ssuubbssttrr((ss,, mm,, nn)) - As above, but the returned string is no longer than nn.
+
+     sspprriinnttff((ff [[,, aa,, ......]]))  - Returns a string containing the formatted print.
+          See pprriinnttff(()) in a C manual.
+
+String Handling With Regular Expressions
+
+     Regular expressions are sequences of special characters for searching for
+     patterns in strings.  ssppeecc implements extended regular expression using the
+     C library rreeggccoommpp(()) and rreeggeexxeecc(()) functions, which have a somewhat
+     platform-dependent implementation.  See the regular expression man page
+     (mmaann 77 rreeggeexx on LLiinnuuxx and mmaann rree__ffoorrmmaatt on OS X) for details of regular
+     expression syntax.  The names and usage of the following ssppeecc functions
+     resemble those used in the UNIX aawwkk utility.  (These functions added in
+     ssppeecc release 6.03.04.)
+
+     rrsspplliitt((ss,, aa,, rree)) - Similar to sspplliitt(()) above, but the optional delimiter
+          argument can be a regular expression.  The string ss is split into
+          elements that are delimited by the regular expression rree and the
+          resulting substrings are assigned to successive elements of the array
+          aa, starting with element 0.  The delimiting characters are eliminated.
+          Returns the number of elements assigned.
+
+     ssuubb((rree,, ssuubb,, ss)) - Replaces the first instance of the regular expression rree
+          in the source string ss with the substitute string ssuubb.  A && in the
+          substitute string is replaced with the text that was matched by the
+          regular expression.  A ""\\&&"" (which must be typed as ""\\\\&&"") will
+          produce a literal &&.  Returns the modified string.
+
+     ggssuubb((rree,, ssuubb,, ss)) - Replaces all instances of the regular expression rree in
+          the source string ss with the substitute string ssuubb.  A && in the
+          substitute string is replaced with the text that was matched by the
+          regular expression.  A ""\\&&"" (which must be typed as ""\\\\&&"") will
+          produce a literal &&.  Returns the modified string.
+
+     ggeennssuubb((rree,, ssuubb,, wwhhiicchh,, ss)) - Replaces instances of the regular expression rree
+          in the source string ss with the substitute string ssuubb based on the
+          value of wwhhiicchh.  If wwhhiicchh is a string beginning with GG or gg (for
+          global), all instances that match are replaced.  Otherwise, wwhhiicchh is a
+          positive integer that indicates which match to replace.  For example,
+          a 22 means replace the second match.
+
+          In addition, the substitute text may contain the sequences \\NN (which
+          must be typed as ""\\\\NN""), where NN is a digit from 0 to 9.  That
+          sequence will be replaced with the text that matches the NNth
+          parenthesized subexpression in rree.  A \\00 is replaced with the text
+          that matches the entire regular expression.
+
+          Returns the modified string.
+
+     mmaattcchh((ss,, rree [[,, aa]])) - Returns the position in the source string ss that
+          matches the regular expression rree.  The first position is 1.  Returns
+          0 if there is no match or -1 if the regular expression is invalid.  If
+          the associative array aa is provided, its contents are cleared and new
+          elements are assigned based on the consecutive matching parenthesized
+          subexpressions in rree.  The zeroth element, aa[[00]], is assigned the
+          entire matching text, while aa[[00]][[""ssttaarrtt""]] is assigned the starting
+          position of the match and aa[[00]][[""lleennggtthh""]] is assigned the length of the
+          match.  Elements from 1 onward are assigned matches, positions and
+          lengths of the corresponding matching parenthesized subexpressions in
+          rree.
+
+Useful Conversion Functions
+
+     iinntt((xx)) - Returns integer part of xx.
+
+     bbccdd((xx)) - Returns binary-coded decimal integer of positive xx.
+
+     ddccbb((xx)) - Returns decimal equivalent of 32-bit BCD xx.
+
+     rraadd((xx)) - Returns xx ** PPII // 118800.
+
+     ddeegg((xx)) - Returns xx ** 118800 // PPII.
+
+Standard Math Functions
+
+     ffaabbss((xx)) - Returns absolute value of xx.
+
+     ssqqrrtt((xx)) - Returns square root of xx.
+
+     ccooss((xx)) - Returns cosine of xx.
+
+     ssiinn((xx)) - Returns sine of xx.
+
+     ttaann((xx)) - Returns tangent of xx.
+
+     aaccooss((xx)) - Returns arc cosine of xx.
+
+     aassiinn((xx)) - Returns arc sine of xx.
+
+     aattaann((xx)) - Returns arc tangent of xx.
+
+     aattaann22((yy,, xx)) - Returns the arc tangent of yy//xx using the signs of the
+          arguments to determine the quadrant of the return value.  The return
+          value is in the range -PI to PI.
+
+     eexxpp((xx)) - Returns exponential of xx.
+
+     eexxpp1100((xx)) - Returns power of 10 to the xx.
+
+     lloogg((xx)) - Returns natural logarithm of xx.
+
+     lloogg1100((xx)) - Returns logarithm, base 10, of xx.
+
+     ppooww((xx,, yy)) - Returns power of yy to the xx.
+
+     rraanndd(()) - Returns a random integer between 0 and 32767.
+
+     rraanndd((rr)) - If rr is positive, returns a random integer between 0 and rr,
+          inclusive.  If rr is negative, returns a random integer between --rr and
+          rr, inclusive.  Values of rr greater than 32767 or less than -16383 are
+          set to those limits.  If rr is zero, zero is returned.  The C library
+          rraanndd(()) function is used to obtain the values.  The seed is set to the
+          time of day on the first call.  The randomness (or lack thereof) of
+          the numbers obtained is due to the C library implementation.
+
+     ssrraanndd((sseeeedd)) - Sets the seed value for the random generator used by the
+          rraanndd(()) function to the integer value sseeeedd. This feature allows the
+          same sequence of random numbers to be generated reproducibly by
+          resetting the seed to the same value.  Returns the value of the
+          previous seed (as of ssppeecc release 6.03.04).
+

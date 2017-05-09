@@ -1,0 +1,30 @@
+.TH "ackno" "reference" "08/01/12" "ackno.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+ackno \- acknowledgements
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)ackno.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "ackno" "reference" "08/01/12" "ackno.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The first version of \fBspec\fP was developed in early 1986 at Harvard University
+by Gerald Swislow (post doc) and Alan Braslau (grad student)
+in the laboratory of Peter Pershan to control a two\-circle spectrometer
+and two variations on a liquid\-surface spectrometer
+using PDP 11/34 and 11/73 computers.
+.sp
+Certified Scientific Software began
+development of the new \fBspec\fP in November, 1987.
+

@@ -1,0 +1,636 @@
+.TH "data" "reference" "08/01/12" "data.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+data \- built\-in functions for handling internal data
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)data.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1991,1992,1993,1994,1995,1997,1998,2011,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "data" "reference" "08/01/12" "data.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+(Note, data groups are no longer used in the standard \fBspec\fP macros, and
+their use is deprecated.
+Data arrays should be used instead.
+See the \fI\%arrays\fP help file.)
+.sp
+\fBspec\fP stores data in up to 256 independent data arrays called groups.
+Each group is configured (see below) to have a particular
+number of data elements per point.
+For example, each point in a group could have elements for
+\fBH\fP, \fBK\fP, \fBL\fP and detector counts.
+Alternatively, each point could have just
+one element and be used to hold data obtained from an MCA.
+.sp
+Groups are configured using the \fBdata_grp()\fP function.
+A group can have up to 2048
+elements per point.  The maximum number of points in a group is determined
+by the product of the number of elements per point and the number of points.
+That product can be no more than 65,536, and may be slightly
+less depending on how the number of elements divides into 2048.
+The maximum number of points for all groups is 262,144.
+(These limits are arbitrary and are set to control the size of static
+data arrays and auxiliary files.  If requested, CSS can make the limits
+larger.)
+.sp
+When starting \fBspec\fP for the first time or with the \fB\-f\fP (fresh) flag,
+one data group (group 0) is configured for 4096 points,
+with each point consisting of two elements.
+The old\-style functions for accessing
+the internal data (\fBpl_get()\fP, \fBpl_put()\fP, etc.)
+are described at the end of this section.
+Their use is discouraged, though, as
+they will not be available in future releases.
+.sp
+When leaving \fBspec\fP,
+the current data group configuration and data points are saved.
+.sp
+\fBspec\fP has several functions to manipulate the internal data.
+These functions allow
+unary and binary arithmetic operations, math functions and analysis
+operations to be performed on all the elements
+of a group or among elements in different groups.
+.sp
+In the functions described below, if an element number is negative,
+the element number is obtained by adding the number of elements per point
+in the group to the negative element number.
+For example, element \-1 is the last element, element \-2 is the second
+to last, etc.
+.sp
+All functions reset to command level if an invalid group,
+point or element is given as an argument.
+Functions that don\(aqt need to return anything in particular return zero.
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBdata_grp(g, n, w)\fP
+\- 
+Configures data group \fBg\fP. The group will have \fBn\fP points, each having
+\fBw\fP elements.  If \fBn\fP and \fBw\fP match
+the previous values for the group, the data in the group
+is unchanged.
+Otherwise, the data values of the reconfigured group are set to zero.  If
+\fBw\fP is zero, the group is eliminated.
+If \fBn\fP is zero, as many points as possible are configured.
+If \fBn\fP is negative, as many points as possible,
+but not more than \fB\-n\fP are configured.
+If \fBg\fP is \-1, the current group configuration is displayed.
+.HP 5m
+."
+\fBdata_info(g, s)\fP
+\- 
+Returns data group configuration information
+for group \fBg\fP, according to the string \fBs\fP.
+Values for \fBs\fP are:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"npts"\fP
+\- 
+the number of configured points.
+.HP 5m
+."
+\fB"elem"\fP
+\- 
+the number of configured elements.
+.HP 5m
+."
+\fB"last"\fP
+\- 
+the number of the last point added to the group.
+.HP 5m
+."
+\fB"precision"\fP
+\- 
+the number of bytes per element, either 4 or 8.
+.PD
+.RE
+.sp
+If the group number is invalid,
+or if the string \fBs\fP is none of the above, returns \-1.
+.RE
+.HP 5m
+."
+\fBdata_get(g, n, e)\fP
+\- 
+Returns the value of element \fBe\fP of point \fBn\fP in group \fBg\fP.
+.HP 5m
+."
+\fBdata_put(g, n, e, v)\fP
+\- 
+Assigns the value \fBv\fP to element \fBe\fP of point \fBn\fP in group \fBg\fP.
+.HP 5m
+."
+\fBdata_nput(g, n, v0 [, v1 ...])\fP
+\- 
+Assigns values to point \fBn\fP of group \fBg\fP.
+Element 0 is assigned \fBv0\fP, element 1 is assigned \fBv1\fP, etc.
+Not all elements need be given,
+although elements are assigned successively, starting at element 0.
+.HP 5m
+."
+\fBdata_uop(gs, es, gd, ed, uop [, arg])\fP
+\- 
+Performs the unary operation specified
+by the string \fBuop\fP on element \fBes\fP for all points in group \fBgs\fP.
+The results are put in element \fBed\fP of the corresponding points in group
+\fBgd\fP. The source and destination groups and/or elements may be the same.
+If the number of points in the groups differ, the operation is
+carried out on up to the smallest number of points among the groups.
+.sp
+Values for \fBuop\fP are:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"clr"\fP
+\- 
+clear to zero.
+.HP 5m
+."
+\fB"fill"\fP
+\- 
+each element is set to point number, starting at 0.
+.HP 5m
+."
+\fB"neg"\fP
+\- 
+negative of source.
+.HP 5m
+."
+\fB"abs"\fP
+\- 
+absolute value of source.
+.HP 5m
+."
+\fB"inv"\fP
+\- 
+inverse of source.
+.HP 5m
+."
+\fB"sin"\fP
+\- 
+sine of source.
+.HP 5m
+."
+\fB"cos"\fP
+\- 
+cosine of source.
+.HP 5m
+."
+\fB"tan"\fP
+\- 
+tangent of source.
+.HP 5m
+."
+\fB"asin"\fP
+\- 
+arcsine of source.
+.HP 5m
+."
+\fB"acos"\fP
+\- 
+arccosine of source.
+.HP 5m
+."
+\fB"atan"\fP
+\- 
+arctangent of source.
+.HP 5m
+."
+\fB"log"\fP
+\- 
+natural logarithm of source.
+.HP 5m
+."
+\fB"exp"\fP
+\- 
+exponential of source.
+.HP 5m
+."
+\fB"log10"\fP
+\- 
+log base 10 of source.
+.HP 5m
+."
+\fB"pow"\fP
+\- 
+the \fBarg\fP power of source.
+.HP 5m
+."
+\fB"copy"\fP
+\- 
+value of source.
+.HP 5m
+."
+\fB"rev"\fP
+\- 
+reversed copy of source.
+.HP 5m
+."
+\fB"sqrt"\fP
+\- 
+square root of source.
+.HP 5m
+."
+\fB"set"\fP
+\- 
+all elements set to the value of \fBarg\fP.
+.HP 5m
+."
+\fB"contract"\fP
+\- 
+every \fBarg\fP points are averaged to make a new point.
+.HP 5m
+."
+\fB"add"\fP
+\- 
+source plus \fBarg\fP.
+.HP 5m
+."
+\fB"sub"\fP
+\- 
+source minus \fBarg\fP.
+.HP 5m
+."
+\fB"mul"\fP
+\- 
+source times \fBarg\fP.
+.HP 5m
+."
+\fB"div"\fP
+\- 
+source divided by \fBarg\fP.
+.PD
+.RE
+.sp
+If any of the operations would result in
+an exception (divide by zero, log or square root of a negative number, etc),
+the operation is not performed and a count of
+the operations skipped is printed as an error message.
+.RE
+.HP 5m
+."
+\fBdata_bop(gs0, es0, gs1, es1, gd, ed, bop)\fP
+\- 
+Performs the binary operation specified
+by the string \fBbop\fP on elements \fBes0\fP and
+\fBes1\fP for all points in
+the groups \fBgs0\fP and \fBgs1\fP. The results are put in element
+\fBed\fP for the corresponding points
+of group \fBgd\fP.
+The source and destination groups and/or elements may be the same.
+If the number of points in the groups differ,
+the operation is carried out on up
+to the smallest number of points among the groups.
+.sp
+Values for \fBbop\fP are:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"add"\fP
+\- 
+The sum of the source elements.
+.HP 5m
+."
+\fB"sub"\fP
+\- 
+Source 0 minus source 1.
+.HP 5m
+."
+\fB"mul"\fP
+\- 
+The product of the source elements.
+.HP 5m
+."
+\fB"div"\fP
+\- 
+Source 0 divided by source 1.
+.PD
+.RE
+.sp
+If the divide would result in an exception,
+the operation is not performed and a count of the operations
+skipped is printed as an error message.
+.RE
+.HP 5m
+."
+\fBdata_anal(g, s, n, e0, e1, op [, arg])\fP
+\- 
+Performs the operations indicated by \fBop\fP
+on \fBn\fP points in group \fBg\fP, starting at point \fBs\fP.
+The operations use the values in element \fBe0\fP (if applicable) and \fBe1\fP.
+If \fBn\fP is zero, the operations are performed on points
+from \fBs\fP to the last point added using \fBdata_nput()\fP or \fBdata_put()\fP.
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"min"\fP
+\- 
+Returns the minimum value of \fBe1\fP. (\fBe0\fP is unused.)
+.HP 5m
+."
+\fB"max"\fP
+\- 
+Returns the maximum value of \fBe1\fP. (\fBe0\fP is unused.)
+.HP 5m
+."
+\fB"i_at_min"\fP
+\- 
+Returns the point number of the data point with
+the minimum value of \fBe1\fP. (\fBe0\fP is unused.)
+.HP 5m
+."
+\fB"i_at_max"\fP
+\- 
+Returns the point number of the data point
+with the maximum value of \fBe1\fP. (\fBe0\fP is unused.)
+.HP 5m
+."
+\fB"i_<=_value"\fP
+\- 
+Returns the point number of the nearest data point
+in \fBe1\fP at or below \fBarg\fP, starting
+from the first point.  (\fBe0\fP is unused.)
+.HP 5m
+."
+\fB"i_>=_value"\fP
+\- 
+Returns the point number of the nearest data point in \fBe1\fP at or above
+\fBarg\fP, starting at the last point.  (\fBe0\fP is unused.)
+.HP 5m
+."
+\fB"uhmx"\fP
+\- 
+Returns the value in \fBe0\fP corresponding to half the maximum value in
+\fBe1\fP, and at a higher index.
+.HP 5m
+."
+\fB"lhmx"\fP
+\- 
+Returns the value in \fBe0\fP corresponding to half the maximum value in
+\fBe1\fP, and at a lower index.
+.HP 5m
+."
+\fB"sum"\fP
+\- 
+Returns the sum of the values in \fBe1\fP. (\fBe0\fP is unused.)
+.HP 5m
+."
+\fB"fwhm"\fP
+\- 
+Returns the full\-width in \fBe0\fP at half the maximum value of \fBe1\fP.
+.HP 5m
+."
+\fB"cfwhm"\fP
+\- 
+Returns the center of the full\-width in \fBe0\fP
+at half the maximum value of \fBe1\fP.
+.HP 5m
+."
+\fB"com"\fP
+\- 
+Returns the center of mass in \fBe0\fP
+with respect to \fBe1\fP. The value is the sum of the
+products of each \fBe0\fP and \fBe1\fP divided by the number of points.
+.HP 5m
+."
+\fB"x_at_min"\fP
+\- 
+Returns the value of \fBe0\fP at the minimum in \fBe1\fP.
+.HP 5m
+."
+\fB"x_at_max"\fP
+\- 
+Returns the value of \fBe0\fP at the maximum in \fBe1\fP.
+.HP 5m
+."
+\fB"sumsq"\fP
+\- 
+Returns the sum of the squares in \fBe1\fP. (\fBe0\fP is unused.)
+.PD
+.RE
+.sp
+The following operations treat a data group as a two dimensional
+data array with rows indexed by the point number and the columns
+indexed by the element number.
+The operations work on the portion of the group determined by
+the starting row \fBs\fP, the number of rows \fBn\fP,
+the starting column \fBe0\fP and the end row \fBe1\fP.
+As usual, if \fBn\fP is zero, all points (rows) from \fBs\fP
+to the last are considered.
+A negative element (column) number is added
+to the group width to obtain the element (column) to use.
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"gmin"\fP
+\- 
+Returns the minimum value.
+.RE
+.HP 5m
+."
+\fB"gmax"\fP
+\- 
+Returns the maximum value.
+.HP 5m
+."
+\fB"gsum"\fP
+\- 
+Returns the sum of all values.
+.HP 5m
+."
+\fB"i_at_gmin"\fP
+\- 
+Returns the index number of the minimum value.
+The index number is the row number times the group width plus the
+element number.
+.HP 5m
+."
+\fB"i_at_gmax"\fP
+\- 
+Returns the index number, as defined above, of the maximum value.
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBdata_dump(g, s, n, e0 [, e1 ...] [, fmt1] [, fmt2])\fP
+\- 
+Efficiently writes elements from group \fBg\fP to turned on output devices.
+The starting point is \fBs\fP and the number
+of points is \fBn\fP. The elements specified by
+\fBe0\fP, \fBe1\fP, etc., are printed.
+If \fBe0\fP is the string \fB"all"\fP, all the elements for each point are printed.
+If \fBn\fP is zero, only the points from \fBs\fP
+to the last point added using \fBdata_nput()\fP or
+\fBdata_put()\fP are printed.
+The element arguments can be combined
+in a single space\- or comma\-delimited string.
+The optional argument \fBfmt1\fP is a string,
+having the format \fB"%#"\fP, that specifies
+how many data points (specified by the number
+\fB#\fP) are to be printed on each line.
+If the number \fB#\fP is followed by the letter
+\fBC\fP, a backslash is added to each continued line,
+appropriate for saving MCA data in managable length lines.
+New versions (since May 1, 1995) of
+the \fBC\-PLOT\fP \fBscans.4\fP user function interpret
+the continued lines correctly for MCA data.
+The optional argument \fBfmt2\fP is a string that specifies an alternate
+\fBprintf()\fP\-style format for the values.
+Only \fBe\fP, \fBg\fP and \fBf\fP formats are recognized.  For example,
+\fB"%15.8f"\fP uses fixed\-point format with eight digits after
+the decimal point and a fifteen\-character\-wide field.
+The default output format is \fB"%g"\fP.
+See \fBprintf()\fP in a C manual for more information.
+Note that in the default installation,
+the internal data arrays use single\-precision floating values,
+which contain only about 8 decimal
+digits of significance.
+.HP 5m
+."
+\fBdata_read(file_name, g, s, n)\fP
+\- 
+Reads data from the ASCII file \fBfile_name\fP,
+and stuffs the data into group \fBg\fP starting at point
+\fBs\fP, reading up to \fBn\fP points.
+If \fBn\fP is zero, all the points in the file are read.
+The values on each line of the file are assigned into
+successive elements for each point in the group.
+If there are more elements on a line in the file than fit in the group,
+or if there are more points in the file than in the group,
+the extra values are ignored.
+Lines beginning with the \fB#\fP character are ignored.
+Returns \-1 if the file can\(aqt be opened,
+otherwise returns the number of points read.
+At present, the maximum input line length is 2,048 characters.
+.HP 5m
+."
+\fBdata_read(arr, g, s, n)\fP
+\- 
+Similar to the above usage,
+but transfers the data from the data array \fBarr\fP to the data group.
+Rows in the data array correspond to points in the data group.
+Columns in the data array correspond to elements in the data group.
+See the \fI\%arrays\fP help file for information on data arrays.
+.HP 5m
+."
+\fBdata_plot(g, s, n, e0, e1 [, e2 ...])\fP
+\- 
+Plots the current data in group \fBg\fP starting
+at point \fBs\fP and plotting \fBn\fP points.
+Element \fBe0\fP is used for \fBx\fP.
+Elements given by the subsequent arguments (up to a maximum of 64)
+are plotted along the \fBy\fP axis.
+The element arguments can be combined in a single space\-
+or comma\-delimited string.  If \fBn\fP is zero, only the points
+from \fBs\fP to the last point added using \fBdata_nput()\fP
+or \fBdata_put()\fP are plotted.
+If preceded by a call of \fBplot_cntl("addpoint")\fP
+and the ranges have not changed, only point
+\fBs+n\-1\fP is drawn.  If preceded by a call of
+\fBplot_cntl("addline")\fP the current plot will not be erased,
+and the plot ranges will not be changed.
+The plotting area is not automatically erased by a call of
+\fBdata_plot()\fP\-use \fBplot_cntl("erase")\fP for that.
+The axis ranges are set using the \fBplot_range()\fP function.
+See \fI\%plot_cntl()\fP for other options that affect drawing the plot.
+.HP 5m
+."
+\fBdata_plot(g, s, n, "all")\fP
+\- 
+As above, but uses element zero for \fBx\fP and the remaining elements
+(up to a maximum of 64) for \fBy\fP values.
+The number of elements is set with the \fBdata_grp()\fP function.
+.HP 5m
+."
+\fBdata_fit(pars, g, s, n, edata, epars [, ...])\fP
+\- 
+Performs a linear fit of the data in element \fBedata\fP
+to the terms in the elements specified by \fBepars\fP.
+The fitted parameters are returned in the array \fBpars\fP
+supplied by the user.
+The function returns the \fBchi\-squared\fP value of the fit,
+if the fit was successful.
+A \-1 is returned if there are insufficient arguments
+or the covariance matrix is singular.
+The fit algorithm is along the same lines as the \fBlfit()\fP routine in
+\fBNumerical Recipes\fP (W.H. Press, et al.,
+Cambridge University Press, 1986, page 512).
+.RE
+.SH "OLD\-STYLE COMPATIBILITY FUNCTIONS"
+.rs
+.sp
+The following functions are currently supported,
+but will be eliminated in future releases.
+New macros should be written using the functions described above.
+.RS 0m
+.HP 5m
+."
+\fBpl_put(i, x, y)\fP
+\- 
+Adds \fBx\fP and \fBy\fP as elements 0 and 1 of group 0, point \fBi\fP.
+.HP 5m
+."
+\fBpl_xget(i)\fP
+\- 
+Returns the value of element 0 in group 0, point \fBi\fP.
+.HP 5m
+."
+\fBpl_yget(i)\fP
+\- 
+Returns the value of element 1 in group 0, point \fBi\fP.
+.HP 5m
+."
+\fBpl_dump(s, n, how)\fP
+\- 
+Efficiently writes pairs of elements from group 0 to turned on
+output devices.  The starting point is \fBs\fP and the number of points is
+\fBn\fP. If \fBhow\fP=0 element 0 values are printed, if \fBhow\fP=1 element 1
+values are printed and if \fBhow\fP=2 both values are printed.
+.HP 5m
+."
+\fBplot_pts(x, s, n)\fP
+\- 
+Plots element 1 versus element 0 of the data values
+in group 0 starting at point
+\fBs\fP and plotting \fBn\fP points.  If preceded by a call of
+\fBplot_cntl("addpoint")\fP and the ranges have not changed, only point
+\fBs+n\-1\fP is drawn.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%data_pipe\fP
+\fI\%plot\fP
+\fI\%splot\fP
+

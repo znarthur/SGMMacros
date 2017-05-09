@@ -1,0 +1,23 @@
+mr                                    macro                                   mr
+
+NAME
+     mmrr - move to a given angle of specular reflection
+
+SYNOPSIS
+
+     mmrr aallpphhaa
+
+DESCRIPTION
+
+     The mmrr macro is used to move to a given angle aallpphhaa of specular reflection
+     (AALLPPHHAA==BBEETTAA).  In contrast to the macro mmaabb, mmrr moves the detector into the
+     plane of incidence.
+
+EXAMPLE
+
+     mmrr 1100mmrr
+
+SEE ALSO
+
+     _m_a_b _m_k _w_a_i_t
+

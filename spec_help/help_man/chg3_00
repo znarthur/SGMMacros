@@ -1,0 +1,644 @@
+.TH "changes" "spec 3.00 Release Notes" "08/01/12" "chg3_00.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 3.00
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg3_00.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1993,1994,1995 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 3.00 Release Notes" "08/01/12" "chg3_00.rst 6.1  08/01/12 CSS"
+.
+.SH "RELEASE 3.00.07"
+.rs
+.sp
+These
+notes summarize the changes made for \fBspec\fP
+release 3.00.07 as of February 12, 1994.
+.SH "New Startup Macro File Name"
+.sp
+If a file named
+\fBsite_f.mac\fP
+exists in the
+\fBSPECD\fP
+directory, it will be read when \fBspec\fP starts fresh, but not otherwise.
+.SH "\fBmotor_par()\fP Changes"
+.sp
+The
+\fB"base_rate"\fP
+and
+\fB"acceleration"\fP
+parameters may now be changed using the
+\fBmotor_par()\fP
+function.
+In addition, changes to the
+\fB"velocity"\fP
+parameter are no longer restricted to values between the base\-rate
+and steady\-state\-rate as set in the
+\fBconfig\fP
+file.
+\fBspec\fP does no checking on the values passed for any of these parameters.
+It is entirely up to the user
+to choose values that are usable by the motor controller.
+.SH "Orientation Matrix Directly Accessible"
+.sp
+For \fBspec\fP configurations that employ orientation matrix
+calculations
+(\fBfourc\fP,
+\fBfive\fP,
+\fBsixc\fP,
+etc.),
+the orientation matrix values are available in the built\-in array
+\fBUB[]\fP.
+Matrix values are stored in the
+\fBUB\fP
+array row wise, i.e.,
+\fBUB[0]\fP,
+\fBUB[1]\fP
+and
+\fBUB[2]\fP
+correspond to the first row, and so on.
+When assigning values to
+\fBUB[]\fP,
+note that the
+\fBcalcG\fP
+macro which is incorporated into many of the standard macros will
+recalculate the orientation matrix using the current lattice parameters
+and orientation reflections.
+.SH "New \fBdata_anal()\fP Options"
+.sp
+The options
+\fB"i_<=_value"\fP
+and
+\fB"i_>=_value"\fP
+are now available in the
+\fBdata_anal()\fP
+function
+to return the point number of the nearest data point
+at or below or at or above a given value.
+See the
+\fBdata\fP
+help file for more information.
+.SH "Driver Support For Nucleus PCA II Card"
+.sp
+\fBspec\fP now provides a driver for the Oxford/Tennelec/Nucleus PCA II
+multichannel analyzer card.
+The driver enables dead\-time corrections
+to be made to the PHA mode count times.
+The driver also will generate
+interrupts at the end of preset real\- or live\-time
+count intervals and after a preset number of MCS\-mode passes.
+Of course, use of the driver ties up an additional PC interrupt
+line.
+See the
+\fBREADME\fP
+file in the
+\fBdrivers\fP
+directory of the \fBspec\fP distribution for installation information.
+.SH "Driverless Support For DSP 6001/2 CAMAC Available"
+.sp
+You can now use the DSP 6001/2 CAMAC controllers with the PC004
+interface card on PC systems in a polled, user\-level I/O mode.
+No CAMAC driver needs to be installed and no modifications need to
+be made to the 6001/2 module in this mode of operation.
+Interrupts should be disabled on the PC004 board.
+.SH "High\-Res Graphics Speed Up For MCA\-Type Plotting"
+.sp
+The
+\fBdata_plot()\fP
+function now uses a faster algorithm for redrawing
+a plot when
+the same group of points is being redrawn.
+The
+\fB"big\-dots"\fP
+and
+\fB"error\-bar"\fP
+options must be turned off, though.
+The fast mode is particularly appropriate for updating the screen while
+acquiring MCA data.
+The function
+\fBplot_cntl("mca")\fP
+must be called before each call to
+\fBdata_plot()\fP
+to engage the faster algorithm.
+.SH "\fBX\fP\-Axis Log Plotting"
+.sp
+The function call
+\fBplot_cntl("xlog")\fP
+will cause the
+\fBx\fP
+axis to be drawn using a logarithmic scale.
+The call
+\fBplot_cntl("\-xlog")\fP
+will disable that mode.
+.SH "Additional Installation Parameters"
+.sp
+The
+\fBInstall\fP
+program now prompts for five additional configuration parameters.
+These parameters select whether the internal data should be stored as
+single\-precision (float) or double\-precision values, whether to link
+in the optional GNU readline history and command editing library,
+whether to include VME hardware support
+and
+where two National Instruments hardware object
+modules for GPIB and VME are located if they are to be used.
+.SH "Per Diffractometer Hardware Locking"
+.sp
+If a second version of \fBspec\fP associated with a particular
+\fBconfig\fP
+file is started up while a prior running version has control of the hardware,
+the second version will be forced into simulate mode.
+Such hardware locking has been implicit in versions of \fBspec\fP
+which use CAMAC
+drivers, in that the hardware
+driver has always
+only allowed one process at a time to open a particular device node.
+.SH "New \fBprompt_mac\fP Built\-In Macro"
+.sp
+If a macro named
+\fBprompt_mac\fP
+is defined, its contents will be executed before \fBspec\fP issues a fresh
+prompt.
+If an error is encountered while the contents of the macro are running,
+the macro will be automatically undefined.
+.SH "New \fBgetline()\fP Function To Read From a File"
+.sp
+A simple version of a new built\-in function named
+\fBgetline()\fP
+is available.
+This function will read an ASCII file a line at a time and return
+a string containing the characters read.
+Values can be picked out of the string using the new
+\fBsscanf()\fP
+function described below.
+See the
+\fBfuncs\fP
+help file for more information.
+.SH "Bug In \fBsplit()\fP Function Fixed"
+.sp
+Previously, the
+\fBsplit()\fP
+function would modify the string that was split.
+It does that no longer.
+.SH "OMS Configuration Designation Changed"
+.sp
+The OMS motors and motor controllers are now selected with the characters
+\fBOMS\fP
+rather than
+\fBPCX\fP,
+as before.
+The
+\fBedconf\fP
+program will automatically convert to the new designation.
+.SH "ACS MD8 Multiplexing Support With E500 Motor Controller"
+.sp
+Support for
+a particular home\-made multiplexor used with a CAMAC E500 motor
+controller, a CAMAC I/O module and the ACS MD8 motor current source
+is now available.
+Only one E500 channel can be multiplexed to up to 16 motors.
+Contact CSS for details on the multiplexor setup.
+.SH "Added Support For DSP CC\-488 GPIB\-To\-CAMAC Module"
+.sp
+The DSP CC\-488 GPIB\-to\-CAMAC module is now supported.
+.SH "RELEASE 3.00.06"
+.rs
+.sp
+These
+notes summarize the changes made for \fBspec\fP
+release 3.00.06 as of December 19, 1993.
+.SH "Quoted Strings Can Be Passed To Macros"
+.sp
+Escaped quotes, as in
+\fB\e"\fP
+or
+\fB\e\(aq\fP,
+can now be used in arguments to macros to pass literal quotes to the macro.
+The previous treatment of
+\fB\e"\fP
+as an argument to a macro had been undefined.
+.SH "CAMAC May Be Configured in Polled Mode"
+.sp
+You can now run the CAMAC drivers in polled mode.
+Instead of CAMAC LAMs generating CPU interrupts to signal
+\fBspec\fP when moving or counting is finished, \fBspec\fP will poll
+the CAMAC driver approximately
+20 times a second to obtain the current LAM status.
+Polling only takes place when the
+\fBwait()\fP
+function is called while moving or counting is in progress.
+Use the
+\fBconfig\fP
+macro to select polled or interrupt mode.
+.SH "Binary Mode \fBgpib_get()\fP and \fBser_get()\fP Improved"
+.sp
+The values returned by the binary mode
+\fBgpib_get()\fP
+and
+\fBser_get()\fP
+functions will now return the same values when running on both
+\fBbig\-endian\fP
+and
+\fBlittle\-endian\fP
+machines.
+By default, the incoming data is treated as
+\fBbig endian\fP.
+If the incoming data is
+\fBlittle endian\fP,
+use
+\fB"int4_swap"\fP
+or
+\fB"int2_swap"\fP
+as the second argument to the functions.
+.SH "New \fBsscanf()\fP Function"
+.sp
+A new built\-in function
+\fBsscanf\fP
+is available.
+Its usage is
+.sp
+.RS 4m
+\fBsscanf(string,  format,  lvalue [, ...])\fP
+.RE
+.sp
+where
+\fBstring\fP
+is literal string or string variable that contains data to be scanned,
+\fBformat\fP
+is a literal string or string variable that contains format specifications
+in the same style as the C language
+\fBscanf()\fP
+functions, and the
+\fBlvalue\fP
+arguments are the names of variables or array elements.
+The function returns the number of items found in the string.
+.SH "Unidirectional Powder Mode Option Available"
+.sp
+The powder mode macros now allow for unidirectional scanning of the
+motor\-mode (rocked) motor.
+See the
+\fBpowder\fP
+help file for details.
+.SH "Bug In \fBdata_anal()\fP Fixed"
+.sp
+A bug where the minimum and maximum values returned by the
+\fBdata_anal()\fP
+function for
+\fBstart\fP
+values not equal to zero may have been incorrect by including the
+values at point zero in the comparisons has been fixed.
+.SH "Bug In \fBdata_plot()\fP Fixed"
+.sp
+A bug where the plots drawn for the
+\fBdata_plot()\fP
+function for
+\fBstart\fP
+and
+\fBnpts\fP
+values not equal to zero may not have been the plots requested
+has been fixed.
+.SH "RELEASE 3.00.05"
+.rs
+.sp
+These
+notes summarize the changes made for \fBspec\fP
+release 3.00.05 as of November 20, 1993.
+.SH "Minor Bug In \fBgpib_get()\fP Fixed"
+.sp
+When the second argument to
+\fBgpib_get()\fP
+is a number to indicate the number of bytes to read,
+previously
+the function would return early if
+the end\-of\-string character (a newline) was received.
+That bug has now been fixed.
+.SH "Minor Change In GPIB Addressing"
+.sp
+A redundant MLA (my listen address)
+used in the addressing sequence for reads of GPIB devices
+(the intended purpose of which is lost in the dim reaches of time)
+has been
+eliminated, as it made at least one instrument unreadable.
+The extra MLA was only used with
+National Instruments boards and the Iotech SCSI488/H controller.
+.SH "Eliminated Historical 24\-Bit Test On Motor Steps"
+.sp
+The 24\-bit limitation on values for motor controller dial positions
+has been eliminated.
+This check dated back to \fBspec\fP\(aqs original use with only
+motor controllers on the 24\-bit CAMAC dataway.
+.SH "Debugging Output Sped Up"
+.sp
+Bottlenecks in printing debugging output to files and to the screen
+have been eliminated, speeding things up,
+particularly for debugging modes 256 and 1,024, associated with
+showing input pushback and macro expansion.
+.SH "Reported Problems With Am9513 Counters Addressed"
+.sp
+The Am9513 counter/timer chip (on the Keithley\-Metrabyte CTM\-05 and
+Scientific Solutions Labmaster PC boards) is now reset by \fBspec\fP
+before each count period, instead of just at start up.
+This seems to correct problems with incorrect count times or
+count values observed by some
+users.
+.SH "Bug In \fBrdef\fP Fixed"
+.sp
+A four\-year old bug in the implementation of
+\fBrdef\fP
+has been fixed.
+The bug only occurred when the macro name was previously unused and
+the definition was an expression to be evaluated, rather than a string
+constant.
+The results of the bug were unpredicatable, as
+the bug was associated with memory allocation.
+It was possible for no ill effects to be observed.
+.SH "RELEASE 3.00.04"
+.rs
+.sp
+These
+notes summarize the changes made for \fBspec\fP
+release 3.00.04 as of November 11, 1993.
+.SH "New \fBser_get()\fP Mode"
+.sp
+A new binary\-read mode has been added to
+\fBser_get()\fP
+to read binary single\-byte, two\-byte or four\-byte
+(unsigned) integers.
+See the
+\fBserial\fP
+help file for details.
+(A similar mode was added to
+\fBgpib_get()\fP
+for release 2.15+, though not mentioned in the update notes.
+See the
+\fBgpib\fP
+help file for details.)
+.SH "Increased Maximum Number Of Counters"
+.sp
+The maximum number of counters allowed has been increaseed from
+20 to 128.
+The scaler screen of the configuration editor
+will scroll when more than 20 channels are configured.
+.SH "Increased Maximum Number Of Data Points"
+.sp
+The maximum number of data points allowed for all data groups has
+been doubled to 128K.
+.SH "New \fBprintf()\fP Format Option"
+.sp
+The
+\fBprintf()\fP
+function now recognizes the
+\fB%u\fP
+option format to print numbers in unsigned integer format.
+.SH "Integer\-To\-Float Conversion On Intel Improved"
+.sp
+When floating point values with a magnitude that exceeds the
+value that will fit in an integer are assigned to an integer in
+programs on some System V/386 systems, programs hang.
+Most cases of such assignment are now caught in \fBspec\fP on these systems.
+Values that would overflow are set to zero (the behavior
+on most systems).
+.SH "Getting Data Group Status"
+.sp
+The command
+\fBdata_grp(\-1, 0, 0)\fP
+will display the current data group configuration and will return
+a value of zero.
+.SH "More Hardware Options For \fBpowder\fP Mode"
+.sp
+The code for the Oregon Microsystems PC board motor controller,
+the ACS MCU motor controller and
+the Am9513\-based counting boards has been fixed to work in
+\fBpowder\fP
+mode.
+.SH "State Commands Made Obsolete"
+.sp
+The new memory allocation scheme has made the
+\fB"garbage collection"\fP
+commands
+\fBgetstate\fP,
+\fBsavstate\fP
+and
+\fBfixstate\fP
+unnecessary.
+Currently, no error message is printed when they are used, but they now
+have no function.
+In future versions, the commands will be eliminated altogether.
+.SH "\fBtime()\fP Fix For Sun Solaris 2"
+.sp
+The
+\fBtime()\fP
+function will now return fractional values on Sun Solaris 2
+systems.
+However, all users must include
+\fB/usr/ucblib\fP
+in their
+\fBLD_LIBRARY_PATH\fP
+environment variable before starting \fBspec\fP.
+.SH "Microvax GPIB Problems Fixed"
+.sp
+A bug where the
+\fBgpib_put()\fP
+function didn\(aqt return the number of bytes written has been fixed.
+Also, the code now ensures the EOI signal is asserted with the last byte
+of data written to the bus.
+.SH "RELEASE 3.00.03"
+.rs
+.sp
+These
+notes summarize the changes made for \fBspec\fP
+release 3.00.03 as of September 28, 1993.
+.SH "Internal Memory Size Constraints Eliminated"
+.sp
+\fBspec\fP\(aqs memory allocation and management has been redesigned to eliminate
+previous size constraints.
+\fBspec\fP will now allocate memory, as required, up to the
+system\-imposed constraints.
+This change allows many more statements to be included within curly
+brackets to make a single parse tree.
+Also, the
+\fBmemstat\fP
+command no longer reports memory fragmentation, but rather statistics
+related to the new memory allocation algorithm.
+In addition, the
+\fBfixstate\fP
+command for memory defragmentation
+is no longer needed and has been eliminated from the standard
+macros.
+.SH "New Plot Title Variable"
+.sp
+Previously, the current scan number was placed in the title position of
+\fBspec\fP\(aqs plots.
+A new global symbol
+\fBT_L\fP
+has been introduced to hold the title.
+The macros
+\fB_head\fP
+and
+\fBgetscan\fP
+macros
+have been modified to write the scan number in
+\fBT_L\fP.
+Now, plots of data sets obtained with the
+\fBgetscan\fP
+macro will show the correct scan number.
+.SH "Reverse Video Standout Mode Shunned"
+.sp
+\fBspec\fP uses
+\fB"stand out"\fP
+mode to highlight alternate fonts when displaying help files and other text
+on a video display.
+The preferred stand out mode is high\-intensity text.
+Many terminal descriptions (in
+\fB/etc/termcap\fP
+or
+\fB/usr/lib/terminfo\fP)
+make reverse video the stand out mode,
+which doesn\(aqt work well with \fBspec\fP\(aqs text.
+\fBspec\fP will now automatically replace the
+\fBESC [ 7 m\fP
+stand out mode string (reverse\-video on ansi\-derived displays) with the
+\fBESC [ 1 m\fP
+high\-intensity text string.
+.SH "Ortec Timer Bug Fixed"
+.sp
+A bug in release 3.00.02 where the times displayed in blind\-timer mode
+with the Ortec 974 or 994 modules
+when counting to monitor counts was off by a factor of 10 or 100 has been
+fixed.
+.SH "Alternate Command Line History Available"
+.sp
+At the \fBspec\fP administrator\(aqs option, the GNU
+\fBreadline\fP
+library may be used with \fBspec\fP.
+The sources to this library are provided in the
+\fBreadline\fP
+subdirectory of the \fBspec\fP distribution.
+See the
+\fBREADME\fP
+file in that directory for instructions on linking.
+See the
+\fBreadline\fP
+help file for a summary of readline\(aqs syntax.
+See the files in the
+\fBreadline/doc\fP
+directory for a complete description of readline\(aqs features.
+.SH "RELEASE 3.00.02"
+.rs
+.sp
+These
+notes summarize the changes made for \fBspec\fP
+release 3.00.02 as of September 1, 1993.
+.SH "Automatic Globalization"
+.sp
+Variables that are assigned values at the top level
+(outside of any curly brackets)
+are now
+automatically made into global variables.
+.SH "Support For Ortec 918"
+.sp
+Preliminary support for the Ortec 918 Multichannel Buffer NIM module
+has been added to \fBspec\fP.
+.SH "Ortec Timer Bug Fixed"
+.sp
+A bug in release 3.00.01 that made Ortec 974 and 994
+timers unusable has been fixed.
+.SH "Compumotor 4000 Bug Fixed"
+.sp
+A bug in release 3.00.01 that resulted in various unpredictable errors
+associated with the Compumotor 4000 motor controller has
+been fixed.
+.SH "RELEASE 3.00.01"
+.rs
+.sp
+These
+notes summarize the changes made for \fBspec\fP
+release 3.00.01 as of August 10, 1993.
+.SH "String, Macro and History Size Limits Increased"
+.sp
+The maximum length of a string constant has been increased from 2048 to
+8192 characters.
+The maximum length of a macro definition has been
+increased from 1920 to 8064 characters.
+The maximum number of commands retained as
+command\-line history as been increased
+from 100 to 1000.
+.SH "New \fBcounter_par()\fP Function"
+.sp
+A new built\-in function named
+\fBcounter_par()\fP
+has been added to support non\-standard
+features in particular counter/timer hardware.
+Currently, only the Ortec counter/timers make use of this function.
+See the
+\fBortec\fP
+help file for more information.
+.SH "New \fBimage_par()\fP Function"
+.sp
+A new built\-in function named
+\fBimage_par()\fP
+has been added to support 2D detectors.
+Currently, only the Photometrics Star 1 CCD camera is supported.
+See the
+\fBstar1\fP
+help file for more information.
+.SH "New \fBplot_cntl()\fP To Return Current Colors"
+.sp
+An option has been added to the
+\fBplot_cntl()\fP
+function to return the color assignments.
+The function
+\fBplot_cntl("colors[numb]")\fP
+where
+\fBnumb\fP
+is a number between zero and 67.
+Pen numbers zero through three are those assigned to the
+\fBbgnd\fP,
+\fBwin\fP,
+\fBtext\fP
+and
+\fBaxis\fP
+elements respectively (see the
+\fBfuncs\fP
+help file).
+Arguments from 4 through 67 are assigned to the symbol colors for
+data elements
+zero through 63.
+.SH "Ortec Counter/Timer Code Revamped"
+.sp
+The code to support the Ortec 974/994/995/997 counters and counter/timers
+has been overhauled to greatly decrease the overhead time per point.
+In addition, it is now possible to use the model 994 as a blind timer.
+See the
+\fBortec\fP
+help file for more information.
+.SH "Fixed Bug With \fB\ex\fP"
+.sp
+A bug of long standing, where the character sequence
+\fB\ex\fP
+did not produce the character
+\fBx\fP,
+where
+\fBx\fP
+was any character not part of a special sequence, has
+been fixed.
+.SH "Memory Leak On Sun Fixed"
+.sp
+A bug that occurred mainly on SunOS systems where the
+parser produced by the yacc program created code that caused
+the virtual size of \fBspec\fP to grow without bounds, has been
+fixed.
+.SH "Bug With \fBtime()\fP On Sun Fixed"
+.sp
+A bug where the built\-in function
+\fBtime()\fP
+did not return fractional seconds on SunOS systems has been fixed.
+

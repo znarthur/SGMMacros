@@ -1,0 +1,97 @@
+radicon                             hardware                             radicon
+
+NAME
+     Radicon - Radicon SCSD-3C scintillation detector with timer/counter
+
+DESCRIPTION
+
+     ssppeecc supports the Radicon model SCSD-3C scintillation detector with
+     embedded timer/counter over a serial interface.  See _w_w_w_._r_a_d_i_c_o_n_._s_p_b_._r_u for
+     details on the hardware.
+
+     The SCSD-3C device has one counter channel and can be operated in either
+     preset-time mode or preset-count mode.  In preset-time mode, the
+     accumulated count value is available.  In preset-count mode, the elapsed
+     time is available.  In both cases, results are only available after the
+     preset is reached.  No intermediate results are accessible.  If the
+     counting is interrupted, no hardware results are available.  While counting
+     or after an interrupted count, ggeettccoouunnttss will fill the SS[[sseecc]] counter array
+     element with the estimated elapsed time.
+
+     The counter register is 32 bits.  In preset-time mode, the register
+     contents are scaled by 8e6, so that the maximum programmable count time is
+     just over 536 seconds.  If the requested count time is longer than that,
+     ssppeecc will automatically restart the counter as many times as necessary.  In
+     preset-count mode, if the time to accumulate the specified preset exceeds
+     the hardware's maximum, the hardware counter overflows and loses the
+     accumulated counts.  ssppeecc will print an error message and set the elapsed
+     time to 536.871 seconds and the elapsed counts to zero.
+
+CONFIGURATION
+
+     The SCSD-3C should be configured for two channels.  Channel 0 should be the
+     time base and channel 1 should be configured as the monitor counter.  The
+     scale factors are built into the code for both channels (1e6 for the time
+     channel and 1 for the monitor).  Values in the ccoonnffiigg file are ignored.
+
+PARAMETERS
+
+     The SCSD-3C has several configuration parameters.  Although the parameters
+     affect the controller as a whole, they should be configured for one of the
+     individual channels.  If the same parameter is given different values for
+     both channels, the last parameter input will take precedence.
+
+     The parameters can be configured using ccoouunntteerr__ppaarr(()) or as nonstandard
+     optional parameters in the ccoonnffiigg file.  To configure the latter, type a pp
+     while on the SScaler screen and enter the parameter name and value as
+     described on the associated help screens.  Values set using ccoouunntteerr__ppaarr(())
+     will be reset to those in the ccoonnffiigg file on start up and on rreeccoonnffiigg.
+
+     The following parameters are available:
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""hhiigghh__vvoollttaaggee"" [[,, aarrgg]])) - Returns or sets the high voltage
+          value sent with the start command.  Value should be from 0 to 818
+          volts.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""uussee__ssoouunndd"" [[,, aarrgg]])) - Returns or sets the mode where the
+          instrument generates sounds that reflect the intensity of the incident
+          flux.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""uussee__wwiinnddooww"" [[,, aarrgg]])) - Returns or sets windowed mode.
+          When enabled, the device uses the upper threshold values to
+          discriminate the input counts.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""uuppppeerr__tthhrreesshhoolldd"" [[,, aarrgg]])) - Returns or sets the value for
+          the upper threshold in windowed mode.  Value should be from 0 to 1023.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""lloowweerr__tthhrreesshhoolldd"" [[,, aarrgg]])) - Returns or sets the value for
+          the lower threshold.  The lower threshold is always enabled and is
+          used to cut off thermal noise and the intrinsic detector noise.  Value
+          should be from 0 to 1022.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""wwiinnddooww"" [[,, aarrgg]])) - Returns or sets the value for the
+          threshold window.  Setting a value changes the upper threshold
+          parameter.  Will silently set the upper threshold to the maximum value
+          if the window is too large.  Note, the window value equals upper -
+          lower + 1.
+
+     The following commands are also available:
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""rreesseett"")) - Sends the reset command to the device.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ssoouunndd__oonn"")) - Sends the sound-on command to the device and
+          turns on the ""uussee__ssoouunndd"" mode.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ssoouunndd__ooffff"")) - Sends the sound-off command to the device
+          and turns off the ""uussee__ssoouunndd"" mode.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""dduummpp"")) - Displays the current values for the parameters
+          formatted as follows:
+
+             uuppppeerr__tthhrreesshhoolldd :: 880000
+             lloowweerr__tthhrreesshhoolldd :: 220044
+                      wwiinnddooww :: 559977
+                hhiigghh__vvoollttaaggee :: 664422
+                   uussee__ssoouunndd :: 11
+                  uussee__wwiinnddooww :: 11
+

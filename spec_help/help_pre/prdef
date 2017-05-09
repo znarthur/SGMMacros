@@ -1,0 +1,23 @@
+prdef                                command                               prdef
+
+NAME
+     pprrddeeff - print macro definitions
+
+SYNOPSIS
+
+     pprrddeeff [[ppaatttteerrnn__nnaammee ...... ]]
+
+DESCRIPTION
+
+     The command pprrddeeff prints macro definitions.  With no arguments, all the
+     macro definitions are printed.  Otherwise, only the macros specified as
+     arguments are printed.  Arguments may contain the ** and ?? metacharacters.
+
+EXAMPLE
+
+     pprrddeeff ppll__**
+
+SEE ALSO
+
+     _l_s_d_e_f _d_e_f
+

@@ -1,0 +1,41 @@
+.TH "mab" "macro" "08/01/12" "mab.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBmab\fP \- move to a given incident and reflected angle
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mab.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mab" "macro" "08/01/12" "mab.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBmab alpha beta\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBmab\fP macro is used to set a surface diffractometer
+to a given angle of incidence \fBalpha\fP
+and to position the detector at a given angle of
+reflection \fBbeta\fP (in the plane of incidence) with respect to the surface.
+It does not necessarily move the detector into the plane of incidence.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBmab 10mr 10mr\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%mr\fP
+\fI\%mk\fP
+\fI\%wait\fP
+

@@ -1,0 +1,45 @@
+.TH "ned" "macro" "08/01/12" "ned.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBned\fP \- full\-screen editor with windows
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)ned.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "ned" "macro" "08/01/12" "ned.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBned [file_name]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBned\fP macro runs the editor with the same name
+in a sub\-shell.  It is the editor of choice for the developers of \fBspec\fP.
+.sp
+The source code to \fBned\fP is available
+by request from Certified Scientific Software, but comes with
+no guarantees.
+.SH "DEFINITION"
+.rs
+.sp
+\fBdef ned \(aqunix("ned $*")\(aq\fP
+.SH "EXAMPLE"
+.rs
+.sp
+\fBned my.mac\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%u\fP
+\fI\%vi\fP
+

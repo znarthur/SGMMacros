@@ -1,0 +1,100 @@
+#===============================================================================
+# file ucolumn.mac
+# Written by X. Jiao 07/12/2005 Version 1.0
+#
+# Generic SPEC macros
+#
+# Decription: to add user defined columns to spec file, based on P. Jemian's 
+#             macros:uni_specdatacolumn.mac
+#
+# User Macros: 
+#    u_column_show: display user defined data columns
+#    u_column_add:  add one new entry of user defined column
+#    u_column_remove: delete one or( a set related to one key identifier)
+#                     column/columns
+#    u_column_clear: clear all user defined columns
+# Internal Macros:
+#    u_column_rebuild
+#
+# Modification History:
+# 7/20/2005 X. Jiao -> created based on uni_specdatacolumn.mac, modified so that
+#                     user columns grouped as key identifier, one can delete
+#                     as pieces while keep others. 
+#
+#=============================================================================== 
+
+
+#===============================================================================
+# global variables 
+#===============================================================================
+global _ADDCOL_ID[]   ;# associative array with definition key identifier
+
+
+#===============================================================================
+# User macros defined here
+#===============================================================================
+def u_column_show '{
+    local A_name B_name
+    for( i in _ADDCOL_ID) {
+       A_name = _ADDCOL_ID[i]
+       B_name = sprintf("_ADDCOL_%s_FMT",i)
+       printf("\nColumns defined as pieces of identifier:%s\n",i)
+       for( j in @A_name) {
+          printf("%s :  %s  :  %s \n", j,@A_name[j],@B_name[j])
+       }    
+    }      
+ 
+}'
+
+def u_column_add(tag,fmt,cmd,key)'{
+    local A_name B_name
+    A_name = sprintf("_ADDCOL_%s_CMD",key)
+    B_name = sprintf("_ADDCOL_%s_FMT",key)
+    if(!_ADDCOL_ID[key]) {
+        _ADDCOL_ID[key] = A_name
+        global @A_name[] @B_name[]
+    }
+    
+    @A_name[tag] = cmd
+    @B_name[tag] = fmt
+    u_column_rebuild
+ 
+}'
+
+def u_column_remove(tag,key) '{
+    local A_name B_name
+    if(_ADDCOL_ID[key]) {
+          A_name = _ADDCOL_ID[key]
+          B_name = sprintf("_ADDCOL_%s_FMT",key)
+          delete @A_name[tag]
+          delete @B_name[tag]
+    }
+    u_column_rebuild
+}'
+
+def u_column_clear(key) '{
+    local A_name B_name i
+    if(_ADDCOL_ID[key]) {
+       A_name = _ADDCOL_ID[key]
+       B_name = sprintf("_ADDCOL_%s_FMT",key)
+       unglobal @A_name
+       unglobal @B_name
+       delete _ADDCOL_ID[key]
+    }
+    else {
+       if (key =="all") {
+         for(i in _ADDCOL_ID) {
+           A_name=_ADDCOL_ID[i]
+           B_name=sprintf("_ADDCOL_%s_FMT",i)
+           unglobal @A_name
+           unglobal @B_name
+           delete _ADDCOL_ID[i]
+         }
+       }
+       
+    }
+    u_column_rebuild
+           
+}'
+
+

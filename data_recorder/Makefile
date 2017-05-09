@@ -12,9 +12,9 @@ EXEC = data_recorder
 
 FFLAGS = -c  -O$(OPTLVL) 
 
-INCLUDE = -I"nexus/hdf5-1.8.17-linux-centos6-x86_64-gcc447-shared/include"  
+INCLUDE = -I"nexus/hdf5-1.8.17-linux-centos6-x86_64-gcc447-shared/include"   
 
-LLIBRARY = -lxml2 -lNeXus -lhdf5
+LLIBRARY = -L"/home/sgm/lib64" -lxml2 -lNeXus -lhdf5 
 
 OBJ = main.o sps.o
 

@@ -1,0 +1,263 @@
+.TH "piper" "software" "08/01/12" "piper.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+piper \- using \fBspec\fP as the back end of a pipe
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)piper.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "piper" "software" "08/01/12" "piper.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP contains certain facilities to aid in its use as
+the back end of a parent program such as a graphical user interface (GUI).
+This document describes those facilities.
+.SH "INVOCATION FLAGS"
+.rs
+.sp
+\fBspec\fP needs to be invoked with several special flags when invoked
+from a parent process.
+.sp
+.RS 4m
+\fBspec \-T fake_tty \-t fake_tty \-p pid fd \-q\fP
+.RE
+.sp
+\fBspec\fP is the name of the \fBspec\fP executable.  The \fB\-T\fP flag and
+\fBfake_tty\fP argument select the tty portion
+of the state file name used to save the user\(aqs state when \fBspec\fP exits.
+The \fB\-t fake_tty\fP forces the current state
+to be restored from the state file associated
+with \fBfake_tty\fP when \fBspec\fP starts up.
+.sp
+The \fB\-p\fP flag takes two arguments: the parent process ID and the
+file descriptor \fBspec\fP should use for its standard input.
+If a tty\-based program is filtering input from the user before the
+commands are sent to \fBspec\fP, that program and \fBspec\fP cannot both
+reading from the standard input.
+For a GUI\-type program, the \fBfd\fP argument can be zero.
+When \fBfd\fP is not zero, \fBspec\fP will
+echo text received from that file descriptor to its standard output.
+The \fBpid\fP argument must be present, but is currently unused.
+.sp
+The \fB\-q\fP flag is optional.
+If present, all output from files and devices in \fBspec\fP may be turned off
+at the same time, including the \fB"tty"\fP output.
+Normally, if a user tries to turn off all output devices, \fBspec\fP
+automatically turns the output to
+\fB"tty"\fP back on.
+.SH "INVOCATION CONTEXT"
+.rs
+.sp
+Before creating a process to execute \fBspec\fP, the parent process
+needs to create two or three pipes that will be used for interprocess
+communication.
+One pipe is for sending commands to \fBspec\fP\(aqs standard input.
+The second pipe is for receiving special commands, described later,
+from \fBspec\fP.
+The optional third pipe receives \fBspec\fP\(aqs standard output.
+.sp
+Sample code for spawning \fBspec\fP follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+int     p_write[2];     /* pipe to spec */
+int     p_read[2];      /* pipe for special messages */
+int     p_out[2];       /* stdout pipe from spec */
+int     spec_pid;       /* process id of spec */
+
+#define PIPE_FD 4     /* File descriptor for special messages */
+
+/* code to set up pipes, fork and exec spec */
+exec_spec() {
+    register int    i, pipe_fd;
+    char    pid_buf[64], fd_buf[64];
+
+    /*
+    * the dup(0) is for the case where we don\(aqt
+    * want spec reading from tty standard input.
+    */
+    pipe_fd = dup(0);
+    sprintf(fd_buf, "%d", pipe_fd);
+    sprintf(pid_buf, "%d", getpid());
+
+    /* open all three pipes */
+    if (pipe(p_write) || pipe(p_read) || pipe(p_out)) {
+        perror("Can\(aqt pipe");
+        return(\-1);
+    }
+    /* spawn a process */
+    if ((spec_pid = fork()) == 0) {
+        /* Restore any caught signals to defaults ... */
+        signal(SIGINT, SIG_DFL);
+
+        /* associate read side of p_write with std input */
+        if (p_write[0] != pipe_fd) {
+            close(pipe_fd);
+            dup(p_write[0]);
+        }
+        /* associate write side of p_out with std output */
+        if (p_out[1] != 1) {
+            close(1);
+            dup(p_out[1]);
+            /* also get standard error */
+            close(2);
+            dup(p_out[1]);
+        }
+        /* associate write side of p_read with PIPE_FD */
+        if (p_read[1] != PIPE_FD) {
+            /*
+            * could also use  dup2(p_read[1], PIPE_FD),
+            * historically, though, dup2() has not been
+            * robust across all platforms.
+            */
+            close(PIPE_FD);
+            dup(p_read[1]);
+        }
+        /*
+        * close other open files ... unlikely
+        * anything past 40 is open?
+        */
+        for (i = 3; i < 40; i++)
+            if (i != PIPE_FD && i != pipe_fd)
+                close(i);
+
+        execl("/cert/spec/fourc", "fourc",
+                "\-pq", pid_buf, fd_buf,
+                "\-T", "piper",
+                "\-t", "piper", (char *) 0);
+
+        perror("Can\(aqt exec spec");
+        _exit(1);
+    }
+    if (spec_pid < 0) {
+        perror("Can\(aqt fork");
+        return(\-1);
+    }
+    /* close off unused ends of the pipes */
+    close(p_write[0]);
+    close(p_read[1]);
+    close(p_out[1]);
+    return(0);
+}
+.ft P
+.fi
+.RE
+.SH "SPECIAL MESSAGES"
+.rs
+.sp
+The following is a list of  messages sent over
+the special pipe from \fBspec\fP to the parent process.
+.RS 0m
+.HP 5m
+."
+\fB[B]ermsg {message}[E]\fP
+\- 
+Transmits error messages produced by the built\-in C code
+and by the user\-level
+\fBeprint\fP command and \fBeprintf()\fP function.
+Note the curly brackets can be used to help parse multi\-line messages.
+.HP 5m
+."
+\fB[B]spec_msg syntax_error parse_error[E]\fP
+\- 
+This message is sent when there is an parsing error in the user input.
+\fBspec\fP resets to command level.
+.HP 5m
+."
+\fB[B]spec_msg error_reset error_reset[E]\fP
+\- 
+This message is sent on errors other than syntax errors
+that cause \fBspec\fP to reset to command level.
+.HP 5m
+."
+\fB[B]spec_msg state_change shell_begin[E]\fP
+\- 
+This message is sent when \fBspec\fP creates a subshell using its built\-in
+\fBunix()\fP command.
+Note, while \fBspec\fP is in a subshell, it will not respond to commands.
+.HP 5m
+."
+\fB[B]spec_msg state_change shell_end[E]\fP
+\- 
+This message is sent when \fBspec\fP returns from a subshell.
+.HP 5m
+."
+\fB[B]spec_msg done_waiting flags[E]\fP
+\- 
+This message is sent when \fBspec\fP returns from the
+\fBwait()\fP function and some hardware activity has completed.
+The bits in \fBflags\fP indicate which activity has completed.
+Bit 1 is set for motors, bit 2 for timers
+and bit 3 for other data acquisition.
+.HP 5m
+."
+\fB[B]spec_msg needs_input motor_sync[E]\fP
+\- 
+This message is sent when \fBspec\fP requires a yes or no response
+to a motor position synchronization question.
+\fBspec\fP will not accept further input until it receives
+one of the characters
+\fBy\fP, \fBY\fP, \fB1\fP, \fBn\fP, \fBN\fP or \fB0\fP.
+.HP 5m
+."
+\fB[B]spec_msg needs_input user_input[E]\fP
+\- 
+This message is sent when \fBspec\fP is expecting user input either from
+the \fBgethelp()\fP paginator, or from the \fBinput()\fP
+or \fBgetval()\fP built\-in functions.
+.HP 5m
+."
+\fB[B]spec_msg ermsg message[E]\fP
+\- 
+Not yet used.
+.HP 5m
+."
+\fB[B]motor_sync motor_number 1 controller_position spec_position[E]\fP
+\- 
+This message is sent when there is a motor synchronization discrepancy.
+The arguments are the motor number, the digit 1, the motor position
+(in dial units) as read from the controller and the motor position
+(in dial units) in \fBspec\fP.
+(Currently only implemented for selected motor controllers.)
+.HP 5m
+."
+\fB[B]spec_msg motor_limit motor_number direction[E]\fP
+\- 
+This message is sent when \fBspec\fP detects a motor
+has hit a hard limit switch.
+The first argument is the motor number and the
+\fBdirection\fP argument is 1 or \-1
+indicating whether the positive or negative limit has been hit.
+(Currently only implemented for selected motor controllers.)
+.RE
+.sp
+The parent process should be prepared to handle motor_sync
+\fBmotor_sync\fP and \fBmotor_limit\fP messages at any time.
+.sp
+Besides the special messages above, any \fBspec\fP output generated
+to the special output devices named \fB"pipe"\fP using
+\fBfprintf("pipe", ...)\fP or \fBon("pipe")\fP
+will arrive through the same file descriptor.
+.SH "CONCLUSION"
+.rs
+.sp
+With the above facilities, one can control \fBspec\fP from a parent process
+in a variety of ways.
+One can completely hide \fBspec\fP\(aqs output from the user, writing special
+macros that send terse message over the \fB"pipe"\fP stream.
+Alternatively, one can present the user with the standard \fBspec\fP input
+and output, filtered through the parent program,
+with the parent program sending additional messages to \fBspec\fP
+from its various GUI\-type widgets.
+

@@ -1,0 +1,376 @@
+changes                      spec 3.00 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 3.00
+
+RELEASE 3.00.07
+
+     These notes summarize the changes made for ssppeecc release 3.00.07 as of
+     February 12, 1994.
+
+New Startup Macro File Name
+     If a file named ssiittee__ff..mmaacc exists in the SSPPEECCDD directory, it will be read
+     when ssppeecc starts fresh, but not otherwise.
+
+mmoottoorr__ppaarr(()) Changes
+     The ""bbaassee__rraattee"" and ""aacccceelleerraattiioonn"" parameters may now be changed using the
+     mmoottoorr__ppaarr(()) function.  In addition, changes to the ""vveelloocciittyy"" parameter are
+     no longer restricted to values between the base-rate and steady-state-rate
+     as set in the ccoonnffiigg file.  ssppeecc does no checking on the values passed for
+     any of these parameters.  It is entirely up to the user to choose values
+     that are usable by the motor controller.
+
+Orientation Matrix Directly Accessible
+     For ssppeecc configurations that employ orientation matrix calculations (ffoouurrcc,
+     ffiivvee, ssiixxcc, etc.), the orientation matrix values are available in the
+     built-in array UUBB[[]].  Matrix values are stored in the UUBB array row wise,
+     i.e., UUBB[[00]], UUBB[[11]] and UUBB[[22]] correspond to the first row, and so on.  When
+     assigning values to UUBB[[]], note that the ccaallccGG macro which is incorporated
+     into many of the standard macros will recalculate the orientation matrix
+     using the current lattice parameters and orientation reflections.
+
+New ddaattaa__aannaall(()) Options
+     The options ""ii__<<==__vvaalluuee"" and ""ii__>>==__vvaalluuee"" are now available in the
+     ddaattaa__aannaall(()) function to return the point number of the nearest data point
+     at or below or at or above a given value.  See the ddaattaa help file for more
+     information.
+
+Driver Support For Nucleus PCA II Card
+     ssppeecc now provides a driver for the Oxford/Tennelec/Nucleus PCA II
+     multichannel analyzer card.  The driver enables dead-time corrections to be
+     made to the PHA mode count times.  The driver also will generate interrupts
+     at the end of preset real- or live-time count intervals and after a preset
+     number of MCS-mode passes.  Of course, use of the driver ties up an
+     additional PC interrupt line.  See the RREEAADDMMEE file in the ddrriivveerrss directory
+     of the ssppeecc distribution for installation information.
+
+Driverless Support For DSP 6001/2 CAMAC Available
+     You can now use the DSP 6001/2 CAMAC controllers with the PC004 interface
+     card on PC systems in a polled, user-level I/O mode.  No CAMAC driver needs
+     to be installed and no modifications need to be made to the 6001/2 module
+     in this mode of operation.  Interrupts should be disabled on the PC004
+     board.
+
+High-Res Graphics Speed Up For MCA-Type Plotting
+     The ddaattaa__pplloott(()) function now uses a faster algorithm for redrawing a plot
+     when the same group of points is being redrawn.  The ""bbiigg--ddoottss"" and
+     ""eerrrroorr--bbaarr"" options must be turned off, though.  The fast mode is
+     particularly appropriate for updating the screen while acquiring MCA data.
+     The function pplloott__ccnnttll((""mmccaa"")) must be called before each call to
+     ddaattaa__pplloott(()) to engage the faster algorithm.
+
+XX-Axis Log Plotting
+     The function call pplloott__ccnnttll((""xxlloogg"")) will cause the xx axis to be drawn using
+     a logarithmic scale.  The call pplloott__ccnnttll((""--xxlloogg"")) will disable that mode.
+
+Additional Installation Parameters
+     The IInnssttaallll program now prompts for five additional configuration
+     parameters.  These parameters select whether the internal data should be
+     stored as single-precision (float) or double-precision values, whether to
+     link in the optional GNU readline history and command editing library,
+     whether to include VME hardware support and where two National Instruments
+     hardware object modules for GPIB and VME are located if they are to be
+     used.
+
+Per Diffractometer Hardware Locking
+     If a second version of ssppeecc associated with a particular ccoonnffiigg file is
+     started up while a prior running version has control of the hardware, the
+     second version will be forced into simulate mode.  Such hardware locking
+     has been implicit in versions of ssppeecc which use CAMAC drivers, in that the
+     hardware driver has always only allowed one process at a time to open a
+     particular device node.
+
+New pprroommpptt__mmaacc Built-In Macro
+     If a macro named pprroommpptt__mmaacc is defined, its contents will be executed
+     before ssppeecc issues a fresh prompt.  If an error is encountered while the
+     contents of the macro are running, the macro will be automatically
+     undefined.
+
+New ggeettlliinnee(()) Function To Read From a File
+     A simple version of a new built-in function named ggeettlliinnee(()) is available.
+     This function will read an ASCII file a line at a time and return a string
+     containing the characters read.  Values can be picked out of the string
+     using the new ssssccaannff(()) function described below.  See the ffuunnccss help file
+     for more information.
+
+Bug In sspplliitt(()) Function Fixed
+     Previously, the sspplliitt(()) function would modify the string that was split.
+     It does that no longer.
+
+OMS Configuration Designation Changed
+     The OMS motors and motor controllers are now selected with the characters
+     OOMMSS rather than PPCCXX, as before.  The eeddccoonnff program will automatically
+     convert to the new designation.
+
+ACS MD8 Multiplexing Support With E500 Motor Controller
+     Support for a particular home-made multiplexor used with a CAMAC E500 motor
+     controller, a CAMAC I/O module and the ACS MD8 motor current source is now
+     available.  Only one E500 channel can be multiplexed to up to 16 motors.
+     Contact CSS for details on the multiplexor setup.
+
+Added Support For DSP CC-488 GPIB-To-CAMAC Module
+     The DSP CC-488 GPIB-to-CAMAC module is now supported.
+
+RELEASE 3.00.06
+
+     These notes summarize the changes made for ssppeecc release 3.00.06 as of
+     December 19, 1993.
+
+Quoted Strings Can Be Passed To Macros
+     Escaped quotes, as in \\"" or \\'', can now be used in arguments to macros to
+     pass literal quotes to the macro.  The previous treatment of \\"" as an
+     argument to a macro had been undefined.
+
+CAMAC May Be Configured in Polled Mode
+     You can now run the CAMAC drivers in polled mode.  Instead of CAMAC LAMs
+     generating CPU interrupts to signal ssppeecc when moving or counting is
+     finished, ssppeecc will poll the CAMAC driver approximately 20 times a second
+     to obtain the current LAM status.  Polling only takes place when the wwaaiitt(())
+     function is called while moving or counting is in progress.  Use the ccoonnffiigg
+     macro to select polled or interrupt mode.
+
+Binary Mode ggppiibb__ggeett(()) and sseerr__ggeett(()) Improved
+     The values returned by the binary mode ggppiibb__ggeett(()) and sseerr__ggeett(()) functions
+     will now return the same values when running on both bbiigg--eennddiiaann and
+     lliittttllee--eennddiiaann machines.  By default, the incoming data is treated as bbiigg
+     eennddiiaann.  If the incoming data is lliittttllee eennddiiaann, use ""iinntt44__sswwaapp"" or
+     ""iinntt22__sswwaapp"" as the second argument to the functions.
+
+New ssssccaannff(()) Function
+     A new built-in function ssssccaannff is available.  Its usage is
+
+         ssssccaannff((ssttrriinngg,,  ffoorrmmaatt,,  llvvaalluuee [[,, ......]]))
+
+     where ssttrriinngg is literal string or string variable that contains data to be
+     scanned, ffoorrmmaatt is a literal string or string variable that contains format
+     specifications in the same style as the C language ssccaannff(()) functions, and
+     the llvvaalluuee arguments are the names of variables or array elements.  The
+     function returns the number of items found in the string.
+
+Unidirectional Powder Mode Option Available
+     The powder mode macros now allow for unidirectional scanning of the
+     motor-mode (rocked) motor.  See the ppoowwddeerr help file for details.
+
+Bug In ddaattaa__aannaall(()) Fixed
+     A bug where the minimum and maximum values returned by the ddaattaa__aannaall(())
+     function for ssttaarrtt values not equal to zero may have been incorrect by
+     including the values at point zero in the comparisons has been fixed.
+
+Bug In ddaattaa__pplloott(()) Fixed
+     A bug where the plots drawn for the ddaattaa__pplloott(()) function for ssttaarrtt and nnppttss
+     values not equal to zero may not have been the plots requested has been
+     fixed.
+
+RELEASE 3.00.05
+
+     These notes summarize the changes made for ssppeecc release 3.00.05 as of
+     November 20, 1993.
+
+Minor Bug In ggppiibb__ggeett(()) Fixed
+     When the second argument to ggppiibb__ggeett(()) is a number to indicate the number
+     of bytes to read, previously the function would return early if the
+     end-of-string character (a newline) was received.  That bug has now been
+     fixed.
+
+Minor Change In GPIB Addressing
+     A redundant MLA (my listen address) used in the addressing sequence for
+     reads of GPIB devices (the intended purpose of which is lost in the dim
+     reaches of time) has been eliminated, as it made at least one instrument
+     unreadable.  The extra MLA was only used with National Instruments boards
+     and the Iotech SCSI488/H controller.
+
+Eliminated Historical 24-Bit Test On Motor Steps
+     The 24-bit limitation on values for motor controller dial positions has
+     been eliminated.  This check dated back to ssppeecc's original use with only
+     motor controllers on the 24-bit CAMAC dataway.
+
+Debugging Output Sped Up
+     Bottlenecks in printing debugging output to files and to the screen have
+     been eliminated, speeding things up, particularly for debugging modes 256
+     and 1,024, associated with showing input pushback and macro expansion.
+
+Reported Problems With Am9513 Counters Addressed
+     The Am9513 counter/timer chip (on the Keithley-Metrabyte CTM-05 and
+     Scientific Solutions Labmaster PC boards) is now reset by ssppeecc before each
+     count period, instead of just at start up.  This seems to correct problems
+     with incorrect count times or count values observed by some users.
+
+Bug In rrddeeff Fixed
+     A four-year old bug in the implementation of rrddeeff has been fixed.  The bug
+     only occurred when the macro name was previously unused and the definition
+     was an expression to be evaluated, rather than a string constant.  The
+     results of the bug were unpredicatable, as the bug was associated with
+     memory allocation.  It was possible for no ill effects to be observed.
+
+RELEASE 3.00.04
+
+     These notes summarize the changes made for ssppeecc release 3.00.04 as of
+     November 11, 1993.
+
+New sseerr__ggeett(()) Mode
+     A new binary-read mode has been added to sseerr__ggeett(()) to read binary
+     single-byte, two-byte or four-byte (unsigned) integers.  See the sseerriiaall
+     help file for details.  (A similar mode was added to ggppiibb__ggeett(()) for release
+     2.15+, though not mentioned in the update notes.  See the ggppiibb help file
+     for details.)
+
+Increased Maximum Number Of Counters
+     The maximum number of counters allowed has been increaseed from 20 to 128.
+     The scaler screen of the configuration editor will scroll when more than 20
+     channels are configured.
+
+Increased Maximum Number Of Data Points
+     The maximum number of data points allowed for all data groups has been
+     doubled to 128K.
+
+New pprriinnttff(()) Format Option
+     The pprriinnttff(()) function now recognizes the %%uu option format to print numbers
+     in unsigned integer format.
+
+Integer-To-Float Conversion On Intel Improved
+     When floating point values with a magnitude that exceeds the value that
+     will fit in an integer are assigned to an integer in programs on some
+     System V/386 systems, programs hang.  Most cases of such assignment are now
+     caught in ssppeecc on these systems.  Values that would overflow are set to
+     zero (the behavior on most systems).
+
+Getting Data Group Status
+     The command ddaattaa__ggrrpp((--11,, 00,, 00)) will display the current data group
+     configuration and will return a value of zero.
+
+More Hardware Options For ppoowwddeerr Mode
+     The code for the Oregon Microsystems PC board motor controller, the ACS MCU
+     motor controller and the Am9513-based counting boards has been fixed to
+     work in ppoowwddeerr mode.
+
+State Commands Made Obsolete
+     The new memory allocation scheme has made the ""ggaarrbbaaggee ccoolllleeccttiioonn"" commands
+     ggeettssttaattee, ssaavvssttaattee and ffiixxssttaattee unnecessary.  Currently, no error message
+     is printed when they are used, but they now have no function.  In future
+     versions, the commands will be eliminated altogether.
+
+ttiimmee(()) Fix For Sun Solaris 2
+     The ttiimmee(()) function will now return fractional values on Sun Solaris 2
+     systems.  However, all users must include //uussrr//uuccbblliibb in their
+     LLDD__LLIIBBRRAARRYY__PPAATTHH environment variable before starting ssppeecc.
+
+Microvax GPIB Problems Fixed
+     A bug where the ggppiibb__ppuutt(()) function didn't return the number of bytes
+     written has been fixed.  Also, the code now ensures the EOI signal is
+     asserted with the last byte of data written to the bus.
+
+RELEASE 3.00.03
+
+     These notes summarize the changes made for ssppeecc release 3.00.03 as of
+     September 28, 1993.
+
+Internal Memory Size Constraints Eliminated
+     ssppeecc's memory allocation and management has been redesigned to eliminate
+     previous size constraints.  ssppeecc will now allocate memory, as required, up
+     to the system-imposed constraints.  This change allows many more statements
+     to be included within curly brackets to make a single parse tree.  Also,
+     the mmeemmssttaatt command no longer reports memory fragmentation, but rather
+     statistics related to the new memory allocation algorithm.  In addition,
+     the ffiixxssttaattee command for memory defragmentation is no longer needed and has
+     been eliminated from the standard macros.
+
+New Plot Title Variable
+     Previously, the current scan number was placed in the title position of
+     ssppeecc's plots.  A new global symbol TT__LL has been introduced to hold the
+     title.  The macros __hheeaadd and ggeettssccaann macros have been modified to write the
+     scan number in TT__LL.  Now, plots of data sets obtained with the ggeettssccaann
+     macro will show the correct scan number.
+
+Reverse Video Standout Mode Shunned
+     ssppeecc uses ""ssttaanndd oouutt"" mode to highlight alternate fonts when displaying
+     help files and other text on a video display.  The preferred stand out mode
+     is high-intensity text.  Many terminal descriptions (in //eettcc//tteerrmmccaapp or
+     //uussrr//lliibb//tteerrmmiinnffoo) make reverse video the stand out mode, which doesn't
+     work well with ssppeecc's text.  ssppeecc will now automatically replace the EESSCC [[
+     77 mm stand out mode string (reverse-video on ansi-derived displays) with the
+     EESSCC [[ 11 mm high-intensity text string.
+
+Ortec Timer Bug Fixed
+     A bug in release 3.00.02 where the times displayed in blind-timer mode with
+     the Ortec 974 or 994 modules when counting to monitor counts was off by a
+     factor of 10 or 100 has been fixed.
+
+Alternate Command Line History Available
+     At the ssppeecc administrator's option, the GNU rreeaaddlliinnee library may be used
+     with ssppeecc.  The sources to this library are provided in the rreeaaddlliinnee
+     subdirectory of the ssppeecc distribution.  See the RREEAADDMMEE file in that
+     directory for instructions on linking.  See the rreeaaddlliinnee help file for a
+     summary of readline's syntax.  See the files in the rreeaaddlliinnee//ddoocc directory
+     for a complete description of readline's features.
+
+RELEASE 3.00.02
+
+     These notes summarize the changes made for ssppeecc release 3.00.02 as of
+     September 1, 1993.
+
+Automatic Globalization
+     Variables that are assigned values at the top level (outside of any curly
+     brackets) are now automatically made into global variables.
+
+Support For Ortec 918
+     Preliminary support for the Ortec 918 Multichannel Buffer NIM module has
+     been added to ssppeecc.
+
+Ortec Timer Bug Fixed
+     A bug in release 3.00.01 that made Ortec 974 and 994 timers unusable has
+     been fixed.
+
+Compumotor 4000 Bug Fixed
+     A bug in release 3.00.01 that resulted in various unpredictable errors
+     associated with the Compumotor 4000 motor controller has been fixed.
+
+RELEASE 3.00.01
+
+     These notes summarize the changes made for ssppeecc release 3.00.01 as of
+     August 10, 1993.
+
+String, Macro and History Size Limits Increased
+     The maximum length of a string constant has been increased from 2048 to
+     8192 characters.  The maximum length of a macro definition has been
+     increased from 1920 to 8064 characters.  The maximum number of commands
+     retained as command-line history as been increased from 100 to 1000.
+
+New ccoouunntteerr__ppaarr(()) Function
+     A new built-in function named ccoouunntteerr__ppaarr(()) has been added to support
+     non-standard features in particular counter/timer hardware.  Currently,
+     only the Ortec counter/timers make use of this function.  See the oorrtteecc
+     help file for more information.
+
+New iimmaaggee__ppaarr(()) Function
+     A new built-in function named iimmaaggee__ppaarr(()) has been added to support 2D
+     detectors.  Currently, only the Photometrics Star 1 CCD camera is
+     supported.  See the ssttaarr11 help file for more information.
+
+New pplloott__ccnnttll(()) To Return Current Colors
+     An option has been added to the pplloott__ccnnttll(()) function to return the color
+     assignments.  The function pplloott__ccnnttll((""ccoolloorrss[[nnuummbb]]"")) where nnuummbb is a number
+     between zero and 67.  Pen numbers zero through three are those assigned to
+     the bbggnndd, wwiinn, tteexxtt and aaxxiiss elements respectively (see the ffuunnccss help
+     file).  Arguments from 4 through 67 are assigned to the symbol colors for
+     data elements zero through 63.
+
+Ortec Counter/Timer Code Revamped
+     The code to support the Ortec 974/994/995/997 counters and counter/timers
+     has been overhauled to greatly decrease the overhead time per point.  In
+     addition, it is now possible to use the model 994 as a blind timer.  See
+     the oorrtteecc help file for more information.
+
+Fixed Bug With \\xx
+     A bug of long standing, where the character sequence \\xx did not produce the
+     character xx, where xx was any character not part of a special sequence, has
+     been fixed.
+
+Memory Leak On Sun Fixed
+     A bug that occurred mainly on SunOS systems where the parser produced by
+     the yacc program created code that caused the virtual size of ssppeecc to grow
+     without bounds, has been fixed.
+
+Bug With ttiimmee(()) On Sun Fixed
+     A bug where the built-in function ttiimmee(()) did not return fractional seconds
+     on SunOS systems has been fixed.
+

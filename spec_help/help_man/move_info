@@ -1,0 +1,138 @@
+.TH "move_info()" "functions" "08/01/12" "move_info.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+move_info() \- returns what would happen on a move
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)move_info.rst    6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2011,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "move_info()" "functions" "08/01/12" "move_info.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBmove_info()\fP function returns information about what would happen
+on a subsequent \fBmove_all\fP command
+given the current motor positions and current values in the \fBA[]\fP array.
+Such a function might be called, for example, within the
+\fBuser_premove\fP macro to determine which motors will be moved to allow
+extra limit checking can be performed involving the relative postion
+of motors.
+.sp
+If called with no arguments, returns a two\-dimensional associative array
+containing the move information.  The array is indexed by
+motor number and information keyword.  The keywords are:
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fB"to_move"\fP	nonzero if motor will move
+\fB"error"\fP	reason the motor will not move
+\fB"commanded"\fP	the commanded position
+\fB"magnitude"\fP	magnitude of the move in user units
+\fB"current"\fP	current position in user units
+\fB"current_dial"\fP	current position in dial units
+\fB"target"\fP	target position in user units
+\fB"target_dial"\fP	target position in dial units
+\fB"backlash"\fP	backlash for this move in user units
+\fB"leftover"\fP	reminder due to motor resolution
+.TE
+.RE
+.sp
+If called with a single argument that is one of the
+above keywords, the function returns a one\-dimensional associative
+array indexed by motor number containing values for that keyword for each motor.
+If called with a motor number or mnemonic as a single argument, the
+function returns a one\-dimensional associative array, indexed by
+the above keywords containing values for the one motor.
+If called with two arguments, motor number and keyword,
+the function returns the corresponding single value.
+.sp
+No matter how the function is called,
+the internal code will calculate values for all motors.
+Thus, if multiple values are needed, it is most efficient and recommended
+to call the function once selecting arguments that will
+return all the needed values.
+.sp
+The \fB"to_move"\fP element will be 1 or 0, indicating whether the motor
+would move or not.  If there is condition that prevents the move, the
+\fB"error"\fP element will contain one of these strings:
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fB"low limit"\fP	move exceeds low limit
+\fB"high limit"\fP	move exceeds high limit
+\fB"busy"\fP	motor is busy
+\fB"read only"\fP	motor is configured as read only
+\fB"protected"\fP	motor configuration does not allow moving
+\fB"disabled"\fP	motor has been disabled
+\fB"externally disabled"\fP	shared motor has been disabled
+\fB"unusable"\fP	motor did not respond to presence test
+.TE
+.RE
+.sp
+Otherwise, there will be no \fB"error"\fP array element.
+.sp
+The \fB"target"\fP and \fB"target_dial"\fP values
+are the final position after backlash.
+The \fB"magnitude"\fP value contains the distance to the target position and
+does not include the magnitude of the backlash.
+.sp
+The \fB"leftover"\fP value is the fractional value that is the difference
+between the requested position and the achievable position
+given the finite resolution of the motor.
+For example, if a motor has 1000 steps per degree, each step corresponds to
+0.001 degrees.
+If one asks to move the motor to a position of 1.0004 degrees, the motor will
+move to 1 degree and the leftover value will be 0.0004 degrees.
+.sp
+The \fB"commanded"\fP value is the target position in user units to the full
+precision requested.
+The other postion\-related values are rounded to the motor resolution.
+The \fB"commanded"\fP position is saved after a move and is available using
+special arguments to the built\-in \fBread_motors()\fP functions.
+.sp
+As mentioned above,
+if multiple values are needed, it is better to make a single call of
+move_info() saving the return values in an array, rather than making
+multiple calls, as each call involves calculations for
+all the motor positions and values, even if only selected values are
+returned.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+{
+   local i, m[]
+   m = move_info()
+   for (i = 0; i < MOTORS; i++)
+        if (m[i]["to_move"]) {
+                ...
+        }
+}
+.ft P
+.fi
+.RE
+.sp
+For the most part, the
+\fBmove_info()\fP function will reflect what will happen on the next
+\fBmove_all\fP command.
+However, for shared motors that can be moved by other processes or
+for motors that have positions that drift or have jitter,
+the status and position may change between the
+\fBmove_info()\fP call and the \fBmove_all\fP call.
+

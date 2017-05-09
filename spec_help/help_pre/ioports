@@ -1,0 +1,80 @@
+ioports                             hardware                             ioports
+
+NAME
+     ioports - I/O port access for PCs
+
+INTRODUCTION
+
+     Access to I/O ports associated with ISA or PCI cards can be configured on
+     the IInntteerrffaaccee screen of the configuration editor along the following lines:
+
+        IIOO PPOORRTT                 AADDDDRR  <<>>MMOODDEE  NNUUMM
+            YYEESS                00xx330000    RReeaadd    11
+            YYEESS               00xxCC110000   WWrriittee    22
+            YYEESS                00xx331100     RR//WW    44
+
+     The NNUUMM field indicates how many consecutive locations (in bytes) can be
+     accessed.  Write-only mode is available for the unusual situation where
+     read access to an I/O location has adverse consequences such as freezing
+     the host PC.
+
+     The ccoonnffiigg file entry syntax is:
+
+         PC_PORT_#  =  hheexx__bbaassee__aaddddrreessss  nnuummbbeerr__ooff__ppoorrttss  rreeaadd__wwrriittee__ffllaagg
+
+     where rreeaadd__wwrriittee__ffllaagg is 0 for read-only, 1 for write-only and 2 for
+     read-write mode.
+
+     It is not necessary to configure I/O ports associated with controllers that
+     have built-in support in ssppeecc.
+
+BUILT-IN FUNCTIONS
+
+     ppoorrtt__ggeett((aa)) - Reads one byte from the PC I/O port with the address aa.
+          Ports must be selected in the ccoonnffiigg file.
+
+     ppoorrtt__ggeettww((aa)) - As above, but reads a 16-bit word.
+
+     ppoorrtt__ppuutt((aa,, bb)) - Write the byte bb to the PC I/O port with the address aa.
+          Writable ports must be selected in the ccoonnffiigg file.
+
+     ppoorrtt__ppuuttww((aa,, bb)) - As above, but writes a 16-bit word.
+
+Configuring I/O Port Access On Linux PC Platforms
+
+     To access I/O ports on Linux PC platforms, required both for the generic
+     access provided by the above functions and also for many of the PC data
+     acquisition and control boards that ssppeecc supports, ssppeecc uses the iiooppll(())
+     system call to raise the I/O privilege level of the ssppeecc process.  That
+     system calls requires root privilege.  In order that users don't have to be
+     the root user to run ssppeecc, ssppeecc is instead installed as a set-user-id-root
+     process.  That means a long listing (llss --ll) of the ssppeecc executable looks
+     something like:
+
+        --rr--ssrr--xxrr--xx 33 rroooott  ssyyss  33555522554466 JJuunn  66  22::4455 ssppeecc
+
+     where the file is owned by rroooott and there is an ss instead of an xx in the
+     first set of permissions.
+
+     As soon as ssppeecc starts out, the effective user-id of the ssppeecc process is
+     changed to that of the real user.  The effective user-id is changed back to
+     rroooott for the duration of the iiooppll(()) system call.  Also, I/O privilege is
+     turned off for any spawned processed.
+
+     The rroooott access is used by ssppeecc is to open //ddeevv//mmeemm for memory mapped
+     devices such as the Oregon Micro System PC-58 motor controller and the Bit3
+     Model 403 VME controller.  Just as with iiooppll(()), root access is only turned
+     on for the duration of the ooppeenn(()) system call for ""//ddeevv//mmeemm"".
+
+     Finally, rroooott access is enabled for the ooppeenn(()) call of the device node
+     associated with any configured USB devices.  With recent ssppeecc releases on
+     modern LLiinnuuxx distributions, that access shouldn't be needed as the uuddeevv
+     rules installed by ssppeecc should have created general read/write access to
+     the associated USB device nodes.
+
+     During the rest of the time, ssppeecc users will not have rroooott privileges.
+
+     The ssppeecc installation program will create the installed ssppeecc executables
+     with the correct owner and modes if the IInnssttaallll script is run by the rroooott
+     user.
+

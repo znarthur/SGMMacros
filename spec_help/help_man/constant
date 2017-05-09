@@ -1,0 +1,42 @@
+.TH "constant" "command" "08/01/12" "constant.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBconstant\fP \- define a constant global symbol
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)constant.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "constant" "command" "08/01/12" "constant.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBconstant symbol value\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBconstant\fP command creates (or modifies the value of an existing)
+global variable.
+The value of a \fBconstant\fP global variable cannot be changed
+by ordinary assignment.  An attempt to so results in an error.
+.sp
+The purpose of the \fBconstant\fP variable type is
+to prevent accidental or casual modification of important parameters.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBconstant EPOCH time()\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%global\fP
+\fI\%syms\fP
+

@@ -1,0 +1,43 @@
+.TH "lsdef" "command" "08/01/12" "lsdef.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBlsdef\fP \- list current macros
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)lsdef.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "lsdef" "command" "08/01/12" "lsdef.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBlsdef [pattern_name ... ]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The command \fBlsdef\fP is used to list the names of the defined macros
+as well as their sizes in bytes.
+With no arguments, all the macro names are listed.
+Otherwise, only the macros specified as arguments are printed.
+Arguments may contain the \fB*\fP and \fB?\fP metacharacters.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBlsdef *scan\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%lscmd\fP
+\fI\%syms\fP
+\fI\%def\fP
+\fI\%undef\fP
+\fI\%whats\fP
+

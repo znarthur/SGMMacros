@@ -1,0 +1,135 @@
+changes                      spec 4.00 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 4
+
+RELEASE 4 - text in preparation
+
+     These notes describe the general features added to ssppeecc for release 4.
+
+Introduction
+     ssppeecc release 4 has been in the works for many months.  It includes many new
+     features to make the program easier to use and to support new hardware
+     devices.  One of the main reasons for the new release is to accommodate
+     two-dimensional detectors.  To that end, a new array data type has been
+     added, along with functions and operators to work on the arrays.
+
+     Preliminary support for a number of CCD cameras is already available,
+     including models from Princeton Instruments and Photometrics.
+
+     Descriptions of the new features in release 4 follow.
+
+New Macro Functions
+     Macro function are now available.  Macros can now be defined to return
+     values and can be used as operands in expressions.  The macro definition
+     can include function arguments, which then become available to the body of
+     the macro function.  For example,
+
+        ddeeff ffaaccttoorriiaall((nn)) ''{{
+                iiff ((nn <<== 11))
+                        rreettuurrnn((11));;
+                rreettuurrnn((nn ** ffaaccttoorriiaall((nn--11))))
+        }}''
+
+New Array Data Type
+     A new type of data array has been created.  Besides eventually replacing
+     the never-popular data groups in the standard macros, the new arrays add
+     new capabilities to ssppeecc.  Unlike ssppeecc's traditional aassssoocciiaattiivvee arrays,
+     which can be indexed by arbitrary numbers or strings and which store
+     elements in no particular order and not particularly efficiently, the new
+     array data types are indexed by consecutive integers starting from zero and
+     store data in contiguous memory, allowing efficient access.  The new arrays
+     must be declared and dimensioned with the new aarrrraayy keyword to allow ssppeecc
+     to allocate memory for the array and to distinguish the new arrays from the
+     associative arrays.  See the _a_r_r_a_y_s help file for detailed information.
+
+New CCD Camera Support
+     Support for image acquisition using CCD cameras is now part of ssppeecc.
+     Currently hardware support is available for a Photometrics model on an HP
+     700 platform, several Princeton Instruments models on Sun platforms using
+     an S-Bus SDV interface card and for the ESRF Frelon camera over several
+     interfaces.  Support for additional cameras will be added as user needs are
+     made known to CSS.
+
+     The iimmaaggee__ggeett(()), iimmaaggee__ppuutt(()) and iimmaaggee__ppaarr(()) functions are available for
+     reading the image and controlling the hardware.  Also, the new functions
+     ffmmtt__wwrriittee(()) and ffmmtt__rreeaadd(()) allow the array data from the CCD cameras to be
+     written to and read from binary data files.
+
+New Password Protection For Designated Motors
+     A new option to the ssppeecc__ppaarr(()) function allows ssppeecc administrators to gain
+     access to motors locked out in the ccoonnffiigg file to ordinary users.  This
+     features allows the administrator to position the motors without having
+     first to go into the configuration editor to change access modes.  Entering
+     ssppeecc__ppaarr((""ssppeeccwwiizz"",, 11)) causes ssppeecc to prompt for the ""WWiizzaarrdd''ss ppaasssswwoorrdd"".
+     If entered correctly, the characters __WWIIZZ are appended to the prompt to
+     remind the user of the special powers, and motors configured with protected
+     status can be moved.  Entering ssppeecc__ppaarr((""ssppeeccwwiizz"",, 00)) disables the special
+     mode.  The encrypted specwiz password is taken from the //eettcc//ppaasssswwdd file,
+     just as with the specwiz feature for the configuration editor.
+
+New ssrraanndd(()) Function
+     The new function ssrraanndd((vvaalluuee)) sets the seed value for the random number
+     generator used by the rraanndd(()) function to the integer vvaalluuee.  This feature
+     allows the same sequence of random numbers to be generated reproducibly by
+     resetting the seed to the same value.
+
+wwhhaattiiss(()) Function Enhanced
+     The wwhhaattiiss(()) function now produces a text description of the object
+     specified by its first argument, if a second nonzero argument is supplied.
+     The wwhhaattss macro takes advantage of the new syntax.
+
+New MCA Features
+         mca_par("disable")
+         mca_get(array)
+         mca_put(array)
+         mca_spar(), mca_sput(), mca_sget()
+         numbering is fixed in config file with @
+         numbering needn't be consecutive
+         mca_sel("?")
+         ROI support
+
+     PCA-II, PCA-3, PCA Multiport implements array get/put
+
+Can Dynamically Assign Monitor Channel
+     For certain counters, the scaler channel used for the monitor preset can be
+     changed using the command ccoouunntteerr__ppaarr((mmnnee,, ""mmoonniittoorr"")).  Counters that
+     currently support this feature are the KS 3640 CAMAC counter, the Joerger
+     VSC16/8 VME scaler and the generic EPICS scaler.
+
+Unlimited String Length For pprriinnttff(()) Family
+     There is no longer a limit to the lengths of strings that can be printed or
+     formatted using the pprriinntt, pprriinnttff(()), sspprriinnttff(()) and ffpprriinnttff(()) functions.
+
+sseerr__ggeett(()), sseerr__ppuutt(()) Revised
+     The sseerr__ggeett(()) function has been revised, rationalized ser_par(sel,
+     "timeout")
+
+Macro Facility Internals Rewritten
+     The internal code for handling macros has been entirely rewritten.  Also,
+     the internal copies of the macros are now saved in the same file with the
+     other state information.  There are no more uusseerrffiilleess//uusseerr__ttttyy##MM in the
+     auxiliary file directory
+
+New Version of GNU Readline Library Bundled
+     A newer version of the GNU readline library is now bundled with ssppeecc.
+
+Obsolete Functions and Commands Are Gone
+     The long-obsolete ffiixxssttaattee and ggeettssttaattee commands are gone (although the
+     once-related ssaavvssttaattee command still exists).  The obsolete functions
+     ppll__xxggeett(()), ppll__yyggeett(()), ppll__ppuutt(()), ppll__aannaall(()), ppll__dduummpp(()) and pplloott__ppttss(()) have
+     been eliminated from the program, although, for the sake of way-backwards
+     compatibility, the file mmaaccrrooss//ccoommppaatt..mmaacc contains replacement definitions
+     for the functions.
+
+New Hardware Support
+     Highland Tech VME HLV 544 motor controller
+
+     BI9000 correlator support
+
+     Many improvements to ESRF support
+
+     new config screen for MCA/CCD
+
+     other config changes ....
+

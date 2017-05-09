@@ -1,0 +1,42 @@
+.TH "showtemp" "macro" "08/01/12" "showtemp.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBshowtemp\fP \- display the current temperature
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)showtemp.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "showtemp" "macro" "08/01/12" "showtemp.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBshowtemp\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBshowtemp\fP macro displays the current temperature and
+temperature controller set point.
+\fBshowtemp\fP is used by the \fBte\fP and \fBteramp\fP macros.
+.sp
+As with all of \fBspec\fP\(aqs temperature\-control macros,
+you need to define a \fBmeasuretemp\fP and a
+\fB_settemp\fP macro that work correctly with your instruments.
+See the \fBTemperature Control Macros\fP section in the
+\fBspec\fP \fBStandard Macro Guide\fP for details.
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%te\fP
+\fI\%teramp\fP
+\fI\%tscan\fP
+\fI\%dtscan\fP
+

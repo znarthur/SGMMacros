@@ -1,0 +1,635 @@
+mythen                              hardware                              mythen
+
+NAME
+     mythen - Dectris Mythen/Mythen2 MCA
+
+INTRODUCTION
+
+     The Dectris Mythen and Mythen2 are high-dynamic range, short readout time
+     and high frame rate MCA models.  ssppeecc supports single and multiple frame
+     acquisition, optionally gated and/or triggered.  Connection to the Mythen
+     is over a UDP or TCP socket.  Multiple units can be configured for use at
+     the same time.
+
+     The original Mythen comes in configurations containing from one to
+     twenty-four 1280-channel modules in a single system.  The new Mythen2 is
+     available with either 640 or 1280 channel modules, where single system
+     configurations can have a mix of both types.
+
+     The Mythen firmware has undergone significant evolution.  The current
+     release of ssppeecc supports Mythen firmware versions 1.3 through 4.  Firmware
+     revisions have introduced new commands and new syntax for existing
+     commands.  In revision 4, some existing commands have been removed.  All
+     these changes should be handled transparently by ssppeecc's built-in code.  For
+     the most part, user commands to set parameters or modes that aren't handled
+     by the firmware version on the configured Mythen units are silently
+     ignored.
+
+CONFIGURATION
+
+     Each Mythen unit is configured on the MCA- and CCD-type AAquisition screen
+     of the the configuration editor along the following lines:
+
+        MMCCAA-- aanndd CCCCDD--AAccqquuiissiittiioonn TTyyppee DDeevviiccee CCoonnffiigguurraattiioonn
+
+        MMCCAA--lliikkee       DDEEVVIICCEE    AADDDDRR  <<>>MMOODDEE                <<>>TTYYPPEE
+         00  YYEESS        mmyytthheenn                  DDeeccttrriiss MMyytthheenn ((UUDDPP))
+         11  YYEESS     hhoosstt::11003300      CCuu          DDeeccttrriiss MMyytthheenn ((UUDDPP))
+         22  YYEESS  119922..116688..00..9900  TTrriimmMMoo          DDeeccttrriiss MMyytthheenn ((UUDDPP))
+         33  YYEESS     hhoosstt::11003311   SSttddCCuu          DDeeccttrriiss MMyytthheenn ((TTCCPP))
+
+     The TTYYPPEE can be configured for either UDP or TCP connections.  (Mythen
+     version 1 firmware only recognizes UDP connections.)  The DDEEVVIICCEE name is
+     either a resolvable host name or IP address.  A port number for the socket
+     connection can be specified.  Otherwise, the default port (1030 for UDP,
+     1031 for TCP) will be used.
+
+     The AADDDDRR field can optionally contain the name of the initial trim or
+     settings file to load.  For firmware below version 2, the names TTrriimmCCrr,
+     TTrriimmCCuu and TTrriimmMMoo are recognized.  If missing, the TTrriimmCCuu trim file will be
+     loaded by default.  For firmware version 2, the names SSttddCCuu, SSttddMMoo, HHggCCrr,
+     HHggCCuu, FFaassttCCuu and FFaassttMMoo are recognized by the Mythen.  For firmware version
+     3 and 4, the names can be one of CCuu, MMoo, CCrr or AAgg.  For firmware version 2
+     and above, if no name is given, the existing settings on the Mythen will be
+     used.  Loading the settings file takes time on the Mythen, making it
+     preferable to leave the AADDDDRR field blank.
+
+     Configure only one entry for units with multiple modules.  Individual
+     modules on the units can be addressed with syntax described in the _M_u_l_t_i_p_l_e
+     _M_o_d_u_l_e_s section below.
+
+     For Mythen firmware 2 and 3, the optional controller parameters ""iinnppooll"" and
+     ""oouuttppooll"" can be assigned through the configuration editor.  Type pp from the
+     main screen to bring up the optional parameter screen and add the parameter
+     names and values to the configuration.
+
+OPERATION
+
+     The Mythen can be started and stopped from ssppeecc two ways:  automatically
+     with the built-in count functions or by explicit mmccaa__ppaarr((""rruunn"")) commands.
+     If auto-run mode is set with
+
+         mmccaa__ppaarr((""aauuttoo__rruunn"",, 11))
+
+     the MCA will be started and stopped with the counting functions used by the
+     standard macros such as cctt and all the scans.  If soft-preset mode is also
+     set with
+
+         mmccaa__ppaarr((""ssoofftt__pprreesseett"",, 11))
+
+     the MCA will programmed with the same count time as the master timer in
+     count-to-time mode.
+
+     For version 4 firmware, if ""ssoofftt__pprreesseett"" is not set, the Mythen will be
+     programmed for a very long count time and halted when the master timer
+     completes.  For earlier firmware, if ""ssoofftt__pprreesseett"" is not set, the Mythen
+     will be programmed for the ""pprreesseett"" count time set with mmccaa__ppaarr(()), which
+     must be nonzero.  With pre-version 4 firmware, data is lost if an
+     acquisition is halted, so counting to a definite preset is the only option.
+
+     A gate signal from the master timer or counter can be used to gate the MCA
+     so that the acquisition interval exactly matches the master.  Enable
+     hardware gating with the ""ggeetteeeenn"" option to mmccaa__ppaarr(()).
+
+     When using ""aauuttoo__rruunn"" mode, only one frame will be acquired.  In order to
+     acquire multiple frames, use
+
+         mmccaa__ppaarr((""rruunn""))
+
+     to start acquisition.  With firmware 3 and earlier, the Mythen can only
+     buffer four data frames, so it is essential that ssppeecc read data as it
+     becomes available.  That is done during the automatic hardware polling
+     built into ssppeecc.  It is important not to disable that feature with
+     ssppeecc__ppaarr(()) and not to set too long of a polling interval.  In addition, one
+     must not run commands during multi-frame acquisition that will interfere
+     with polling, such as creating a subshell with uunniixx(()).  With version 4
+     firmware, the Mythen2 can buffer several thousand frames, so continuous
+     real-time transfer of the data to ssppeecc is not as crucial.
+
+CORRECTIONS
+
+     The Mythen offers three correction capabilities: bad-channel, flat-field
+     and rate correction.  Each correction can be configured to be performed
+     within the Mythen before data is returned, within ssppeecc or not at all.
+
+     With bad-channel correction, counts in channels marked as bad will be
+     replaced with the average counts from the next neighbors.  If the
+     correction is turned off, the channel will contain a -2.  The bad-channel
+     file is included with the detector as part of the firmware.
+
+     The flat-field correction, when enabled, is applied to the entire image
+     using data from a correction file included with the detector.
+
+     The rate correction corrects for dead time at high data rates.
+
+MULTI-FRAME DATA
+
+     There are two ways for ssppeecc to store the Mythen multi-frame data.  In the
+     first method, ssppeecc will allocate enough storage to hold the data for the
+     number of frames configured.  The data can be retrieved using the ""ffrraammee""
+     or ""ccffrraammee"" options to mmccaa__ppaarr(()).  The ""ffrraammee"" option returns the data as
+     read from the Mythen.  The ""ccffrraammee"" option applies any corrections
+     (flat-field, bad-channel, rate) that have been configured to be done in
+     ssppeecc rather than by the Mythen firmware.
+
+     In the second method for reading data, an appropriately configured data
+     array is designated using the ""aarrrraayy"" option to mmccaa__ppaarr(()).  The data array
+     should be of type lloonngg, the number of columns should be equal to the total
+     number of channels in all the Mythen modules associated with the unit.  The
+     number of rows in the array should be at least as great as the number of
+     frames set with the ""ffrraammeess"" option.  For example, a data array configured
+     as
+
+         lloonngg aarrrraayy ddaattaa[[220000]][[11228800]]
+
+     would accommodate 200 frames for a 1K single-module unit.  If using a 6K or
+     24K Mythen, multiply the 1280 by the number of modules.  With a Mythen2,
+     take into account the total number of 640- or 1280-channel modules.
+
+     ssppeecc will apply any data corrections that are configured to be performed by
+     ssppeecc to the data that goes into the array.
+
+     The array can also be a shared data array.  ssppeecc will automatically tag the
+     array as ""ffrraammeess"" and set the ffrraammee__ssiizzee and llaatteesstt__ffrraammee elements of the
+     shared data header (see ssppeecc's _a_r_r_a_y_s help file).  An auxiliary utility
+     such as _P_y_M_c_a can do real-time display of the data in the shared array as
+     it arrives.
+
+     Both methods for storing the data may be active at the same time.
+
+     The standard mmccaa__ggeett(()) function will return the first frame of multi-frame
+     data.  Use the ""ffrraammee"" or ""ccffrraammee"" option to mmccaa__ppaarr(()) to read any single
+     frame.
+
+     For firmware prior to version 4, high frame rates can be achieved by
+     setting the ""bbiittss"" parameter to 4, 8 or 16.  Data will be read in a
+     compressed format and no corrections will be performed in the Mythen.
+     However, ssppeecc will still do the flat-field correction (""aauuttooccoorrrreecctt""),
+     bad-channel interpolation (""bbaaddcchhaann"") or rate correction (""rraattee__ccoorrrreecctt"")
+     if the value of the corresponding option has been set to a value of 1 or 2.
+
+     The compressed format is not available in firmware 4, although the ""bbiittss""
+     parameter can still be set to control the dynamic range of the acquisition.
+
+MULTIPLE MODULES
+
+     The Mythen hardware is available in configurations that include more than
+     one module.  For the original Mythen, each module has 1280 channels.  With
+     the Mythen2, modules can have 1280 or 640 channels.  When reading the data
+     with mmccaa__ggeett(()) or getting the bad-channel or flat-field arrays with
+     mmccaa__ppaarr(()), the default is get all the channels from all the modules in the
+     returned array.
+
+     The mmccaa__ggeett(()) and mmccaa__ppaarr(()) functions work with the default MCA unit.  If
+     there is only one MCA unit configured, that unit is the default.
+     Otherwise, the mmccaa__sseell(()) function can be used to select which MCA to use as
+     the default unit.  The mmccaa__ssppaarr(()) and mmccaa__ssggeett(()) take an initial argument
+     that specifies a specific MCA unit number, independent of the default MCA
+     unit number.
+
+     For multiple modules in a given Mythen unit, the MCA selection syntax for
+     the commands mmccaa__ssppaarr(()) and mmccaa__ssggeett(()) is expanded. To select a specific
+     Mythen module, address arguments may be given as ""00..00"", 00..11, 00..22, ...,
+     where the first digit is the MCA unit number from the ccoonnffiigg file, and the
+     digit right of the decimal point is the MCA device, where the devices are
+     numbered starting from 0.  For module zero, the argument needs to be passed
+     as a string.  Quote marks are optional for higher numbered modules.  The
+     syntax ""00::00"", ""00::11"", ""00::22"", ..., is also recognized, where the arguments
+     for each module are strings.
+
+     The syntax for mmccaa__ggeett(()) and mmccaa__ssggeett(()) is
+
+         mmccaa__ggeett((aarrrr [[,, rrooii__bbeegg [[,, rrooii__eenndd]]]]))
+         mmccaa__ssggeett((aaddddrr,, aarrrr [[,, rrooii__bbeegg [[,, rrooii__eenndd]]]]))
+
+     where aarrrr is a data array to receive the data, and the optional rrooii__bbeegg and
+     rrooii__eenndd arguments specify start and end channels in the MCA data.  By
+     default, both functions will return data from all the modules.  If the
+     option rrooii__bbeegg and rrooii__eenndd arguments are used, they will be with respect to
+     the total channel count from all modules.  However, if a subaddress is used
+     with mmccaa__ssggeett(()), only the data for the specified module will be returned.
+     The optional rrooii__bbeegg and rrooii__eenndd arguments will be with respect to the data
+     in that module only.
+
+     The subaddress syntax with mmccaa__ssppaarr(()) affects certain of the available
+     commands as follows.  If no subaddress is used, ""ffllaattffiieelldd"",
+     ""ffllaattffiieelldd__nnoorrmm"", ""bbaaddcchhaannnneellss"", ""ffrraammee"" and ""ccffrraammee"" return an array
+     containing channels for all the modules, otherwise just for the module
+     specified.  For ""sseenndd"", ""rreeaadd"" and ""rreeaadd__ffllooaatt"", module addressing will be
+     used if there is a subaddress.  If a subaddress is used with ""dduummpp"",
+     information will be displayed only for the module specified.  If no
+     subaddress is used with ""nnppttss"", the total number of channels for all
+     modules will be returned, otherwise just for the module specified.  For
+     ""ttaauu"", ""aauuttoosseettttiinnggss"", ""eenneerrggyy"" and ""kktthhrreesshh"", the command will apply to
+     module zero if no subaddress is given.
+
+PARAMETERS
+
+     ssppeecc can set all of the Mythen operational parameters using the mmccaa__ppaarr(())
+     function, as described in the following section.  The parameters
+     ""aauuttoo__rruunn"", ""ssoofftt__pprreesseett"", ""pprreesseett"", ""bbiittss"", ""ffrraammeess"", ""ddeellbbeeff"",
+     ""ddeellaafftteerr"", ""ggaatteeeenn"", ""ggaatteess"", ""ttrriiggeenn"", ""ccoonnttttrriiggeenn"", ""tthhrreesshhoolldd"",
+     ""iinnppooll"", ""oouuttppooll"", ""aauuttooccoorrrreecctt"", ""bbaaddcchhaann"", ""rraattee__ccoorrrreecctt"", ""kktthhrreesshh"",
+     ""ttaauu"" and ""vveerrbboossee"" will be retained in the user state file.  In addition,
+     ""iinnppooll"" and ""oouuttppooll"" can be set as optional controller parameters in the
+     hardware configuration file.  Values set in the configuration file will
+     take precedence over values in the state file.
+
+     Before sending the start command to the MCA, any parameters that have been
+     updated will be sent to the Mythen.  All parameters will also be updated on
+     the next start command if there has been a ""ttrriimmffiillee"" or ""sseettttiinnggss"" command
+     issued.  The mmccaa__ppaarr(()) command ""uuppddaattee"" can also be used to have the
+     parameters updated without starting an acquisition.
+
+     More than one client can communicate with a Mythen device at the same time.
+     Firmware version 3 and later return a command sequence number that allows
+     ssppeecc to detect whether another client has sent a command.  If there is an
+     unexpected change in the sequence number, ssppeecc will reprogram all
+     parameters for the next acquisition.  If the other client's access was
+     read-only, the reprogramming is unnecessary, but there is currently no way
+     to tell whether the other client changed parameters.
+
+FUNCTIONS
+
+     When called with the optional argument, the functions below will set the
+     parameter to the value of the argument.  With no arguments, the functions
+     will return the current value of the parameter.  If the firmware version
+     allows it, ssppeecc will read the parameter value from the Mythen.  It isn't
+     possible for ssppeecc to read parameter values (with earlier firmware versions)
+     returned values will be those previously set using mmccaa__ppaarr(()) during the
+     current session, or the saved values from the user's state file, if not
+     starting fresh.
+
+     Note, ssppeecc does not normally send commands to change the parameters until
+     the Mythen MCA is started, either using the ""rruunn"" command or during
+     counting when ""aauuttoo__rruunn"" is enabled.  However, the ""uuppddaattee"" command will
+     send values for changed parameters to the Mythen (available in ssppeecc
+     6.03.02).  Of the following, the only commands that access the Mythen
+     (besides the obvious ""rruunn"" and ""hhaalltt"") are ""rreesseett"", ""aauuttoosseettttiinnggss"",
+     ""ttrriimmffiillee"", ""sseettttiinnggss"", ""sseenndd"", ""rreeaadd"", ""rreeaadd__ffllooaatt"" and, of course,
+     ""uuppddaattee"".  The commands ""ffllaattffiieelldd"", ""ffllaattffiieelldd__nnoorrmm"" and ""bbaaddcchhaannnneellss""
+     will read the associated data from the Mythen if the data has not already
+     been cached by ssppeecc.
+
+     If multiple MCA devices are configured in ssppeecc, use the mmccaa__sseell(()) function
+     to designate the device to use with the mmccaa__ppaarr(()) and mmccaa__ggeett(()) functions,
+     or use the mmccaa__ssppaarr(()) and mmccaa__ssggeett(()) forms of the functions.  See the _m_c_a
+     help file for more information.
+
+     When using the multiple-module versions, certain commands below are module
+     specific.  The module can be specified using the mmccaa__ssppaarr(()) version of the
+     command, as explained in the _M_u_l_t_i_p_l_e _M_o_d_u_l_e_s section above.
+
+     mmccaa__ppaarr((""uuppddaattee"")) - Sends any modified parameters to the Mythen.  Modified
+          parameters are also sent with the ""rruunn"" command.
+
+     mmccaa__ppaarr((""rruunn"")) - Programs the device with updated parameters and starts
+          acquisition.
+
+     mmccaa__ppaarr((""hhaalltt"")) - Halts acquisition.
+
+     mmccaa__ppaarr((""pprreesseett"" [[,, sseeccoonnddss]])) - Returns or sets the preset value used when
+          manually starting the MCA using the ""rruunn"" option or when using
+          ""aauuttoo__rruunn"" with ""ssoofftt__pprreesseett"" off with version 3 or earlier firmware.
+          If the gate is enabled in multi-frame mode, the preset is ignored by
+          the Mythen, but if the frame rate is greater than 10 frames per
+          second, the preset should be set to a value of 0.1 or less so that
+          ssppeecc will use a more robust method for reading data at high frame
+          rates.
+
+     mmccaa__ppaarr((""aauuttoo__rruunn"" [[,, aarrgg]])) - With no arguments, returns nonzero if
+          auto-run mode set, otherwise returns zero.  If aarrgg is 1, enables
+          auto-run mode.  If aarrgg is 0, turns off auto-run mode.  When auto-run
+          mode is set the device is started and stopped with the counting
+          functions ttccoouunntt(()), mmccoouunntt(()), etc.  When not set, the counting
+          functions are ignored, but the device can be controlled with the ""rruunn""
+          and ""hhaalltt"" options.  In addition, the device can be halted with the
+          ssttoopp(()) function and will be halted with ^^CC.  Auto-run mode is off by
+          default for the Mythen.
+
+     mmccaa__ppaarr((""ssoofftt__pprreesseett"" [[,, aarrgg]])) - With no arguments, returns nonzero if
+          soft-preset mode is set, otherwise returns zero.  If aarrgg is 1, enables
+          soft-preset mode.  If aarrgg is 0, turns off soft-preset mode.  When set,
+          and if auto-run mode is enabled (see above), the Mythen is programmed
+          to count for the time preset given as an argument to the ttccoouunntt(())
+          function.  The wwaaiitt(()) function will wait until both the timer and the
+          Mythen have counted to their respective presets.  When soft-preset
+          mode is not set, but auto-run mode is, the Mythen2 with version 4
+          firmware is programmed for continuous data acquisition and will be
+          stopped when the timer's preset is reached.  Mythen with version 3 and
+          lower firmware will be programmed with the preset time set with the
+          ""pprreesseett"" option.  When counting to monitor (using mmccoouunntt(())) rather
+          than to time with soft-preset active, the Mythen is programmed using
+          the same rules as when soft-preset is off.
+
+     mmccaa__ppaarr((""nnppttss""||""ggrroouupp__ssiizzee"")) - Returns the total number of channels.  Use a
+          subaddress with mmccaa__ssppaarr(()) to read the number of channels in a
+          specific module.
+
+     mmccaa__ppaarr((""bbiittss"" [[,, vvaalluuee]])) - Returns or sets the number of bits per channel
+          for the Mythen to use while acquiring data.  Fewer bits allow for
+          slightly faster frame rates in multi-frame mode.  Valid values are 4,
+          8, 16 and 24.
+
+     mmccaa__ppaarr((""ffrraammeess"" [[,, nnuummbbeerr]])) - Returns or sets the number of frames to
+          acquire when using a manual start.  When using ""aauuttoo__rruunn"" mode, where
+          the MCA is started and stopped with the master timer, only one frame
+          will be acquired.
+
+     mmccaa__ppaarr((""llaatteesstt__ffrraammee"")) - Returns the frame number of the most recently
+          acquired frame.
+
+     mmccaa__ppaarr((""ttrriimmffiillee"" [[,, nnaammee]])) - Returns the name of the current trim file,
+          or loads the specified trim file.  The trim file contains all the
+          initialization parameters for the MCA and is located with the MCA
+          firmware.  Each trim file has an associated flat-field file.  The
+          flat-field data will be read and stored by ssppeecc to be used for the
+          optional flat-field correction operation.  (Deprecated with version 2
+          firmware.  Not available with firmware 4.)
+
+     mmccaa__ppaarr((""aauuttoosseettttiinnggss"" [[,, tthhrreesshhoolldd]])) - Tells the Mythen to load suitable
+          settings corresponding to the value of tthhrreesshhoolldd. Units are keV.  If
+          the optional argument is missing, the value set via the ""tthhrreesshhoolldd""
+          command is used.  If that value is unset, uses the threshold value
+          initially read from the Mythen.  For multiple module systems, the
+          module number needs to be specified as described above.  (Only for
+          version 2 or 3 firmware.)
+
+     mmccaa__ppaarr((""sseettttiinnggss"" [[,, nnaammee]])) - Without the optional argument, returns the
+          name of the current settings designation.  Otherwise, sends the Mythen
+          the command to load the settings associated with nnaammee. (Requires
+          version 2 or later firmware.)
+
+     mmccaa__ppaarr((""eenneerrggyy"" [[,, vvaalluuee]])) - Returns or sets the X-ray energy in keV.  For
+          multiple module systems, the value will be for module zero, unless a
+          different module number is specified using mmccaa__ssppaarr((00)) with a
+          subaddress.  (Only for version 3 and later firmware.)
+
+     mmccaa__ppaarr((""kktthhrreesshh""||""tthhrreesshhoolldd"" [[,, vvaalluuee]])) - Returns or sets the threshold
+          energy in keV.  For multiple module systems, the value will be for
+          module zero, unless a different module number is specified using
+          mmccaa__ssppaarr((00)) with a subaddress.
+
+     mmccaa__ppaarr((""ddeellbbeeff"" [[,, sseeccoonnddss]])) - Returns or sets the delay between trigger
+          and the first measurement.
+
+     mmccaa__ppaarr((""ddeellaafftteerr"" [[,, sseeccoonnddss]])) - Returns or sets the delay between
+          measurements when accumulating multiple frames.
+
+     mmccaa__ppaarr((""ggaatteeeenn"" [[,, 00||11]])) - Returns or sets gated-measurement mode (0 for
+          disabled and 1 for enabled).
+
+     mmccaa__ppaarr((""ggaatteess"" [[,, nnuummbbeerr]])) - Returns or sets the number of gate signals
+          for a gated measurement.
+
+     mmccaa__ppaarr((""ttrriiggeenn"" [[,, 00||11]])) - Returns or sets triggered-measurement mode (0
+          for disabled and 1 for enabled).  A trigger starts the entire
+          multi-frame acquisition or a separate trigger is needed for each
+          frame, depending on the value of the continuous-trigger-enable
+          parameter, ""ccoonnttttrriiggeenn"".
+
+     mmccaa__ppaarr((""ccoonnttttrriiggeenn"" [[,, 00||11]])) - Returns or sets repeated
+          triggered-measurement mode (0 for disabled and 1 for enabled).  With
+          this mode, each frame needs a trigger signal.
+
+     mmccaa__ppaarr((""iinnppooll"" [[,, 00||11]])) - Returns or sets the input polarity for the
+          trigger and gate signals (1 for falling edge and 0 for rising edge).
+          Can be set as an optional parameter in the ccoonnffiigg file.  (Not
+          available with firmware 4.)
+
+     mmccaa__ppaarr((""oouuttppooll"" [[,, 00||11]])) - Returns or sets the output polarity for trigger
+          and gate signals (1 for active low and 0 for active high).  Can be set
+          as an optional parameter in the ccoonnffiigg file.  (Not available with
+          firmware 4.)
+
+     mmccaa__ppaarr((""ffrraammee"",, nnuummbbeerr)) - Returns a long data array containing the data in
+          frame nnuummbbeerr. Frame numbers start at zero.
+
+     mmccaa__ppaarr((""ccffrraammee"",, nnuummbbeerr)) - Returns a long data array containing the
+          corrected data in frame nnuummbbeerr. Frame numbers start at zero.
+
+     mmccaa__ppaarr((""aarrrraayy"" [[,, aarrrraayy]])) - Returns or sets the name of the data array to
+          be used to receive multi-frame data.  The array name can be passed as
+          the array variable or as a string.  The array should be type lloonngg, the
+          number of columns should be 1280 times the number of modules for 6K
+          and 24K systems, and the number of rows should be at least as great as
+          the number of frames.
+
+     mmccaa__ppaarr((""aauuttooccoorrrreecctt"" [[,, 00||11||22]])) - Returns or sets the mode where data
+          placed directly into the designated data array has the flat-field
+          correction applied.  A zero disables autocorrection, while nonzero
+          enables the mode.  With version 2 firmware and later, the correction
+          is performed within the Mythen if the value is one and the data is not
+          being read using the rraaww method.  Otherwise, the correction is
+          performed within ssppeecc.
+
+     mmccaa__ppaarr((""ffllaattffiieelldd"")) - Returns a long data array containing the flat-field
+          data as read from the detector for all channels or for one module on a
+          multi-module system if specified with an mmccaa__ssppaarr(()) subaddress.  The
+          flat-field data is used when ""aauuttooccoorrrreecctt"" mode is enabled.
+
+     mmccaa__ppaarr((""ffllaattffiieelldd__nnoorrmm"")) - Returns a float data array containing the
+          normalized flat-field data for all channels or for one module on a
+          multi-module system if specified with an mmccaa__ssppaarr(()) subaddress.  The
+          flat-field data is used when ""aauuttooccoorrrreecctt"" mode is enabled.
+
+     mmccaa__ppaarr((""bbaaddcchhaann__iinntteerrppoollaattee"" [[,, 00||11||22]])) - Returns or sets bad-channel
+          interpolation mode.  When on, the values in channels marked as bad are
+          replaced with values interpolated from neighboring channels.  A zero
+          disables bad-channel interpolation.  The interpolation is performed
+          within the Mythen if the value is one and the data is not being read
+          using the rraaww method.  Otherwise, the correction is performed within
+          ssppeecc.  Bad-channel interpolation is only available with version 2 or
+          later firmware.
+
+     mmccaa__ppaarr((""bbaaddcchhaannnneellss"")) - Returns the bad-channels array for all channels or
+          for one module on a multi-module system if specified with an
+          mmccaa__ssppaarr(()) subaddress.
+
+     mmccaa__ppaarr((""rraattee__ccoorrrreecctt"" [[,, 00||11||22]])) - Returns or sets rate-correction mode.
+          A value of zero disables rate-correction.  A value of one sets the
+          correction to be done within the Mythen (or in ssppeecc if data is being
+          read using the rraaww method).  A value of two sets the correction to be
+          done in ssppeecc.
+
+     mmccaa__ppaarr((""ttaauu"" [[,, vvaalluuee]])) - Returns or sets the dead-time constant for rate
+          correction.  Units are nanoseconds.  (Requires version 2 firmware.)
+          For multiple module systems, the value will be for module zero, unless
+          a different module number is specified using mmccaa__ssppaarr((00)) with a
+          subaddress.
+
+     mmccaa__ppaarr((""vveerrbboossee"",, [[00||11]])) - Returns or sets the verbose flag.  When set,
+          ssppeecc will display an updated frame count when acquiring multiple
+          frames.
+
+     mmccaa__ppaarr((""rreesseett"")) - Sends the command to reset the Mythen to the default
+          settings.  (Requires version 2 firmware.)
+
+     mmccaa__ppaarr((""dduummpp"")) - Displays the current values of the Mythen parameters for
+          all modules for all modules or for just one module on a multi-module
+          system if specified with an mmccaa__ssppaarr(()) subaddress.  For example, with
+          version 4 firmware:
+
+             DDeeccttrriiss MMyytthheenn 66KK SSNN 11000077 ((ffww 44..00..00)) oovveerr TTCCPP ......
+
+                                         AAsssseemmbblleedd::  TTuuee JJaann 2200 0088::0066::3388 CCEETT 22001155
+                           SSyysstteemm cchhiipp tteemmppeerraattuurree::  6622..5511 CC
+                             MMoodduullee sseerriiaall nnuummbbeerrss::  11001199,, 11003300
+                SSeennssoorr mmaatteerriiaall,, tthhiicckknneessss && wwiiddtthh
+                                         MMoodduullee  00::  SSiilliiccoonn,, 445500xx88000000 uumm
+                                         MMoodduullee  11::  SSiilliiccoonn,, 332200xx44000000 uumm
+                         HHVV,, tteemmppeerraattuurree,, hhuummiiddiittyy
+                                         MMoodduullee  00::  220000 VV,, 3311..4499 CC,, 1133%%
+                                         MMoodduullee  11::  112200 VV,, 3311..5588 CC,, 1122%%
+                           XX--rraayy eenneerrggyy ((""eenneerrggyy""))
+                                         MMoodduullee  00::  88..0055 KKeevv       ((66..556655 ttoo 4400 KKeevv))
+                                         MMoodduullee  11::  88..0055 KKeevv       ((44 ttoo 4400 KKeevv))
+                      TThhrreesshhoolldd eenneerrggyy ((""kktthhrreesshh""))
+                                         MMoodduullee  00::  66..44 KKeevv        ((55..55 ttoo 2200 KKeevv))
+                                         MMoodduullee  11::  55..44 KKeevv        ((33..55 ttoo 2200 KKeevv))
+
+                         BBiittss ppeerr cchhaannnneell ((""bbiittss""))::  2244
+                                 FFrraammeess ((""ffrraammeess""))::  11
+                          AArrrraayy ffoorr ddaattaa ((""aarrrraayy""))::  --nnoonnee--
+                      SShhooww ffrraammee ccoouunntt ((""vveerrbboossee""))::  ddiissaabblleedd
+
+             FFllaatt ffiieelldd ccoorrrreeccttiioonn ((""aauuttooccoorrrreecctt""))::  ddiissaabblleedd ((00))
+             BBaadd cchhaannnneell iinntteerrppoollaattiioonn ((""bbaaddcchhaann""))::  eennaabblleedd iinn MMyytthheenn ((11))
+                  RRaattee ccoorrrreeccttiioonn ((""rraattee__ccoorrrreecctt""))::  ddiissaabblleedd ((00))
+                  RRaattee ccoorrrreeccttiioonn ccoonnssttaanntt ((""ttaauu""))
+                                         MMoodduullee  00::  116633..8855 nnsseecc
+                                         MMoodduullee  11::  227733..116622 nnsseecc
+
+                                   GGaattee ((""ggaatteeeenn""))::  ddiissaabblleedd
+                         GGaatteess ppeerr ffrraammee ((""ggaatteess""))::  11
+                                TTrriiggggeerr ((""ttrriiggeenn""))::  ddiissaabblleedd
+             TTrriiggggeerr ffoorr eeaacchh ffrraammee ((""ccoonnttttrriiggeenn""))::  ddiissaabblleedd
+                 TTrriiggggeerr ttoo ssttaarrtt ddeellaayy ((""ddeellbbeeff""))::  00 sseecc
+                 DDeellaayy bbeettwweeeenn ffrraammeess ((""ddeellaafftteerr""))::  00 sseecc
+
+                            PPrreesseett ttiimmee ((""pprreesseett""))::  11 sseecc
+                        AAuuttoo--rruunn mmooddee ((""aauuttoo__rruunn""))::  OOnn ((11))
+                       SSoofftt--pprreesseett ((""ssoofftt__pprreesseett""))::  OOnn ((11))
+
+          With version 3 firmware:
+
+             DDeeccttrriiss MMyytthheenn 66KK SSNN 00661111 ((ffww 33..00..00)) oovveerr UUDDPP ......
+
+                                         AAsssseemmbblleedd::  TThhuu FFeebb 1199 1144::1177::0099 CCEETT 22001155
+                             MMoodduullee sseerriiaall nnuummbbeerrss::  00009999,, 000000cc,, 00006699
+                        SSeennssoorr mmaatteerriiaall,, tthhiicckknneessss::  SSiilliiccoonn,, 332200 uumm
+                        SSeettttiinnggss mmooddee ((""sseettttiinnggss""))::  aauuttoo 66..440000000000 88..005500000000
+                           XX--rraayy eenneerrggyy ((""eenneerrggyy""))
+                                         MMoodduullee  00::  88..0055 KKeevv       ((44..0099 ttoo 4400 KKeevv))
+                                         MMoodduullee  11::  88..0055 KKeevv       ((44..0099 ttoo 4400 KKeevv))
+                                         MMoodduullee  22::  88..0055 KKeevv       ((44..0099 ttoo 4400 KKeevv))
+                      TThhrreesshhoolldd eenneerrggyy ((""kktthhrreesshh""))
+                                         MMoodduullee  00::  66..44 KKeevv        ((44 ttoo 2200 KKeevv))
+                                         MMoodduullee  11::  66..44 KKeevv        ((44 ttoo 2200 KKeevv))
+                                         MMoodduullee  22::  66..44 KKeevv        ((44 ttoo 2200 KKeevv))
+
+                         BBiittss ppeerr cchhaannnneell ((""bbiittss""))::  2244
+                                 FFrraammeess ((""ffrraammeess""))::  11
+                          AArrrraayy ffoorr ddaattaa ((""aarrrraayy""))::  --nnoonnee--
+                      SShhooww ffrraammee ccoouunntt ((""vveerrbboossee""))::  ddiissaabblleedd
+
+             FFllaatt ffiieelldd ccoorrrreeccttiioonn ((""aauuttooccoorrrreecctt""))::  ddiissaabblleedd ((00))
+             BBaadd cchhaannnneell iinntteerrppoollaattiioonn ((""bbaaddcchhaann""))::  eennaabblleedd iinn ssppeecc ((22))
+                  RRaattee ccoorrrreeccttiioonn ((""rraattee__ccoorrrreecctt""))::  ddiissaabblleedd ((00))
+                  RRaattee ccoorrrreeccttiioonn ccoonnssttaanntt ((""ttaauu""))
+                                         MMoodduullee  00::  229944..4411 nnsseecc
+                                         MMoodduullee  11::  119988..009977 nnsseecc
+                                         MMoodduullee  22::  119900..552255 nnsseecc
+
+                          IInnppuutt ppoollaarriittyy ((""iinnppooll""))::  ffaalllliinngg eeddggee ((00))
+                        OOuuttppuutt ppoollaarriittyy ((""oouuttppooll""))::  aaccttiivvee hhiigghh ((00))
+                                   GGaattee ((""ggaatteeeenn""))::  ddiissaabblleedd
+                         GGaatteess ppeerr ffrraammee ((""ggaatteess""))::  11
+                                TTrriiggggeerr ((""ttrriiggeenn""))::  ddiissaabblleedd
+             TTrriiggggeerr ffoorr eeaacchh ffrraammee ((""ccoonnttttrriiggeenn""))::  ddiissaabblleedd
+                 TTrriiggggeerr ttoo ssttaarrtt ddeellaayy ((""ddeellbbeeff""))::  00 sseecc
+                 DDeellaayy bbeettwweeeenn ffrraammeess ((""ddeellaafftteerr""))::  00 sseecc
+
+                            PPrreesseett ttiimmee ((""pprreesseett""))::  00 sseecc
+                        AAuuttoo--rruunn mmooddee ((""aauuttoo__rruunn""))::  OOnn ((11))
+                       SSoofftt--pprreesseett ((""ssoofftt__pprreesseett""))::  OOnn ((11))
+
+          With version 2 firmware:
+
+             DDeeccttrriiss MMyytthheenn 66KK SSNN00110099 ((ffww 22..11..00)) oovveerr UUDDPP ......
+
+                                         AAsssseemmbblleedd::  TTuuee MMaarr 1199 1100::5566::3377 CCEETT 22001133
+                             MMoodduullee sseerriiaall nnuummbbeerrss::  00009999,, 000000cc,, 00006699
+                                   SSeennssoorr mmaatteerriiaall::  SSiilliiccoonn
+                                  SSeennssoorr tthhiicckknneessss::  332200 uumm
+                        SSeettttiinnggss ttyyppee ((""sseettttiinnggss""))::  pprreeddeeffiinneedd SSttddCCuu
+                    TThhrreesshhoolldd eenneerrggiieess ((""kktthhrreesshh""))
+                                         MMoodduullee  00::  66..4411111166 kkeeVV
+                                         MMoodduullee  11::  66..3399885544 kkeeVV
+                                         MMoodduullee  22::  66..44226633 kkeeVV
+
+                         BBiittss ppeerr cchhaannnneell ((""bbiittss""))::  2244
+                                 FFrraammeess ((""ffrraammeess""))::  11
+                          AArrrraayy ffoorr ddaattaa ((""aarrrraayy""))::  --nnoonnee--
+                      SShhooww ffrraammee ccoouunntt ((""vveerrbboossee""))::  ddiissaabblleedd
+
+             FFllaatt ffiieelldd ccoorrrreeccttiioonn ((""aauuttooccoorrrreecctt""))::  ddiissaabblleedd ((00))
+             BBaadd cchhaannnneell iinntteerrppoollaattiioonn ((""bbaaddcchhaann""))::  eennaabblleedd iinn MMyytthheenn ((11))
+                       RRaattee ccoorrrreeccttiioonn ((""rraatteeccoorr""))::  ddiissaabblleedd ((00))
+                  RRaattee ccoorrrreeccttiioonn ccoonnssttaanntt ((""ttaauu""))::  00 nnsseecc
+
+                          IInnppuutt ppoollaarriittyy ((""iinnppooll""))::  ffaalllliinngg eeddggee ((00))
+                        OOuuttppuutt ppoollaarriittyy ((""oouuttppooll""))::  aaccttiivvee hhiigghh ((00))
+                                   GGaattee ((""ggaatteeeenn""))::  ddiissaabblleedd
+                         GGaatteess ppeerr ffrraammee ((""ggaatteess""))::  11
+                                TTrriiggggeerr ((""ttrriiggeenn""))::  ddiissaabblleedd
+             TTrriiggggeerr ffoorr eeaacchh ffrraammee ((""ccoonnttttrriiggeenn""))::  ddiissaabblleedd
+                 TTrriiggggeerr ttoo ssttaarrtt ddeellaayy ((""ddeellbbeeff""))::  00 sseecc
+                 DDeellaayy bbeettwweeeenn ffrraammeess ((""ddeellaafftteerr""))::  00 sseecc
+
+                            PPrreesseett ttiimmee ((""pprreesseett""))::  00 sseecc
+                        AAuuttoo--rruunn mmooddee ((""aauuttoo__rruunn""))::  OOffff ((00))
+                       SSoofftt--pprreesseett ((""ssoofftt__pprreesseett""))::  OOffff ((00))
+
+          Note, the parameter values are those ssppeecc will use the next time it
+          starts the Mythen.  The exact list of parameters displayed depends on
+          Mythen firmware version and ssppeecc release.
+
+     mmccaa__ppaarr((""fflluusshh"")) - Flushes the sockets associated with the connection to
+          the Mythen.  This command should not be needed under normal operation.
+
+     mmccaa__ppaarr((""sseenndd"",, ssttrriinngg)) - Sends the contents of ssttrriinngg to the Mythen.  If a
+          subaddress is specified with mmccaa__ssppaarr(()), the specified module will be
+          addressed before the command is sent.  (Normally not used, available
+          for debugging.)
+
+     mmccaa__ppaarr((""rreeaadd"",, ssttrriinngg)) - Sends the contents of ssttrriinngg to the Mythen and
+          returns the integer response.  If a subaddress is specified with
+          mmccaa__ssppaarr(()), the specified module will be addressed before the command
+          is sent.  (Normally not used, available for debugging.)
+
+     mmccaa__ppaarr((""rreeaadd__ffllooaatt"",, ssttrriinngg)) - Sends the contents of ssttrriinngg to the Mythen
+          and returns the floating-point value sent in response.  If a
+          subaddress is specified with mmccaa__ssppaarr(()), the specified module will be
+          addressed before the command is sent.  (Normally not used, available
+          for debugging.)
+
+VERSION HISTORY
+
+     ssppeecc release 6.03.02 added complete support for Mythen firmware versions 3
+     and 4 and fixed many issues and inconsistencies.
+
+     ssppeecc release 6.00.11 added support for the multiple-module 6K and 24K
+     Mythen models, and for Mythen firmware through version 2.0.5.
+
+     ssppeecc release 5.09.01-3 added support for most features found in Mythen
+     firmware version 2.
+
+SEE ALSO
+
+     _m_c_a
+
+     _h_t_t_p_:_/_/_w_w_w_._d_e_c_t_r_i_s_._c_o_m
+
+     _h_t_t_p_:_/_/_p_y_m_c_a_._s_o_u_r_c_e_f_o_r_g_e_._n_e_t
+

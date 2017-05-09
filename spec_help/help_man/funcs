@@ -1,0 +1,1922 @@
+.TH "functions" "reference" "05/09/15" "funcs.rst 6.7  05/09/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+functions \- built\-in functions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)funcs.rst        6.7  05/09/15  CSS
+.
+.\" Copyright (c) 1990-2007,2009,2010,2012,2013,2015
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "functions" "reference" "05/09/15" "funcs.rst 6.7  05/09/15 CSS"
+.
+.SH "Operating System Utility Functions"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBchdir()\fP
+\- 
+Changes \fBspec\fP\(aqs current working directory to user\(aqs
+home directory as obtained from the
+environment variable \fBHOME\fP. Returns \fBtrue\fP or \fBfalse\fP
+as the command was successful or not.
+Updates the value of the built\-in variable \fBCWD\fP.
+.HP 5m
+."
+\fBchdir(d)\fP
+\- 
+As above but changes to the directory \fBd\fP.
+.HP 5m
+."
+\fBunix()\fP
+\- 
+Spawns an interactive subshell using the program obtained from the user\(aqs
+environment variable \fBSHELL\fP or \fBshell\fP. Uses \fB/bin/sh\fP if the
+environment variable is unset.  Returns exit status of shell.
+.HP 5m
+."
+\fBunix(cmd)\fP
+\- 
+As above, but uses \fB/bin/sh\fP to execute the one\-line command \fBcmd\fP
+.HP 5m
+."
+\fBunix(cmd, var [, len])\fP
+\- 
+As above, but the second argument \fBvar\fP
+is the name of a variable in which to place
+the string output of \fBcmd\fP.
+The maximum length of the string is 4096 bytes (including a null byte).
+The optional third argument \fBlen\fP can be used to specify a larger size.
+This feature available since \fBspec\fP Release 4.03.01.
+.HP 5m
+."
+\fBtime()\fP
+\- 
+Returns the current epoch in seconds.  The UNIX epoch
+is the number of seconds from January 1, 1970, 00:00:00 GMT.
+The value returned includes a fractional part
+with the resolution dependent on the host platform.
+Millisecond resolution is standard, although on 80X86 systems
+only hundredth of a second resolution is returned.
+.HP 5m
+."
+\fBdate()\fP
+\- 
+Returns a string containing
+the current date as \fB"Mon Feb 8 21:04:04 EST 1988"\fP
+.HP 5m
+."
+\fBdate(fmt)\fP
+\- 
+As above, but the output string is formatted
+according to the specifications in the string \fBfmt\fP.
+The format is passed to the standard C library \fBstrftime()\fP function
+(see the \fBstrftime\fP man page) with one addition:
+\fBspec\fP fills in the format options
+\fB"%.1"\fP through \fB"%.9"\fP with the fractional seconds,
+where the single digit specifies the number of decimal digits.
+For example,
+.sp
+.RS 5m
+.RS 4m
+.nf
+\fBp date("%m\-%d\-%Y %T.%.6")\fP
+.fi
+.sp
+.RE
+.sp
+would display
+.sp
+.RS 4m
+.nf
+\fB01\-14\-2005 22:59:30.148067\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBdate(t [, fmt])\fP
+\- 
+As above, but from the epoch given by \fBt\fP. See \fBtime()\fP above.
+.HP 5m
+."
+\fBfile_info(f [, cmd])\fP
+\- 
+Returns information on the file or device named \fBf\fP.
+With just the one \fBf\fP argument,
+\fBfile_info()\fP returns nonzero if the file
+or device exists and zero otherwise.  If
+\fBf\fP is the string \fB"?"\fP,
+the possible values for \fBcmd\fP are listed.
+If \fBf\fP is the string \fB"."\fP,
+\fBspec\fP uses the information from the last
+\fBstat()\fP system call,
+avoiding the overhead associated with an additional system call.
+The values for \fBcmd\fP and the information returned follow.
+Note that the first set of values essentially mimic the contents
+of the data structure returned by the \fBstat()\fP system call,
+while the second set of values have the same meaning as
+arguments to the \fBtest\fP utility invoked from the shell.
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"dev"\fP
+\- 
+the device number on which \fBf\fP resides.
+.HP 5m
+."
+\fB"ino"\fP
+\- 
+the inode number of \fBf\fP.
+.HP 5m
+."
+\fB"mode"\fP
+\- 
+number coding the access modes and file attributes.
+.HP 5m
+."
+\fB"nlink"\fP
+\- 
+number of hard links for \fBf\fP.
+.HP 5m
+."
+\fB"uid"\fP
+\- 
+user id of the owner.
+.HP 5m
+."
+\fB"gid"\fP
+\- 
+group id of the owner.
+.HP 5m
+."
+\fB"rdev"\fP
+\- 
+device id if \fBf\fP is a block or character device.
+.HP 5m
+."
+\fB"size"\fP
+\- 
+size in bytes of \fBf\fP.
+.HP 5m
+."
+\fB"lines"\fP
+\- 
+number of newline characters in the file (as of \fBspec\fP 6.03.04).
+If the file does not end with a newline, the count is increased by one.
+.HP 5m
+."
+\fB"atime"\fP
+\- 
+time when \fBf\fP\(aqs data was last accessed.
+.HP 5m
+."
+\fB"mtime"\fP
+\- 
+time when \fBf\fP\(aqs data was last modified.
+.HP 5m
+."
+\fB"ctime"\fP
+\- 
+time when \fBf\fP\(aqs attributes were last modified.
+.HP 5m
+."
+\fB"isreg"\fP or \fB"\-f"\fP
+\- 
+whether \fBf\fP is a regular file.
+.HP 5m
+."
+\fB"isdir"\fP or \fB"\-d"\fP
+\- 
+whether \fBf\fP is a directory.
+.HP 5m
+."
+\fB"ischr"\fP or \fB"\-c"\fP
+\- 
+whether \fBf\fP is a character device.
+.HP 5m
+."
+\fB"isblk"\fP or \fB"\-b"\fP
+\- 
+whether \fBf\fP is a block device.
+.HP 5m
+."
+\fB"islnk"\fP or \fB"\-h"\fP or \fB"\-L"\fP
+\- 
+whether \fBf\fP is a symbolic link.
+.HP 5m
+."
+\fB"isfifo"\fP or \fB"\-p"\fP
+\- 
+whether \fBf\fP is a named pipe (fifo).
+.HP 5m
+."
+\fB"issock"\fP or \fB"\-S"\fP
+\- 
+whether \fBf\fP is a socket.
+.HP 5m
+."
+\fB"\-e"\fP
+\- 
+whether \fBf\fP exists.
+.HP 5m
+."
+\fB"\-s"\fP
+\- 
+whether the size of \fBf\fP is greater than zero.
+.HP 5m
+."
+\fB"\-r"\fP
+\- 
+whether \fBf\fP is readable.
+.HP 5m
+."
+\fB"\-w"\fP
+\- 
+whether \fBf\fP is writable.
+.HP 5m
+."
+\fB"\-x"\fP
+\- 
+whether \fBf\fP is executable.
+.HP 5m
+."
+\fB"\-o"\fP
+\- 
+whether \fBf\fP is owned by you.
+.HP 5m
+."
+\fB"\-G"\fP
+\- 
+whether \fBf\fP is owned by your group.
+.HP 5m
+."
+\fB"\-u"\fP
+\- 
+whether \fBf\fP is setuid mode.
+.HP 5m
+."
+\fB"\-g"\fP
+\- 
+whether \fBf\fP is setguid mode.
+.HP 5m
+."
+\fB"\-k"\fP
+\- 
+whether \fBf\fP has its sticky bit set.
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBfile_info(pid, "alive")\fP
+\- 
+Returns nonzero if the process associated
+with the process ID \fBpid\fP exists and zero otherwise.
+.HP 5m
+."
+\fBgetenv(s)\fP
+\- 
+Returns the string value of the environment variable \fBs\fP.
+.RE
+.SH "Evaluation Functions"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBeval(s)\fP
+\- 
+Parses and executes the string \fBs\fP.
+If the string is an expression, its value is returned.
+If the string is a statement or statement list,
+\fBeval()\fP returns \fBtrue\fP (nonzero) if there
+were no errors executing the statement(s).
+The type of errors that normally cause \fBspec\fP to reset to command
+level (syntax errors, for example)
+will only cause \fBeval()\fP to return \fBfalse\fP.
+Local symbols defined in the statement block in which \fBeval()\fP is
+used are not visible to the statements in the string \fBs\fP.
+.HP 5m
+."
+\fBeval2(s)\fP
+\- 
+Similar to \fBeval()\fP, but local symbols
+in the statement blocks surrounding the \fBeval2()\fP
+function call are visible and can be read or modified.
+To use local variables within the \fBeval2()\fP string
+that won\(aqt be associated with local variables of the same name
+outside the \fBeval2()\fP call,
+use curly brackets to enclose the statements with the \fBlocal\fP
+declaration within the string \fBs\fP.
+.RE
+.SH "Command Files"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBdofile(f [, start])\fP
+\- 
+Queues the file \fBf\fP for reading commands.
+Returns nonzero if the file cannot be opened.
+If the optional argument \fBstart\fP is an integer,
+the number specifies at which line to start reading the file.
+(Currently, only positive integers are allowed.)
+If the argument is anything else, it is considered a search string, and
+text is read from the file starting
+at the first line containing that search string.
+The metacharacters \fB*\fP, which matches any string, and
+\fB?\fP, which matches any single character, are allowed in the search string.
+Initial and trailing white space is ignored when searching for a match.
+.HP 5m
+."
+\fBqdofile(f [, start])\fP
+\- 
+As above, but doesn\(aqt echo the contents of the file to the screen.
+.RE
+.SH "Help Functions"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBgethelp(f [, flags])\fP
+\- 
+Prints the paginated help file \fBf\fP on the screen.
+If \fBf\fP contains a \fB/\fP, the argument is treated
+as an absolute or relative pathname.
+Otherwise, the argument refers to a file in the \fBspec_help\fP (or
+\fBhelp\fP) subdirectory of the
+\fBSPECD\fP directory.
+.sp
+Prior to \fBspec\fP release 6, \fBspec\fP contained an internal help file
+parser and formatter.  With release 6, help files are formatted using
+the standard \fBgroff\fP utility and paginated using the standard \fBless\fP
+utility.
+.sp
+If the argument \fBf\fP is a pathname and the optional \fBflags\fP argument
+has bit 0x02 set, \fBspec\fP will use \fBgroff\fP formatting macros appropriate
+for help files written using pre\-release 6 conventions.
+.sp
+Returns non\-zero if the file couldn\(aqt be opened.
+.HP 5m
+."
+\fBwhatis(s, ["info"])\fP
+\- 
+With one argument, returns a number
+that indicates what the string argument \fBs\fP is.
+With two arguments,
+returns a string containing a text description of what \fBs\fP is.
+The number is a two\-word (32\-bit) integer,
+with the low word containing a code for the type of object
+and the high word containing more information for certain objects.
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l l .
+Low Word	High Word	Meaning
+0	0	Not a command, macro or keyword
+0	1	Command or keyword
+2	Length	Macro name (length is in bytes)
+4	0x0001	New\-style data array
+4	0x0010	Number\-valued
+4	0x0020	String\-valued
+4	0x0040	Constant\-valued
+4	0x0100	Associative array
+4	0x0200	Built\-in
+4	0x0400	Global
+4	0x0800	Unset
+4	0x2000	Immutable
+4	0x4000	Local
+4	0x8000	Associative array element
+.TE
+.RE
+.sp
+Most type\-4 symbols have more than one of the high\-word bits set.
+.RE
+.RE
+.SH "Controlling Output Files"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBopen()\fP
+\- 
+Lists all open files.  Returns zero.
+.HP 5m
+."
+\fBopen(file_name)\fP
+\- 
+Makes \fBfile_name\fP, which is a string constant or expression,
+available for output.  Files are opened to append.
+Returns zero for success, \-1 if the file can not be opened or if there
+are too many open files.
+.HP 5m
+."
+\fBclose(file_name)\fP
+\- 
+Closes \fBfile_name\fP
+and removes it from the table of files available for output.
+Returns zero for success, \-1 if the file wasn\(aqt open.
+Any open file should be closed before attempting
+to modify the file with other UNIX utilities.
+Otherwise the file may be corrupted if two processes
+are writing to the file.
+.HP 5m
+."
+\fBon()\fP
+\- 
+Lists all open files and indicates which ones are
+currently turned on for output.
+.HP 5m
+."
+\fBon(file_name)\fP
+\- 
+Turns on \fBfile_name\fP for output.
+All messages, except for some error and debugging messages, but
+including all \fBprint\fP and \fBprintf()\fP output,
+are sent to all turned\-on devices.
+If \fBfile_name\fP has not been made available
+for output with the \fBopen()\fP function, it will be opened.
+Returns zero for success,
+\-1 if the file can\(aqt be opened or if there are too many open files.
+.HP 5m
+."
+\fBoff(file_name)\fP
+\- 
+Turns off output to \fBfile_name\fP,
+but keeps it in the list of files available for output.
+If this was the last turned\-on file or device,
+\fBtty\fP is turned back on automatically.
+Returns zero for success, \-1 if the file wasn\(aqt open.
+.RE
+.SH "Macro\-Related Functions"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBcdef(name, s, [key, [flags]])\fP
+\- 
+The function \fBcdef()\fP is used to define chained macros.
+The function can be used
+to maintain a macro definition in pieces
+that can be selectively included into a complete macro definition.
+The argument \fBname\fP is the name of the macro.  The argument
+\fBs\fP contains a piece to add to the macro.
+.sp
+The chained macro can have three parts:  a front, a middle and a back.
+Pieces included in each of the parts of the macros
+are sorted lexicographically by the keys.
+Pieces without a key are placed in the middle, in the order in which they
+were added, but after any middle pieces that include a key.
+.sp
+With the optional \fBkey\fP argument,
+the pieces can be selectively replaced or deleted.
+The \fBflags\fP argument controls whether the pieces are
+added to the front or to the back of the macro or whether the pieces
+should be selectively included in the definition based on whether
+\fBkey\fP is a currently configured motor or counter mnemonic.
+.sp
+The bit meanings for \fBflags\fP are as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB0x01\fP
+\- 
+only include if key is a motor mnemonic
+and the motor is not disabled.
+.HP 5m
+."
+\fB0x02\fP
+\- 
+only include if key is a counter mnemonic
+and the counter is not disabled.
+.HP 5m
+."
+\fB0x10\fP
+\- 
+place in the front part of the macro.
+.HP 5m
+."
+\fB0x20\fP
+\- 
+place in the back part of the macro.
+.PD
+.RE
+.sp
+If \fBflag\fP is the string \fB"delete"\fP, the piece associated with
+\fBkey\fP is deleted from the named macro,
+or if the name is the null string,
+from all the chained macros.
+.sp
+If \fBflag\fP is the string \fB"enable"\fP, the parts of the named macro
+associated with \fBkey\fP are enabled, and if \fBflag\fP is the string
+\fB"disable"\fP, the associated parts are disabled.
+If \fBname\fP is the null string
+\fB""\fP, then all chained macros that have parts associated with
+\fBkey\fP will have those parts enabled or disabled.
+.sp
+If \fBkey\fP is the null string, the \fBflags\fP have no effect.
+.sp
+The \fBcdef()\fP function will remove any existing macro defined using
+\fBdef\fP or \fBrdef\fP. Likewise, \fBdef\fP and
+\fBrdef\fP will removed an existing \fBcdef()\fP macro with the same name.
+However, the commands \fBlsdef\fP, \fBprdef\fP and
+\fBundef\fP do work with chained macros.  When \fBspec\fP starts, when the
+\fBreconfig\fP command is run (or the \fBconfig\fP macro is invoked)
+or when individual motors or counters are enabled or disabled,
+all the chained macros are adjusted for the currently configured
+and enabled motors and counters.
+.RE
+.HP 5m
+."
+\fBcdef("?")\fP
+\- 
+Lists all the pieces of all the chained macros.
+.HP 5m
+."
+\fBcdef(name, "?")\fP
+\- 
+Lists the pieces of the macro named \fBname\fP, as will a
+\fB"?"\fP as the third or fourth argument.
+.HP 5m
+."
+\fBclone(dest, src)\fP
+\- 
+Duplicates the macro \fBsrc\fP as a new macro named
+\fBdest\fP.
+Currently a clone of a \fBcdef\fP chained macro becomes an ordinary macro.
+.HP 5m
+."
+\fBstrdef(s)\fP
+\- 
+Returns a string containing the macro definition of \fBs\fP. If
+\fBs\fP is not a defined macro, returns the string \fBs\fP itself.
+(Available as of \fBspec\fP release 5.08.02\-6.)
+.HP 5m
+."
+\fBstrdef(s, key)\fP
+\- 
+If \fBs\fP is a chained macro, returns
+a string containing only the definition segment associated
+with \fBkey\fP.
+If \fBs\fP is not a defined macro, returns the string \fBs\fP itself.
+If \fBs\fP is a macro, but not a chained macro, returns the definition.
+If \fBs\fP is a chained macro, but doesn\(aqt contain a segment associated
+with \fBkey\fP, returns the null string.
+(Available as of \fBspec\fP release 6.03.04.)
+.RE
+.SH "User Input and Output"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBinput()\fP
+\- 
+Reads a line of input from the keyboard.  Removes leading
+white space and trailing newline and returns the string.
+Returns the null string
+\fB""\fP if only white space was entered.
+.HP 5m
+."
+\fBinput(s)\fP
+\- 
+As above, but prompts with the string \fBs\fP.
+.HP 5m
+."
+\fBinput(n)\fP
+\- 
+This function behaves differently depending on whether the
+input source is the keyboard (the normal case)  or a pipe
+from another program (as when
+\fBspec\fP is invoked with the \fB\-p fd pid\fP
+option with nonzero \fBfd\fP.)
+.sp
+In the normal case, if
+\fBn\fP is less than or equal to zero, the tty state is set to
+\fBcbreak\fP mode and input echo is turned off.  Then
+\fBinput()\fP checks to see if the user has typed a character and
+immediately returns a null string if nothing has been typed.
+Otherwise, it returns a string containing
+the single (or first) character the user typed.
+If \fBn\fP is less than zero, the cbreak,
+no\-echo mode remains in effect when
+\fBinput()\fP returns.
+If \fBn\fP is greater than zero,
+the normal tty state is restored
+(as it is also if there is an error, if the user types
+\fB^C\fP or if the user enters the \fBexit\fP command).
+Also, no characters are read and the null string is returned.
+The normal tty state will always be restored
+before the next main prompt is issued, whether due to an error, a
+\fB^C\fP, or through the normal flow of the program.
+.sp
+If \fBn\fP is \-2 or less, there is an added feature where \fBinput()\fP will
+return special codes for particular special key sequences.  Currently,
+the arrow\-key and forward delete key sequences
+are recognized, with
+return codes of 0xE8, 0xEA, 0xEB, 0xEC and 0xFF
+for left, up, down, right and forward delete, respectively.
+(As of \fBspec\fP release 6.01.)
+.sp
+When \fBspec\fP is invoked
+with the \fB\-p fd pid\fP option with nonzero
+\fBfd\fP, \fBinput()\fP reads nothing
+but does return the number of characters available to be read.
+If \fBn\fP is nonzero, \fBinput()\fP simply reads
+and returns a line of text, as if it had been invoked
+with no argument.
+.HP 5m
+."
+\fByesno([s, ] x)\fP
+\- 
+Prompts the user with the optional string \fBs\fP,
+then waits for a yes or no response.
+The function returns 1 if the user answers with a string beginning with
+\fBY\fP, \fBy\fP or \fB1\fP. The value of
+\fBx\fP is returned if the user simply enters return.
+Otherwise the function returns 0.
+If the prompt string \fBs\fP is present, the characters
+\fB" (YES)? "\fP or \fB" (NO)? "\fP are appended
+depending on the value of \fBx\fP.
+.HP 5m
+."
+\fBgetval([s, ] x [, u])\fP
+\- 
+Prompts the user with the string \fBs\fP, if present,
+then waits for a user response.
+If the user enters a value, that value is returned.  The value of
+\fBx\fP is returned if the user simply enters return.  If the prompt string
+\fBs\fP is present, the string is printed followed by the current value of
+\fBx\fP and the string \fBu\fP,
+if present, in parenthesis, a question mark and a space.
+The function works with both number and string values.
+The optional third argument
+is intended to be used for a unit string
+(available as of \fBspec\fP release 5.08.02\-6).
+.HP 5m
+."
+\fBgetsval([s, ] x)\fP
+\- 
+Like \fBgetval()\fP above, prompts the user with the string
+\fBs\fP, if present, then waits for a user response.  The value of
+\fBx\fP is returned if the user simply enters return.  If the prompt string
+\fBs\fP is present, the string is printed followed by the current value of
+\fBx\fP in parenthesis, a question mark and a space.
+Unlike \fBgetval()\fP, this function
+does not convert hexadecimal or octal input
+(number strings that begin with 0, 0x or 0X)
+to the corresponding decimal value.
+Rather, the \fBgetsval()\fP function returns the literal string as entered.
+.HP 5m
+."
+\fBgetline(f [, arg])\fP
+\- 
+This function reads the ASCII file given
+by the string \fBf\fP a line at a time and returns the
+string so obtained, including the trailing newline.
+If \fBarg\fP is the string \fB"open"\fP,
+the function returns zero if the file can be opened for reading,
+otherwise \-1 is returned.
+If \fBarg\fP is \fB"close"\fP, the file is closed and zero is returned.
+If \fBarg\fP is zero, the first line of the file is returned.
+If only the first argument is present,
+the next line of the file is read and returned.
+At the end of the file, a \-1 is returned.
+The previous file, if any, is closed and the new file
+is opened automatically when
+the filename argument changes
+(at least in this preliminary implementation).
+.HP 5m
+."
+\fBsscanf(s, fmt, arg [, ... ])\fP
+\- 
+Scans the literal string or string variable \fBs\fP for data, where
+\fBfmt\fP contains a format specification
+in the same style as the C language \fBscanf()\fP function.
+Each \fBarg\fP is a variable name or array element
+that will be assigned the values
+scanned for.  The function returns the number of items found in the string.
+.HP 5m
+."
+\fBprintf(fmt [, a, ...])\fP
+\- 
+Does formatted printing on the turned\-on output devices.
+See \fBprintf()\fP in a C\-manual.
+Returns \fBtrue\fP.
+.HP 5m
+."
+\fBfprintf(file_name, fmt [, a, ...])\fP
+\- 
+Does formatted printing on \fBfile_name\fP.
+All other devices (except log files)
+are turned off while the string is printed.
+.HP 5m
+."
+\fBeprintf(fmt [, a, ...])\fP
+\- 
+Same behavior as \fBprintf()\fP, above,
+except that if an error\-log file is open,
+the generated output will also be written to that file,
+in addition to any other files or device turned on for output.
+The first line of any strings written
+to the error\-log files will be prefixed with the
+\fB#E\fP characters.
+.HP 5m
+."
+\fBtty_cntl(s)\fP
+\- 
+Sends terminal\-specific escape sequences to the display.
+The sequences are only written to the
+\fB"tty"\fP device and only if it is turned on for output.
+The sequences are obtained from the system terminal\-capability
+data base using the value of the environmental variable
+\fBTERM\fP. The following values for \fBs\fP are recognized:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"ho"\fP
+\- 
+move the cursor to the home position (upper left corner).
+.HP 5m
+."
+\fB"cl"\fP
+\- 
+clear the screen.
+.HP 5m
+."
+\fB"ce"\fP
+\- 
+clear to the end of the line.
+.HP 5m
+."
+\fB"cd"\fP
+\- 
+clear from current position to the end of the screen.
+.HP 5m
+."
+\fB"so"\fP
+\- 
+start text stand\-out mode.
+.HP 5m
+."
+\fB"se"\fP
+\- 
+end text stand\-out mode.
+.HP 5m
+."
+\fB"md"\fP
+\- 
+start bold (intensified) mode.
+.HP 5m
+."
+\fB"me"\fP
+\- 
+end bold mode.
+.HP 5m
+."
+\fB"us"\fP
+\- 
+start underline mode.
+.HP 5m
+."
+\fB"ue"\fP
+\- 
+end underline mode.
+.HP 5m
+."
+\fB"mb"\fP
+\- 
+start blink mode.  (Note, xterms don\(aqt blink.)
+.HP 5m
+."
+\fB"mh"\fP
+\- 
+start half\-bright mode.
+.HP 5m
+."
+\fB"mr"\fP
+\- 
+start reverse video mode.
+.HP 5m
+."
+\fB"up"\fP
+\- 
+move up one row.
+.HP 5m
+."
+\fB"do"\fP
+\- 
+move down one row.
+.HP 5m
+."
+\fB"le"\fP
+\- 
+move left one column.
+.HP 5m
+."
+\fB"nd"\fP
+\- 
+move right one column (non\-destructive space).
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBtty_cntl("resized?")\fP
+\- 
+Updates the \fBROWS\fP and
+\fBCOLS\fP variables in the event the window size has changed and returns
+a nonzero value if the window size has changed since the last call to
+\fBtty_cntl("resized?")\fP.
+.HP 5m
+."
+\fBtty_fmt(x, y, w, s)\fP
+\- 
+Writes the string \fBs\fP to the screen starting at column \fBx\fP and row
+\fBy\fP, where column 0, row 0 is the upper left corner of the screen.
+The string is only written to the \fB"tty"\fP device
+and only if it is turned on for output.
+If \fBs\fP is longer than the width given by
+\fBw\fP, the string is split at space characters
+such that no line is longer then
+\fBw\fP. Newlines in the string are retained, however.
+The function will truncate words that are wider than
+\fBw\fP and drop lines that would go off the bottom of the screen.
+Negative \fBx\fP or \fBy\fP position the cursor relative
+to the left or bottom edges of the screen,
+respectively.  The function returns the number of lines written.
+.sp
+The two\-letter control sequences listed above
+for the \fBtty_cntl()\fP function can be included in the string
+\fBs\fP by using the special string \fB"\e[xx]"\fP,
+where \fBxx\fP is the two\-letter sequence.
+Note, though, the formatting code may fail
+if the sequence changes the current position of the output text.
+.HP 5m
+."
+\fBtty_move(x, y [, s\fP])
+\- 
+Moves the cursor to column \fBx\fP and row
+\fBy\fP, where column 0, row 0 is the upper left corner of the screen.
+If the third argument
+\fBs\fP is present, it is written as a label at the given position.
+The two\-letter control sequences listed above
+for the \fBtty_cntl()\fP function can be included in the string
+\fBs\fP by using the special string \fB"\e[xx]"\fP,
+where \fBxx\fP is the two\-letter sequence.
+The sequences and string are only written to the \fB"tty"\fP
+device and only if it is turned on for output.
+.sp
+Negative \fBx\fP or \fBy\fP position the cursor relative
+to the left or bottom edges of the screen, respectively.
+.sp
+Relative moves are specified by adding +/\-1000 to \fBx\fP or
+\fBy\fP. Both arguments must specify either relative or absolute moves.
+If one coordinate specifies a relative move, the absolute move
+in the other coordinate will be ignored.
+Note, not all terminal types support relative moves.
+.RE
+.SH "Counting and Moving"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBsleep(t)\fP
+\- 
+Suspends execution for \fBt\fP seconds, where \fBt\fP may be non\-integral.
+In old versions, a negative \fBt\fP indicated sleep was
+for clock ticks (1/60 second each).
+Returns \fBtrue\fP.
+.HP 5m
+."
+\fBmcount(t)\fP
+\- 
+Begins counting for \fBt\fP monitor counts.  Returns \fBtrue\fP.
+.HP 5m
+."
+\fBtcount(t)\fP
+\- 
+Begins counting for \fBt\fP seconds.
+Returns \fBtrue\fP.
+.HP 5m
+."
+\fBcnt_mne(i)\fP
+\- 
+Returns the string mnemonic of counter \fBi\fP
+as given in the configuration file.
+.HP 5m
+."
+\fBcnt_name(i)\fP
+\- 
+Returns the string name of counter \fBi\fP
+as given in the configuration file.
+.HP 5m
+."
+\fBcnt_num(mne)\fP
+\- 
+Returns the counter number corresponding to the counter mnemonic
+\fBmne\fP, or \-1 if there is no such counter configured.
+.HP 5m
+."
+\fBcounter_par(i, s [, v])\fP
+\- 
+Returns or sets configuration parameters for counter \fBi\fP. See the
+\fI\%counting\fP help file for more information.
+.HP 5m
+."
+\fBmca_sel(n)\fP
+\- 
+Selects which MCA\-type device to use for subsequent calls of the
+\fBmca_get()\fP, \fBmca_put()\fP and \fBmca_par()\fP functions.
+The MCA device numbering is set in the \fBconfig\fP file with the string
+\fB@mca_N\fP, where \fBN\fP is the device number (from 0 to 31).
+Returns \-1 if not configured for device \fBn\fP, otherwise returns zero.
+It is not necessary to use \fBmca_sel()\fP if only one MCA\-type device is
+configured and is configured as device 0.
+.HP 5m
+."
+\fBmca_sel("?")\fP
+\- 
+Lists the configured MCA devices and indicates which device is
+currently selected for the \fBmca_get()\fP, \fBmca_put()\fP and
+\fBmca_par()\fP functions with an asterisk.
+Also displays the MCA device number for use with the
+\fBmca_sget()\fP, \fBmca_sput()\fP and \fBmca_spar()\fP functions
+and displays whether the presence test found
+the unit unresponsive or if the
+user has disabled the unit.
+Returns the total number of MCA devices recognized in the \fBconfig\fP file.
+Note, the value of the built\-in global variable
+\fBMCAS\fP is always set to the number of MCA devices.
+.HP 5m
+."
+\fBmca_sel(n, "?")\fP
+\- 
+Returns a string containing one line of information about MCA device
+\fBn\fP, or 0 if \fBspec\fP isn\(aqt configured for device \fBn\fP.
+.HP 5m
+."
+\fBmca_get(arr [, roi_beg [, roi_end]])\fP
+\- 
+Gets data from the currently selected MCA\-type device, and transfers it to
+the array \fBarr\fP.
+If the optional starting channel and ending channel are given,
+the data is read from those hardware channels and placed starting
+at the beginning of the array.  For example,
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC.1> ulong array data[1024]
+SPEC.2> mca_get(data)
+SPEC.3> mca_get(data, 32, 128)
+SPEC.4> mca_get(data[32:128], 32, 128)
+.ft P
+.fi
+.RE
+.sp
+The last example uses subarray syntax to position the data in
+array elements corresponding to the MCA channel positions.
+.RE
+.HP 5m
+."
+\fBmca_get(g, e [, roi_beg [, roi_end]])\fP
+\- 
+As above, but transfers the data to element \fBe\fP of data group
+\fBg\fP instead of an array.  Returns the number of points transferred.
+.HP 5m
+."
+\fBmca_sget(sel, ...)\fP
+\- 
+Like the above functions, but uses the MCA device numbered
+\fBsel\fP in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmca_put(...)\fP and \fBmca_sput(sel, ...)\fP
+\- 
+These functions have the same syntax as the above, but transfer data
+to the MCA device (for devices that support transfer in that direction).
+.HP 5m
+."
+\fBmca_par(cmd [, arg])\fP
+\- 
+A function to access various features and parameters
+of the currently selected MCA device.  The string
+\fBcmd\fP selects an option.
+The argument \fBarg\fP contains an optional value.
+Some values for \fBcmd\fP apply to all MCA devices,
+while some apply only to certain devices.
+See the \fI\%mca\fP help file for additional information.
+.HP 5m
+."
+\fBmca_spar(sel, cmd [, arg])\fP
+\- 
+Like the above, but uses the MCA device numbered \fBsel\fP in the
+\fBconfig\fP file.
+.HP 5m
+."
+\fBimage_get(sel, arr)\fP
+\- 
+Reads image data from the 2D acquisition device numbered \fBsel\fP into
+the data array \fBarr\fP.
+.HP 5m
+."
+\fBimage_put(sel, arr)\fP
+\- 
+Writes image data from the data array \fBarr\fP to
+the 2D acquisition device numbered \fBsel\fP (for devices that support
+transfer in that direction).
+.HP 5m
+."
+\fBimage_par(sel [, v])\fP
+\- 
+Returns or sets configuration parameters for 2D acquisition devices.
+.HP 5m
+."
+\fBwait()\fP
+\- 
+Wait for all asynchronous activity to complete.
+Returns \fBtrue\fP.
+.HP 5m
+."
+\fBwait(w)\fP
+\- 
+Wait for moving (\fBw\fP=1), counting (\fBw\fP=2),
+other data acquisition (MCAs, CCDs, etc.)
+(\fBw\fP=4) or remote connections
+and remote asynchronous events (\fBw\fP= 8), to complete.  If bit 5 of
+\fBw\fP is set, returns \fBtrue\fP if activities flagged by bits
+0, 1, 2 or 3 are active.  Returns \fBfalse\fP otherwise.
+See the \fI\%wait\fP help file for details.
+.HP 5m
+."
+\fBstop(w)\fP
+\- 
+Stop moving (\fBw\fP=1),
+or counting and other asynchronous data acquisition (\fBw\fP=2).
+If \fBw\fP is zero or missing all asynchronous activity is halted.
+Returns \fBtrue\fP.
+.HP 5m
+."
+\fBset_sim(i)\fP
+\- 
+Turns simulate mode on (\fBi\fP=1),
+off (\fBi\fP=0), or only reports state (\fBi\fP=\-1),
+The first two return the value of the previous state as
+\fBtrue\fP (on) or \fBfalse\fP (off) and do a \fBwait()\fP before changing state.
+\fBset_sim(0)\fP reads in the motor settings file to restore motor positions.
+See the \fI\%set_sim\fP help file for details.
+.HP 5m
+."
+\fBmotor_mne(i)\fP
+\- 
+Returns the string mnemonic of motor \fBi\fP
+as given in the configuration file.
+.HP 5m
+."
+\fBmotor_name(i)\fP
+\- 
+Returns the string name of motor \fBi\fP
+as given in the configuration file.
+.HP 5m
+."
+\fBmotor_num(mne)\fP
+\- 
+Returns the motor number corresponding to the motor mnemonic
+\fBmne\fP, or \-1 if there is no such motor configured.
+.HP 5m
+."
+\fBmotor_par(i, s [, v])\fP
+\- 
+Returns or sets configuration parameters for motor \fBi\fP.
+Values for the string
+\fBs\fP include \fB"acceleration"\fP, \fB"base_rate"\fP,
+\fB"step_size"\fP, \fB"velocity"\fP or \fB"backlash"\fP.
+The values may be modified by giving a value for
+\fBv\fP, although modifications to \fB"step_size"\fP must be enabled using
+.sp
+.RS 5m
+.RS 4m
+\fBspec_par("modify_step_size", 1)\fP
+.RE
+.sp
+first.
+See the \fI\%motors\fP help file and the help file
+for particular motor controllers
+for more information on possible parameters.  Rereading the
+\fBconfig\fP file resets the values of the motor parameters
+to the values in the \fBconfig\fP file.
+Little consistency checking is done by \fBspec\fP
+on the values programmed with
+\fBmotor_par()\fP.
+Be sure to use values meaningful to your particular motor controller.
+.RE
+.HP 5m
+."
+\fBget_lim(i, w)\fP
+\- 
+Returns the dial limit of motor \fBi\fP. If \fBw\fP > 0,
+returns high limit.
+If \fBw\fP < 0, returns low limit.
+If \fBw\fP > 1, returns high limit corrected for configured backlash.
+If \fBw\fP < 1, returns low limit corrected for configured backlash.
+.HP 5m
+."
+\fBset_lim(i, u, v)\fP
+\- 
+Sets the low and high dial limits of motor \fBi\fP.
+It doesn\(aqt matter which order the limits,
+\fBu\fP and \fBv\fP, are given.  Returns \-1 if not configured for motor
+\fBi\fP or if the motor is protected, unusable or moving, else returns 0.
+.HP 5m
+."
+\fBdial(i, u)\fP
+\- 
+Returns the motor dial position for motor \fBi\fP
+corresponding to user angle \fBu\fP.
+.HP 5m
+."
+\fBuser(i, d)\fP
+\- 
+Returns the user angle for motor \fBi\fP
+corresponding to dial position \fBu\fP.
+.HP 5m
+."
+\fBchg_dial(i, u)\fP
+\- 
+Sets the dial position of motor \fBi\fP to \fBu\fP by changing the
+contents of the controller registers.
+Returns \-1 if not configured for motor
+\fBi\fP or if the motor is protected, unusable or moving, else returns 0.
+.HP 5m
+."
+\fBchg_dial(i, s [, u])\fP
+\- 
+Starts motor \fBi\fP on a home or limit search, according to the value of
+\fBs\fP, as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"home+"\fP
+\- 
+move to home switch in positive direction.
+.HP 5m
+."
+\fB"home\-"\fP
+\- 
+move to home switch in negative direction.
+.HP 5m
+."
+\fB"home"\fP
+\- 
+move to home switch in positive direction if current dial position
+is less than zero, otherwise move to home switch in negative direction.
+.HP 5m
+."
+\fB"lim+"\fP
+\- 
+move to limit switch in positive direction.
+.HP 5m
+."
+\fB"lim\-"\fP
+\- 
+move to limit switch in negative direction.
+.PD
+.RE
+.sp
+Positive and negative direction are with respect to the dial position
+of the motor.
+(Not all motor controllers implement the home or limit search feature.)
+If present, the value of the third argument is used to set the motor\(aqs
+dial position when the home or limit position is reached
+(as of \fBspec\fP release 4.05.10\-3).
+Returns \-1 if not configured for motor \fBi\fP or if the motor
+is protected, unusable or moving, else returns 0.
+.RE
+.HP 5m
+."
+\fBchg_offset(i, u)\fP
+\- 
+Sets offset (determining user angle) of motor \fBi\fP to
+\fBu\fP. Returns \-1 if not configured for motor
+\fBi\fP or if the motor is unusable or moving, else returns 0.
+.HP 5m
+."
+\fBread_motors(mode [, which])\fP
+\- 
+Reads the motors and places the motor positions in the
+\fBA[]\fP array with options set by \fBmode\fP, as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+Bit 0 (0x01)
+\- 
+If clear, user positions are put into \fBA[]\fP.
+If set, dial positions are put into the motor array.
+.HP 5m
+."
+Bit 1 (0x02)
+\- 
+If set, forces reading the hardware.
+For many motor controllers,
+\fBspec\fP doesn\(aqt necessarily read the hardware if
+the position hasn\(aqt been changed by \fBspec\fP since
+the controller was last read.
+.HP 5m
+."
+Bit 2 (0x04)
+\- 
+If set, position discrepancies between \fBspec\fP
+and the motor hardware
+will be silently resolved in favor of the hardware.
+Otherwise, \fBspec\fP will prompt the user as to whether the software
+or hardware positions should be considered correct.
+.HP 5m
+."
+Bit 3 (0x08)
+\- 
+If set, the hardware is read, but the contents of the
+\fBA[]\fP array are not modified.
+.HP 5m
+."
+Bit 4 (0x10)
+\- 
+If set, the "commanded" positions are placed in
+\fBA[]\fP. The hardware is not accessed.  If the optional argument
+\fBwhich\fP is set to a particular motor number or mnemonic,
+\fBA[]\fP is not modified,
+and the return value will be the commanded position
+for the specified motor.
+.PD
+.RE
+.RE
+.RE
+.SH "Plotting and Analysis"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBdata_grp(g, n, w)\fP
+\- 
+Configures data group \fBg\fP.
+The group will have \fBn\fP points, each having
+\fBw\fP elements.  If \fBn\fP and
+\fBw\fP match the previous values for the group, the data in the group
+is unchanged.
+Otherwise, the data values of the reconfigured group are set to zero.
+If \fBw\fP is zero, the group is eliminated.
+.HP 5m
+."
+\fBdata_info(g, s)\fP
+\- 
+Returns a number representing a parameter
+of the data group \fBg\fP according to the string \fBs\fP as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"elem"\fP
+\- 
+number of elements (width).
+.HP 5m
+."
+\fB"npts"\fP
+\- 
+number of points.
+.HP 5m
+."
+\fB"last"\fP
+\- 
+last modified (added) point.
+.PD
+.RE
+.sp
+Returns \-1 if the group or command is invalid.
+.RE
+.HP 5m
+."
+\fBdata_put(g, n, e, v)\fP
+\- 
+Assigns the value \fBv\fP to element \fBe\fP
+of point \fBn\fP in group \fBg\fP.
+.HP 5m
+."
+\fBdata_get(g, n, e)\fP
+\- 
+Returns the value of element \fBe\fP of point \fBn\fP in group \fBg\fP.
+.HP 5m
+."
+\fBdata_nput(g, n, v0 [, v1 ... ])\fP
+\- 
+Assigns values to point \fBn\fP of group \fBg\fP. Element 0 is assigned
+\fBv0\fP, element 1 is assigned \fBv1\fP, etc.
+Not all elements need be given, although elements are assigned
+successively, starting at element 0.
+.HP 5m
+."
+\fBdata_uop(gs, es, gd, ed, uop [, arg])\fP
+\- 
+Performs the unary operation specified by the string \fBuop\fP on element
+\fBes\fP for all points in group \fBgs\fP. The results are put in element
+\fBed\fP of the corresponding points in group \fBgd\fP.
+The source and destination groups and/or elements may be the same.
+If the number of points in the groups differ, the operation is
+carried out on up to the smallest number of points among the groups.
+See the \fI\%data\fP help file for possible values for \fBuop\fP.
+.HP 5m
+."
+\fBdata_bop(gs0, es0, gs1, es1, gd, ed, bop)\fP
+\- 
+Performs the binary operation specified by the string \fBbop\fP on elements
+\fBes0\fP and \fBes1\fP for all points in the groups \fBgs0\fP and
+\fBgs1\fP.
+The results are put in element \fBed\fP for the corresponding points
+of group \fBgd\fP.
+The source and destination groups and/or elements may be the same.
+If the number of points in the groups differ, the operation is
+carried out on up to the smallest number of points among the groups.
+See the \fI\%data\fP help file for possible values for \fBbop\fP.
+.HP 5m
+."
+\fBdata_anal(g, s, n, e0, e1, op)\fP
+\- 
+Performs the operations indicated by \fBop\fP on \fBn\fP points in group
+\fBg\fP, starting at point \fBs\fP.
+The operations use the values in element
+\fBe0\fP (if applicable) and \fBe1\fP.
+If \fBn\fP is zero, the operations are performed on points from
+\fBs\fP to the last point added
+using \fBdata_nput()\fP or \fBdata_put()\fP. See the
+\fI\%data\fP help file for possible values for \fBop\fP.
+.HP 5m
+."
+\fBdata_dump(g, s, n, e0 [, e1 ...] [, fmt1] [, fmt2])\fP
+\- 
+Efficiently writes elements from group \fBg\fP to turned on output devices.
+The starting point is \fBs\fP and the number of points is \fBn\fP.
+The elements specified by
+\fBe0\fP, \fBe1\fP, etc., are printed.
+If \fBe0\fP is the string \fB"all"\fP,
+all the elements for each point are printed.
+If \fBn\fP is zero, only the points from \fBs\fP
+to the last point added using
+\fBdata_nput()\fP or \fBdata_put()\fP are printed.
+The optional argument \fBfmt1\fP is a string, having the format
+\fB"%#"\fP, that specifies how many data points
+(specified by the number \fB#\fP) to be printed on each line.
+The optional argument \fBfmt2\fP is a string
+that specifies an alternate \fBprintf()\fP\-style format for the values.
+Only \fBe\fP, \fBg\fP and \fBf\fP formats are recognized.
+For example, \fB"%15.8f"\fP uses fixed\-point format
+with eight digits after the decimal point
+and a fifteen\-character\-wide field.  The default output format is
+\fB"%g"\fP. See \fBprintf()\fP in a C manual for more information.
+Note that in the default installation, the internal data arrays use
+single\-precision floating values, which contain only about 8 decimal
+digits of significance.
+.HP 5m
+."
+\fBdata_read(file_name, g, s, n)\fP
+\- 
+reads data from the ASCII file \fBfile_name\fP,
+and stuffs the data into group
+\fBg\fP starting at point \fBs\fP, reading up to \fBn\fP points.
+If \fBn\fP is zero, all the points in the file are read.
+The values on each line of the file are assigned
+into successive elements for each point in the group.
+If there are more elements on a line in the file than fit in the group,
+or if there are more points in the file than in the group, the extra
+values are ignored.
+Returns \-1 if the file can\(aqt be opened,
+otherwise returns the number of points read.
+.HP 5m
+."
+\fBdata_plot(g, s, n, e0, e1 [, e2 ...])\fP
+\- 
+Plots the current data in group \fBg\fP starting
+at point \fBs\fP and plotting \fBn\fP points.
+Element \fBe0\fP is used for \fBx\fP.
+Elements given by the subsequent arguments (up to a maximum of 64)
+are plotted along the \fBy\fP axis.
+If \fBn\fP is zero,
+only the points from \fBs\fP to the last point added using
+\fBdata_nput()\fP or \fBdata_put()\fP are plotted.
+If proceeded by a call of \fBplot_cntl("addpoint")\fP
+and the ranges have not changed, only point
+\fBs + n \- 1\fP is drawn.  If proceed by a call of
+\fBplot_cntl("addline")\fP the current plot will not be erased,
+and the plot ranges will not be
+changed.  The plotting area is not automatically erased by a call of
+\fBdata_plot()\fP\-use \fBplot_cntl("erase")\fP for that.
+The axis ranges are set using the \fBplot_range()\fP function.
+See \fBplot_cntl()\fP for other options that affect drawing the plot.
+.HP 5m
+."
+\fBdata_plot(g, s, n, "all")\fP
+\- 
+As above, but uses element zero for \fBx\fP
+and the remaining elements (up to a maximum of 64)
+for \fBy\fP values.
+The number of elements is set with the \fBdata_grp()\fP function.
+.HP 5m
+."
+\fBdata_fit(pars, g, s, n, edata, epars [, ...])\fP
+\- 
+Performs a linear fit of the data in element \fBedata\fP
+to the terms in the elements specified by \fBepars\fP.
+The fitted parameters are returned in the array \fBpars\fP
+supplied by the user.
+The function returns the \fBchi\-squared\fP value of the fit,
+if the fit was successful.
+A \-1 is returned if there are insufficient arguments
+or the covariance matrix is singular.
+The fit algorithm is along the same lines as the \fBlfit()\fP routine in
+\fBNumerical Recipes\fP (W.H. Press, et al.,
+Cambridge University Press, 1986, page 512).
+.HP 5m
+."
+\fBplot_cntl(s)\fP
+\- 
+Selects built\-in plotting features.
+The argument \fBs\fP is a string of comma\- or space\-delimited options.
+See the \fI\%plot_cntl\fP help file for descriptions of the many options.
+.HP 5m
+."
+\fBplot_move(x, y [, s [, c]])\fP
+\- 
+Moves the current position to column \fBx\fP and row
+\fBy\fP, where column 0, row 0 is the upper left corner of the screen.
+The range of values is 0 <= \fBx\fP < 80 and 0 <= \fBy\fP < 25.
+Fractional values are allowed (as of \fBspec\fP release 6.00.04).
+If the third argument \fBs\fP is present,
+it is written as a label at the given position.
+If using color high\-resolution graphics,
+the fourth argument, if present, is the color to use to draw the label.
+(See the \fI\%colors\fP help file.)
+The background color for the entire label will be
+the background color at the starting position.
+If graphics mode is not on, \fBplot_move()\fP works just as \fBtty_move()\fP.
+.HP 5m
+."
+\fBplot_range(xmin, xmax, ymin, ymax)\fP
+\- 
+Sets the ranges of the internally generated plots.
+If any of the arguments is the string
+\fB"auto"\fP,
+the corresponding range limit is determined automatically from the data
+at the time the plot is drawn.  If any of the arguments is the string
+\fB"extend"\fP,
+the corresponding range limit is only changed if the current data
+decrease the minimum or increase the maximum.  Returns \fBtrue\fP.
+.RE
+.SH "CAMAC Hardware"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBca_get(i, a)\fP
+\- 
+Returns the 24\-bit value read (using F = 0)
+from the \fBi\fP\-th (\fBi\fP = 0, 1, ... )
+CAMAC I/O device (from the \fBconfig\fP file) using subaddress \fBa\fP.
+.HP 5m
+."
+\fBca_put(x, i, a)\fP
+\- 
+Writes the 24\-bit value \fBx\fP (using F = 16)
+to the \fBi\fP\-th (\fBi\fP = 0, 1, ... )
+CAMAC I/O device (from the \fBconfig\fP file)
+using subaddress \fBa\fP. Returns the value written.
+.HP 5m
+."
+\fBca_fna(f, n, a [, v])\fP
+\- 
+Sends the arbitrary FNA command to the module
+in slot \fBn\fP. If the dataway command given by
+\fBf\fP is a write function, the 24\-bit value to be written is contained in
+\fBv\fP. If the dataway command given by
+\fBf\fP is a read command,
+the function returns the 24\-bit value obtained from the module.
+The user should avoid issuing commands that would cause a LAM and
+should certainly avoid issuing commands to slots that are being
+used for motor or counter control by \fBspec\fP\(aqs internal hardware code.
+.HP 5m
+."
+\fBca_cntl(cmd [, arg])\fP
+\- 
+Performs a CAMAC crate initialize if \fBcmd\fP is \fB"Z"\fP or
+\fB"init"\fP, performs a crate clear if \fBcmd\fP is \fB"C"\fP or
+\fB"clear"\fP, sets crate inhibit if \fBcmd\fP is \fB"inhibit"\fP and
+\fBarg\fP is 1, and clears crate inhibit
+if \fBcmd\fP is \fB"inhibit"\fP and \fBarg\fP is 0.
+During normal operation, you should not need to issue these commands.
+You should probably issue a \fBreconfig\fP
+after sending a crate initialize or clear.
+.RE
+.SH "User Level Access To Hardware Interfaces"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBgpib_cntl()\fP, \fBgpib_get()\fP, \fBgpib_put()\fP, \fBgpib_poll()\fP
+\- 
+See the \fI\%gpib\fP help file for detailed usage.
+.HP 5m
+."
+\fBser_get()\fP, \fBser_put()\fP, \fBser_par()\fP
+\- 
+See the \fI\%serial\fP help file for detailed usage.
+.HP 5m
+."
+\fBsock_get()\fP, \fBsock_put()\fP, \fBsock_par()\fP
+\- 
+See the \fI\%sockets\fP help file for detailed usage.
+.HP 5m
+."
+\fBvme_get()\fP, \fBvme_get32()\fP, \fBvme_move()\fP, \fBvme_put()\fP, \fBvme_put32()\fP
+\- 
+See the \fI\%vme\fP help file for detailed usage.
+.RE
+.sp
+The following functions are for generic access to \fBspec\fP\(aqs built\-in
+support for fieldbus devices.
+Fieldbus
+refers to a family of industrial computer network protocols.  Currently, the
+only supported protocol is a limited implementation of CANbus.
+.RS 0m
+.HP 5m
+."
+\fBfbus_put(unit, d0 [, d1, ...])\fP
+\- 
+Sends a message to the fieldbus device specified as controller
+number \fBunit\fP in the hardware \fBconfig\fP file.
+The message is made up of the no more than 16 following arguments.
+.sp
+For CANbus, bit 31 of \fBd0\fP indicates whether to set CAN RTR
+(the Remote Transmission Request bit).
+Bits 0 through 28 of \fBd0\fP hold the CAN ID when in PeliCAN mode.
+Bits 0 through 10 of \fBd0\fP hold the CAN ID when in BasiCAN mode.
+The CAN message is contained in \fBd1\fP through \fBd8\fP, which
+are interpreted as 8\-bit byte values.  Any missing values are
+interpreted as zero.
+.RE
+.HP 5m
+."
+\fBfbus_get(unit)\fP
+\- 
+Reads a message
+from the field\-bus device specified as controller
+number \fBunit\fP in the hardware \fBconfig\fP file.
+Returns an eight element data array of long (32\-bit) integers
+.sp
+For CANbus, only the low order byte of each element of the returned
+array contains data.
+.RE
+.SH "PC Port Hardware"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBport_get(a)\fP
+\- 
+Reads one byte from the PC I/O port
+with the address \fBa\fP. Ports must be selected in the \fBconfig\fP file.
+.HP 5m
+."
+\fBport_getw(a)\fP
+\- 
+As above, but reads a 16\-bit word.
+.HP 5m
+."
+\fBport_put(a, b)\fP
+\- 
+Write the byte \fBb\fP to the PC I/O port with the address
+\fBa\fP. Writable ports must be selected in the \fBconfig\fP file.
+.HP 5m
+."
+\fBport_putw(a, b)\fP
+\- 
+As above, but writes a 16\-bit word.
+.RE
+.SH "Hooks To User\-Added C\-Code Functions"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBcalc(i)\fP
+\- 
+Calls user\-added function having code \fBi\fP. Returns user supplied value.
+.HP 5m
+."
+\fBcalc(i, x)\fP
+\- 
+As above, but passes argument \fBx\fP to the function.
+.RE
+.SH "String Handling"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBasc(s)\fP
+\- 
+Returns the ASCII value of the first character
+of the string value of the argument \fBs\fP.
+.HP 5m
+."
+\fBlength(s)\fP
+\- 
+Returns length of string \fBs\fP.
+.HP 5m
+."
+\fBindex(s1, s2)\fP
+\- 
+Returns an integer indicating the position
+of the first occurrence of string \fBs2\fP in string
+\fBs1\fP, counted from 1, or zero if \fBs1\fP does not contain \fBs2\fP.
+.HP 5m
+."
+\fBsplit(s, a)\fP
+\- 
+splits the string \fBs\fP at space characters
+and assigns the resulting substrings to successive
+elements of the array \fBa\fP, starting with element 0.
+The space characters are eliminated.
+The functions returns the number of elements assigned.
+.HP 5m
+."
+\fBsplit(s, a, t)\fP
+\- 
+splits the string \fBs\fP into the elements
+that are delimited by the string
+\fBt\fP and assigns the resulting substrings
+to successive elements of the array
+\fBa\fP, starting with element 0.
+The delimiting characters are eliminated.
+Returns the number of elements assigned.
+.HP 5m
+."
+\fBsubstr(s, m)\fP
+\- 
+Returns the portion of string \fBs\fP
+that begins at \fBm\fP, counted from 1.
+.HP 5m
+."
+\fBsubstr(s, m, n)\fP
+\- 
+As above, but the returned string is no longer than \fBn\fP.
+.HP 5m
+."
+\fBsprintf(f [, a, ...])\fP
+\- 
+Returns a string containing the formatted print.
+See \fBprintf()\fP in a C manual.
+.RE
+.SH "String Handling With Regular Expressions"
+.rs
+.sp
+Regular expressions are sequences of special characters
+for searching for patterns in strings.
+\fBspec\fP implements extended regular expression using
+the C library \fBregcomp()\fP and \fBregexec()\fP functions,
+which have a somewhat platform\-dependent implementation.
+See the regular expression man page (\fBman 7 regex\fP on \fBLinux\fP and \fBman re_format\fP
+on OS X) for details of regular expression syntax.
+The names and usage of the following \fBspec\fP functions resemble those used in
+the UNIX \fBawk\fP utility.
+(These functions added in \fBspec\fP release 6.03.04.)
+.RS 0m
+.HP 5m
+."
+\fBrsplit(s, a, re)\fP
+\- 
+Similar to \fBsplit()\fP above, but the optional
+delimiter argument can be a regular expression.
+The string \fBs\fP is split into elements
+that are delimited by the regular expression
+\fBre\fP and the resulting substrings
+are assigned to successive elements of the array
+\fBa\fP, starting with element 0.
+The delimiting characters are eliminated.
+Returns the number of elements assigned.
+.HP 5m
+."
+\fBsub(re, sub, s)\fP
+\- 
+Replaces the first instance of the regular expression \fBre\fP
+in the source string \fBs\fP with the substitute string \fBsub\fP.
+A \fB&\fP in the substitute string is replaced with the text
+that was matched by the regular expression.  A \fB"\e&"\fP (which must be
+typed as \fB"\e\e&"\fP) will produce
+a literal \fB&\fP.
+Returns the modified string.
+.HP 5m
+."
+\fBgsub(re, sub, s)\fP
+\- 
+Replaces all instances of the regular expression \fBre\fP
+in the source string \fBs\fP with the substitute string \fBsub\fP.
+A \fB&\fP in the substitute string is replaced with the text
+that was matched by the regular expression.  A \fB"\e&"\fP (which must be
+typed as \fB"\e\e&"\fP) will produce
+a literal \fB&\fP.
+Returns the modified string.
+.HP 5m
+."
+\fBgensub(re, sub, which, s)\fP
+\- 
+Replaces instances of the regular expression \fBre\fP
+in the source string \fBs\fP with the substitute string \fBsub\fP
+based on the value of \fBwhich\fP.
+If \fBwhich\fP is a string beginning with \fBG\fP or \fBg\fP (for global),
+all instances that match are replaced.
+Otherwise, \fBwhich\fP is a positive integer that indicates which
+match to replace.  For example, a \fB2\fP means replace
+the second match.
+.sp
+In addition, the substitute text may contain the sequences \fB\eN\fP
+(which must be typed as \fB"\e\eN"\fP),
+where \fBN\fP is a digit from 0 to 9.  That sequence will be
+replaced with the text that matches the \fBN\fPth parenthesized subexpression
+in \fBre\fP.  A \fB\e0\fP is replaced with the text that matches the entire
+regular expression.
+.sp
+Returns the modified string.
+.HP 5m
+."
+\fBmatch(s, re [, a])\fP
+\- 
+Returns the position in the source string \fBs\fP that matches
+the regular expression \fBre\fP.  The first position is 1.
+Returns 0 if there is no match
+or \-1 if the regular expression is invalid.
+If the associative array \fBa\fP is provided, its contents are
+cleared and new elements are assigned based on the consecutive
+matching parenthesized subexpressions in \fBre\fP.  The zeroth element, \fBa[0]\fP,
+is assigned the entire matching text, while \fBa[0]["start"]\fP is assigned
+the starting position of the match and \fBa[0]["length"]\fP is assigned the
+length of the match.  Elements from 1 onward are assigned matches, positions
+and lengths of the corresponding matching parenthesized subexpressions in \fBre\fP.
+.RE
+.SH "Useful Conversion Functions"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBint(x)\fP
+\- 
+Returns integer part of \fBx\fP.
+.HP 5m
+."
+\fBbcd(x)\fP
+\- 
+Returns binary\-coded decimal integer of positive \fBx\fP.
+.HP 5m
+."
+\fBdcb(x)\fP
+\- 
+Returns decimal equivalent of 32\-bit BCD \fBx\fP.
+.HP 5m
+."
+\fBrad(x)\fP
+\- 
+Returns \fBx * PI / 180\fP.
+.HP 5m
+."
+\fBdeg(x)\fP
+\- 
+Returns \fBx * 180 / PI\fP.
+.RE
+.SH "Standard Math Functions"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBfabs(x)\fP
+\- 
+Returns absolute value of \fBx\fP.
+.HP 5m
+."
+\fBsqrt(x)\fP
+\- 
+Returns square root of \fBx\fP.
+.HP 5m
+."
+\fBcos(x)\fP
+\- 
+Returns cosine of \fBx\fP.
+.HP 5m
+."
+\fBsin(x)\fP
+\- 
+Returns sine of \fBx\fP.
+.HP 5m
+."
+\fBtan(x)\fP
+\- 
+Returns tangent of \fBx\fP.
+.HP 5m
+."
+\fBacos(x)\fP
+\- 
+Returns arc cosine of \fBx\fP.
+.HP 5m
+."
+\fBasin(x)\fP
+\- 
+Returns arc sine of \fBx\fP.
+.HP 5m
+."
+\fBatan(x)\fP
+\- 
+Returns arc tangent of \fBx\fP.
+.HP 5m
+."
+\fBatan2(y, x)\fP
+\- 
+Returns the arc tangent of \fBy/x\fP using the signs
+of the arguments to determine the quadrant of the return
+value.  The return value is in the range \-PI to PI.
+.HP 5m
+."
+\fBexp(x)\fP
+\- 
+Returns exponential of \fBx\fP.
+.HP 5m
+."
+\fBexp10(x)\fP
+\- 
+Returns power of 10 to the \fBx\fP.
+.HP 5m
+."
+\fBlog(x)\fP
+\- 
+Returns natural logarithm of \fBx\fP.
+.HP 5m
+."
+\fBlog10(x)\fP
+\- 
+Returns logarithm, base 10, of \fBx\fP.
+.HP 5m
+."
+\fBpow(x, y)\fP
+\- 
+Returns power of \fBy\fP to the \fBx\fP.
+.HP 5m
+."
+\fBrand()\fP
+\- 
+Returns a random integer between 0 and 32767.
+.HP 5m
+."
+\fBrand(r)\fP
+\- 
+If \fBr\fP is positive, returns a random integer between 0 and
+\fBr\fP, inclusive.
+If \fBr\fP is negative, returns a random integer between \fB\-r\fP
+and \fBr\fP, inclusive.
+Values of \fBr\fP greater than 32767 or less than \-16383
+are set to those limits.  If \fBr\fP is zero, zero is returned.
+The C library \fBrand()\fP function is used to obtain the values.
+The seed is set to the time of day on the first call.
+The randomness (or lack thereof) of the numbers obtained
+is due to the C library implementation.
+.HP 5m
+."
+\fBsrand(seed)\fP
+\- 
+Sets the seed value for the random generator used
+by the \fBrand()\fP function to the integer value
+\fBseed\fP. This feature allows the same sequence of random numbers to be
+generated reproducibly by resetting the seed to the same value.
+Returns the value of the previous seed (as of \fBspec\fP release 6.03.04).
+.RE
+

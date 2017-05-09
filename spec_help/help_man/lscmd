@@ -1,0 +1,42 @@
+.TH "lscmd" "command" "08/01/12" "lscmd.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBlscmd\fP \- list the built\-in commands and functions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)lscmd.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "lscmd" "command" "08/01/12" "lscmd.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBlscmd [pattern_name ... ]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBlscmd\fP lists the built\-in commands and functions
+recognized by \fBspec\fP.
+With no arguments, all the built\-in keywords are listed.
+Otherwise, only those specified as arguments are printed.
+Parentheses are printed after the keywords that are functions.
+Arguments may contain the \fB*\fP and \fB?\fP metacharacters.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBlscmd get*\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%syms\fP
+\fI\%lsdef\fP
+\fI\%whats\fP
+

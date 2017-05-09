@@ -1,0 +1,282 @@
+px4                                 hardware                                 px4
+
+NAME
+     px4 - Amptek PX4 USB/Serial MCA
+
+INTRODUCTION
+
+     ssppeecc supports the Amptek PX4 over both USB and RS-232C interfaces.  (USB
+     support in ssppeecc is currently available on Linux and Mac OS X platforms.)
+     The serial baud rate is fixed at 57.6K.
+
+     In USB mode, the maximum number of data channels is 8,192.  With the serial
+     interface, the PX4 can be configured for up to 4,096 channels.
+
+     Multiple PX4 units can be configured for simultaneous use with ssppeecc.  When
+     using the USB interface, the module serial number can be configured in the
+     AADDDDRR field of the configuration editor.  If the configured serial number or
+     numbers are zero, ssppeecc will assign the USB PX4 modules in the order they
+     are discovered on the USB bus.
+
+     The PX4 has many operational parameters.  Amptek provides
+     Windows-compatible software to control the PX4.  That software can read and
+     create parameter configuration files that are interchangeable with ssppeecc.
+     See the ""rreeaadd__ccoonnffiigg"" and ""ssaavvee__ccoonnffiigg"" options to mmccaa__ppaarr(()) below.
+
+FUNCTIONS
+
+     The standard MCA commands supported by ssppeecc are described in the _m_c_a help
+     file.  Of the standard functions, the Amptek PX4 MCA supports mmccaa__ggeett(())
+     (but not mmccaa__ppuutt(())). The standard mmccaa__ppaarr(()) options ""iinnffoo"", ""cchhaannss"",
+     ""mmaaxx__cchhaannss"", ""mmaaxx__cchhaannnneellss"", ""ddiissaabbllee"", ""aauuttoo__rruunn"", ""ssoofftt__pprreesseett"",
+     ""aauuttoo__cclleeaarr"", ""nnaattiivvee__ttyyppee"", ""rruunn"", ""hhaalltt"", ""cclleeaarr"", ""ggrroouupp__ssiizzee"" and
+     ""sseelleecctt__ggrroouupp"", are supported by the Amptek PX4 MCA.
+
+     The option ""nnppttss"" is a synonym for ""ggrroouupp__ssiizzee"". The option ""bbuuffffeerr"" is a
+     synonym for ""sseelleecctt__ggrroouupp"".
+
+     The ""aauuttoo__cclleeaarr"" mode is on by default.
+
+     Options specific to the PX4 are described below.
+
+     MMCCAA
+
+     mmccaa__ppaarr((""nnppttss"" [[,, vvaalluuee]])) - With the optional argument, sets the number of
+          channels to vvaalluuee. Allowed settings are 256, 512, 1024, 2048 and 4096.
+          When using the USB interface, 8192 is also allowed.  Returns the
+          current number of channels.
+
+     mmccaa__ppaarr((""iinnppuutt__ggaattee"" [[,, vvaalluuee]])) - With the optional argument, sets the TTL
+          gate according to vvaalluuee, which can be a number or a string, as below:
+          00 oorr ""ooffff""
+          11 oorr ""hhiigghh""
+          22 oorr ""llooww""
+
+          Returns one of the above strings, indicating the state of the TTL
+          gate.
+
+     mmccaa__ppaarr((""ssllooww__tthhrreesshhoolldd"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          slow threshold percent to vvaalluuee. The allowed range is from 0 to 24.41%
+          of full scale.  Returns the current setting.
+
+     mmccaa__ppaarr((""SSCCAA##"" [[,, vvaalluuee]])) - With the optional argument, sets the SCA
+          channel indicated by ## (a number from 1 to 8) to vvaalluuee.  Returns the
+          value of SSCCAA##.
+
+     mmccaa__ppaarr((""SSCCAA##"",, ""eennaabbllee"")) - Enables the designated SCA by setting the high
+          order bit.  Returns the contents of the SCA register.
+
+     mmccaa__ppaarr((""SSCCAA##"",, ""ddiissaabbllee"")) - Disables the designated SCA by clearing the
+          high order bit.  Returns the contents of the SCA register.
+
+     mmccaa__ppaarr((""SSCCAA##"",, ""lloowweerr"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          lower bytes of the designated SCA register to vvaalluuee. Allowed values
+          are from 0 to 8191.  Returns the current setting.  The value is the
+          lower ROI limit for the designated scaler channel.
+
+     mmccaa__ppaarr((""SSCCAA##"",, ""uuppppeerr"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          upper bytes of the designated SCA register to vvaalluuee. Allowed values
+          are from 0 to 8191.  Returns the current setting.  The value is the
+          upper ROI limit for the designated scaler channel.
+
+     SShhaappiinngg
+
+     mmccaa__ppaarr((""rriissee__ttiimmee"" [[,, vvaalluuee]])) - With the optional argument, sets the rise
+          (or peaking) time to vvaalluuee. The argument is in microseconds.
+          Permitted values are from 0.8 to 102.4, although only 24 discrete
+          values are available.  The software will select the value closed to
+          the argument.  Returns the current rise time in microseconds.
+
+     mmccaa__ppaarr((""ffllaatt__ttoopp"" [[,, vvaalluuee]])) - With the optional argument, sets the value
+          of the flat-top width.  The argument vvaalluuee is in microseconds.
+          Permitted values are between 0.2 and 51.2 altogether, but only 16
+          discrete values are allowed for each value of rise time.  Returns the
+          value of the flat-top width in microseconds.
+
+     mmccaa__ppaarr((""ppiilleeuupp__rreejjeecctt"" [[,, vvaalluuee]])) - With the optional argument, turns
+          pileup rejection mode on for vvaalluuee set to 1 or a string starting with
+          YY or yy. Otherwise turns pileup rejection mode off.  Returns 0 or 1
+          indicating whether the mode is off or on.
+
+     mmccaa__ppaarr((""ffaasstt__tthhrreesshhoolldd"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          current fast-channel threshold.  The argument vvaalluuee can be an integer
+          from 0 to 250.  Returns the current fast-channel threshold setting.
+
+     mmccaa__ppaarr((""rriissee__ttiimmee__ddiisscc"" [[,, vvaalluuee]])) - With the optional argument, turns
+          rise-time discrimination mode on for vvaalluuee set to 1 or a string
+          starting with YY or yy. Otherwise turns rise-time discrimination mode
+          off.  Returns 0 or 1 indicating whether the mode is off or on.
+
+     mmccaa__ppaarr((""rrttdd__ssllooww"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          rise-time discrimination threshold percent to vvaalluuee. The allowed range
+          is from 0 to 48.83% of full scale.  Returns the current setting.
+
+     mmccaa__ppaarr((""rrttdd__ffaasstt"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          rise-time discrimination fast full width at half maximum to vvaalluuee. The
+          valid range is from 4 to 19.  Returns the current setting.
+
+     mmccaa__ppaarr((""aauuttoo__bbaasseelliinnee"" [[,, vvaalluuee]])) - With the optional argument, turns
+          baseline restoration mode on for vvaalluuee set to 1 or a string starting
+          with YY or yy. Otherwise turns baseline restoration mode off.  Returns 0
+          or 1 indicating whether baseline restoration is off or on.
+
+     mmccaa__ppaarr((""bbaasseelliinnee__rreessttoorraattiioonn"" [[,, vvaalluuee]])) - With the optional argument,
+          sets the baseline restoration to vvaalluuee, which can be a number from 63
+          to 124, or one of the strings ""ssllooww"", ""mmeeddiiuumm"" or ""ffaasstt"".  Returns a
+          number indicating the current baseline restoration setting.
+
+     GGaaiinn aanndd PPoollee ZZeerroo
+
+     mmccaa__ppaarr((""ggaaiinn"" [[,, vvaalluuee]])) - With the optional argument, sets the gain to
+          vvaalluuee, which can be from 3.1 to 562.83.  Returns the current gain
+          value as derived from the coarse- and fine-gain settings.
+
+     mmccaa__ppaarr((""ppoollee__zzeerroo"" [[,, vvaalluuee]])) - With the optional argument, sets the pole
+          zero to vvaalluuee. The valid range is from 0 to 250.  Returns the current
+          pole-zero setting.
+
+     mmccaa__ppaarr((""iinnppuutt__ooffffsseett"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          input offset to vvaalluuee, which is in volts.  The valid range is -2.050V
+          to 1.95V.  Returns the current setting.
+
+     mmccaa__ppaarr((""iinnppuutt__ppoollaarriittyy"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          input polarity according to vvaalluuee, which can be a number or a string,
+          as below:
+
+              --11 oorr ""nneeggaattiivvee""
+              11 oorr ""ppoossiittiivvee""
+
+          Returns one of the above strings indicating the current setting.
+
+     mmccaa__ppaarr((""ddeetteeccttoorr__rreesseett"" [[,, vvaalluuee]])) - Sets the detector-reset lockout
+          period to the setting closest to vvaalluuee, in milliseconds.  Possible
+          values are 0, 0.102, 0.205, 0.410, 0.819, 1.64, 3.28, 6.55 and 13.11.
+          Returns the current value.
+
+     PPoowweerr
+
+     mmccaa__ppaarr((""ppoowweerr"" [[,, vvaalluuee]])) - With the optional argument the string ""oonn"" or
+          a nonzero value, enables the on-board power supplies.  Otherwise
+          disables the power supplies.  Returns 0 or 1 to indicate whether the
+          on-board power supplies are disabled enabled.
+
+     mmccaa__ppaarr((""TTEECC"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          thermo-electric cooler to vvaalluuee, which is in degrees Kelvin.  The
+          allowed range is from 180.0K to 299.9K.  Returns the current setting.
+
+     mmccaa__ppaarr((""hhiigghh__vvoollttaaggee"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          high-voltage supply to vvaalluuee in volts, or disables the high-voltage
+          supply if vvaalluuee is the string ""ooffff"". Returns the current setting or
+          the string ""ooffff"" if the high-voltage is disabled.
+
+     mmccaa__ppaarr((""pprreeaammpp__vvoollttaaggee"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          preamplifier voltage to vvaalluuee, which must be 5 or 8.5.  Returns 5 or
+          8.5, indicating the current preamplifier voltage setting.
+
+     MMiisscceellllaanneeoouuss
+
+     mmccaa__ppaarr((""aannaalloogg__oouutt"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          analog output according to vvaalluuee, a number from 0 to 4, as follows:
+
+         00 Fast channel
+         11 Shaped Pulse
+         22 Decimated Input
+         33 Test
+         44 Off
+
+     Returns one of the above strings indicating the current setting.
+
+     mmccaa__ppaarr((""oouuttppuutt__ooffffsseett"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          output offset to vvaalluuee with units in millivolts.  The valid range is
+          from -500mV to 492mV.  Returns the current setting.
+
+     mmccaa__ppaarr((""aauuxx__oouuttppuutt"" [[,, vvaalluuee]])) - Sets the auxiliary output according to
+          vvaalluuee, which can be a number or a string, as below:
+
+              00 or ""iiccrr""
+              11 or ""ppiilleeuupp""
+              22 or ""hhoolldd""
+              33 or ""oonneesshhoott""
+              44 or ""ddeett__rreess""
+              55 or ""mmccaa__eenn""
+              66 or ""ttrriiggggeerr""
+              77 or ""ssccaa88""
+
+          Returns one of the above strings indicating the current setting.
+
+     mmccaa__ppaarr((""aauuddiioo"" [[,, vvaalluuee]])) - With the optional argument, sets the audio
+          output according to vvaalluuee, which can be a number or a string, as
+          below:
+
+              00 or ""ooffff""
+              22 or ""llooww""
+              11 or ""mmeeddiiuumm""
+              33 or ""hhiigghh""
+
+          Returns one of the above strings.
+
+     OOtthheerr
+
+     mmccaa__ppaarr((""bbuuffffeerr"" [[,, vvaalluuee]])) - With the optional argument, sets the active
+          buffer to A or B according to whether vvaalluuee is 0 or 1, respectively.
+          The mmccaa__ggeett(()) command reads from the active buffer.  The ""ssttaattuuss""
+          option to mmccaa__ppaarr(()) displays the status for the active buffer.  The
+          clear commands clear the active buffer.  When the MCA is started, the
+          configuration is set to acquire to the active buffer.  Returns 0 or 1
+          to indicate whether buffer A or B is active.
+
+     mmccaa__ppaarr((""eellaappsseedd__ccoouunnttss""||""ssllooww__ccoouunnttss"")) - Returns the slow counts value for
+          the current acquisition.
+
+     mmccaa__ppaarr((""ffaasstt__ccoouunnttss"")) - Returns the fast counts value for the current
+          acquisition.
+
+     mmccaa__ppaarr((""eellaappsseedd__ttiimmee"")) - Returns the elapsed time of the current
+          acquisition.
+
+     mmccaa__ppaarr((""ssttaattuuss"")) - Reads and displays the current PX4 status buffer
+          information.
+
+     mmccaa__ppaarr((""ppaarrss"")) - Displays the current PX4 software configuration.
+
+     mmccaa__ppaarr((""ggeett__ccoonnffiigg"")) - Reads the hardware configuration buffer from the
+          PX4.  The parameters can be displayed with the ""ppaarrss"" option above.
+
+     mmccaa__ppaarr((""sseett__ccoonnffiigg"")) - Writes the PX4 hardware configuration buffer with
+          the current software settings.
+
+     mmccaa__ppaarr((""rreeaadd__ccoonnffiigg"",, ffiilleennaammee)) - Reads the PX4 configuration from
+          ffiilleennaammee, which must conform the Amptek PX4 configuration file format.
+          This command does not update the hardware configuration.  The hardware
+          settings corresponding to the file configuration can be displayed with
+          the ""ppaarrss"" option above.  The settings can be transferred to the PX4
+          using the ""sseett__ccoonnffiigg"" option above.
+
+     mmccaa__ppaarr((""ssaavvee__ccoonnffiigg"",, ffiilleennaammee)) - Saves the current configuration to
+          ffiilleennaammee using the Amptek PX4 configuration file format.
+
+     mmccaa__ppaarr((""pprreesseett__ttiimmee"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          preset count time to vvaalluuee and sets time-preset mode.  When using the
+          ""rruunn"" mmccaa__ppaarr(()) option, the MCA will run for the specified number of
+          seconds.  Set the preset time to zero to run indefinitely.  Returns
+          the current preset count time.
+
+     mmccaa__ppaarr((""pprreesseett__ccoouunnttss"" [[,, vvaalluuee]])) - With the optional argument, sets the
+          preset count to vvaalluuee and sets count-preset mode.  When using the
+          ""rruunn"" mmccaa__ppaarr(()) option, the MCA will run until the accumulated number
+          of counts in the region-of-interest (set with ""rrooii"" below) is reached.
+          Set the preset counts to zero to run indefinitely.  Returns the
+          current preset count value.
+
+     mmccaa__ppaarr((""rrooii"" [[,, rrooii__bbeeggiinn,, rrooii__eenndd]])) - With the optional arguments, sets
+          the region-of-interest to channels from rrooii__bbeeggiinn to rrooii__eenndd. When
+          counting to in preset-counts mode, counting continues until the total
+          counts in the region of interest reaches the preset count value.  The
+          region-of-interest values are written to SCA 8 when counting in
+          preset-count mode is started.  Returns the number of channels in the
+          region of interest.
+
+SEE ALSO
+
+     _a_m_p_t_e_k_._c_o_m _m_c_a
+

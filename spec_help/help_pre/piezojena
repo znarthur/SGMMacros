@@ -1,0 +1,176 @@
+piezojena                           hardware                           piezojena
+
+NAME
+     piezojeno - Piezosystem Jena GmbH Voltage Amplifier
+
+DESCRIPTION
+
+     The Piezosystem Jena Voltage Amplifier is a controller for up to three
+     piezo actuators.  ssppeecc has been tested with model NV40/3CLE, but should
+     also work with models NV40/3, NV120/1 and NV120/1CLE.  The Piezosystem Jena
+     controller has both serial and USB interfaces, although ssppeecc accesses the
+     USB as a serial interface using the standard USB-to-serial drivers
+     available on modern LLiinnuuxx and OS X platforms.  See _w_w_w_._p_i_e_z_o_j_e_n_a_._c_o_m for
+     details on the hardware.
+
+CONFIGURATION
+
+     From ssppeecc's hardware configuration editor (eeddccoonnff, normally run from the
+     ccoonnffiigg macro), select the controller type and assign the interface
+     parameters along the following lines:
+
+        MMoottoorr aanndd CCoouunntteerr DDeevviiccee CCoonnffiigguurraattiioonn ((NNoott CCAAMMAACC))
+
+        MMOOTTOORRSS     DDEEVVIICCEE AADDDDRR <<>>MMOODDEE NNUUMM                                <<>>TTYYPPEE
+           YYEESS //ddeevv//ttttyySS00   <<>>  1199220000   33  PPiieezzoossyysstteemm JJeennaa CCoonnttrroolllleerr ((SSeerriiaall))
+
+     On the MMotor screen of the configuration editor, choose the controller type
+     as PPZZOOJJEENNAA.  The steps-per-degree parameter should be set to 10000.  The
+     slew rate, base rate and acceleration time are not used by ssppeecc for this
+     controller.  Several of the standard optional motor parameters, reached by
+     typing a lower case mm from the main motor configuration screen, are
+     recognized by ssppeecc for this controller and may be useful, as described
+     below.
+
+     There is no status available from the controller as to whether the move has
+     completed or if the stage is on target, so moves are considered complete
+     immediately after sending the move command.  A delay can be added by
+     configuring the optional settle-time and dead-band parameters.
+
+     To configure a settle time at the end of each move, set the optional
+     parameters DC dead band (""ddcc__ddeeaadd__bbaanndd"") and DC settle time
+     (""ddcc__sseettttllee__ttiimmee"").  If both of these parameters are configured, ssppeecc will
+     wait for at least the time given by the settle time before reporting the
+     move complete.  In addition, ssppeecc will also wait for the difference between
+     the target position and the actual position to be within the dead band.  If
+     the motor doesn't settle within five seconds, ssppeecc reports an error.
+
+     The read-back slop parameter (""sslloopp"") can be used to suppress position
+     discrepancy messages.  If the slop parameter is set to some number of
+     steps, ssppeecc will not report position discrepancies smaller than that value
+     and will instead silently accept the reported hardware value as the
+     position.
+
+     The hardware read-mode parameter (""rreeaadd__mmooddee"") controls when the position
+     is read from the hardware and can also tell ssppeecc to always accept the
+     reported hardware value, no matter how large the discrepancy between it and
+     the software position.  ssppeecc normally assumes a motor is at its last
+     position.  If the PPRREEMMOOVVEE read-mode option is set, ssppeecc will always read
+     the hardware before moving the motor.  If the AALLWWAAYYSS option is set, ssppeecc
+     will read the hardware whenever the ggeett__aanngglleess command is run from user
+     level.  If the NNOO QQUUEERRYY option is set, ssppeecc will always assume the hardware
+     is correct and not query the user as to how to resolve the discrepancy if
+     the returned hardware position differs from the current software position.
+     Note, the ""sslloopp"" parameter is not used when the NNOO QQUUEERRYY option is set,
+
+     There are a number of encoder parameters associated with the controller
+     that affect all channels.  These parameters are named to match the commands
+     used to program the controller: ""eennccmmooddee"", ""eennccttiimmee"", ""eenncclliimm"", ""eenncceexxpp"",
+     ""eennccssttooll"" and ""eennccssttccll"".  (See the controller user manual for details on
+     the meaning of the parameters.)  These parameters can be set as
+     non-standard optional parameters on the DDevice screen associated with the
+     controller by typing a lower case pp when the row containing the controller
+     is highlighted.  Parameters set in the ccoonnffiigg file this way can be accessed
+     using mmoottoorr__ppaarr(()), but are read only.  These parameters can also be set as
+     non-standard optional parameters associated with a single motor channel by
+     typing pp from the MMotor screen.  Parameter values set this way can be
+     accessed via mmoottoorr__ppaarr(()) for both reading and writing.  Although the
+     parameter is assigned to a particular motor channel, the value affects all
+     channels on the same controller.  If different values are set for different
+     motor channels, the value set for the highest numbered motor will be the
+     value sent to the controller.
+
+PARAMETERS
+
+     mmoottoorr__ppaarr((mmnnee,, ""cclloooopp"" [[,, 00||11]])) - Sets or returns the current operating
+          mode for the actuator mmnnee.  A value of 1 sets or indicates closed-loop
+          mode.  A value of 0 sets or indicates open-loop mode.  This parameter
+          can also be set as a non-standard optional motor parameter in the
+          ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ffeennaabbllee"" [[,, 00||11]])) - Sets or returns the soft-start setting
+          for the actuator mmnnee.  When enabled, the controller runs the actuator
+          through the entire range of motion on power up.
+
+     mmoottoorr__ppaarr((mmnnee,, ""mmoonnwwppaa"" [[,, 00||11||22]])) - Sets or returns the the value for the
+          monitor output configuration for the actuator mmnnee.  A value of 0 sets
+          it to actuator voltage.  A value of 1 sets the output to a value
+          proportional to the position (if the hardware has that functionality).
+          A value of 2 sets the output to the actuator voltage when in open-loop
+          mode and proportional to the position when in closed-loop mode.  See
+          the controller user manual for details.  This parameter can also be
+          set as a non-standard optional motor parameter in the ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""eennccmmooddee"" [[,, 00||11||22]])) - Sets or returns the encoder mode
+          parameter for all channels on the controller associated with mmnnee.
+          Mode 0 is normal with acceleration.  Mode 1 is adjustable interval.
+          Mode 2 is adjustable interval with acceleration.  Can be set as a
+          non-standard optional controller or motor parameter in the ccoonnffiigg
+          file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""eennccttiimmee"" [[,, vvaalluuee]])) - Sets or returns the scanning interval
+          parameter for all channels on the controller associated with mmnnee.
+          Allowed values are from 0 to 5.1 seconds.  Can be set as a
+          non-standard optional controller or motor parameter in the ccoonnffiigg
+          file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""eenncclliimm"" [[,, vvaalluuee]])) - Sets or returns the limit on stroke or
+          voltage for all channels on the controller associated with mmnnee.
+          Allowed values are from 1 to 65535.  Can be set as a non-standard
+          optional controller or motor parameter in the ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""eenncceexxpp"" [[,, vvaalluuee]])) - Sets the exponent for acceleration in
+          encoder mode 0 for all channels on the controller associated with mmnnee.
+          Allowed values are from 1 to 10.  Can be set as a non-standard
+          optional controller or motor parameter in the ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""eennccssttooll"" [[,, vvaalluuee]])) - Sets the step size for open-loop mode
+          for all channels on the controller associated with mmnnee.  Allowed
+          values are from 0.001 to 150 Volts.  Can be set as a non-standard
+          optional controller or motor parameter in the ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""eennccssttccll"" [[,, vvaalluuee]])) - Sets the step size for closed-loop
+          mode for all channels on the controller associated with mmnnee.  Allowed
+          values are from 0.001 to 100 um.  Can be set as a non-standard
+          optional controller or motor parameter in the ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""lliigghhtt"" [[,, vvaalluuee]])) - Sets or returns the brightness setting
+          on the controller associated with mmnnee.  Allowed values are from 0 to
+          255.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp"")) - Displays current values for parameters along the
+          following lines:
+
+             CCoonnttrroolllleerr ppaarraammeetteerrss::
+                               MMooddee ((""eennccmmooddee"")):: NNoorrmmaall wwiitthh aacccceelleerraattiioonn ((00))
+                  SSccaannnniinngg iinntteerrvvaall ((""eennccttiimmee"")):: 22 sseecc ((110000))
+                               LLiimmiitt ((""eenncclliimm"")):: 22
+                 EExxppoonneenntt ffoorr mmooddee 00 ((""eenncceexxpp"")):: 33
+                OOppeenn--lloooopp sstteepp ssiizzee ((""eennccssttooll"")):: 00..550000 VV
+              CClloosseedd--lloooopp sstteepp ssiizzee ((""eennccssttccll"")):: 00..550000 uumm
+                   DDiissppllaayy bbrriigghhttnneessss ((""lliigghhtt"")):: 11
+
+             PPaarraammeetteerrss ffoorr mmoottoorr mm00::
+                       OOppeerraattiioonn mmooddee ((""cclloooopp"")):: CClloosseedd lloooopp ((11))
+                      MMoonniittoorr oouuttppuutt ((""mmoonnwwppaa"")):: AAllwwaayyss aaccttuuaattoorr ppoossiittiioonn ((11))
+                SSoofftt ssttaarrtt ffuunnccttiioonn ((""ffeennaabbllee"")):: EEnnaabblleedd ((11))
+
+          The controller parameters are for the controller associated with motor
+          mmnnee.  Values in parenthesis are the actual command arguments sent to
+          the controller.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the channel
+          associated with mmnnee.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the channel
+          associated with mmnnee, as above, and returns a string containing the
+          response.
+
+     mmoottoorr__ppaarr((mmnnee,, ""uusseenndd"",, ccmmdd)) - Sends the string ccmmdd to the controller unit
+          associated with mmnnee.  Use this option for commands that are not
+          associated with a specific channel.
+
+     mmoottoorr__ppaarr((mmnnee,, ""uurreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the controller unit
+          assigned with mmnnee, and returns the reply.  Use this option for
+          commands that are not associated with a specific channel.
+

@@ -1,0 +1,32 @@
+klradial                              macro                             klradial
+
+NAME
+     kkllrraaddiiaall - scan along a radius in the KKLL-plane in reciprocal space
+
+SYNOPSIS
+
+     kkllrraaddiiaall aannggllee ssttaarrtt eenndd iinntteerrvvaallss ttiimmee [[eexxpprreessssiioonn]]
+
+DESCRIPTION
+
+     The kkllrraaddiiaall macro scans along a radius in the KKLL-plane in reciprocal
+     space.  The angle of the arc from the positive KK axis is given by aannggllee and
+     the scan runs from the radius given by ssttaarrtt to the radius given by eenndd.
+     The number of data points collected will be iinntteerrvvaallss++11.  Count time is
+     given by ttiimmee, which if positive, specifies seconds and if negative,
+     specifies monitor counts.
+
+     The optional last argument can supply expressions to be evaluated after KK
+     and LL are calculated for each point.  You may, for example, supply an
+     expression to calculate values for HH or include expressions to offset the
+     values of KK and LL.
+
+EXAMPLES
+
+     kkllrraaddiiaall 4455 ..00 ssqqrrtt((22)) 1100 1100
+     kkllrraaddiiaall 9900 00 11 2200 6600 ""KK++==..55;; LL++==..55""
+
+SEE ALSO
+
+     _h_k_l_s_c_a_n _h_s_c_a_n _k_s_c_a_n _l_s_c_a_n _h_k_c_i_r_c_l_e _h_l_c_i_r_c_l_e _k_l_c_i_r_c_l_e _h_k_r_a_d_i_a_l _h_l_r_a_d_i_a_l
+

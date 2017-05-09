@@ -1,0 +1,24 @@
+set_lm                                macro                               set_lm
+
+NAME
+     sseett__llmm - set lower and upper software limits
+
+SYNOPSIS
+
+     sseett__llmm mmoottoorr llooww__lliimmiitt hhiigghh__lliimmiitt
+
+DESCRIPTION
+
+     The sseett__llmm macro is used to establish the llooww__lliimmiitt and hhiigghh__lliimmiitt for one
+     mmoottoorr in units of the user positions.  (The built-in function sseett__lliimm(()),
+     used by the sseett__llmm macro, establishes the limits in terms of dial
+     positions.)
+
+EXAMPLE
+
+     sseett__llmm pphhii --9900 9900
+
+SEE ALSO
+
+     _l_m
+

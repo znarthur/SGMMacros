@@ -1,0 +1,259 @@
+nigpib                              hardware                              nigpib
+
+NAME
+     nigpib - National Instruments GPIB Controllers
+
+DESCRIPTION
+
+     ssppeecc supports a number of National Instruments GPIB controllers on a
+     variety of platforms.  The support is available using ssppeecc's built-in code
+     (highly recommended), kernel-level drivers supplied by National Instruments
+     (on LLiinnuuxx, driver release 0.8.6 or prior, or driver release 2.9 or later)
+     or freely available open-source drivers.  If the lliinnuuxx--ggppiibb open-source
+     driver from Source Forge is installed, GPIB controllers from other vendors
+     can also be used with the ssppeecc's NI GPIB support.  In addition, ssppeecc
+     supports the National Instruments VME-GPIB module via ssppeecc's built-in code.
+
+NI GPIB on LLiinnuuxx With Built-In Support
+
+     The easiest and recommended configuration for using National Instruments
+     PCII, PCIIA, AT-GPIB and PCI-GPIB cards and GPIB-ENET and VME-GPIB modules
+     with ssppeecc is the built-in support. (AT-GPIB and PCI-GPIB/rev 01 support
+     available as of ssppeecc release 5.07.02-01, GPIB-ENET and GPIB-ENET/100 as of
+     release 5.07.02-04, GPIB-ENET/1000 as of release 5.10.02-3, all PCI-GPIB as
+     of ssppeecc release 5.7.02-06, VME-GPIB as of ssppeecc release 5.08.03-10).  The
+     built-in support means no kernel-level driver is used, so there is no
+     dependency on LLiinnuuxx kernel version.  No additional software needs to be
+     installed and no additional modules or libraries need to be linked with
+     ssppeecc.  In fact, it is recommended not to install any of the National
+     Instruments LLiinnuuxx software drivers or libraries.
+
+     Configuration is along the following lines for the particular devices:
+
+        IInntteerrffaaccee CCoonnffiigguurraattiioonn
+
+           GGPPIIBB DDEEVVIICCEE  AADDDDRR <<>>MMOODDEE                        <<>>TTYYPPEE
+         00  YYEESS        00xx22bb88             NNaatt IInnsstt PPCCIIII ((bbuuiilltt--iinn))
+         00  YYEESS        00xx22ee00            NNaatt IInnsstt PPCCIIIIAA ((bbuuiilltt--iinn))
+         00  YYEESS        00xx22cc00          NNaatt IInnsstt AATT--GGPPIIBB ((bbuuiilltt--iinn))
+         00  YYEESS          11::33         NNaatt IInnsstt PPCCII--GGPPIIBB ((bbuuiilltt--iinn))
+         00  YYEESS       00xx22110000         NNaatt IInnsstt VVMMEE--GGPPIIBB ((bbuuiilltt--iinn))
+         00  YYEESS  hhoosstt               NNaatt IInnsstt GGPPIIBB--EENNEETT ((bbuuiilltt--iinn))
+
+     For the ISA cards (PCII, PCIIA, AT-GPIB), the board's base address must be
+     configured.  The built-in support operates through user-level access to the
+     I/O ports and registers.  No interrupts are involved, and no DMA is used.
+     For the ISA cards, the IRQ and DMA jumpers can be left open.  All data
+     transfers between ssppeecc and the controllers are done using polled I/O.  For
+     most applications, the built-in support works well.
+
+     For the PCI cards, the AADDDDRR field can contain zero, or numbers identifying
+     the PCI bus and slot number.  The latter configuration is useful if more
+     than one PCI-GPIB card is installed.  If the AADDDDRR is zero, the boards are
+     assigned to the GPIB unit in the order in which they are discovered.  PCI
+     bus and slot numbers can be found using the LLiinnuuxx utility //ssbbiinn//llssppccii.
+     Note, though, that utility displays hexadecimal numbers while ssppeecc's
+     configuration uses decimal.
+
+     For the GPIB-ENET module, an IP address or resolvable host name must be
+     entered as the DDEEVVIICCEE.
+
+     The VME-GPIB module has two GPIB connectors, so can be configured as two
+     GPIB controllers for ssppeecc.  For each controller, AADDDDRR is the base address
+     set via the DIP switches on the controller card plus 0x100 for GPIB port A
+     and plus 0x180 for GPIB port B.  Thus, for the default VME address of
+     0x2000, one would configure the AADDDDRR parameter as 0x2100 for port A and
+     0x2180 for port B.
+
+     No GPIB drivers should be used or installed for any GPIB controllers that
+     ssppeecc will be accessing using the built-in support.  Installing such drivers
+     may conflict with ssppeecc's use of the board.
+
+NI GPIB On LLiinnuuxx With the NI Driver
+
+     ssppeecc supports some versions of the LLiinnuuxx drivers that National Instruments
+     provides for the PCI-GPIB and AT-GPIB/TNT cards and the GPIB-ENET models.
+     However, ssppeecc's built-in support, described above, is usually the best
+     choice.
+
+     Old versions of the National Instruments drivers can downloaded from
+     ftp.ni.com in the directory _s_u_p_p_o_r_t_/_g_p_i_b_/_l_i_n_u_x.  The most recent driver
+     package (circa August 2014) is available from the download pages at the NI
+     website at _n_i_._c_o_m_/_d_o_w_n_l_o_a_d_/_n_i_-_4_8_8_._2_-_3_._2_/_4_9_1_6_/_e_n.
+
+     With the old drivers for the PC cards, ssppeecc supports the 0.x series drivers
+     (last version 0.8.6).  Those drivers work with Linux kernels through
+     release 2.4.  Versions 2.2 though 2.8 of the NI driver packages are not
+     compatible with ssppeecc.  Version 2.9 of the NI driver can be linked with ssppeecc
+     release 5.10.02-3, although use has not been well tested.  Version 3.2 of
+     the NI driver can be linked as of ssppeecc release 6.02.08.
+
+     Old versions of the NI software for use with the GPIB-ENET module, namely
+     the nniieenneett--lliinnuuxx--11..11..ttaarr..ggzz or nniieenneett--lliinnuuxx--11..22..ttaarr..ggzz packages, can also
+     be used.  The GPIB-ENET support works at user level and doesn't depend on
+     kernel version.  Again, the NI 2.2 through 2.8 driver packages that also
+     contain GPIB-ENET support are not compatible with ssppeecc.
+
+     The NI driver distribution contains instructions for installation, which
+     should be followed.  Note, though, there is no need to run the iibbccoonnff
+     utility to configure the driver for ssppeecc for the PC cards (although iibbccoonnff
+     must be used with the GPIB-ENET device to initialize the //eettcc//ggppiibbrrcc file.)
+     ssppeecc does all GPIB access from the board level device, normally //ddeevv//ggppiibb00.
+     No other special device files are needed.  ssppeecc also sets the device
+     parameters, such as timeouts and end-of-string behavior, as needed at run
+     time.
+
+     For the 0.x and 2.9 drivers and the nienet-linux packages, ssppeecc needs to be
+     linked with the cciibb..oo file included in the driver distribution.  When
+     running the ssppeecc installation script IInnssttaallll, enter the appropriate path
+     for the file's location when presented with the following:
+
+        CChhooiicceess ffoorr EExxttrraa oobbjjeecctt ffiilleess aarree::
+
+         11)) nnoo    -- nnoo aaddddiittiioonnaall oobbjjeecctt ffiilleess
+         22)) ootthheerr -- yyoouurr cchhooiiccee
+
+        IIff tthheerree aarree aaddddiittiioonnaall ssiittee--ddeeppeennddeenntt oobbjjeeccttss ffiilleess,, ssuucchh
+        aass tthhoossee pprroovviiddeedd bbyy hhaarrddwwaarree vveennddoorrss,, eenntteerr tthhee nnaammeess hheerree..
+
+        CChhoooossee EExxttrraa oobbjjeecctt ffiilleess ((nnoo))?? //uussrr//llooccaall//nniiggppiibb//cciibb..oo
+
+     For version 3.2 of the NI driver, choose instead the file nnii44888822..oo, along
+     these lines:
+
+        CChhoooossee EExxttrraa oobbjjeecctt ffiilleess ((nnoo))?? //uussrr//llooccaall//nnaattiinnsstt//nnii44888822//lliibb6644//nnii44888822..oo
+
+     In addition, for version 3.2 drivers, add --ddll as extra library flags:
+
+        CChhoooossee EExxttrraa lliibbrraarryy ffllaaggss ((nnoo))?? --ddll
+
+     If ssppeecc has already been installed, remove the file ssppeecc in the ssppeecc
+     distribution directory before running the installation script to insure
+     that the ssppeecc executable gets relinked.
+
+     When running the configuration editor, select either of the following
+     options for the PCI cards:
+
+        IInntteerrffaaccee CCoonnffiigguurraattiioonn
+
+           GGPPIIBB     DDEEVVIICCEE AADDDDRR <<>>MMOODDEE                       <<>>TTYYPPEE
+         00  YYEESS //ddeevv//ggppiibb00                      NNaatt IInnsstt wwiitthh cciibb..oo
+         00  YYEESS //ddeevv//ggppiibb00             NNaatt IInnsstt wwiitthh cciibb..oo ((sshhaarreedd))
+
+     For the Ethernet device, choose from the following:
+
+        IInntteerrffaaccee CCoonnffiigguurraattiioonn
+
+           GGPPIIBB  DDEEVVIICCEE AADDDDRR <<>>MMOODDEE                               <<>>TTYYPPEE
+         00  YYEESS   ggppiibb00                    NNaatt IInnsstt GGPPIIBB--EENNEETT wwiitthh cciibb..oo
+         00  YYEESS   ggppiibb00           NNaatt IInnsstt GGPPIIBB--EENNEETT wwiitthh cciibb..oo ((sshhaarreedd))
+
+     The "shared" version allows the GPIB interface to be shared among more than
+     one instance of ssppeecc running on the same platform.  ssppeecc uses kernel
+     semaphores and shared memory to coordinate access to the driver.  If only
+     one instance of ssppeecc is using the GPIB interface, then one can avoid a
+     little overhead by selecting the non-shared configuration.
+
+Using Both GPIB-ENET and PCI Cards With Old NI Drivers
+
+     If using the version 0.x NI drivers for the PCI-GPIB (not necessary, if the
+     ssppeecc's built-in support is used), it would normally not be possible to use
+     both the PCI-GPIB card and the ENET-GPIB device at the same time.  Both
+     devices require linking with different NI cciibb..oo files, which results in a
+     name-space conflict.  However, there is a workaround for ssppeecc, at least for
+     NI driver releases 0.8.6 and earlier.
+
+     The ssppeecc distribution contains a script called mmaakkeeCCIIBB in the distribution
+     directory that will create a file called CCIIBB..cc. Such a file is a modified
+     version of the National Instruments cciibb..cc, with the function names starting
+     with ib replaced with names starting with IB, and the 488.2 functions
+     (unused by ssppeecc) eliminated.  See the comments in the mmaakkeeCCIIBB file for more
+     information on creating the CCIIBB..cc file.
+
+     Beginning with release 0.8.4, NI has dropped the cciibb..cc file from the driver
+     package.  However, the version of cciibb..cc from early driver packages (0.8.3,
+     for example) can be used.
+
+     One then links ssppeecc with both this new CCIIBB..oo file and the cciibb..oo file
+     included with the GPIB-ENET distribution.  In the ssppeecc configuration file,
+     you select the "with CIB.o" device for the PC card GPIB interfaces.
+
+Using the Source-Forge GPIB Driver
+
+     The Source Forge LLiinnuuxx GPIB project GPIB drivers work with ssppeecc using the
+     "Nat Inst with cib.o" configuration options described above.  The package
+     distribution is available at the project's home at
+     _h_t_t_p_:_/_/_l_i_n_u_x_-_g_p_i_b_._s_o_u_r_c_e_f_o_r_g_e_._n_e_t along with documentation.  (The Source
+     Forge GPIB project is the successor to the deprecated linux-lab GPIB
+     project used with ssppeecc prior to the release of a driver by National
+     Instruments.)
+
+     To install the lliinnuuxx--ggppiibb driver you need first to have the LLiinnuuxx kernel
+     source installed.  To properly configure the sources to match the running
+     kernel, change to the appropriate //uussrr//ssrrcc//lliinnuuxx-- directory and run the
+     commands:
+
+        mmaakkee mmrrpprrooppeerr
+        mmaakkee oollddccoonnffiigg
+        mmaakkee ddeepp
+
+     Note, the LLiinnuuxx kernel is something of a moving target.  Instructions for
+     building compatible modules change often.  Check the "how-to" files
+     associated with the lliinnuuxx--ggppiibb driver for current instructions.
+
+     Next, you can go the directory with the extracted lliinnuuxx--ggppiibb sources and
+     execute the commands:
+
+        ..//ccoonnffiigguurree
+        mmaakkee
+        mmaakkee iinnssttaallll
+
+     Finally, to link the lliinnuuxx--ggppiibb library with ssppeecc, go to the ssppeecc
+     distribution directory.  Enter the complete path name of the library, such
+     as //uussrr//llooccaall//lliibb//lliibbggppiibb..ssoo, as an "extra object file" option to the ssppeecc
+     IInnssttaallll script.  (The ssppeecc linking won't work with a --llggppiibb type of
+     argument due to the idiosyncrasies of the ssppeecc linking.)
+
+     Be sure to configure appropriate entries in //eettcc//ggppiibb..ccoonnff for the card(s)
+     to be controlled by ssppeecc.  Entries should be configured along the lines of
+
+        iinntteerrffaaccee {{
+              mmiinnoorr == 00
+              bbooaarrdd__ttyyppee == ""nnii__ppccii""
+              nnaammee == ""ggppiibb""
+              ppaadd == 00
+              mmaasstteerr == yyeess
+        }}
+
+     for the National Instruments PCI-GPIB card.  Important points are that the
+     interface should be configured as the master, the primary address of the
+     master should be zero as in ppaadd == 00, and the value in the nnaammee field will
+     be the string that must appear in the DDEEVVIICCEE field in the ssppeecc
+     configuration editor, as in the following:
+
+        IInntteerrffaaccee CCoonnffiigguurraattiioonn
+
+           GGPPIIBB     DDEEVVIICCEE AADDDDRR <<>>MMOODDEE                       <<>>TTYYPPEE
+         00  YYEESS       ggppiibb                      NNaatt IInnsstt wwiitthh cciibb..oo
+
+     (Even though the text reads "Nat Inst with cib.o", it is the correct
+     configuration for using the Source Forge lliinnuuxx--ggppiibb driver with a
+     lliibbggppiibb..ssoo libary!)
+
+     Next, make sure the new driver is loaded with the command:
+
+         mmooddpprroobbee ttnntt44888822
+
+     Also, be sure to run the ggppiibb__ccoonnffiigg utility after installing the driver.
+
+     If all works, the following lines can be added to //eettcc//mmoodduulleess..ccoonnff so that
+     the driver is loaded automatically when needed, and you won't need to use
+     mmooddpprroobbee or ggppiibb__ccoonnffiigg after rebooting:
+
+        aalliiaass cchhaarr--mmaajjoorr--116600 ggppiibb__ccoommmmoonn
+        aalliiaass cchhaarr--mmaajjoorr--116600--00 ttnntt44888822
+        ppoosstt--iinnssttaallll ttnntt44888822 //uussrr//llooccaall//ssbbiinn//ggppiibb__ccoonnffiigg ----mmiinnoorr 00
+
+     Note, the Source Forge GPIB library supports GPIB cards from vendors other
+     than National Instruments, and those cards should also be usable with ssppeecc.
+

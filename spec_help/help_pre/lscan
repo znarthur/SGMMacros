@@ -1,0 +1,24 @@
+lscan                                 macro                                lscan
+
+NAME
+     llssccaann - scan along the LL-axis in reciprocal space
+
+SYNOPSIS
+
+     llssccaann ssttaarrtt eenndd iinntteerrvvaallss ttiimmee
+
+DESCRIPTION
+
+     llssccaann is a linear scan in reciprocal space along the LL-axis from ssttaarrtt to
+     eenndd. The step size is (ssttaarrtt--eenndd))//iinntteerrvvaallss.  The number of data points
+     collected will be iinntteerrvvaallss++11.  Count time is given by ttiimmee, which if
+     positive, specifies seconds and if negative, specifies monitor counts.
+
+EXAMPLE
+
+     llssccaann ..99 11..11 1100 1100
+
+SEE ALSO
+
+     _h_s_c_a_n _k_s_c_a_n _h_k_l_s_c_a_n _h_k_c_i_r_c_l_e _h_l_c_i_r_c_l_e _k_l_c_i_r_c_l_e _h_k_r_a_d_i_a_l _h_l_r_a_d_i_a_l _k_l_r_a_d_i_a_l
+

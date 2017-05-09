@@ -1,0 +1,377 @@
+.TH "\fBspec\fP" "reference" "08/01/12" "spec.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBspec\fP, \fBfourc\fP, \fBtwoc\fP, \fBsurf\fP, etc. \- X\-ray diffractometer operation for specific configurations
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)spec.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1994,1995,1997,2003,2006,2011,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "**spec**" "reference" "08/01/12" "spec.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBfourc\fP
+[ \fB\-fFLsy\fP ]
+[ \fB\-d\fP \fBdebug\fP ]
+[ \fB\-g\fP \fBgeometry\fP ]
+[ \fB\-N\fP \fBmy_name\fP ]
+[ \fB\-u\fP \fBuser\fP ]
+[ \fB\-t\fP \fBtty\fP ]
+[ \fB\-T\fP \fBfake_tty\fP ]
+[ \fB\-o\fP \fBoption=value\fP [...]]
+[ \fB\-C\fP \fBfile\fP [...]]
+[ \fB\-D\fP \fBdirectory\fP ]
+[ \fB\-p\fP \fBfd pid\fP ]
+[ \fB\-S\fP | \fB\-S\fP  \fBp1\fP | \fB\-S\fP  \fBp1\-p2\fP ]
+[[ \fB\-l\fP \fBoutputfile\fP [...]]
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP provides a software environment for the operation
+of an X\-ray diffractometer
+and other data\-acquisition instruments.  \fBspec\fP
+contains a sophisticated command interpreter that uses a C\-like grammar
+and is partially modeled on the standard UNIX utility
+\fBawk\fP. \fBspec\fP supports a variety of X\-ray diffractometer configurations.
+The diffractometer geometry is chosen by the program name.
+Some of the more popular geometries currently supported include:
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBspec\fP
+\- 
+General instrument control and data acquisition
+.HP 5m
+."
+\fBfourc\fP
+\- 
+Standard four\-circle diffractometer
+.HP 5m
+."
+\fBtwoc\fP
+\- 
+Standard two\-circle diffractometer
+.HP 5m
+."
+\fBsixc\fP
+\- 
+Six\-circle diffractometer
+(\fBdelta\fP, \fBtheta\fP, \fBchi\fP, \fBphi\fP, \fBmu\fP, \fBgamma\fP)
+.HP 5m
+."
+\fBkappa\fP
+\- 
+kappa diffractometer
+.HP 5m
+."
+\fBpsic\fP
+\- 
+Psi\-circle, including kappa type
+.HP 5m
+."
+\fBsurf\fP
+\- 
+Various liquid surface diffractometer configurations
+.RE
+.RE
+.sp
+The following options are recognized:
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fB\-f\fP
+\- 
+Fresh start.
+All symbols are set to their default values and
+the standard macros are read to establish the default state.
+.RE
+.HP 5m
+."
+\fB\-F\fP
+\- 
+Clean and fresh start.
+All symbols are set to their default values but
+no command files are read and no macros are defined.
+Only the built\-in commands are available.
+.HP 5m
+."
+\fB\-s\fP
+\- 
+Simulation mode.
+No hardware commands are issued.
+If started in simulation mode,
+simulation mode cannot be turned off without restarting the program.
+.HP 5m
+."
+\fB\-y\fP
+\- 
+Yes, change motor controller registers initially if they disagree with the
+\fBsettings\fP file.
+Normally, \fBspec\fP requires you to confirm such a change.
+This flag would be useful if you know controller power had been turned off.
+.HP 5m
+."
+\fB\-L\fP
+\- 
+Do not check or create the state\-file lock.
+Normally, \fBspec\fP prevents more than one instance of itself using the same
+user\-name plus terminal\-name derived state file.
+In some situations, particularly if a site configures the state files
+to reside on an NFS\-mounted disk, the lock test that spec uses
+always indicates another
+instance of \fBspec\fP is running, making it impossible to start.
+This flag overrides that test.
+Normally, this flag will not be used.
+.HP 5m
+."
+\fB\-d\fP \fBdebug\fP
+\- 
+Set the initial value of the debugging variable \fBDEBUG\fP to \fBdebug\fP.
+See the \fI\%debug\fP help file for a list of the debugging categories.
+A value of 192 is useful for debugging hardware problems.
+.HP 5m
+."
+\fB\-g\fP \fBgeometry\fP
+\- 
+Force loading of macro files and activation of geometry calculations
+for the specified geometry,
+while using the configuration files taken
+from the name by which \fBspec\fP is invoked.
+.HP 5m
+."
+\fB\-N\fP \fBmy_name\fP
+\- 
+Use \fBmy_name\fP for setting the \fBspec\fP prompt
+and the name of the configuration
+file directory.  Also sets the geometry as if
+\fB\-g\fP was given as an argument.
+To select a geometry not corresponding to \fBmy_name\fP,
+use the \fB\-g\fP flag after the \fB\-N\fP flag.
+.HP 5m
+."
+\fB\-u\fP \fBuser\fP
+\- 
+Use \fBuser\fP\(aqs last saved state as the current user\(aqs initial state.
+.HP 5m
+."
+\fB\-t\fP \fBtty\fP
+\- 
+Use the current user (or \fBuser\fP\(aqs) last saved state
+from the terminal specified by \fBtty\fP.
+The terminal can be specified as \fB\-t\fP \fB/dev/tty01\fP or
+\fB\-t\fP \fBtty01\fP. Note, \fBspec\fP uses the string \fBttyp#\fP
+to refer to a pseudoterminal.
+.HP 5m
+."
+\fB\-T\fP \fBfake_tty\fP
+\- 
+This option creates a user state associated with
+\fBfake_tty\fP, which may be any name
+(although only the first six characters are used).
+This option allows you to bypass the locking feature that prevents multiple
+instances of \fBspec\fP to be started by the same user
+from the same terminal.
+.HP 5m
+."
+\fB\-o\fP \fBoption=value\fP
+\- 
+Initializes the \fBspec_par()\fP \fBoption\fP to \fBvalue\fP.
+See the \fI\%spec_par\fP help file for a list of the available options.
+Multiple \fB\-o\fP options may be given.
+.HP 5m
+."
+\fB\-C\fP \fBfile\fP
+\- 
+Open the command file
+\fBfile\fP as a start\-up command file to be read
+after the standard start\-up command files, but before the optional file
+\fBspec.mac\fP in the current directory, which will always be read last.
+If there is an error in reading or executing the commands in these files,
+\fBspec\fP will jump to the main prompt and not read any remaining queued
+command files.
+Up to 32 files may be specified with multiple \fB\-C\fP options.
+(This flag added in \fBspec\fP release 5.07.01\-1.)
+.HP 5m
+."
+\fB\-D\fP \fBdirectory\fP
+\- 
+Use \fBdirectory\fP instead of the compiled\-in name (usually
+\fB/usr/local/lib/spec.d\fP) or the value of the
+\fBSPECD\fP environmental variable (if set)
+as the auxiliary file directory.
+.HP 5m
+."
+\fB\-p\fP \fBfd pid\fP
+\- 
+Indicates that \fBspec\fP input is coming from a pipe from another program.
+The argument \fBfd\fP is the file descriptor
+that \fBspec\fP should use for standard input.
+The argument \fBpid\fP is the process ID of the spawning process.
+If \fBfd\fP is zero, \fBspec\fP will not re\-echo input
+from the file descriptor to \fBspec\fP\(aqs standard output.
+.HP 5m
+."
+\fB\-S\fP
+\- 
+Starts \fBspec\fP in server mode listening at the first available port in
+the default range of 6510 to 6530.
+.HP 5m
+."
+\fB\-S\fP \fBp1\fP
+\- 
+Starts \fBspec\fP in server mode listening
+at the specified port number \fBp1\fP.
+.HP 5m
+."
+\fB\-S\fP \fBp1\-p2\fP
+\- 
+Starts \fBspec\fP in server mode listening on the first available port
+in the given range.
+.HP 5m
+."
+\fB\-l\fP \fBoutputfile\fP
+\- 
+Specifies an output file.
+Output to the file will begin immediately, so will include
+the initial hardware configuration messages.
+Files will be opened even when starting fresh.
+(Added in \fBspec\fP release 5.09.02\-2.)
+.RE
+.RE
+.SH "ENVIRONMENT"
+.rs
+.sp
+\fBspec\fP uses the following environment variables:
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSPECD\fP
+\- 
+An auxiliary file directory to use instead of the compiled in name.
+.HP 5m
+."
+\fBTERM\fP
+\- 
+The text terminal type.
+.HP 5m
+."
+\fBGTERM\fP
+\- 
+The graphics terminal type for high\-resolution graphics
+.HP 5m
+."
+\fBHOME\fP
+\- 
+The user\(aqs home directory.
+.HP 5m
+."
+\fBSHELL\fP
+\- 
+The shell program to be used for interactive subshells.
+.HP 5m
+."
+\fBSPEC_PAGER\fP or \fBPAGER\fP
+\- 
+A program through which to pipe the help files.
+If unset, the \fBless\fP command with special arguments is used.
+.HP 5m
+."
+\fBDISPLAY\fP
+\- 
+The display name and screen number on which
+to display the X\-window plots.
+.RE
+.RE
+.SH "FILES"
+.rs
+.sp
+\fBspec.d\fP is the auxiliary file directory, often
+\fB/usr/local/lib/spec.d\fP.
+\fBgconf\fP is the name by which \fBspec\fP was invoked, as in
+\fBfourc\fP, \fBtwoc\fP, etc.
+.RS 0m
+.HP 5m
+."
+\fB./spec.mac\fP
+\- 
+Optional private command file always read at startup.
+.HP 5m
+."
+\fBspec.d/site.mac\fP
+\- 
+Optional site command file always read at startup.
+.HP 5m
+."
+\fBspec.d/site_f.mac\fP
+\- 
+Optional site command file read on fresh start.
+.HP 5m
+."
+\fBspec.d/standard.mac\fP
+\- 
+Standard macro definitions read on fresh start.
+.HP 5m
+."
+\fBspec.d/gconf.mac\fP
+\- 
+Standard geometry macro definitions read on fresh start.
+Uses only first 4 letters of \fBgconf\fP.
+.HP 5m
+."
+\fBspec.d/gconf/config\fP
+\- 
+Hardware configuration file.
+.HP 5m
+."
+\fBspec.d/gconf/settings\fP
+\- 
+Motor settings file.
+.HP 5m
+."
+\fBspec.d/gconf/conf.mac\fP
+\- 
+Optional configuration command file always read at startup.
+.HP 5m
+."
+\fBspec.d/gconf/userfiles/hdw_lock\fP
+\- 
+Hardware lock file.
+.HP 5m
+."
+\fBspec.d/gconf/userfiles/user_ttyL\fP
+\- 
+\fBUser\fP\(aqs lock file.  Uses only first 6 letters of \fBuser\fP and of \fBtty\fP.
+.HP 5m
+."
+\fBspec.d/gconf/userfiles/user_ttyS\fP
+\- 
+\fBUser\fP\(aqs state file.  Uses only first 6 letters of \fBuser\fP and of \fBtty\fP.
+.HP 5m
+."
+\fBspec.d/gconf/userfiles/user_ttyP\fP
+\- 
+\fBUser\fP\(aqs data points file.  Only first 6 letters of \fBuser\fP and of \fBtty\fP.
+.HP 5m
+."
+\fBspec.d/help/*\fP
+\- 
+Help files.
+.RE
+

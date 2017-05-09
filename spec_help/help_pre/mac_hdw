@@ -1,0 +1,957 @@
+mac_hdw                             reference                            mac_hdw
+
+NAME
+     mac_hdw - macro-hardware facility
+
+Description
+
+     The macro-hardware facility links user-defined macro functions with ssppeecc's
+     built-in C code for device control.  The facility supports user-defined
+     motors, counters, MCA-type (1D) and image-type (2D) devices, providing a
+     simple method to control hardware devices that don't have ssppeecc's built-in
+     support.  (MCA support added in release 5.10.10-1, image devices in release
+     6.03.02.)
+
+     The facility also provides a simple method to implement calculational
+     pseudomotors.  Calculational pseudomotors are motions created by the
+     combined movement of multiple real motors.  For example, the gap and offset
+     of a two-blade slit are derived from the real motions of two blades.
+     Likewise, the height, pitch and roll of a table are derived from the real
+     motions of three or four table legs.
+
+     There are up to three macro functions that can be defined for
+     macro-hardware devices.  During start up and on the rreeccoonnffiigg command, ssppeecc
+     will call a ccoonnffiigguurraattiioonn  macro for each macro-hardware controller unit
+     and for each macro-hardware motor and counter channel.  This macro function
+     is required for calculational pseudomotors and for MCA- and image-type
+     devices to return necessary configuration settings, but optional for
+     regular motor and counter controllers.
+
+     For each low-level command corresponding to built-in spec functions to
+     implement motor, counter, MCA or image control capabilities, ssppeecc will call
+     a ccoommmmaanndd  macro function.  The command function is called with various
+     parameters when ssppeecc sends commands to count, move motors, etc.  The
+     function only needs to implement a subset of the available parameters, as
+     described in detail below.
+
+     For calculational pseudomotors, ssppeecc will instead call a ccaallccuullaattiioonn macro
+     function to calculate the position of each pseudomotor based on the real
+     motor positions and to calculate the real motor positions based on a target
+     pseudomotor position.
+
+     Finally, ssppeecc will call an optional ppaarraammeetteerr  macro function to set or get
+     values associated with the built-in mmoottoorr__ppaarr(()), ccoouunntteerr__ppaarr(()), mmccaa__ppaarr(())
+     and iimmaaggee__ppaarr(()) functions.
+
+Configuration
+
+     To enable a macro motor or counter, configure a macro controller on the
+     DDevices screen of configuration editor, as follows:
+
+         MMOOTTOORRSS  DDEEVVIICCEE  AADDDDRR  <<>>MMOODDEE  NNUUMM                <<>>TTYYPPEE
+            YYEESS   mmoottxxxx     --            55           MMaaccrroo MMoottoorr
+
+        SSCCAALLEERRSS  DDEEVVIICCEE  AADDDDRR  <<>>MMOODDEE  NNUUMM                <<>>TTYYPPEE
+            YYEESS   ccnnttxxxx     --            55         MMaaccrroo CCoouunntteerr
+            YYEESS   ccnnttzzzz     --            55   MMaaccrroo CCoouunntteerr//TTiimmeerr
+
+     Here, the mmoottxxxx, ccnnttxxxx or ccnnttzzzz entries for DEVICE are arbitrary
+     user-created names that match the prefix for the macros associated with the
+     particular macro-hardware controller.
+
+     The counter type is for plain counters that are started and stopped by the
+     master timer and return count values for scaler channels.  The
+     counter/timer type is for a master timer.  ssppeecc supports multiple macro
+     hardware master timers.  The wwaaiitt(()) function will wait until all return a
+     not-busy status.
+
+     To enable a macro-hardware MCA or image device, configure the controller on
+     the MCA- and CCD-type configuration screen as follows:
+
+        MMCCAA--lliikkee   DDEEVVIICCEE  AADDDDRR  <<>>MMOODDEE                  <<>>TTYYPPEE
+         00  YYEESS     mmccaaxxxx     --                       MMaaccrroo MMCCAA
+
+        CCCCDD--lliikkee   DDEEVVIICCEE  AADDDDRR  <<>>MMOODDEE                  <<>>TTYYPPEE
+         00  YYEESS     ccccddxxxx     --                       MMaaccrroo CCCCDD
+
+     Again, the mmccaaxxxx and ccccddxxxx entries are arbitrary names, but serve as the
+     prefix to the macros.
+
+     The AADDDDRR field is optional in all cases, but may contain a string value.
+     For motors and counters, the value can be retrieved within ssppeecc using
+
+           mmoottoorr__ppaarr((mmnnee,, ""aaddddrreessss""))
+         or
+           ccoouunntteerr__ppaarr((mmnnee,, ""aaddddrreessss""))
+
+     where mmnnee is the mnemonic of any motor or counter channel associated with
+     the controller (as of ssppeecc release 5.06.04-4).  For MCA and image devices,
+     use
+
+           mmccaa__ppaarr((""aaddddrreessss""))
+           mmccaa__ssppaarr((nnuumm,, ""aaddddrreessss""))
+         or
+           iimmaaggee__ppaarr((nnuumm,, ""aaddddrreessss""))
+
+     where nnuumm is the MCA or image device number.  In addition, within the macro
+     functions described below, the value will assigned to a local variable
+     named pprreeffiixx__AADDDDRR (as of ssppeecc release 5.06.04-8).
+
+     Nonstandard optional controller parameters, entered and modified using the
+     pp command on the DDevices screen and stored in the ccoonnffiigg file prefixed by
+     the string CCOONNPPAARR::, are accessible within the macro hardware functions as
+     elements of the associative array pprreeffiixx__CCOONNPPAARR[[]], where the array elements
+     are indexed by the parameter name.  In addition, the parameters for motors
+     and counters are also available using
+
+           mmoottoorr__ppaarr((mmnnee,, ppaarr))
+         or
+           ccoouunntteerr__ppaarr((mmnnee,, ppaarr))
+
+     where mmnnee is the mnemonic of any motor or counter channel associated with
+     the controller and ppaarr is the parameter name (as of ssppeecc release
+     5.08.05-1).  For MCA and image devices, use
+
+           mmccaa__ppaarr((ppaarr))
+           mmccaa__ssppaarr((nnuumm,, ppaarr))
+         or
+           iimmaaggee__ppaarr((nnuumm,, ppaarr))
+
+     where nnuumm is the MCA or image device number.
+
+     Individual motor and counters are assigned to macro-hardware controllers on
+     the MMotor and SScaler screens, respectively.  On the MMotor screen, select
+     MMAACC__MMOOTT as the controller type.  For ordinary counters, choose MMAACC__CCNNTT as
+     the controller type on the SScaler screen.  For polled counters (introduced
+     in ssppeecc release 5.08.03-3), choose the MMAACC__CCNNTTPP controller type.
+
+     Unit numbers for macro motors and counters are assigned consecutively,
+     starting at zero for each macro motor controller and for each macro counter
+     controller.
+
+The Macro Functions
+
+     For standard macro motors, macro counters, macro MCA devices and macro
+     image devices, the three possible user-defined macro functions have names
+     formed by prepending the prefix defined in the ccoonnffiigg file to __ccoonnffiigg(()),
+     __ccmmdd(()) and __ppaarr(()).  For calculational pseudomotors, a __ccaallcc(()) function is
+     needed rather than the __ccmmdd(()) function.
+
+     For the standard motor and counter macro functions, the first argument is
+     the motor or counter number if the call applies to a single channel or the
+     string ""...."" if the call applies to all channels associated with the motor
+     or counter controller.  For MCA and image devices, the first argument is
+     the MCA or image device number.
+
+     For all the __ccmmdd(()) functions, the second argument is a string that contains
+     a key specific to the command.  Remaining arguments, if any, contain
+     parameters.
+
+     If an optional AADDDDRR string is included in the ccoonnffiigg file for the
+     associated controller, the string will be assigned to a variable named
+     pprreeffiixx__AADDDDRR.  Likewise, nonstandard optional parameters configured for the
+     associated controller are assigned to an associative array variable named
+     pprreeffiixx__CCOONNPPAARR.  However, the variables are only visible within the macro
+     functions.
+
+     To send an error back to ssppeecc from the macro functions, return the special
+     string ""..eerrrroorr.."".
+
+     It may be helpful to set the ssppeecc DEBUG level to 128 to display the macro
+     function calls.  The debugging messages should make clear when, how and in
+     what order the various macro functions are called.
+
+The __ccoonnffiigg(()) Function
+
+     The pprreeffiixx__ccoonnffiigg(()) function is called after reading the ccoonnffiigg file.  On
+     startup, the function is called after the initial command files have been
+     read, so that macros defined in the initial command files can be used to
+     set up the macro hardware.  For regular macro motors and counters, this
+     function is optional and need not exist.  The function is required for
+     calculation pseudomotors to configure the dependencies between real and
+     pseudomotors.  The function is also required for MCA and image devices to
+     configure the maximum number of channels or pixels and the native data
+     type.
+
+     The pprreeffiixx__ccoonnffiigg macro function is called as follows:
+
+     pprreeffiixx__ccoonnffiigg((""...."",, ""ccttrrll"",, pp11,, pp22)) - Called for each macro-hardware motor
+          and counter controller unit.  The parameter pp11 is the unit number of
+          the controller, while pp22 is the number of channels set as NUM on the
+          DDevices screen of the configuration editor.  If the function returns
+          the string ""..eerrrroorr.."", ssppeecc will consider the controller unresponsive
+          and won't call the macro functions for the associated channels.
+
+     pprreeffiixx__ccoonnffiigg((mmnnee,, ""mmoott"",, uunniitt,, mmoodduullee,, cchhaann)) - Called for each macro motor
+          channel, where mmnnee is the motor mnemonic, uunniitt is the unit number of
+          the associated controller, mmoodduullee is the optional module number and
+          cchhaann is the channel number.  For calculational pseudomotors, this call
+          must return a string containing a list of mnemonics for the real
+          motors on which the pseudomotor depends.  If the function returns the
+          string ""..eerrrroorr.."", ssppeecc will consider the channel unusable.
+
+     pprreeffiixx__ccoonnffiigg((mmnnee,, ""ccnntt"",, uunniitt,, 00,, cchhaann)) - Called for each macro counter
+          channel, where mmnnee is the counter mnemonic, uunniitt is the unit number of
+          the associated controller, and cchhaann is the channel number.  The fourth
+          argument is currently always zero.  If the function returns the string
+          ""..eerrrroorr.."", ssppeecc will consider the channel unusable.
+
+     pprreeffiixx__ccoonnffiigg((nnuumm,, ""mmccaa"")) - Called for each macro MCA, where nnuumm is the MCA
+          number.  This function must return a string with two arguments in any
+          order: the maximum number of channels for the MCA and the native data
+          type.  The data type is one of the words bbyyttee, uubbyyttee, sshhoorrtt, uusshhoorrtt,
+          lloonngg, uulloonngg, ffllooaatt or ddoouubbllee.  An example return string is ""44009966
+          uulloonngg"".  If the function returns the string ""..eerrrroorr.."", ssppeecc will
+          consider the MCA unit unusable.
+
+     pprreeffiixx__ccoonnffiigg((nnuumm,, ""iimmaaggee"")) - Called for each macro image device, where nnuumm
+          is the image device number.  This function must return a string with
+          three arguments: the number of rows, number of columns and native data
+          type.  The data type is one of the words bbyyttee, uubbyyttee, sshhoorrtt, uusshhoorrtt,
+          lloonngg, uulloonngg, ffllooaatt or ddoouubbllee.  An example return string is ""119955 448877
+          lloonngg"" for 195 rows and 487 columns.  If the function returns the
+          string ""..eerrrroorr.."", ssppeecc will consider the image device unusable.
+
+     For motors and counters, the unit and channel numbers are assigned in the
+     configuration editor just as with other motors and counters.  Unit numbers
+     are assigned consecutively to each controller type.  That is, the first
+     macro motor controller listed is unit zero, as is the first macro counter
+     controller, both independent of other controller types.  Counter unit and
+     channel numbers are assigned explicitly on the SScaler screen of the
+     configuration editor.  Motor unit, module and channel numbers can be
+     explicitly assigned in the unit/channel field of the configuration editor.
+     If left blank, the channels numbers are assigned automatically in
+     consecutive order.
+
+     For macro hardware designed for general purpose applications, these calls
+     to the pprreeffiixx__ccoonnffiigg(()) macro function can be used to set up the rest of the
+     macro interface.  For simple motor and counter applications, the
+     pprreeffiixx__ccoonnffiigg(()) function may not be needed at all.
+
+Motors
+
+The __ccmmdd(()) Function For Motors
+     The pprreeffiixx__ccmmdd(()) function is called to control regular macro motors.  The
+     second argument of the function is a command key.  There are many more
+     command keys than any particular macro motor implementation needs.  Only
+     the command keys that are relevant to the particular application should be
+     included in the user-defined macro function.
+
+     The syntax of the function call is:
+
+     pprreeffiixx__ccmmdd((mmnnee,, kkeeyy [[,, pp11 [[,, pp22]]]] [[,, uunniitt]])) - Called by the C code for all
+          operations related to motor control.  mmnnee is the string ""...."" for keys
+          that apply to all motors, such as with the keys ""pprreessttaarrtt__aallll"" and
+          ""ssttaarrtt__aallll"".  mmnnee is the motor number for keys that apply to
+          individual motors.  Each key is only called one way or the other.  kkeeyy
+          is a string containing the particular command.  pp11 and pp22, if present,
+          are parameters related to the command.  If the mmnnee argument is the
+          string ""...."" the uunniitt parameter will be included and specifies the unit
+          number for which the command applies (as of ssppeecc release 5.07.03-3).
+
+     In the following, the phrase "sent when changed" means the pprreeffiixx__ccmmdd(())
+     macro function is only called with the given key before the first
+     applicable move command or home command after ssppeecc reads the ccoonnffiigg file,
+     either on startup or after a rreeccoonnffiigg command (included in the ccoonnffiigg
+     macro), or after the associated parameter has been changed using the
+     mmoottoorr__ppaarr(()) function.
+
+     Note, the pprreeffiixx__ccmmdd(()) macro function must not assign a value to any
+     elements of the motor position AA[[]] array.
+
+     ""bbaassee__rraattee"" - Sent when changed. The pp11 parameter contains the base rate in
+          units of Hz.
+
+     ""sslleeww__rraattee"" - Sent when changed. The pp11 parameter contains the slew rate in
+          units of Hz.
+
+     ""aacccceelleerraattiioonn"" - Sent when changed. Also called if the base rate or slew
+          rate have changed, since some motor controllers need to be told to
+          recalculate acceleration ramps if the velocity parameters change.  The
+          pp11 parameter contains the acceleration time in units of milliseconds.
+          The pp22 parameter contains the acceleration in units of steps per
+          second per second.
+
+     ""hhoommee__bbaassee__rraattee"" - Sent when changed. The pp11 parameter contains the home
+          base rate in units of Hz.
+
+     ""hhoommee__sslleeww__rraattee"" - Sent when changed. The pp11 parameter contains the home
+          slew rate in units of Hz.
+
+     ""hhoommee__aacccceelleerraattiioonn"" - Sent when changed. The pp11 parameter contains the home
+          acceleration time in units of milliseconds.  The pp22 parameter contains
+          the home acceleration in units of steps per second per second.
+
+     ""pprreerreeaadd__aallll"" - Sent prior to a possible read of all the motors.  Note,
+          depending on the configured hardware read modes for the motors, there
+          may be no subsequent commands to read a motor associated with this
+          controller.  Either ""pprreerreeaadd__aallll"" or ""pprreerreeaadd__oonnee"" (below), but not
+          both, will be called prior to the ""ppoossiittiioonn"" call below.
+
+     ""pprreerreeaadd__oonnee"" - Sent prior to reading an individual motor.  Either
+          ""pprreerreeaadd__aallll"" (above) or ""pprreerreeaadd__oonnee"", but not both, will be called
+          prior to the ""ppoossiittiioonn"" call below.
+
+     ""ppoossiittiioonn"" - For this key, the macro function must return the current motor
+          position in dial units.  This call will be preceded by a call with a
+          key of either ""pprreerreeaadd__oonnee"" or ""pprreerreeaadd__aallll"".
+
+          The macro-hardware motors use natural units for positions.  For such
+          motor controllers, ssppeecc only uses the steps-per-degree parameter in
+          the ccoonnffiigg file to determine the precision of the position values.
+          The precision is determined by the magnitude of the parameter.  For
+          example, a value of 1000 will cause ssppeecc to round to the nearest
+          0.001, while a value of 5000 will cause ssppeecc to round to the nearest
+          0.0002.  The rounding is performed on the value returned by the
+          ""ppoossiittiioonn"" key.
+
+     ""sseett__ppoossiittiioonn"" - Sent to set the current dial position of the macro motor.
+          The parameter pp11 contains the position in dial units.
+
+     ""pprreessttaarrtt__aallll"" - For regular moves, sent if any motors associated with the
+          macro motor controller need to be moved.
+
+     ""pprreessttaarrtt__oonnee"" - For regular moves and homing moves, sent for each motor
+          that needs to be moved.  For regular moves, a call of ""pprreessttaarrtt__aallll""
+          comes first.
+
+     ""mmaaggnniittuuddee"" - For regular moves, sent with the magnitude of the move in
+          dial units.  The parameter pp11 contains the position in dial units and
+          includes the sign of the move.  The magnitude is also included with
+          the ""ssttaarrtt__oonnee"" key (below).
+
+     ""ssttaarrtt__oonnee"" - Sent to start a regular move for one motor.  The parameter pp11
+          contains the target position in dial units to accommodate a controller
+          that requires absolute positions.  The parameter pp22 contains the
+          magnitude of the move in dial units to accommodate a controller that
+          requires relative positions.
+
+     ""ssttaarrtt__aallll"" - Sent after all ""ssttaarrtt__oonnee"" commands to accommodate
+          controllers that use a simultaneous start.
+
+     ""ggeett__ssttaattuuss"" - Sent to get the move and limit status of individual motors.
+          If the motor is moving, the macro function must return a value with
+          bit 0x02 set.  If the low limit is active, the return value must have
+          bit 0x04 set.  If the high limit is active, the return value must have
+          bit 0x08 set.  Setting bit 0x10 indicates an "emergency stop" and
+          setting bit 0x20 indicates a motor fault (as of ssppeecc release
+          5.07.04-4), both which currently result in similar behavior to when a
+          limit is hit.  Otherwise, the macro function must return a value of
+          zero.
+
+     ""fflluusshh__aallll"" - Sent before the "hard" position synchronization that occurs
+          on startup and before and after reading the ccoonnffiigg and sseettttiinnggss files
+          on a rreeccoonnffiigg command.
+
+     ""fflluusshh__oonnee"" - Sent for each motor after the ""fflluusshh__aallll"" key above and
+          before a ""ggeett__ssttaattuuss"" during the position synchronization.
+
+     ""aabboorrtt__oonnee"" - Sent for each active motor when motors are halted, normally
+          either by a ^^CC from the keyboard or by a ssttoopp(()) command.
+
+     ""aabboorrtt__aallll"" - Sent to each macro motor controller that has busy motors when
+          motor are halted.  The key is sent after the ""aabboorrtt__oonnee"" keys are
+          sent.  This command accommodates controllers that allow a single
+          command to halt all its associated motors.
+
+     ""sseeaarrcchh"" - Sent to initiate a home or limit search.  A ""pprreessttaarrtt__oonnee"" call
+          will precede this call.  The parameter pp11 indicates the type of search
+          as follows.
+
+          ""hhoommee"" - Find the home position as appropriate.
+          ""hhoommee++"" - Find the home position by moving in the positive direction.
+          ""hhoommee--"" - Find the home position by moving in the negative direction.
+          ""lliimm++"" - Find the positive limit.
+          ""lliimm--"" - Find the negative limit.
+
+          If the underlying cchhgg__ddiiaall(()) call includes the optional third argument
+          or if the optional parameter ""hhoommee__ppoossiittiioonn"" is set, the parameter pp22
+          contains the position in dial units that corresponds to the home or
+          limit switch.
+
+     ""ddiiffff__ppoossiittiioonn"" - Sent if the motor is configured for a settle time.  To
+          configure a motor for settle time, both the DC dead-band and the DC
+          settle-time parameters have to be set (usually from the first optional
+          motor parameter screen of the configuration editor - get there by
+          typing an mm from the primary motor screen).  The settle-time parameter
+          is in seconds.  ssppeecc will wait for at least as long as the settle time
+          before treating a move as complete.  In addition, ssppeecc will wait until
+          the value returned by this call is less than the dead band, but for no
+          longer than five seconds.  The preferred units for dead band are
+          steps, but it is only necessary that the units in the ccoonnffiigg file
+          agree with the units returned by this call.
+
+     Backlash is handled as two separate move commands.  If the macro function
+     will take care of backlash, set the backlash parameter to zero in the
+     ccoonnffiigg file.
+
+     The default behavior with respect to reading the motor position is to only
+     ask for the motor position from the controller during position
+     synchronization or at the end of a move.  The motor parameter "hardware
+     read mode" (on the second optional motor parameter screen of the
+     configuration editor) can be set to require ssppeecc to ask for the position
+     before each move and/or for every rreeaadd__mmoottoorrss(()) call from user level.  The
+     hardware read mode can also be set so that position discrepancies are
+     always silently resolved in favor of the value returned by the controller
+     (or macro function).
+
+     A minimal implementation would likely recognize the keys ""ssttaarrtt__oonnee"",
+     ""ggeett__ssttaattuuss"", ""ppoossiittiioonn"" and ""sseett__ppoossiittiioonn"". An example that does nothing
+     useful follows:
+
+        ddeeff mmoottxxxx__ccmmdd((mmnnee,, kkeeyy,, pp11,, pp22)) ''{{
+            gglloobbaall ddeemmoo__ppooss[[]]
+
+            iiff ((kkeeyy ==== ""sseett__ppoossiittiioonn"")) {{
+                    ddeemmoo__ppooss[[mmnnee]] == pp11
+                    rreettuurrnn
+            }}
+            iiff ((kkeeyy ==== ""ppoossiittiioonn"")) {{
+                    rreettuurrnn((ddeemmoo__ppooss[[mmnnee]]))
+            }}
+            iiff ((kkeeyy ==== ""ssttaarrtt__oonnee"")) {{
+                    ddeemmoo__ppooss[[mmnnee]] == pp11
+                    rreettuurrnn
+            }}
+            iiff ((kkeeyy ==== ""ggeett__ssttaattuuss"")) {{
+                    rreettuurrnn((00))
+            }}
+        }}''
+
+The __ppaarr(()) Function For Motors
+     The pprreeffiixx__ppaarr(()) macro function is called when various motor parameters are
+     set, and when the mmoottoorr__ppaarr(()) function is used to retrieve a user-defined
+     parameter.  The mmnnee argument will always be a motor number and never the
+     string ""...."" that is used with the other user-defined macro-hardware
+     functions.
+
+     The function will be called as:
+
+     pprreeffiixx__ppaarr((mmnnee,, kkeeyy,, ""ggeett"")) - The function should return a value for the
+          parameter named as kkeeyy for motor number mmnnee. The macro function will
+          never be called to get a parameter value when kkeeyy is a parameter name
+          that is built into the ssppeecc C code.
+
+     pprreeffiixx__ppaarr((mmnnee,, kkeeyy,, ""sseett"",, pp11 [[,, pp22]])) - Called when various parameters
+          change their value, as described below.
+
+     The built-in parameter names are as follows.  The pprreeffiixx__ppaarr(()) function
+     will never be called with ""ggeett"" for these parameters, as their values are
+     maintained internally.
+
+     The first set below are called only when mmoottoorr__ppaarr(()) is executed from
+     user-level.
+
+     ""aacccceelleerraattiioonn"" - pp11 contains the acceleration time in milliseconds.  pp22
+          contains the acceleration value in steps per second per second.
+
+     ""bbaacckkllaasshh"" - pp11 contains the new backlash value in steps.
+
+     ""bbaacckkllaasshh__rraattee"" - pp11 contains the new backlash rate in Hz.
+
+     ""bbaassee__rraattee"" - pp11 contains the new base rate in Hz.
+
+     ""ddiissaabbllee"" - pp11 contains 1 or 0, depending on whether the motor was disabled
+          or un-disabled (available as of ssppeecc release 5.06.03-8).
+
+     ""sslleeww__rraattee"" or ""vveelloocciittyy"" - pp11 contains the new slew  rate in Hz.
+
+     ""sstteepp__ssiizzee"" - pp11 contains the new step-size parameter.
+
+     The following two keys are called when an associated function is executed
+     from user level.
+
+     ""lliimmiittss"" - pp11 contains the low limit in dial units.  pp22 contains the high
+          limit in dial units.  Called when the user-level sseett__lliimm(()) function is
+          executed.
+
+     ""ooffffsseett"" - Called when the user-level cchhgg__ooffffsseett(()) function is executed.
+          pp11 contains the offset in user units.
+
+     The following optional motor parameters generate a call to the user-defined
+     macro-hardware function when the values are read from the ccoonnffiigg file and
+     when the values are set with the mmoottoorr__ppaarr(()) function.  See the _m_o_t_o_r_s help
+     file for additional information on the parameters.
+
+         ""hhoommee__sslleeww__rraattee""
+         ""hhoommee__bbaassee__rraattee""
+         ""hhoommee__aacccceelleerraattiioonn""
+         ""ddcc__ddeeaadd__bbaanndd""
+         ""ddcc__sseettttllee__ttiimmee""
+         ""ddcc__pprrooppoorrttiioonnaall__ggaaiinn""
+         ""ddcc__ddeerriivvaattiivvee__ggaaiinn""
+         ""ddcc__iinntteeggrraall__ggaaiinn""
+         ""ddcc__iinntteeggrraattiioonn__lliimmiitt""
+         ""ddcc__ffoolllloowwiinngg__eerrrroorr""
+         ""ddcc__ssaammpplliinngg__iinntteerrvvaall""
+         ""eennccooddeerr__sstteepp__ssiizzee""
+         ""sstteepp__mmooddee""
+         ""sslloopp""
+         ""rreeaadd__mmooddee""
+         ""ddeecceelleerraattiioonn""
+         ""ttoorrqquuee""
+         ""mmiisscc__11""
+         ""mmiisscc__22""
+         ""mmiisscc__33""
+         ""mmiisscc__44""
+         ""mmiisscc__55""
+         ""mmiisscc__66""
+
+     There are a number of valid arguments to mmoottoorr__ppaarr(()) which will not
+     generate a call to the pprreeffiixx__ppaarr(()) macro function at all.  These include
+     ""uunniitt"", ""cchhaannnneell"", ""rreessppoonnssiivvee"", ""ccoonnttrroolllleerr"", ""ddeevviiccee__iidd"", ""aaccttiivvee"",
+     ""ssttaattuuss"", ""ccoonnffiigg__sstteepp__ssiizzee"", ""ccoonnffiigg__aacccceelleerraattiioonn"", ""ccoonnffiigg__vveelloocciittyy"",
+     ""ccoonnffiigg__bbaassee__rraattee"", ""ccoonnffiigg__bbaacckkllaasshh"", ""llooww__lliimmiitt"" and ""hhiigghh__lliimmiitt"".
+
+     Arguments to mmoottoorr__ppaarr(()) that are not recognized by the built-in C code
+     will be passed on, as is, to the pprreeffiixx__ppaarr(()) user-defined macro function.
+
+Calculational Pseudo Motors
+     For calculational pseudomotors, two macro functions must be be provided
+     with names formed by prepending the prefix from the ccoonnffiigg file to
+     pprreeffiixx__ccoonnffiigg(()) and pprreeffiixx__ccaallcc(()).
+
+     The pprreeffiixx__ccoonnffiigg(()) function, when called with the key equal to ""mmoott"", must
+     return a string that contains a space-delimited list of mnemonics for the
+     real motors on which motor mmnnee depends.
+
+     The pprreeffiixx__ccaallcc(()) macro function will be called as follows:
+
+     pprreeffiixx__ccaallcc((mmnnee,, mmooddee)) - When called with mmooddee equal to zero, the function
+          should assign a value to AA[[mmnnee]] corresponding to the current position
+          of the pseudomotor mmnnee. When called with mmooddee equal to one, the
+          function should assign a value to AA[[mmnnee]] corresponding to the target
+          position of the real motor mmnnee.
+
+     When called to calculate the real motor positions for a move (with mmooddee
+     equal 1), the function will first be called with mmnnee set to the string
+     ""...."", then called with each of the real motor mnemonics as arguments, in
+     turn.  One can use the initial call to calculate quantities that depend on
+     the current positions of the real motors before new values are assigned in
+     subsequent calls.
+
+     The pprreeffiixx__ccaallcc(()) function should only include commands to calculate
+     pseudomotor positions from real motor positions or vice versa.  The
+     function should not contain calls to do hardware access.  In fact, calls to
+     the built-in functions wwaaiitt(()) or rreeaadd__mmoottoorrss(()) will return immediately if
+     called from the pprreeffiixx__ccaallcc(()) macro function, to avoid possible recursion
+     as those built-in functions can subsequently call the invoking
+     pprreeffiixx__ccaallcc(()) macro function.
+
+     Note, if the pseudomotor is disabled via mmoottoorr__ppaarr((mmnnee,, ""ddiissaabbllee"",, 11)) the
+     calls to pprreeffiixx__ccaallcc(()) with mmooddee equal to 1 will be skipped.  That will
+     prevent new positions from being calculated for the associated real motors.
+
+     With ssppeecc release 5.06.04-4, a special mmoottoorr__ppaarr(()) option called ""cchhaann00"" is
+     available for macro motors.  The command
+
+         mmoottoorr__ppaarr((mmnnee,, ""cchhaann00""))
+
+     will return the motor number of the macro motor in the first channel of the
+     same controller unit and module number of the macro motor with mnemonic
+     mmnnee. This feature allows for simplified implementation of general-purpose
+     calculational pseudomotors.  For example, if there are parameters
+     associated with a group of motors, one copy of the parameters can be
+     assigned to the ""cchhaann00"" motor and then accessed by the related motors.
+
+     The following examples implements calculational pseudomotors for a slit.
+     The slit has two blades whose real motors have mnemonics ssll22tt and ssll22bb
+     (slit 2 top and bottom).  The pseudomotors are the slit gap and the slit
+     offset position with mnemonics ssll22gg and ssll22oo, respectively.
+
+     The DDevices screen of the configuration editor should look as follows for
+     the controller:
+
+        MMOOTTOORRSS   DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE  NNUUMM               <<>>TTYYPPEE
+          YYEESS     sslliitt22                   22          MMaaccrroo MMoottoorr
+
+     The macros would be as follows:
+
+        ddeeff sslliitt22__ccoonnffiigg((mmnnee,, ttyyppee,, uunniitt,, mmoodduullee,, cchhaann)) ''{{
+              iiff ((ttyyppee ==== ""mmoott""))
+                      rreettuurrnn ""ssll22tt ssll22bb""
+        }}''
+        ddeeff sslliitt22__ccaallcc((mmnnee,, mmooddee)) ''{{
+              iiff ((mmooddee ==== 00)) {{
+                      iiff ((mmnnee ==== ssll22gg))
+                              AA[[ssll22gg]] == AA[[ssll22tt]] ++ AA[[ssll22bb]]
+                      iiff ((mmnnee ==== ssll22oo))
+                              AA[[ssll22oo]] == ((AA[[ssll22tt]] -- AA[[ssll22bb]]))//22
+              }} eellssee {{
+                      iiff ((mmnnee ==== ssll22bb))
+                              AA[[ssll22bb]] == --AA[[ssll22oo]] ++ AA[[ssll22gg]]//22
+                      iiff ((mmnnee ==== ssll22tt))
+                              AA[[ssll22tt]] == AA[[ssll22oo]] ++ AA[[ssll22gg]]//22
+              }}
+        }}''
+
+     The following mmaakkee__sslliitt__mmaaccss macro can be used to generate macros such as
+     the above.
+
+        ddeeff mmaakkee__sslliitt__mmaaccss ''{{
+            llooccaall   nnaammee,, ffiillee
+            llooccaall   ll,, rr,, gg,, oo
+
+            ffiillee == ggeettvvaall((""FFiillee ffoorr mmaaccrrooss"",, ""ttttyy""))
+            nnaammee == ggeettvvaall((""NNaammee ooff sslliitt"",, ""SSlliitt11""))
+            rr == ggeettvvaall((""MMnneemmoonniicc ffoorr rriigghhtt//ttoopp sslliitt"",, ""ss11rr""))
+            ll == ggeettvvaall((""MMnneemmoonniicc ffoorr lleefftt//bboottttoomm sslliitt"",, ""ss11ll""))
+            gg == ggeettvvaall((""MMnneemmoonniicc ffoorr ggaapp"",, ""ss11vvgg""))
+            oo == ggeettvvaall((""MMnneemmoonniicc ffoorr ooffffsseett"",, ""ss11vvoo""))
+
+            ffpprriinnttff((ffiillee,, ""\\nn\\
+        ddeeff %%ss__ccoonnffiigg((mmnnee,, ttyyppee,, uunniitt,, mmoodduullee,, cchhaann)) \\''{{\\nn\\
+            iiff ((ttyyppee ==== \\""mmoott\\""))\\nn\\
+                    rreettuurrnn \\""%%ss %%ss\\""\\nn\\
+        }}\\''\\nn\\
+        ddeeff %%ss__ccaallcc((mmnnee,, mmooddee)) \\''{{\\nn\\
+            iiff ((mmooddee ==== 00)) {{\\nn\\
+                    iiff ((mmnnee ==== %%ss))\\nn\\
+                            AA[[mmnnee]] == AA[[%%ss]] ++ AA[[%%ss]]\\nn\\
+                    iiff ((mmnnee ==== %%ss))\\nn\\
+                            AA[[mmnnee]] == ((AA[[%%ss]] -- AA[[%%ss]]))//22\\nn\\
+            }} eellssee {{\\nn\\
+                    iiff ((mmnnee ==== %%ss))\\nn\\
+                            AA[[mmnnee]] == --AA[[%%ss]] ++ AA[[%%ss]]//22\\nn\\
+                    iiff ((mmnnee ==== %%ss))\\nn\\
+                            AA[[mmnnee]] == AA[[%%ss]] ++ AA[[%%ss]]//22\\nn\\
+            }}
+        }}\\''\\nn"",, nnaammee,,ll,,rr,, nnaammee,, gg,,rr,,ll,, oo,,rr,,ll,, ll,,oo,,gg,, rr,,oo,,gg))
+        }}''
+
+     The following example implements a table-height pseudomotor with mnemonic
+     tt11zz that is the average height of the three real motors tt11ff, tt11bb11 and tt11bb22
+     that correspond to the table legs.  When the height is moved, each leg is
+     moved by an amount equal to the difference of the current height and the
+     target height.  The current average height needs to be calculated from the
+     current real-motor positions before the new positions are assigned.  The
+     feature where the pprreeffiixx__ccaallcc(()) function is called with mmnnee set to the
+     string ""...."" before being called with the real motor mnemonics is used to
+     save the average position in a global variable to be used in the subsequent
+     calls.
+
+        ddeeff ttaabb11__ccoonnffiigg((mmnnee,, ttyyppee,, uunniitt,, mmoodduullee,, cchhaann)) ''{{
+              gglloobbaall  ttaabb11__aavvee
+              iiff ((ttyyppee ==== ""mmoott""))
+                      rreettuurrnn ""tt11ff tt11bb11 tt11bb22""
+        }}''
+        ddeeff TTEE11__vveerrtt__jjaacckk__ccaallcc((mmnnee,, mmooddee)) ''{{
+              iiff ((mmooddee ==== 00)) {{
+                      iiff ((mmnnee ==== tt11zz))
+                              AA[[mmnnee]] == ((AA[[tt11ff]]++AA[[tt11bb11]]++AA[[tt11bb22]]))//33
+              }} eellssee {{
+                      iiff ((mmnnee ==== ""....""))
+                              ttaabb11__aavvee == ((AA[[tt11ff]]++AA[[tt11bb11]]++AA[[tt11bb22]]))//33
+                      eellssee iiff ((mmnnee ==== tt11ff))
+                              AA[[tt11ff]] ++== AA[[tt11zz]] -- ttaabb11__aavvee
+                      eellssee iiff ((mmnnee ==== tt11bb11))
+                              AA[[tt11bb11]] ++== AA[[tt11zz]] -- ttaabb11__aavvee
+                      eellssee iiff ((mmnnee ==== tt11bb22))
+                              AA[[tt11bb22]] ++== AA[[tt11zz]] -- ttaabb11__aavvee
+              }}
+        }}''
+
+     This last example shows how an eenneerrggyy pseudomotor can be readily created
+     that ties in with the standard ssppeecc energy macros from the eenneerrggyy..mmaacc
+     distribution file.  Such a pseudomotor can then be scanned using the
+     standard motor scans.  Note, the existing energy macros, such as EEssccaann,
+     mmoovveeEE, etc., will still work.
+
+     The pprreeffiixx__ccoonnffiigg(()) function below makes use of the monochromator mnemonic
+     conventions set in eenneerrggyy..mmaacc.
+
+        ddeeff EEnneerrggyy__ccoonnffiigg((mmnnee,, ttyyppee,, uunniitt,, mmoodduullee,, cchhaann)) ''{{
+                 iiff ((ttyyppee ==== ""mmoott"")) {{
+                         iiff ((mmoonnoo__ttyyppee ==== 11))
+                                 rreettuurrnn((mmoottoorr__mmnnee((MMoonnoo))))
+                         iiff ((mmoonnoo__ttyyppee ==== 22))
+                                 rreettuurrnn((""mmoonnoo mmoonn__yy mmoonn__zz""))
+                         iiff ((mmoonnoo__ttyyppee ==== 33))
+                                 rreettuurrnn((""mmoonnuu mmoonndd mmoonnttrraavv""))
+                         iiff ((mmoonnoo__ttyyppee ==== 44))
+                                 rreettuurrnn((""mmoonnuu mmoonndd mmoonnttrraavv mmoonnooffff""))
+                 }}
+        }}''
+        ddeeff EEnneerrggyy__ccaallcc((mmnnee,, mmooddee)) ''{{
+                 iiff ((mmooddee ==== 00)) {{
+                         ccaallccEE
+                         AA[[eenneerrggyy]] == hhcc__oovveerr__ee // LLAAMMBBDDAA
+                 }} eellssee {{
+                         ccaallccMM AA[[eenneerrggyy]]
+                         ccaallccEE
+                 }}
+        }}''
+
+     The prefix EEnneerrggyy and motor mnemonic eenneerrggyy are, as always, arbitrary, but
+     must match the configured device name on the DDevices screen and motor
+     mnemonic on the MMotor screen.
+
+Counter/timers
+
+The __ccmmdd(()) Function For Counters
+     The pprreeffiixx__ccmmdd(()) macro function for counters is called in response to
+     ssppeecc's counter-related built-in functions and commands: ttccoouunntt(()), mmccoouunntt(()),
+     wwaaiitt(()), ssttoopp(()), mmoovvee__ccnntt, ggeettccoouunnttss and ssyynncc.
+
+     There are three possible counter channel configurations: a master timer, a
+     regular counter channel or a polled counter channel.  The function calls
+     differ depending on the configuration.
+
+     A master timer belongs to controller type "Macro Counter/Timer" . The
+     counter type is MMAACC__CCNNTT and the individual channel is identified as either
+     ttiimmeerr or mmoonniittoorr. For such a channel, the ""ssttaarrtt__oonnee"" call will include a
+     nonzero parameter indicating the count mode as described below.  Also,
+     ""ggeett__ssttaattuuss"" calls will be made to determine when the count time has
+     completed.
+
+     A regular counter channel belongs to controller type "Macro Counter" with
+     counter type MMAACC__CCNNTT and function type ccoouunntteerr.
+
+     The polled counter type also has controller type "Macro Counter" and
+     function type ccoouunntteerr, but the counter type is MMAACC__CCNNTTPP.  Polled counters
+     will receive ""ggeett__ssttaattuuss"" calls to see when the counter is no longer busy.
+
+     The syntax of the function call is:
+
+     pprreeffiixx__ccmmdd((mmnnee,, kkeeyy [[,, pp11 [[,, pp22]]]] [[,, uunniitt]])) - Called by the C code for all
+          operations related to counter/timer control.  mmnnee is the string ""....""
+          for keys that apply to all counters.  mmnnee is the counter number for
+          keys that apply to individual counters.  Each key is only called one
+          way or the other.  kkeeyy is a string containing the particular command.
+          pp11 and pp22, if present, are parameters related to the command.  If the
+          mmnnee argument is the string ""...."" the uunniitt parameter will be included
+          and specifies the unit number for which the command applies (as of
+          ssppeecc release 5.07.03-3).
+
+     When the ""ssttaarrtt__aallll"" and ""ssttaarrtt__oonnee"" keys are sent as described below, the
+     count-mode parameter will be set as follows:
+
+         0   this channel is not the master timer
+         1   count to a monitor preset - mmccoouunntt(())
+         2   count to a time preset - ttccoouunntt(())
+         3   just count until the counters are halted - mmoovvee__ccnntt
+
+     Possible keys are as follows:
+
+     ""pprreessttaarrtt__aallll"" - Sent to the controller (mmnnee set to ""...."")  before any
+          counters are started.  pp11 will contain the count preset, either in
+          seconds or monitor counts.  pp22 contains the count mode (1, 2 or 3), as
+          in the above list.  The fifth argument will contain the unit number of
+          the controller.
+
+     ""ssttaarrtt__oonnee"" - Sent to start each counter at the start of the counting
+          period.  The function will be called for the regular counting channels
+          before being called for the master timer channel.  pp11 is the count
+          time in seconds if counting to time or in counts if counting to
+          monitor.  If mmnnee is the master timer, pp22 will contain 1, 2 or 3 to
+          indicate the counting mode.  If mmnnee is not the master, pp22 will be
+          zero.
+
+     ""ggeett__ssttaattuuss"" - Sent after the counters have been started, but only to the
+          master timer/counter, if there is one, or to any counters configured
+          as polled (with type MMAACC__CCNNTTPP).  Must return nonzero if the channel is
+          busy or zero if the counting is finished.
+
+     ""ccoouunnttss"" - Called when ssppeecc's built-in ggeettccoouunnttss function is executed.  The
+          macro function must return the current counts for scaler channel
+          number mmnnee. Note, all the scalers channels associated with real
+          counters will have been read before the macro function call, so the
+          values in the SS[[]] counter array will be current for the non-macro
+          counters.
+
+     ""hhaalltt__aallll"" - Sent to each macro counter controller (mmnnee set to ""...."") when
+          counting is halted.  The key is sent before the ""hhaalltt__oonnee"" keys are
+          sent.  The third argument will contain the unit number of the
+          controller.
+
+     ""hhaalltt__oonnee"" - Sent to each active counter when counting is halted.  The pp11
+          argument will be zero if called at the end of normal counting and one
+          if called when ^^CC is typed at the keyboard or when a ssttoopp(()) or ssyynncc
+          command is entered or after motors have stopped with a mmoovvee__ccnntt.
+
+          Commands to halt counters are sent when a preset count time elapses,
+          if a ^^CC is typed from the keyboard, when a ssttoopp(()) or ssyynncc command is
+          encountered from user-level or after motors have stopped when the
+          mmoovvee__ccnntt command is used.
+
+The __ppaarr(()) Function For Counters
+     There are currently no built-in keywords that produce calls to the
+     pprreeffiixx__ppaarr(()) macro function for counters.  The macro function will only be
+     called when ssppeecc's user-level ccoouunntteerr__ppaarr(()) function is called to set or
+     retrieve an otherwise unrecognized parameter.
+
+     The function will be called as:
+
+     pprreeffiixx__ppaarr((mmnnee,, kkeeyy,, ""ggeett"")) - The function should return a value for the
+          user-defined parameter named as kkeeyy for counter number mmnnee.
+
+     pprreeffiixx__ppaarr((mmnnee,, kkeeyy,, ""sseett"",, pp11)) - Called to set the user-defined parameter
+          kkeeyy to pp11 for counter number mmnnee.
+
+     The mmnnee argument will always be a counter number and never the string ""...."".
+
+     A call of ccoouunntteerr__ppaarr(()) to set ""ddiissaabbllee"" mode on or off will be passed
+     through to pprreeffiixx__ppaarr(()).
+
+     Built-in arguments to ccoouunntteerr__ppaarr(()) that are not passed to the pprreeffiixx__ppaarr(())
+     macro function include ""uunniitt"", ""cchhaannnneell"", ""rreessppoonnssiivvee"", ""ccoonnttrroolllleerr"",
+     ""ddeevviiccee__iidd"", ""ssccaallee"", ""mmoonniittoorr"" and ""ttiimmeerr"".
+
+MCAs and Image Devices
+
+The __ccmmdd(()) Function For MCA and Image Devices
+     The MCA device pprreeffiixx__ccmmdd(()) function is called when ssppeecc's mmccaa__ggeett(()),
+     mmccaa__ssggeett(()), mmccaa__ppuutt(()) and mmccaa__ssppuutt(()) built-in functions are used.  Image
+     devices are associated with iimmaaggee__ggeett(()) and iimmaaggee__ppuutt(()).  The pprreeffiixx__ccmmdd(())
+     macro function for both types of device gets called from ttccoouunntt(()),
+     mmccoouunntt(()), mmoovvee__ccnntt, wwaaiitt(()), ssttoopp(()) and ssyynncc.  The pprreeffiixx__ccmmdd(()) macro
+     function is also called in response to the standard mmccaa__ppaarr(()), mmccaa__ssppaarr(())
+     and iimmaaggee__ppaarr(()) commands ""cclleeaarr"", ""rruunn"" and ""hhaalltt"".
+
+     For MCA devices, the syntax of the function call is:
+
+     pprreeffiixx__ccmmdd((nnuumm,, kkeeyy [[,, pp11 [[,, pp22 [[,, ddaattaa]]]]]])) - Called by the C code for
+          operations related to MCA control.  nnuumm is the MCA number.  kkeeyy is a
+          string containing the particular command.  pp11 and pp22, if present, are
+          parameters related to the command.  For the mmccaa__ggeett(()) and mmccaa__ppuutt(())
+          functions, ddaattaa will be a data array for sending or receiving the MCA
+          data.
+
+     For image devices, the syntax of the function call is:
+
+     pprreeffiixx__ccmmdd((nnuumm,, kkeeyy [[,, pp11 [[,, pp22 [[,, pp33,, pp44,, pp55]]]]]])) - Called by the C code
+          for operations related to image-device control.  nnuumm is the
+          image-device number.  kkeeyy is a string containing the particular
+          command.  pp11 through pp55 are parameters related to the command.
+
+     None of the keys are mandatory in the implementation.  Possible keys are as
+     follows:
+
+     ""cclleeaarr"" - Sent in response to mmccaa__ppaarr((""cclleeaarr"")) or iimmaaggee__ppaarr((""cclleeaarr"")) and
+          before ""rruunn"" when ""aauuttoo__cclleeaarr"" mode is enabled.  There are no
+          additional parameters.
+
+     ""rruunn"" - Sent in response to mmccaa__ppaarr((""rruunn"")) or iimmaaggee__ppaarr((""rruunn"")) and at the
+          start of counting associated with the standard ttccoouunntt(()), mmccoouunntt(()) and
+          mmoovvee__ccnntt commands when ""aauuttoo__rruunn"" mode is enabled.  If ""ssoofftt__pprreesseett""
+          mode is enabled, pp11 will be the counting preset (seconds or monitor
+          counts), otherwise pp11 will be the value set with the mmccaa__ppaarr(())
+          ""pprreesseett"" option.  pp22 will be the count mode, as follows:
+
+              1       called by mmccoouunntt(())
+              2       called by ttccoouunntt(())
+              3       called via mmoovvee__ccnntt
+              4       called by mmccaa__ppaarr((""rruunn""))
+
+     ""hhaalltt"" - Sent in response to mmccaa__ppaarr((""hhaalltt"")) or iimmaaggee__ppaarr((""hhaalltt"")).  Also
+          sent at the end of counting associated with the standard ttccoouunntt(()),
+          mmccoouunntt(()) and mmoovvee__ccnntt commands if ""aauuttoo__rruunn"" mode is enabled, but only
+          when ""ssoofftt__pprreesseett"" is not enabled and the ""pprreesseett"" value set via
+          mmccaa__ppaarr(()) or iimmaaggee__ppaarr(()) is zero.  The pp11 argument will be zero if
+          called at the end of normal counting and one if called when ^^CC is
+          typed at the keyboard, when a ssttoopp(()) or ssyynncc command is entered or
+          after motors have stopped with a mmoovvee__ccnntt.
+
+     ""ggeett__ssttaattuuss"" - Called during counting.  A return value of one will indicate
+          the MCA or image device is still busy.
+
+     ""rreeaadd"" (for MCA) - Sent to read data. pp11 and pp22 are the first and last
+          channels to be read, respectively, reflecting the optional first and
+          last channel arguments to mmccaa__rreeaadd(()).  ddaattaa is a data array of the
+          native type (configured with the pprreeffiixx__ccoonnffiigg(()) call) where the data
+          should be written.  The optional return value is the number of points
+          actually read.  The value will be used by mmccaa__ggeett(()) to determine how
+          many points to copy to the returned array.  If no value is returned,
+          mmccaa__ggeett(()) will use the requested number of points.
+
+     ""wwrriittee"" (for MCA) - Sent to write data.  pp11 and pp22 are the first and last
+          channels to be written, respectively, reflecting the optional first
+          and last channel arguments to mmccaa__wwrriittee(()).  ddaattaa is a data array of
+          the native type (configured with the pprreeffiixx__ccoonnffiigg(()) call) where the
+          data can be read.  The optional return value is the number of points
+          actually written.
+
+     The ""rreeaadd"" and ""wwrriittee"" keys for images are called with region of interest
+     (ROI) parameters.  The parameters are set with iimmaaggee__ppaarr(()) as described
+     below.  The ROI parameters define which part of the image should be
+     returned (with ""rreeaadd"") or written (with ""wwrriittee"").  If no ROI has been
+     defined, the values will encompass the entire image.  The ROI arguments can
+     be ignored if not meaningful with the particular implementation.
+
+     ""rreeaadd"" (for images) - Sent to read data. pp11 is a data array of the native
+          type.  pp22 through pp55 define the region of interest (ROI) in the order
+          first row, last row, first column, last column.  The optional return
+          value is the number of points actually read.
+
+     ""wwrriittee"" (for images) - Sent to write data.  pp11 is a data array of the
+          native type.  pp22 through pp55 define the region of interest (ROI) in the
+          order first row, last row, first column, last column.  The optional
+          return value is the number of points actually written.
+
+The __ppaarr(()) Function For MCA and Image Devices
+     The pprreeffiixx__ppaarr(()) macro function is called when various MCA or image device
+     parameters are set, and when the mmccaa__ppaarr(()), mmccaa__ssppaarr(()) or iimmaaggee__ppaarr(())
+     functions are used to retrieve a user-defined parameter.  The nnuumm argument
+     is the MCA or image device number.
+
+     The standard mmccaa__ppaarr(()) and iimmaaggee__ppaarr(()) commands ""iinnffoo"", ""aauuttoo__rruunn"",
+     ""ssoofftt__pprreesseett"", ""aauuttoo__cclleeaarr"", ""nnaattiivvee__ttyyppee"" and ""pprreesseett"" are handled by
+     ssppeecc's built-in code and will not generate calls to the pprreeffiixx__ppaarr(()) macro
+     function, although the value set for ""pprreesseett"" will be included in the
+     arguments passed to pprreeffiixx__ccmmdd(()) with ""rruunn"".
+
+     The read-only MCA commands ""cchhaannss"" and ""mmaaxx__cchhaannss"" are also handled by
+     ssppeecc's built-in code.  Similarly, the read-only commands ""rroowwss"" and ""ccoollss""
+     that apply to image devices are handled by the built-in code.
+
+     In addition, the region-of-interest (ROI) commands for images, ""rrooww__bbeegg"",
+     ""rrooww__eenndd"", ""ccooll__bbeegg"", ""ccooll__eenndd"" and ""rrooii"", are implemented in the built-in
+     code.  The first four set or get a single parameter.  The ""rrooii"" option
+     takes four additional arguments in the order row_beg, row_end, col_beg and
+     col_end.  The ""rrooii"" option without parameters returns the number of points
+     in the current ROI.  The ROI parameters are passed to the pprreeffiixx__ccmmdd(())
+     function as arguments for the ""rreeaadd"" and ""wwrriittee"" keys.
+
+     The standard ""ddiissaabbllee"" call will be passed to the pprreeffiixx__ppaarr(()) function
+     when setting or clearing the disabled state.
+
+     Tha mmccaa__ppaarr(()) command ""cchhaann##"" will generate a call to the pprreeffiixx__ccmmdd(())
+     function with a ""rreeaadd"" or ""wwrriittee"" key, as appropriate with the ROI values
+     set to the indicated channel number.
+
+     The pprreeffiixx__ppaarr(()) function will be called as:
+
+     pprreeffiixx__ppaarr((nnuumm,, kkeeyy,, ""ggeett"")) - The function should return a value for the
+          user-defined parameter named as kkeeyy for MCA or image device number
+          nnuumm.
+
+     pprreeffiixx__ppaarr((nnuumm,, kkeeyy,, ""sseett"",, pp11)) - Called to set the user-defined parameter
+          kkeeyy to pp11 for MCA or image device number nnuumm.
+
+MCA and Image Device Counting Mode Summary
+     The ""aauuttoo__rruunn"" mode must be enabled for the standard ssppeecc counting commands
+     to control the MCA or image device.  If the ""ssoofftt__pprreesseett"" mode is enabled,
+     when the pprreeffiixx__ccmmdd(()) function is called with the ""rruunn"" argument, pp11 will
+     be the count time -- in seconds with ttccoouunntt(()) (counting to time) and in
+     counts with mmccoouunntt(()) (counting to monitor).  In ""aauuttoo__rruunn"" mode, the macro
+     hardware device will be polled using ""ggeett__ssttaattuuss"".  If the device takes
+     longer to count than the master timer, ssppeecc will wait until the device has
+     finished.  The ""hhaalltt"" command is not called at the normal end of counting,
+     but is called if counting is stopped with ssttoopp(()) or aborted with ^^CC or
+     ssyynncc.
+
+     If ""ssoofftt__pprreesseett"" is disabled, when the pprreeffiixx__ccmmdd(()) function is called with
+     the ""rruunn"" argument, pp11 will be the value set using the ""pprreesseett"" command to
+     mmccaa__ppaarr(()) or iimmaaggee__ppaarr(()), or zero if the value has not been set.  If the
+     value is nonzero, ssppeecc will poll the MCA until it returns a non-busy
+     status.  Thus one can have the macro hardware MCA count to a different
+     preset than the master timer.  If the preset value is zero, the MCA will be
+     sent a halt command when the master timer reaches the end of the count
+     interval.
+
+     The pp11 argument will be zero for powder-mode counting with the mmoovvee__ccnntt
+     command, and the device will be sent a ""hhaalltt"" command when the designated
+     motor has completed its trajectory.
+
+     In all cases, a count abort will generate a ""hhaalltt"" command.
+

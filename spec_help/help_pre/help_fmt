@@ -1,0 +1,225 @@
+help_fmt                            reference                           help_fmt
+
+NAME
+     help format - help file format conventions and syntax
+
+SPECIAL NOTE FOR ssppeecc RELEASE 6
+
+     The syntax described below is no longer used by the standard ssppeecc help
+     utility.  With ssppeecc release 6, help files are now authored using
+     reStructuredText (reST) format.  For terminal display, the reST files are
+     converted to an _n_r_o_f_f format, then processed using _m_a_n-page type macros for
+     display.
+
+     Files residing in the SSPPEECCDD//hheellpp directory that use the following
+     directives will be processed using _g_r_o_f_f (or _n_r_o_f_f) with a compatible macro
+     set.  The ssppeecc program itself no longers contains built-in code for
+     formatting help files.
+
+INTRODUCTION
+
+     This document describes the formatting syntax and conventions used with the
+     ssppeecc and CC--PPLLOOTT help files.  The formatting syntax uses the conventions of
+     the traditional UNIX text formatters (nnrrooffff, ttrrooffff, ddiittrrooffff, etc.),
+     although only a small subset of the formatting directives are supported by
+     the ssppeecc and CC--PPLLOOTT built-in formatting.  The supported directives are
+     described below.
+
+     The distributions of ssppeecc and CC--PPLLOOTT include utilities for preparing both
+     PostScript and HTML (hyper text markup language) versions of the help files
+     using either the standard ddiittrrooffff or the GNU ggrrooffff packages.
+
+FORMATTING COMMANDS
+
+     Input text that has a dot on the first line is a formatting command.
+     Unrecognized commands are ignored in ssppeecc and CC--PPLLOOTT.
+
+     The following commands are supported:
+
+     ..\\"" - Begins a comment.  The rest of the text on the line is ignored.
+
+     ..bbpp - Begins a new page.
+
+     ..BBPP - Same as above.
+
+     ..nnee NN - Indicates NN lines are needed on the current page.  If there isn't
+          enough room on the current page, a new page is started.
+
+     ..sspp NN - spaces NN lines.  Without an argument, one line is skipped.  The
+          argument may contain a decimal point and a unit indicator for the
+          benefit of nnrrooffff/ttrrooffff, although for ssppeecc and CC--PPLLOOTT, only the integer
+          part of the argument is used.
+
+     ..ttaa NN - Start words every NN letters, somewhat like using tabs.
+
+     ..bbrr - Causes a line break.  The current line is finished and a new line is
+          started.
+
+     ..nnff - Switch to no-fill mode.  Each newline in the input causes a newline
+          in the output.
+
+     ..ffii - Switch to fill mode.  Words are collected from the input until a full
+          line of output is available.
+
+     ..TTHH nnaammee ccaatteeggoorryy ddaattee SSCCCCSS__iinnffoo - Should be on the first line of a help
+          file.  The arguments are used in the page header (and footer, when
+          printed) and are, respectively, the name of the help file, the
+          category (such as macro, function, reference, etc.), the date the file
+          was last revised and source-code control information.
+
+     ..SSHH - Does a subhead.  There can't be more than six arguments, although you
+          can use double quotes to put more than one word in an argument.
+          Subheads are placed all the way to the left of the page.
+
+     ..HHPP NN - Starts a hanging paragraph.  The optional argument NN specifies the
+          indent level.  The default is 0.
+
+     ..hhpp NN - Can be used within a ..HHPP block to increase or decrease the indent.
+          The optional argument NN specifies the indent level.  This command will
+          skip a line.
+
+     ..PPPP - Starts a paragraph.
+
+     ..LLPP - Same as above.
+
+     ..((LL  FF NN II - Starts a no-fill block.  The optional argument FF indicates the
+          font to use and may be RR, II, CC, BB or OO.  (See below for a description
+          of the font code letters.)  The optional argument NN is the number of
+          lines needed.  If there is not enough room to print that many lines on
+          the current page, a new page will be started.  The optional argument II
+          is the number of spaces of extra indentation to add.
+
+     ..))LL - Ends the no-fill block started by ..((LL.
+
+     ..QQ - Put quotation marks around arguments.  If no arguments, put quotation
+          marks around text on next input line.
+
+     ..NNEE - Only relevant for screen displays, this command indicates the screen
+          should not be erased before displaying the first page.
+
+     ## - Starts a comment if its the first character on a line.  The rest of the
+          text on the line is ignored.  This comment notation is only for files
+          that will not be run off using nnrrooffff/ttrrooffff.
+
+     ..BBLL - Begin a list of items.
+
+     ..EELL - Ends a list of items.
+
+     ..LLII iitteemm - Adds iitteemm to a list of items.  For HTML documents, one list
+          items appears per line of output.  For non-HTML documents, list items
+          are separated by tabs, and will fill the row according to the current
+          tab stops.
+
+     ..DDLL ++ or ..DDLL -- - For HTML output, indicates the start or end of a
+          definition block.
+
+     ..DDDD tteexxtt - For HTML output, indicates the start of a definition.  For the
+          other formats, the optional argument is simply copied verbatim.
+
+     ..HHRR tteexxtt[[ CC [[ UURRLL ]]]] - For HTML output, creates a hypertext link.  If one
+          or two arguments are present, names the link tteexxtt..hhttmmll.  If the second
+          argument is CC, outputs tteexxtt in Courier font.  If the third argument is
+          present, uses that as the URL link.  For non-HTML formats, the text is
+          copied verbatim in the indicated font.
+
+FONT CONTROL
+
+     The help files use the following fonts for the purposes indicated.  In the
+     printed documentation, the New Century Schoolbook typeface is used for the
+     Roman, italic and bold fonts.  When used with ssppeecc and CC--PPLLOOTT, the
+     directives to switch to bold, italic or one of the Courier typefaces result
+     in highlighted text on a video terminal.
+
+     Roman (R) - Used for normal text.
+
+     IIttaalliicc (I) - Used for file and path names, including system commands, along
+     with book titles, etc.
+
+     BBoolldd (B) - Used for section heads.  Occasionally used for emphasis.
+     Sometimes used to display arguments to system commands.
+
+     CCoouurriieerr (C) - Used to represent literal text that might be output by the
+     computer program or might be typed by a user at the keyboard.
+
+     CCoouurriieerr BBoolldd (CB) - Occasionally used to distinguish text a user types from
+     text output by the computer.
+
+     CCoouurriieerr OObblliiqquuee (O) - Used to represent variable computer text, such as the
+     argument to a function.
+
+     "Quoted Text" (Q) - Not really a font, but used to place double quotes
+     around a bit of text.
+
+     All the fonts, except Roman, display as highlighted text on the video
+     terminal.
+
+     The formatting commands:
+
+         ..BB ..CC ..II ..OO
+
+     put their arguments in the associated font.  If there are no arguments to
+     the above commands, the next line of input is put in that font.
+
+     The formatting commands:
+
+        ..RRBB  ..BBRR  ..IIRR  ..CCRR  ..OORR  ..CCBB
+        ..RRII  ..BBII  ..IIBB  ..CCII  ..OOCC
+        ..RRCC       ..IICC  ..CCOO
+        ..RROO
+
+     place the first argument in the first font, the second argument in the
+     second font and append an optional third argument in the regular text font,
+     except for ..CCBB, which uses Courier Bold and Roman for the two fonts.  The
+     space characters between the arguments are removed.  Use double quotes to
+     include space characters within arguments.  A space character is added
+     after the last argument.  The formatting commands:
+
+        ..rrbb       ..iirr
+        ..rrii            ..ccii  ..oocc
+        ..rrcc       ..iicc  ..ccoo
+        ..rroo
+
+     work as above, except a space characters is not appended after the last
+     argument.
+
+     The @@ symbol is used in the help file sources to represent literal double
+     quote characters, which makes it easier to insert literal double quote
+     characters into formatting command arguments.  To enter a literal @@ use
+     both a backslash and the troff ..ttrr directive, as in:
+
+        ..ttrr @@@@
+        aa lliitteerraall \\@@ aappppeeaarrss
+        ..ttrr @@""
+
+SPECIAL CHARACTER SEQUENCES
+
+     The following special character sequences are recognized:
+
+         \\""         A double quote
+         \\&&         A zero-width space
+         \\00         A digit-width space
+         \\||         A sixth-em space (no space on screen)
+         \\((****       An asterisk (*)
+         \\((hhyy       A hyphen (-)
+         \\((mmuu       The multiplication sign (x)
+         \\((ssppaaccee))   An unpaddable space
+         \\**((CCPP      The string CC--PPLLOOTT
+         \\**((SSPP      The string ssppeecc
+         \\**((UUNN      The string UNIX
+         \\--         A minus sign (-)
+         \\@@         An @ sign
+         \\\\         A back slash
+         \\ee         A back slash
+         \\ff11        Switch to font R
+         \\ffCC        Switch to font C
+         \\ffPP        Switch to previous font
+         \\ff\\**((##CC    Switch to font C
+         \\ff\\**((##II    Switch to font I
+         \\ff\\**((##OO    Switch to font O
+
+HINTS
+
+     Since the ..iiff command is not recognized by the ssppeecc and CC--PPLLOOTT built-in
+     formatter, use the command ..iiff tt ...... to insert formatting directives to be
+     executed only when the help files are being printed with ttrrooffff.
+

@@ -1,0 +1,61 @@
+changes                      spec 2.9 Release Notes                      changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.9
+
+DESCRIPTION
+
+     These notes summarize the modifications made for ssppeecc release 2.9, as
+     finalized on October 10, 1988.
+
+CHANGES
+
+     Invoking ssppeecc with --yy will force the motor registers to be changed to agree
+     with the settings file when the program starts up.  If you are confident
+     the settings file is okay, and know the motor registers have been wiped
+     out, say by shutting off crate power, then this option ought to be just the
+     thing.
+
+     The message noting the discrepancy between motor-controller registers and
+     program memory now shows the values of each in user units (angles) in
+     addition to steps.
+
+     Hitting a hard motor limit will cause the program to reset to command
+     level, whether in a scan or in a command file.  Previously, although motor
+     motion was aborted on a hard limit, command execution continued.
+
+     The pprrddeeff command now shows backslashes associated with escaped delimiter
+     characters within a macro definition, as in:
+
+        ddeeff ssiillllyy ''pprriinntt ""WWhhoo\\''ss oonn ffiirrsstt??""''
+
+     Previously, these backslashes were not shown.
+
+     All instances of the command mmoovvee__aallll in the standard macros have been
+     replaced by the macro mmoovvee__eemm.  The default definition of mmoovvee__eemm is simply
+     mmoovvee__aallll.  The purpose of mmoovvee__eemm is to make it easy for the user to
+     include limit checks of moves that involve more than one motor by
+     redefining mmoovvee__eemm.
+
+     A new macro mmeesshh that performs a mesh scan of any two motors is included.
+
+     The wwmm and uuwwmm macros now check that their arguments are valid motor names.
+
+     A new built-in command llooccaall (with the same syntax as the gglloobbaall command)
+     can be used to reuse a preexisting variable name and give the new instance
+     of that name scope only within and below the curly-bracketed block in which
+     it is defined.  A known bug with the current implementation is that you
+     cannot use the gglloobbaall keyword at the same level or lower to uunnllooccaalliizzee use
+     of a previously local-declared variable name.
+
+     The motor screen for the eeddccoonnff configuration and settings editor now wraps
+     around when changing motor columns instead of sticking at motor 0 or at the
+     last motor.
+
+     The CAMAC drivers can be optionally compiled either to allow only the super
+     user to issue a ZZ or to allow any user to issue a ZZ.  Previously, it was
+     only super-user only.
+
+     This release supports the 386/ix operating system on 80386-based machines.
+     See the 338866 help file.
+

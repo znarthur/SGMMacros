@@ -1,0 +1,668 @@
+.TH "amptek" "hardware" "03/22/15" "dp5.rst 6.8  03/22/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+dp5 \- Amptek DP5/PX5/DP5G/MCA8000D MCA products
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)dp5.rst  6.8  03/22/15  CSS
+.
+.\" Copyright (c) 2013,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "amptek" "hardware" "03/22/15" "dp5.rst 6.8  03/22/15 CSS"
+.
+.SH "INTRODUCTION"
+.rs
+.sp
+This help file describes the \fBspec\fP support for
+the Amptek DP5, PX5, DP5G and MCA8000D (and products derived from those)
+using Amptek\(aqs version 6 firmware.
+In the following text, although DP5 is named explicitly, the descriptions
+apply to all the above models.
+.sp
+The \fBspec\fP support for the DP5 is available over serial, USB
+and ethernet interfaces.
+.sp
+Not all functionality available on the DP5 is currently included in the
+\fBspec\fP support.  If a missing feature is needed, please contact CSS.
+.SH "CONFIGURATION"
+.rs
+.sp
+The DP5 is configured on the MCA\- and CCD\-type
+\fBA\fPcquisition screen of the the configuration editor
+along the following lines:
+.RS 3m
+.sp
+.nf
+.ft CB
+MCA\- and CCD\-Acquisition Type Device Configuration
+
+MCA\-like       DEVICE   ADDR  <>MODE                       <>TYPE
+ 0  YES    /dev/ttyS1     <>  115200    Amptek DP5 (FW6) (Serial)
+ 1  YES                 9467               Amptek DP5 (FW6) (USB)
+ 2  YES  192.168.1.13                   Amptek DP5 (FW6) (Socket)
+.ft P
+.fi
+.RE
+.sp
+For the serial interface, \fBspec\fP sets the baud rate to 115200 when
+initializing the device no matter what baud rate is set in the \fBconfig\fP
+file, since the device only works at 115200 baud.
+.sp
+With the USB interface, the \fBADDR\fP field can optionally be set to the
+module\(aqs serial number, which is useful if more than one DP5 is connected
+via USB.  Otherwise it is not possible to distinguish one from the other
+in the configuration.  If the \fBADDR\fP field is zero, the modules are
+assigned in the order in which they are discovered on the USB interface,
+which works fine if there is just one module.
+.sp
+For the socket interface, the \fBDEVICE\fP field contains a resolvable
+hostname or an IP address.  The port number can be optionally appended
+with a colon, as \fB192.168.1.13:10001\fP.  If missing, the default port, 10001
+is used.  One can set the DP5 IP address using the \fB"ethernet"\fP option
+to \fBmca_par()\fP as described below.
+.sp
+Note, the DP5 firmware requires a 15 second timeout period after closing
+the socket connection before the socket can be reopened from the same IP
+address.  Normally \fBspec\fP\(aqs \fBreconfig\fP command closes and reinitializes
+sockets connections.  For the DP5, \fBspec\fP keeps the socket connection open across
+a \fBreconfig\fP if the DP5 configuration remains unchanged. If the \fBDEVICE\fP
+string is altered or if \fBspec\fP
+is quit and restarted within 15 seconds, the DP5 socket access will fail until
+the timeout period on the DP5 completes.  \fBspec\fP will detect this failure
+and automatically pause for the required interval.
+.SH "FUNCTIONS"
+.rs
+.sp
+The standard MCA commands supported by \fBspec\fP are described in the
+\fI\%mca\fP help file.
+Of the standard functions, the \fBspec\fP MCA support for the Amptek DP5\-type devices
+includes
+\fBmca_get()\fP but not \fBmca_put()\fP.
+In addition to the \fBmca_par()\fP options described below, the
+the standard
+\fBmca_par()\fP options
+\fB"info"\fP, \fB"chans"\fP, \fB"max_chans"\fP, \fB"max_channels"\fP,
+\fB"disable"\fP and
+\fB"native_type"\fP are supported.
+.sp
+As explained in the \fI\%mca\fP help file, when more than one MCA is configured in \fBspec\fP
+the \fBmca_sel()\fP command or the \fBmca_sget()\fP and \fBmca_spar()\fP commands can be used
+to direct commands to particular modules.
+.sp
+In the \fBmca_par()\fP options described below, the argument parsing is case insensitive.
+Either lower case or upper case may be used.  The DP5 requires upper case for
+parameters sent to it.  \fBspec\fP
+makes the conversion automatically.
+.SH "STATE FILE"
+.rs
+.sp
+Several parameters are saved in the user state file so that the values will
+persist when restarting \fBspec\fP as the same user.
+The parameters that are saved are those corresponding to \fB"npts"\fP (the number
+of channels), the presets \fB"preset_time"\fP, \fB"preset_real"\fP, \fB"preset_live"\fP (for the MCA800D)
+and \fB"preset_counts"\fP,
+and the upper and lower region\-of\-interest (\fB"roi"\fP) limits.
+In addition, the settings for \fB"auto_clear"\fP, \fB"auto_run"\fP and \fB"soft_preset"\fP
+are saved.
+.SH "INTERFACE"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_par("ethernet")\fP
+\- 
+Reads the current ethernet configuration and displays the results
+along the following lines:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+    Address: 192.168.1.13
+    Gateway: 192.168.1.1
+Subnet mask: 255.255.255.0
+       Port: 10001
+MAC address: 00:0b:3c:5c:f7:f0
+.ft P
+.fi
+.RE
+.sp
+When using the USB or serial interface,
+if the DP5 fails to detect the ethernet chip, the command will fail with
+the error message "CP2201 not found".
+The problem can usually be solved by cycling the power on the DP5.
+.RE
+.HP 5m
+."
+\fBmca_par("ethernet", "address [, gateway [, subnet]]")\fP
+\- 
+Sets the DP5 ethernet parameters for IP address, gateway address
+and subnet mask.  Values are entered using the standard dotted\-decimal notation, as
+shown in the previous display.
+The gateway and subnet mask values are optional.  The gateway defaults to
+an address with the first three elements of the IP address with a "\fB.1\fP"
+in the fourth position.
+The subnet mask defaults to \fB255.255.255.0\fP.
+The following commands would set the same parameters:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+mca_par("ethernet", "192.168.1.13")
+mca_par("ethernet", "192.168.1.13,192.168.1.1,255.255.255.0")
+.ft P
+.fi
+.RE
+.sp
+Note, the items in the second argument can be delimited by commas, spaces,
+colons or semicolons.
+After sending the command to set
+the configuration, the new configuration is read back and displayed.
+One would
+normally connect to the DP5 over the USB or serial interface to configure the
+ethernet settings.
+.RE
+.RE
+.SH "OPERATION"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_par("clear")\fP
+\- 
+Sends commands to the DP5 to clear the spectrum and the scalers.
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+If \fB"auto_clear"\fP mode is set, sends commands to clear the spectrum and scalers.
+If a preset value is nonzero, programs the DP5 with either the preset accumulation time,
+the preset real time or the preset counts.
+Finally, sends the command to start acquisition.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+Sends the command to halt acquisition.
+.HP 5m
+."
+\fBmca_par("auto_clear" [, 0|1])\fP
+\- 
+With no arguments returns the current value of auto\-clear mode.
+Otherwise turns auto\-clear mode off or on.
+When auto\-clear mode is on, the spectrum and scalers are cleared automatically
+each time an acquisition is started.
+.HP 5m
+."
+\fBmca_par("auto_run" [, 0|1])\fP
+\- 
+With no arguments returns the current value of auto\-run mode.
+Otherwise turns auto\-run mode off or on.
+When auto\-run mode is on, the DP5 is started automatically with the standard
+\fBspec\fP count commands.
+.HP 5m
+."
+\fBmca_par("soft_preset" [, 0|1])\fP
+\- 
+With no arguments, returns the current value of soft\-preset mode.
+Otherwise turns soft\-preset mode off or on.
+When soft\-preset mode is on in conjunction with auto\-run mode, the DP5 will
+be programmed for the same preset accumulation time as the master timer when
+counting to time, or the same preset counts as the master counter when counting
+to preset counts.  \fBspec\fP will include the DP5 when polling for the end of
+counting when soft\-preset mode is on.
+.HP 5m
+."
+\fBmca_par("npts" [, value])\fP
+\- 
+With no arguments, returns the current number of points configured for the DP5
+spectrum.  Otherwise sets the number of points to \fBvalue\fP.
+Allowed values are 256, 512, 1024, 2048, 4096 and 8192.
+Setting the DP5 number\-of\-channels parameter \fBMCAC\fP has the same effect.
+.HP 5m
+."
+\fBmca_par("group_size" [, value])\fP
+\- 
+Has the same meaning as \fB"npts"\fP above.
+.HP 5m
+."
+\fBmca_par("preset_time" [, value])\fP
+\- 
+With no arguments, returns the current preset acquisition time in seconds.
+Otherwise sets the preset acquisition time to \fBvalue\fP.
+The DP5 is not programmed with the value until acquisition is started.
+.HP 5m
+."
+\fBmca_par("preset" [, value])\fP
+\- 
+Has the same meaning as \fB"preset_time"\fP above.
+.HP 5m
+."
+\fBmca_par("preset_real" [, value])\fP
+\- 
+With no arguments, returns the current preset real time in seconds.
+Otherwise sets the preset real time to \fBvalue\fP.
+The DP5 is not programmed with the value until acquisition is started.
+.HP 5m
+."
+\fBmca_par("preset_live" [, value])\fP
+\- 
+With no arguments, returns the current preset live time in seconds.
+Otherwise sets the preset real time to \fBvalue\fP.
+Only available with the MCA8000D.
+The MCA8000D is not programmed with the value until acquisition is started.
+.HP 5m
+."
+\fBmca_par("preset_counts" [, value])\fP
+\- 
+With no arguments, returns the value for the current preset counts.
+Otherwise sets the preset counts value to \fBvalue\fP.
+The DP5 is not programmed with the value until acquisition is started.
+The preset counts are the counts accumulated in the region of interest
+programmed for scaler number 8.
+.HP 5m
+."
+\fBmca_par("roi" [, lower, upper])\fP
+\- 
+With no arguments, returns the number of channels in the current region
+of interest.
+Otherwise, sets the region of interest used with preset\-counts mode.
+Scaler 8 of the DP5 will be programmed with the region\-of\-interest
+values when acquisition is started.
+.HP 5m
+."
+\fBmca_par("roi", "lower"|"upper" [, value])\fP
+\- 
+With the argument \fB"lower"\fP or \fB"upper"\fP, returns the associated
+region\-of\-interest limit.  With a third argument, sets the associated
+region\-of\-interest limit to \fBvalue\fP and returns the number of channels
+in the current region\-of\-interest.
+.HP 5m
+."
+\fBmca_par("autoset_input_offset")\fP
+\- 
+Sends the \fBautoset input offset\fP packet to the DP5.
+.HP 5m
+."
+\fBmca_par("autoset_fast_threshold")\fP
+\- 
+Sends the \fBautoset fast threshold\fP packet to the DP5.
+.RE
+.SH "STATUS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_par("status")\fP
+\- 
+Reads the status packet from the DP5 and displays elements of the status
+as shown:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+                 DP5:  s/n 9467
+        FPGA version:  6.1
+            Firmware:  6.6.9
+          Fast count:  0
+          Slow count:  9502
+            GP count:  0
+         MCA enabled:  No
+   Accumulation time:  4.999 sec
+           Live time:  4.999 sec
+           Real time:  5 sec
+Preset count reached:  0
+ Preset real reached:  1
+     Oscope data rdy:  0
+ Auto Fast Threshold:  not locked
+   Auto Input Offset:  locked
+     Unit configured:  yes
+          FPGA clock:  20MHz
+   Clock set by auto:  no
+          Board Temp:  43C
+       Detector Temp:  0.0K
+         Detector HV:  0V
+     List\-mode clock:  1us
+      List\-mode sync:  INT
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("slow_counts")\fP
+\- 
+Reads the status packet and returns the current value for slow counts.  The
+DP5 documentation says, "Slow counts are counts from the slow (shaped) channel.
+Any event that is counted in the spectrum is also counted here."
+.HP 5m
+."
+\fBmca_par("elapsed_counts")\fP
+\- 
+Reads the status packet and returns the same value as returned by the
+\fB"slow_counts"\fP option.
+.HP 5m
+."
+\fBmca_par("fast_counts")\fP
+\- 
+Reads the status packet and returns the current value for fast counts.
+.HP 5m
+."
+\fBmca_par("elapsed_time")\fP
+\- 
+Reads the status packet and returns the elapsed (accumulation) time in seconds.
+.HP 5m
+."
+\fBmca_par("live_time")\fP
+\- 
+Reads the status packet and returns the live time in seconds.
+.HP 5m
+."
+\fBmca_par("real_time")\fP
+\- 
+Reads the status packet and returns the real time in seconds.
+.HP 5m
+."
+\fBmca_par("diagnostic")\fP
+\- 
+Reads the DP5 diagnostic packet and displays the results along the following lines:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+FPGA version:    6.1
+    Firmware:    6.6
+    DP5 Temp:   43.595C
+         PWR:    5.044V
+        3.3V:    3.279V
+        2.5V:    2.492V
+        1.2V:    1.199V
+       +5.5V:    5.488V
+       \-5.5V:   \-5.463V
+       An_In:    1.728V
+     Vref_In:    1.423V
+.ft P
+.fi
+.RE
+.sp
+Note, the DP5 takes up to 2.5 seconds to respond to a diagnostic packet request.
+.RE
+.RE
+.SH "PARAMETERS"
+.rs
+.sp
+The DP5 has many parameters and \fBspec\fP offers many methods for accessing the parameters.
+.RS 0m
+.HP 5m
+."
+\fBmca_par("pars")\fP
+\- 
+Displays a table containing a description, the name and the current value for all
+the available parameters, along the lines of the following:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+DPP Device Type: DP5
+                     Description  Name   Value
+      MCA/MCS number of channels "MCAC": 1024
+    Threshold for shaped channel "THSL": 4.003%
+         Preset acquisition time "PRET": OFF
+                   Preset counts "PREC": OFF
+     Preset counts low threshold "PRCL": 0
+    Preset counts high threshold "PRCH": 8191
+                Preset real time "PRER": OFF
+                    Gate control "GATE": OFF
+                Peak detect mode "PDMD": NORM
+             Set spectrum offset "SOFF": OFF
+         Low\-level discriminator "TLLD": OFF
+                MCA input source "MCAS": NORM
+                    MCS timebase "MCST": 0.000s
+               MCS low threshold "MCSL": 0
+              MCS high threshold "MCSH": 8191
+                    Peaking time "TPEA": 8.000us
+                  Flat top width "TFLA": 2.000us
+         Pile\-up reject interval "PURE": OFF
+      Threshold for fast channel "THFA": 80.000
+       Fast channel peaking time "TPFA": 400ns
+             BLR down correction "BLRD": 2
+               BLR up correction "BLRU": 1
+               Baseline restorer "BLRM": 1
+                     20MHz/80MHz "CLCK": 20MHz
+         Risetime discrimination "RTDE": OFF
+                   RTD threshold "RTDT": 0.000%
+                 RTD sensitivity "RTDS": 0%
+         Non\-trapezoidal shaping "CUSP": 0%
+                      Total gain "GAIN": 3.000
+                     Coarse gain "GAIA": 2
+                       Fine gain "GAIF": 1.2043
+                    Input offset "INOF": DEF
+                    Analog input "AINP": NEG
+          Detector reset lockout "RESL": OFF
+Turn supplies on/off at power up "BOOT": OFF
+                      DAC output "DACO": SHAPED
+                      DAC offset "DACF": 199mV
+              Auxiliary output 1 "AUO1": ICR
+                     Test pulser "TPMO": \-S
+              Auxiliary output 2 "AUO2": ICR
+                 GP counter edge "GPED": FA
+      GP counter uses MCA enable "GPME": ON
+          GP counter gate enable "GPGA": ON
+ GP counter clear with MCA clear "GPMC": ON
+         GP counter input source "GPIN": AUX1
+              Scope trigger edge "SCOE": RI
+          Scope trigger position "SCOT": 87%
+              Digital scope gain "SCOG": 1
+                 SCA pulse width "SCAW": 100ns
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("par_options")\fP
+\- 
+Displays a table containing a description, the name, the current value and
+the options for parameter values for all the available parameters, along the
+lines of the following:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+  MCA/MCS number of channels "MCAC": 1024       256|512|1024|2048|4096|8192
+Threshold for shaped channel "THSL": 4.003%     ##.###[%]
+     Preset acquisition time "PRET": OFF        ########.###[s]|OF|OFF
+                                      ...
+.ft P
+.fi
+.RE
+.sp
+Vertical bars separate valid options.  The \fB#\fP characters indicate the
+range of number values.  Unit strings shown in square brackets are optional.
+.RE
+.HP 5m
+."
+\fBmca_par("par_array")\fP
+\- 
+Returns an associative array indexed by the four\-letter parameter names with
+each element containing the parameter value.  Elements will be string
+valued or number valued, as appropriate.
+.HP 5m
+."
+\fBmca_par("save_config", filename)\fP
+\- 
+Reads the current parameter values from the DP5 and writes them to \fBfilename\fP
+using the Amptek parameter\-file format.
+.HP 5m
+."
+\fBmca_par("read_config", filename)\fP
+\- 
+Reads parameter values from the given \fBfilename\fP, which must be in the
+Amptek parameter\-file format, and programs the DP5 with those values.
+.HP 5m
+."
+\fBmca_par("read_config2", filename)\fP
+\- 
+As above, but programs the DP5 one parameter at a time.  The method takes
+longer, but if there are error messages from the DP5 due to a parameter value,
+the error message will be associated with the particular parameter.
+.HP 5m
+."
+\fBmca_par("set_config")\fP
+\- 
+Programs the DP5 using the current values for all the parameters.  This
+command should not be needed, as the DP5 is programmed with each parameter as
+it is set and when values are read from a parameter file.
+.HP 5m
+."
+\fBmca_par("set_config2")\fP
+\- 
+As above, but programs the DP5 one parameter at a time.  The method takes
+longer, but if there are error messages from the DP5 due to a parameter value,
+the error message will be associated with the particular parameter.
+.HP 5m
+."
+\fBmca_par(parameter [, value])\fP
+\- 
+Sets or reads a single DP5 parameter.  The parameter
+name is the first argument to \fBmca_par()\fP.  If only one argument, the current
+value is read from the DP5 and returned.  If the second
+argument is a valid parameter, the DP5 is programmed with that value.
+.HP 5m
+."
+\fBmca_par(parameter, "syntax")\fP
+\- 
+Returns the syntax options for the specified parameter.
+.HP 5m
+."
+\fBmca_par("reset")\fP
+\- 
+Sends the command to reset the DP5 configuration to default values.
+Note, though, \fBspec\fP will reprogram
+the number of channels parameters \fB"MCAC"\fP
+to the value it
+had prior to the reset command.
+.HP 5m
+."
+\fBmca_par("send", command)\fP
+\- 
+Sends the parameter configuration command directly to the DP5.
+The only time this command might be
+useful is if a new parameter not recognized by \fBspec\fP is added to the DP5 firmware.
+Usage would be:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+mca_par("send", "GATE=OFF")
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("read", command)\fP
+\- 
+Can be used to read a parameter value directly from the DP5.
+The only time this command might be
+useful is if a new parameter not recognized by \fBspec\fP is added to the DP5 firmware.
+Usage would be:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+print mca_par("read", "GATE")
+.ft P
+.fi
+.RE
+.RE
+.RE
+.SH "SCALERS"
+.rs
+.sp
+Each of the 16 scalers can be programmed for an lower and upper region of interest.
+The scalers will accumulate counts that fall within that region.
+Scaler 8 is special in that its region of interest values are programmed to the
+region of interest set with the \fBmca_par("roi")\fP command
+when using
+preset\-counts mode.
+.RS 0m
+.HP 5m
+."
+\fBmca_par("scalers")\fP
+\- 
+Reads the current scaler values and
+displays a list of current value, region of interest lower and upper limits
+and output state for each of the scalers on the device.
+.HP 5m
+."
+\fBmca_par("scaler_array")\fP
+\- 
+Reads the current scaler values and
+returns a 16\-element data array (unsigned long) containing the data.
+.HP 5m
+."
+\fBmca_par("scaler#")\fP
+\- 
+Reads and returns the current scaler value
+for scaler number \fB#\fP, where \fB#\fP is from 1 to 16.
+.HP 5m
+."
+\fBmca_par("scaler#", "lower" [, value])\fP
+\- 
+Sets or reads the lower region of interest limit
+for scaler number \fB#\fP, where \fB#\fP is from 1 to 16.
+.HP 5m
+."
+\fBmca_par("scaler#", "upper" [, value])\fP
+\- 
+Sets or reads the upper region of interest limit
+for scaler number \fB#\fP, where \fB#\fP is from 1 to 16.
+.HP 5m
+."
+\fBmca_par("scaler#", "output" [, value])\fP
+\- 
+Sets or reads the output configuration
+for scaler number \fB#\fP, where \fB#\fP is from 1 to 8.
+The \fBvalue\fP argument can be \fB"OFF"\fP, \fB"LOW"\fP or \fB"HIGH"\fP.
+.RE
+.SH "DIGITAL OSCILLOSCOPE"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_par("arm_scope")\fP
+\- 
+Sends the command to arm the digital oscilloscope.
+.HP 5m
+."
+\fBmca_par("scope")\fP
+\- 
+Reads and returns the oscilloscope data as a 2048 element \fBushort\fP
+data array.
+.HP 5m
+."
+\fBmca_par("scope_rearm")\fP
+\- 
+Reads and returns the oscilloscope data as above and rearms the
+digital oscilloscope.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%mca\fP
+\fI\%amptek.com\fP
+

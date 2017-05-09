@@ -1,0 +1,69 @@
+dsp2190                             hardware                             dsp2190
+
+NAME
+     dsp2190 - DSP Technology 2190 CAMAC MCS Averager
+
+DESCRIPTION
+
+     The DSP Technology 2190 Multichannel Scaling Averager consists of a pair of
+     CAMAC modules: the 2090S Multichannel Scaling module and the 4101 Averaging
+     Memory module.  These two modules must occupy consecutive slots in the
+     CAMAC crate, with the 2090S in the lower-numbered slot.  The averager is
+     selected in the ccoonnffiigg file as
+
+         CCAA__DDSSPP22119900 == sslloott__nnuummbbeerr
+
+     where the slot number is that of the 2090S module.
+
+FUNCTIONS
+
+     The mmccaa__ppaarr(()) function controls the modules' behavior as follows:
+
+     mmccaa__ppaarr((""rruunn"")) - programs the MCS for the number of bins and sweeps set
+          with the functions described below, then enables any other counters
+          and starts the averaging process.  When the programmed number of
+          sweeps is completed, the MCS will generate a CAMAC LAM, which will
+          cause the other counters to be disabled.  Use the wwaaiitt(()) function to
+          determine when the programmed number of sweeps are complete.
+
+     mmccaa__ppaarr((""hhaalltt"")) - halts the MCS and disables the other counters.
+
+     mmccaa__ppaarr((""bbiinnss"")) - returns the number of bins in each sweep.  (Referred to
+          in the module documentation as "record length").
+
+     mmccaa__ppaarr((""bbiinnss"",, vvaalluuee)) - sets the number of bins in each sweep to vvaalluuee.
+          The number of bins can range from 8 to 32,767.
+
+     mmccaa__ppaarr((""sswweeeeppss"")) - returns the number of sweeps to be summed.
+
+     mmccaa__ppaarr((""sswweeeeppss"",, vvaalluuee)) - sets the number of sweeps to be summed in the
+          next scan to vvaalluuee.  The number of sweeps can range from 1 to 65,536.
+
+     mmccaa__ppaarr((""sswweeeeppss__ccoommpp"")) - returns the number of sweeps completed in the
+          previous scan.  An error message is printed if this function is called
+          while a scan is in progress.
+
+     mmccaa__ppaarr((""ffiirrsstt__cchh"")) - returns the first channel to be read out using
+          mmccaa__ggeett(()).
+
+     mmccaa__ppaarr((""ffiirrsstt__cchh"",, vvaalluuee)) - sets the first channel to be read out using
+          mmccaa__ggeett(()) to vvaalluuee.
+
+     mmccaa__ppaarr((""nnppttss"")) - returns the number of channels to be read out using
+          mmccaa__ggeett(()).
+
+     mmccaa__ppaarr((""nnppttss"",, vvaalluuee)) - sets the number of channels to be read out using
+          mmccaa__ggeett(()) to vvaalluuee.
+
+     Note that the mmccaa__ggeett(()) function cannot be used while the MCS module is
+     taking data.
+
+     Note that the 4101 doesn't actually average the sweeps, but only
+     accumulates sums in each channel.  To obtain an average, you must divide
+     the data in each channel by the number of sweeps.  The averaging scan will
+     halt before the programmed number of sweeps is completed if any of the
+     channels overflow.
+
+     The module expects an external trigger and the external trigger is required
+     to begin each sweep.
+

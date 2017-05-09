@@ -1,0 +1,103 @@
+changes                      spec 2.7 Release Notes                      changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.7
+
+DESCRIPTION
+
+     These notes summarize the modifications made for ssppeecc release 2.7, as
+     finalized on July 8, 1988.
+
+CHANGES
+
+     GPIB support for the Tecmar board in the AT is now included.  The user must
+     have read and write permission for //ddeevv//iioommeemm.  The board must be installed
+     at base address 300.  If the ccoonnffiigg file assigns a slot to the Kinetic
+     Systems 3388 GPIB CAMAC module, the Tecmar board will be unavailable.
+
+     A presence test is performed when the E500 is first opened and when the
+     user types ssyynncc or rreeccoonnffiigg.  (rreeccoonnffiigg is called by the ccoonnffiigg macro.)  If
+     the presence test fails, all associated motors are marked uunnuussaabbllee.  Once
+     marked unusable, the program must be restarted to make them usable.  Trying
+     to move an unusable motor produces an error message.
+
+     The E500 ""rreemmaaiinniinngg sstteeppss"", usually resulting from aborting motion, are
+     noted and cleared in the LAM routine.  Thus ""cclleeaarriinngg rreemmaaiinniinngg sstteeppss""
+     messages seldom occur when initiating a move.
+
+     When there is a discrepancy between pprriivviilleeggeedd motor settings and the
+     controller registers, the registers are now changed, rather than the
+     settings.
+
+     When there is a discrepancy between wwrriittaabbllee motors and controller
+     settings, the user must type either yy or nn.  No default is allowed.  (YY or
+     11 and NN or nn are also acceptable input.)
+
+     The ggeettaanngglleess and ggeettddiiaallss commands now read and return the current
+     contents of the controller registers, not the program's idea of the motor
+     positions.  (However, at present, the program's idea of the motor position
+     is not changed by these two commands-that still occurs the same way as in
+     previous versions.)
+
+     SSIIMMUULLAATTEE is no longer a built-in variable.  Instead, a new function,
+     sseett__ssiimm(()) is used to turn simulation mode on and off, where sseett__ssiimm((00))
+     turns the mode off and sseett__ssiimm((11)) turns the mode on.  Both wait for moving
+     and counting to finish before changing the mode, and both return the
+     previous mode.  sseett__ssiimm((--11)) returns the current value of simulation mode
+     without changing it.  Whenever simulation mode is turned off, the motor
+     settings file is reread to restore the motor positions.
+
+     Negative arguments to sslleeeepp(()) are allowed.  They represent clock ticks,
+     where a clock tick is 1/60th of a second, e.g., sslleeeepp((--1100)) pauses for
+     approximately a sixth of a second.
+
+     mmoovvee has been renamed mmoovvee__aallll to make it harder for a user to start motors
+     moving by accident.
+
+     eeddccoonnff has been revised, due to popular demand.  Changes include the
+     following: When invoked with the --ss option, eeddccoonnff is put into simulation
+     mode where nothing can be changed and files can't be written.  Also, if the
+     user doesn't have write permission to the ccoonnffiigg file, no configuration
+     parameters can be changed, and only the settings and/or limits of the
+     configured wwrriittaabbllee motors can be changed.  System error messages are now
+     shown giving the reason for failures when opening, closing, reading and
+     writing the files.  Also, the motor settings can now be put outside the
+     limits, although a warning message will be printed when the user writes out
+     the files.  The dial setting is now maintained when changing the
+     number-of-steps parameter.  Finally, there is always at least one motor.
+
+     The tweak macro ttww has been changed to only output to the printer at the
+     beginning and end of the tweaking process.
+
+     The sseett__ddiiaall macro no longer changes the limits.  However the macro refuses
+     to set the dial outside of the current limits.
+
+     The format of motor positions written to the data file by the scan macros
+     has been compressed.  The motor names are no longer printed.  The motor
+     positions are printed eight per line with the format
+
+         ##PP00 ((eeiigghhtt mmoottoorrss))
+
+         ##PP11 ((aannootthheerr eeiigghhtt mmoottoorrss))
+
+     etc.
+
+     The ccoonnffiigg macro invokes eeddccoonnff with the --ss flag if ssppeecc is in simulation
+     mode.
+
+     New macros display motor positions while motors are moving.  Their names
+     are uuwwmm, uummvv, uummvvrr, uuaann, uuppll, uubbrr and uummkk.  Except for the update feature,
+     they are identical to wwmm, mmvv, mmvvrr, aann, ppll, bbrr and mmkk.  The global variable
+     UUPPDDAATTEE contains the sleep time between screen updates and can be changed by
+     the user.
+
+     The Makefile for installing ssppeecc has a new variable PPEERRMMSS that contains the
+     permissions to assign to the ccoonnffiigg file.  The default is to make the
+     config file writable by everyone.  (Typing mmaakkee iinnssttaallll__xx2200 will install
+     the BNL X20 ssppeecc automatically giving the ccoonnffiigg file restricted access.)
+
+     A bug whereby CAMAC interrupts that arrived during a sslleeeepp(()) sometimes
+     caused the sslleeeepp(()) to not wake up is fixed.  A bug whereby assigning string
+     values to the motor position array, AA[[]], used to produce surprising results
+     is fixed.
+

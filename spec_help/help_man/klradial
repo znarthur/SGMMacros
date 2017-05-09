@@ -1,0 +1,60 @@
+.TH "klradial" "macro" "01/29/14" "klradial.rst 6.2  01/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBklradial\fP \- scan along a radius in the \fBKL\fP\-plane in reciprocal space
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)klradial.rst     6.2  01/29/14  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "klradial" "macro" "01/29/14" "klradial.rst 6.2  01/29/14 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBklradial angle start end intervals time [expression]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBklradial\fP macro scans along a radius in the
+\fBKL\fP\-plane in reciprocal space.
+The angle of the arc from the positive \fBK\fP axis is given by
+\fBangle\fP and the scan runs from the radius given by
+\fBstart\fP to the radius given by \fBend\fP.
+The number of data points collected will be
+\fBintervals+1\fP.  Count time is given by
+\fBtime\fP, which if positive, specifies seconds and if negative,
+specifies monitor counts.
+.sp
+The optional last argument can supply expressions to be evaluated after
+\fBK\fP and \fBL\fP are calculated for each point.
+You may, for example, supply an expression to calculate values for
+\fBH\fP or include expressions to offset the values of \fBK\fP and \fBL\fP.
+.SH "EXAMPLES"
+.rs
+.nf
+
+\fBklradial 45 .0 sqrt(2) 10 10\fP
+\fBklradial 90 0 1 20 60 "K+=.5; L+=.5"\fP
+.fi
+.sp
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%hklscan\fP
+\fI\%hscan\fP
+\fI\%kscan\fP
+\fI\%lscan\fP
+\fI\%hkcircle\fP
+\fI\%hlcircle\fP
+\fI\%klcircle\fP
+\fI\%hkradial\fP
+\fI\%hlradial\fP
+

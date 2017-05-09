@@ -1,0 +1,54 @@
+.TH "ascan" "macro" "08/01/12" "ascan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBascan\fP \- one\-motor scan
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)ascan.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "ascan" "macro" "08/01/12" "ascan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBascan motor start end intervals time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBascan\fP scans one motor, as specified by \fBmotor\fP.
+The motor starts at the position given by \fBstart\fP and ends at the
+position given by \fBend\fP.
+The step size is \fB(start\-end)/intervals\fP.
+The number of data points collected will be
+\fBintervals+1\fP.  Count time is given by \fBtime\fP, which if positive,
+specifies seconds and if negative, specifies monitor counts.
+.SH "EXAMPLE"
+.rs
+.RS 3m
+.sp
+.nf
+.ft CB
+ascan th 0 1 20 10
+.ft P
+.fi
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%a2scan\fP
+\fI\%a3scan\fP
+\fI\%a4scan\fP
+\fI\%dscan\fP
+\fI\%d2scan\fP
+\fI\%d3scan\fP
+\fI\%mesh\fP
+

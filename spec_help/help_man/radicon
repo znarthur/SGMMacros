@@ -1,0 +1,161 @@
+.TH "radicon" "hardware" "08/01/12" "radicon.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+Radicon \- Radicon SCSD\-3C scintillation detector with timer/counter
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)radicon.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2011,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "radicon" "hardware" "08/01/12" "radicon.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP supports the Radicon model SCSD\-3C scintillation detector with
+embedded timer/counter over a serial interface.
+See \fI\%www.radicon.spb.ru\fP for details on the hardware.
+.sp
+The SCSD\-3C device has one counter channel and can be operated in
+either preset\-time mode or preset\-count mode.  In preset\-time mode, the
+accumulated count value is available.
+In preset\-count mode, the elapsed time is available.
+In both cases, results are only available after the preset is reached.
+No intermediate results are accessible.
+If the counting is interrupted, no hardware results are available.
+While counting or after an interrupted count, \fBgetcounts\fP will fill the
+\fBS[sec]\fP counter array element with the estimated elapsed time.
+.sp
+The counter register is 32 bits.
+In preset\-time mode, the register contents are scaled by 8e6, so that
+the maximum programmable count time is just over 536 seconds.
+If the requested count time is longer than that,
+\fBspec\fP will automatically restart the counter as many times as necessary.
+In preset\-count mode, if the time to accumulate the specified preset exceeds
+the hardware\(aqs maximum, the hardware counter overflows and loses
+the accumulated counts.
+\fBspec\fP will print an error message and set the elapsed time to 536.871 seconds
+and the elapsed counts to zero.
+.SH "CONFIGURATION"
+.rs
+.sp
+The SCSD\-3C should be configured for two channels.
+Channel 0 should be the time base and channel 1
+should be configured as the monitor counter.
+The scale factors are built into the code for both channels
+(1e6 for the time channel and 1 for the monitor).
+Values in the \fBconfig\fP file are ignored.
+.SH "PARAMETERS"
+.rs
+.sp
+The SCSD\-3C has several configuration parameters.
+Although the parameters affect the controller as a whole,
+they should be configured for one of the individual channels.
+If the same parameter is given different values for both
+channels, the last parameter input will take precedence.
+.sp
+The parameters can be configured using
+\fBcounter_par()\fP or as nonstandard optional parameters in the
+\fBconfig\fP file.
+To configure the latter, type a \fBp\fP while on the \fBS\fPcaler
+screen and enter the parameter name and value
+as described on the associated help screens.
+Values set using \fBcounter_par()\fP will be reset to those in the
+\fBconfig\fP file on start up and on \fBreconfig\fP.
+.sp
+The following parameters are available:
+.RS 0m
+.HP 5m
+."
+\fBcounter_par(mne, "high_voltage" [, arg])\fP
+\- 
+Returns or sets the high voltage value sent with the start command.
+Value should be from 0 to 818 volts.
+.HP 5m
+."
+\fBcounter_par(mne, "use_sound" [, arg])\fP
+\- 
+Returns or sets the mode where the instrument generates sounds
+that reflect the intensity of the incident flux.
+.HP 5m
+."
+\fBcounter_par(mne, "use_window" [, arg])\fP
+\- 
+Returns or sets windowed mode.
+When enabled, the device uses the upper threshold values to discriminate the
+input counts.
+.HP 5m
+."
+\fBcounter_par(mne, "upper_threshold" [, arg])\fP
+\- 
+Returns or sets the value for the upper threshold in windowed mode.
+Value should be from 0 to 1023.
+.HP 5m
+."
+\fBcounter_par(mne, "lower_threshold" [, arg])\fP
+\- 
+Returns or sets the value for the lower threshold.
+The lower threshold is always enabled and is used to cut off
+thermal noise and the intrinsic detector noise.
+Value should be from 0 to 1022.
+.HP 5m
+."
+\fBcounter_par(mne, "window" [, arg])\fP
+\- 
+Returns or sets the value for the threshold window.
+Setting a value changes the upper threshold parameter.
+Will silently set the upper threshold to the maximum value if
+the window is too large.
+Note, the window value equals upper \- lower + 1.
+.RE
+.sp
+The following commands are also available:
+.RS 0m
+.HP 5m
+."
+\fBcounter_par(mne, "reset")\fP
+\- 
+Sends the reset command to the device.
+.RE
+.HP 5m
+."
+\fBcounter_par(mne, "sound_on")\fP
+\- 
+Sends the sound\-on command to the device and
+turns on the \fB"use_sound"\fP mode.
+.HP 5m
+."
+\fBcounter_par(mne, "sound_off")\fP
+\- 
+Sends the sound\-off command to the device and
+turns off the \fB"use_sound"\fP mode.
+.HP 5m
+."
+\fBcounter_par(mne, "dump")\fP
+\- 
+Displays the current values for the parameters formatted
+as follows:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+upper_threshold : 800
+lower_threshold : 204
+         window : 597
+   high_voltage : 642
+      use_sound : 1
+     use_window : 1
+.ft P
+.fi
+.RE
+.RE
+.RE
+

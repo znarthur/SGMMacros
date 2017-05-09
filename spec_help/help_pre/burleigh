@@ -1,0 +1,147 @@
+oms                                 hardware                                 oms
+
+NAME
+     burleigh - Burleigh 6200ULN with 671 interface
+
+DESCRIPTION
+
+     The Burleigh 6200ULN Inchworm Controller operates the Burleigh Inchworm
+     motors in closed-loop mode.  ssppeecc supports this controller using the
+     Burleigh Model 671 ISA PC card interface.  Currently, only one 671 card at
+     a time is supported, but support for multiple cards will be added when
+     required by a ssppeecc user.  The 671 card supports three 6200ULN controllers
+     with each controller supporting up to three motors.
+
+CONFIGURATION
+
+     The motor controller type is BBUURRLL667711 on the motor screen of the
+     configuration editor.  The steps-per-degree parameter is only used to
+     determine the resolution at which you can specify moves.  A value of 100 is
+     appropriate for a 0.02 um encoder resolution.
+
+     To avoid frequent messages regarding position discrepancies, choose a
+     reasonable number of steps for the motor "slop" parameter on the optional
+     motor-parameter screen of the configuration editor.
+
+CALIBRATE
+
+     To achieve well-defined speeds, it is necessary to calibrate each motor's
+     movement.  The mmoottoorr__ppaarr(()) option ""ccaalliibbrraattee"", described below, does that.
+     A motor is moved at a series of speeds, and the distance traveled and time
+     taken is measured.  The measured values are fit to a simple power law
+     described by two constants, with separate parameters calculated in forward
+     in reverse directions for high and low speeds.  Thus, eight parameters are
+     found for each motor.
+
+     Note, the calibration operation takes a couple of minutes.  ssppeecc turns off
+     stall detection, if on, during calibration, and restores it afterwards.
+
+     The calibration parameters for nine motors can be saved in ASCII format to
+     a file according to Burleigh conventions.  ssppeecc will automatically load
+     calibrations from a file if it exists and can be found using the following
+     rules.  If the environment variable BBUURRLLEEIIGGHH__CCAALLIIBB set, its value is taken
+     as the pathname of the calibration file.  If it is not set, ssppeecc looks for
+     a file named 667711ccaalliibb..ttxxtt in the current directory.  The parameters are
+     loaded from the calibration file, if it exists, when the controller is
+     initialized at program start up and on hardware reconfiguration.
+
+     While running ssppeecc, the mmoottoorr__ppaarr(()) options ""ccaalliibb__ffiillee"", ""llooaadd__ccaalliibb"" and
+     ""ssaavvee__ccaalliibb"", also described below, can be used to change the name of the
+     file and to load or save calibration parameters.
+
+STALL
+
+     The controller has the ability to detect a stalled motor.  The mmoottoorr__ppaarr(())
+     option ""ssttaallll"" is used to turn stall-detection on or off.  When stall
+     detection is turned on, the controller makes a configurable number of
+     checks that the encoder has sent a configurable number of pulses over a
+     configurable interval.  If stall is detected, the controller stops the
+     motor and returns a status indication.  The above three parameters can be
+     entered directly using the mmoottoorr__ppaarr(()) options ""ssttaallll__tteessttss"",
+     ""ssttaallll__iinntteerrvvaall"" and ""ssttaallll__ttoolleerraannccee"" described below.  Since the stall
+     detection depends on the motor speed, the above parameters need to be
+     changed to match the speed.
+
+     ssppeecc provides an alternative method for setting the stall parameters that
+     automatically adjusts to the motor speed.  The mmoottoorr__ppaarr(()) options
+     ""ssttaallll__ttiimmee"" and ""ssttaallll__ppeerrcceenntt"", described below, are used.  The
+     ""ssttaallll__ttiimmee"" parameter is the number of seconds in total to spend doing the
+     stall tests, while ""ssttaallll__ppeerrcceenntt"" is the percentage value of the current
+     speed below which the motor is considered stalled.
+
+     Setting any of the first three parameters switches to the mode where the
+     parameters are set directly.  Setting either of the last two parameters
+     switches to the alternative mode.
+
+SPECIAL COMMANDS
+
+     The following special commands are available through the mmoottoorr__ppaarr(())
+     function.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ccaalliibb__ffiillee"" [[,, ffiillee]])) - Sets or returns the pathname of
+          the calibration file.  The same calibration file is used for all
+          motors.  The file name is not reset during hardware reconfiguration.
+          The mmoottoorr parameter is any motor associated with the 671 controller.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""llooaadd__ccaalliibb"" [[,, ffiillee]])) - Loads calibration parameters for
+          all motors from the current calibration file or from the ffiillee
+          specified as the optional argument.  The mmoottoorr parameter is any motor
+          associated with the 671 controller.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ssaavvee__ccaalliibb"" [[,, ffiillee]])) - Writes calibration parameters for
+          all motors to the current calibration file or to the ffiillee specified as
+          the optional argument.  The mmoottoorr parameter is any motor associated
+          with the 671 controller.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ccaalliibbrraattee"")) - Runs the calibration test for the specified
+          motor.  Use the ""ssaavvee__ccaalliibb"" option to save the calibration parameters
+          to a file.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""mmaaiinntt"" [[,, hhooww]])) - Turns position maintenance on or off
+          for mmoottoorr if the optional argument hhooww is nonzero or zero.  Without
+          the arguments, returns nonzero or zero reflecting the current state of
+          maintenance mode.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddwweellll"" [[,, hhooww]])) - If the optional argument is present
+          enables the dwell test for mmoottoorr.  Otherwise returns a status
+          indicating whether the dwell-test mode is active.  Consult the
+          Burleigh documentation for details.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ssttaallll"" [[,, hhooww]])) - If the optional argument is present,
+          turns stall detection on or off for mmoottoorr depending on whether hhooww is
+          nonzero or zero.  Otherwise, returns the value matching the current
+          state of stall detection.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ssttaallll__tteessttss"" [[,, vvaalluuee]])) - Sets or returns the numbers of
+          consecutive tries for the stall detection to consider mmoottoorr stalled.
+          The default value is 5.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ssttaallll__iinntteerrvvaall"" [[,, vvaalluuee]])) - Sets or returns the time
+          interval for each stall test in seconds for mmoottoorr.  The default value
+          is 0.05 seconds.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ssttaallll__ttoolleerraannccee"" [[,, vvaalluuee]])) - Sets or returns the number
+          of encoder counts expected during each stall test for mmoottoorr.  The
+          default value is 30.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ssttaallll__ttiimmee"" [[,, vvaalluuee]])) - Sets or returns the total stall
+          time for the alternative stall parameter calculation for mmoottoorr.  The
+          default value is 0.2 seconds.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ssttaallll__ppeerrcceenntt"" [[,, vvaalluuee]])) - Sets or returns the percent
+          of current speed below which mmoottoorr is considered stalled.  The default
+          value is 50 for fifty percent.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""mmvvssuubbsstteepp"",, ssuubbsstteeppss]])) - Moves motor the selected number
+          of ssuubbsstteeppss and returns when the movement is complete.  The motor
+          position is updated at the end of the move.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddiissppllaayy"" [[,, hhooww]])) - If hhooww is present, selects the units
+          for the front panel display for mmoottoorr as follows:
+          1   inches
+          2   millimeters
+          4   microns
+
+          Without the optional argument, the value corresponding to the current
+          display setting is returned.
+

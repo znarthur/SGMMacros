@@ -128,15 +128,15 @@ def mac_mot_cmd(mne, key, p1) '{
                 	return (en_setp)
 		}
 		if (mne == xps_x) {
-			xpsx = epics_get("SMTR16114I1022:mm:fbk")
+			xpsx = epics_get("SMTR16114I1022:mm:sp")
 			return(xpsx)
 		}
 		if (mne == xps_y) { 
-			xpsy = epics_get("SMTR16114I1023:mm:fbk")
+			xpsy = epics_get("SMTR16114I1023:mm:sp")
 			return(xpsy)
 		}
 		if (mne == xps_z) {
-			xpsz = epics_get("SMTR16114I1024:mm:fbk")
+			xpsz = epics_get("SMTR16114I1024:mm:sp")
 			return(xpsz)
 		}
 		if (mne == xps_r) {
@@ -483,11 +483,11 @@ def hex_p_calc(mne, mode) '{
 			A[hex_zp] = A[hex_x]*0.683013 + A[hex_y]*-0.183013 + A[hex_z]*0.707107
 	} else {
 			A[hex_x] = A[hex_xp]*-0.258819+A[hex_yp]*+0.683013+A[hex_zp]*0.683013
-		#	hex_set_x = A[hex_x]
+			hex_set_x = A[hex_x]
 			A[hex_y] = A[hex_xp]*-0.965926+A[hex_yp]*-0.183013+A[hex_zp]*-0.183013
-		#	hex_set_y = A[hex_y]
+			hex_set_y = A[hex_y]
 			A[hex_z] = A[hex_yp]*-0.707107+A[hex_zp]*0.707107
-		#	hex_set_z = A[hex_z]
+			hex_set_z = A[hex_z]
 	}
 }'
 ###########################################
@@ -501,28 +501,34 @@ def lights '{
 	epics_put("ILC1611-4-I10-02", $1)
 }'
 
-def beam_on '{
-	local onalready
-	onalready = 0
-	print ("Turning beam on.")
-	if (epics_get("AM1611-4-I10:beam:status") != "BEAM ON"){
-		epics_put("AM1611-4-I10:beam:opr:on", 1, 2)
-		sleep(2)
-		print ("Waiting for beam...")
-		sleep(5)
-       }
-	else if (epics_get("AM1611-4-I10:beam:status") == "BEAM ON"){
-		print "Beam was already on."
-		onalready = 1
-	}
-	if ((epics_get("AM1611-4-I10:beam:status") == "BEAM ON") && (onalready != 1)){
-		print "Beam is on!"
-	}
+global offline_test
+offline_test = 0
 
+def beam_on '{
+	if(offline_test == 0){
+		local onalready
+		onalready = 0
+		print ("Turning beam on.")
+		if (epics_get("AM1611-4-I10:beam:status") != "BEAM ON"){
+			epics_put("AM1611-4-I10:beam:opr:on", 1, 2)
+			sleep(2)
+			print ("Waiting for beam...")
+			sleep(5)
+     		}
+		else if (epics_get("AM1611-4-I10:beam:status") == "BEAM ON"){
+			print "Beam was already on."
+			onalready = 1
+		}
+		if ((epics_get("AM1611-4-I10:beam:status") == "BEAM ON") && (onalready != 1)){
+			print "Beam is on!"
+		}
+	}
 }'
 
 def beam_off '{
-	epics_put("AM1611-4-I10:beam:opr:off", 1)
+	if(offline_test == 0){
+		epics_put("AM1611-4-I10:beam:opr:off", 1)
+	}
 }'
 
 def turbos_on '{
@@ -749,12 +755,21 @@ def energy_status '{
 		printf("Undulator gap motor moving.\n")
 	grating
 	harmonic
+	undgap = epics_get("UND1411-01:gap:mm:fbk")
+	printf("Undulator Gap: %g mm\n", undgap)
 	exs = epics_get("PSL16114I1004:Y:mm:fbk")
 	printf("Exit Slit: %g mm\n", exs)
 }'
 
-def status '{
+def ring_current '{
+        current = epics_get("PCT1402-01:mA:fbk")
+	printf("RING CURRENT: %g mA\n", current)
+}'
 
+def status '{
+	
+	ring_current	
+	printf("\n")
 	energy_status
 	printf("\n")
 	vac_status
@@ -869,7 +884,7 @@ def ladder2 '{
 				qcomment "Ladder 2 is retracted"
 			}
 		}
-		else if (pos > 64000 && pos < 72000) {
+		else if (pos > 60000 && pos < 72000) {
 			print "Ladder 2 is in the phosphor position."
 			if (commentflag == 1) {
 				qcomment "Ladder 2 is in the phosphor position"
@@ -928,7 +943,7 @@ def ladder2 '{
 		}
 		else if (("$1" == "Phosphor") | ("$1" == "phosphor")) {
 			print "Moving ladder 2 to the phosphor position"
-			epics_put("SMTR16114I1014:step", 68000)
+			epics_put("SMTR16114I1014:step", 61000)
 		}
 		else if (("$1" == "Through") | ("$1" == "through")) {
 			print "Moving ladder 2 to the pass-through position"

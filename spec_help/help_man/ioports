@@ -1,0 +1,134 @@
+.TH "ioports" "hardware" "09/24/12" "ioports.rst 6.2  09/24/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+ioports \- I/O port access for PCs
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)ioports.rst      6.2  09/24/12  CSS
+.
+.\" Copyright (c) 1997,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "ioports" "hardware" "09/24/12" "ioports.rst 6.2  09/24/12 CSS"
+.
+.SH "INTRODUCTION"
+.rs
+.sp
+Access to I/O ports associated with ISA or PCI cards can be configured
+on the \fBInterface\fP screen of the configuration editor along the following
+lines:
+.RS 3m
+.sp
+.nf
+.ft CB
+IO PORT                 ADDR  <>MODE  NUM
+    YES                0x300    Read    1
+    YES               0xC100   Write    2
+    YES                0x310     R/W    4
+.ft P
+.fi
+.RE
+.sp
+The \fBNUM\fP field indicates how many consecutive locations (in bytes)
+can be accessed.
+Write\-only mode is available for the unusual situation where read
+access to an I/O location has adverse consequences such as
+freezing the host PC.
+.sp
+The \fBconfig\fP file entry syntax is:
+.sp
+.RS 4m
+.nf
+PC_PORT_#  =  \fBhex_base_address\fP  \fBnumber_of_ports\fP  \fBread_write_flag\fP
+.fi
+.sp
+.RE
+.sp
+where \fBread_write_flag\fP is 0 for read\-only, 1 for write\-only and 2 for read\-write mode.
+.sp
+It is not necessary to configure I/O ports associated with controllers that have
+built\-in support in \fBspec\fP.
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBport_get(a)\fP
+\- 
+Reads one byte from the PC I/O port with the address \fBa\fP.
+Ports must be selected in the \fBconfig\fP file.
+.HP 5m
+."
+\fBport_getw(a)\fP
+\- 
+As above, but reads a 16\-bit word.
+.HP 5m
+."
+\fBport_put(a, b)\fP
+\- 
+Write the byte \fBb\fP to the PC I/O port with the address
+\fBa\fP. Writable ports must be selected in the \fBconfig\fP file.
+.HP 5m
+."
+\fBport_putw(a, b)\fP
+\- 
+As above, but writes a 16\-bit word.
+.RE
+.SH "Configuring I/O Port Access On Linux PC Platforms"
+.rs
+.sp
+To access I/O ports on Linux PC platforms, required
+both for the generic access provided by the above functions and also for
+many of the PC data acquisition and control boards that \fBspec\fP supports,
+\fBspec\fP uses the \fBiopl()\fP system call
+to raise the I/O privilege level of the \fBspec\fP process.
+That system calls requires root privilege.
+In order that users don\(aqt have to be the
+root user to run \fBspec\fP, \fBspec\fP is instead installed
+as a set\-user\-id\-root process.
+That means a long listing (\fBls \-l\fP) of the \fBspec\fP executable
+looks something like:
+.RS 3m
+.sp
+.nf
+.ft CB
+\-r\-sr\-xr\-x 3 root  sys  3552546 Jun  6  2:45 spec
+.ft P
+.fi
+.RE
+.sp
+where the file is owned by \fBroot\fP and there is an \fBs\fP instead of an
+\fBx\fP in the first set of permissions.
+.sp
+As soon as \fBspec\fP starts out, the effective user\-id of the \fBspec\fP
+process is changed to that of the real user.
+The effective user\-id is changed back to
+\fBroot\fP for the duration of the \fBiopl()\fP system call.
+Also, I/O privilege is turned off for any spawned processed.
+.sp
+The \fBroot\fP access is used by \fBspec\fP is to open
+\fB/dev/mem\fP for memory mapped devices such as the Oregon Micro System PC\-58 motor
+controller and the Bit3 Model 403 VME controller.
+Just as with \fBiopl()\fP, root access is only turned on for the duration of the
+\fBopen()\fP system call for \fB"/dev/mem"\fP.
+.sp
+Finally, \fBroot\fP access is enabled for the \fBopen()\fP call of
+the device node associated with any
+configured USB devices.
+With recent \fBspec\fP releases on modern \fBLinux\fP distributions, that access
+shouldn\(aqt be needed as the \fBudev\fP rules installed by \fBspec\fP should
+have created general read/write access to the associated USB device nodes.
+.sp
+During the rest of the time, \fBspec\fP users will not have \fBroot\fP privileges.
+.sp
+The \fBspec\fP installation program will create the installed \fBspec\fP
+executables with the correct owner and modes
+if the \fBInstall\fP script is run by the \fBroot\fP user.
+

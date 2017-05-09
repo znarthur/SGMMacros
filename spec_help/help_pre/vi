@@ -1,0 +1,25 @@
+vi                                    macro                                   vi
+
+NAME
+     vvii - invokes the standard UNIX visual editor
+
+SYNOPSIS
+
+     vvii [[ffiillee__nnaammee ......]]
+
+DESCRIPTION
+
+     The vvii macro runs the standard UNIX visual editor in a sub-shell.
+
+DEFINITION
+
+     ddeeff vvii ''uunniixx((""vvii $$**""))''
+
+EXAMPLE
+
+     vvii ddoo..ssccaannss
+
+SEE ALSO
+
+     _n_e_d _u
+

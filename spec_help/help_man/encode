@@ -1,0 +1,192 @@
+.TH "encode" "reference" "12/14/13" "encode.rst 6.2  12/14/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBencode()\fP/\fBdecode()\fP \- data stream manipulation
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)encode.rst       6.2  12/14/13  CSS
+.
+.\" Copyright (c) 2011,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "encode" "reference" "12/14/13" "encode.rst 6.2  12/14/13 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBencode()\fP and \fBdecode()\fP built\-in functions
+convert between \fBspec\fP data objects and
+standard data\-interchanges formats.
+Such a capability may be useful, for example, to pass data over
+sockets between \fBspec\fP and other processes.
+Currently, the JSON (JavaScript Object Notation) format is supported.
+.sp
+The \fBspec\fP data objects are numbers, strings,
+associative arrays and data arrays.
+The \fBencode()\fP function takes as argument one
+or more spec data objects and returns
+a string conforming to the data\-interchange format specifications.
+The \fBdecode()\fP functions takes a string argument which contains encoded data
+and returns a \fBspec\fP data object appropriate to the data.
+Since \fBspec\fP does not have composite data types, the
+\fBdecode()\fP function only accepts encoded representations
+of one kind of value, but that value can be an associative array structure
+or a data array containing multiple items.
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.sp
+In the \fBencode()\fP and \fBdecode()\fP functions,
+the first argument is the name of the format.
+Currently, \fB"json"\fP is the only recognized format.
+The argument is case insensitive.
+.RS 0m
+.HP 5m
+."
+\fBencode(format, obj [, ...])\fP
+\- 
+Returns a string representation of the \fBspec\fP data objects
+in the specified \fBformat\fP.
+.HP 5m
+."
+\fBdecode(format, str)\fP
+\- 
+Returns a \fBspec\fP data object obtained from the string
+representation in \fBformat\fP.
+.RE
+.SH "FORMATS"
+.rs
+.sp
+The JSON format is documented at \fI\%json.org\fP.
+In general, a JSON value can be a string, a number, an object or an array.
+Arbitrary white space is allowed between the various elements.
+.sp
+Strings are always delimited by double quotes.
+Within strings, octal string escape sequences are not allowed.
+Instead, \fB\eu\fP followed by \fBfour\-hex\-digits\fP is used.
+Since \fBspec\fP only supports eight\-bit characters, the two high\-order
+hex digits are ignored when decoding such sequences.
+.sp
+Numbers can only be in decimal format (no octal or hexadecimal),
+and leading zeroes are not allowed.
+.sp
+A JSON object is a comma\-delimited list of name/value pairs
+(separated by a colon),
+enclosed in curly brackets.  The name is always a string.
+\fBspec\fP only supports values that are numbers or strings.  The object
+type is used for encoding and decoding associative arrays.
+\fBspec\fP supports conversion between  both one\- and two\-dimensional
+\fBspec\fP associative arrays and JSON objects.
+.sp
+The array object is a comma\-delimited list of numbers
+or strings enclosed in square brackets.
+\fBspec\fP supports one\- or two\-dimensional number arrays
+and one\-dimensional string arrays.
+\fBspec\fP can encode an array of mixed values,
+but can only decode arrays that have one value type.
+.SH "EXAMPLES"
+.rs
+.sp
+The following examples illustrate JSON encoding.
+.sp
+\fBspec\fP associative arrays are encoded as a JSON \fBobject\fP,
+which is a set of name/value pairs, enclosed in curly brackets.
+The name is always a string.
+\fBspec\fP\(aqs encoded objects will only include string and number value types.
+To encode a \fBspec\fP associative array:
+.RS 3m
+.sp
+.nf
+.ft CB
+1.SPEC> s = encode("json", A)
+
+2.SPEC> print s
+{"0": 120, "1": 60, "2": \-35.2645, "3": \-45}
+.ft P
+.fi
+.RE
+.sp
+\fBspec\fP number data arrays can contain signed
+or unsigned 8\-, 16\- or 32\-bit integers,
+32\-bit floats or 64\-bit doubles and can have one or two dimensions.
+To encode a data array:
+.RS 3m
+.sp
+.nf
+.ft CB
+3.SPEC> ulong array data[10], data[2][5]
+
+4.SPEC> array_op("fill", data)
+
+5.SPEC> s = encode("json", data)
+
+6.SPEC> print s
+[0,1,2,3,4,5,6,7,8,9]
+
+7.SPEC> array_op("fill", data2)
+
+8.SPEC> print encode("json", data2)
+[[0,0,0,0,0],[1,1,1,1,1],[2,2,2,2,2]]
+.ft P
+.fi
+.RE
+.sp
+A \fBspec\fP string data array is similar to an 8\-bit array
+with respect to storage, but the contents will be encoded as JSON strings.
+A one\-dimensional string array will be encoded as a single string.
+A two\-dimensional string array will be encoded
+as one\-dimensional array of strings:
+.RS 3m
+.sp
+.nf
+.ft CB
+9.SPEC> string array sdata[20], sdata2[3][20]
+
+10.SPEC> sdata = "\e033[7mtest\e033[0m"
+
+11.SPEC> sdata2[0] = "first"
+
+12.SPEC> sdata2[1] = "middle"
+
+13.SPEC> sdata2[2] = "last"
+
+14.SPEC> print encode("json", sdata)
+"\eu001B[7mtest\eu001B[0m"
+
+15.SPEC> print encode("json", sdata2)
+["first","middle","last"]
+.ft P
+.fi
+.RE
+.sp
+Note the octal escapes in the first example have been encoded using
+\fB\eu\fP followed by four hexadecimal digits.
+.sp
+A list of mixed data objects can also be encoded:
+.RS 3m
+.sp
+.nf
+.ft CB
+16.SPEC> s = encode("json", PI, "hello world", data, A)
+
+17.SPEC> print s
+[3.14159265358979, "hello world", [0,1,2,3,4,5,6,7,8,9],
+{"0": 120, "1": 60, "2": \-35.2645, "3": \-45}]
+.ft P
+.fi
+.RE
+.sp
+Here, the list is encoded as an array of values consisting
+of a number, a string, an array and an object.
+.sp
+The \fBdecode()\fP function will only accept JSON encoded strings
+that can be decoded to one of the recognized \fBspec\fP data types.
+Mixed data types, such as combinations of scalers
+and arrays in the last example above, are not valid for \fBdecode()\fP,
+since \fBspec\fP
+has no data type in which to return the decoded mixed values.
+

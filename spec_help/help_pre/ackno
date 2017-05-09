@@ -1,0 +1,16 @@
+ackno                               reference                              ackno
+
+NAME
+     ackno - acknowledgements
+
+DESCRIPTION
+
+     The first version of ssppeecc was developed in early 1986 at Harvard University
+     by Gerald Swislow (post doc) and Alan Braslau (grad student) in the
+     laboratory of Peter Pershan to control a two-circle spectrometer and two
+     variations on a liquid-surface spectrometer using PDP 11/34 and 11/73
+     computers.
+
+     Certified Scientific Software began development of the new ssppeecc in
+     November, 1987.
+

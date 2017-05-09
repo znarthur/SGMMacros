@@ -1,0 +1,57 @@
+printing                            reference                           printing
+
+NAME
+     printing - producing formatted output
+
+DESCRIPTION
+
+     The pprriinntt command and the pprriinnttff(()) and ffpprriinnttff(()) functions are used to send
+     output to files or to the screen.  In ssppeecc, files and devices are turned oonn
+     or ooffff using special commands (see the ffiilleess help file), and printed output
+     generally goes to all devices that are currently oonn. The ffpprriinnttff(()) function
+     differs in that it turns off output to everything except the file or device
+     specified in its first argument.
+
+     The pprriinntt command prints each of its arguments separated by spaces, and
+     then prints a newline.  Strings are printed as is, numbers are printed
+     using the ""%%gg"" format.
+
+     The functions pprriinnttff(()), ffpprriinnttff(()) and sspprriinnttff(()) use format specifications
+     just like those in C.  A few of those format specifications are %%ss to print
+     a string, %%gg to print a floating point number and %%dd to print an integer.
+     An embedded \\nn prints a newline.  See the description of pprriinnttff(()) in a C
+     manual for more details.
+
+BUILT-IN COMMANDS AND FUNCTIONS
+
+     pprriinntt aa,, bb ......  - Prints each argument, separated by spaces.
+
+     pprriinnttff((ffoorrmmaatt,, aa,, bb ...... )) - Prints aa, bb, etc. using ffoorrmmaatt.
+
+     ffpprriinnttff((ffiillee__nnaammee,, ffoorrmmaatt [[,, aa,, ......]]))  - Does formatted printing on
+          ffiillee__nnaammee.  All other devices (except log files) are turned off while
+          the string is printed.
+
+     sspprriinnttff((ffoorrmmaatt,, aa,, bb ...... )) - Returns a string holding the formatted print.
+
+EXAMPLES
+
+        11..SSPPEECC>> pprriinntt ssqqrrtt((22)),, PPII,, PPRRIINNTTEERR
+        11..4411441122 33..1144115599 //ddeevv//llpp
+
+        22..SSPPEECC>> pprriinnttff((""TTooddaayy iiss %%ss..  PPII == %%..33gg\\nn"",,\\
+             ddaattee(()),, PPII))
+        TTooddaayy iiss SSaatt JJaann 2233 0000::5544::2233 11998888..  PPII == 33..1144
+
+        33..SSPPEECC>> FFIILLEENNAAMMEE == sspprriinnttff((""%%ss//ddaattaa//rruunn..%%dd"",,\\
+                HHOOMMEE,, rruunn));;
+
+        44..SSPPEECC>> pprriinntt FFIILLEENNAAMMEE
+        //uussrr//ggeerrrryy//ddaattaa//rruunn..1122
+
+SEE ALSO
+
+     _f_i_l_e_s
+
+     pprriinnttff(()) in any C-language programming manual.
+

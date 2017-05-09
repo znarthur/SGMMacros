@@ -1,0 +1,193 @@
+piper                               software                               piper
+
+NAME
+     piper - using ssppeecc as the back end of a pipe
+
+DESCRIPTION
+
+     ssppeecc contains certain facilities to aid in its use as the back end of a
+     parent program such as a graphical user interface (GUI).  This document
+     describes those facilities.
+
+INVOCATION FLAGS
+
+     ssppeecc needs to be invoked with several special flags when invoked from a
+     parent process.
+
+         ssppeecc --TT ffaakkee__ttttyy --tt ffaakkee__ttttyy --pp ppiidd ffdd --qq
+
+     ssppeecc is the name of the ssppeecc executable.  The --TT flag and ffaakkee__ttttyy argument
+     select the tty portion of the state file name used to save the user's state
+     when ssppeecc exits.  The --tt ffaakkee__ttttyy forces the current state to be restored
+     from the state file associated with ffaakkee__ttttyy when ssppeecc starts up.
+
+     The --pp flag takes two arguments: the parent process ID and the file
+     descriptor ssppeecc should use for its standard input.  If a tty-based program
+     is filtering input from the user before the commands are sent to ssppeecc, that
+     program and ssppeecc cannot both reading from the standard input.  For a
+     GUI-type program, the ffdd argument can be zero.  When ffdd is not zero, ssppeecc
+     will echo text received from that file descriptor to its standard output.
+     The ppiidd argument must be present, but is currently unused.
+
+     The --qq flag is optional.  If present, all output from files and devices in
+     ssppeecc may be turned off at the same time, including the ""ttttyy"" output.
+     Normally, if a user tries to turn off all output devices, ssppeecc
+     automatically turns the output to ""ttttyy"" back on.
+
+INVOCATION CONTEXT
+
+     Before creating a process to execute ssppeecc, the parent process needs to
+     create two or three pipes that will be used for interprocess communication.
+     One pipe is for sending commands to ssppeecc's standard input.  The second pipe
+     is for receiving special commands, described later, from ssppeecc.  The
+     optional third pipe receives ssppeecc's standard output.
+
+     Sample code for spawning ssppeecc follows:
+
+        iinntt     pp__wwrriittee[[22]];;     //** ppiippee ttoo ssppeecc **//
+        iinntt     pp__rreeaadd[[22]];;      //** ppiippee ffoorr ssppeecciiaall mmeessssaaggeess **//
+        iinntt     pp__oouutt[[22]];;       //** ssttddoouutt ppiippee ffrroomm ssppeecc **//
+        iinntt     ssppeecc__ppiidd;;       //** pprroocceessss iidd ooff ssppeecc **//
+
+        ##ddeeffiinnee PPIIPPEE__FFDD 44     //** FFiillee ddeessccrriippttoorr ffoorr ssppeecciiaall mmeessssaaggeess **//
+
+        //** ccooddee ttoo sseett uupp ppiippeess,, ffoorrkk aanndd eexxeecc ssppeecc **//
+        eexxeecc__ssppeecc(()) {{
+            rreeggiisstteerr iinntt    ii,, ppiippee__ffdd;;
+            cchhaarr    ppiidd__bbuuff[[6644]],, ffdd__bbuuff[[6644]];;
+
+            //**
+            ** tthhee dduupp((00)) iiss ffoorr tthhee ccaassee wwhheerree wwee ddoonn''tt
+            ** wwaanntt ssppeecc rreeaaddiinngg ffrroomm ttttyy ssttaannddaarrdd iinnppuutt..
+            **//
+            ppiippee__ffdd == dduupp((00));;
+            sspprriinnttff((ffdd__bbuuff,, ""%%dd"",, ppiippee__ffdd));;
+            sspprriinnttff((ppiidd__bbuuff,, ""%%dd"",, ggeettppiidd(())));;
+
+            //** ooppeenn aallll tthhrreeee ppiippeess **//
+            iiff ((ppiippee((pp__wwrriittee)) |||| ppiippee((pp__rreeaadd)) |||| ppiippee((pp__oouutt)))) {{
+                ppeerrrroorr((""CCaann''tt ppiippee""));;
+                rreettuurrnn((--11));;
+            }}
+            //** ssppaawwnn aa pprroocceessss **//
+            iiff ((((ssppeecc__ppiidd == ffoorrkk(()))) ==== 00)) {{
+                //** RReessttoorree aannyy ccaauugghhtt ssiiggnnaallss ttoo ddeeffaauullttss ...... **//
+                ssiiggnnaall((SSIIGGIINNTT,, SSIIGG__DDFFLL));;
+
+                //** aassssoocciiaattee rreeaadd ssiiddee ooff pp__wwrriittee wwiitthh ssttdd iinnppuutt **//
+                iiff ((pp__wwrriittee[[00]] !!== ppiippee__ffdd)) {{
+                    cclloossee((ppiippee__ffdd));;
+                    dduupp((pp__wwrriittee[[00]]));;
+                }}
+                //** aassssoocciiaattee wwrriittee ssiiddee ooff pp__oouutt wwiitthh ssttdd oouuttppuutt **//
+                iiff ((pp__oouutt[[11]] !!== 11)) {{
+                    cclloossee((11));;
+                    dduupp((pp__oouutt[[11]]));;
+                    //** aallssoo ggeett ssttaannddaarrdd eerrrroorr **//
+                    cclloossee((22));;
+                    dduupp((pp__oouutt[[11]]));;
+                }}
+                //** aassssoocciiaattee wwrriittee ssiiddee ooff pp__rreeaadd wwiitthh PPIIPPEE__FFDD **//
+                iiff ((pp__rreeaadd[[11]] !!== PPIIPPEE__FFDD)) {{
+                    //**
+                    ** ccoouulldd aallssoo uussee  dduupp22((pp__rreeaadd[[11]],, PPIIPPEE__FFDD)),,
+                    ** hhiissttoorriiccaallllyy,, tthhoouugghh,, dduupp22(()) hhaass nnoott bbeeeenn
+                    ** rroobbuusstt aaccrroossss aallll ppllaattffoorrmmss..
+                    **//
+                    cclloossee((PPIIPPEE__FFDD));;
+                    dduupp((pp__rreeaadd[[11]]));;
+                }}
+                //**
+                ** cclloossee ootthheerr ooppeenn ffiilleess ...... uunnlliikkeellyy
+                ** aannyytthhiinngg ppaasstt 4400 iiss ooppeenn??
+                **//
+                ffoorr ((ii == 33;; ii << 4400;; ii++++))
+                    iiff ((ii !!== PPIIPPEE__FFDD &&&& ii !!== ppiippee__ffdd))
+                        cclloossee((ii));;
+
+                eexxeeccll((""//cceerrtt//ssppeecc//ffoouurrcc"",, ""ffoouurrcc"",,
+                        ""--ppqq"",, ppiidd__bbuuff,, ffdd__bbuuff,,
+                        ""--TT"",, ""ppiippeerr"",,
+                        ""--tt"",, ""ppiippeerr"",, ((cchhaarr **)) 00));;
+
+                ppeerrrroorr((""CCaann''tt eexxeecc ssppeecc""));;
+                __eexxiitt((11));;
+            }}
+            iiff ((ssppeecc__ppiidd << 00)) {{
+                ppeerrrroorr((""CCaann''tt ffoorrkk""));;
+                rreettuurrnn((--11));;
+            }}
+            //** cclloossee ooffff uunnuusseedd eennddss ooff tthhee ppiippeess **//
+            cclloossee((pp__wwrriittee[[00]]));;
+            cclloossee((pp__rreeaadd[[11]]));;
+            cclloossee((pp__oouutt[[11]]));;
+            rreettuurrnn((00));;
+        }}
+
+SPECIAL MESSAGES
+
+     The following is a list of  messages sent over the special pipe from ssppeecc
+     to the parent process.
+
+     [[BB]]eerrmmssgg {{mmeessssaaggee}}[[EE]] - Transmits error messages produced by the built-in C
+          code and by the user-level eepprriinntt command and eepprriinnttff(()) function.
+          Note the curly brackets can be used to help parse multi-line messages.
+
+     [[BB]]ssppeecc__mmssgg ssyynnttaaxx__eerrrroorr ppaarrssee__eerrrroorr[[EE]] - This message is sent when there
+          is an parsing error in the user input.  ssppeecc resets to command level.
+
+     [[BB]]ssppeecc__mmssgg eerrrroorr__rreesseett eerrrroorr__rreesseett[[EE]] - This message is sent on errors
+          other than syntax errors that cause ssppeecc to reset to command level.
+
+     [[BB]]ssppeecc__mmssgg ssttaattee__cchhaannggee sshheellll__bbeeggiinn[[EE]] - This message is sent when ssppeecc
+          creates a subshell using its built-in uunniixx(()) command.  Note, while
+          ssppeecc is in a subshell, it will not respond to commands.
+
+     [[BB]]ssppeecc__mmssgg ssttaattee__cchhaannggee sshheellll__eenndd[[EE]] - This message is sent when ssppeecc
+          returns from a subshell.
+
+     [[BB]]ssppeecc__mmssgg ddoonnee__wwaaiittiinngg ffllaaggss[[EE]] - This message is sent when ssppeecc returns
+          from the wwaaiitt(()) function and some hardware activity has completed.
+          The bits in ffllaaggss indicate which activity has completed.  Bit 1 is set
+          for motors, bit 2 for timers and bit 3 for other data acquisition.
+
+     [[BB]]ssppeecc__mmssgg nneeeeddss__iinnppuutt mmoottoorr__ssyynncc[[EE]] - This message is sent when ssppeecc
+          requires a yes or no response to a motor position synchronization
+          question.  ssppeecc will not accept further input until it receives one of
+          the characters yy, YY, 11, nn, NN or 00.
+
+     [[BB]]ssppeecc__mmssgg nneeeeddss__iinnppuutt uusseerr__iinnppuutt[[EE]] - This message is sent when ssppeecc is
+          expecting user input either from the ggeetthheellpp(()) paginator, or from the
+          iinnppuutt(()) or ggeettvvaall(()) built-in functions.
+
+     [[BB]]ssppeecc__mmssgg eerrmmssgg mmeessssaaggee[[EE]] - Not yet used.
+
+     [[BB]]mmoottoorr__ssyynncc mmoottoorr__nnuummbbeerr 11 ccoonnttrroolllleerr__ppoossiittiioonn ssppeecc__ppoossiittiioonn[[EE]] - This
+          message is sent when there is a motor synchronization discrepancy.
+          The arguments are the motor number, the digit 1, the motor position
+          (in dial units) as read from the controller and the motor position (in
+          dial units) in ssppeecc.  (Currently only implemented for selected motor
+          controllers.)
+
+     [[BB]]ssppeecc__mmssgg mmoottoorr__lliimmiitt mmoottoorr__nnuummbbeerr ddiirreeccttiioonn[[EE]] - This message is sent
+          when ssppeecc detects a motor has hit a hard limit switch.  The first
+          argument is the motor number and the ddiirreeccttiioonn argument is 1 or -1
+          indicating whether the positive or negative limit has been hit.
+          (Currently only implemented for selected motor controllers.)
+
+     The parent process should be prepared to handle motor_sync mmoottoorr__ssyynncc and
+     mmoottoorr__lliimmiitt messages at any time.
+
+     Besides the special messages above, any ssppeecc output generated to the
+     special output devices named ""ppiippee"" using ffpprriinnttff((""ppiippee"",, ......)) or
+     oonn((""ppiippee"")) will arrive through the same file descriptor.
+
+CONCLUSION
+
+     With the above facilities, one can control ssppeecc from a parent process in a
+     variety of ways.  One can completely hide ssppeecc's output from the user,
+     writing special macros that send terse message over the ""ppiippee"" stream.
+     Alternatively, one can present the user with the standard ssppeecc input and
+     output, filtered through the parent program, with the parent program
+     sending additional messages to ssppeecc from its various GUI-type widgets.
+

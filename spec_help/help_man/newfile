@@ -1,0 +1,84 @@
+.TH "newfile" "macro" "08/01/12" "newfile.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBnewfile\fP \- data file management
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)newfile.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "newfile" "macro" "08/01/12" "newfile.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBnewfile [file_name] [current_scan_number]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBnewfile\fP macro is used to initialize a new data file
+or reopen an old data file.
+You might open a new data file for each new sample or each new experiment.
+There is no specific limit to the number of scans you can put in a data file,
+although for practical considerations, you may want to start a new file after
+you have accumulated one or two hundred scans or when the size of the
+data file makes it unwieldy.
+.sp
+If \fBfile_name\fP doesn\(aqt contain the \fB/\fP character, and
+if there is a directory named \fBdata\fP in the current directory,
+the file is opened in that directory.
+If you give \fBnull\fP as a file name, \fB/dev/null\fP is used.
+Otherwise the file name or path name given by \fBfile_name\fP is used.
+.sp
+The next scan written to the file will have
+scan number \fBcurrent_scan_number\fP +1.
+.sp
+You can use \fBnewfile\fP to reopen an existing data file.
+New scans will be placed at then end of the file.
+You can use command \fBu grep #S file_name\fP
+to find the last scan number in an existing file.
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBDATAFILE\fP
+\- 
+Global variable holding name of the current data file.
+Its value is written in the data file header preceded by \fB#F\fP.
+.HP 5m
+."
+\fBSCAN_N\fP
+\- 
+Global variable holding current scan number.
+Its value is written in the data file scan headers preceded by \fB#S\fP.
+.HP 5m
+."
+\fBEPOCH\fP
+\- 
+Constant variable holding the time at which the data file was opened.
+Its value is written in the data file header preceded by \fB#E\fP.
+.HP 5m
+."
+\fBTITLE\fP
+\- 
+Global variable written as a comment in the data file header.
+Its value is an arbitrary string set by the user.
+.RE
+.SH "EXAMPLE"
+.rs
+.sp
+\fBnewfile Au110.12\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%startup\fP
+\fI\%scans\fP
+

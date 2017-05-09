@@ -1,0 +1,299 @@
+.TH "plot_cntl" "function" "08/04/13" "plot_cntl.rst 6.3  08/04/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+plot_cntl() \- control of built\-in plotting
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)plot_cntl.rst    6.3  08/04/13  CSS
+.
+.\" Copyright (c) 1990-1997,2002,2012,2013
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "plot_cntl" "function" "08/04/13" "plot_cntl.rst 6.3  08/04/13 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBplot_cntl(s)\fP
+\- 
+Selects built\-in plotting features.  The argument
+\fBs\fP is a string of comma\- or space\-delimited options.
+The following options may be
+preceded by a minus sign to turn the associated feature
+off or  nothing (or an optional plus
+sign) to turn the feature on.
+A question mark before or after the option will return a value of
+one or a zero
+that indicates whether the associated feature is currently on or off.
+For example,
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+plot_cntl("xlog,ylog")    # turns x and y log\-axis mode on
+plot_cntl("+xlog")        # turns x log\-axis mode on
+plot_cntl("\-xlog")        # turns x log\-axis mode off
+print plot_cntl("xlog?")  # returns 1 if mode on, else 0
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fB"xlog"\fP
+\- 
+use a logarithmic \fBx\fP axis.
+.HP 5m
+."
+\fB"ylog"\fP
+\- 
+use a logarithmic \fBy\fP axis.
+.HP 5m
+."
+\fB"xexact"\fP
+\- 
+force \fBx\fP\-axis minimum and maximum to be set to the scan endpoints
+(as opposed to being rounded).
+.HP 5m
+."
+\fB"colors"\fP
+\- 
+enable the use of colors.
+.HP 5m
+."
+\fB"dots"\fP
+\- 
+draw graphics\-mode points with large dots.
+.HP 5m
+."
+\fB"lines"\fP
+\- 
+connect graphics\-mode points with lines.
+.HP 5m
+."
+\fB"ebars"\fP
+\- 
+draw vertical lines through each point of length equal to the twice the
+square root of the \fBy\fP value.
+.HP 5m
+."
+\fB"persist"\fP
+\- 
+keep graphics\-mode on after ordinary user input.  \fBspec\fP errors, a
+\fB^C\fP from the keyboard or \fBplot_cntl("close")\fP restore text mode.
+.HP 5m
+."
+\fB"perpetual"\fP
+\- 
+keep graphics\-mode on continuously (appropriate if using X windows, for
+example).
+.HP 5m
+."
+\fB"ascii"\fP
+\- 
+draw plots on the terminal window using cursor positioning commands and
+ASCII characters rather than using the high\-resolution \fBx11\fP window.
+.HP 5m
+."
+\fB"dumbterm"\fP
+\- 
+indicates a terminal window that lacks cursor positioning.  The
+value is set automatically when \fBspec\fP starts up.  When this mode
+is on, text plots are drawn down the page using only space characters
+to position the plotted points.  Note when this mode is on, the
+special control strings used by the \fBtty_cntl()\fP and the positioning
+used by \fBtty_move()\fP are unavailable.
+.RE
+.sp
+Other options are:
+.RS 0m
+.HP 5m
+."
+\fB"font=string"\fP
+\- 
+sets the font used for the \fBx11\fP high\-resolution plot windows.
+If the font is a scalable font, its size will be chosen to match the
+current size of the plot window.
+Otherwise, the font size will be fixed to either the value specified
+in the font name using the
+\fBX Logical Font Description Conventions\fP XLFD,
+or if the size fields are wild carded, the font size will
+be selected by the X server.
+.RE
+.HP 5m
+."
+\fB"title=string"\fP
+\- 
+sets the title\-bar text for \fBx11\fP high\-resolution plot windows.
+In a comma\-separated list of arguments to \fBplot_cntl()\fP,
+this one must appear last.
+.HP 5m
+."
+\fB"geometry=string"\fP
+\- 
+sets the size and position for \fBx11\fP high\-resolution plot windows.
+The format of the geometry string is the same as expected by
+standard X windows applications, as in
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+plot_cntl("geometry=512x380\-0+10")
+.ft P
+.fi
+.RE
+.sp
+As with the conventional syntax, not all parts of the geometry string
+are required.
+.RE
+.HP 5m
+."
+\fB"colors=bgnd:win:text:axis:symb:..."\fP
+\- 
+assign colors for drawing the various graphics\-mode elements.
+The values for
+\fBbgnd\fP (the background color of the area outside the axis),
+\fBwin\fP (the background color of the area inside the axis),
+\fBtext\fP (the color of the text),
+\fBaxis\fP (the color of the axis) and
+\fBsymb ...\fP (the color of the plotting symbols)
+are integers.
+The first 10 colors are standardized according to the following table:
+.sp
+.RS 5m
+.RS 4m
+.nf
+0 \- background (normally white or black)
+1 \- foreground (normally black or white)
+2 \- blue
+3 \- red
+4 \- green
+5 \- yellow
+6 \- cyan
+7 \- magenta
+8 \- white
+9 \- black
+.fi
+.sp
+.RE
+.sp
+Other colors may be available depending on the particular device.
+You don\(aqt have to assign values to all colors.
+.RE
+.HP 5m
+."
+\fB"colors[numb]"\fP
+\- 
+Returns the current color assignments, where
+\fBnumb\fP is a number between zero and 67.
+Numbers zero through three return the colors assigned to the
+\fBbgnd\fP, \fBwin\fP, \fBtext\fP and \fBaxis\fP
+elements respectively.  Numbers from 4 through 67 return the colors
+assigned to the plotting symbols.
+.HP 5m
+."
+\fB"filter1"\fP
+\- 
+select filter 1 (the default).  All plotting commands
+are directed to this filter.
+.HP 5m
+."
+\fB"filter2"\fP, \fB"filter3"\fP, \fB"filter4"\fP, \fB"filter5"\fP
+\- 
+select filters 2 through 5.
+Subsequent plotting commands are directed to the selected filter.
+.HP 5m
+."
+\fB"open"\fP
+\- 
+turn on graphics mode.  If there is no graphics filter program
+currently active for the current filter number (see above), the filter
+program associated with the current \fBGTERM\fP variable is started.
+The only currently useful value for \fBGTERM\fP is \fBx11\fP.
+When using X11 graphics, you can assign a value to the built\-in
+variable \fBDISPLAY\fP before a call of
+\fBplot_cntl("open")\fP to set the X display on which the plot will be drawn.
+If the filter is currently open, and you wish to change the display, use
+\fBplot_cntl("kill")\fP first.  For example,
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+DISPLAY="host1:0"; plot_cntl("filter1,open")
+DISPLAY="host2:0"; plot_cntl("filter2,open")
+.ft P
+.fi
+.RE
+.sp
+will create plot windows on two different hosts.
+.RE
+.HP 5m
+."
+\fB"close"\fP
+\- 
+turn off graphics mode, unless the perpetual
+or persistent mode has been selected.
+.HP 5m
+."
+\fB"kill"\fP
+\- 
+turn off graphics mode and terminate graphics process.
+.HP 5m
+."
+\fB"erase"\fP
+\- 
+clear the graphics\-mode screen (or the text screen
+if graphics mode is off).
+.HP 5m
+."
+\fB"raise"\fP
+\- 
+raises the \fBx11\fP high\-resolution plot window to the top of the desktop
+window stack, making it visible.
+.HP 5m
+."
+\fB"addpoint"\fP
+\- 
+before a call to \fBarray_plot()\fP or \fBdata_plot()\fP will cause
+the plot to be made with minimal redrawing.
+Used for updated plotting during scans.
+.HP 5m
+."
+\fB"addline"\fP
+\- 
+before a call to \fBarray_plot()\fP or
+\fBdata_plot()\fP will prevent the current data from being erased
+and the new data from
+changing the ranges when the new data points are drawn.
+Used for plotting several data sets from different data groups
+or array elements on top of each other.
+.HP 5m
+."
+\fB"mca"\fP
+\- 
+before a call to \fBarray_plot()\fP or
+\fBdata_plot()\fP will cause the data points to be displayed using a minimal
+redrawing algorithm, appropriate for displaying data actively being
+accumulated by an MCA\-type device.
+The \fB"dots"\fP and \fB"ebars"\fP modes must be turned off.
+.HP 5m
+."
+\fB"lp"\fP
+\- 
+before a call to \fBarray_plot()\fP or
+\fBdata_plot()\fP will generate printing instructions appropriate
+for plotting on a 132\-column printer.
+.RE
+

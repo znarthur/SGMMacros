@@ -1,0 +1,55 @@
+.TH "dscan" "macro" "01/29/14" "dscan.rst 6.2  01/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBdscan\fP or \fBlup\fP \- motor scan relative to the starting position
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)dscan.rst        6.2  01/29/14  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "dscan" "macro" "01/29/14" "dscan.rst 6.2  01/29/14 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.nf
+
+\fBdscan motor start end intervals time\fP
+\fBlup motor start end intervals time\fP
+.fi
+.sp
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBdscan\fP (also called \fBlup\fP) scans one motor,
+as specified by \fBmotor\fP. If the motor is at position
+\fBX\fP before the scan begins, the scan will run from
+\fBX+start\fP to \fBX+end\fP.
+The step size is \fB(start\-end)/intervals\fP.
+The number of data points collected will be \fBintervals+1\fP.
+Count time is given by \fBtime\fP, which if positive, specifies
+seconds and if negative, specifies monitor counts.
+.sp
+Upon termination, the motor is returned to its starting position.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBdscan phi \-1 1 20 10\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%ascan\fP
+\fI\%a2scan\fP
+\fI\%a3scan\fP
+\fI\%a4scan\fP
+\fI\%d2scan\fP
+\fI\%d3scan\fP
+\fI\%mesh\fP
+

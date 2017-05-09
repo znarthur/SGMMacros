@@ -1,0 +1,40 @@
+.TH "cat" "macro" "08/01/12" "cat.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+cat \- UNIX shell cat command
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)cat.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "cat" "macro" "08/01/12" "cat.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBcat file_name [file_name ... ]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBcat\fP macro runs the standard UNIX utility of the same name.
+The \fBcat\fP utility copies the \fBfile_name\fP arguments to the standard output.
+.SH "DEFINITION"
+.rs
+.sp
+\fBdef cat \(aqunix("cat $*")\(aq\fP
+.SH "EXAMPLE"
+.rs
+.sp
+\fBcat do.scans\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fBUNIX User Reference Manual\fP
+

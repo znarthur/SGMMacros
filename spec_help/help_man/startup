@@ -1,0 +1,86 @@
+.TH "startup" "macro" "04/16/13" "startup.rst 6.2  04/16/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBstartup\fP \- procedure to initialize parameters
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)startup.rst      6.2  04/16/13  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "startup" "macro" "04/16/13" "startup.rst 6.2  04/16/13 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBstartup\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBstartup\fP macro lets you change the default parameters
+that are used by many of the macros in the standard library.
+The \fBstartup\fP macro gathers together initialization macros such as
+\fBnewfile\fP, \fBsetscans\fP, \fBsetplot\fP and \fBstartgeo\fP into one place. Also,
+\fBstartup\fP prompts you for a title,
+the name of a command file
+directory, the default count time and the updated\-move\-and\-count
+update interval.
+.sp
+The title you enter will appear in the scan headers that
+are printed in the data file and on the screen.
+.sp
+The command file directory name is used by the \fBdo\fP and \fBqdo\fP macros.
+These macros look for command files in the command file directory
+if they are not in the current directory.
+If you want to keep your \fBspec\fP command files in a special directory,
+you can enter that directory name.
+Otherwise, you can enter a single dot to indicate the current directory.
+.sp
+The default count time is initially one second and is used by the
+\fBct\fP and \fBuct\fP macros as the count time if no arguments are given.
+.sp
+The update time controls how often the motor controllers or counters
+are read and the readings displayed on the screen during updated
+moving and counting.  The default value is 0.25 seconds.
+Setting the value to zero is allowed, and causes the hardware registers
+to be read as often as possible.  Entering zero or
+a small value may slow down other processes on the computer, though,
+so beware if you or someone else is trying
+to do something else from another window or terminal.
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBTITLE\fP
+\- 
+Scan title.
+.HP 5m
+."
+\fBDO_DIR\fP
+\- 
+Alternate command file directory.
+.HP 5m
+."
+\fBCOUNT\fP
+\- 
+Default count time.
+.HP 5m
+."
+\fBUPDATE\fP
+\- 
+Update interval for screen displays.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%newfile\fP
+\fI\%setplot\fP
+\fI\%setscans\fP
+

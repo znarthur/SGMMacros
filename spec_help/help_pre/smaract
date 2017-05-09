@@ -1,0 +1,217 @@
+smaract                             hardware                             smaract
+
+NAME
+     SmarAct - SmarAct GmbH SCU and MCS controllers for micro- and
+     nanopositioning
+
+DESCRIPTION
+
+     ssppeecc supports the SmarAct SCU and MCS controller modules over a serial
+     interface.  See _w_w_w_._s_m_a_r_a_c_t_._d_e for details on the hardware.
+
+CONFIGURATION
+
+     ssppeecc supports the SmarAct SCU and MCS controller in both open-loop and
+     closed-loop modes.  The closed-loop mode requires the optional sensor
+     module hardware is installed.  Such channels should be configured with
+     controller type SSMMAARRAACCTT__EE in the configuration editor.  The open-loop
+     configuration can be used with or without sensor module hardware and is
+     configured with controller type SSMMAARRAACCTT.
+
+     When a sensor is installed and detected, the controller requires different
+     commands for rotary versus linear sensors.  The controller cannot detect
+     the sensor type, although the sensor type can be saved in non-volatile
+     memory on the controller.  The sensor type information can be set in ssppeecc's
+     hardware ccoonnffiigg file.  If the sensor type in the ccoonnffiigg file differs from
+     the sensor type as reported by the controller's non-volatile memory, ssppeecc
+     will set the controller to the type in the ccoonnffiigg file.
+
+     One can specify the sensor type in the ccoonnffiigg file by either of two
+     methods.  The first method is to set the standard optional motor parameter
+     ""rroottaarryy"" to a non-zero value to indicate a rotary positioner or zero to
+     indicate a linear positioner.  The second method is to create a
+     non-standard optional motor parameter called ""sseennssoorr__ttyyppee"" and set its
+     value to the sensor type as specified in the SmarAct documentation.  ssppeecc
+     recognizes the defined codes and will send the commands appropriate to the
+     configured sensor type.
+
+     The linear sensors are available in micrometer and nanometer resolution.
+     The rotary sensors have micro-degree resolution.  In the ssppeecc configuration
+     editor, choose a value for the steps-per-unit parameter as appropriate.
+     For example, if the sensor resolution is in nanometers, a value of 1e6 will
+     allow the positions to be specified in millimeters.
+
+     The MCS models allow setting the steady-state rate (speed) parameter.  The
+     units are microns per second for linear positioners and microdegrees per
+     second for rotary positioners.  The base rate and acceleration parameters
+     are not used with any of the SmarAct controllers.
+
+     When operating in open-loop mode, the move commands send a value for the
+     number of steps to take.  The steps are conditioned by an amplitude and a
+     step frequency.  The amplitude defaults to 50 Volts, but can be set by
+     creating the non-standard optional motor parameter ""aammpplliittuuddee"" in the
+     ccoonnffiigg file.  The step frequency is the steady-state rate in Hz from the
+     ccoonnffiigg file.
+
+     Note, the ""nnoonn--ssttaannddaarrdd ooppttiioonnaall"" parameters are set in the configuration
+     editor using the pp command from the DDevices screen for controller
+     parameters or from the MMotor screen for motor parameters.  ""SSttaannddaarrdd""
+     optional motor parameters are found using the mm command once or twice from
+     the MMotor screen of the configuration editor.
+
+     For actuators that have no sensor, there are no commands available to read
+     the actual position or even the commanded position from the controller.
+     ssppeecc will estimate the position during moves based on the configured step
+     frequency (stead-state rate) and the elapsed time.  That estimated position
+     will be displayed during updated moves.  If a move is aborted, the
+     estimated position at the time of interruption will be used as the current
+     position.
+
+PARAMETERS
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseennssoorr__mmooddee"")) - MCS only.  Returns the default value for
+          the power mode of the sensors for the controller associated with motor
+          channel mmnnee.  A value of 1 is normal mode.  A value of 2 is power-save
+          mode.  If unset, normal mode is used.  Should only be set in the
+          ccoonnffiigg file as a non-standard optional parameter associated with the
+          controller entry on the DDevices screen.  Setting the parameter for an
+          individual motor channel will be ineffective.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseennssoorrss"" [[,, aarrgg]])) - MCS only.  Sets or returns the current
+          power mode for the sensors for the controller associated with motor
+          channel mmnnee.  If aarrgg is zero or the string ""ooffff"", disables the
+          sensors.  Otherwise, the sensors are enabled using either normal mode
+          or the value contained in the ""sseennssoorr__mmooddee"" parameter if that is set.
+          This parameter should not be set in the ccoonnffiigg file.  Note, the power
+          mode affects all the channels on a controller.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp"")) - Displays parameters for channel mmnnee in the
+          following format (for an MCS channel):
+
+             SSmmaarrAAcctt mmoottoorr ""ssxx"",, uunniitt 00 cchhaannnneell 33::
+              EEmmeerrggeennccyy ssttoopp mmooddee::  nnoorrmmaall
+                      SSeennssoorr mmooddee::  eennaabblleedd
+                      SSeennssoorr ttyyppee::  lliinneeaarr ppoossiittiioonneerr wwiitthh nnaannoosseennssoorr
+                         PPoossiittiioonn::  110000..000011 mmmm
+                  SSooffttwwaarree lliimmiittss::  nnoonnee
+                CClloosseedd lloooopp ssppeeeedd::  5500 uumm//sseecc
+                   SSaaffee ddiirreeccttiioonn::  bbaacckkwwaarrdd ((11))
+                          VVoollttaaggee::  6633..66996633 ((22660099))
+
+          If no sensor is detected, fewer parameters are available:
+
+             SSmmaarrAAcctt mmoottoorr ""mm00"",, uunniitt 00 cchhaannnneell 00::
+              EEmmeerrggeennccyy ssttoopp mmooddee::  nnoorrmmaall
+                      SSeennssoorr mmooddee::  ddiissaabblleedd
+                         PPoossiittiioonn::  uunnkknnoowwnn -- nnoo sseennssoorr ddeetteecctteedd
+                          VVoollttaaggee::  4499..99775566 ((22004477))
+
+          The display for an SCU channels has much less information.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ccaalliibbrraattee__sseennssoorr"")) - Sends a command to run the calibrate
+          sequence for the indicated channel.  The wwaaiitt(()) command can be used to
+          wait for the sequence to finish.
+
+     mmoottoorr__ppaarr((mmnnee,, ""aammpplliittuuddee"" [[,, aarrgg]])) - Sets or returns the voltage amplitude
+          for the indicated channel used for moves for channels that lack a
+          position sensor.  Such channels are configured as SSMMAARRAACCTT rather than
+          SSMMAARRAACCTT__EE (with encoder).  If unset, a value of 50 Volts is used.
+          Allowed values are from 0 to 100 for MCS models and 15 to 100 for SCU
+          models.  This parameter will only exist if created as a non-standard
+          optional parameter in the ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""hhoolldd__ttiimmee"" [[,, aarrgg]])) - Sets or returns the hold-time
+          parameter for the indicated channel.  The units are milliseconds.  The
+          parameter defines how long the controller will actively hold the
+          position after reaching the target for sensor-enabled positioners.  If
+          unset, a value of zero will be used.  See the SmarAct documentation
+          for additional details.  This parameter will only exist if created as
+          a non-standard optional parameter in the ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rroottaarryy"")) - This standard optional parameter can be set to a
+          non-zero value in the ccoonnffiigg file to indicate a rotary sensor is in
+          used.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseennssoorr__ttyyppee"")) - Sets or returns the configured sensor type
+          according to these values from the SmarAct documentation.  For MCS
+          models, the types are:
+
+               1 - linear with nanosensor
+               2 - rotary with nanosensor
+               4 - rotary with microsensor
+               5 - linear with nanosensor, large actuator
+               6 - linear with nanosensor, reference marks
+               7 - rotary with microsensor
+               8 - rotary with nanosensor
+               9 - linear with microsensor
+              10 - rotary with microsensor, no reference marks, end stops
+              11 - goniometer with 60.5mm radius
+              12 - goniometer with 77.5mm radius
+              13 - rotary with absolute sensors
+              14 - rotary with microsensor
+              15 - rotary with microsensor, no reference marks, no end stops
+
+          For SCU models, the types are:
+
+               1 - Linear positioner with microsensor, end stops
+               4 - Rotary positioner with microsensor, no ref mark, end stops
+               5 - Rotary positioner with 60.5mm radius, end stops
+               6 - Rotary positioner with 77.5mm radius, end stops
+               7 - Rotary positioner with absolute sensor
+               8 - Rotary positioner with microsensor, end stops
+               9 - Rotary positioner with microsensor, no ref mark, no end stops
+              10 - Rotary positioner
+              11 - Rotary positioner with end stops
+              12 - Rotary positioner
+              13 - Rotary positioner with end stops
+              14 - Linear positioner with magnetic encoder, end stops
+              15 - Rotary positioner with 93.5mm radius, end stops
+              16 - Linear positioner with microsensor, double piezo, end stops
+              17 - Tip tilt positioner with 25.4mm diameter
+
+          The sensor type can be used instead of the ""rroottaarryy"" parameter to
+          differentiate a linear stage from a rotary stage.  This parameter will
+          only exist if created as a non-standard optional parameter in the
+          ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ssaaffee__ddiirreeccttiioonn"" [[,, aarrgg]])) - For actuators without a physical
+          reference mark, sets the safe direction for performing a limit search.
+          Zero is forward and one is backward.  This parameter will only exist
+          if created as a non-standard optional parameter in the ccoonnffiigg file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the SmarAct channel
+          assigned to motor mmnnee.  Note, ssppeecc will add the motor number and other
+          command delimiters as needed, although for certain commands on the
+          SCU, use a zero as a place holder for the channel number.  For
+          example, to set the positioner alignment parameters for a motor on an
+          SCU controller, one could use:
+
+             mmoottoorr__ppaarr((mmnnee,, ""sseenndd"",, ""SSPPAA00AA11FF220000BB115500""))
+
+          The first zero after SSPPAA will be replaced with the motor channel.  To
+          set the closed-loop maximum frequency with the MCS controller, the
+          following would work:
+
+             mmoottoorr__ppaarr((mmnnee,, ""sseenndd"",, ""SSCCLLFF,,33000000""))
+
+          ssppeecc will automatically insert the channel number before the comma.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the SmarAct channel
+          assigned to motor mmnnee, and returns the reply.  Note, ssppeecc will add the
+          motor number to the command.  For example, the following can be used
+          to read the closed-loop maximum frequency for a particular channel:
+
+             pp mmoottoorr__ppaarr((sszz,, ""rreeaadd"",, ""GGCCLLFF""))
+
+     mmoottoorr__ppaarr((mmnnee,, ""uusseenndd"",, ccmmdd)) - Sends the string ccmmdd to the SmarAct
+          controller unit associated with motor mmnnee.  Use this option for
+          commands that are not associated with a specific channel.
+
+     mmoottoorr__ppaarr((mmnnee,, ""uurreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the SmarAct
+          controller unit assigned with motor mmnnee, and returns the reply.  Use
+          this option for commands that are not associated with a specific
+          channel.  For example, the following can be used to read the system ID
+          number on an MCS controller:
+
+             pp mmoottoorr__ppaarr((sszz,, ""uurreeaadd"",, ""GGSSII""))
+

@@ -1,0 +1,402 @@
+motors                              hardware                              motors
+
+NAME
+     motors - commands and functions for controlling motors
+
+DESCRIPTION
+
+     Motor positions are stored in memory, in the sseettttiinnggss file and, if the
+     hardware allows, in motor-controller registers.  The user has access to the
+     motor positions through the built-in array AA[[]]. The number of steps per
+     degree (or millimeter, inch, etc.), direction of motion, rate of rotation,
+     direction of backlash, etc., are defined in a configuration file.  Each
+     motor has an associated name and mnemonic, also assigned in the
+     configuration file.
+
+     ssppeecc employs two methods for specifying motor position, dial units and user
+     units.  Dial units should be set to correspond to the physical dial
+     settings of the spectrometer.  Doing so makes it more likely you can
+     recover motor positions in the event controller and software positions are
+     simultaneously lost.  User units are related to dial units by a simple
+     linear relation.  User angles are set to nominal values during the lineup
+     procedure.
+
+     The sseettttiinnggss file contains a copy of the most recent value written to the
+     motor controller register, the user-units offset and the software limits
+     for each motor.  The sseettttiinnggss file is read at program start up and on the
+     rreeccoonnffiigg command.  The sseettttiinnggss file is written each time a motor is moved
+     or when the offset or limits are changed.
+
+     Dial and user units are related by the following expressions.
+
+         uusseerr == ssiiggnn ** ddiiaall ++ ooffffsseett
+         ddiiaall == ccoonnttrroolllleerr__rreeggiisstteerr // sstteeppss__ppeerr__uunniitt
+
+     ssiiggnn and sstteeppss__ppeerr__uunniitt are set in the configuration file.
+
+     For example, if ssiiggnn == 11 and sstteeppss__ppeerr__uunniitt == 220000, the current position
+     would be
+
+         uusseerr == ccoonnttrroolllleerr__rreeggiisstteerr // 220000 ++ ooffffsseett
+
+     Motor positions displayed by ssppeecc are generally rounded to the precision
+     allowed by the steps-per-unit parameter.  With ssppeecc release 5.10.01-1, it
+     is now possible to retrieve the "commanded" motor position, which is the
+     position requested with a move command.  The commanded position can be
+     retrieved using rreeaadd__mmoottoorrss(()).
+
+BUILT-IN COMMANDS, FUNCTIONS AND VARIABLES
+
+     AA[[]] - An array used to transfer motor positions between the user and the
+          program.
+
+     rreeaadd__mmoottoorrss((mmooddee [[,, wwhhiicchh]])) - Reads the motors and places the motor
+          positions in the AA[[]] array with options set by mmooddee, as follows:
+
+          Bit 0 (0x01) - If clear, user positions are put into AA[[]].  If set,
+               dial positions are put into the motor array.
+          Bit 1 (0x02) - If set, forces reading the hardware.  For many motor
+               controllers, ssppeecc doesn't necessarily read the hardware if the
+               position hasn't been changed by ssppeecc since the controller was
+               last read.
+          Bit 2 (0x04) - If set, position discrepancies between ssppeecc and the
+               motor hardware will be silently resolved in favor of the
+               hardware.  Otherwise, ssppeecc will prompt the user as to whether the
+               software or hardware positions should be considered correct.
+          Bit 3 (0x08) - If set, the hardware is read, but the contents of the
+               AA[[]] array are not modified.
+          Bit 4 (0x10) - If set, the "commanded" positions are placed in AA[[]].
+               The hardware is not accessed.  If the optional argument wwhhiicchh is
+               set to a particular motor number or mnemonic, AA[[]] is not
+               modified, and the return value will be the commanded position for
+               the specified motor.
+
+          The optional argument wwhhiicchh is currently only used for return of the
+          commanded position.
+
+          The following macro definitions are included in the standard set:
+
+              ddeeff ggeettaanngglleess ''rreeaadd__mmoottoorrss((00))''
+              ddeeff ggeettddiiaallss  ''rreeaadd__mmoottoorrss((11))''
+              ddeeff ggeett__aanngglleess ''rreeaadd__mmoottoorrss((00));; uusseerr__ggeettaanngglleess''
+
+          The ggeett__aanngglleess definition includes a call to user-hook macro,
+          uusseerr__ggeettaanngglleess, that can be defined locally.  It is recommended to use
+          ggeett__aanngglleess in local macros.
+
+          Note, prior to the introduction of rreeaadd__mmoottoorrss(()) in ssppeecc release
+          4.03.07, ggeettaanngglleess and ggeettddiiaallss were built-in commands.
+
+     mmoovvee__aallll - Move all motors to the user positions specified in AA[[]].
+
+          The following macro definition is included in the standard macro set:
+
+              ddeeff mmoovvee__eemm ''uusseerr__pprreemmoovvee;; mmoovvee__aallll;; uusseerr__ppoossttmmoovvee''
+
+          The mmoovvee__eemm macro includes calls to user-hook macros that can be
+          defined locally.  It is recommend that local macros use mmoovvee__eemm rather
+          than mmoovvee__aallll.
+
+     mmoovvee__ccnntt - As mmoovvee__aallll, but gates scalers open during move and does not
+          perform backlash correction.  Move velocity is at the base rate.
+
+     mmoottoorr__mmnnee((ii)) - Returns the string mnemonic of motor ii as given in the
+          configuration file.
+
+     mmoottoorr__nnaammee((ii)) - Returns the string name of motor ii as given in the
+          configuration file.
+
+     mmoottoorr__nnuumm((mmnnee)) - Returns the motor number corresponding to the motor
+          mnemonic mmnnee, or -1 if there is no such motor configured.
+
+     mmoottoorr__ppaarr((ii,, ss,, vv,, ""aadddd"")) - Creates a temporary run-time motor parameter
+          for motor ii named ss with initial value vv.
+
+     mmoottoorr__ppaarr((ii,, ss [[,, vv]])) - Returns or sets configuration parameters for motor
+          ii.  Recognized values for the string ss include:
+
+          ""sstteepp__ssiizzee"" - Returns what is called the step-size parameter.
+               However, the parameter name is misleading.  The value returned is
+               actually the number of steps per unit (where the unit is
+               generally degrees, millimeters, microns, etc.), nnoott the size of a
+               single step.  If vv is given, then the parameter is set to that
+               value.
+
+               Note, the parameter can be negative, which might be needed to
+               make the dial position agree with the rotation sense of the
+               motor.
+
+               Since changing this parameter seriously affects the motor
+               position calculation, as a precaution, the function
+               ssppeecc__ppaarr((""mmooddiiffyy__sstteepp__ssiizzee"",, 11)) must be entered first to enable
+               step-size modifications using mmoottoorr__ppaarr(()).
+          ""ssiiggnn"" - Returns 1 or -1, indicating the rotation sense of the user
+               angle versus the dial angle, as set in the ccoonnffiigg file (as of
+               ssppeecc release 5.08.01-5).  This is a read-only parameter.
+          ""ooffffsseett"" - Returns the value of the ""ooffffsseett"" motor parameter, which is
+               the difference between the user and dial motor positions (as of
+               ssppeecc release 5.08.01-1).  This is a read-only parameter.
+          ""aacccceelleerraattiioonn"" - Returns the value of the current acceleration
+               parameter.  The units of acceleration are the time in
+               milliseconds for the motor to accelerate to full speed.  If vv is
+               given, then the acceleration is set to that value.
+          ""bbaassee__rraattee"" - Returns the current base-rate parameter.  The units are
+               steps per second.  If vv is given, then the base rate is set to
+               that value.
+          ""vveelloocciittyy"" - Returns the current steady-state velocity parameter.  The
+               units are steps per second.  If vv is given, then the steady-state
+               velocity is set to that value.
+          ""bbaacckkllaasshh"" - Returns the value of the backlash parameter.  Its sign
+               and magnitude determine the direction and extent of the motor's
+               backlash correction.  If vv is given, then the backlash is set to
+               that value.  Setting the backlash to zero disables the backlash
+               correction.
+          ""ccoonnffiigg__sstteepp__ssiizzee"" - Returns the value of the ""sstteepp__ssiizzee"" parameter as
+               set in the ccoonnffiigg file.
+          ""ccoonnffiigg__aacccceelleerraattiioonn"" - Returns the value of the ""aacccceelleerraattiioonn""
+               parameter as set in the ccoonnffiigg file.
+          ""ccoonnffiigg__bbaassee__rraattee"" - Returns the value of the ""bbaassee__rraattee"" parameter as
+               set in the ccoonnffiigg file.
+          ""ccoonnffiigg__vveelloocciittyy"" - Returns the value of the ""vveelloocciittyy"" parameter as
+               set in the ccoonnffiigg file.
+          ""ccoonnffiigg__bbaacckkllaasshh"" - Returns the value of the ""bbaacckkllaasshh"" parameter as
+               set in the ccoonnffiigg file.
+          ""ccoonnttrroolllleerr"" - Returns a string containing the controller name of the
+               specified motor.  The controller names are those used in ssppeecc's
+               ccoonnffiigg files.
+          ""uunniitt"" - Returns the unit number of the specified motor.  Each motor
+               controller unit may contain more than one motor channel.
+          ""cchhaannnneell"" - Returns the channel number of the specified motor.
+          ""rreessppoonnssiivvee"" - Returns a nonzero value if the motor responded to an
+               initial presence test or appears otherwise to be working.
+          ""aaccttiivvee"" - Returns a nonzero value if the motor is currently moving.
+          ""hhiigghh__lliimm__hhiitt"" - Returns nonzero if the high limit is active (for most
+               supported motor controllers) (as of ssppeecc release 5.06.05.7).
+          ""llooww__lliimm__hhiitt"" - Returns nonzero if the low limit is active (for most
+               supported motor controllers) (as of ssppeecc release 5.06.05.7).
+          ""ddiissaabbllee"" - Returns a nonzero value if the motor has been disabled by
+               software.  If vv is given and is nonzero, then the motor is
+               disabled.  If vv is given and is zero, the motor becomes no longer
+               disabled.  A disabled motor channel will not be accessed by any
+               of ssppeecc's commands, and, of course, cannot be moved.  Any
+               ccddeeff(())-defined macros will automatically exclude the portions of
+               the macro keyed to the particular motor when the motor is
+               software disabled.
+          ""wwrriittaabbllee"" - Returns a value indicating the permission status of the
+               motor, as set in the ccoonnffiigg file.  If bit 1 is set, the motor can
+               be moved.  If bit 2 is set, the limits can be changed.  A fully
+               protected motor will return zero.  A fully open motor will return
+               3.  (Added in ssppeecc release 5.08.01-1.) This is a read-only
+               parameter.
+          ""sslloopp"" - Returns the value of the slop parameter.  If vv is given, sets
+               the slop parameter.  When this parameter is greater than zero,
+               discrepancies between hardware and software motors positions are
+               silently resolved in favor of the the hardware when the number of
+               steps in the discrepancy is less than the value of the slop
+               parameter.  If the value is negative, discrepancies less than the
+               absolute value of the parameter are resolved in favor of software
+               by changing the hardware controller position, if possible.
+          ""rreeaadd__mmooddee"" - Returns the value of the hardware read-mode parameter.
+               If vv is given, sets the parameter.  The read-mode parameter
+               allows setting ssppeecc's behavior for motors that are likely to be
+               moved by other programs while spec is monitoring the position of
+               the motor, or that have encoders and positions that fluctuate.
+               The return value and the value for vv is coded as follows:
+
+               Bit 0 (0x01) - ssppeecc will always read the hardware before moving
+                    the motor.  Normally, ssppeecc assumes the motor is at its last
+                    position.
+               Bit 1 (0x02) - ssppeecc will always read the hardware whenever the
+                    ggeett__aanngglleess command is run from user level.  Normally, ssppeecc
+                    does not access hardware if the motor hasn't been moved
+                    since the controller was last read.
+               Bit 2 (0x04) - ssppeecc will always assume the hardware is correct
+                    and not query the user if the returned hardware position
+                    differs from the current software position.
+          ""hhoommee__sslleeww__rraattee"" - Returns the value of the home-slew-rate parameter.
+               If vv is given, sets the parameter.  This parameter is the
+               steady-state velocity used during a home search.  (Only available
+               for selected controllers.)
+          ""hhoommee__bbaassee__rraattee"" - Returns the value of the home-base-rate parameter.
+               If vv is given, sets the parameter.  This parameter is the
+               base-rate velocity used during a home search.  (Only available
+               for selected controllers.)
+          ""hhoommee__aacccceelleerraattiioonn"" - Returns the value of the home-acceleration
+               parameter.  If vv is given, sets the parameter.  This parameter is
+               the acceleration used during a home search.  (Only available for
+               selected controllers.)
+          ""ddcc__ddeeaadd__bbaanndd"" - Returns the value of the dead-band parameter for DC
+               motors.  Sets the parameter if vv is given.
+          ""ddcc__sseettttllee__ttiimmee"" - Returns the value of the settle-time parameter for
+               DC motors.  Sets the parameter if vv is given.
+          ""ddcc__ggaaiinn"" - Returns the value of the gain parameter for DC motors.
+               Sets the parameter if vv is given.
+          ""ddcc__ddyynnaammiicc__ggaaiinn"" - Returns the value of the dynamic-gain parameter
+               for DC motors.  Sets the parameter if vv is given.
+          ""ddcc__ddaammppiinngg__ccoonnssttaanntt"" - Returns the value of the damping-constant
+               parameter for DC motors.  Sets the parameter if vv is given.
+          ""ddcc__iinntteeggrraattiioonn__ccoonnssttaanntt"" - Returns the value of the
+               integration-constant parameter for DC motors.  Sets the parameter
+               if vv is given.
+          ""ddcc__iinntteeggrraattiioonn__lliimmiitt"" - Returns the value of the integration-limit
+               parameter for DC motors.  Sets the parameter if vv is given.
+          ""ddcc__ffoolllloowwiinngg__eerrrroorr"" - Returns the value of the dc-following parameter
+               for DC motors.  Sets the parameter if vv is given.
+          ""ddcc__ssaammpplliinngg__iinntteerrvvaall"" - Returns the value of the sampling-interval
+               parameter for DC motors.  Sets the parameter if vv is given.
+          ""eennccooddeerr__sstteepp__ssiizzee"" - Returns the value of the encoder step size
+               parameter.  Sets the parameter if vv is given.
+          ""sstteepp__mmooddee"" - Returns the value of the step-mode parameter.  Sets the
+               parameter if vv is given.  A zero indicates full-step mode, while
+               a one indicates half-step mode.
+          ""ddeecceelleerraattiioonn"" - Returns the value of the deceleration parameter.
+               Sets the parameter if vv is given.
+          ""ttoorrqquuee"" - Returns the value of the torque parameter.  Sets the
+               parameter if vv is given.
+
+     Rereading the ccoonnffiigg file resets the values of all the motor parameters to
+     the values in the ccoonnffiigg file.  Only moderate consistency checking is done
+     by ssppeecc on the values programmed with mmoottoorr__ppaarr(()). Be sure to use values
+     meaningful to your particular motor controller.
+
+     ggeett__lliimm((ii,, ww)) - Returns the dial limit of motor ii.  If ww > 0, returns high
+          limit.  If ww < 0, returns low limit.  If ww > 1, returns high limit
+          corrected for configured backlash.  If ww < 1, returns low limit
+          corrected for configured backlash.
+
+     sseett__lliimm((ii,, uu,, vv)) - Sets the low and high dial limits of motor ii.  It
+          doesn't matter which order the limits, uu and vv, are given.  Returns -1
+          if not configured for motor ii or if the motor is protected, unusable
+          or moving, else returns 0.
+
+     ddiiaall((ii,, uu)) - Returns the motor dial position for motor ii corresponding to
+          user angle uu.
+
+     uusseerr((ii,, dd)) - Returns the user angle for motor ii corresponding to dial
+          position uu.
+
+     cchhgg__ddiiaall((ii,, uu)) - Sets the dial position of motor ii to uu by changing the
+          contents of the controller registers.  Returns -1 if not configured
+          for motor ii or if the motor is protected, unusable or moving, else
+          returns 0.
+
+     cchhgg__ddiiaall((ii,, ss [[,, uu]])) - Starts motor ii on a home or limit search, according
+          to the value of ss, as follows:
+
+          ""hhoommee++"" - move to home switch in positive direction.
+          ""hhoommee--"" - move to home switch in negative direction.
+          ""hhoommee"" - move to home switch in positive direction if current dial
+               position is less than zero, otherwise move to home switch in
+               negative direction.
+          ""lliimm++"" - move to limit switch in positive direction.
+          ""lliimm--"" - move to limit switch in negative direction.
+
+          Positive and negative direction are with respect to the dial position
+          of the motor.  (Not all motor controllers implement the home or limit
+          search feature.)  If present, the value of the third argument is used
+          to set the motor's dial position when the home or limit position is
+          reached (as of ssppeecc release 4.05.10-3).  Returns -1 if not configured
+          for motor ii or if the motor is protected, unusable or moving, else
+          returns 0.
+
+     cchhgg__ooffffsseett((ii,, uu)) - Sets offset (determining user angle) of motor ii to uu.
+          Returns -1 if not configured for motor ii or if the motor is unusable
+          or moving, else returns 0.
+
+MOTOR NUMBERING
+
+     For most motor controllers, unit and channel numbers can be explicitly
+     assigned to individual motors channels in the hardware configuration
+     editor.  The unit numbers start from zero for each different model of motor
+     controller and are implicitly assigned to consecutive units as they are
+     listed in the configuration editor.
+
+     Channel numbers start from zero for most motor controllers.  For the
+     following controllers, where the hardware clearly labels the motor
+     channels, the channel numbers start from one: AllMotion EZStepper, Attocube
+     ANC300, Attocube ANC350, Bruker D8, Compumotor 6K, Delta Tau PMAC/PMAC2,
+     EPICS standard motor record, HANARO MCU, HMT HCC1, IMS MDrive, IMS
+     MicroLYNX 4/7, JVL SMI20B, Kohzu Seiki PMC-2/3/4 GT, Kohzu SC-200/400/800,
+     Labo NT-2400, MAC Science MXC, Micos MMC-100, Micos VENUS-1/2/3 Compatible,
+     MicroMo MVP-2001, Munich BR-tronik IPS, New Focus 8742, Newport Agilis,
+     Newport CONEX-AGP, Physik Instrumente C-630, Physik Instrumente E-710 and
+     E-712, PMC DCX-100 and DCX-PCI300, Rigaku RINT-2000, RISO ECB, SCIPE,
+     Siemens D5000, Sigmatech FC-501A and Velmex VXM-1/VXM-2.
+
+     If the optional unit/channel numbering is left blank, motors are assigned
+     to motor controller channels in the order they each appear in the ccoonnffiigg
+     file.  For example, if several motor controllers of the same type are
+     configured and each can control eight motors, the first eight motors
+     configured are assigned to the first controller, the next eight, to the
+     next controller, and so on.  If a controller channel is unusable, a motor
+     must still be configured for that channel, although if given the name
+     ""uunnuusseedd"", information about that motor won't be displayed by the standard
+     macros.
+
+     Note, support for the following older motor controllers hasn't been updated
+     to recognize unit/channel numbering: Joerger SMC, Oriel 18011, Compumotor
+     3000/4000 and SX, Micro-Controle IP28 and SIX19, Klinger MC4, ACS MCB, NSLS
+     MMC32, NSK and Inel XRGCI.
+
+     For these controllers, the consecutive numbering rule applies.
+
+     Standard macros such as wwhh display only the motors most relevant to a
+     particular geometry.  Other macros that display information about all the
+     motors, such as wwaa, list these most relevant motors first.  For a
+     particular geometry configuration, the relevant motors are established in
+     the __aassssiiggnn macro, which is normally in geometry-specific macro file.  A
+     user can change the order in which the motors are displayed by redefining
+     the __aassssiiggnn macro.
+
+MOTION
+
+     Motors are set in motion by the command mmoovvee__aallll, which simultaneously
+     moves all motors to the positions in the array AA[[]] (in user units).  Note,
+     though, the standard macros use mmoovvee__eemm, which incorporates the
+     uusseerr__pprreemmoovvee and uusseerr__ppoossttmmoovvee user-hook macros before and after the
+     mmoovvee__aallll call.  It is recommended that local macros also use mmoovvee__eemm rather
+     than mmoovvee__aallll.
+
+     When mmoovvee__aallll is executed, the code makes several checks on the validity of
+     the move, including checks on whether any of the dial positions
+     corresponding to the user angles in AA[[]] are outside the dial limits.  If
+     so, no motors are moved, and the program responds with an error.
+
+     Note, moving motors is asynchronous.  The program returns while the motors
+     are still in motion.  However, moving motors can be synchronized using the
+     function wwaaiitt(()).
+
+     When writing macros to move motors, you should always wait for motors to
+     stop, do a ggeett__aanngglleess command to fill AA[[]] with the current positions,
+     assign new values to the elements of AA[[]] for the motors that are to be
+     moved, and then do the mmoovvee__eemm.
+
+     Study the definitions of the standard macros mmvv, uummvv, bbrr, aann, ppll, etc., to
+     see normal usage.
+
+SECURE MOTORS
+
+     At some ssppeecc installations, the ssppeecc administrator may prevent users from
+     either moving particular motors or changing the limits of particular
+     motors.
+
+EXAMPLE
+
+     Here is a primitive macro to move one motor:
+
+        ddeeff mmvv ''
+           iiff (($$## !!== 22)) {{
+                pprriinntt ""uussaaggee::  mmvv mmoottoorr ppoossiittiioonn""
+                eexxiitt
+           }}
+           wwaaiitt(())       ## LLeett pprreevviioouuss mmoottiioonnss ffiinniisshh..
+           ggeett__aanngglleess   ## MMaakkee ssuurree AA[[]] iiss ccuurrrreenntt ssoo nnoo
+                        ##   ootthheerr mmoottoorrss ssttaarrtt mmoovviinngg..
+           AA[[$$11]]==$$22     ## CChhaannggee tthhee rreelleevvaanntt AA[[]]..
+           mmoovvee__eemm      ## SSttaarrtt tthhee mmoottoorrss..
+        ''
+
+     SEE ALSO +++++++++++++++++++++++++++++++++==
+
+     _c_o_n_f_i_g___a_d_m _l_m _m_v _m_v_d _m_v_r _s_e_t _s_e_t___d_i_a_l _s_e_t___l_m _t_w _w _w_a _w_m
+

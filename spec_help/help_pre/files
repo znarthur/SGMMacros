@@ -1,0 +1,66 @@
+files                               reference                              files
+
+NAME
+     files - conventions for file/device output
+
+BUILT-IN FUNCTIONS
+
+     With this group of functions, the name ""ttttyy"", when used for ffiillee__nnaammee, is
+     special and refers to the user's terminal.
+
+     ooppeenn(()) - Lists all open files.  Returns zero.
+
+     ooppeenn((ffiillee__nnaammee)) - Makes ffiillee__nnaammee, which is a string constant or
+          expression, available for output.  Files are opened to append.
+          Returns zero for success, -1 if the file can not be opened or if there
+          are too many open files.
+
+     cclloossee((ffiillee__nnaammee)) - Closes ffiillee__nnaammee and removes it from the table of files
+          available for output.  Returns zero for success, -1 if the file wasn't
+          open.  Any open file should be closed before attempting to modify the
+          file with other UNIX utilities.  Otherwise the file may be corrupted
+          if two processes are writing to the file.
+
+     oonn(()) - Lists all open files and indicates which ones are currently turned
+          on for output.
+
+     oonn((ffiillee__nnaammee)) - Turns on ffiillee__nnaammee for output.  All messages, except for
+          some error and debugging messages, but including all pprriinntt and
+          pprriinnttff(()) output, are sent to all turned-on devices.  If ffiillee__nnaammee has
+          not been made available for output with the ooppeenn(()) function, it will
+          be opened.  Returns zero for success, -1 if the file can't be opened
+          or if there are too many open files.
+
+     ooffff((ffiillee__nnaammee)) - Turns off output to ffiillee__nnaammee, but keeps it in the list of
+          files available for output.  If this was the last turned-on file or
+          device, ttttyy is turned back on automatically.  Returns zero for
+          success, -1 if the file wasn't open.
+
+     If the user changes ssppeecc's current directory, open files may be referenced
+     either by the name with which the files were opened or by the correct path
+     name relative to the current directory.
+
+     Errors during parsing or execution of commands, or typing a ^^CC turns off
+     all open files except log files.  (A log file is a file with a name
+     beginning with the characters lloogg.)
+
+     Files should be closed before attempting to edit them outside of ssppeecc.
+
+GLOBALS
+
+     DDAATTAAFFIILLEE - Global variable, holds name of data file.
+
+MACROS
+
+     oonndd - turns DDAATTAAFFIILLEE on.
+
+     ooffffdd - turns DDAATTAAFFIILLEE off.
+
+     oonntt - turns ""ttttyy"" on.
+
+     oofffftt - turns ""ttttyy"" off.
+
+SEE ALSO
+
+     _n_e_w_f_i_l_e _s_t_a_r_t_u_p
+

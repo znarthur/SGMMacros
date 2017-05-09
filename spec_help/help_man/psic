@@ -1,0 +1,876 @@
+.TH "psic" "reference" "08/01/12" "psic.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+psic \- PSI\-circle geometry modes
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)psic.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1999,2001,2002,2004,2005,2011,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "psic" "reference" "08/01/12" "psic.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBpsic\fP version of \fBspec\fP operates a type of six\-circle diffractometer
+that has two circles to orient the detector and four circles to
+orient the sample.  Unlike the traditional six\-circle configuration,
+the sample circles are not coupled to the motions of the detector circles.
+.sp
+The angle calculations and operating modes for the
+psi\-circle diffractometer are based on those
+presented in a paper by
+H. You of Argonne National Lab in
+\fBJ. Appl. Cryst.\fP, \fB32\fP, 614\-623 (1999).
+(See \fI\%http://journals.iucr.org/j/issues/1999/04/00/hn0093\fP)
+.SH "CONVENTIONS"
+.rs
+.sp
+The psi\-circle motor names and mnemonics are as follows:
+.TS
+;
+l l l l .
+	\fBDelta\fP	\fBdel\fP	\- Rotates detector arm
+	\fBEta\fP	\fBeta\fP	\- Holds \fBchi\fP and \fBphi\fP circles
+	\fBChi\fP	\fBchi\fP	\- Sample tilt
+	\fBPhi\fP	\fBphi\fP	\- Sample rotation
+	\fBMu\fP	\fBmu\fP	\- Rotates sample circles around vertical
+	\fBNu\fP	\fBnu\fP	\- Rotates detector arm around vertical axis
+	\fBK\-eta\fP	\fBketa\fP	\- For \fBkappa\fP geometry
+	\fBKappa\fP	\fBkap\fP	\- For \fBkappa\fP geometry
+	\fBK\-phi\fP	\fBkphi\fP	\- For \fBkappa\fP geometry
+	\fBDet Rot\fP	\fBdaz\fP	\- Optional azimuthal detector slit rotation
+.TE
+.sp
+The mnemonics are compiled into the C code, so must match
+those given above, while the motor names can be anything.
+.sp
+The \fBketa\fP, \fBkap\fP and
+\fBkphi\fP motors are associated with the kappa variation of
+the psi\-circle diffractometer.
+In such a configuration, these motors are the real motors, while the
+\fBeta\fP, \fBchi\fP and \fBphi\fP are pseudo\-motors (indicated by controller\-type
+\fBNONE\fP in the configuration file).
+.sp
+The last motor, \fBdaz\fP, corresponds to an optional azimuthal rotation
+of the detector used to maintain a specific angular acceptance.
+See the section on detector rotation below.
+.SH "PSI\-CIRCLE MODES"
+.rs
+.sp
+The psi\-circle modes represent various constraints that
+can be made on the extra three degrees of freedom available in
+the transformation from reciprocal
+space to diffractometer angles.
+Use the \fBsetmode\fP macro to select a psi\-circle mode.
+.sp
+The psi\-circle geometry code
+uses a different formalism for specifying operating modes than previous
+\fBspec\fP geometries.
+Instead of just one value to select a mode,
+up to five small numbers select the mode.
+The following table shows what the five numbers represent.
+.RS 3m
+.sp
+.nf
+.ft CB
+       g_mode1       g_mode2      g_mode3  g_mode4  g_mode5
+0            .             .  ....omega\-fixed.....        X  0
+1  Delta\-fixed    Alpha=Beta  ..........Eta\-fixed..........  1
+2     Nu\-fixed   Alpha\-fixed  ...........Mu\-fixed..........  2
+3    Qaz\-fixed    Beta\-fixed  ..........Chi\-fixed..........  3
+4    Naz\-fixed     Psi\-fixed  ..........Phi\-fixed..........  4
+5         Zone             X    Eta=Del/2        X        X  5
+6            X             X      Mu=Nu/2        X        X  6
+.ft P
+.fi
+.RE
+.sp
+The first row indicates the names used to refer to the five mode parameters.
+The first and last columns are the possible values for those parameters.
+The \fBX\fP positions are not used.
+Some modes allow zero for \fBg_mode1\fP and/or \fBg_mode2\fP.
+.sp
+In general, the first two columns are related
+to detector angles and pseudo\-angles,
+while the last three columns are used to set sample circles.
+The implemented modes are:
+.RS 0m
+.HP 5m
+."
+\fBsetmode 5\fP
+\- 
+Selects \fBzone\fP mode.
+In \fBzone\fP mode, the scattering vector is confined to a plane
+specified by two reciprocal lattice vectors.
+Values for \fBchi\fP and \fBphi\fP are chosen to keep \fBQ\fP in that plane.
+See the \fBsz\fP, \fBcz\fP and \fBmz\fP macros below.
+.HP 5m
+."
+\fBsetmode 0 0 s1 s2 s3\fP
+\- 
+Selects a mode where three sample circles are fixed, as specified by
+the values for \fBs1\fP \fBs2\fP and \fBs3\fP, which must all be different.
+.HP 5m
+."
+\fBsetmode d1 d2 s1\fP
+\- 
+Requires nonzero values for the first three mode parameters.
+The \fBs1\fP
+mode can be any sample circle, or the special values 5 or 6 to set
+\fBeta\fP=\fBdel\fP/2 or \fBmu\fP=\fBnu\fP/2, respectively.
+.HP 5m
+."
+\fBsetmode 0  d2 s1 s2\fP
+\- 
+Requires a nonzero \fBg_mode2\fP if \fBg_mode1\fP is zero.
+(Currently, the \fBmu\fP\-fixed + \fBphi\fP\-fixed modes aren\(aqt working.)
+.HP 5m
+."
+\fBsetmode d1 0 s1 s2\fP
+\- 
+Requires a nonzero \fBg_mode1\fP if \fBg_mode2\fP is zero.
+(Currently, the
+\fBeta\fP\-fixed + \fBchi\fP\-fixed, the \fBeta\fP\-fixed +
+\fBphi\fP\-fixed and the \fBnaz\fP\-fixed modes aren\(aqt working.)
+.HP 5m
+."
+\fBsetmode  d1 0 0 0\fP
+\- 
+Selects \fBomega\fP\-fixed mode, where
+\fBomega\fP is defined as the angle of the scattering vector
+\fBQ\fP with respect to the plane of the \fBchi\fP circle.
+Requires a nonzero \fBg_mode1\fP.
+.RE
+.\" FOUR-CIRCLE MODES
+.
+.\" ===================================
+.
+.\" .LP
+.
+.\" Omega=0, Horizontal scattering:
+.
+.\" qaz = 0, mu=nu/2
+.
+.\" Omega=0, Vertical scattering:
+.
+.\" qaz = 90, eta=del/2
+.
+.SH "CUT POINTS"
+.rs
+.sp
+Cut points affect the direction the diffractometer circles turn to get from
+one position to the next.  For example,
+if a cut point is at zero, the corresponding circle will only move through
+angles of 0 to 360 degrees.
+Thus, to get from 355 (=\-5) to 5 degrees,
+the circle will turn 350 degrees.
+If a cut point is at \-180, the circle will
+move through angles from \-180 to 180.
+Thus the same motion from \-5 to 5 will require only 10 degrees of movement.
+Use the \fBcuts\fP macro to select cut points for all the diffractometer angles.
+.SH "SECTORS"
+.rs
+.sp
+The calculation of
+\fBHKL\fP from the six diffractometer circles involves sums and products
+of the sines and the cosines of each angle.
+If one takes each angle \fBx\fP and substitutes \fB\-x\fP, 180 + \fBx\fP and 180 \- \fBx\fP
+(which only affects the sign of the sines and cosines), one can find
+sixteen combinations where the sign changes cancel out,
+resulting in identical
+\fBHKL\fP values for any set of diffractometer angles.
+Some of these alternative angle settings may
+be better suited to constraints of a particular experiment
+or experimental configuration.
+For historical reasons, \fBspec\fP refers to these alternative angle
+settings as \fBsectors\fP.
+.sp
+If one or more of the diffractometer angles is set to a multiple of
+\fBpi\fP/2, it is possible that additional combinations of angles, other than the
+sixteen combinations mentioned above, become available.
+As of \fBspec\fP release 5.06.04\-1, the
+\fBpsic\fP geometry code does a exhaustive search through all possible
+transformations in order to find any additional available sectors.
+In addition, besides ruling out the transformations
+that violate the frozen\-angle constraints
+or wind up at a different
+\fBHKL\fP, the new code also rules out angle combinations that
+are outside the software motor limits.
+.sp
+\fBspec\fP provides two methods of choosing sectors.
+One can have one of the 16 legacy transformations always performed
+(although the resulting angles may well violate the fixed
+conditions associated with the current geometry mode).
+Or one can have \fBspec\fP run through all the transformations,
+and after rejecting those that violate the frozen conditions or motor limits,
+select the one that best conforms to a built\-in ranking scheme.
+.sp
+The sixteen transformations that always result in identical
+\fBHKL\fP are as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+ \-      del     eta     chi     phi     nu      mu
+ 1      .       .       .       .       .       .
+ 2      .       \-x      180\-x   180+x   .       180+x
+ 3      .       180\-x   180+x   .       .       180+x
+ 4      .       180+x   \-x      180+x   .       .
+ 5      \-x      .       \-x      180+x   \-x      180\-x
+ 6      \-x      \-x      180+x   .       \-x      \-x
+ 7      \-x      180\-x   180\-x   180+x   \-x      \-x
+ 8      \-x      180+x   .       .       \-x      180\-x
+ 9      180\-x   .       .       .       180+x   .
+10      180\-x   \-x      180\-x   180+x   180+x   180+x
+11      180\-x   180\-x   180+x   .       180+x   180+x
+12      180\-x   180+x   \-x      180+x   180+x   .
+13      180+x   .       \-x      180+x   180\-x   180\-x
+14      180+x   \-x      180+x   .       180\-x   \-x
+15      180+x   180\-x   180\-x   180+x   180\-x   \-x
+16      180+x   180+x   .       .       180\-x   180\-x
+.ft P
+.fi
+.RE
+.sp
+Note, for sector transformations on the detector circles when
+used with the \fBnaz\fP\- and \fBqaz\fP\-fixed modes and the
+constraints \fBeta\fP=\fBdel\fP/2 or \fBmu\fP=\fBnu\fP/2
+the \fBeta\fP or \fBmu\fP angles will be modified to maintain the constraint
+and the remaining sample circles will be recalculated
+to keep the same reciprocal
+space coordinates (as of \fBspec\fP release 5.05.04\-01).
+.sp
+To have one of the above transformations always performed,
+use the \fBsector\fP macro (or assign a value to the
+\fBg_sect\fP symbol).
+Set the sector to zero to have \fBspec\fP
+use the ranking method and examine a greater number of possible sector
+transformations.
+.sp
+So far, three ranking schemes are implemented.
+The first is for a pseudo\-vertical orientation, the second
+for a pseudo\-horizontal orientation and the third to accommodates
+users at ESRF\(aqs ID01 beamline.
+Each scheme favors keeping particular circles within angular ranges
+as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+1 Pseudo\-vert:  0 <= del    chi < 180   \-90 <=  nu mu eta < 90
+2 Pseudo\-horz:  0 <=     nu chi < 180   \-90 <= del mu eta < 90
+3 ESRF ID1:     0 <= del nu chi < 180   \-90 <=     mu eta < 90
+.ft P
+.fi
+.RE
+.sp
+For the kappa configuration, \fBchi\fP is kept between two times the kappa angle
+(\fBg_kappa\fP) and that angle minus 180 degrees.
+.sp
+For ranking sector transformations, \fBspec\fP currently uses a somewhat
+\fBad hoc\fP weighting scheme.
+Weights for the \fBdel\fP, \fBnu\fP, \fBmu\fP, \fBeta\fP and
+\fBchi\fP transformations are assigned values of 16, 8, 4, 2 and 1,
+respectively, if the angle falls in the preferred range.
+The transformation with the highest ranking
+(that doesn\(aqt violate the constraints of the geometry mode)
+is then selected.
+.sp
+The ranking scheme is selected by assigning values to
+\fBg_prefer\fP. A value of one
+selects the vertical orientation ranking scheme, a value of
+two selects the horizontal ranking scheme and a value of three selects
+the ESRF ID1 scheme.
+.sp
+Users are encouraged to suggest additional ranking schemes that meet
+particular needs, and CSS will endeavor to include them in future
+releases.
+.sp
+If both \fBg_sect\fP and
+\fBg_prefer\fP are zero, then the sector 1 angles (no transformations) are used.
+.sp
+See the \fBsectors\fP and the \fBShowSect\fP macros below
+for options on displaying the possible transformations.
+.SH "GLOBALS AND MACROS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBQ[]\fP
+\- 
+a built\-in array which holds the following psic\-circle parameters:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fBdef H \(aqQ[0]\(aq\fP
+\- 
+Reciprocal space coordinate.
+.HP 5m
+."
+\fBdef K \(aqQ[1]\(aq\fP
+\- 
+Reciprocal space coordinate.
+.HP 5m
+."
+\fBdef L \(aqQ[2]\(aq\fP
+\- 
+Reciprocal space coordinate.
+.HP 5m
+."
+\fBdef LAMBDA \(aqQ[3]\(aq\fP
+\- 
+Wavelength of X rays.
+.HP 5m
+."
+\fBdef ALPHA \(aqQ[4]\(aq\fP
+\- 
+The angle between the reference vector and the  \fBx\fP\-\fBz\fP plane.
+Also, the incident angle when the reference vector
+is the surface normal.
+.HP 5m
+."
+\fBdef BETA \(aqQ[5]\(aq\fP
+\- 
+Exit angle when the reference vector is the surface normal.
+.HP 5m
+."
+\fBdef OMEGA \(aqQ[6]\(aq\fP
+\- 
+The angle between \fBQ\fP and the plane of the \fBchi\fP circle.
+.HP 5m
+."
+\fBdef TTH \(aqQ[7]\(aq\fP
+\- 
+Twice the Bragg angle.
+Also, the angle between \fBQ\fP and the \fBx\fP\-\fBz\fP plane.
+.HP 5m
+."
+\fBdef PSI \(aqQ[8]\(aq\fP
+\- 
+Azimuthal angle of reference vector with respect to \fBQ\fP
+and the scattering plane.
+.HP 5m
+."
+\fBdef TAU \(aqQ[9]\(aq\fP
+\- 
+Longitudinal angle of reference vector with respect to \fBQ\fP
+and the scattering plane.
+.HP 5m
+."
+\fBdef QAZ \(aqQ[10]\(aq\fP
+\- 
+Azimuthal angle of \fBQ\fP, i.e., the angle between \fBQ\fP
+and the \fBy\fP\-\fBz\fP plane.
+.HP 5m
+."
+\fBdef NAZ \(aqQ[11]\(aq\fP
+\- 
+Azimuthal angle of reference vector, i.e., the angle between
+the reference vector and the \fBy\fP\-\fBz\fP plane.
+.HP 5m
+."
+\fBdef SIGMA_AZ \(aqQ[12]\(aq\fP
+\- 
+Angle used in alternate method of specifying reference vector.
+.HP 5m
+."
+\fBdef TAU_AZ \(aqQ[13]\(aq\fP
+\- 
+Angle used in alternate method of specifying reference vector.
+.HP 5m
+."
+\fBdef F_ALPHA \(aqQ[14]\(aq\fP
+\- 
+Frozen value of \fBALPHA\fP for \fBalpha\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_BETA \(aqQ[15]\(aq\fP
+\- 
+Frozen value of \fBBETA\fP for \fBbeta\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_OMEGA \(aqQ[16]\(aq\fP
+\- 
+Frozen value of \fBOMEGA\fP for \fBomega\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_PSI \(aqQ[17]\(aq\fP
+\- 
+Frozen value of \fBPSI\fP for \fBpsi\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_NAZ \(aqQ[18]\(aq\fP
+\- 
+Frozen value of \fBNAZ\fP for \fBnaz\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_QAZ \(aqQ[19]\(aq\fP
+\- 
+Frozen value of \fBQAZ\fP for \fBqaz\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_DEL \(aqQ[20]\(aq\fP
+\- 
+Frozen value of \fBA[del]\fP for \fBdelta\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_ETA \(aqQ[21]\(aq\fP
+\- 
+Frozen value of \fBA[eta]\fP for \fBeta\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_CHI \(aqQ[22]\(aq\fP
+\- 
+Frozen value of \fBA[chi]\fP for \fBchi\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_PHI \(aqQ[23]\(aq\fP
+\- 
+Frozen value of \fBA[phi]\fP for \fBphi\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_MU \(aqQ[24]\(aq\fP
+\- 
+Frozen value of \fBA[mu]\fP for \fBmu\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_NU \(aqQ[25]\(aq\fP
+\- 
+Frozen value of \fBA[nu]\fP for \fBnu\fP\-fixed mode.
+.HP 5m
+."
+\fBdef F_CHI_Z \(aqQ[26]\(aq\fP
+\- 
+Value calculated for \fBA[chi]\fP in \fBzone\fP mode.
+.HP 5m
+."
+\fBdef F_PHI_Z \(aqQ[27]\(aq\fP
+\- 
+Value calculated for \fBA[phi]\fP in \fBzone\fP mode.
+.HP 5m
+."
+\fBdef CUT_DEL \(aqQ[28]\(aq\fP
+\- 
+Cut point for \fBdel\fP circle.
+.HP 5m
+."
+\fBdef CUT_ETA \(aqQ[29]\(aq\fP
+\- 
+Cut point for \fBeta\fP circle.
+.HP 5m
+."
+\fBdef CUT_CHI \(aqQ[30]\(aq\fP
+\- 
+Cut point for \fBchi\fP circle.
+.HP 5m
+."
+\fBdef CUT_PHI \(aqQ[31]\(aq\fP
+\- 
+Cut point for \fBphi\fP circle.
+.HP 5m
+."
+\fBdef CUT_MU \(aqQ[32]\(aq\fP
+\- 
+Cut point for \fBmu\fP circle.
+.HP 5m
+."
+\fBdef CUT_NU \(aqQ[33]\(aq\fP
+\- 
+Cut point for \fBnu\fP circle.
+.HP 5m
+."
+\fBdef CUT_KETA \(aqQ[34]\(aq\fP
+\- 
+Cut point for \fBketa\fP circle.
+.HP 5m
+."
+\fBdef CUT_KAP \(aqQ[35]\(aq\fP
+\- 
+Cut point for \fBkap\fP circle.
+.HP 5m
+."
+\fBdef CUT_KPHI \(aqQ[36]\(aq\fP
+\- 
+Cut point for \fBkphi\fP circle.
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBG[]\fP
+\- 
+a built\-in array which holds the following psic\-circle parameters:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fBdef g_prefer \(aqG[0]\(aq\fP
+\- 
+Holds sector preference value.
+.HP 5m
+."
+\fBdef g_sect \(aqG[1]\(aq\fP
+\- 
+Holds sector mode.
+.HP 5m
+."
+\fBdef g_frz \(aqG[2]\(aq\fP
+\- 
+Nonzero when frozen mode is on.
+.HP 5m
+."
+\fBdef g_haz \(aqG[3]\(aq\fP
+\- 
+\fBH\fP of azimuthal reference vector.
+.HP 5m
+."
+\fBdef g_kaz \(aqG[4]\(aq\fP
+\- 
+\fBK\fP of azimuthal reference vector.
+.HP 5m
+."
+\fBdef g_laz \(aqG[5]\(aq\fP
+\- 
+\fBL\fP of azimuthal reference vector.
+.HP 5m
+."
+\fBdef g_zh0 \(aqG[6]\(aq\fP
+\- 
+\fBH\fP of first zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zk0 \(aqG[7]\(aq\fP
+\- 
+\fBK\fP of first zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zl0 \(aqG[8]\(aq\fP
+\- 
+\fBL\fP of first zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zh1 \(aqG[9]\(aq\fP
+\- 
+\fBH\fP of second zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zk1 \(aqG[10]\(aq\fP
+\- 
+\fBK\fP of second zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zl1 \(aqG[11]\(aq\fP
+\- 
+\fBL\fP of second zone\-mode vector.
+.HP 5m
+."
+\fBdef g_kappa \(aqG[12]\(aq\fP
+\- 
+Kappa tilt angle.
+.HP 5m
+."
+\fBdef g_sigtau \(aqG[15]\(aq\fP
+\- 
+Nonzero if using angles \fBSIGMA_AZ\fP and
+\fBTAU_AZ\fP to specify azimuthal reference vector.
+.HP 5m
+."
+\fBdef g_mode1 \(aqG[16]\(aq\fP
+\- 
+Holds a geometry mode parameter.
+.HP 5m
+."
+\fBdef g_mode2 \(aqG[17]\(aq\fP
+\- 
+Holds a geometry mode parameter.
+.HP 5m
+."
+\fBdef g_mode3 \(aqG[18]\(aq\fP
+\- 
+Holds a geometry mode parameter.
+.HP 5m
+."
+\fBdef g_mode4 \(aqG[19]\(aq\fP
+\- 
+Holds a geometry mode parameter.
+.HP 5m
+."
+\fBdef g_mode5 \(aqG[20]\(aq\fP
+\- 
+Holds a geometry mode parameter.
+.HP 5m
+."
+\fBdef g_use_daz \(aqG[21]\(aq\fP
+\- 
+If set and the detector\-rotation motor
+\fBdaz\fP is configured, enables detector\-rotation calculations.
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBca H K L\fP
+\- 
+Calculates and display the motor positions and values for the pseudo\-angles
+at the given reciprocal space position.
+.HP 5m
+."
+\fBpa\fP
+\- 
+Displays most of the geometry mode and orientation matrix parameters.
+.HP 5m
+."
+\fBfreeze [values ... ]\fP
+\- 
+Sets \fBfrozen\fP mode and assigns frozen values using either
+the current angle settings
+or the optional arguments.  In frozen mode, angles and pseudo\-angles
+fixed by the selected geometry mode are assigned their frozen values before
+calculating motor positions for the non\-fixed angles.
+If present, the arguments are assigned to the frozen parameters
+in the same order that the \fBg_mode\fP parameters fix values.
+With no arguments, the current positions of the fixed angles and/or
+pseudo\-angles are used in the assignment.
+.HP 5m
+."
+\fBunfreeze\fP
+\- 
+Turns off \fBfrozen\fP mode
+.HP 5m
+."
+\fBsetmode [modes ...]\fP
+\- 
+Sets the up\-to\-five geometry mode parameters.
+If no arguments are given, the macro displays a table of possible
+modes, the current mode and queries for a new mode.
+.HP 5m
+."
+\fBcuts [angle cut]|[all_cuts ...]\fP
+\- 
+Sets the cut points.
+A single motor mnemonic and one cut point can be given as arguments,
+or all six (or nine in kappa\-mode) cut points may be given as arguments
+in the order
+\fBdel\fP \fBeta\fP \fBchi\fP \fBphi\fP \fBmu\fP \fBnu\fP (\fBketa\fP \fBkappa\fP \fBkphi\fP).
+With no arguments, the macro queries for all cut points.
+.HP 5m
+."
+\fBsigtau [1|0]\fP
+\- 
+Turns on or off the mode where the azimuthal reference vector is
+specified by two angles, conventionally referred to as \fBsigma\fP and
+\fBtau\fP, or the mode mode where the azimuthal reference vector
+is specified by \fBHKL\fP values.
+A value of one enables the first of the above.
+The default method is the second of the above.
+.HP 5m
+."
+\fBsetaz [sigma tau]|[H K L]\fP
+\- 
+Defines the azimuthal reference vector according to the method
+selected by the \fBsigtau\fP macro.
+.HP 5m
+."
+\fBsector [which]\fP
+\- 
+Selects the current sector transformation.
+Values from 1 to 16 correspond to specific transformations.
+A value of zero allows the ranking and preference scheme.
+See the Sectors discussion above.
+.HP 5m
+."
+\fBprefer [how]\fP
+\- 
+Selects the preferred sector calculation.
+A value of zero turns off the preference ranking.
+See the Sectors discussion above.
+.HP 5m
+."
+\fBsectors [H K L]\fP
+\- 
+Displays the possible motor positions corresponding to the different
+allowed sectors for a particular reciprocal space position.
+If none is given as an argument, the current
+\fBHKL\fP values are used.
+.HP 5m
+."
+\fBShowSect [arg]\fP
+\- 
+Displays the possible sectors corresponding to the current
+\fBHKL\fP values.  The bits in \fBarg\fP have the following meaning:
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l .
+0x01	Show the basic 16 sectors
+0x02	Show all 4096 sectors
+0x04	Show values for \fBomega\fP, \fBqaz\fP and \fBnaz\fP
+0x08	If kappa mode, show both real and pseudo angles
+0x10	Show ruled\-out sectors
+0x20	Show sectors ruled out by limits
+.TE
+.RE
+.sp
+Sectors with duplicate values are never displayed.
+When bit 0x10 is set, sectors that are ruled out are displayed with a
+code that indicates the reason, as follows:
+.sp
+.RS 4m
+.TS
+;
+l l .
+F	Violates Frozen angle
+o	Violates a frozen pseudoangle \fBomega\fP, \fBqaz\fP and \fBnaz\fP
+Q	Produces different \fBHKL\fP values
+L	Violates motor Limit
+.TE
+.RE
+.sp
+The sector numbers for the legacy 16 sectors are displayed
+as decimal values.
+The sector number of the remaining 4080 sectors
+are displayed in hexadecimal.
+If \fBarg\fP is missing, the default behavior
+is the same as if \fBarg\fP=0x02.
+.RE
+.HP 5m
+."
+\fBsetkappa [kappa_tilt_angle]\fP
+\- 
+For kappa\-type diffractometers, tells the software the fixed value of
+the \fBkappa\fP tilt angle.
+.HP 5m
+."
+\fBstartgeo\fP
+\- 
+Calls the several macros used to setup the geometry mode.
+.HP 5m
+."
+\fBsavegeo\fP
+\- 
+Prints the values of all the geometry configuration parameters
+in assignment format.
+Can be used to save the parameters as a command file that can be
+read back later.
+.HP 5m
+."
+\fBsz [h0 k0 l0 h1 k1 l1]\fP
+\- 
+For \fBzone\fP mode, sets the two reciprocal space vectors
+\fBz0\fP and \fBz1\fP that define the plane of the scattering vector.
+.HP 5m
+."
+\fBcz a b\fP
+\- 
+For the two zone vectors \fBz0\fP and \fBz1\fP
+calculates and displays \fBQ\fP for the vector \fBa\fP \fBz0\fP + \fBb\fP \fBz1\fP.
+.HP 5m
+."
+\fBmz a b\fP
+\- 
+For the two zone vectors \fBz0\fP and \fBz1\fP
+moves the diffractometer to the \fBQ\fP value corresponding to the vector
+\fBa\fP \fBz0\fP + \fBb\fP \fBz1\fP.
+.HP 5m
+."
+\fBon_daz\fP
+\- 
+Enables detector rotation.
+.HP 5m
+."
+\fBoff_daz\fP
+\- 
+Disables detector rotation.
+.RE
+.SH "ZEROS AND ROTATION SENSE"
+.rs
+.sp
+In order for the calculations in the \fBpsi\fP\-circle code to work correctly,
+you must set the rotation sense and zeros
+of the circles according to the conventions built into the code.
+.sp
+The laboratory coordinate system used in the code is right handed.
+The \fBx\fP axis points upward and the
+\fBy\fP axis points along the direction of the incident beam.
+When all circle are at zero, the
+\fBz\fP axis points outward from a sample mounted on the \fBphi\fP circle.
+.sp
+The rotation sense is defined with respect to the positive unit vectors of the
+coordinate system described above.
+For a right\-handed rotation, if your thumb points along the unit vector that
+is in line with the rotation axis,
+your fingers will point in the positive rotation direction.
+.sp
+The rotation sense of an axis can be changed by changing the sign of the
+\fBsteps\-per\-degree\fP parameter or the \fBsign\-of\-user*dial\fP parameter in the
+\fBconfig\fP file.
+You should set the sign of the first parameter so that the \fBspec\fP
+dial positions agree with the dial indicators of each circle.
+Set the sign of the second parameter as necessary to make the
+\fBspec\fP user angles agree with
+the rotation sense described below.
+.sp
+The \fBmu\fP and \fBnu\fP circles are in the
+\fBy\fP\-\fBz\fP plane, with the rotation axes along the
+\fBx\fP axis with a right\-handed rotation convention.
+The zero of \fBmu\fP is such that the \fBeta\fP circle
+is on the negative side of the
+\fBx\fP\-\fBy\fP plane with its rotation axis along the \fBz\fP axis.
+Likewise, the zero of \fBnu\fP is such that the
+\fBdelta\fP circle is also on the negative side of the
+\fBx\fP\-\fBy\fP plane with the rotation axis also along the \fBz\fP axis.
+.sp
+The
+\fBdelta\fP, \fBeta\fP and \fBphi\fP circles all have a left\-handed rotation sense.
+The \fBdelta\fP circle is at zero when the detector arm is along the positive
+\fBy\fP direction.
+\fBEta\fP is zero when the \fBchi\fP circle is in the
+\fBx\fP\-\fBz\fP plane, with the \fBchi\fP axis along the \fBy\fP axis.
+The \fBchi\fP rotation is right\-handed.
+The zero of \fBchi\fP puts the \fBphi\fP rotation axis along the
+\fBz\fP direction with the "surface normal" of the
+\fBphi\fP table pointed in the positive \fBz\fP direction.
+The zero of the \fBphi\fP circle is arbitrary.
+.sp
+In the \fBkappa\fP configuration, the \fBeta\fP, \fBchi\fP and
+\fBphi\fP real motors are replaced with \fBketa\fP, \fBkap\fP and
+\fBkphi\fP. The \fBketa\fP and
+\fBkphi\fP circles have the same left\-handed rotation convention as
+\fBeta\fP and \fBphi\fP, while \fBkap\fP is right handed.
+The zero of \fBketa\fP is chosen so that the rotation axis of the
+\fBkap\fP motor lies in the positive \fBy\fP\-\fBz\fP quadrant.
+The zero of \fBkap\fP places the \fBphi\fP rotation axis in the positive
+\fBz\fP direction.  The zero of \fBkphi\fP is arbitrary.
+.SH "AZIMUTHAL DETECTOR ROTATION"
+.rs
+.sp
+The optional motor \fBdaz\fP (for detector azimuth)
+corresponds to an azimuthal rotation of the detector or detector slits
+that can be
+used to maintain a specific angular acceptance at the detector.
+The theory for this motion is described  by
+E. Vlieg in \fBJ. Appl. Cryst.\fP, \fB31\fP, 198\-203 (1998).
+(See \fI\%http://journals.iucr.org/j/issues/1998/02/00/pe0028\fP)
+.sp
+The macros \fBon_daz\fP and
+\fBoff_daz\fP are available to enable and disable the rotation.
+The automatic rotation only occurs when moving to reciprocal space
+positions.
+That is, the target position is calculated along with the other
+geometry motor positions by \fBcalcA\fP.
+

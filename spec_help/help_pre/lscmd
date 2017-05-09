@@ -1,0 +1,25 @@
+lscmd                                command                               lscmd
+
+NAME
+     llssccmmdd - list the built-in commands and functions
+
+SYNOPSIS
+
+     llssccmmdd [[ppaatttteerrnn__nnaammee ...... ]]
+
+DESCRIPTION
+
+     llssccmmdd lists the built-in commands and functions recognized by ssppeecc.  With
+     no arguments, all the built-in keywords are listed.  Otherwise, only those
+     specified as arguments are printed.  Parentheses are printed after the
+     keywords that are functions.  Arguments may contain the ** and ??
+     metacharacters.
+
+EXAMPLE
+
+     llssccmmdd ggeett**
+
+SEE ALSO
+
+     _s_y_m_s _l_s_d_e_f _w_h_a_t_s
+

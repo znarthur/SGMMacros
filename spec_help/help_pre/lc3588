@@ -1,0 +1,57 @@
+lc3588                              hardware                              lc3588
+
+NAME
+     lc3588 - LeCroy 3588 Histogramming Memory Module
+
+DESCRIPTION
+
+     The LeCroy 3588 Histogramming Memory Module is an MCA module that is used
+     in ssppeecc with the LeCroy 3512 Spectroscopy ADC module.  The 3588 is chosen
+     in the ccoonnffiigg file as
+
+         CCAA__LLCC33558888 == sslloott__nnuummbbeerr
+
+     The module can be hardware configured for either 16K of 24-bit wide
+     channels or 32K of 12-bit wide channels.  ssppeecc currently only supports the
+     first configuration.
+
+FUNCTIONS
+
+     mmccaa__ggeett((gg,, ee)) - gets data from currently selected group on the 3588, and
+          transfers it to element ee of ssppeecc data group gg.
+
+     mmccaa__ppuutt((gg,, ee)) - writes data to the currently selected group on the 3588,
+          taking it from element ee of ssppeecc data group gg.
+
+     mmccaa__ppaarr((""cclleeaarr"")) - clears the channels of the current group.
+
+     mmccaa__ppaarr((""rruunn"")) - starts acquisition.  Note that the ttccoouunntt(()) and mmccoouunntt(())
+          functions (used in the counting macros) will also start acquisition.
+
+     mmccaa__ppaarr((""hhaalltt"")) - stops acquisition.  Note that the 3588 will also be
+          halted when the ttccoouunntt(()) and mmccoouunntt(()) functions (used in the counting
+          macros) complete their count intervals or are aborted.
+
+     mmccaa__ppaarr((""ggrroouupp__ssiizzee"")) - returns the current group size.
+
+     mmccaa__ppaarr((""ggrroouupp__ssiizzee"",, ssiizzee)) - sets the group size to ssiizzee.  Legal values
+          are 256, 512, 1024, 2048, 4096, 8192 and 16384.
+
+     mmccaa__ppaarr((""sseelleecctt__ggrroouupp"")) - returns the currently active group.  Groups are
+          numbered starting at zero.
+
+     mmccaa__ppaarr((""sseelleecctt__ggrroouupp"",, ggrroouupp)) - set the active group to ggrroouupp. Groups are
+          numbered starting at zero.  The number of possible groups depends on
+          the group size.  If ggrroouupp is greater than the maximum number of
+          groups, the current group is set to ggrroouupp modulus the maximum number
+          of groups.
+
+     mmccaa__ppaarr((""rreeaaddoonnee"",, cchhaannnneell)) - returns the contents of channel number
+          cchhaannnneell.  The channel number is with respect to the current group.
+
+     mmccaa__ppaarr((""cchhaann##"")) - returns the contents of channel number ##.  The channel
+          number is with respect to the current group.
+
+     mmccaa__ppaarr((""cchhaann##"",, vvaalluuee)) - sets channel ## to vvaalluuee.  The channel number is
+          with respect to the current group.
+

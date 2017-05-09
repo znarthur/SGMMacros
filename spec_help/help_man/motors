@@ -1,0 +1,795 @@
+.TH "motors" "hardware" "04/30/15" "motors.rst 6.3  04/30/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+motors \- commands and functions for controlling motors
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)motors.rst       6.3  04/30/15  CSS
+.
+.\" Copyright (c) 1990-1992,1994-1997,2000,2001,2003,2008,2010,2011,2012,2015
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "motors" "hardware" "04/30/15" "motors.rst 6.3  04/30/15 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+Motor positions are stored in memory, in the \fBsettings\fP file and,
+if the hardware allows, in motor\-controller registers.
+The user has access to the motor positions through the built\-in array
+\fBA[]\fP. The number of steps per degree (or millimeter, inch, etc.),
+direction of motion, rate of rotation, direction of backlash, etc.,
+are defined in a configuration file.
+Each motor has an associated name and mnemonic,
+also assigned in the configuration file.
+.sp
+\fBspec\fP employs two methods for specifying motor position,
+dial units and user units.
+Dial units should be set to correspond to the physical dial settings
+of the spectrometer.
+Doing so makes it more likely you can recover motor positions
+in the event controller and software positions are simultaneously lost.
+User units are related to dial units by a simple linear relation.
+User angles are set to nominal values during the lineup procedure.
+.sp
+The \fBsettings\fP file contains
+a copy of the most recent value written to the motor controller register,
+the user\-units offset and the software limits for each motor.
+The \fBsettings\fP file is read at program start up and
+on the \fBreconfig\fP command.
+The \fBsettings\fP file is written each time a motor is moved or when the offset
+or limits are changed.
+.sp
+Dial and user units are related by the following expressions.
+.sp
+.RS 4m
+.nf
+\fBuser = sign * dial + offset\fP
+\fBdial = controller_register / steps_per_unit\fP
+.fi
+.sp
+.RE
+.sp
+\fBsign\fP and \fBsteps_per_unit\fP are set in the configuration file.
+.sp
+For example, if \fBsign = 1\fP and \fBsteps_per_unit = 200\fP, the current
+position would be
+.sp
+.RS 4m
+\fBuser = controller_register / 200 + offset\fP
+.RE
+.sp
+Motor positions displayed by \fBspec\fP are generally rounded to the precision
+allowed by the steps\-per\-unit parameter.  With \fBspec\fP release 5.10.01\-1,
+it is now possible to retrieve the
+"commanded" motor position, which is the position requested with a move command.
+The commanded position can be retrieved using \fBread_motors()\fP.
+.SH "BUILT\-IN COMMANDS, FUNCTIONS AND VARIABLES"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBA[]\fP
+\- 
+An array used to transfer motor positions between the user and the program.
+.HP 5m
+."
+\fBread_motors(mode [, which])\fP
+\- 
+Reads the motors and places the motor positions in the
+\fBA[]\fP array with options set by \fBmode\fP, as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+Bit 0 (0x01)
+\- 
+If clear, user positions are put into \fBA[]\fP.
+If set, dial positions are put into the motor array.
+.HP 5m
+."
+Bit 1 (0x02)
+\- 
+If set, forces reading the hardware.
+For many motor controllers,
+\fBspec\fP doesn\(aqt necessarily read the hardware if
+the position hasn\(aqt been changed by \fBspec\fP since
+the controller was last read.
+.HP 5m
+."
+Bit 2 (0x04)
+\- 
+If set, position discrepancies between \fBspec\fP
+and the motor hardware
+will be silently resolved in favor of the hardware.
+Otherwise, \fBspec\fP will prompt the user as to whether the software
+or hardware positions should be considered correct.
+.HP 5m
+."
+Bit 3 (0x08)
+\- 
+If set, the hardware is read, but the contents of the
+\fBA[]\fP array are not modified.
+.HP 5m
+."
+Bit 4 (0x10)
+\- 
+If set, the "commanded" positions are placed in
+\fBA[]\fP. The hardware is not accessed.  If the optional argument
+\fBwhich\fP is set to a particular motor number or mnemonic,
+\fBA[]\fP is not modified,
+and the return value will be the commanded position
+for the specified motor.
+.PD
+.RE
+.sp
+The optional argument \fBwhich\fP is currently only used
+for return of the commanded position.
+.sp
+The following macro definitions are included in the standard set:
+.sp
+.RS 4m
+.nf
+\fBdef getangles \(aqread_motors(0)\(aq\fP
+\fBdef getdials  \(aqread_motors(1)\(aq\fP
+\fBdef get_angles \(aqread_motors(0); user_getangles\(aq\fP
+.fi
+.sp
+.RE
+.sp
+The \fBget_angles\fP definition includes a call to user\-hook macro,
+\fBuser_getangles\fP, that can be defined locally.  It is recommended to use
+\fBget_angles\fP in local macros.
+.sp
+Note, prior to the introduction of \fBread_motors()\fP
+in \fBspec\fP release 4.03.07,
+\fBgetangles\fP and \fBgetdials\fP were built\-in commands.
+.RE
+.HP 5m
+."
+\fBmove_all\fP
+\- 
+Move all motors to the user positions specified in \fBA[]\fP.
+.sp
+The following macro definition is included in the standard
+macro set:
+.sp
+.RS 5m
+.RS 4m
+\fBdef move_em \(aquser_premove; move_all; user_postmove\(aq\fP
+.RE
+.sp
+The \fBmove_em\fP macro includes calls to user\-hook macros that
+can be defined locally.  It is recommend that local macros use
+\fBmove_em\fP rather than \fBmove_all\fP.
+.RE
+.HP 5m
+."
+\fBmove_cnt\fP
+\- 
+As \fBmove_all\fP, but gates scalers open during move
+and does not perform backlash correction.
+Move velocity is at the base rate.
+.HP 5m
+."
+\fBmotor_mne(i)\fP
+\- 
+Returns the string mnemonic of motor \fBi\fP
+as given in the configuration file.
+.HP 5m
+."
+\fBmotor_name(i)\fP
+\- 
+Returns the string name of motor \fBi\fP
+as given in the configuration file.
+.HP 5m
+."
+\fBmotor_num(mne)\fP
+\- 
+Returns the motor number corresponding to the motor mnemonic
+\fBmne\fP, or \-1 if there is no such motor configured.
+.HP 5m
+."
+\fBmotor_par(i, s, v, "add")\fP
+\- 
+Creates a temporary run\-time motor parameter for motor \fBi\fP named
+\fBs\fP with initial value \fBv\fP.
+.HP 5m
+."
+\fBmotor_par(i, s [, v])\fP
+\- 
+Returns or sets configuration parameters for motor \fBi\fP.
+Recognized values for the string \fBs\fP include:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"step_size"\fP
+\- 
+Returns what is called the step\-size parameter.
+However, the parameter name is misleading.
+The value returned is actually the number of steps per unit
+(where the unit is
+generally degrees, millimeters, microns, etc.),
+\fBnot\fP the size of a single step.
+If \fBv\fP is given, then the parameter is set to that value.
+.sp
+Note, the parameter can be negative, which might be needed
+to make the dial position agree with the rotation sense of the motor.
+.sp
+Since changing this parameter seriously affects the
+motor position calculation, as a precaution,
+the function \fBspec_par("modify_step_size", 1)\fP
+must be entered first to enable step\-size modifications using
+\fBmotor_par()\fP.
+.HP 5m
+."
+\fB"sign"\fP
+\- 
+Returns 1 or \-1, indicating the rotation sense of the user angle
+versus the dial angle, as set in the
+\fBconfig\fP file (as of \fBspec\fP release 5.08.01\-5).
+This is a read\-only parameter.
+.HP 5m
+."
+\fB"offset"\fP
+\- 
+Returns the value of the
+\fB"offset"\fP motor parameter, which is the difference
+between the user and dial motor
+positions (as of \fBspec\fP release 5.08.01\-1).
+This is a read\-only parameter.
+.HP 5m
+."
+\fB"acceleration"\fP
+\- 
+Returns the value of the current acceleration parameter.
+The units of acceleration are the time in
+milliseconds for the motor to accelerate to full speed.
+If \fBv\fP is given, then the acceleration is set to that value.
+.HP 5m
+."
+\fB"base_rate"\fP
+\- 
+Returns the current base\-rate parameter.
+The units are steps per second.
+If \fBv\fP is given, then the base rate is set to that value.
+.HP 5m
+."
+\fB"velocity"\fP
+\- 
+Returns the current steady\-state velocity parameter.
+The units are steps per second.
+If \fBv\fP is given, then the steady\-state velocity
+is set to that value.
+.HP 5m
+."
+\fB"backlash"\fP
+\- 
+Returns the value of the backlash parameter.
+Its sign and magnitude determine the direction
+and extent of the motor\(aqs
+backlash correction.
+If \fBv\fP is given, then the backlash is set to that value.
+Setting the backlash to zero disables the backlash correction.
+.HP 5m
+."
+\fB"config_step_size"\fP
+\- 
+Returns the value of the \fB"step_size"\fP parameter
+as set in the \fBconfig\fP file.
+.HP 5m
+."
+\fB"config_acceleration"\fP
+\- 
+Returns the value of the \fB"acceleration"\fP parameter
+as set in the \fBconfig\fP file.
+.HP 5m
+."
+\fB"config_base_rate"\fP
+\- 
+Returns the value of the \fB"base_rate"\fP parameter
+as set in the \fBconfig\fP file.
+.HP 5m
+."
+\fB"config_velocity"\fP
+\- 
+Returns the value of the \fB"velocity"\fP parameter
+as set in the \fBconfig\fP file.
+.HP 5m
+."
+\fB"config_backlash"\fP
+\- 
+Returns the value of the \fB"backlash"\fP parameter
+as set in the \fBconfig\fP file.
+.HP 5m
+."
+\fB"controller"\fP
+\- 
+Returns a string containing the controller name of the specified motor.
+The controller names are those used in \fBspec\fP\(aqs \fBconfig\fP files.
+.HP 5m
+."
+\fB"unit"\fP
+\- 
+Returns the unit number of the specified motor.
+Each motor controller unit may contain more than one motor channel.
+.HP 5m
+."
+\fB"channel"\fP
+\- 
+Returns the channel number of the specified motor.
+.HP 5m
+."
+\fB"responsive"\fP
+\- 
+Returns a nonzero value if the motor responded to an initial presence
+test or appears otherwise to be working.
+.HP 5m
+."
+\fB"active"\fP
+\- 
+Returns a nonzero value if the motor is currently moving.
+.HP 5m
+."
+\fB"high_lim_hit"\fP
+\- 
+Returns nonzero if the high limit is active (for most supported
+motor controllers) (as of \fBspec\fP release 5.06.05.7).
+.HP 5m
+."
+\fB"low_lim_hit"\fP
+\- 
+Returns nonzero if the low limit is active (for most supported
+motor controllers) (as of \fBspec\fP release 5.06.05.7).
+.HP 5m
+."
+\fB"disable"\fP
+\- 
+Returns a nonzero value if the motor has been disabled by software.
+If \fBv\fP is given and is nonzero, then the motor is disabled.
+If \fBv\fP is given and is zero, the motor becomes no longer disabled.
+A disabled motor channel will not be accessed
+by any of \fBspec\fP\(aqs commands,
+and, of course, cannot be moved.
+Any \fBcdef()\fP\-defined macros will automatically
+exclude the portions of the macro keyed to
+the particular motor when the motor is software disabled.
+.HP 5m
+."
+\fB"writable"\fP
+\- 
+Returns a value indicating the permission status of the motor,
+as set in the
+\fBconfig\fP file.  If bit 1 is set, the motor can be moved.
+If bit 2 is set, the limits can be changed.
+A fully protected motor will return zero.
+A fully open motor will return 3.
+(Added in \fBspec\fP release 5.08.01\-1.) This is a read\-only parameter.
+.HP 5m
+."
+\fB"slop"\fP
+\- 
+Returns the value of the slop parameter.
+If \fBv\fP is given, sets the slop parameter.
+When this parameter is greater than zero,
+discrepancies between hardware
+and software motors positions are silently resolved
+in favor of the the
+hardware when the number of steps in the discrepancy is less than the
+value of the slop parameter.
+If the value is negative, discrepancies less
+than the absolute value of
+the parameter are resolved in favor of
+software by changing the hardware controller position, if possible.
+.HP 5m
+."
+\fB"read_mode"\fP
+\- 
+Returns the value of the hardware read\-mode parameter.
+If \fBv\fP is given, sets the parameter.
+The read\-mode parameter allows setting \fBspec\fP\(aqs behavior for
+motors that are likely to be moved by other
+programs while spec is monitoring the position of the motor, or that
+have encoders and positions that fluctuate.  The return value and
+the value for \fBv\fP is coded as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+Bit 0 (0x01)
+\- 
+\fBspec\fP will always read the hardware before moving the motor.
+Normally, \fBspec\fP assumes the motor is at its last position.
+.HP 5m
+."
+Bit 1 (0x02)
+\- 
+\fBspec\fP will always read the hardware whenever the \fBget_angles\fP
+command is run from user level.  Normally, \fBspec\fP does not access
+hardware if the motor hasn\(aqt been moved since the controller was
+last read.
+.HP 5m
+."
+Bit 2 (0x04)
+\- 
+\fBspec\fP will always assume the hardware is correct and not query
+the user if the returned hardware position differs
+from the current software position.
+.RE
+.RE
+.HP 5m
+."
+\fB"home_slew_rate"\fP
+\- 
+Returns the value of the home\-slew\-rate parameter.
+If \fBv\fP is given, sets the parameter.
+This parameter is the steady\-state velocity used during a home search.
+(Only available for selected controllers.)
+.HP 5m
+."
+\fB"home_base_rate"\fP
+\- 
+Returns the value of the home\-base\-rate parameter.
+If \fBv\fP is given, sets the parameter.
+This parameter is the base\-rate velocity used during a home search.
+(Only available for selected controllers.)
+.HP 5m
+."
+\fB"home_acceleration"\fP
+\- 
+Returns the value of the home\-acceleration parameter.
+If \fBv\fP is given, sets the parameter.
+This parameter is the acceleration used during a home search.
+(Only available for selected controllers.)
+.HP 5m
+."
+\fB"dc_dead_band"\fP
+\- 
+Returns the value of the dead\-band parameter for DC motors.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"dc_settle_time"\fP
+\- 
+Returns the value of the settle\-time parameter for DC motors.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"dc_gain"\fP
+\- 
+Returns the value of the gain parameter for DC motors.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"dc_dynamic_gain"\fP
+\- 
+Returns the value of the dynamic\-gain parameter for DC motors.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"dc_damping_constant"\fP
+\- 
+Returns the value of the damping\-constant parameter for DC motors.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"dc_integration_constant"\fP
+\- 
+Returns the value of the integration\-constant parameter for DC motors.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"dc_integration_limit"\fP
+\- 
+Returns the value of the integration\-limit parameter for DC motors.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"dc_following_error"\fP
+\- 
+Returns the value of the dc\-following parameter for DC motors.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"dc_sampling_interval"\fP
+\- 
+Returns the value of the sampling\-interval parameter for DC motors.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"encoder_step_size"\fP
+\- 
+Returns the value of the encoder step size parameter.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"step_mode"\fP
+\- 
+Returns the value of the step\-mode parameter.
+Sets the parameter if \fBv\fP is given.
+A zero indicates full\-step mode, while a one indicates half\-step mode.
+.HP 5m
+."
+\fB"deceleration"\fP
+\- 
+Returns the value of the deceleration parameter.
+Sets the parameter if \fBv\fP is given.
+.HP 5m
+."
+\fB"torque"\fP
+\- 
+Returns the value of the torque parameter.
+Sets the parameter if \fBv\fP is given.
+.PD
+.RE
+.RE
+.RE
+.sp
+Rereading the \fBconfig\fP file resets the values
+of all the motor parameters to the values in the
+\fBconfig\fP file.  Only moderate consistency checking is done
+by \fBspec\fP on the values programmed with
+\fBmotor_par()\fP. Be sure to use values meaningful
+to your particular motor controller.
+.RS 0m
+.HP 5m
+."
+\fBget_lim(i, w)\fP
+\- 
+Returns the dial limit of motor \fBi\fP.
+If \fBw\fP > 0, returns high limit.
+If \fBw\fP < 0, returns low limit.
+If \fBw\fP > 1, returns high limit corrected for configured backlash.
+If \fBw\fP < 1, returns low limit corrected for configured backlash.
+.RE
+.HP 5m
+."
+\fBset_lim(i, u, v)\fP
+\- 
+Sets the low and high dial limits of motor \fBi\fP.
+It doesn\(aqt matter which order the limits, \fBu\fP and \fBv\fP, are given.
+Returns \-1 if not configured for motor \fBi\fP or if the motor
+is protected, unusable or moving, else returns 0.
+.HP 5m
+."
+\fBdial(i, u)\fP
+\- 
+Returns the motor dial position for motor \fBi\fP corresponding
+to user angle \fBu\fP.
+.HP 5m
+."
+\fBuser(i, d)\fP
+\- 
+Returns the user angle for motor \fBi\fP
+corresponding to dial position \fBu\fP.
+.HP 5m
+."
+\fBchg_dial(i, u)\fP
+\- 
+Sets the dial position of motor \fBi\fP to \fBu\fP by changing the
+contents of the controller registers.
+Returns \-1 if not configured for motor \fBi\fP or if the motor
+is protected, unusable or moving, else returns 0.
+.HP 5m
+."
+\fBchg_dial(i, s [, u])\fP
+\- 
+Starts motor \fBi\fP on a home or limit search, according to the value of
+\fBs\fP, as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"home+"\fP
+\- 
+move to home switch in positive direction.
+.HP 5m
+."
+\fB"home\-"\fP
+\- 
+move to home switch in negative direction.
+.HP 5m
+."
+\fB"home"\fP
+\- 
+move to home switch in positive direction if current dial position
+is less than zero, otherwise move to home switch in negative direction.
+.HP 5m
+."
+\fB"lim+"\fP
+\- 
+move to limit switch in positive direction.
+.HP 5m
+."
+\fB"lim\-"\fP
+\- 
+move to limit switch in negative direction.
+.PD
+.RE
+.sp
+Positive and negative direction are with respect to the dial position
+of the motor.
+(Not all motor controllers implement the home or limit search feature.)
+If present, the value of the third argument is used to set the motor\(aqs
+dial position when the home or limit position is reached
+(as of \fBspec\fP release 4.05.10\-3).
+Returns \-1 if not configured for motor \fBi\fP or if the motor
+is protected, unusable or moving, else returns 0.
+.RE
+.HP 5m
+."
+\fBchg_offset(i, u)\fP
+\- 
+Sets offset (determining user angle) of motor \fBi\fP to
+\fBu\fP. Returns \-1 if not configured for motor \fBi\fP or if the motor
+is unusable or moving, else returns 0.
+.RE
+.SH "MOTOR NUMBERING"
+.rs
+.sp
+For most motor controllers, unit and channel numbers can be explicitly assigned
+to individual motors channels in the hardware configuration editor.
+The unit numbers start from zero for each different model of
+motor controller and are implicitly assigned to consecutive units
+as they are listed in the configuration editor.
+.sp
+Channel numbers start from zero for most motor controllers.
+For the following controllers, where the hardware clearly
+labels the motor channels, the channel numbers start from one:
+AllMotion EZStepper,
+Attocube ANC300,
+Attocube ANC350,
+Bruker D8,
+Compumotor 6K,
+Delta Tau PMAC/PMAC2,
+EPICS standard motor record,
+HANARO MCU,
+HMT HCC1,
+IMS MDrive,
+IMS MicroLYNX 4/7,
+JVL SMI20B,
+Kohzu Seiki PMC\-2/3/4 GT,
+Kohzu SC\-200/400/800,
+Labo NT\-2400,
+MAC Science MXC,
+Micos MMC\-100,
+Micos VENUS\-1/2/3 Compatible,
+MicroMo MVP\-2001,
+Munich BR\-tronik IPS,
+New Focus 8742,
+Newport Agilis,
+Newport CONEX\-AGP,
+Physik Instrumente C\-630,
+Physik Instrumente E\-710 and E\-712,
+PMC DCX\-100 and DCX\-PCI300,
+Rigaku RINT\-2000,
+RISO ECB,
+SCIPE,
+Siemens D5000,
+Sigmatech FC\-501A
+and
+Velmex VXM\-1/VXM\-2.
+.sp
+If the optional unit/channel numbering is left blank,
+motors are assigned to motor controller channels in the order they each
+appear in the \fBconfig\fP file.
+For example, if several motor controllers of the same type
+are configured and each can
+control eight motors, the first eight motors configured are assigned to
+the first controller, the next eight, to the next controller, and so on.
+If a controller channel is unusable, a motor must still be configured for
+that channel, although if given the name
+\fB"unused"\fP, information about that motor won\(aqt be displayed
+by the standard macros.
+.sp
+Note, support for the following older motor controllers hasn\(aqt been
+updated to recognize unit/channel numbering:
+Joerger SMC,
+Oriel 18011, Compumotor 3000/4000 and SX,
+Micro\-Controle IP28 and SIX19, Klinger MC4,
+ACS MCB, NSLS MMC32, NSK
+and
+Inel XRGCI.
+.sp
+For these controllers, the consecutive numbering rule applies.
+.sp
+Standard macros such as
+\fBwh\fP display only the motors most relevant to a particular geometry.
+Other macros that display information about all the motors, such as
+\fBwa\fP, list these most relevant motors first.
+For a particular geometry configuration, the relevant motors are
+established in the \fB_assign\fP macro,
+which is normally in geometry\-specific macro file.
+A user can change the order in which the motors are displayed by redefining
+the \fB_assign\fP macro.
+.SH "MOTION"
+.rs
+.sp
+Motors are set in motion by the command \fBmove_all\fP, which simultaneously
+moves all motors to the positions in the array \fBA[]\fP (in user units).
+Note, though, the standard macros use \fBmove_em\fP, which incorporates
+the \fBuser_premove\fP and
+\fBuser_postmove\fP user\-hook macros before and after
+the \fBmove_all\fP call.  It is recommended that local macros
+also use \fBmove_em\fP rather than
+\fBmove_all\fP.
+.sp
+When \fBmove_all\fP is executed, the code makes several checks on the
+validity of the move, including checks on whether any of the dial
+positions corresponding to the user angles in \fBA[]\fP are outside the
+dial limits.
+If so, no motors are moved, and the program responds with an error.
+.sp
+Note, moving motors is asynchronous.  The program returns while the
+motors are still in motion.  However, moving motors can be synchronized
+using the function \fBwait()\fP.
+.sp
+When writing macros to move motors, you should always wait for
+motors to stop, do a \fBget_angles\fP command to fill \fBA[]\fP with the current
+positions, assign new values to the elements of
+\fBA[]\fP for the motors that are to be moved, and then do the
+\fBmove_em\fP.
+.sp
+Study the definitions of the standard macros
+\fBmv\fP, \fBumv\fP, \fBbr\fP, \fBan\fP, \fBpl\fP, etc., to see normal usage.
+.SH "SECURE MOTORS"
+.rs
+.sp
+At some \fBspec\fP installations, the \fBspec\fP administrator may
+prevent users from either moving particular motors or
+changing the limits of particular motors.
+.SH "EXAMPLE"
+.rs
+.sp
+Here is a primitive macro to move one motor:
+.RS 3m
+.sp
+.nf
+.ft CB
+def mv \(aq
+   if ($# != 2) {
+        print "usage:  mv motor position"
+        exit
+   }
+   wait()       # Let previous motions finish.
+   get_angles   # Make sure A[] is current so no
+                #   other motors start moving.
+   A[$1]=$2     # Change the relevant A[].
+   move_em      # Start the motors.
+\(aq
+.ft P
+.fi
+.RE
+.sp
+SEE ALSO
++++++++++++++++++++++++++++++++++==
+.sp
+\fI\%config_adm\fP
+\fI\%lm\fP
+\fI\%mv\fP
+\fI\%mvd\fP
+\fI\%mvr\fP
+\fI\%set\fP
+\fI\%set_dial\fP
+\fI\%set_lm\fP
+\fI\%tw\fP
+\fI\%w\fP
+\fI\%wa\fP
+\fI\%wm\fP
+

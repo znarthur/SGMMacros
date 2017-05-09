@@ -1,0 +1,172 @@
+.TH "colors" "graphics" "08/01/12" "colors.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+colors \- color codes for high\-resolution graphics
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)colors.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1991,1992,1993,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "colors" "graphics" "08/01/12" "colors.rst 6.1  08/01/12 CSS"
+.
+.SH "USING COLORS"
+.rs
+.sp
+If your high\-resolution display supports colors, you can change the colors
+used by \fBspec\fP\(aqs plotting with the function call:
+.sp
+.RS 4m
+.nf
+\fBplot_cntl("colors=bgnd:win:text:axis:symb")\fP
+.fi
+.sp
+.RE
+.sp
+The values for \fBbgnd\fP (the background color of the area outside the axis),
+\fBwin\fP (the background color of the area inside the axis),
+\fBtext\fP (the color of the text),
+\fBaxis\fP (the color of the axis) and
+\fBsymb\fP (the color of the plotting symbols)
+are integers.  Values not given will not be changed.
+.sp
+The standard macros \fBsplot\fP and
+\fBrplot\fP use the color values in the strings
+\fBsplot_col\fP and
+\fBrplot_col\fP to set colors before plotting.
+Default values for VGA and EGA displays are:
+.sp
+.RS 4m
+.nf
+\fBsplot_col="11:12:9:3:2"\fP
+\fBrplot_col="12:11:9:3:2"\fP
+.fi
+.sp
+.RE
+.sp
+Defaults for X Windows and Sunview are:
+.sp
+.RS 4m
+.nf
+\fBsplot_col="16:49:9:3:2"\fP
+\fBrplot_col="49:16:9:3:2"\fP
+.fi
+.sp
+.RE
+.sp
+You can choose other color combinations by assigning
+new values to these strings.
+(The first two colors should be light and the last three
+should be dark to provide good contrast between the background and
+foreground.)
+.sp
+A call of
+.sp
+.RS 4m
+.nf
+\fBplot_cntl("\-colors")\fP
+.fi
+.sp
+.RE
+.sp
+will turn use of colors off.  A call of
+.sp
+.RS 4m
+.nf
+\fBplot_cntl("colors")\fP
+.fi
+.sp
+.RE
+.sp
+will turn use of colors on, if the device support colors.
+.SH "IN\-COMMON COLORS"
+.rs
+.sp
+The first 10 colors are standardized for all color display devices
+according to the following table:
+.sp
+.RS 4m
+.TS
+;
+l l .
+0 \- background	(normally white or black)
+1 \- foreground	(normally black or white)
+2 \- blue	3 \- red
+4 \- green	5 \- yellow
+6 \- cyan	7 \- magenta
+8 \- white	9 \- black
+.TE
+.RE
+.SH "PC CONSOLE GRAPHICS COLOR ASSIGNMENT"
+.rs
+.sp
+The colors for vga and ega graphics on 386 and 486 PC computers
+are as follows:
+.TS
+;
+l l .
+0 \- black	1 \- bright white
+2 \- blue	3 \- red
+4 \- green	5 \- yellow
+6 \- cyan	7 \- magenta
+8 \- bright white	9 \- black
+10 \- light blue	11 \- light green
+12 \- light cyan	13 \- light red
+14 \- light magenta	15 \- brown
+16 \- gray	17 \- white
+.TE
+.SH "X WINDOWS AND SUNVIEW COLORS"
+.rs
+.sp
+The colors available on X Windows and SunView are as follows:
+.TS
+;
+l l .
+0 \- white	1 \- black
+2 \- blue	4 \- red
+3 \- green	5 \- yellow
+6 \- cyan	7 \- magenta
+8 \- white	9 \- black
+10 \- aquamarine	11 \- medium aquamarine
+12 \- blue	13 \- cadet blue
+14 \- cornflower blue	15 \- dark slate blue
+16 \- light blue	17 \- light steel blue
+18 \- medium blue	19 \- medium slate blue
+20 \- midnight blue	21 \- navy blue
+22 \- sky blue	23 \- slate blue
+24 \- steel blue	25 \- coral
+26 \- cyan	27 \- firebrick
+28 \- brown	29 \- sandy brown
+30 \- gold	31 \- goldenrod
+32 \- light goldenrod	33 \- green
+34 \- dark green	35 \- dark olive green
+36 \- forest green	37 \- lime green
+38 \- olive drab	39 \- medium sea green
+40 \- medium spring green	41 \- pale green
+42 \- sea green	43 \- spring green
+44 \- yellow green	45 \- dark slate gray
+46 \- dim gray	47 \- light gray
+48 \- gray	49 \- khaki
+50 \- magenta	51 \- maroon
+52 \- orange	53 \- orchid
+54 \- dark orchid	55 \- medium orchid
+56 \- pink	57 \- plum
+58 \- red	59 \- indian red
+60 \- medium violet red	61 \- orange red
+62 \- violet red	63 \- salmon
+64 \- sienna	65 \- tan
+66 \- thistle	67 \- turquoise
+68 \- dark turquoise	69 \- medium turquoise
+70 \- violet	71 \- blue violet
+72 \- wheat	73 \- yellow
+74 \- green yellow	
+.TE
+.sp
+Colors from 75 to 175 are 101 shades of gray from black to white.
+

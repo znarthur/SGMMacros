@@ -1,0 +1,67 @@
+.TH "tw" "macro" "04/16/13" "tw.rst 6.2  04/16/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBtw\fP \- "tweak" motors
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)tw.rst   6.2  04/16/13  CSS
+.
+.\" Copyright (c) 1990,1991,1995,1998,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "tw" "macro" "04/16/13" "tw.rst 6.2  04/16/13 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBtw  motor [motor2 ...] delta [delta2 ...] [ctime]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBtw\fP macro is used to interactively move one or more
+motors in small increments.
+Each time you hit return the motor or motors specified in the arguments
+will be moved the amount given by the corresponding
+\fBdelta\fP parameters.
+The delta parameters can be of different signs for the different
+motors.
+You can change directions for all the motors by typing
+\fB+\fP or \fB\-\fP (or \fBp\fP or \fBn\fP) before hitting return.
+You can also enter a new (signed) delta
+for the first motor for subsequent moves.
+The delta for the other motors will be changed proportionally.
+.sp
+If the optional \fBctime\fP parameter is given, the results of counting for the
+specified time will be displayed after each move.
+If the settling\-time parameter \fB_sleep\fP (set by the
+\fBsetscans\fP macro) is nonzero, counting will be delayed by the specified time.
+.sp
+If the global variable \fBTW_BEEP\fP is nonzero,
+the macro will beep when the moving and counting is finished
+for each iteration.  By default, beeping is off.
+.sp
+If the global variable \fBTW_UPDATE\fP is nonzero,
+the moving and counting values will be updated on the screen
+using the value of the standard \fBUPDATE\fP variable
+as the delay between each update.
+By default, the updated mode is enabled.
+.SH "EXAMPLE"
+.rs
+.sp
+.RS 4m
+.nf
+\fBtw th .01\fP
+\fBtw tth th 1 .5 2\fP
+.fi
+.sp
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%dscan\fP
+

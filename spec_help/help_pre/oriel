@@ -1,0 +1,105 @@
+oriel                               hardware                               oriel
+
+NAME
+     oriel - Oriel 18092 motor controller
+
+DESCRIPTION
+
+     The Oriel 18092 Encoder Mike Controller is supported by ssppeecc on both
+     RS-232C and GPIB interfaces.
+
+     The controller is selected in the ccoonnffiigg file as
+
+         RRSS__1188009922 == ddeevviiccee__nnaammee bbaauudd__rraattee nnuummbbeerr__ooff__mmoottoorrss
+         GGPP__1188009922 == ggppiibb__aaddddrreessss nnuummbbeerr__ooff__mmoottoorrss
+
+     depending on the interface being used.
+
+     When running the configuration editor, switch to the device configuration
+     screen to select the appropriate interface.  On the motor screen, select
+     the 1188009922 controller type for each motor to be controlled.
+
+     By default, motors are automatically assigned to the controller channels in
+     the same order they appear on the motor screen.  If there is more than one
+     controller, the channels are assigned to the controllers in the order in
+     which the controllers appear on the motor device screen.  However, for the
+     Oriel 18092 motor controller, controller-unit and motor-channel numbers can
+     be assigned in arbitrary order on the second line of the motor
+     configuration screen.
+
+PARAMETERS
+
+     ssppeecc allows a number of additional parameters to be set in the
+     configuration file and by the mmoottoorr__ppaarr(()) function for this controller.
+     Use the configuration editor to establish the long-term values of the
+     parameters in the configuration file.  Use mmoottoorr__ppaarr(()) to make changes to
+     the parameters that only are in effect during a particular ssppeecc session.
+     To set the parameters from the configuration editor, use the mm command from
+     the main motor screen to access the optional-parameter screens.
+
+     The following parameters are associated with DC motor operation.  The
+     two-letter command sent to the motor controller associated with each
+     parameter is given in parenthesis.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddcc__ggaaiinn"" [[,, vvaalluuee]])) - If vvaalluuee is given, sets the gain
+          (or derivative gain), otherwise returns the current value.  The
+          factory default value is 3000.  (""SSGG"") (Note, the Oriel manual
+          incorrectly indicates this parameter is set with "SD".)
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddcc__iinntteeggrraattiioonn__ccoonnssttaanntt"" [[,, vvaalluuee]])) - If vvaalluuee is given,
+          sets the integral gain, otherwise returns the current value.  The
+          factory default value is 10. (""SSII"")
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddcc__iinntteeggrraattiioonn__lliimmiitt"" [[,, vvaalluuee]])) - If vvaalluuee is given,
+          sets the integration limit, otherwise returns the current value.  The
+          factory default value is 200. (""IILL"")
+
+     Another mmoottoorr__ppaarr(()) parameter is:
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""sslloopp"" [[,, vvaalluuee]])) - If vvaalluuee is given, sets a threshold
+          value in steps, below which ssppeecc suppresses position discrepancy
+          messages when ssppeecc and the motor controller disagree about motor
+          position, otherwise returns the current value.
+
+     With the GPIB interface on the Oriel 18092, it is apparently necessary for
+     an application to insert delays before sending commands and reading back
+     responses.  The following two parameters allow the length of the delay to
+     be tuned.  These two parameters cannot be set in the configuration file.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""wwddeellaayy"" [[,, vvaalluuee]])) - If vvaalluuee is given, sets the delay
+          before writing a command over the GPIB interface to vvaalluuee
+          microseconds, otherwise returns the current value.  The default value
+          is 75000 (0.075 usec).
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""rrddeellaayy"" [[,, vvaalluuee]])) - If vvaalluuee is given, sets the delay
+          before reading a response over the GPIB interface to vvaalluuee
+          microseconds, otherwise returns the current value.  The default value
+          is 75000 (0.075 usec).
+
+COMMAND PASS THROUGH
+
+     Command pass through is available using the following:
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the Oriel 18092
+          channel associated with mmoottoorr.  For example, set ccmmdd to ""SSBB11,,33,,88"" to
+          set output bits 1, 3 and 8.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the Oriel 18092
+          channel associated with mmoottoorr, as above, and returns a string
+          containing the response.
+
+LIMITATIONS
+
+     The Oriel 18092 motor controller only allows its internal position
+     registers to be set to zero.  Thus the cchhgg__ddiiaall(()) function (used by the
+     sseett__ddiiaall macro) will not accept nonzero position arguments.  Similarly, if
+     there is a motor position discrepancy between ssppeecc and the controller, if
+     you choose to change the controller register position to agree with ssppeecc
+     and if the ssppeecc dial position is not zero, the ssppeecc dial position will
+     instead be changed to agree with the controller, and the the ssppeecc ooffffsseett
+     parameter will be changed to keep the same ssppeecc user-units position.
+
+VERSION
+
+     The above description describes the Oriel 18092 firmware version 1.0d.
+

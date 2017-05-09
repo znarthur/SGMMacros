@@ -1,0 +1,85 @@
+.TH "config" "macro" "01/29/14" "config.rst 6.2  01/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBconfig\fP \- edit the hardware configuration
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)config.rst       6.2  01/29/14  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "config" "macro" "01/29/14" "config.rst 6.2  01/29/14 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBconfig\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBconfig\fP macro runs the configuration editor program
+\fBedconf\fP for the current spectrometer geometry.
+This program displays several configuration screens.
+The \fBmotor\fP screen presents all the motor related parameters
+(step\-size, stepping rate, limits, etc.)
+as well as the current positions of all motors.
+The \fBscaler\fP screen allows you to configure the scaler (counter)
+names and mnemonics and also which hardware channel is
+associated with which name.
+The \fBdevice\fP screen lets you select non\-CAMAC motor controllers,
+timer/counters and MCA\-type devices.
+The \fBinterface\fP screen is used to select a CAMAC controller, a GPIB controller,
+and ports for user\-level serial devices and user\-level PC I/O ports.
+If a CAMAC device is defined, the \fBCAMAC\fP screen
+that shows the slot configuration will become accessible.
+.sp
+Help is available while running the configuration editor using the
+commands \fB?\fP and \fBH\fP.
+.sp
+When you exit \fBedconf\fP, \fBspec\fP rereads the modified configuration
+and re\-initializes the hardware devices.
+.sp
+On some installations, only authorized users are able
+to modify the hardware configuration.
+.SH "FILES"
+.rs
+.nf
+
+\fBspec.d/spectro/config\fP
+\fBspec.d/spectro/settings\fP
+.fi
+.sp
+.SH "DEFINITION"
+.rs
+.RS 3m
+.sp
+.nf
+.ft CB
+def config \(aq
+   wait(\-1)
+   sync
+   unix(sprintf("%s/edconf %s %s/%s",\e
+     SPECD, set_sim(\-1)? "\-s":"", SPECD, SPEC))
+   reconfig
+   _assign
+\(aq
+.ft P
+.fi
+.RE
+.SH "SEE ALSO"
+.rs
+.nf
+
+.in +2
+\fI\%config_adm\fP
+\fBspec\fP \fBAdministrator\(aqs Guide\fP
+.in -2
+.fi
+.sp
+

@@ -1,0 +1,60 @@
+sockets                             function                             sockets
+
+NAME
+     sock_io (deprecated) - Connect to sockets
+
+IMPORTANT NOTE
+
+     The ssoocckk__iioo(()) functions are deprecated as of ssppeecc release 5.01.01.  Please
+     see the _s_o_c_k_e_t_s help file for a description of the ssoocckk__ggeett(()), ssoocckk__ppuutt(())
+     and ssoocckk__ppaarr(()) replacement functions.
+
+BUILT-IN FUNCTIONS
+
+     ssoocckk__iioo((hhoosstt::ppoorrtt,, ccmmdd [[,, aarrgg]) - Connects and communicates with sockets
+          created by other processes on the local or a remote host.  The hhoosstt
+          can be specified by a symbolic name or by an IP address.  The string
+          ccmmdd is one of the following:
+
+          ""??""  - Lists the command options available.
+          ""sshhooww"" - Lists the current open sockets and their status.
+          ""iinnffoo"" - Returns a string that lists the current open sockets and
+               their status.
+          ""ccoonnnneecctt"" - Opens the socket to the specified host and port.  Returns
+               ttrruuee for success and ffaallssee for failure.
+          ""lliisstteenn"" - Sets up a socket for listening, allowing another instance
+               of ssppeecc or some other program to make a connection.
+          ""cclloossee"" - Closes the socket associated with the specified host and
+               port.
+          ""sseenndd"" - Sends the string aarrgg to the specified socket, opening it if
+               not already connected.
+          ""rreeaadd"" - Reads from the specified socket, opening it if not already
+               connected.  Currently, the message to be read can be no longer
+               than 1,024 bytes.  With no argument, reads until a newline or
+               until the timeout expires.  An optional string argument can
+               specify an end-of-string (EOS) delimiter, in which case the
+               socket will be read until characters matching the EOS sequence
+               are read or until the timeout expires.  Trailing newlines and
+               carriage returns will be removed from the returned string.  Also,
+               if the optional argument is a number, it specifies the number of
+               bytes to be read.  That number of bytes (or less, if the timeout
+               expires) will be read and returned.
+          ""ttiimmeeoouutt"" - With no argument, returns the current read-timeout value
+               in seconds.  Otherwise, sets the read timeout to aarrgg.  A negative
+               timeout value causes the socket read to block until it is
+               satisfied.  The default timeout value is 5 seconds.
+
+     Note, the ""ccoonnnneecctt"" command isn't required, as the connection will be made
+     if needed with the other commands.  However, the return value from the
+     ""ccoonnnneecctt"" command may be used to test if a socket can be created.  The
+     connection remains open until the ""cclloossee"" option is used.  Simultaneous
+     connections to multiple ports are allowed.
+
+     The following example connects to the eecchhoo service on port 7 of the local
+     host.
+
+        SSPPEECC..11>> ssoocckk__iioo((""llooccaallhhoosstt::77"",, ""sseenndd"",, ""TThhiiss iiss aa tteesstt..\\nn""))
+
+        SSPPEECC..22>> pprriinntt ssoocckk__iioo((""llooccaallhhoosstt::77"",, ""rreeaadd""))
+        TThhiiss iiss aa tteesstt..
+

@@ -1,0 +1,203 @@
+changes                      spec 4.02 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 4.02
+
+RELEASE 4.02.04
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.02.04
+     as of May 12, 1997.
+
+New Tty Control In ttttyy__mmoovvee(()) and ttttyy__ffmmtt(())
+     All the tty attribute-control strings available with the ttttyy__ccnnttll(())
+     function can now be included in special character sequences (as in \\[[mmdd]]
+     and \\[[mmee]] to start and end bold mode, for example) in the strings passed to
+     the ttttyy__mmoovvee(()) and ttttyy__ffmmtt(()) functions.
+
+New eenndd__mmaacc Built-In Macro
+     If a macro named eenndd__mmaacc is defined, its contents will be executed when
+     ssppeecc exits in normal fashion.  The eenndd__mmaacc macro will not be run if ssppeecc is
+     killed or exits due to a fatal error.  If there is an error while executing
+     the commands in eenndd__mmaacc, ssppeecc will exit anyway, and the eenndd__mmaacc macro will
+     remain defined.
+
+2D Associative Arrays Enhanced
+     The following syntax using 2D associative arrays is now available:
+
+        tteesstt[[""iinnddeexx11""]][[""vvaall00""]] == ""ddaattaa00""
+        tteesstt[[""iinnddeexx11""]][[""vvaall22""]] == ""ddaattaa22""
+        tteesstt[[""iinnddeexx22""]][[""vvaall11""]] == ""ddaattaa11""
+        tteesstt[[""iinnddeexx22""]][[""vvaall33""]] == ""ddaattaa33""
+
+        ffoorr ((ii iinn tteesstt[[""iinnddeexx11""]]))
+                pprriinntt ii,, tteesstt[[""iinnddeexx11""]][[ii]]
+
+        iiff ((""vvaall22"" iinn tteesstt[[""iinnddeexx11""]]))
+                pprriinntt ""yyeess""
+
+GPIB and CAMAC Sharing Fixed
+     The HP SICL GPIB controller can now be configured as a shared controller.
+     GPIB problems that occurred when the KS 3929 SCSI-to-CAMAC controller was
+     configured as shared but the GPIB controller was not have been fixed.
+
+Fixed Motion Bug With Large Backlash and Move Magnitudes
+     A very old bug, where motor backlash movements didn't get done when the
+     product of the backlash magnitude and the move magnitude exceeded the
+     maximum value for a long integer, has been fixed.
+
+Code For Princeton Instruments ST116 PDA Fixed
+     Support for the ST116 PDA has been updated to work with ssppeecc release 4.
+     The mmccaa__ggeett(()) routine now returns the number of points read, as is the
+     current convention.  The status byte sent by the instrument at the end of
+     the data stream and formerly returned by mmccaa__ggeett(()) is now available using
+     mmccaa__ppaarr((""ssttaattuuss__bbyyttee"")).
+
+Command Completion Tuned
+     ssppeecc now does context-dependent command completion for the llssddeeff, uunnddeeff,
+     pprrddeeff, llssccmmdd, ssyymmss and uunngglloobbaall commands when linked with the GNU readline
+     library.  (Command completion lists the possible valid completions or fills
+     in a unique completion when the <<ttaabb>> key is pressed after partial input.)
+
+xx1111ffiilltt Core Dump Fixed
+     A bug that sometimes caused a core dump from the X11 filter program xx1111ffiilltt
+     when DDIISSPPLLAAYY could not be opened has been fixed.
+
+RELEASE 4.02.03
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.02.03
+     as of April 18, 1997.
+
+Wizard Password Can Be In a SSPPEECCDD//ppaasssswwdd File
+     The ssppeecc wizard password can now be located in a file named ppaasssswwdd in the
+     ssppeecc auxiliary file directory (useful if shadow passwords are used, as the
+     shadow file containing the encrypted password can be read only by root).
+     The format of the file is the same as in the conventional ppaasssswwdd file,
+     although this file need only contain the one line for the ssppeeccwwiizz user.
+     The wizard password is used with the ^^WW command in the eeddccoonnff configuration
+     editor and with wizard mode with the ssppeecc__ppaarr((""ssppeeccwwiizz"",, 11)) function.
+
+The uucctt and ccoouunntteerrss Macros Fixed Up
+     The ccoouunntteerrss macro will now check that the scaler channels are within
+     range.  The uucctt macro will now print only the first six counters, if there
+     are more than six counters configured.  Note, the uuccttnn macro can provide an
+     updated display of more than six counters.
+
+Support For Bit 3 VME Workstation Controllers Fleshed Out
+     ssppeecc now supports access to the full A32 and dual-port memory address
+     space, including DMA transfers to and from ssppeecc data arrays, with the Bit 3
+     Model 466-1/467-1 VME controllers on Sun platforms and the Model 487-1 VME
+     controller on HP platforms.
+
+Support For Princeton Instruments CCD Camera Controllers Improved
+     The code for the Princeton Instruments CCD camera controllers has been
+     revised a bit.  KKiinneettiiccss mode is now supported.  The iimmaaggee__ppaarr(()) function
+     argument ""kkiinneettiiccss"" is used to turn the mode on or off.  The argument
+     ""kkiinnwwiinnssiizzee"" is used to set the number of rows in the kinetics-mode window.
+
+Bug Fixed With 0xFF Printed After Parsing Macro Functions
+     Odd behavior, introduced with the recent fix of an obscure bug dealing with
+     parsing macro functions, where a character with ASCII value 255 would be
+     sent to the screen after a macro function was parsed, has been corrected.
+
+RELEASE 4.02.02
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.02.02
+     as of March 31, 1997.
+
+New vvmmee__mmoovvee(()) Function
+     A new vvmmee__mmoovvee(()) function copies data between VME A32 address space and
+     ssppeecc data arrays.  See the _v_m_e help file for more information.
+
+Macro Source Files Displayed With pprrddeeff
+     The pprrddeeff command will now display (as a comment) the name of the source
+     file in which the macro was defined.  This feature, which is on by default,
+     can be disabled using ssppeecc__ppaarr((""sshhooww__pprrddeeff__ffiilleess"",, 00)).
+
+Can Now Configure Parity For rraaww Serial Interface
+     The options rraaww eevveennpp and rraaww ooddddpp can now be selected on the Interfaces
+     screen of the configuration editor for generic serial devices.
+
+Bug with ccddeeff(()) Fixed
+     Using the chained macro function ccddeeff(()) with just one argument will create
+     an empty macro with the given name.  If the macro already exists, it will
+     do nothing.  Previously, such usage was undefined.
+
+ffiillee__iinnffoo(()) Bug Fixed
+     A bug with the new ffiillee__iinnffoo(()) function, where use with a single argument
+     to test for the existence of a file could result in a segmentation
+     violation, has been fixed.
+
+Bit 3 VME Support on Sun Platforms
+     The Bit 3 S-BUS VME controllers for SunOS 4.x and Solaris 2.x platforms are
+     now supported.
+
+New Feature For NSK Motor Controller
+     The function mmoottoorr__ppaarr((mmnnee,, ""rreeaadd"")) will now return the strings read for
+     the NSK motor controller.
+
+Tweak Macro Enhanced
+     You can now change the tweak step size in the ttww macro by typing a
+     numerical value at the ttww prompt.
+
+More Flexible ESRF Format Read
+     The ffmmtt__rreeaadd(()) function for the ESRF data-file format now works with
+     headers that are not exactly 1024 bytes long.
+
+Additions To ggmmccii Geometry
+     The ggmmccii geometry, as used at CEA in Grenoble, now includes the latest
+     revisions from the users there.
+
+RELEASE 4.02.01
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.02.01
+     as of March 9, 1997.
+
+New Default X11 Plot Titles
+     ssppeecc now sets the default X11 plot title to the name by name of the running
+     program followed by the filter number as in ffoouurrcc 11, ffoouurrcc 22, ssiixxcc 11, etc.
+     The plot title can still be changed using pplloott__ccnnttll((""ttiittllee==......"")).
+
+Improved File-Write Error Handling
+     When there is a write error on output to a file, ssppeecc will turn off further
+     output to the file until there is a oonn(()) or ooppeenn(()) call.  That gives the
+     user an opportunity to cclloossee(()) the file if no further output is possible,
+     due perhaps to a down NFS connection.  Previously, ssppeecc would continue
+     attempts to flush any pending output, even after write errors.
+
+New xxxxxx__ppaarr((...... ""ddeevviiccee__iidd"")) Partially Implemented
+     The mmoottoorr__ppaarr(()), ccoouunntteerr__ppaarr(()), mmccaa__ppaarr(()), mmccaa__ssppaarr(()) and iimmaaggee__ppaarr(())
+     functions all now take a new ""ddeevviiccee__iidd"" parameter.  In the case of ESRF
+     device server devices, the return value is the string name of the imported
+     device.  For some ESRF devices, the return value will be ""??""  if the device
+     was not successfully imported.  For non-ESRF devices, the return value may
+     be ""??"" or some other identifier such as GPIB address or CAMAC slot.
+
+eexxiitt Bug In Macro Functions Fixed
+     A bug, whereby an eexxiitt command in a macro function didn't reset to command
+     level, has been fixed.
+
+Mnemonic Checking Fix Fixed
+     The 4.01.15 fix to prevent the same mnemonic being used for both a motor
+     and a counter led to some problems when restarting ssppeecc after it terminated
+     abnormally.  Now the mnemonics are kept straight.
+
+ssccaannss..44 Fix For @@AA Array Data
+     A bug in ssccaannss..44..cc, where \\ continuation lines of @@AA array data were not
+     ignored when the MCA data wasn't asked for, has been fixed.
+
+X25 ssuurrff Modifications
+     The ssuurrff geometry for the NSLS X25 diffractometer will now work with either
+     a one- or two-motor detector-height stages.
+
+Distinct Configuration For NI GPIB-ENET
+     There is now a distinct configuration choice for the National Instruments
+     GPIB-ENET controller on platforms that support that device.  With the
+     GPIB-ENET configuration selected, ssppeecc will block keyboard signals during
+     calls to the subroutines in the NI cciibb..oo module, as experience has shown
+     those routines are not rebust with respect to signals.
+
+More Changes For the MM2500/ITL09 Motor Controllers
+     On the advice of the manufacturer, ssppeecc now sleeps for 100 msec before
+     reading a response to a command sent to the MM2500/ITL09 motor controllers.
+     Perhaps that will help.
+

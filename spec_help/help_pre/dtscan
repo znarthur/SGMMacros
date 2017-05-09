@@ -1,0 +1,33 @@
+dtscan                                macro                               dtscan
+
+NAME
+     ddttssccaann - relative temperature scan
+
+SYNOPSIS
+
+     ddttssccaann ssttaarrtt eenndd iinntteerrvvaallss ttiimmee [[sslleeeepp__ttiimmee]]
+
+DESCRIPTION
+
+     The ddttssccaann macro scans the temperature control set point about the current
+     set point.  The arguments ssttaarrtt and eenndd specify the relative beginning and
+     ending values of the set point.  The number of data points collected will
+     be iinntteerrvvaallss++11.  Count time is given by ttiimmee, which if positive, specifies
+     seconds and if negative, specifies monitor counts.
+
+     The optional sslleeeepp__ttiimmee argument specifies a time in seconds to delay after
+     each temperature change.
+
+     As with all of ssppeecc's temperature-control macros, you need to define a
+     mmeeaassuurreetteemmpp and a __sseetttteemmpp macro that work correctly with your instruments.
+     See the TTeemmppeerraattuurree CCoonnttrrooll MMaaccrrooss section in the ssppeecc SSttaannddaarrdd MMaaccrroo GGuuiiddee
+     for details.
+
+EXAMPLE
+
+     ddttssccaann 00 11 1100 1100
+
+SEE ALSO
+
+     _t_e _t_e_r_a_m_p _t_s_c_a_n _s_h_o_w_t_e_m_p
+

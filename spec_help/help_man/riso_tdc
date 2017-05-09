@@ -1,0 +1,91 @@
+.TH "TDC" "hardware" "08/01/12" "riso_tdc.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+TDC \- Risoe TDC
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)riso_tdc.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1997,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "TDC" "hardware" "08/01/12" "riso_tdc.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Risoe Time\-to\-Digital Converter (TDC) P2011a/P2012a
+processes events from the Risoe 2D multiwire small angle neutron
+scattering detector.  \fBspec\fP supports the TDC over a GPIB interface.
+.sp
+The controller is selected in the \fBconfig\fP file with the line
+.sp
+.RS 4m
+\fBGP_RISOTDC = gpib_address @img_sel\fP
+.RE
+.sp
+where
+\fBsel\fP is the image\-device number used as the first argument in the
+\fBimage_par()\fP and \fBimage_get()\fP functions below.
+When running the configuration editor, switch to  the
+MCA\- and CCD\-like device configuration
+screen to select the Risoe TDC as a CCD\-like device.
+.sp
+The size of the 2D data array sent by the TDC is 128x128.
+The native data type is unsigned long.
+.SH "FUNCTIONS"
+.rs
+.sp
+The \fBimage_par()\fP function controls the TDC behavior as follows:
+.RS 0m
+.HP 5m
+."
+\fBimage_par(sel, "clear")\fP
+\- 
+Clears the TDC memory.
+.HP 5m
+."
+\fBimage_par(sel, "run")\fP
+\- 
+Start data collection.  Memory is not cleared.
+.HP 5m
+."
+\fBimage_par(sel, "halt")\fP
+\- 
+Halt data collection.
+.HP 5m
+."
+\fBimage_par(sel, "XYmode")\fP
+\- 
+Set 2D mode, 128x128 pixels.
+This is the default mode.
+.HP 5m
+."
+\fBimage_par(sel, "Xmode")\fP
+\- 
+Set data collection to 1D mode along the horizontal direction.
+.HP 5m
+."
+\fBimage_par(sel, "Ymode")\fP
+\- 
+Set data collection to 1D mode along the vertical direction.
+.HP 5m
+."
+\fBimage_par(sel, "map", num)\fP
+\- 
+Set the map number as described in the TDC manual.
+The default value for \fBnum\fP is zero,
+which is appropriate for 2D data collection.
+For 1D data collection, a value of 2 is recommended.
+.HP 5m
+."
+\fBimage_get(sel, arr)\fP
+\- 
+Reads data into the array \fBarr\fP.
+.RE
+

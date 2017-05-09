@@ -1,0 +1,31 @@
+mk                                    macro                                   mk
+
+NAME
+     mmkk and uummkk - move to the reciprocal space coordinates (HHKKLL)
+
+SYNOPSIS
+
+     mmkk HH KK LL
+
+     uummkk HH KK LL
+
+DESCRIPTION
+
+     The mmkk macro is used to move the diffractometer to the reciprocal space
+     coordinates given by HH, KK and LL.
+
+     The uummkk macro also moves the diffractometer, but provides an updated
+     display of the motor positions and corresponding reciprocal space
+     coordinates while the motors are moving.  The update interval, in seconds,
+     is set by the global variable UUPPDDAATTEE.
+
+     mmkk is synonymous with bbrr.
+
+EXAMPLE
+
+     mmkk 00 00 11
+
+SEE ALSO
+
+     _c_a _c_a_l _b_r _f_o_u_r_c
+

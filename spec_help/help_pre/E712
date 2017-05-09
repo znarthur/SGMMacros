@@ -1,0 +1,312 @@
+E712                                hardware                                E712
+
+NAME
+     E712 - Physik Instrumente E-712 Piezo Controller
+
+DESCRIPTION
+
+     The Physik Instrument E-712 is a modular digital piezo controller available
+     in 3- and 6-channel configurations.  ssppeecc supports the controller's serial
+     and Ethernet interfaces.
+
+     Use the DDevice screen of ssppeecc's hardware configuration editor, the eeddccoonnff
+     program (normally run from the ccoonnffiigg macro), to select the controller type
+     and to assign the interface parameters:
+
+        MMoottoorr aanndd CCoouunntteerr DDeevviiccee CCoonnffiigguurraattiioonn ((NNoott CCAAMMAACC))
+
+        MMOOTTOORRSS     DDEEVVIICCEE AADDDDRR <<>>MMOODDEE NNUUMM                       <<>>TTYYPPEE
+           YYEESS //ddeevv//ttttyySS11   <<>> 111155220000   33 PPII EE--771122 CCoonnttrroolllleerr ((SSeerriiaall))
+           YYEESS   EE771122hhoosstt               33 PPII EE--771122 CCoonnttrroolllleerr ((SSoocckkeett))
+
+     For the socket configuration, the DDEEVVIICCEE column contains an IP address or
+     resolvable host name.  A optional port number can be specified as in
+     119922..116688..11..112233::5500000000. If not specified, the default port of 50000 is used.
+     (That is currently the only port supported by the controller.)
+
+     The piezo stages supported by the E-712 can be operated in servo or
+     open-loop mode.  When ssppeecc makes a connection to the controller, ssppeecc
+     queries the current setting of each stage.  If in open-loop mode, ssppeecc uses
+     the SSVVAA command to move the motor and the VVOOLL?? command to read the
+     position.  In servo mode, the commands MMOOVV and PPOOSS?? are used.  The mode can
+     be changed using the ""sseerrvvoo__mmooddee"" option to mmoottoorr__ppaarr(()).  The ""sseerrvvoo__mmooddee""
+     parameter can be also added to the hardware ccoonnffiigg file as a nonstandard
+     optional parameter, as described below.
+
+     When in open-loop mode, there is no status available from the controller as
+     to whether the move has completed or if the stage is on target, so moves
+     are considered complete virtually immediately after sending the move
+     command.  Configure the settle time and dead band parameters, described
+     below, if delays are needed.
+
+     On the MMotor screen of the configuration editor, choose the controller type
+     as PPII__EE771122. An appropriate value for the steps-per-degree parameter is 1e6.
+     The slew rate, base rate and acceleration time are not used by ssppeecc for
+     this controller.  However, some of the standard optional motor parameters,
+     reached by typing a lower case mm from the main motor configuration screen,
+     are recognized and may be useful.
+
+     To configure a settling time at the end of each move, set the optional
+     parameters DC dead band (""ddcc__ddeeaadd__bbaanndd"") and DC settle time
+     (""ddcc__sseettttllee__ttiimmee"").  If those parameters are configured, after the
+     controller reports the move is complete, ssppeecc will continue to wait an
+     additional time given by the settle time before reporting the move
+     complete.  In addition, ssppeecc will also wait for the difference between the
+     target position and the actual position to be within the dead band.  If the
+     motor doesn't settle within five seconds, ssppeecc reports an error.  Note, the
+     dead band and settling time parameters set here are not associated with the
+     controller's internal on-target tolerance parameter (0x07000900) and
+     settling time parameter (0x07000901).
+
+     Additionally, the read-back slop parameter (""sslloopp"") and/or the hardware
+     read-mode parameter (""rreeaadd__mmooddee"") can be used as needed to suppress
+     position discrepancy messages.  If the slop parameter is set to some number
+     of steps, ssppeecc will not report position discrepancies smaller than that
+     value and will instead silently accept the reported hardware value as the
+     position.  The read-mode parameter controls how often the position is read
+     from the hardware and can also tell ssppeecc to always accept the reported
+     hardware value, no matter how large.  ssppeecc normally assumes a motor is at
+     its last position.  If the PPRREEMMOOVVEE read-mode option is set, ssppeecc will
+     always read the hardware before moving the motor.  If the AALLWWAAYYSS option is
+     set, ssppeecc will read the hardware whenever the ggeett__aanngglleess command is run
+     from user level.  If the NNOO QQUUEERRYY option is set, ssppeecc will always assume
+     the hardware is correct and not query the user as to how to resolve the
+     discrepancy if the returned hardware position differs from the current
+     software position.  If the NNOO QQUUEERRYY option is set, the ""sslloopp"" parameter is
+     not used.
+
+PARAMETER CLASSES
+
+     The E-712 has hundreds of parameters which are described in more detail in
+     the Physik Instrumente user manual for the controller.  Physik Instrumente
+     assigns the parameters to nine classes, each associated with a particular
+     function, as follows:
+
+         SSeerrvvoo       logical axis
+         IInnppuutt       input channel
+         OOuuttppuutt      output channel
+         SSyysstteemm      whole system
+         DDDDLL         Dynamic Digital Linearization
+         SSttddIIFF       standard interfaces
+         WWaavveeGGeenn     wave generator
+         RReeccoorrddeerr    data recorder
+         FFWW__UUppddaattee   firmware
+
+     For any given class, there are values for a varying number of channel or
+     index identifiers.  For example, there are as many SSeerrvvoo indices as there
+     are logical axes.  The number of IInnppuutt, OOuuttppuutt and FFWW__UUppddaattee indices
+     depends on the hardware model.  Some SSyysstteemm parameters have only one index
+     while the number of indices for other SSyysstteemm parameters depends on the
+     hardware model.  There is only one index for DDDDLL, SSttddIIFF, WWaavveeGGeenn and
+     RReeccoorrddeerr parameters for all hardware models.
+
+     Each parameter is associated with a unique hexadecimal number code, an axis
+     (or index) identifier number from 1 to the maximum number of indices, a
+     class as listed above, an attribute that indicates what privileges are need
+     to modify the parameter and a description of the parameter.  ssppeecc only
+     allows modification to unprotected parameters.  For other parameters, the
+     controller requires a password to make changes.
+
+PARAMETER DISPLAY
+
+     Various parameter attributes can be displayed with options to the
+     mmoottoorr__ppaarr(()) function, as described below.  For example the following
+     displays non-zero parameters associated with axis 1 of the controller:
+
+        SSPPEECC..11>> pp mmoottoorr__ppaarr((zz,, ""dduummpp__sseerrvvoo""))
+        SSeerrvvoo ppaarraammeetteerrss::
+                   RRaannggee LLiimmiitt mmaaxx  [[11]] ((00xx0077000000000011)) :: 5500
+              SSeerrvvoo LLoooopp SSlleeww--RRaattee  [[11]] ((00xx0077000000220000)) :: 55000000
+               OOppeenn LLoooopp SSlleeww--RRaattee  [[11]] ((00xx0077000000220011)) :: 11ee++0066
+                 SSeerrvvoo--lloooopp PP--TTeerrmm  [[11]] ((00xx0077000000330000)) :: 00..003311
+                 SSeerrvvoo--lloooopp II--TTeerrmm  [[11]] ((00xx0077000000330011)) :: 00..000000336633555522
+            PPoossiittiioonn ffrroomm SSeennssoorr 11  [[11]] ((00xx0077000000550000)) :: 00..55
+            PPoossiittiioonn ffrroomm SSeennssoorr 22  [[11]] ((00xx0077000000550011)) :: 00..55
+                         AAxxiiss NNaammee  [[11]] ((00xx0077000000660000)) :: ZZ
+                         AAxxiiss UUnniitt  [[11]] ((00xx0077000000660011)) :: uumm
+                               ......
+
+     The following options are available.  Note, the argument is case
+     insensitive - upper and/or lower case letters can be used interchangeably.
+     All commands are directed to the controller associated with motor mmnnee.
+     Only commands in the SSeerrvvoo class are automatically associated with the
+     particular motor axis mmnnee.  Some forms of the commands suppress displaying
+     parameters that have a value of zero for ease of viewing.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp"")) - Display all parameters from all classes.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__aallll"")) - Display all parameters from all classes, but
+          suppress printing parameters with values of zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__SSeerrvvoo"")) - Display non-zero parameters associated with
+          the motor mmnnee.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__SSeerrvvoo"",, nn)) - Display all parameters associated with
+          the axis nn.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__IInnppuutt"")) - Display non-zero parameters associated with
+          all input channels.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__IInnppuutt"",, nn)) - Display all parameters associated with
+          input channel nn.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__OOuuttppuutt"")) - Display non-zero parameters associated with
+          all output channels.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__OOuuttppuutt"",, nn)) - Display all parameters associated with
+          output channel nn.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__SSyysstteemm"")) - Display non-zero system parameters.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__SSyysstteemm"",, nn)) - Display all system parameters with index
+          nn.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__FFWW__UUppddaattee"")) - Display all non-zero firmware-related
+          parameters.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__FFWW__UUppddaattee"",, nn)) - Display all firmware-related
+          parameters with index nn.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__SSttddIIFF"")) - Display all non-zero interface-related
+          parameters.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__DDDDLL"")) - Display all non-zero dynamic digital
+          linearization parameters.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__WWaavveeGGeenn"")) - Display all non-zero wave generator
+          parameters.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp__RReeccoorrddeerr"")) - Display all non-zero recorder parameters.
+
+INDIVIDUAL PARAMETERS
+
+     Individual parameters can be displayed or set using the hexadecimal
+     parameter code.  A particular parameter code may be associated with more
+     than one parameter, as differentiated by index number.  For SSeerrvvoo class
+     parameters, the index number can come from the motor number.  For all
+     classes of parameters, the index number can be specified using a string in
+     the form ""hheexxppaarr::iinnddeexx"".  For example, to print the stage type (a SSyysstteemm
+     class parameter) associated with axis 2, use:
+
+         pp mmoottoorr__ppaarr((mmnnee,, ""00xx00ff000000110000::22""))
+
+     For SSeerrvvoo class parameters, if the index number is missing, it will be
+     derived from the motor number.  If the index count for the parameter is
+     one, no index need be given.  Otherwise, an error message is displayed.  If
+     an index is not needed, the parameter number does not need to be passed as
+     a string.  For example, to print the axis name, the following works:
+
+         pp mmoottoorr__ppaarr((mmnnee,, 00xx0077000000660000))
+
+     Parameter values are set by supplying the value in the third argument:
+
+         mmoottoorr__ppaarr((mmnnee,, 00xx77000000220000,, 55000000))
+
+     The abovet sets the servo loop slew-rate for motor mmnnee to 5000.
+
+NONSTANDARD OPTIONAL PARAMETERS
+
+     Nonstandard optional parameters are hardware parameters that are not part
+     of ssppeecc's device-independent hardware support.  The parameters can be
+     recognized by ssppeecc's device-dependent support, as documented for the
+     particular controller.
+
+     From the ssppeecc hardware configuration editor, nonstandard optional
+     parameters are created by typing the pp command when a device row or motor
+     column contains the highlighted cell.  For the E-712, parameters can be
+     associated either with the controller unit on the DDevices screen or with
+     individual motors on the MMotor screen.
+
+     Nonstandard optional parameters recognized by the E-712 support are the
+     parameter ""sseerrvvoo__mmooddee"" and all the hexadecimal parameter codes recognized
+     by the controller.  The ""sseerrvvoo__mmooddee"" parameter and hexadecimal parameters
+     in the SSeerrvvoo class are associated with an individual motor axis.  The rest
+     of the hexadecimal parameters are associated with the controller entry.
+
+     The configuration screen for nonstandard optional parameters for a motor
+     channel looks like this (reached by typing the pp command from the main
+     MMotor screen):
+
+        CCuussttoomm PPaarraammeetteerrss ffoorr MMoottoorr ""XXrroott"" ((xxrroott))          22//22 ccoonnffiigguurreedd
+
+        NNAAMMEE                      VVAALLUUEE
+        sseerrvvoo__mmooddee                11
+        00xx77000000330000                 ..003311
+
+        TTyyppee pp wwhheenn ddoonnee               TTyyppee ?? aanndd HH ffoorr hheellpp,, ^^CC ttoo qquuiitt
+
+     For the controller entry on the DDevices screen, the nonstandard optional
+     parameter screen looks like this:
+
+        CCuussttoomm PPaarraammeetteerrss ffoorr ""PPII EE--771122 PPiieezzoo CCoonnttrroolllleerr""  66//66 ccoonnffiigguurreedd
+
+        NNAAMMEE                      VVAALLUUEE
+        00xx0022000000110000::11                  11
+        00xx0022000000110000::22                  11
+        00xx0022000000110011::11                  11
+        00xx0022000000110011::22                  11
+        00xx0022000000110022::11                 1166
+        00xx0022000000110022::22                 1166
+
+     The nonstandard optional parameters can also be accessed via the
+     mmoottoorr__ppaarr(()) command, although if the parameters are given values in the
+     ccoonnffiigg file, the ccoonnffiigg file values will be reprogrammed when the hardware
+     is reinitialized on startup or with the rreeccoonnffiigg command.
+
+PARAMETER ACCESS VIA mmoottoorr__ppaarr(())
+
+     The nonstandard optional parameters may be accessed via mmoottoorr__ppaarr(()),
+     whether or not the parameters have been entered into the ccoonnffiigg file, as
+     described above.  When using mmoottoorr__ppaarr(()) to access parameters not
+     associated with a particular axis, such as all of the hexadecimal
+     parameters that are not in the SSeerrvvoo class, the mmnnee argument simply
+     identifies the controller to which the parameter belongs.
+
+     Note, values for nonstandard optional parameters associated with the
+     controller device in the ccoonnffiigg file cannot be modified using mmoottoorr__ppaarr(()).
+     Their values can only be changed through the configuration editor.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseerrvvoo__mmooddee"")) - Returns one or zero, indicating whether
+          servo mode is on or off for the specified axis.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseerrvvoo__mmooddee"",, 11||00)) - Sets or clears servo motor for motor
+          mmnnee.
+
+     mmoottoorr__ppaarr((mmnnee,, hheexxppaarr)) - Returns current value for hheexxppaarr. If associated
+          with the SSeerrvvoo class, returns for motor mmnnee.  Otherwise, if only one
+          "item" associated with the parameter, returns that item.  Otherwise,
+          returns an error.
+
+     mmoottoorr__ppaarr((mmnnee,, ""hheexxppaarr::iinnddeexx"")) - Returns current value for hheexxppaarr
+          associated with item iinnddeexx. Item numbers start at one.
+
+     mmoottoorr__ppaarr((mmnnee,, hheexxppaarr,, vvaalluuee)) - Set value for hheexxppaarr. If associated with
+          the SSeerrvvoo class, sets value for motor mmnnee.  Otherwise, if only one
+          "item" associated with the parameter, sets that item.  Otherwise,
+          returns an error.
+
+     mmoottoorr__ppaarr((mmnnee,, ""hheexxppaarr::iinnddeexx"",, vvaalluuee)) - Set value for hheexxppaarr associated
+          with item iinnddeexx. Item numbers start at one.
+
+COMMAND PASS THROUGH
+
+     Command pass through is available using the following functions.  Command
+     pass through should be used with caution to avoid interfering with the
+     built-in programming commands ssppeecc sends to the controllers.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the channel
+          associated with mmnnee.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the channel
+          associated with mmnnee, as above, and returns a string containing the
+          response.
+
+     mmoottoorr__ppaarr((mmnnee,, ""uusseenndd"",, ccmmdd)) - Sends the ccmmdd to the controller associated
+          with mmnnee.  Unlike the ""sseenndd"" option above, no channel address is added
+          to the string.
+
+     mmoottoorr__ppaarr((mmnnee,, ""uurreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the controller
+          associated with mmnnee, as above, and returns a string containing the
+          response.  Again, unlike the ""rreeaadd"" option above, no channel address
+          is added to the string.
+

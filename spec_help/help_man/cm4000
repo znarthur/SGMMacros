@@ -1,0 +1,82 @@
+.TH "cm4000" "hardware" "09/25/12" "cm4000.rst 6.2  09/25/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+cm4000 \- Compumotor 4000 motor controller
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)cm4000.rst       6.2  09/25/12  CSS
+.
+.\" Copyright (c) 1994,1995,1996,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "cm4000" "hardware" "09/25/12" "cm4000.rst 6.2  09/25/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Compumotor Model 4000 can be used either over its GPIB
+or one of its two RS\-232C interfaces.
+From the configuration editor, switch to the
+\fBD\fPevice screen to select the appropriate
+version of the CM4000 controller from one of the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS        DEVICE   ADDR  <>MODE  NUM                           <>TYPE
+   YES                    3            4           Compumotor 4000 (GPIB)
+   YES    /dev/ttyS0     <>    9600    4  Compumotor 4000 (Serial port 1)
+   YES    /dev/ttyS1     <>    9600    4  Compumotor 4000 (Serial port 2)
+.ft P
+.fi
+.RE
+.sp
+Corresponding entries in the \fBconfig\fP file are:
+.sp
+.RS 4m
+.nf
+\fBGP_CM4000  =  gpib_address  number_of_motors\fP
+\fBRS1_CM4000  =  device_name  baud_rate  number_of_motors\fP
+\fBRS2_CM4000  =  device_name  baud_rate  number_of_motors\fP
+.fi
+.sp
+.RE
+.sp
+On the \fBMotor\fP screen, select the \fBCM4000\fP controller type
+for each motor to be controlled.
+Motors are assigned to the CM4000 channels in the same order
+they appear on the motor screen.
+.SH "CONTROLLER SETUP"
+.rs
+.sp
+You must program the RS\-232 baud rate or the
+GPIB address using the Compumotor front panel controls
+before trying to access it with \fBspec\fP.
+You should consult the Compumotor manual for details,
+but in brief, the procedure is as follows.
+First enter the \fBACCESS\fP code (the factory default is \fB4000\fP).
+Then choose the
+\fBIMMED\fP function, and then the \fBDEFINE GPIB ADDR\fP statement to select the
+the GPIB address.  Alternatively, choose the \fBIMMED\fP function, and the the
+\fBRS232 PORT1\fP statement to configure the baud rate for the RS\-232 interface.
+.sp
+There are many other configuration options with this controller.
+Other than the GPIB address and the baud rate, you should
+probably not change any of these others.
+You can reestablish the factory defaults using the
+\fBRESET\fP function from the main menu.
+.sp
+Output pins 46 or 47 on the programmable output connector
+can be used to gate a counter during powder\-mode scans.
+While the powder\-mode motor is moving during these scans,
+\fBspec\fP sets pin 46 high and pin 47 low.
+Use the one appropriate for your particular counter.
+To gate the Ortec 994 counter/timer, for example,
+pin 46 and an even\-numbered pin (all are logic ground)
+are connected to the front panel \fBenable\fP BNC connector on the Ortec module.
+

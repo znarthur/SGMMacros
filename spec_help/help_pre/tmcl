@@ -1,0 +1,164 @@
+tmcl                                hardware                                tmcl
+
+NAME
+     TMCL - Trinamic Motion Control Language (TMCL) motor controllers
+
+DESCRIPTION
+
+     The Trinamic Motion Control Language (TMCL) motor controllers come in many
+     models, as described at the _T_r_i_n_a_m_i_c _w_e_b_s_i_t_e.  The controllers are
+     supported by ssppeecc over serial (RS-232C), USB and CAN-bus interfaces.  (The
+     USB interface appears as a serial device to ssppeecc.)
+
+     The current ssppeecc release has been tested with models TMCM-1140 and
+     TMCM-3110.  The code may need tuning for some other models in the series.
+     Contact CSS for details.
+
+CONFIGURATION
+
+     Configure the motor controllers on the DDevices screen of the configuration
+     editor as follows, choosing the CAN bus or serial/USB entry, as
+     appropriate:
+
+        MMoottoorr aanndd CCoouunntteerr DDeevviiccee CCoonnffiigguurraattiioonn ((NNoott CCAAMMAACC))
+
+        MMOOTTOORRSS     DDEEVVIICCEE   AADDDDRR <<>>MMOODDEE NNUUMM                      <<>>TTYYPPEE
+           YYEESS //ddeevv//ttmmccll00     <<>>   99660000  1100  TTrriinnaammiicc TTMMCCLL ((SSeerriiaall||UUSSBB))
+           YYEESS                 00         1166     TTrriinnaammiicc TTMMCCLL ((CCAANN bbuuss))
+
+     The TMCL serial interface is RS-485, so requires use of an RS-232 to RS-458
+     converter to connect to the usual serial ports available on computers.
+
+     The TMCL USB interface identifies itself to the computer as a modem-type
+     device.  On LLiinnuuxx, the kernel driver will create special device nodes named
+     //ddeevv//ttttyyAACCMM00, //ddeevv//ttttyyAACCMM11, etc.  The ssppeecc uuddeevv rules (see
+     //eettcc//uuddeevv//rruulleess..dd//1100--ssppeecc__uussbb..rruulleess) will automatically create links with
+     corresponding names //ddeevv//ttmmccll00, //ddeevv//ttmmccll11, etc.  Set the baud rate in the
+     MODE column.  The hardware default is 9600.
+
+     If using the CAN-bus interface, configure the CAN-bus controller in the
+     field-bus section of the IInterfaces screen of the configuration editor.
+     ssppeecc allows multiple field-bus controllers to be configured with each
+     assigned an index number starting from zero.  The ADDR field for the TMCL
+     device holds the index number of the field-bus controller to be used.  One
+     may need to Use the USB interface temporarily to set the CAN bus parameters
+     on the TMCL controller to other than the default (1M bit rate, ID 1).
+
+     On the MMotor screen of the configuration editor, choose TTMMCCLL as the
+     controller type.  The TMCL motor channels require uunniitt//mmoodduullee//cchhaannnneell
+     configuration for each motor channel.  The uunniitt numbers refer to the
+     entries on the DDevices screen for the controller configuration and start at
+     zero for each type of controller.  That is, the first TMCL controller is
+     unit 0, even if other controller types appear before it in the listing.
+     The mmoodduullee number is the configured module address.  The cchhaannnneell numbers
+     run from 0 to one minus the number of motor channels.  Modules are
+     available with 1, 3 and 6 axes.
+
+     The TMCL firmware includes over a hundred parameters.  Some of them are
+     standard parameters set by ssppeecc, but others are associated with special
+     functions of the controller.  The parameters can be set using mmoottoorr__ppaarr(())
+     as described below.  The parameters can also be configured as non-standard
+     optional parameters using the configuration editor.
+
+     Parameters that can be stored in EEPROM will be saved to EEPROM when set
+     using mmoottoorr__ppaarr(()) or when configured as nonstandard optional parameters in
+     the ccoonnffiigg file.  To prevent excessive writing to EEPROM, ssppeecc will always
+     preread the value from EEPROM and only store values that are to be changed.
+     EEPROM parameters are indicated in the output of the ""dduummpp"" and ""ggdduummpp""
+     commands below with an EE in the Access column.
+
+FUNCTIONS
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreesseett"")) - Restores all settings stored in the EEPROM to
+          their factory defaults.  After using this command, execute a rreeccoonnffiigg
+          or restart ssppeecc to synchronize ssppeecc's settings with that of the TMCL.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggdduummpp"")) - Displays the current values of the global
+          parameters for the controller associated with motor mmnnee.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp"")) - Displays the current values of the axis parameters
+          for motor mmnnee.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ppaarr##"" [[,, vvaall]])) - Sets or returns the value of the axis
+          parameter number specified by ##.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggppaarr##"" [[,, vvaall]])) - Sets or returns the value of the global
+          parameter number specified by ##.
+
+     mmoottoorr__ppaarr((mmnnee,, ""PPeeaakkCCuurrrreenntt"" [[,, vvaall]])) - Sets or returns the absolute
+          maximum current value.
+
+     mmoottoorr__ppaarr((mmnnee,, ""PPoowweerrDDoowwnnCCuurrrreenntt"" [[,, vvaall]])) - Sets or returns the standby
+          current value.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSEE__ccuurrrreenntt__mmiinn"" [[,, vvaall]])) - Sets or returns the smartEnergy
+          minimum current value.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSEE__ccuurrrreenntt__ddoowwnn"" [[,, vvaall]])) - Sets or returns the smartEnergy
+          current down step value.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSEE__hhyysstteerreessiiss"" [[,, vvaall]])) - Sets or returns the smartEnergy
+          hysteresis value.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSEE__ccuurrrreenntt__uupp"" [[,, vvaall]])) - Sets or returns the smartEnergy
+          current up step value.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ssttoopp__oonn__ssttaallll"" [[,, vvaall]])) - Sets or returns the stop-on-stall
+          value.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSEE__tthhrreesshhoolldd__ssppeeeedd"" [[,, vvaall]])) - Sets or returns the
+          smartEnergy threshold speed.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSEE__ccuurrrreenntt__ssllooww"" [[,, vvaall]])) - Sets or returns the smartEnergy
+          slow run current value.
+
+     mmoottoorr__ppaarr((mmnnee,, ""AAcccceelleerraattiioonnCCuurrrreenntt"" [[,, vvaall]])) - Sets or returns the boost
+          current value.
+
+     mmoottoorr__ppaarr((mmnnee,, ""PPoowweerrDDoowwnnDDeellaayy"" [[,, vvaall]])) - Sets or returns the power-down
+          delay time.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseett__ppuulllluupp"",, 00||11)) - Switches the pull-up resistors for all
+          inputs off (0) or on (1).
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseett__bbiitt"",, vvaall)) - Set output port number vvaall to high.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ccllrr__bbiitt"",, vvaall)) - Set output port number vvaall to low.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ppuutt__bbiittss""||""sseett__bbiittss""||""ppuutt__bbyyttee"",, vvaall)) - Set output ports
+          that correspond to bits set in vvaall and clears output ports that
+          correspond to bits not set in vvaall.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__bbiitt"",, vvaall)) - Returns 0 or 1 based on whether the input
+          port corresponding to bit number vvaall is high or low.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__bbiittss""||""ggeett__bbyyttee"")) - Returns an 8-bit value that
+          reflects the setting of the input ports.
+
+CHECKING FOR RESET
+
+     It is possible to have ssppeecc continuously check whether power has been
+     cycled to the TMCL by reading back a volatile user register that has been
+     loaded with a signature value during hardware configuration.  To enable
+     such an automatic check, set the custom controller parameter
+     ""cchheecckk__iinntteerrvvaall"" in the hardware ccoonnffiigg file.  If this parameter has a
+     value greater than zero, ssppeecc will check for reset no more frequently than
+     that number of seconds.  If a reset is noted, the controller position will
+     be reset to the last good position in software.  The check will be
+     performed before moving, reading positions, on the ssyynncc command, and before
+     changing parameters with mmoott__ppaarr(()), but no more often than the specified
+     interval.  When the controller is idle, there is no checking done.
+
+     To set the parameter, go the controller configuration line on the DDevices
+     screen of the configuration editor and type pp to enter the parameter:
+
+        CCuussttoomm PPaarraammeetteerrss ffoorr ""TTrriinnaammiicc TTMMCCLL ((SSeerriiaall||UUSSBB))""
+
+        NNAAMMEE                      VVAALLUUEE
+        cchheecckk__iinntteerrvvaall            22
+
+     The above example configures the checking at no more often than every two
+     seconds.  In the current implementation, the parameter needs to be
+     separately configured for each controller for which checks are to be
+     enabled.
+

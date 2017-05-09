@@ -1,0 +1,19 @@
+resume                                macro                               resume
+
+NAME
+     rreessuummee - continue an aborted scan
+
+SYNOPSIS
+
+     rreessuummee [[nn||--nn]]
+
+DESCRIPTION
+
+     The rreessuummee macro (also called ssccaann__oonn) resumes a scan that was previously
+     aborted.  With a positive argument, nn points are skipped.  A negative
+     argument redoes the previous nn points.
+
+     For example, rreessuummee --11 redoes the previous point, while rreessuummee 33 skips the
+     next three points.  Giving a very large number will force the end-of-scan
+     plots, etc., without taking any more data points.
+

@@ -1,0 +1,152 @@
+plot_cntl                           function                           plot_cntl
+
+NAME
+     plot_cntl() - control of built-in plotting
+
+DESCRIPTION
+
+     pplloott__ccnnttll((ss)) - Selects built-in plotting features.  The argument ss is a
+          string of comma- or space-delimited options.  The following options
+          may be preceded by a minus sign to turn the associated feature off or
+          nothing (or an optional plus sign) to turn the feature on.  A question
+          mark before or after the option will return a value of one or a zero
+          that indicates whether the associated feature is currently on or off.
+          For example,
+
+             pplloott__ccnnttll((""xxlloogg,,yylloogg""))    ## ttuurrnnss xx aanndd yy lloogg--aaxxiiss mmooddee oonn
+             pplloott__ccnnttll((""++xxlloogg""))        ## ttuurrnnss xx lloogg--aaxxiiss mmooddee oonn
+             pplloott__ccnnttll((""--xxlloogg""))        ## ttuurrnnss xx lloogg--aaxxiiss mmooddee ooffff
+             pprriinntt pplloott__ccnnttll((""xxlloogg??""))  ## rreettuurrnnss 11 iiff mmooddee oonn,, eellssee 00
+
+     ""xxlloogg"" - use a logarithmic xx axis.
+
+     ""yylloogg"" - use a logarithmic yy axis.
+
+     ""xxeexxaacctt"" - force xx-axis minimum and maximum to be set to the scan endpoints
+          (as opposed to being rounded).
+
+     ""ccoolloorrss"" - enable the use of colors.
+
+     ""ddoottss"" - draw graphics-mode points with large dots.
+
+     ""lliinneess"" - connect graphics-mode points with lines.
+
+     ""eebbaarrss"" - draw vertical lines through each point of length equal to the
+          twice the square root of the yy value.
+
+     ""ppeerrssiisstt"" - keep graphics-mode on after ordinary user input.  ssppeecc errors,
+          a ^^CC from the keyboard or pplloott__ccnnttll((""cclloossee"")) restore text mode.
+
+     ""ppeerrppeettuuaall"" - keep graphics-mode on continuously (appropriate if using X
+          windows, for example).
+
+     ""aasscciiii"" - draw plots on the terminal window using cursor positioning
+          commands and ASCII characters rather than using the high-resolution
+          xx1111 window.
+
+     ""dduummbbtteerrmm"" - indicates a terminal window that lacks cursor positioning.
+          The value is set automatically when ssppeecc starts up.  When this mode is
+          on, text plots are drawn down the page using only space characters to
+          position the plotted points.  Note when this mode is on, the special
+          control strings used by the ttttyy__ccnnttll(()) and the positioning used by
+          ttttyy__mmoovvee(()) are unavailable.
+
+     Other options are:
+
+     ""ffoonntt==ssttrriinngg"" - sets the font used for the xx1111 high-resolution plot
+          windows.  If the font is a scalable font, its size will be chosen to
+          match the current size of the plot window.  Otherwise, the font size
+          will be fixed to either the value specified in the font name using the
+          XX LLooggiiccaall FFoonntt DDeessccrriippttiioonn CCoonnvveennttiioonnss XLFD, or if the size fields are
+          wild carded, the font size will be selected by the X server.
+
+     ""ttiittllee==ssttrriinngg"" - sets the title-bar text for xx1111 high-resolution plot
+          windows.  In a comma-separated list of arguments to pplloott__ccnnttll(()), this
+          one must appear last.
+
+     ""ggeeoommeettrryy==ssttrriinngg"" - sets the size and position for xx1111 high-resolution plot
+          windows.  The format of the geometry string is the same as expected by
+          standard X windows applications, as in
+
+             pplloott__ccnnttll((""ggeeoommeettrryy==551122xx338800--00++1100""))
+
+          As with the conventional syntax, not all parts of the geometry string
+          are required.
+
+     ""ccoolloorrss==bbggnndd::wwiinn::tteexxtt::aaxxiiss::ssyymmbb::......""  - assign colors for drawing the
+          various graphics-mode elements.  The values for bbggnndd (the background
+          color of the area outside the axis), wwiinn (the background color of the
+          area inside the axis), tteexxtt (the color of the text), aaxxiiss (the color
+          of the axis) and ssyymmbb ...... (the color of the plotting symbols) are
+          integers.  The first 10 colors are standardized according to the
+          following table:
+
+              0 - background (normally white or black)
+              1 - foreground (normally black or white)
+              2 - blue
+              3 - red
+              4 - green
+              5 - yellow
+              6 - cyan
+              7 - magenta
+              8 - white
+              9 - black
+
+          Other colors may be available depending on the particular device.  You
+          don't have to assign values to all colors.
+
+     ""ccoolloorrss[[nnuummbb]]"" - Returns the current color assignments, where nnuummbb is a
+          number between zero and 67.  Numbers zero through three return the
+          colors assigned to the bbggnndd, wwiinn, tteexxtt and aaxxiiss elements respectively.
+          Numbers from 4 through 67 return the colors assigned to the plotting
+          symbols.
+
+     ""ffiilltteerr11"" - select filter 1 (the default).  All plotting commands are
+          directed to this filter.
+
+     ""ffiilltteerr22"", ""ffiilltteerr33"", ""ffiilltteerr44"", ""ffiilltteerr55"" - select filters 2 through 5.
+          Subsequent plotting commands are directed to the selected filter.
+
+     ""ooppeenn"" - turn on graphics mode.  If there is no graphics filter program
+          currently active for the current filter number (see above), the filter
+          program associated with the current GGTTEERRMM variable is started.  The
+          only currently useful value for GGTTEERRMM is xx1111.  When using X11
+          graphics, you can assign a value to the built-in variable DDIISSPPLLAAYY
+          before a call of pplloott__ccnnttll((""ooppeenn"")) to set the X display on which the
+          plot will be drawn.  If the filter is currently open, and you wish to
+          change the display, use pplloott__ccnnttll((""kkiillll"")) first.  For example,
+
+             DDIISSPPLLAAYY==""hhoosstt11::00"";; pplloott__ccnnttll((""ffiilltteerr11,,ooppeenn""))
+             DDIISSPPLLAAYY==""hhoosstt22::00"";; pplloott__ccnnttll((""ffiilltteerr22,,ooppeenn""))
+
+          will create plot windows on two different hosts.
+
+     ""cclloossee"" - turn off graphics mode, unless the perpetual or persistent mode
+          has been selected.
+
+     ""kkiillll"" - turn off graphics mode and terminate graphics process.
+
+     ""eerraassee"" - clear the graphics-mode screen (or the text screen if graphics
+          mode is off).
+
+     ""rraaiissee"" - raises the xx1111 high-resolution plot window to the top of the
+          desktop window stack, making it visible.
+
+     ""aaddddppooiinntt"" - before a call to aarrrraayy__pplloott(()) or ddaattaa__pplloott(()) will cause the
+          plot to be made with minimal redrawing.  Used for updated plotting
+          during scans.
+
+     ""aaddddlliinnee"" - before a call to aarrrraayy__pplloott(()) or ddaattaa__pplloott(()) will prevent the
+          current data from being erased and the new data from changing the
+          ranges when the new data points are drawn.  Used for plotting several
+          data sets from different data groups or array elements on top of each
+          other.
+
+     ""mmccaa"" - before a call to aarrrraayy__pplloott(()) or ddaattaa__pplloott(()) will cause the data
+          points to be displayed using a minimal redrawing algorithm,
+          appropriate for displaying data actively being accumulated by an
+          MCA-type device.  The ""ddoottss"" and ""eebbaarrss"" modes must be turned off.
+
+     ""llpp"" - before a call to aarrrraayy__pplloott(()) or ddaattaa__pplloott(()) will generate printing
+          instructions appropriate for plotting on a 132-column printer.
+

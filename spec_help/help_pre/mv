@@ -1,0 +1,26 @@
+mv                                    macro                                   mv
+
+NAME
+     mmvv and uummvv - move one motor
+
+SYNOPSIS
+
+     mmvv mmoottoorr uusseerr__vvaalluuee
+     uummvv mmoottoorr uusseerr__vvaalluuee
+
+DESCRIPTION
+
+     The mmvv macro moves mmoottoorr to the user angle given by uusseerr__vvaalluuee.
+
+     The uummvv macro also moves the motor, but provides an updated display of the
+     motor position on the screen while the motor is moving.  The update
+     interval, in seconds, is set by the global variable UUPPDDAATTEE.
+
+EXAMPLE
+
+     mmvv tthh 00
+
+SEE ALSO
+
+     _m_v_d _m_v_r _m_o_t_o_r_s _w_a_i_t
+

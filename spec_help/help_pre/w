@@ -1,0 +1,22 @@
+w                                     macro                                    w
+
+NAME
+     ww - wait for moving and counting and then beep
+
+SYNOPSIS
+
+     ww
+
+DESCRIPTION
+
+     The ww macro lets you know when all moving and/or counting has finished by
+     ringing the console bell when a call of wwaaiitt((00)) returns.
+
+DEFINITION
+
+     ddeeff ww ''wwaaiitt((00));; bbeeeepp''
+
+SEE ALSO
+
+     _w_a_i_t
+

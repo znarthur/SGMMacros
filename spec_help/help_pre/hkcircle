@@ -1,0 +1,34 @@
+hkcircle                              macro                             hkcircle
+
+NAME
+     hhkkcciirrccllee - scan along an arc in the HHKK-plane in reciprocal space
+
+SYNOPSIS
+
+     hhkkcciirrccllee rraaddiiuuss aannggllee__ssttaarrtt aannggllee__eenndd iinntteerrvvaallss ttiimmee [[eexxpprreessssiioonn]]
+
+DESCRIPTION
+
+     The hhkkcciirrccllee macro scans along a circular arc in the HHKK-plane in reciprocal
+     space.  The radius of the arc is given by rraaddiiuuss and the arc runs from
+     aannggllee__ssttaarrtt to aannggllee__eenndd.  The number of data points collected will be
+     iinntteerrvvaallss++11.
+
+     Count time is given by ttiimmee, which if positive, specifies seconds and if
+     negative, specifies monitor counts.
+
+     The optional last argument can supply expressions to be evaluated after HH
+     and KK are calculated for each point.  You may, for example, supply an
+     expression to calculate values for LL or include expressions to offset the
+     values of HH and KK.
+
+EXAMPLES
+
+     hhkkcciirrccllee 11 00 9900 1100 6600 ""HH ++== ..55;; KK ++== ..55""
+     hhkkcciirrccllee 11 00 9900 1100 6600 LL==HH//..112255
+     hhkkcciirrccllee 11 00 336600 1100 6600 LL==00
+
+SEE ALSO
+
+     _h_k_l_s_c_a_n _h_s_c_a_n _k_s_c_a_n _l_s_c_a_n _h_l_c_i_r_c_l_e _k_l_c_i_r_c_l_e _h_k_r_a_d_i_a_l _h_l_r_a_d_i_a_l _k_l_r_a_d_i_a_l
+

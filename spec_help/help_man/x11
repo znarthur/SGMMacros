@@ -1,0 +1,302 @@
+.TH "x11" "reference" "08/01/12" "x11.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBx11\fP \- \fBspec\fP graphics under the X Window System
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)x11.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1992,1993,1995,1996,1997,2006,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "x11" "reference" "08/01/12" "x11.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+You can have \fBspec\fP draw high resolution graphics in X Window System
+windows by selecting high resolution graphics (with the \fBsetplot\fP macro)
+and setting the \fBGTERM\fP global variable to
+\fBx11\fP. You can set \fBGTERM\fP either as an
+environment variable in the shell or by assigning it the
+\fB"x11"\fP string while running \fBspec\fP.
+However, each time you start \fBspec\fP, the environment variable will override
+a previously assigned value to \fBGTERM\fP.
+.sp
+The process that \fBspec\fP creates
+(named \fBx11filt\fP) to do the plotting looks at the \fBDISPLAY\fP
+environment variable.
+The value of \fBspec\fP\(aqs built\-in variable named \fBDISPLAY\fP
+will be propagated to the
+\fBx11filt\fP process environment when it is spawned.
+Thus it is possible to change the host on which the plots are drawn while
+running \fBspec\fP by assigning new values to \fBDISPLAY\fP. For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+DISPLAY="host1:0"; plot_cntl("filter1,open")
+DISPLAY="host2:0"; plot_cntl("filter2,open")
+.ft P
+.fi
+.RE
+.sp
+will create plot windows on two different hosts.
+.SH "RESOURCE FILE ITEMS (\fB.Xdefaults\fP)"
+.rs
+.sp
+Some parameters associated with the X windows plot can be set in an
+\fB.Xdefaults\fP file in your home directory.
+You can include some or all of the following parameters:
+.RS 3m
+.sp
+.nf
+.ft CB
+spec.geometry:      =640x380\-20+10
+spec.Foreground:    black
+spec.Background:    white
+spec.Backstore:     on
+spec.Retained:      off
+spec.BorderWidth:   4
+spec.Border:        black
+spec.Font:          \-\-\-\-r\-\-\-\-\-\-\-\-\-\-*
+spec.FontDebug:     0
+spec.Colors:        on
+spec.AutoRaise:     on
+spec.DotSize:       small
+.ft P
+.fi
+.RE
+.sp
+The values for the parameters given above are the defaults.
+.sp
+Up to five X graphics windows may be used with \fBspec\fP simultaneously.
+Parameters specified in the \fB.Xdefaults\fP file with the keyword
+\fBspec\fP will apply to all, unless overridden by the following.
+Parameters specified with the keyword \fBspec_1\fP,
+will apply to the window selected with the command
+\fBplot_cntl("filter1")\fP, parameters specified with the keyword
+\fBspec_2\fP will apply to the window selected
+with the command \fBplot_cntl("filter2")\fP, etc.
+An additional \fBx11filt\fP process is created for each window.
+.sp
+The \fBgeometry\fP parameter uses the conventional notation to set the
+width and height of the window and the offsets from the edges of the
+root window.  All the values are in pixels.
+.sp
+The \fBBackground\fP and \fBForeground\fP parameters
+set the colors associated with color numbers zero and one,
+respectively.
+.sp
+The \fBBackstore\fP and \fBRetained\fP parameters
+select how the image in the window will be saved when the window is
+covered up by another window.
+The backing\-store method can be the most efficient way to preserve
+the window contents if the graphics display supports it.
+For the retained\-pixmap method, the
+\fBx11filt\fP process performs all the drawing operations
+on both the active display
+and an in\-memory copy of the window, and uses the in\-memory copy to
+redraw uncovered portions of the window on \fBexpose\fP events.
+The retained\-pixmap method is generally
+not as efficient as using backing store, but may be necessary
+if backing store is unavailable.
+If backing store is requested, but unsupported by the display,
+the retained\-pixmap method is automatically used.
+.sp
+The \fBBorderWidth\fP and
+\fBBorder\fP parameters select the width and color of the window border, but
+are generally ignored when a window manager (such as \fBmwm\fP) is running.
+.sp
+The
+\fBFont\fP parameter uses the standard notation for specifying application fonts
+in X Windows.  The default font uses the
+\fB*\fP to wild card all fields except the fourth, which
+selects a \fBroman\fP font.
+The graphics program selects among all
+the fonts that match the pattern the one that best fits
+the height and width of the window when the program
+first starts and each
+time the window is resized.
+The font selected can be limited to a single family in your
+\fB.Xdefaults\fP file with syntax as in following examples,
+.RS 3m
+.sp
+.nf
+.ft CB
+spec.Font: \-\-lucidatypewriter\-bold\-r\-\-\-\-\-\-\-\-\-\-*
+spec.Font: \-\-fixed\-medium\-r\-\-\-\-\-\-\-\-\-\-*
+spec.Font: \-\-courier\-medium\-r\-
+.ft P
+.fi
+.RE
+.sp
+Note, your choice of a font can be aided with the X utility
+\fBxlsfonts\fP which lists all the available fonts, and the utility
+\fBxfontsel\fP which can be used to inspect the available fonts.
+.sp
+The \fBx11filt\fP program also supports
+\fBscalable\fP fonts introduced in X11R5, when such a font is selected using
+the \fB.Xdefaults\fP resources or the
+\fBplot_cntl()\fP \fB"font="\fP option described below.
+For scalable fonts, the server uses an algorithm to fit the font to
+whatever size is requested.  Scalable fonts can be identified by the
+zeros in the 7th, 8th and 12th fields of their long name.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+spec.Font: \-adobe\-courier\-bold\-r\-normal\-\-0\-0\-0\-0\-m\-0\-iso8859\-1
+spec.Font: \-adobe\-courier\-medium\-r\-normal\-\-0\-0\-0\-0\-m\-0\-iso8859\-1
+.ft P
+.fi
+.RE
+.sp
+are a couple of possible scalable fonts.
+.sp
+Please note that on some older systems, the \fBfonts.dir\fP files in the
+\fB/usr/lib/X11/fonts\fP directories aren\(aqt up to date, so the
+\fBx11filt\fP graphics program will try to load a font that doesn\(aqt exist.
+This problem can be fixed by having the system administrator run the
+\fBmkfontdir\fP command.
+.sp
+Setting the \fBFontDebug\fP property to a nonzero value will cause the
+\fBx11filt\fP filter process to display some font diagnostics on the
+terminal screen, which may be useful if there are problems with the
+font appearance.
+Debugging can be turned off either by setting the property value back to
+zero or with the \fBplot_cntl()\fP 9900 command described below.
+.sp
+The program will use color if it determines you are using
+a color display.  The \fBColors\fP parameter lets you turn use of colors off.
+.sp
+By default, the graphics window will be brought to the top of the
+stacking order among its siblings each time its contents are changed.
+To disable this feature, set the \fBAutoRaise\fP parameter to off.
+.sp
+The \fBDotSize\fP parameter controls the size
+of the smallest point drawn by \fBspec\fP.
+Possible values are
+.sp
+.RS 4m
+.IP \(bu 2
+\fBscaled\fP
+.IP \(bu 2
+\fBpixel\fP
+.IP \(bu 2
+\fBsmall\fP
+.IP \(bu 2
+\fBmedium\fP
+.IP \(bu 2
+\fBlarge\fP
+.RE
+.sp
+The pixel patterns are as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+                                    X
+    X               X      XXX     XXX
+   XX       X      XXX     XXX    XXXXX
+                    X      XXX     XXX
+                                    X
+ scaled   pixel   small   medium  large
+(typical)
+.ft P
+.fi
+.RE
+.sp
+The \fBscaled\fP points use the X library
+\fBXFillArc()\fP routine to draw a filled circle.
+The result depends on the platform and is often nonsymmetric.
+Before being a configurable option, the default dot size was
+\fBscaled\fP. The default is now \fBsmall\fP.
+.SH "\fBplot_cntl()\fP COMMANDS"
+.rs
+.sp
+You can assign a title to the graphics window using the command
+.sp
+.RS 4m
+\fBplot_cntl("title=This is a title")\fP
+.RE
+.sp
+from \fBspec\fP.  The title can be changed at any time.
+.sp
+You can also change the size and position of the window at any time using
+the \fBplot_cntl()\fP function as in
+.sp
+.RS 4m
+\fBplot_cntl("geometry=640x380\-20+10")\fP
+.RE
+.sp
+Fonts can be selected using
+.sp
+.RS 4m
+\fBplot_cntl("font=\-adobe\-courier\-bold\-r\-normal\-\-20\-140\-100\-100\-m\-110\-iso8859\-1")\fP
+.RE
+.sp
+for example.  If a non\-scalable font is chosen this way,
+the font size will no longer
+change to match the size of the window.
+Any valid font name can be used, including short alias names, as in,
+.sp
+.RS 4m
+\fBplot_cntl("font=8x16")\fP
+.RE
+.sp
+Several special features can be accessed using
+.sp
+.RS 4m
+\fBplot_cntl("cmd=numb")\fP
+.RE
+.sp
+(as of \fBspec\fP release 5.01.02\-7) where the following values for
+\fBnumb\fP are recognized:
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fB9109\fP	turns auto\-raise mode on
+\fB9110\fP	turns auto\-raise mode off
+\fB9120\fP	selects scaled dot size
+\fB9121\fP	selects single pixel dot size
+\fB9122\fP	selects small dot size
+\fB9123\fP	selects medium dot size
+\fB9124\fP	selects large dot size
+\fB9666\fP	creates a detached window (see below)
+\fB9900\fP	turns font debugging off
+\fB9901\fP	turns font debugging on
+.TE
+.RE
+.sp
+Also, the \fBnumb\fP argument can be
+a space\- or comma\-separated list of numbers.
+.SH "DETACHING A WINDOW"
+.rs
+.sp
+You can make a detached copy of an active \fBspec\fP X11 plot window
+by pressing the control key and any mouse button
+while the mouse cursor is over the window
+(as of \fBspec\fP release 5.01.02\-7).
+A new X11 window will be created that contains the contents of the
+original window.
+The contents of the new window will no longer change, and the window
+will remain on the screen, even after \fBspec\fP exits.
+Use the window manager close button or menu item to delete the window.
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%colors\fP
+\fI\%setplot\fP
+\fI\%splot\fP
+

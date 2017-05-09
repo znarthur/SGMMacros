@@ -1,0 +1,186 @@
+kl2000                              hardware                              kl2000
+
+NAME
+     kl2000 - Newport MM2000/MM3000 motor controller
+
+DESCRIPTION
+
+     The Newport (formerly Klinger) MM2000 and MM3000 motor controllers are
+     supported by ssppeecc on both RS-232C and GPIB interfaces.  The MM2000 is also
+     supported on the ISA bus interface.  On the serial interface, ssppeecc supports
+     the daisy chaining available on the MM2000 and MM3000 controllers.  All
+     these controllers can be used both with DC motors (with encoders) and with
+     the 1.5M-type stepper motors.
+
+     The controller is selected in the ccoonnffiigg file as
+
+         RRSS__MMMM22000000 == ddeevviiccee__nnaammee bbaauudd__rraattee nnuummbbeerr__ooff__mmoottoorrss
+         RRSS22__MMMM22000000 == ddeevviiccee__nnaammee bbaauudd__rraattee nnuummbbeerr__ooff__mmoottoorrss
+         GGPP__MMMM22000000 == ggppiibb__aaddddrreessss nnuummbbeerr__ooff__mmoottoorrss
+         PPCC__MMMM22000000 == bbaassee__aaddddrreessss nnuummbbeerr__ooff__mmoottoorrss
+
+     depending on the interface being used.  The second example above selects
+     the daisy-chained RS-232C configuration.
+
+     When running the configuration editor, switch to the device configuration
+     screen to select the appropriate interface.  On the motor screen, select
+     the MMMM22000000 or MMMM22000000__EE controller type for each motor to be controlled.
+     The latter choice indicates encoders are being used.
+
+     By default, motors are automatically assigned to the controller channels in
+     the same order they appear on the motor screen.  If there is more than one
+     controller, the channels are assigned to the controllers in the order in
+     which the controllers appear on the motor device screen.  Also available is
+     the new nonconsecutive channel assignment feature that has been implemented
+     for selected motor controllers.  Controller unit and motor channel numbers
+     can be selected and assigned on the second line of the motor configuration
+     screen in any order.  Not all channels need to be assigned.
+
+     When using the daisy chain feature, if automatic channel numbering is
+     selected in the configuration file, the controller daisy-chain addresses
+     must be assigned consecutively starting with address 0 using either the
+     controller dip switch, the controller front panel menu or by sending a
+     command over the serial interface.  If the unit/channel configuration is
+     used, the daisy-chain addresses will be derived from the channel number.
+
+PARAMETERS
+
+     ssppeecc allows a number of additional parameters to be set in the
+     configuration file and by the mmoottoorr__ppaarr(()) function for these controllers.
+     Use the configuration editor to establish the long-term values of the
+     parameters in the configuration file.  Use mmoottoorr__ppaarr(()) to make changes to
+     the parameters that only are in effect during a particular ssppeecc session.
+     To set the parameters from the configuration editor, use the mm command from
+     the main motor screen to access the optional-parameter screens.
+
+     The following parameters are associated with DC motor operation.  The
+     two-letter command sent to the motor controller associated with each
+     parameter is given in parenthesis.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddcc__pprrooppoorrttiioonnaall__ggaaiinn"" [[,, vvaalluuee]])) - If vvaalluuee is given,
+          sets the proportional gain, otherwise returns the current value.
+          (""KKPP"")
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddcc__ddeerriivvaattiivvee__ggaaiinn"" [[,, vvaalluuee]])) - If vvaalluuee is given, sets
+          the derivative gain (or damping constant), otherwise returns the
+          current value. (""KKDD"")
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddcc__iinntteeggrraall__ggaaiinn"" [[,, vvaalluuee]])) - If vvaalluuee is given, sets
+          the integral gain, otherwise returns the current value.  (""KKII"")
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddcc__iinntteeggrraattiioonn__lliimmiitt"" [[,, vvaalluuee]])) - If vvaalluuee is given,
+          sets the integrator limit, otherwise returns the current value.
+          (""IILL"")
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddcc__ssaammpplliinngg__iinntteerrvvaall"" [[,, vvaalluuee]])) - If vvaalluuee is given,
+          sets the derivative sampling interval, otherwise returns the current
+          value.  (""DDSS"")
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ddcc__ffoolllloowwiinngg__eerrrroorr"" [[,, vvaalluuee]])) - If vvaalluuee is given, sets
+          the following-error threshold, otherwise returns the current value.
+          (""FFEE"")
+
+     To set the gain for the tttthh motor, for example, use
+
+         mmoottoorr__ppaarr((tttthh,, ""ddcc__pprrooppoorrttiioonnaall__ggaaiinn"",, 11000000))
+
+     The function
+
+         mmoottoorr__ppaarr((tttthh,, ""ddcc__pprrooppoorrttiioonnaall__ggaaiinn""))
+
+     returns the current value of the ""ddcc__pprrooppoorrttiioonnaall__ggaaiinn"" parameter.
+
+     Another mmoottoorr__ppaarr(()) parameter is:
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""sslloopp"" [[,, vvaalluuee]])) - If vvaalluuee is given, sets a threshold
+          value in steps, below which ssppeecc suppresses position discrepancy
+          messages when ssppeecc and the motor controller disagree about motor
+          position, otherwise returns the current value.
+
+COMMAND PASS THROUGH
+
+     Command pass through is available using the following:
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the MM2000 channel
+          associated with mmoottoorr.  For example, set ccmmdd to ""SSBB11,,33,,88"" to set
+          output bits 1, 3 and 8.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the MM2000 channel
+          associated with mmoottoorr, as above, and returns a string containing the
+          response.
+
+JOYSTICK
+
+     To enable joystick control for a particular motor, use the command
+
+         mmoottoorr__ppaarr((mmoottoorr,, ""jjooyy__oonn"",, cchhaannnneell))
+
+     where mmoottoorr is the motor number and cchhaannnneell is the channel number, as
+     explained in the Klinger manual for the JJYY command.  To disable joystick
+     control, use the command
+
+         mmoottoorr__ppaarr((mmoottoorr,, ""jjooyy__ooffff""))
+
+     Not only does the ""jjooyy__oonn"" command send the proper joystick enable codes to
+     the MM2000/MM3000, but it also changes behavior within ssppeecc.  In
+     particular, position discrepancies between ssppeecc and the controller are
+     automatically corrected in favor of the controller for all commands, except
+     for the ssyynncc and rreeccoonnffiigg commands.  (A message is printed, though, when
+     the position correction is made.)  In addition, when joystick control is
+     enabled, the motor controller is queried to read the current position for
+     the motor on all ggeettaanngglleess commands, not just when the motor is active, as
+     is the joystick-disabled case.
+
+     Suggested macros for controlling the joystick are:
+
+        ddeeff jjooyy__oonn ''
+            iiff (($$## !!== 22)) {{
+                    pprriinntt ""UUssaaggee::  jjooyy__oonn mmoottoorr cchhaannnneell""
+                    eexxiitt
+            }}
+            __cchheecckk00 ""$$11""
+            mmoottoorr__ppaarr(($$11,,""jjooyy__oonn"",,$$22))
+        ''
+
+        ddeeff jjooyy__ooffff ''
+            iiff (($$## !!== 11)) {{
+                    pprriinntt ""UUssaaggee::  jjooyy__ooffff mmoottoorr""
+                    eexxiitt
+            }}
+            __cchheecckk00 ""$$11""
+            mmoottoorr__ppaarr(($$11,,""jjooyy__ooffff""))
+        ''
+
+     To make things even easier, you could define macros such as
+
+        ddeeff oonn__jjooyy ''
+            jjooyy__oonn tttthh 11
+            jjooyy__oonn tthh  22
+            jjooyy__oonn cchhii 33
+            jjooyy__ooffff pphhii 44
+        ''
+
+     and
+
+        ddeeff ooffff__jjooyy ''
+            jjooyy__ooffff tttthh
+            jjooyy__ooffff tthh
+            jjooyy__ooffff cchhii
+            jjooyy__ooffff pphhii
+        ''
+
+LIMITATIONS
+
+     The MM2000/MM3000 motor controller only allows its internal position
+     registers to be set to zero.  Thus the cchhgg__ddiiaall(()) function (used by the
+     sseett__ddiiaall macro) will not accept nonzero position arguments.  Similarly, if
+     there is a motor position discrepancy between ssppeecc and the controller, if
+     you choose to change the controller register position to agree with ssppeecc
+     and if the ssppeecc dial position is not zero, the ssppeecc dial position will
+     instead be changed to agree with the controller, and the the ssppeecc ooffffsseett
+     parameter will be changed to keep the same ssppeecc user-units position.
+
+VERSION
+
+     The above description describes the MM3000 firmware version 2.3.
+

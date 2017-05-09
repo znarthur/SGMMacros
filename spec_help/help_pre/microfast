@@ -1,0 +1,111 @@
+microfast                           hardware                           microfast
+
+NAME
+     microfast - Oxford/Tennelec/Nucleus Microfast MCA
+
+DESCRIPTION
+
+     The Microfast is an ISA (PC card) multichannel analyzer available with
+     2048, 4096, 8192 or 16384 32-bit channels.  The card can be used for
+     counting to live-time, real-time or gross-counts presets.  The card also
+     includes an on-board discriminator.
+
+FUNCTIONS
+
+     mmccaa__ggeett((aarrrr [[,, rrooii__bbeegg [[,, rrooii__eenndd]]]])) or mmccaa__ggeett((gg,, ee [[,, rrooii__bbeegg [[,,
+          rrooii__eenndd]]]])) - Gets data from the currently selected MCA-type device,
+          and transfers it to the array aarrrr or to element ee of data group gg. Use
+          of arrays rather than data groups is recommended.  The native data
+          type for the Microfast is uulloonngg.
+
+     mmccaa__ppaarr((""ddiissaabbllee"" [[,, aarrgg]])) - With no arguments, returns nonzero if the
+          selected MCA device has been disabled by the user, otherwise returns
+          zero.  If aarrgg is 1, disables the MCA.  If aarrgg is 0, turns off the
+          disabled mode.  When the device is disabled, ssppeecc will not access the
+          hardware.  On startup, and after the standard ccoonnffiigg macro or the
+          rreeccoonnffiigg command is run, disabled mode is off.
+
+     mmccaa__ppaarr((""aauuttoo__rruunn"" [[,, aarrgg]])) - With no arguments, returns nonzero if the
+          selected MCA device has auto-run mode set, otherwise returns zero.  If
+          aarrgg is 1, enables auto-run mode.  If aarrgg is 0, turns off auto-run
+          mode.  When auto-run mode is set the device is started and stopped
+          with the counting functions ttccoouunntt(()), mmccoouunntt(()), etc.  When not set,
+          the counting functions are ignored, but the device can be controlled
+          with the ""rruunn"" and ""hhaalltt"" options described below.  In addition, the
+          device can be halted with the ssttoopp(()) function and will be halted with
+          ^^CC. On startup, and after the standard ccoonnffiigg macro or the rreeccoonnffiigg
+          command is run, auto-run mode is on.
+
+     mmccaa__ppaarr((""ssoofftt__pprreesseett"" [[,, aarrgg]])) - With no arguments, returns nonzero if the
+          selected MCA device has soft-preset mode set, otherwise returns zero.
+          If aarrgg is 1, enables soft-preset mode.  If aarrgg is 0, turns off
+          soft-preset mode.  When set, and if auto-run mode is enabled (see
+          above), the MCA device is set to count for the time preset given as an
+          argument to the ttccoouunntt(()) function.  The wwaaiitt(()) function will wait
+          until both the timer and the MCA device have counted to their
+          respective presets.  When soft-preset mode is not set, but auto-run
+          mode is, the device is programmed for continuous data acquisition and
+          will be stopped when the timer's preset is reached.  Currently, when
+          both soft-preset and auto-run modes are in effect, when counting to
+          monitor (using mmccoouunntt(())) rather than to time, the device is also
+          programmed for continuous data acquisition, as above.
+
+     mmccaa__ppaarr((""rruunn"")) - Programs the MCA device with the appropriate parameters
+          and starts acquisition.
+
+     mmccaa__ppaarr((""hhaalltt"")) - Halts the MCA device.
+
+     mmccaa__ppaarr((""cclleeaarr"")) - Clears the data in the current group.
+
+     mmccaa__ppaarr((""ggrroouupp__ssiizzee"" [[,, aarrgg]])) or mmccaa__ppaarr((""ggaaiinn"" [[,, aarrgg]])) - With no
+          argument, returns the current group size.  Otherwise sets the group
+          size to aarrgg. Valid arguments are 256, 512, 1024, 2048, etc., up to the
+          total number of channels.  On the Microfast card, setting the gain is
+          the same as setting the group size.
+
+     mmccaa__ppaarr((""sseelleecctt__ggrroouupp"" [[,, aarrgg]])) - With no argument, returns the currently
+          active group.  Otherwise, sets the active group to aarrgg.
+
+     mmccaa__ppaarr((""pprreesseett"" [[,, aarrgg]])) - With no arguments, returns the current preset
+          value.  Otherwise, sets the preset to aarrgg. The preset value is in
+          seconds for live-time and real-time modes or number of counts for
+          integral mode.  If the preset is zero, the device will programmed for
+          continuous run, except when the soft-preset mode is in effect, as
+          described above.
+
+     mmccaa__ppaarr((""lliivvee"")) - Sets the MCA device to live-time mode.
+
+     mmccaa__ppaarr((""rreeaall"")) - Sets the MCA device to real-time (or true-time) mode.
+
+     mmccaa__ppaarr((""iinntteeggrraall"")) - Sets the MCA device to a mode where it runs until the
+          counts in a region of interest reach the preset.
+
+     mmccaa__ppaarr((""eellaappsseedd__lliivvee"")) - Returns the elapsed live time in seconds.
+
+     mmccaa__ppaarr((""eellaappsseedd__rreeaall"")) - Returns the elapsed real time in seconds.
+
+     mmccaa__ppaarr((""ddeeaadd"")) - Returns the dead-time percentage, calculated as 100 *
+          (rreeaall__ttiimmee - lliivvee__ttiimmee) / rreeaall__ttiimmee.
+
+     mmccaa__ppaarr((""ggrroossss__ccoouunnttss"")) - Returns the total counts in all channels.
+
+     mmccaa__ppaarr((""aaddcc__lllldd"" [[,, aarrgg]])) - With no argument, returns the current
+          lower-level discriminator setting.  Otherwise, sets the lower-level
+          discriminator to aarrgg.  The default value is 32.  Legal values are from
+          0 to 4095.
+
+     mmccaa__ppaarr((""aaddcc__uulldd"" [[,, vvaalluuee]])) - With no argument, returns the current
+          upper-level discriminator setting.  Otherwise, sets the upper-level
+          discriminator to vvaalluuee.  The default value is 4095.  Legal values are
+          from 0 to 4095.
+
+     mmccaa__ppaarr((""aaddcc__zzeerroo"" [[,, vvaalluuee]])) - With no argument, returns the current
+          zero-level discriminator setting.  Otherwise, sets the zero-level
+          discriminator to vvaalluuee.  The default value is 2047.  Legal values are
+          from 0 to 4095.  Changing the zero-level shifts the spectrum to the
+          left or right.
+
+SEE ALSO
+
+     _a_r_r_a_y_s _m_c_a
+

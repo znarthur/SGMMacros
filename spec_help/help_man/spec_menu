@@ -1,0 +1,384 @@
+.TH "spec_menu" "function" "05/13/14" "spec_menu.rst 6.3  05/13/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+spec_menu() \- create interactive menu from specifications
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)spec_menu.rst    6.3  05/13/14 CSS
+.
+.\" Copyright (c) 2013,2014
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "spec_menu" "function" "05/13/14" "spec_menu.rst 6.3  05/13/14 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBspec_menu()\fP function creates
+interactive menus
+that might be used for configuring macros and other \fBspec\fP options.
+When the menu is active, the user can use arrow and control keys
+to navigate the options and edit strings.
+.sp
+While waiting for input in \fBspec_menu()\fP, \fBspec\fP will continue
+to poll hardware and respond to client commands if in server mode,
+just as \fBspec\fP does while waiting for input at the main
+command prompt.
+.SH "USAGE"
+.rs
+.sp
+\fBspec_menu(menu [, modes [, dumbterm]])\fP
+.sp
+The \fBmenu\fP argument is a two\-dimensional associative array
+that completely describes the menu as detailed below.
+The first index of the array is a number that identifies an item.
+The second index of the array is a string that matches one of
+a set of keys that identify an attribute for the item.
+The value of the array element depends on the key.
+.sp
+The optional \fBmodes\fP argument is a single value where each
+bit can be associated with a menu item.  Up to 52 items
+may have associated bits.
+.sp
+If the number of menu items plus
+the number of lines needed to display the hints and \fB"info"\fP strings
+is greater than the number of rows in the terminal window, the menu
+items will be scrollable.
+The number of additional lines above or below the visible
+window will be displayed in the left of the screen.
+Navigating past the top or bottom will automatically scroll the menu.
+.sp
+If the width of the menu is greater than the width of the window, the
+menu items will be compressed or scrolled horizontally, to fit the
+available space.
+.sp
+If \fBdumbterm\fP is nonzero, \fBspec_menu()\fP will not use
+cursor positioning.  Instead, the
+menu options will be displayed one at a time in sequence and
+the user will be prompted for a value.
+In this mode, entering a single \fB\-\fP for any response will
+jump back and prompt again for the previous item in the sequence.
+.sp
+The function will return a possibly modified value for \fBmodes\fP,
+reflecting
+the user\(aqs choices.
+If the menu is exited with \fB^C\fP or the \fBx\fP
+command, the values of the \fBmenu\fP items on entry are restored.
+.SH "MENU KEYS"
+.rs
+.sp
+Each item selected by the first index into the \fBmenu[][]\fP array
+can have various attributes configured via the following string keys
+placed in the second array index.
+.sp
+The \fB"title"\fP, \fB"head"\fP and \fB"subhead"\fP items don\(aqt have any other modifiers.
+All other items require at least a \fB"desc"\fP key.  An item with a \fB"desc"\fP key
+also needs at least one of \fB"bit"\fP, \fB"value"\fP, \fB"svalue"\fP, \fB"@"\fP or \fB"list"\fP.
+The other keys are optional.
+.RS 0m
+.HP 5m
+."
+\fB"title"\fP
+\- 
+The title for the menu.  No further attributes apply to a \fB"title"\fP item.
+Only one title will be displayed, and it will be displayed at the top of the page.
+.HP 5m
+."
+\fB"width"\fP
+\- 
+The width of the menu.  If not specified, the entire window will be used.
+.HP 5m
+."
+\fB"head"\fP
+\- 
+A section header for the menu.  It will be preceded by a blank line.
+.HP 5m
+."
+\fB"subhead"\fP
+\- 
+A subsection header for the menu.  It will not be preceded by a blank line.
+.HP 5m
+."
+\fB"desc"\fP
+\- 
+A required descriptive text string for each item.  The string is displayed when
+prompting for the value.
+A null description creates a blank line.
+.HP 5m
+."
+\fB"info"\fP
+\- 
+Optional text that gives a description of the parameter.  The \fB"info"\fP
+text is displayed only when the current item is active.  The text will
+be formatted for width using the rules of the \fBtty_fmt()\fP function.
+Formatting will work best if there are no embedded newlines in the string.
+.RE
+.sp
+The value of a menu item is modifiable if at least one of the
+following five keys is included in the item description.
+.RS 0m
+.HP 5m
+."
+\fB"bit"\fP
+\- 
+Associates a bit in the \fBmodes\fP argument to this item.
+The element value should be a single bit and each item in the array
+that has a bit set
+should have a unique value.  The associated bit will
+be set or cleared in the return value of \fBspec_menu()\fP.
+Also, a \fB"bit"\fP attribute can be associated with items that have a
+\fB"value"\fP, \fB"svalue"\fP, \fB"toggle"\fP or  \fB"list"\fP attribute so that
+such items can be enabled or disabled for editing using the
+\fB"bit_and"\fP, \fB"bit_or"\fP and \fB"bit_not"\fP attributes.
+.sp
+Currently, bits 0 through 51 can be used.
+.RE
+.HP 5m
+."
+\fB"toggle"\fP
+\- 
+Similar to the \fB"bit"\fP key in that the value can be toggled on
+or off, but there is no limit to the number of such items and
+no connection to the \fBmodes\fP argument.
+The item\(aqs value contains the initial state on entry and the selected
+state when \fBspec_menu()\fP returns.
+.HP 5m
+."
+\fB"value"\fP
+\- 
+Indicates a number value is wanted.  Also used to hold the
+\fB"list"\fP item selection.  This item\(aqs value will be modified.
+Not used if the \fB"@"\fP indirection key is present.
+.sp
+Note, the number value can be entered as an expression which will
+be evaluated with the result displayed.
+.HP 5m
+."
+\fB"svalue"\fP
+\- 
+Indicates a string value is wanted.  Can also be used to select the
+current \fB"list"\fP item.  This item\(aqs value will be
+modified.
+Not used if the \fB"@"\fP indirection key is present.
+.HP 5m
+."
+\fB"list"\fP
+\- 
+Presents a list of possible values, only one of which can be
+selected.  The selection is set and returned in \fB"value"\fP,
+\fB"svalue"\fP or indirectly via the \fB"@"\fP key.  Use \fB"value"\fP
+to indicate selection based on position in the list, counting
+from one.  Use \fB"svalue"\fP to indicate selection based on a
+matching strings.  If \fB"@"\fP is used, \fBspec\fP will use a
+number or string as appropriate.
+.sp
+By default, one or more space characters separate the list items.
+An alternate delimiter character or string can be specified using
+the \fB"delim"\fP attribute.
+.HP 5m
+."
+\fB"@"\fP
+\- 
+The value of this element contains the string name
+of a \fBspec\fP variable that is to be modified.
+If its current value is a number, then the rules for entering
+number values will be followed.  If its current value is a string
+or the parameter is unset, the string rules will be followed.
+This key takes precedence over \fB"value"\fP or \fB"svalue"\fP attributes.
+Names of scalars and associative array elements are allowed, but
+data array elements are not.  If the named variable doesn\(aqt exist,
+\fBspec_menu()\fP will display the variable name and "not found" as the value.
+.HP 5m
+."
+\fB"format"\fP
+\- 
+Can be used to set an alternative \fBprintf()\fP format for display of
+a number\-valued item.  For example, \fB"0x%X"\fP can be used to display
+a value in hexadecimal.  In fact, the format can be used to specify
+the same number value in multiple formats, such as \fB"hex=0x%x dec=%d"\fP.
+The default format is \fB"%.9g"\fP.
+.HP 5m
+."
+\fB"delim"\fP
+\- 
+Provides an alternative delimiter for \fB"list"\fP items.  Can be one
+or more characters.  The default delimiter is a space character.
+When the delimiter is a space character, multiple space and tab characters
+count as one delimiter.  When the delimiter is any other character or string,
+each instance is a delimiter.
+.HP 5m
+."
+\fB"default"\fP
+\- 
+For \fB"list"\fP items, sets the default choice if the value passed via
+\fB"value"\fP, \fB"svalue"\fP or \fB"@"\fP is invalid or out of range.
+.HP 5m
+."
+\fB"min"\fP
+\- 
+For \fB"value"\fP items, a minimum value to allow.
+.HP 5m
+."
+\fB"max"\fP
+\- 
+For \fB"value"\fP items, a maximum value to allow.
+.RE
+.sp
+The item types \fB"bit"\fP, \fB"value"\fP, \fB"svalue"\fP, \fB"toggle"\fP and \fB"list"\fP
+can have the following attributes set to enable or disable the item for editing
+based on the bit values of other items
+in the current value of \fBmodes\fP.
+.RS 0m
+.HP 5m
+."
+\fB"bit_and"\fP
+\- 
+Editable if all the matching bits (or bit) are set in \fBmodes\fP.
+.RE
+.HP 5m
+."
+\fB"bit_or"\fP
+\- 
+Editable if any of the matching bits (or bit) are set in \fBmodes\fP.
+.HP 5m
+."
+\fB"bit_not"\fP
+\- 
+Editable if the matching bits (or bit) are not set in \fBmodes\fP.
+.RE
+.sp
+Finally, this key applies to bit\-toggle items:
+.RS 0m
+.HP 5m
+."
+\fB"bit_flip"\fP
+\- 
+Flip the YES/NO sense of this item.
+Normally, when a bit  is set in \fBmodes\fP, the value is presented as "YES".
+If "bit_flip" is present, the logic is reversed.  This option can
+be used to avoid double negatives in the query/response, particularly
+when one doesn\(aqt have the freedom to define what a set bit means.
+For example, "Draw error bars (YES)?" is preferable to "Don\(aqt draw
+error bars (NO)".
+.RE
+.RE
+.SH "RETURN VALUES"
+.rs
+.sp
+On a normal return with the \fBq\fP or \fB^D\fP keys, \fBspec_menu()\fP will return
+an updated value for \fBmodes\fP that reflects the new values of all the \fB"bit"\fP
+items.
+In addition, new values for \fB"value"\fP, \fB"svalue"\fP and variables passed indirectly
+using \fB"@"\fP will be assigned.  Finally, for any items that have been modified
+an element will be added to
+the \fBmenu\fP array with a second index named \fB"updated"\fP and a value set to one.
+.SH "NAVIGATION AND EDITING"
+.rs
+.sp
+The menu is presented as a list with the cursor positioned at the
+current value for a modifiable item.
+The up\- and down\-arrow keys, the \fB^P\fP (previous) and \fB^N\fP (next)
+control keys and the return key accept the current choice and move up or down the list.
+.sp
+One exits the menu saving the modifications using
+the \fBq\fP (quit) key or \fB^D\fP.
+One can abandon the menu without saving the modifications using the
+\fBx\fP (exit) key or \fB^C\fP.
+.sp
+The display is refreshed with \fB^L\fP, taking into account
+the current window size.
+.sp
+Bit\-value and toggle items are toggled using the space bar or the left\- or right\-arrow keys.
+In addition, the
+\fBy\fP, \fBY\fP and \fB1\fP keys select YES, while the \fBn\fP, \fBN\fP and \fB0\fP
+keys select NO.
+.sp
+List items are also navigated using
+the left\- and right\-arrow keys and the \fB^B\fP (back) and \fB^F\fP (forward)
+to move one position.  The \fB^A\fP and \fB^E\fP keys move to the first item
+and last item, respectively.
+Also, typing the first character of a list item will move the cursor
+to the first item in the list that begins with that character.
+The space bar makes the currently highlighted item the list selection.
+.sp
+Text entry items (both string\- and number\-valued)
+allow insertion and deletion of text from any point in the string.
+The left\- and right\-arrow keys and the \fB^B\fP (back) and \fB^F\fP (forward)
+move one position.  The \fB^A\fP and \fB^E\fP keys move the cursor to the start and end
+of the entry, respectively.  The \fB^D\fP key and the keyboard forward\-delete key both delete
+forward.  The backspace and delete key delete backward.  The \fB^U\fP and \fB^K\fP
+keys delete from the current position to the beginning and end of line, respectively.
+.sp
+For number\-valued items, the text entered will be evaluated.
+Thus expressions are allowed.  For example, \fBPI/2\fP, \fB2 + 2\fP or
+\fBpow(2,12)\fP are all valid entries.  Note, though, currently whatever
+is typed is executed by the spec interpreter.  Entering arbitrary
+\fBspec\fP commands may take the user out of the menu or produce output
+that overlays the menu.  The \fB^L\fP refresh command will redraw the menu
+in the latter case.
+.sp
+To enter a string that starts with one of the navigation command letters, namely \fBq\fP or \fBx\fP,
+use one of the text\-editing keys, such as left\- or right\-arrow to switch to
+text\-entry mode.
+.sp
+When items are disabled by way of the \fB"bit_and"\fP, \fB"bit_or"\fP and \fB"bit_not"\fP logic,
+the values appear as \fB\-\-\-\fP, and the up/down navigation passes over those items.
+.SH "EXAMPLES"
+.rs
+.sp
+The standard \fBspec\fP macros \fBsetplot\fP, \fBsetshow\fP, \fBmstartup\fP
+and \fBplotselect\fP all use the
+\fBspec_menu()\fP function.
+Here is another example:
+.RS 3m
+.sp
+.nf
+.ft CB
+ def menu1 \(aq{
+     local i, menu[], modes
+     local   group_size
+
+     modes = 1
+     group_size = 512
+     menu[++i]["title"] = "Menu Example"
+     menu[++i]["desc"] = "Enable List Examples"
+     menu[  i]["bit"] = 0x0001
+
+     menu[++i]["desc"] = "  List Example 1"
+     menu[  i]["bit_and"] = 0x0001
+     menu[  i]["list"] = "Now is the time for all good men"
+     menu[  i]["svalue"] = "time"
+
+     menu[++i]["desc"] = "  List Example 2"
+     menu[  i]["bit_and"] = 0x0001
+     menu[  i]["list"] = "The quick::brown fox::jumps over::the lazy dog"
+     menu[  i]["delim"] = "::"
+     menu[  i]["value"] = 3
+
+     menu[++i]["desc"] = "  List Example 3"
+     menu[  i]["bit_and"] = 0x0001
+     menu[  i]["list"] = "128 256 512 1024 2048 4096 8192"
+     menu[  i]["@"] = "group_size"
+
+     menu[++i]["desc"] = ""
+     menu[++i]["desc"] = "Use logarithmic y\-axis"
+     menu[  i]["bit"]     = PL_YLOG
+     menu[++i]["desc"] = "Force y\-axis minimum to zero"
+     menu[  i]["bit"]     = PL_YZERO
+     menu[  i]["bit_not"] = PL_YLOG
+
+     modes = spec_menu(menu, modes)
+
+     print modes, group_size
+}\(aq
+.ft P
+.fi
+.RE
+

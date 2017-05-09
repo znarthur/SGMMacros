@@ -1,0 +1,136 @@
+.TH "meteor" "hardware" "08/01/12" "meteor.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+meteor \- Matrox Meteor PC Board Frame Grabber
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)meteor.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1999,2000,2001,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "meteor" "hardware" "08/01/12" "meteor.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Matrox Meteor frame grabber is a PCI board supported by \fBspec\fP on
+\fBLinux\fP platforms through the kernel\-level driver available at
+\fI\%ftp://ftp.rwii.com/pub/linux/system/Meteor/\fP.
+(The currently supported driver version is 1.5.4.)
+.sp
+\fBspec\fP treats the frame grabber as a CCD\-like device.
+It is selected on the \fBA\fPcquisition\-type
+device screen of the configuration editor as:
+.RS 3m
+.sp
+.nf
+.ft CB
+MCA\- and CCD\-Acquisition Type Device Configuration
+
+CCD\-like        DEVICE  ADDR <>MODE                        <>TYPE
+ 0   YES  /dev/meteor0     1             Meteor Frame Grabber PCI
+.ft P
+.fi
+.RE
+.sp
+The device name, of course, must match what was created with the driver
+installation.  The address field (ADDR) is used
+to select the signal format for the frame grabber as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+ADDR Format Size
+ 1   NTSC   480x640
+ 2   PAL    576x768
+ 3   SECAM  576x768
+.ft P
+.fi
+.RE
+.sp
+Currently \fBspec\fP sets the input source to the RCA\-type connector
+when the device is opened.
+.SH "FUNCTIONS"
+.rs
+.sp
+From \fBspec\fP, the frame grabber is accessed as an image device.
+It is read using the \fBimage_get()\fP function, for example, as
+.sp
+.RS 4m
+.nf
+\fBubyte array image[480][640]\fP
+\fBimage_get(0, image)\fP
+.fi
+.sp
+.RE
+.sp
+The native data type the unsigned byte
+\fBubyte\fP, as used above.
+.sp
+Special options include:
+.RS 0m
+.HP 5m
+."
+\fBimage_par(sel, "single")\fP
+\- 
+Selects single\-capture mode.
+Every \fBimage_get()\fP function will start a single frame capture,
+and wait until the frame
+is available.  The frame buffer will then be copied to the user\(aqs data area.
+Single\-capture mode is the default on start\-up.
+.HP 5m
+."
+\fBimage_par(sel, "continuous")\fP
+\- 
+Selects continuous\-capture mode.
+Each time \fBimage_get()\fP is called,
+\fBspec\fP will check the time stamp on the current frame buffer.
+When the time stamp changes from \fBspec\fP\(aqs previously saved value,
+\fBspec\fP will copy the
+current frame buffer contents to the user\(aqs data area.
+This method should insure that a different frame is returned each time.
+(A more robust method of collecting a series of frames
+may be implemented in the future.  Contact CSS for more information.)
+.HP 5m
+."
+\fBimage_par(sel, "fps" [, value])\fP
+\- 
+Returns or sets the number of frames per second acquired
+by the device in continuous\-capture mode.
+The maximum value is 30 in NTSC mode and 25 in PAL and SECAM modes.
+.HP 5m
+."
+\fBimage_par(sel, "timestamp")\fP
+\- 
+Returns the time stamp of the last frame obtained via \fBimage_get()\fP
+in terms of the current UNIX epoch.
+(The UNIX epoch is the number of seconds
+from January 1, 1970, 00:00:00 GMT.)
+The value returned includes a fractional part with the resolution
+of the system clock.
+The value returned is in the same units as \fBspec\fP\(aqs \fBtime()\fP function.
+.HP 5m
+."
+\fBimage_par(sel, "frames")\fP
+\- 
+Returns the current frame count.
+.HP 5m
+."
+\fBimage_par(sel, "showall")\fP
+\- 
+Displays internal driver information.
+.HP 5m
+."
+\fBimage_par(sel, "reset")\fP
+\- 
+Resets the hardware interface.
+.RE
+.\" 
+.
+

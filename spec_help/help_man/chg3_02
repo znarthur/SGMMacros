@@ -1,0 +1,525 @@
+.TH "changes" "spec 3.02 Release Notes" "08/01/12" "chg3_02.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 3.02
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg3_02.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1995 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 3.02 Release Notes" "08/01/12" "chg3_02.rst 6.1  08/01/12 CSS"
+.
+.SH "RELEASE 3.02.02"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.02.02 as of April 4, 1995.
+.SH "New \fBgetenv()\fP Function"
+.sp
+A new function
+\fBgetenv(s)\fP
+returns the string value of the environment variable
+\fBs\fP.
+.SH "\fBedconf\fP Asks To Confirm Rereading After Edits"
+.sp
+The hardware configuration editor
+\fBedconf\fP
+now asks you to confirm whether you want to reread the starting
+or backup configurations (with the
+\fBr\fP
+or
+\fBR\fP
+commands) if you have made changes to the configuration before having
+saved them.
+.SH "Help File Format Changes"
+.sp
+The behavior of some of the
+formatting sequences used in the \fBspec\fP help files has been
+changed and some new sequences added.
+The changes allow HTML versions of the files to be created using
+\fBnroff\fP
+or GNU
+\fBgroff\fP.
+See the comments in
+\fBhelp/Makefile\fP
+for information on that.
+.SH "\fBEscan\fP Macro Change"
+.sp
+The
+\fBEscan\fP
+macro, when used with the
+\fBfixQ\fP
+option, now takes extra measures to ensure that
+the position in reciprocal space does not drift.
+.SH "\fBnewfile\fP Macro Revision"
+.sp
+The
+\fBnewfile\fP
+macro now
+separates motor names by at least two spaces in the data file header.
+.SH "New \fBcounter_par()\fP Options"
+.sp
+The
+\fBcounter_par()\fP
+function now supports the following arguments for all controllers:
+.RS 0m
+.HP 5m
+."
+\fB"unit"\fP
+\- 
+returns the unit number of the indicated counter.
+.HP 5m
+."
+\fB"channel"\fP
+\- 
+returns the channel number of the indicated counter.
+.HP 5m
+."
+\fB"responsive"\fP
+\- 
+returns nonzero if the hardware appears to be working for the indicated
+counter.
+.HP 5m
+."
+\fB"controller"\fP
+\- 
+returns a string that indicates the controller type of the indicated
+counter.
+.RE
+.SH "New \fBmotor_par()\fP Options"
+.sp
+The
+\fBmotor_par()\fP
+function now supports the following arguments for all controllers:
+.RS 0m
+.HP 5m
+."
+\fB"unit"\fP
+\- 
+returns the unit number of the indicated motor.
+.HP 5m
+."
+\fB"channel"\fP
+\- 
+returns the channel number of the indicated motor.
+.HP 5m
+."
+\fB"responsive"\fP
+\- 
+returns nonzero if the hardware appears to be working for the indicated
+motor.
+.HP 5m
+."
+\fB"controller"\fP
+\- 
+returns a string that indicates the controller type of the indicated
+motor.
+.HP 5m
+."
+\fB"active"\fP
+\- 
+returns nonzero if the indicated motor is currently moving.
+.RE
+.SH "National Instruments GPIB Support for \fBlinux\fP"
+.sp
+\fBspec\fP now supports the
+\fBlinux\fP
+GPIB driver for the National Instruments AT\-GPIB card.
+That driver is available via anonymous ftp from
+\fBkoala.chemie.fu\-berlin.de\fP.
+.SH "CAMAC E500 Channel Multiplexor Improvements"
+.sp
+The code for the E500 multiplexor
+has been changed to insure that the multiplexed motors are always
+restarted with consistent motor phases relative to the
+last move of the particular motor.
+In addition, if more than one multiplexed motor is commanded to move,
+each such motor will automatically be moved in sequence.
+The sequence is the order in which the motors
+are numbered in the
+\fBconfig\fP
+file.
+.SH "\fBcdef\fP Bug fixed"
+.sp
+A bug in the code that reads the portion of a user\(aqs state file
+that stores the
+\fBcdef\fP\-type
+macros
+has been fixed.
+The bug could produce buffer overruns leading to unpredictable
+side affects.
+.SH "New D32 Surface Geometry"
+.sp
+A new
+\fBsurf_d32\fP
+configuration, as used at ESRF beamline D32, has been added.
+.SH "RELEASE 3.02.01"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.02.01 as of February 18, 1995.
+.SH "Expanded Syntax for \fBdata_plot()\fP and \fBdata_dump()\fP"
+.sp
+The element arguments to the
+\fBdata_plot()\fP
+and
+\fBdata_dump()\fP
+functions can now be combined in a single space\- or comma\-delimited
+string.
+This change will make a task such as
+creation of plotting macros to plot a variable
+numbers of curves in the same plot window easier.
+.SH "Stand Alone Help File Viewer Now Included"
+.sp
+The \fBspec\fP
+distribution now includes the stand alone CSS help file previewer
+\fBchelp\fP.
+This file will automatically be installed in the same directory as the
+other executables.
+.SH "\fBedconf\fP Treats Change In Step Size Differently"
+.sp
+Previously, changing the
+step\-size parameter in the configuration editor caused the
+accumulator value to change to keep the motor positions fixed.
+Users have requested that the behavior be altered so that the
+accumulator would remain fixed, but the user and dial
+positions would scale
+with the change in the step size parameter.
+That change has been made.
+.SH "More Efficient Output\-File Flushing"
+.sp
+Previously, \fBspec\fP flushed file output after each
+print\-type command to an output file or device.
+\fBspec\fP users have reported that
+on certain platforms where the output was to an NFS\-mounted file system,
+this frequent
+flushing introduced considerable delays.
+\fBspec\fP now performs flushing less frequently.
+A
+\fB"flush_interval"\fP
+parameter, that can be set by the
+\fBspec_par()\fP
+function, specifies how many seconds to allow between output buffer
+flushing.
+The default
+\fB"flush_interval"\fP
+is
+0.5 seconds.
+If the interval is set to zero, the previous frequent\-flushing behavior
+will be restored.
+Output to the screen is still flushed immediately.
+Output to other devices is also flushed each time
+the main \fBspec\fP prompt is
+issued.
+.SH "Get Count Scale Factor"
+.sp
+The function
+\fBcounter_par(mne, "scale")\fP
+will return value of the scale factor set in the
+\fBconfig\fP
+file for the indicated counter.
+.SH "New CAMAC \fBca_cntl()\fP Function"
+.sp
+A new function
+\fBca_cntl()\fP
+allows users to perform CAMAC initialize, clear and inhibit
+crate operations from within \fBspec\fP on
+all CAMAC controllers supported by \fBspec\fP.
+Both
+\fBca_cntl("Z")\fP
+and
+\fBca_cntl("init")\fP
+issue the CAMAC Z (crate initialize) command.
+Both
+\fBca_cntl("C")\fP
+and
+\fBca_cntl("clear")\fP
+issue the CAMAC C (crate clear) command.
+The usage
+\fBca_cntl("inhibit", 1)\fP
+sets crate inhibit, while
+\fBca_cntl("inhibit", 0)\fP
+clears crate inhibit.
+During normal operation, users should not need to issue these commands.
+Users should probably issue a
+\fBreconfig\fP
+after sending a crate initialize or clear.
+.SH "Increase In Number Of Devices That Can Be Configured"
+.sp
+The configuration editor
+\fBedconf\fP
+now allows entry of up to twenty rows each of information for non\-CAMAC
+motor controllers and timer/counter devices, MCA\-type data acquisition
+devices, generic serial devices and PC I/O port addresses.
+The commands
+\fB^F\fP
+and
+\fB^B\fP
+select display of additional rows.
+.SH "Optional Motor Configuration By Unit/Channel"
+.sp
+The configuration editor now allows entering of unit/channel
+information for motors as an alternative to the automatic consecutive
+unit/channel assignment normally used.
+Note:  at present, only selected motor controllers
+(E500, ESRF MAXE) in \fBspec\fP recognize
+unit/channel information.
+Unit/channel information, when used, must be enterned for all motors
+associated with a particular type of motor controller.
+Manual unit/channel numbering is turned on simply by entering
+values in the form
+\fBunit/channel\fP
+in an otherwise blank cells.
+Entering a single number changes just the channel number.
+Entering
+\fB^D\fP
+turns off manual numbering.
+No consistency checking is done on the assignment in the configuration
+editor.
+\fBspec\fP does check for consistency when reading the
+\fBconfig\fP
+file, though.
+The config file uses the syntax
+.RS 3m
+.sp
+.nf
+.ft CB
+MOT012 = E500:0/3 ...
+.ft P
+.fi
+.RE
+.sp
+to store the unit/channel information.
+.SH "New Motor Position Discrepancy Message (For Some)"
+.sp
+A new motor\-position discrepancy message has been deployed (currently for
+selected motor controls only).
+The new message gives hints to the appropriate course of action when
+motor position discrepancies arise.
+The new message is currently implemented for the following
+motor controllers:
+Oriel 18092, NSLS MMC32, Huber 9000, MicroControle ITL09, Klinger MM2000,
+NSK, PI, EPICS motors and ESRF motors.
+The rest of the motor controllers will be converted to the new message
+shortly.
+.SH "Fixed Recursion Bug With Undefined \fBcleanup\fP Macro"
+.sp
+A bug that under certain circumstances produced a continuous stream of
+\fBcleanup: undefined\fP
+messages has been fixed.
+.SH "Memory Leaks Fixed"
+.sp
+A couple of small memory leaks in \fBspec\fP have been fixed.
+Also, the
+\fBmemstat\fP
+command now does a more complete job of memory accounting, including
+the addition of new
+categories for memory allocated by
+\fBcdef()\fP
+macros
+and memory allocated for configured hardware.
+.SH "Macro Fix Involving \fBcalcG\fP"
+.sp
+To make it easier for users to work with a manually entered orientation
+matrix,
+the
+\fBcalcG\fP
+macro (which sets a flag to indicate
+the orientation matrix should be recalculated
+using the current values of the
+lattice constants, orientation reflections and
+X\-ray wavelength) has
+been relocated to the
+\fBsav_ub\fP
+macro.
+\fBcalcG\fP
+was formerly included in the
+\fBsavegeo\fP
+macro (which is defined differently for each diffractometer geometry),
+which calls
+\fBsav_ub\fP.
+(The
+\fBsavegeo\fP
+macro is called by the
+\fBsave\fP
+macro, which saves important parameters in a command file.)
+For users who enter the orientation matrix manually, the
+\fBsav_ub\fP
+macro should be redefined with a macro that writes the contents of
+\fBUB\fP
+to the save file.
+.SH "Improvements in Internal Pseudomotor Code"
+.sp
+Recent improvements in the internal code for pseudomotors have been
+propagated to the
+\fBgeo_sixc.c\fP,
+\fBgeo_surf.c\fP,
+\fBgeo_w21h.c\fP
+and
+\fBgeo_w21v.c\fP
+source code.
+The changes require use of the new internal C\-code functions
+\fBset_pseudo_targ()\fP
+and
+\fBset_pseudo_pos()\fP.
+Contact CSS for technical details on adding pseudomotors to
+geometry code.
+.SH "Motor/Counter Disabling Implemented"
+.sp
+The functions
+.sp
+.RS 4m
+\fBmotor_par(mne, "disable" [, 0|1])\fP
+.RE
+.sp
+and
+.sp
+.RS 4m
+\fBcounter_par(mne, "disable" [, 0|1])\fP
+.RE
+.sp
+now work for all motors and counters to disable hardware access of
+the indicated motor or counter.
+All usable motors and counters are reenabled on startup and
+\fBreconfig\fP.
+.SH "MCA\-type Devices Can Be Disabled"
+.sp
+Normally MCA\-type
+devices are started and stopped the same as other
+configured counters
+by the
+\fBtcount()\fP
+and
+\fBmcount()\fP
+functions.
+The function
+.sp
+.RS 4m
+\fBmca_par("disable" [, 0|1])\fP
+.RE
+.sp
+now allows that automatic starting and stopping to be disabled.
+The command works on the device currently selected
+with the
+\fBmca_sel()\fP
+function.
+Such devices can still be started and stopped using
+\fBmca_par("run")\fP
+and
+\fBmca_par("halt")\fP,
+and will also  be stopped by a
+\fB^C\fP
+typed at the keyboard.
+.SH "New \fBmca_put()\fP Function"
+.sp
+A new function
+\fBmca_put(g, e)\fP
+is available.
+For certain MCA\-type devices, this function will send the data in
+data group
+\fBg\fP
+element
+\fBe\fP
+to the device.
+.SH "CAMAC Block Mode Transfers For Selected Controllers"
+.sp
+CAMAC block mode transfers are now implemented for the Kinetic Systems
+3929 SCSI\-CAMAC controller on HP 700 platforms and for the Kinetic Systems
+3988 GPIB\-CAMAC controller.
+Block modes transfers are used by some MCA\-type modules.
+.SH "More CAMAC Presence Tests"
+.sp
+Simple
+CAMAC presence tests have been added for
+the Kinetic Systems 3512 and 3610,
+the DSP QS450,
+and the LeCroy 2301, 3512 and 3588 modules.
+These tests simply see if a module in the selected slot responds to
+a suitable CAMAC command.
+The test can\(aqt confirm whether the appropriate module is present.
+Presence tests for CAMAC modules such as the Kinetic Systems 3640 and the
+DSP E500, where the module can return a unique ID, continue to be
+performed.
+.SH "Changes For the CAMAC E500"
+.sp
+Several changes have been made in the code for the DSP E500
+motor controller.
+The E500 will no longer make moves smaller than the backlash
+at the base rate.
+Rather, the normal acceleration profile will be used.
+In addition, the E500 will no longer read all the configured motors with
+each
+\fBgetangles\fP.
+Rather, positions will be read during hardware configuration, at the end of
+moves, on
+\fBsync\fP
+commands and while moving.
+Also, the motor positions will not be checked for consistency with the
+controller before each move, as was done historically.
+Finally, the E500 code will recognize the new, optional
+unit/channel configuration information that may be present in the
+\fBconfig\fP
+file.
+.SH "Changes For the CAMAC KS 3640"
+.sp
+The Kinetic Systems 3640 no longer asserts and clears crate inhibit
+during counting.
+.SH "Changes For the CAMAC LeCroy 2301"
+.sp
+The LeCroy 2301 MCA buffer now implements the
+\fBmca_par("chan#")\fP
+to read the contents of channel
+\fB#\fP
+and
+\fBmca_par("chan#", value)\fP
+to set the contents of channel
+\fB#\fP.
+Also the module supports the new
+\fBmca_put()\fP
+function.
+In addition, the LeCroy 2301
+now uses CAMAC block\-mode transfers on
+CAMAC controllers where \fBspec\fP supports such transfers.
+.SH "Changes For the CAMAC DSP 2190/4101"
+.sp
+The DSP 2190 MCS Averager/4101 Histogramming Memory
+now uses CAMAC block\-mode transfers on
+CAMAC controllers where \fBspec\fP supports such transfers.
+.SH "Changes For ESRF MAXE Motor Controllers"
+.sp
+There is now no longer a
+limit within \fBspec\fP on the number of MAXE controllers that
+can be configured.
+The MAXE controller supports the new unit/channel motor configuration
+option.
+.SH "Bug With ACS MCB Motor Controller Fixed"
+.sp
+A bug in the code in the ACS MCB motor controllers, where rate
+parameters may not have been set
+correctly for certain motors, has been fixed.
+.SH "Better \fBedconf\fP on HP700 Platforms"
+.sp
+On the hp700 platforms, the configuration editor
+\fBedconf\fP
+is now built with the
+HP V.4 Curses Library
+(\fBlibcur_colr.a\fP).
+This library fixes bugs in the less\-than\-optimal
+screen updating of the standard curses library.
+The version of
+\fBedconf\fP
+shipped with \fBspec\fP will be statically linked with this library, since
+it is not part of the standard HP\-UX
+.q instant\-ignition
+installation (although it is
+included on the HP\-UX distribution media).
+

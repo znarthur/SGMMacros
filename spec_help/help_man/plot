@@ -1,0 +1,96 @@
+.TH "plot" "macro" "08/01/12" "plot.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBplot\fP \- make plots of the last scan
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)plot.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "plot" "macro" "08/01/12" "plot.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBplot [data_group] [x_element] [y_element]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBplot\fP macro is called at the end of each scan
+in order to plot the data.  You should use the
+\fBsetplot\fP macro to select whether a screen plot, a simple printer plot or both
+are produced by \fBplot\fP.
+.SH "DEFINITION"
+.rs
+.sp
+If both end\-of\-scan screen plots and lp plots are selected,
+\fBplot\fP is defined something like:
+.RS 3m
+.sp
+.nf
+.ft CB
+def plot \(aq
+   if (BG) {do_bg} # calculate linear background
+   splot \e$*       # draw screen plot
+   onp; offt       # turn on printer, off tty
+   lp_plot \e$*     # draw lp plot
+   plot_res \e$*    # print scan results
+   ont; offp       # turn on tty, off printer
+\(aq
+.ft P
+.fi
+.RE
+.sp
+If neither or just one type of plot is selected,
+the \fBplot\fP macro is redefined accordingly.
+If no plots are selected, the scan results are still printed
+on the screen and printer.
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBBG\fP
+\- 
+global variable holding a flag that if set, indicates
+to use the background\-subtracted data in the analysis results and
+plots produced by the \fBplot\fP macro.
+It is important to make sure the
+\fBdo_bg\fP macro is called to calculate the background\-subtracted data before
+using macros such as \fBpl_FWHM\fP that look at the value of
+\fBBG\fP to determine which data group to analyze.
+The various standard definitions for the \fBplot\fP macro will call
+\fBdo_bg\fP when appropriate.
+.RE
+.SH "MACROS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBdo_bg\fP
+\- 
+calculates a linear background based on the scan endpoints, subtracts the
+background from the scan (in data group 0) and places the results in
+data group 1.
+.HP 5m
+."
+\fBplot_res\fP
+\- 
+prints results of simple scan analysis including peak value,
+full\-width at half max, integrated intensity, etc.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%data\fP
+\fI\%setplot\fP
+\fI\%splot\fP
+\fI\%lp_plot\fP
+

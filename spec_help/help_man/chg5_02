@@ -1,0 +1,886 @@
+.TH "changes" "spec 5.02 Release Notes" "08/01/12" "chg5_02.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 5.02
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg5_02.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2002,2003,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 5.02 Release Notes" "08/01/12" "chg5_02.rst 6.1  08/01/12 CSS"
+.
+.SH "March 2, 2003 \- RELEASE 5.02.04\-9"
+.rs
+.SH "Fix For Parsing Of \fBvme_xxx()\fP Options"
+.sp
+An old bug, where a single argument containing a comma\-separated
+list of options
+for the
+\fBvme_get()\fP,
+\fBvme_put()\fP,
+\fBvme_get32()\fP,
+\fBvme_put32()\fP
+and
+\fBvme_move()\fP
+functions wasn\(aqt parsed correctly, has been fixed.
+Options contained in a comma\-separated list of arguments were not
+a problem.
+.SH "Fix For ESRF TACO MAXE Motor Limits"
+.sp
+\fBspec\fP now recognizes the case where a motor interfaced using the ESRF
+TACO MAXE device server has both limits active.
+Previously, only the case where one limit was active
+was recognized.
+.SH "February 21, 2003 \- RELEASE 5.02.04\-8"
+.rs
+.SH "New \fBarray_op()\fP Option"
+.sp
+The
+\fB"sum"\fP
+and
+\fB"sumsq"\fP
+options of
+\fBarray_op()\fP
+can now take a third argument to specify a frame size for return
+values that are arrays of sums of elements.
+See the
+\fI\%arrays\fP help file for details.
+.SH "Support For Struck SIS1100/3100 PCI to VME"
+.sp
+\fBspec\fP now supports the Struck model SIS1100/3100 PCI to VME bus
+coupler on
+\fBLinux\fP
+platforms.
+.SH "Fix For Channel Numbering For PI C\-804"
+.sp
+An off\-by\-one numbering problem for the the Physik Instrumente C\-804
+motor controller, introduced in \fBspec\fP release 5.01.01, has been fixed.
+.SH "February 11, 2003 \- RELEASE 5.02.04\-7"
+.rs
+.SH "Crash On Certain Array Errors Fixed"
+.sp
+A bug introduced in \fBspec\fP release 5.02.03, where the error messages
+that were to be displayed on certain array operations
+(divide by zero or an assignment of an array to a scaler) instead produced
+segmentation faults on certain platforms, has been fixed.
+.SH "February 6, 2003 \- RELEASE 5.02.04\-6"
+.rs
+.SH "New Debug Option For Socket I/O"
+.sp
+If the bit 0x400000 is added to the global
+\fBDEBUG\fP
+level when bit 0x40 (hardware debugging) is also set, the
+messages sent and received over sockets will be displayed in an
+all\-hexadecimal format, rather than the normal ASCII with backslash
+escapes for non\-printable characters.
+.SH "Shared Memory Fix For HP Platforms"
+.sp
+One of the shared memory improvements in \fBspec\fP release 5.02.01\-1
+apparently resulted in a bug on HP platforms, in that shared memory
+segments created within one \fBspec\fP process would not be visible
+to other processes.
+That problem has been corrected, although
+the automatic deletion
+of shared segments is back to its pre\-release 5.02.01\-1 level of
+robustness for HP platforms.
+.SH "February 3, 2003 \- RELEASE 5.02.04\-5"
+.rs
+.SH "Obscure \fBeval()\fP Bug Fixed"
+.sp
+An obscure bug, where the usage
+\fBeval("#")\fP
+would cause \fBspec\fP to crash,
+has been fixed.
+.SH "MCS Support For Seiko EG&G MCA 7700"
+.sp
+\fBspec\fP now supports multichannel scaling on the Seiko EG&G MCA 7700
+device.
+New arguments for
+\fBmca_par()\fP
+to support MCS mode
+are
+\fB"mcs"\fP
+to set multichannel scaling mode,
+\fB"dwell"\fP
+to set the dwell time (with a value of \-1 setting external dwell),
+\fB"passes"\fP
+to set the number of MCS passes
+and
+\fB"elapsed_passes"\fP
+to read the numbers of MCS passes completed.
+.SH "Retry Feature For EPICS Reads"
+.sp
+This version of \fBspec\fP will retry EPICS channel\-access reads that
+fail with a timeout.
+The new
+\fB"retries"\fP
+argument to
+\fBepics_par()\fP
+can be used to read or set the number of retries.
+Although a process variable name must be provided to
+\fBepics_par()\fP,
+the setting is currently global to all process variables.
+The default value is two, and the default is restored each time
+\fBspec\fP is run.
+Messages will be printed when the channel access reads are retried.
+Users are requested to inform CSS if retries prove successful (or not).
+.SH "February 2, 2003 \- RELEASE 5.02.04\-4"
+.rs
+.SH "Some Obscure Memory\-Related Bugs Fixed"
+.sp
+A couple of problems that caused memory faults on some platforms,
+related to the display of help files with \fBspec\fP\(aqs built\-in pager and
+the release of shared arrays when \fBspec\fP quits, have been fixed.
+.SH "January 30, 2003 \- RELEASE 5.02.04\-3"
+.rs
+.SH "Fix For \fBedconf\fP Configuration Editor"
+.sp
+A bug in the
+\fBedconf\fP
+hardware configuration editor, where a motor\(aqs unit/channel
+information would be lost when a motor was inserted or
+deleted and adjacent motor columns did not have unit/channel information
+turned on, has been fixed.
+.SH "New Feature For the \fBedconf\fP Configuration Editor"
+.sp
+When in the list menus of the
+\fBedconf\fP
+hardware configuration editor,
+typing a letter will scroll to
+the first item in the menu that begins with that letter.
+The letters are case insensitive.
+However, the command characters
+\fBj\fP
+and
+\fBk\fP
+are still recognized as moves down and up, respectively.
+However, typing
+\fBJ\fP
+or
+\fBK\fP
+will cause a jump to the items matching those letters.
+.SH "January 27, 2003 \- RELEASE 5.02.04\-2"
+.rs
+.SH "Fix For Four GPIB Controllers"
+.sp
+A bug that prevented GPIB controller unit four from being recognized
+has been fixed.
+.SH "Word Access for ISA DAC Motors"
+.sp
+ISA digital\-to\-analog modules can now be configured for either byte or
+word access.
+Previously, only byte access was used.
+Also, see the new
+\fI\%dac\fP help file for a description of the DAC motor interface.
+.SH "Fixes For Recent Update To ESRF TACO Maxe Motor Controller Support"
+.sp
+Problems with excessive hardware reads
+in the revised Maxe code included in \fBspec\fP
+release 5.02.03\-4 have been fixed.
+.SH "January 17, 2003 \- RELEASE 5.02.04\-1"
+.rs
+.SH "\fBnewfile\fP Macro Fix"
+.sp
+The
+\fBnewfile\fP
+macro will now write the
+\fB#F\fP
+control line that contains the file name
+for new data files, no matter
+what the starting scan number is.
+Previously, the file name was only written for new files when the
+starting scan was number one.
+.SH "Fix For Geometry\-less Installations"
+.sp
+The installation procedure will now create a start\-up command file
+for the
+\fBspec\fP\-type
+geometry\-less configurations that aren\(aqt named
+\fBspec\fP.
+The start\-up file will be named with the first four letters of the
+configuration name, appended with
+\fB.mac\fP
+and contain a call of the
+\fBno_hkl\fP
+macro.
+.SH "Updated MXC Hardware Support"
+.sp
+Support for the Bruker (formerly MAC Science) MXC motor controllers and
+counter/timers has been updated to work with another version of the
+controller.
+.SH "ESRF UDP Transfer Size Increased"
+.sp
+The maximum data size for
+\fBesrf_io()\fP
+UDP transfers has been increased from 8,192 to 32,768 bytes.
+.SH "December 12, 2002 \- RELEASE 5.02.04"
+.rs
+.SH "Pseudomotor Improvements"
+.sp
+The
+\fBset\fP
+macro now works with
+pseudomotors.
+For the kind of pseudomotor where the motor position is calculated from
+the positions of one or more real motors, such
+as with the
+\fBkappa\fP
+configurations of the
+\fBfourc\fP
+or
+\fBpsic\fP
+geometries,
+the
+\fBchg_offset()\fP
+function, as called by
+\fBset\fP,
+will now automatically adjust the offsets of the real motors
+on which the pseudomotor depends.
+\fBspec\fP also now enforces the rule that
+for this type of
+pseudomotor
+the user and dial positions must be the same.
+Thus, the
+\fBchg_dial()\fP
+function, as used in the
+\fBset_dial\fP
+macro, will produce an error if an attempt is made to change
+the pseudomotor dial position.
+Note, the definitions of the
+\fBset\fP
+and
+\fBset_dial\fP
+macros have been modified as part of the update.
+.SH "December 5, 2002 \- RELEASE 5.02.03\-6"
+.rs
+.SH "Fix For MM4005/4006 Limit Search"
+.sp
+A bug, where negative limit searches on Newport MM4005/4006
+motors controllers didn\(aqt work, has been fixed.
+.SH "November 22, 2002 \- RELEASE 5.02.03\-5"
+.rs
+.SH "New Signal Handling On Exit"
+.sp
+\fBspec\fP\(aqs exit behavior on receiving the signals
+SIGTERM (the default signal sent with
+the
+\fBkill\fP
+command)
+and SIGQUIT (the signal sent with a keyboard
+\fB^\e\fP,
+at least on most platforms) has been changed.
+Previously, \fBspec\fP would wait for the current
+moving and counting to finish, or wait for
+an additional
+signal, such as a SIGINT from a keyboard
+\fB^C\fP,
+that would stop the acquisition.
+Now \fBspec\fP will halt the hardware activity when the first signal arrives.
+Also, \fBspec\fP now catches SIGHUP (the hang\-up signal,
+as sent by a window manager
+when the window manager exits) and halts hardware activity
+as with SIGQUIT and SIGTERM.
+\fBspec\fP will save the user state file on SIGHUP, but still will not with
+SIGQUIT and SIGTERM.
+.SH "Fix For \fBeval()\fP"
+.sp
+A bug, where an
+\fBeval()\fP
+call of a macro function that contained a loop that called a macro function
+that had no return value and where that call would cause the loop to break
+after one iteration,
+has been fixed.
+.SH "Fix For Motor Round Off"
+.sp
+An obscure bug with motor position rounding has been fixed.
+With certain step size values, if the user\-position
+offset was set to exactly one half step beyond the configured step size,
+under some conditions, such a motor would move a
+step when other motors were commanded to move.
+.SH "November 20, 2002 \- RELEASE 5.02.03\-4"
+.rs
+.SH "Motor Power Control For Tsuji Controllers"
+.sp
+If the optional motor parameter
+\fB"generic parameter 1"\fP
+is set for a Tsuji PM16C\-02/04 motor channel, \fBspec\fP will issue
+commands to turn the motor hold current off when the motor is not moving.
+The parameter value is the delay time (in seconds) both between
+the time the power is turned on and the move is started and between
+the end of the move and the time the power is turned off.
+A value of zero will skip the delay.
+If the field in the configuration editor is blank (type
+\fB^D\fP
+to blank the field),
+then the motor hold current will remain on all the time.
+.SH "New Version for ESRF TACO Maxe Motor Controllers"
+.sp
+The code to support the ESRF TACO Maxe motor controllers has been
+reorganized as part of a modernization effort.
+Functionality should remain as before, but if anomalies are noticed,
+please contact your \fBspec\fP administrator or CSS HQ.
+.SH "November 18, 2002 \- RELEASE 5.02.03\-3"
+.rs
+.SH "Fix For \fBx11filt\fP Fonts"
+.sp
+\fBspec\fP now accepts a parameter of either
+\fBc\fP
+(character cell)
+or
+\fBm\fP
+(monospace)
+in the
+\fBspacing\fP
+field of the X Logical Font Descriptor (XLFD) string.
+Previously, only
+\fBm\fP
+was accepted (unless overwritten by specific font choices using an
+\fBXdefaults\fP
+resource file or a
+\fBplot_cntl()\fP
+call).
+.SH "October 26, 2002 \- RELEASE 5.02.03\-2"
+.rs
+.SH "Support For \fBpsic\fP Azimuthal Detector Rotation"
+.sp
+\fBspec\fP will now calculate detector rotation in the
+\fBpsic\fP
+geometry according to the E. Vlieg 2+3 diffractometer configuration.
+See the
+\fI\%psic\fP help file for more information.
+.SH "Support For Parallel\-Rail 3\-Axis Four\-Circle Geometry"
+.sp
+The
+\fBfourc\fP
+geometry code now includes preliminary support for a new configuration
+that has monochromator, sample circles, analyzer and detector
+circles mounted on four parallel rails, perpendicular to the
+incident beam.
+See the
+\fBgeo_fourc.c\fP
+and
+\fBmacros/fourc.src\fP
+files for additional information.
+.SH "Updated Geometry Code"
+.sp
+The remaining geometry code
+has been revised to use the current \fBspec\fP
+convention of returning an error rather than resetting to command
+level when a calculation fails.
+The affected geometries in this revision are
+\fBgmci\fP,
+\fBs2d2\fP,
+\fBsurf\fP,
+\fBtwoc\fP,
+\fBw21h\fP
+and
+\fBw21v\fP.
+(The other geometries were updated in prior releases.)
+Also, the standard macros
+\fBbr\fP,
+\fBmk\fP,
+\fBca\fP
+and
+\fBcal\fP
+have been revised to exit if the function call embedded in the
+\fBcalcA\fP
+macro (to calculate motor positions given the
+\fBHKL\fP
+of the scattering vector)
+fails.
+.SH "Support For Velmex VXM Motor Controllers"
+.sp
+\fBspec\fP now supports the Velmex, Inc. VXM\-1 and VXM\-2 motor controllers
+over a serial interface.
+.SH "Support For IMS MDrive Motor Controllers"
+.sp
+\fBspec\fP contains preliminary support for Intelligent Motion Systems, Inc.
+MDrive 17/23/34 motor controllers over a serial interface.
+.SH "Upgrade to Gomm Controllers"
+.sp
+The code for the Uni\-Erlangen Gomm motor and counter controllers
+now supports controllers on more than one serial line.
+.SH "October 20, 2002 \- RELEASE 5.02.03\-1"
+.rs
+.SH "Fix and Enhancement For Rigaku Controllers"
+.sp
+\fBspec\fP now works properly with a variant firmware version in a Rigaku
+RINT or D/MAX type motor controller.
+Rigaku version numbers are unknown.
+The manifestation of the problem was that motor positions weren\(aqt read
+correctly during or just after a move.
+That problem is fixed.
+Also, Rigaku firmware has never allowed a remote program to read motor
+positions while motors are moving.
+\fBspec\fP will now estimate the current position based on
+motor speed and acceleration and display the estimated position during
+updated moves.
+.SH "October 13, 2002 \- RELEASE 5.02.03"
+.rs
+.SH "Fix For \fBarray_dump()\fP and \fBarray_pipe()\fP"
+.sp
+A bug introduced in release 5.01.01 (as an unintended consequence of
+another fix), which limited the output of
+\fBarray_dump()\fP
+and
+\fBarray_pipe()\fP
+to 64 columns of the array argument, has been fixed.
+.SH "Improved \fB^C\fP Responsiveness During Array Printing"
+.sp
+A
+\fB^C\fP
+interrupt during output of a large data array with the
+\fBprint\fP
+command will now
+more likely stop the output.
+.SH "New \fBmotor_par()\fP Options To Set Limits"
+.sp
+The new options
+\fB"low_limit"\fP
+and
+\fB"high_limit"\fP
+are available to set and retrieve motor limits.
+The
+\fBset_lim()\fP
+and
+\fBget_lim()\fP
+built\-in functions continue to be available.
+.SH "Fix For Very Large Arrays"
+.sp
+A recently introduced bug, where a negative data array dimension in
+an
+\fBarray\fP
+declaration would
+be interpreted as a very large number rather than produce an error,
+has been fixed.
+.SH "New Command Character in \fBedconf\fP"
+.sp
+The double quote character
+\fB"\fP
+is now recognized by the configuration editor
+\fBedconf\fP
+as equivalent to the single quote character
+\fB\(aq\fP
+as a command to begin string\-entry mode.
+.SH "September 30, 2002 \- RELEASE 5.02.02\-12"
+.rs
+.SH "Fix For Compumotor 3000 and 4000 Motor Controllers"
+.sp
+A bug, where \fBspec\fP could segmentation fault when trying to
+use the old Compumotor CM3000 or CM4000 motor controllers
+with recent versions of the National Instruments
+GPIB driver,
+has been fixed.
+.SH "September 20, 2002 \- RELEASE 5.02.02\-11"
+.rs
+.SH "Fix For Detecting EPICS Motor Configuration Error"
+.sp
+A bug, where \fBspec\fP could segmentation fault when EPICS motors were
+configured on the Motor screen of the configuration editor but
+the number of motors on the Devices screen was zero, has been fixed.
+.SH "Fix For Setting TACO Serial Line Parity"
+.sp
+A bug, where \fBspec\fP didn\(aqt adjust the number of data bits from eight
+to seven
+on the TACO
+serial line driver when setting parity to even or odd, has been fixed.
+.SH "September 6, 2002 \- RELEASE 5.02.02\-10"
+.rs
+.SH "Bug In Serial and Socket EOS\-mode Reads Fixed"
+.sp
+A bug introduced in release 5.02.02 (May 20, 2002),
+where when
+reading serial devices in end\-of\-string (EOS) mode,
+a false EOS match was sometimes reported, has been fixed.
+The bug affected both built\-in hardware code and user\-level
+\fBser_get()\fP
+and
+\fBsock_get()\fP
+functions.
+.SH "September 2, 2002 \- RELEASE 5.02.02\-9"
+.rs
+.SH "Plot Ranging Bug Fixed"
+.sp
+A bug, where the high\-resolution plotting in \fBspec\fP would hang
+on certain platforms or display peculiar axis labels on others
+if all the data points for the
+\fBx\fP
+or
+\fBy\fP
+axis were an identical very large number (such as 1e38),
+has been fixed.
+.SH "Newport MM4000/4005/4006 Updates"
+.sp
+A number of fixes and updates have been made for the Newport
+MM4000/4005/4006 motor controller support.
+For the 4005/4006, the commands (unavailable on the 4000)
+to set the base rate, the
+home base rate and the home acceleration are now implemented.
+Also, it is now possible to set the dial (home) position to an
+arbitrary value on all three models.
+An alternate home command (generally
+\fB"OR2"\fP),
+rather than the default
+\fB"OR1"\fP
+can be selected by entering the command as Generic Parameter 1 on
+the second optional motor parameter screen of the configuration editor.
+Also, limit searches are now properly implemented
+on the 4005 and 4006 models (although
+unavailable on the 4000 model).
+In addition, problems with doing a move
+after hitting a hard limit have been fixed.
+Finally, the settle\-time feature is now supported with these controllers.
+.SH "August 21, 2002 \- RELEASE 5.02.02\-8"
+.rs
+.SH "Shared Memory Fix For Solaris Platforms"
+.sp
+One of the shared memory improvements in \fBspec\fP release 5.02.01\-1
+resulted in a bug on Solaris platforms, in that shared memory
+segments created within one \fBspec\fP process would not be visible
+to other processes.
+That problem has been corrected, although for Solaris platforms only,
+the automatic deletion
+of shared segments is back to its pre\-release 5.02.01\-1 level of
+robustness.
+.SH "August 11, 2002 \- RELEASE 5.02.02\-7"
+.rs
+.SH "MCA Interface Additions"
+.sp
+A new
+\fBMCAS\fP
+global variable is available that is set to the total number of
+configured MCA devices.
+The
+\fBmca_sel()\fP
+function can return one line of information about a particular MCA using
+the syntax
+\fBmca_sel(n, "?")\fP,
+where
+\fBn\fP
+is the MCA device number.
+.SH "Update to Roentec MCA Support"
+.sp
+A couple of features have been added to
+the Roentec XFlash MAX MCA support.
+The device can now be configured to run at any baud rate.
+Previously, the reset command sent by \fBspec\fP would reset the baud rate
+to 38400.
+A new
+\fBmca_par()\fP
+option
+\fB"bin"\fP
+can be used to set the number of channels averaged together within the
+device during the data read out.
+For hardware configurations that support live\-time presets and readouts,
+the standard live\-time and dead\-time
+\fBmca_par()\fP
+commands are now available.
+.SH "Support For Ortec MCS\-PCI Multichannel Scaler"
+.sp
+\fBspec\fP now supports the Ortec MCS\-PCI multichannel scaler module.
+See the
+\fI\%mcspci\fP help file for details.
+.SH "Help Display Bugs Fix"
+.sp
+A bug introduced in release 5.01.03,
+where display of a long
+help file using either the
+\fBgethelp()\fP
+function or the
+\fBchelp\fP
+shell utility
+would cause a segmentation fault
+on some platforms, has been fixed.
+Also, the
+\fBb\fP
+command to move backwards a page when using the built\-in pager
+was left out of that release, but is now restored.
+.SH "July 23, 2002 \- RELEASE 5.02.02\-6"
+.rs
+.SH "Fix For Macro Functions Returning Arrays"
+.sp
+A bug remaining from the release 5.02.02\-2
+fixes for data arrays used with macro functions has been fixed.
+Specifically,
+a macro function can now return a data array declared as a local
+in the macro function without causing a
+segmentation fault or bad values in the returned array.
+.SH "Fix For Plot Macro Setup"
+.sp
+A bug in the plot macros, where
+the
+\fBSCAN_D\fP
+data array would not be configured correctly
+if the symbol did not already exist as a two\-dimensional
+array, has been fixed.
+.SH "July 16, 2002 \- RELEASE 5.02.02\-5"
+.rs
+.SH "Extern Shared Array Fix"
+.sp
+A bug, where declaring an
+\fBextern shared array\fP
+more than once for the same array would result in a segmentation fault,
+has been fixed.
+.SH "July 10, 2002 \- RELEASE 5.02.02\-4"
+.rs
+.SH "Fix For IMS Controllers"
+.sp
+A bug introduced in \fBspec\fP release 5.01.03 that broke
+party\-line mode for IMS motor controllers has been fixed.
+.SH "July 3, 2002 \- RELEASE 5.02.02\-3"
+.rs
+.SH "Support For Ortec 996 Counter/Timer"
+.sp
+The Ortec 996 one\-channel counter/timer is now supported in \fBspec\fP as
+either a single channel counter or a single channel counter with
+blind timer.
+See the
+\fI\%ortec\fP help file for details.
+.SH "Fix For Setting EPICS Timeout"
+.sp
+It is now possible to set the timeout value for an EPICS process variable
+using
+\fBepics_par()\fP
+before connecting to the variable in the remote IOC.
+Previously, the timeout could be set only after the connection
+was made, which would be impossible if the default timeout was too short
+to make the connection.
+.SH "Fix For Setting TACO Timeout"
+.sp
+An old bug that affected setting the RPC timeout for TACO (ESRF) device
+server connections has been fixed.
+The bug had little impact except when attempting to set a timeout of less
+than one second.
+.SH "June 21, 2002 \- RELEASE 5.02.02\-2"
+.rs
+.SH "Fixes For Macro Functions With Data Arrays"
+.sp
+Bugs in recent \fBspec\fP releases involving
+memory leaks and memory corruption errors
+when passing data arrays to macro functions as arguments
+or from macro functions as return values appear to be fixed.
+Also, behavior when passing subarrays as macro function arguments
+is now well defined.
+A subarray will be passed by value.
+That is, new memory will be allocated for the
+data, and modifications to the data won\(aqt change the array in the
+calling function.
+.SH "Support For OMS Servo\-Motor Controllers"
+.sp
+\fBspec\fP now includes preliminary support for OMS servo\-motor controllers.
+Select motor type
+\fBOMS_S\fP
+in the
+\fBconfig\fP
+editor.
+The optional DC\-motor parameters for proportional, derivative and integral
+gain (KP, KD and KI) are implemented.
+Selecting the servo\-motor type automatically enables encoder capability.
+.SH "June 2, 2002 \- RELEASE 5.02.02\-1"
+.rs
+.SH "New Ignore\-Simulate Mode For Sockets"
+.sp
+To accommodate the client\-server macros, sockets can now be
+made immune to simulate mode with the new
+\fB"ignore_sim"\fP
+option to
+\fBsock_par()\fP.
+See the
+\fI\%sockets\fP help file for usage.
+The macros in
+\fBserver.mac\fP
+have been modified to use this new mode.
+.SH "May 20, 2002 \- RELEASE 5.02.02"
+.rs
+.SH "Memory Leaks Fixed"
+.sp
+A number of small memory leaks have been fixed.
+A
+leak that occurred when command file input was interrupted
+by an error or
+\fB^C\fP
+has been fixed.
+A leak that occurred
+when a macro function was used and then redefined within a
+statement block has been fixed.
+A leak that occurred when a data subarray was passed
+to a macro function as an argument has been fixed.
+.SH "Improvements To the \fBunglobal\fP Command"
+.sp
+Several improvements and fixes have made in the behavior of
+\fBunglobal\fP
+command.
+Use of
+\fBunglobal\fP
+within a statement block will now clear the current values of symbols and
+mark them as unset.
+Use of
+\fBunglobal\fP
+on a
+\fBconstant\fP
+symbol within a statement block will remove the
+\fBconstant\fP
+attribute.
+Use of
+\fBunglobal\fP
+in a macro function on a data array passed as an argument will clear
+the values in the array to zero, but will not remove the array.
+.SH "\fBclone()\fP Improvement"
+.sp
+The
+\fBclone()\fP
+function can now be used to redefine an existing macro.
+.SH "Looping Bug In \fBeval()\fP Fixed"
+.sp
+A bug that caused an endless stream of error messages when the
+\fBeval()\fP
+function was passed an unterminated string has been fixed.
+.SH "General Improvements To \fBeval()\fP"
+.sp
+A significant code rearrangement to create separate data structures
+for each
+\fBeval()\fP
+invocation should increase the robustness of the function.
+.SH "Fix Of \fBfor (var in arr)\fP Syntax"
+.sp
+A bug, where the
+\fBfor (var in arr[num])\fP
+syntax didn\(aqt properly loop through the elements of the two\-dimensional
+associative array when
+\fBnum\fP
+was a number constant, has been fixed.
+.SH "Array Alignment Extended"
+.sp
+The automatic array alignment to put the start of data on memory page
+boundaries for arrays used with
+\fBimage_get()\fP
+and
+\fBimage_put()\fP
+has been extended.
+Now all data arrays greater than 0.5 Mbyte will be aligned to a page
+boundary when they are created.
+.SH "Expanded Galil Motor Controller Support"
+.sp
+\fBspec\fP now supports the Galil Optima series motor controllers, including
+the DMC\-2x00 models,
+over ethernet and serial interfaces.
+.SH "Fix For Four VME Controllers"
+.sp
+A bug that prevented VME controller unit four from being recognized
+has been fixed.
+.SH "Multiple Driver\-less SBS PCI Controllers Implemented"
+.sp
+\fBspec\fP can now support multiple (up to four)
+SBS 616/617/618 PCI\-to\-VME bus adapters
+in
+\fB"driverless"\fP
+mode on
+\fBLinux\fP
+platforms
+In this mode, \fBspec\fP controls the PCI card directly, rather than going through
+the kernel driver supplied by SBS.
+.SH "Support For XIA X10P Parallel Port MCA"
+.sp
+\fBspec\fP now supports the XIA model X10P parallel Port MCA on
+\fBLinux\fP
+platforms.
+.SH "Update To New XIA Libraries"
+.sp
+This release of \fBspec\fP requires linking with the current release
+(0.0.6) of the
+XIA libraries to use the DXP4C, DXP4C2X and the X10P modules.
+.SH "May 2, 2002 \- RELEASE 5.02.01\-1"
+.rs
+.SH "New Optional Scaler Parameter Screen"
+.sp
+The configuration editor now includes a new screen to configure
+optional scaler parameters.
+The optional screen is accessed with the command
+\fBs\fP
+from the main Scaler screen.
+Currently, the only optional scaler parameter used is for the
+new EPICS process\-variable counters.
+.SH "New EPICS Process\-Variable Counters"
+.sp
+Arbitrary EPICS process\-variables may now be configured as counters.
+Their values will be read with the
+\fBgetcounts\fP
+command, called by the standard counting macros,
+with the EPICS channel access get commands.
+No other commands are issued.
+The process\-variable name will be formed from the prefix given on the
+Controllers screen of the configuration editor and the string
+entered as miscellaneous
+parameter 1 from the new optional Scaler parameter screen.
+.SH "April 29, 2002 \- RELEASE 5.02.01"
+.rs
+.SH "Memory Alignment For \fBimage_get()\fP and \fBimage_put()\fP Data Arrays"
+.sp
+In order to accommodate image acquisition devices that transfer data
+directly to memory and that require the data to be aligned on memory
+page boundaries (memory addresses that are multiples of 4096),
+data arrays used with the
+\fBimage_get()\fP
+and
+\fBimage_put()\fP
+functions
+will now be
+automatically aligned on memory page boundaries (in most cases).
+.SH "Shared Array Updates"
+.sp
+A number of updates and improvements have been made to the shared array
+facility:
+.IP \(bu 2
+The size of the header of the shared segment has been increased to
+put the start of the data array on a page boundary to accommodate
+acquisition hardware that requires page\-aligned data.
+.IP \(bu 2
+The new start\-up option
+\fB\-o old_shared=1\fP
+will tell \fBspec\fP to create shared segments using the old\-size headers
+to accommodate
+applications that have not yet been recompiled for the new header size.
+.IP \(bu 2
+The
+\fBextern shared\fP
+array feature can be used with both
+old and new header sizes, even when using the
+\fBold_shared\fP
+option above.
+.IP \(bu 2
+Shared segments will automatically disappear when the
+last attached process detaches or exits, even if \fBspec\fP exits abnormally.
+Previously, \fBspec\fP only removed the segment when exiting normally.
+.IP \(bu 2
+If \fBspec\fP creates a shared array,
+exits while another process is attached and
+then restarts with the previous state file, \fBspec\fP
+will reconnect to the existing array.
+In prior releases, \fBspec\fP would always create a new segment.
+.SH "New State File"
+.sp
+The state file format needed modification to accommodate the
+array\-alignment feature, making the current state file
+incompatible with previous releases.
+The current \fBspec\fP version can
+read state files from previous versions, but will write state files
+that will not be readable by
+previous \fBspec\fP versions.
+.SH "Support For Alternate \fBtwoc\fP Configuration"
+.sp
+The
+\fBgeo_twoc.c\fP
+code has been modified to support an alternate configuration
+where the
+\fBth\fP
+and
+\fBtth\fP
+rotations are coupled.
+

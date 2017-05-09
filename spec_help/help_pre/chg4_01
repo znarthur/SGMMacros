@@ -1,0 +1,619 @@
+changes                      spec 4.01 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 4.01
+
+RELEASE 4.01.17 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.17
+     BETA as of February 18, 1997.
+
+Fixed Macro Function Bug From Previous Release
+     The fix of the obscure eellssee-less iiff parsing bug in the previous release
+     introduced a new bug relating to the parsing of macro functions.  Both bugs
+     are now fixed, with the hope no new bug is created.
+
+No More ccaallccGG in ggppsseett
+     As there is no need for the ggppsseett macro to contain an invocation of ccaallccGG,
+     it no longer does.
+
+RELEASE 4.01.16 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.16
+     BETA as of February 9, 1997.
+
+mmccaa__ppaarr(()) Calls To Disabled Or Unresponsive Devices Fixed
+     ssppeecc now handles mmccaa__ppaarr(()) calls to user-disabled or to unresponsive MCA
+     hardware devices by printing an error message and returning a -1.
+     Previously, ssppeecc's behavior varied for the different MCA devices.
+
+Unresponsive GPIB Controller No Longer Resets To Command Level
+     When accessing GPIB devices with ggppiibb__ggeett(()), ggppiibb__ppuutt(()), etc., after the
+     configured GPIB controller fails the presence test, ssppeecc will no longer
+     silently reset to command level.  Instead ggppiibb__ggeett(()) will return a null
+     string, and the other functions will return -1.
+
+Improvements For the MM2500/ITL09 Motor Controllers
+     The code for the MM2500/ITL09 motor controller should now do a better job
+     of handling timeouts in reading responses from the controller and in
+     programming parameters for a unit that has had values erased from its
+     non-volatile memory.
+
+Bug With Long Time Presets For Silena MCA Fixed
+     A couple of bugs in the code for the Silena MCA, where count times longer
+     than 6533.5 seconds were not handled correctly, have been fixed.
+
+RELEASE 4.01.15 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.15
+     BETA as of January 31, 1997.
+
+ddaattaa__ppiippee(()) Works With New Arrays
+     The ddaattaa__ppiippee(()) function can now take array arguments in addition to data
+     groups.  See the _d_a_t_a___p_i_p_e help file.
+
+Fixed Parsing Bug With eellssee-less iiff
+     A bug with parsing iiff statements that didn't have a matching eellssee statement
+     when the body of the iiff statement contained a call to a macro function has
+     been fixed.
+
+Fixed Parsing Bug With iiff Block As Macro
+     A very old and obscure parsing bug, where ssppeecc would not accept the eellssee
+     keyword following an iiff statement when the statement block of the iiff
+     statement was a macro containing a curly-bracket-delimited statement block,
+     has been fixed.
+
+Fixed Bug Allowing Same Mnemonic For Motor and Counter
+     A bug, where one could configure the same motor mnemonic for both a motor
+     and counter, has been fixed.  ssppeecc will now print an error message.
+
+Support For Bit 3 VME Controller on HP
+     The Bit 3 Model 487-1 E/ISA VME controller with the Bit 3 Model 933 support
+     software is now supported by ssppeecc on HP 700 series platforms.
+
+Support For Bit 3 PCI-VME
+     The Bit 3 Model 616 and 617 PCI-VME controllers are now supported, but only
+     on lliinnuuxx platforms.  The Model 617 is the more expensive model as it
+     provides DMA capabilities.  Presently, ssppeecc does not support DMA transfer,
+     so the new 616 is the recommended controller.
+
+Support For Joerger VSC16/8 VME Scaler
+     The Joerger VSC16/8 VME scaler module is now supported by ssppeecc.  This VME
+     device requires a controller with A32/D32 capabilities.  Presently, the Bit
+     3 Model 616/617 controllers on lliinnuuxx and the Bit 3 Model 487-1 on the HP
+     700 series platforms are the only supported controllers with the
+     capability.
+
+Support For Galil DMC-1000 PC Board Motor Controller
+     ssppeecc now provides preliminary support for the Galil DMC-1000 PC board motor
+     controller, currently, only for stepping motors.
+
+Added vvmmee__ggeett3322(()) and vvmmee__ppuutt3322(())
+     See the _v_m_e help file.
+
+Oriel 18092 GPIB Interface Supported
+     ssppeecc now supports the GPIB interface on the Oriel 18092 Encoder Mike
+     controller, in addition to the serial interface.  Also, the unit/channel
+     configuration is supported for this controller.  Also, a bug in setting the
+     gain parameter has been fixed.  (The manual incorrectly states the gain is
+     set with an SSDD command.  The actual command is SSGG.)  See the _o_r_i_e_l help
+     file for more information.
+
+Fixed Oriel 18011 Bug
+     A bug, which made the Oriel 18011 motor controller unusable with ssppeecc and
+     which had gone unnoticed and unreported for the last three years, has been
+     fixed.
+
+Am9513 Looks For Second Chip At Two I/O Ports
+     The code for the Am9513 based PC boards for timing and counting will now
+     probe for the second Am9513 chip at both the base+4 and the base+2
+     addresses.  The National Instruments board places the second chip at
+     base+2, which now almost makes the board usable with ssppeecc.  To fully use
+     the board, the prewired connections of the time base to the counter inputs
+     must be changed by modified the printed circuit board.
+
+RELEASE 4.01.14 BETA
+
+     No notes.
+
+RELEASE 4.01.13 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.13
+     BETA as of December 22, 1996.
+
+New Options To Force Row-Wise or Column-Wise Arrays
+     For the functions aarrrraayy__dduummpp(()), aarrrraayy__ffiitt(()) and aarrrraayy__pplloott(()), it matters
+     whether each row or each column of a two-dimensional array corresponds to a
+     data point.  Previously, ssppeecc took the larger dimension of the array to
+     correspond to point number.  That is still the default behavior, but now
+     the new ""rrooww__wwiissee"" and ""ccooll__wwiissee"" arguments to aarrrraayy__oopp(()) can force the
+     sense of the array.  See the _a_r_r_a_y_s help file for details.
+
+New Arrays Work With eessrrff__iioo(())
+     The new array data type can now be used with the eessrrff__iioo(()) function for
+     device server commands that require DD__VVAARR__CCHHAARRAARRRR, DD__VVAARR__SSHHOORRTTAARRRR,
+     DD__VVAARR__LLOONNGGAARRRR, DD__VVAARR__UULLOONNGGAARRRR, DD__VVAARR__FFLLOOAATTAARRRR and DD__VVAARR__DDOOUUBBLLEEAARRRR, data
+     types.
+
+KS 3929 SCSI-To-CAMAC Supported on Solaris 2.x
+     CSS now provides a driver for the Kinetic Systems 3929 SCSI-to-CAMAC module
+     for Sun Solaris 2.x platforms.  See the ddrriivveerrss//ssooll22__kksscc33992299//RREEAADDMMEE file
+     included with Solaris 2 distributions.
+
+Signal Blocking For HP-LAN GPIB
+     Due to problems reported with the HP-LAN GPIB device hanging when
+     transactions are interrupted with a signal generated by a keyboard ^^CC, that
+     signal is blocked during calls to the HP SICL library for that GPIB
+     controller.
+
+RELEASE 4.01.12 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.12
+     BETA as of December 11, 1996.
+
+More Improvements To X11 Font Handling
+     The default font pattern for the X11 high resolution window is now
+     restricted to mono-spaced fonts.  In addition, scalable fonts are now
+     supported.  Also, a new ""ffoonnttss==......""  option to the pplloott__ccnnttll(()) function is
+     available to select a fixed size or scalable font while running ssppeecc.  See
+     the _x_1_1 and new _p_l_o_t___c_n_t_l help files for more information.
+
+RELEASE 4.01.11 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.11
+     BETA as of November 16, 1996.
+
+2D Associative Arrays Implemented
+     The associative arrays that have always been available with ssppeecc may now be
+     used with two-dimensional array indices.  Internally, The arrays are hashed
+     using the string value of the first index, followed by the character \\003344
+     (^^\\), followed by the string value of the second index.  A user can access
+     such a 2D array element using a single index constructed according to the
+     above recipe.
+
+Bugs Fixed For the MM2500/ITL09 Motor Controllers
+     Two bugs with the Newport MM2500 and MicroControle ITL09 motor controllers
+     have been fixed.  ssppeecc now allows up to eight seconds for the acceleration
+     ramp to be built.  The previous three second timeout was too short.  Also,
+     a bug where the multiplier and divisor factors were sometimes incorrectly
+     set has been fixed.
+
+Ortec GPIB Power-On Message Flushed
+     ssppeecc now does a GPIB read with a very short timeout when initializing the
+     Ortec 9XX counter/timers in order to flush out the message sent when the
+     modules are first powered up.  Previously, users had to perform a
+     ggppiibb__ggeett(()) from the ssppeecc prompt to flush the message.
+
+Multiple GPIB Controllers Now Allowed
+     ssppeecc now allows up to four GPIB controllers to be configured by the same
+     instance of ssppeecc.  In the configuration editor, use the ^^FF and ^^BB command
+     on the GPIB controller line of the Interfaces screen to configure each
+     controller.  In the ccoonnffiigg file, the unit number is specified as @@ggppiibb__00,
+     @@ggppiibb__11, etc.  GPIB addresses can be entered using the uunniitt::aaddddrreessss syntax.
+     If no uunniitt:: prefix is given, unit zero is used.  In the ccoonnffiigg file, GPIB
+     unit numbers are coded in the GPIB address as
+
+        uunniitt ** 110000 ++ aaddddrreessss..
+
+     From ssppeecc, the ggppiibb__ggeett(()), ggppiibb__ppuutt(()), etc., commands can use either the
+     above coding or the ""uunniitt::aaddddrreessss"" syntax.  Note that sharing a GPIB
+     controller among multiple instances of ssppeecc is still possible, but ssppeecc
+     still uses only one semaphore to regulate access to each shared controller.
+     Thus, if there are two GPIB controllers shared by more than one process,
+     when any process accesses either controller, other processes will be
+     blocked from accessing both controllers until the first process releases
+     the semaphore.
+
+Some Improvements for National Instruments GPIB
+     An old bug, apparently not manifested until recently where a short integer
+     was used to hold transfer counts, which should have limited transfers to
+     32K or 64K bytes, has been fixed.  Also, the error message printed with
+     National Instruments GPIB controllers are now a little more informative.
+     Also, the EECCIICC error (Not Controller In Charge or lost Controller In Charge
+     during command) no longer causes an error reset.  That change is to
+     accommodate sharing of the GPIB-ENET model, which seems to always generate
+     an EECCIICC error when a new process connects to it.
+
+New Platform Targets
+     The new installation platforms eessrrff__lliinnuuxx, and eeppiiccss__ssoollaarriiss22 are
+     available.
+
+New ggmmccii Geometry
+     A new ggmmccii geometry, as used at CEA in Grenoble is supported.
+
+Some Improvements To X11 Font Handling
+     On a number of lliinnuuxx installations, the font data base (consisting of the
+     files //uussrr//lliibb//XX1111//ffoonnttss//**//ffoonnttss..ddiirr), is often incorrect on new
+     installations, which leads to BBaadd nnaammee errors with the ssppeecc X11 graphics.
+     The xx1111ffiilltt program now prints a lengthly error message explaining that the
+     system administrator should fix the problem by running the mmkkffoonnttddiirr
+     utility.  In addition, some font debugging is available by entering the
+     commands pplloott__mmoovvee((00,,00,,"" "",,99990011)) to enable font debugging and
+     pplloott__mmoovvee((00,,00,,"" "",,99990000)) to disable it.
+
+Image Handling Of ROI and Binning Changed
+     No text.
+
+ssppeecc Installation Faster With Respect To GNU Readline
+     Previously, when ssppeecc was installed configured to be linked with the GNU
+     readline library, the library source files were compiled even though the
+     object modules were included in the ssppeecc distribution in a library archive.
+     The installation procedure has been modified to avoid the extra
+     time-consuming compilation.
+
+ESRF MCA Bug Fixed
+     A bug with the ESRF MCA code, where the values reported for real and live
+     time were swapped, has been fixed.
+
+ffmmtt__rreeaadd(())/ffmmtt__wwrriittee(()) Bugs Fixed
+     No text.
+
+ccaallccGG Removed From sseettEE Macro
+     It turns out there is no need for the ccaallccGG macro in sseettEE so sseettEE no longer
+     contains ccaallccGG.
+
+Silena 7328/7329 MCA Supported
+     ssppeecc now supports the Silena 7328/7329 MCA on a GPIB interface.
+
+New eessrrff__iioo(()) Data Type Added
+     The DD__SSTTAATTEE__FFLLOOAATT__RREEAADDPPOOIINNTT data type is now supported in the eessrrff__iioo(())
+     function.
+
+RELEASE 4.01.10 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.10
+     BETA as of October 2, 1996.
+
+OMS PC-58 and Bit-3 403 Ported To HP
+     The Oregon Micro Systems PC-58 ISA motor controller and the Bit-3 Model 403
+     ISA VME controller can now be used on HP platforms with E/ISA slots.  These
+     boards require both I/O port access and memory mapping.
+
+EPICS Unit/Channel Numbering Starts At One
+     When using the manual unit/channel number configuration, EPICS motor
+     channels are now numbered starting from one, rather than zero, as is the
+     case with most ssppeecc motors.  The change is to match the conventional motor
+     numbering of an EPICS data base.
+
+EPICS Scaler Enhancements
+     ssppeecc support for the EPICS scaler records now uses callbacks to determine
+     when counting is finished.  Previously, the less efficient polling method
+     was used.
+
+SSIIGGIINNTT From Another Process Handled Better
+     Previously, for ssppeecc installations where ssppeecc was linked with the GNU
+     readline library, if another process sent ssppeecc a SSIIGGIINNTT signal, ssppeecc would
+     ignore the next line of input.  That should no longer be the case.
+
+RELEASE 4.01.09 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.09
+     BETA as of September 17, 1996.
+
+GPIB IFC Can Now Be Asserted
+     You can now use ggppiibb__ccnnttll((aa,, ""iiffcc"")), to send the IFC (interface clear)
+     message to reset the GPIB bus.  See the _g_p_i_b help file for more
+     information.
+
+aarrrraayy__oopp((""ccoonnttrraacctt"")) Improved
+     When used with one-dimensional arrays, the ""ccoonnttrraacctt"" option of aarrrraayy__oopp(())
+     will now use the first argument after the array name as the contraction
+     factor.  Previously, that first argument was ignored, and the following
+     argument was used.
+
+eeddccoonnff Bug On HP Fixed
+     A problem, seemingly only manifested on the HP platforms, where the eeddccoonnff
+     configuration editor would exit prematurely while writing out the
+     configuration and motor settings file when the path name for the files was
+     too long, has been fixed.
+
+RELEASE 4.01.08 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.08
+     BETA as of September 10, 1996.
+
+Removed Files No Longer Recreated On Startup
+     Previously, if a file opened in a ssppeecc session was removed before a
+     subsequent session, ssppeecc would recreate the file on startup.  That no
+     longer happens.  Instead a warning message is printed that the old file
+     file has disappeared.  Of course, the next time output is directed to a
+     file by the same name, ssppeecc will create a new instance of the file.
+
+Parser Bug Fixed
+     A bug, where ssppeecc would expand the macro name in a ddeeff or rrddeeff statement
+     immediately following an eellssee-less iiff statement inside a statement block,
+     has been fixed.
+
+Case Insensitive ddeevv__iimmppoorrtt(()) For ESRF Devices
+     ssppeecc now does a case-insensitive hashing of device names to keep track of
+     which devices are in use.  Previously, ssppeecc would attempt to re-import a
+     device if the name was spelled with a different capitalization scheme.
+
+New iimmaaggee__ppaarr(()) Options
+     The iimmaaggee__ppaarr(()) function now accepts the options ""bbeegg__ccooll"", ""eenndd__ccooll"",
+     ""bbeegg__rrooww"" and ""eenndd__rrooww"" with values to set the iimmaaggee__ggeett(()) region of
+     interest.
+
+New vvmmee__ggeett(()) and vvmmee__ppuutt(()) Functions
+     The new functions vvmmee__ggeett(()) and vvmmee__ppuutt(()) are available for doing A16, D8
+     transfers to VME modules.  A24, A32, D16 and D32 transfers await a future
+     release.
+
+New Array Functions
+     The new functions aarrrraayy__ffiitt(()), aarrrraayy__dduummpp(()) and aarrrraayy__pplloott(()) do for arrays
+     what ddaattaa__ffiitt(()), ddaattaa__dduummpp(()) and ddaattaa__pplloott(()) do for data groups.
+
+aarrrraayy__oopp(()) ""xx__aatt__mmiinn"" and ""xx__aatt__mmaaxx"" Commands Fixed
+     The ""xx__aatt__mmiinn"" and ""xx__aatt__mmaaxx"" options to the aarrrraayy__oopp(()) function now work
+     correctly.
+
+New aarrrraayy__oopp(()) Options
+     The aarrrraayy__oopp(()) function now accepts the ""rroowwss"" option to return the number
+     of rows in an array, the ""ccoollss"" option to return the number of columns in
+     an array and the ""uuppddaatteedd??""  option, which returns nonzero if values in a
+     shared array have been modified by ssppeecc or a cooperating external process.
+     In addition, the ""??""  option lists whats options are available.
+
+EPICS Motor Enhancements
+     There are now two kinds of EPICS motors available, selected as either
+     EEPPIICCSS__MM11 or EEPPIICCSS__MM22 in the configuration file.  The first is for
+     ssppeecc-configured motors, where the motor parameters is the ssppeecc
+     configuration file are written to the EPICS data base.  The second is for
+     EPICS-configured motors, where ssppeecc obtains the initial motor parameters
+     from the EPICS data base.  In either case, parameter values set using
+     mmoottoorr__ppaarr(()) while ssppeecc is running will be set in the EPICS data base.  For
+     EEPPIICCSS__MM22 motors, position discrepancies between ssppeecc and the EPICS data
+     base will be always resolved in favor of EPICS.  Also, the unit/channel
+     configuration feature is now available for EPICS motors.
+
+OMS PC-58 Motor Controller Now Supported
+     The Oregon Micro Systems Model PC-58 motor controller is now supported on
+     lliinnuuxx platforms and in driverless mode only.  Both the I/O-port address and
+     memory-map address must be set in the configuration file to agree with the
+     board jumpers.  The interrupt on the board should be disabled.
+
+Memory-Map Address Configurable For PC Boards
+     For PC boards requiring both a memory-map address and an I/O port address
+     in their configuration (such as the Bit-3 Model 403 VME controller and the
+     OMS PC-58 motor controller on lliinnuuxx platforms), the configuration editor
+     now allows entry of the memory-mapping address in hexadecimal in the DDEEVVIICCEE
+     column.
+
+RELEASE 4.01.07 BETA
+
+     No notes.
+
+RELEASE 4.01.06 BETA
+
+     No notes.
+
+RELEASE 4.01.05 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.05
+     BETA as of August 20, 1996.
+
+Command Completion Available With GNU Readline Library
+     The command-completion feature of the GNU readline library is now enabled
+     (if ssppeecc is linked with the GNU readline library).  In this preliminary
+     implementation, possible completions for the first word of a command are
+     built-in keywords and macro names.  Possible completions for subsequent
+     words are filenames.  The tab key is what is initially bound to the
+     command-completion function.
+
+Added Protection From State File Corruption
+     Previously, there was an opportunity for the state file to get corrupted on
+     exiting, if a signal arrived at an indelicate time.  Signals are now
+     properly blocked during the save state that occurs when ssppeecc exits.  The
+     problem seemed to only show up when ssppeecc was run as the back end of a GUI
+     program that sent redundant signals when terminating ssppeecc.
+
+New FFRREESSHH Built-In Variable
+     A new built-in variable named FFRREESSHH exists.  It has a nonzero value if ssppeecc
+     was invoked with the --ff (fresh start) flag or if a fresh start was forced
+     by an incompatible state file version.  The value is zero otherwise.
+
+New ccddeeff(()) Options
+     The chained-macro function ccddeeff(()) now accepts two additional flags:
+     ccddeeff((""nnaammee"",, """",, kkeeyy,, ""eennaabbllee"")) and ccddeeff((""nnaammee"",, """",, kkeeyy,, ""ddiissaabbllee"")).  The
+     first case enables the parts of the chained macro nnaammee associated with kkeeyy,
+     while the second case disables those parts.  If nnaammee is the null string """",
+     then all chained macros that have parts associated with kkeeyy will have those
+     parts enabled or disabled.
+
+New ffiillee__iinnffoo(()) Built-In Function
+     A new ffiillee__iinnffoo((ffiillee__nnaammee [[,, ccmmdd]])) built-in function provides most of the
+     information available about a file or device available from the ssttaatt(())
+     system call.  If invoked with only the first ffiillee__nnaammee argument,
+     ffiillee__iinnffoo(()) returns zero if the file exists and nonzero otherwise.  If
+     ffiillee__nnaammee is the string ""??"", the possible values for ccmmdd are listed.  See
+     the _f_u_n_c_s help file for more information.
+
+More Attribute Control Strings For ttttyy__ccnnttll(())
+     Attribute strings to set bold, blink, reverse-video and underline mode are
+     now available with the ttttyy__ccnnttll(()) function.  See the _f_u_n_c_s help file for
+     more information.
+
+ttttyy__mmoovvee(()) Parses New Attribute Escape Strings
+     New attribute escape sequences have been introduced to simplify designing
+     text screens in ssppeecc.  The syntax of the sequence is ""\\[[xxxx]]"" where xxxx is
+     one of the two-character control strings recognized by the ttttyy__ccnnttll(())
+     function, such as ccll to clear the screen or ssoo to start stand-out mode.
+     Presently, only the ttttyy__mmoovvee(()) function recognizes these sequences.
+     Adapting the ttttyy__ffmmtt(()) function to parse the strings is in progress.
+
+Change In Parsing Of \\[[
+     To accommodate the ""\\[[xxxx]]"" escape sequences, a backslash preceding a left
+     square bracket is now passed through the lexical analyzer.
+
+New VVaarr iinn  AArrrraayy Syntax
+     A syntactical feature for associative arrays (forms of which are available
+     in the standard aawwkk and ggaawwkk utilities) is now available in ssppeecc.  Namely
+     the construction
+
+        iiff ((vvaarr iinn aassssoocc__aarrrraayy)) {{
+                     ......
+        }}
+
+     will evaluate true or false depending on whether the associative array
+     aassssoocc__aarrrraayy contains an element with index vvaarr..  In addition, the
+     construction
+
+        ffoorr ((vvaarr iinn aassssoocc__aarrrraayy)) {{
+                   pprriinntt aassssoocc__aarrrraayy[[vvaarr]]
+        }}
+
+     will run through each element of the associative array aassssoocc__aarrrraayy
+     assigning to vvaarr the string value of the index of each element.  Note,
+     though, the order in which the elements are assigned is indeterminate and
+     not constant.
+
+New ddeelleettee Keyword For Associative Arrays
+     Individual elements of associative arrays may be removed using the new
+     ddeelleettee keyword, as in
+
+        ddeelleettee mmiisscc[[""ffoooo""]]
+
+New aarrrraayy__oopp(()) Commands
+     New commands are available for array_op() to determine whether the array is
+     in shared memory and the number of rows or columns in the array.  In
+     addition, aarrrraayy__oopp((""??""))  lists the possible operations.
+
+New Facility To Read and Write Binary Data
+     The new ffmmtt__rreeaadd(()) and ffmmtt__wwrriittee(()) functions are available for reading and
+     writing the new array data type from and to binary files.  A variety of
+     binary formats will be supported, and there will be provisions for users to
+     modify existing or add new formats.  The facility includes provisions for
+     reading and writing file header information.
+
+String-Array Data Type Introduced
+     Preliminary implementation of a string-array data type in available.  Each
+     row of the array can contain one string.  The array must be dimensioned
+     with enough columns to accommodate of the strings anticipated.  ssppeecc will
+     allocate one extra byte per row to make sure the strings are null
+     terminated.
+
+New iimmaaggee__ppaarr(()) Options
+     The iimmaaggee__ppaarr(()) function now takes two new options.  With the ""aauuttoo__rruunn""
+     mode turned on, image devices will be started and stopped with ssppeecc's
+     built-in counting functions.  With the ""ssoofftt__pprreesseett"" mode in effect, when
+     in ""aauuttoo__rruunn"" mode, the image device is programmed with the count time
+     passed to ssppeecc's counting function.  Otherwise, the device is started and
+     stopped when the configured timer starts and stops.
+
+A ccoonnffiigg__mmaacc Macro Will Be Run After rreeccoonnffiigg
+     If a macro named ccoonnffiigg__mmaacc is defined, it will be run automatically after
+     reading the hardware configuration file on program startup and after the
+     rreeccoonnffiigg command (run from the standard ccoonnffiigg macro).
+
+No More Unwanted Files Named ppiippee
+     Previously the special output file name ""ppiippee"" was only special when ssppeecc
+     was invoked with the --pp flag.  At sites where ssppeecc is sometimes used with
+     the --pp flag, macros that opened ""ppiippee"" would leave files named ppiippee lying
+     about when ssppeecc wasn't invoked with the --pp flag.  Now, the output file name
+     ""ppiippee"" is always special.  When not invoked with the --pp flag, ssppeecc ignores
+     commands to send output to ""ppiippee"".
+
+Shared Arrays Now Readable By All
+     The shared-data segment used by the shared arrays is now created with
+     permissions set to allow any user to read the data.
+
+More Robust Method Of Storing Miscellaneous State Parameters
+     The method for saving certain miscellaneous items in the state file, such
+     as the ssppeecc__ppaarr(()) and pplloott__ccnnttll(()) options and various hardware parameters,
+     has been improved.  Previously relinking ssppeecc would generally cause the
+     saved values of the parameters to be lost.
+
+More Robust Handling Of Missing Settings File
+     Previously, if the motor sseettttiinnggss file was missing or empty, ssppeecc would
+     automatically switch to simulate mode.  That behavior has been changed.
+     Although a missing sseettttiinnggss file indicates some sort of administrative or
+     system problem, users have indicated they would prefer ssppeecc not to switch
+     to simulate mode, so that they can run the ccoonnffiigg macro to change the motor
+     settings.
+
+ESRF MCA Start/Stop Functions Enhanced
+     No text.
+
+Princeton Instruments CCD Support Enhanced
+     No text.
+
+ESRF MAXE Bug Fixed
+     A bug relating to using the ESRF MAXE motor controller with the
+     unit/channel configuration, whereby it was possible for the wrong motor to
+     move, has been fixed.
+
+OMS Limit Bug Fixed
+     An old bug, where motors controlled by any of the supported Oregon Micro
+     Systems motor controllers couldn't be moved off of a limit switch, has been
+     fixed.
+
+Fix for PI Motor Controller
+     A bug, where use of a too-small buffer for reading a reply from the Physik
+     Instrumente C-804 DC motor controller caused various problems elsewhere in
+     ssppeecc, has been fixed.
+
+Unit/Channel Configuration For the E500 Fixed
+     Bugs in the new unit/channel configuration option for the DSP E500 CAMAC
+     motor controllers have been fixed.
+
+Fix For the Newport MM2000 PC Board Motor Controller
+     A recently introduced bug that prevented the PC board version of the
+     Newport MM2000 motor controller from working at all has been fixed.
+
+Fixes For the Huber 9000 Motor Controller
+     Two bugs relating to the Huber SMC 9000 stepping motor controller have been
+     fixed.  Step sizes other than 1000 steps per degree are now allowed.  A
+     truncation error that sometimes occurred on reading the motor position has
+     been corrected.
+
+RELEASE 4.01.04 BETA
+
+     These notes summarize the cumulative changes made for ssppeecc release 4.01.04
+     BETA as of July 17, 1996.
+
+NEW DEVELOPMENTS
+     The following are new developments for release 4.
+
+Input Push Back Handling Improved
+     The code that handles the macro expansion has been brought into the modern
+     era.  Previously, a temporary file was used to handle very large macro
+     expansion.  Now expansion is handled entirely in dynamically allocated
+     memory.  The new scheme is more efficient, and allows clear macro debugging
+     messages.
+
+Revised Macro Debugging Format
+     The output format for macro debugging (DDEEBBUUGG==225566) has been redone.
+
+Source Code Control Introduced
+     The source code for ssppeecc release 4 is now under source code control.  Such
+     a change won't mean much to the user, but it does indicate we are getting
+     serious about this release.
+
+CAMAC Driver Ported to lliinnuuxx
+     The CSS CAMAC driver for the DSP 6001/2 with PC 004 CAMAC controller is now
+     available on lliinnuuxx.  See the ddrriivveerrss//RREEAADDMMEE file for more information.
+
+PARALLEL CHANGES FROM RELEASE 3
+
+Special Check For an xxtteerrmm by eeddccoonnff
+     On some platforms, the ccuurrsseess library calls made from the eeddccoonnff
+     configuration editor from an xxtteerrmm window caused strange characters to
+     appear on the screen.  That problem has been fixed.
+
+sshhooww..aawwkk Bug Fixed
+     A bug in the sshhooww..aawwkk script, where there wasn't a pause when there were
+     less than twelve plots on the last page when the --ww (wait) flag was used,
+     has been fixed.
+
+Princeton Applied Research 283 Device Supported
+     Preliminary (and only partial) support for the Princeton Applied Research
+     Model 283 Potentiostat/Galvanostat is available.
+
+Anorad Motor Controllers Supported
+     Preliminary support for the Anorad I-Series motors controllers is
+     available.
+
+KS 3988 GPIB-To-CAMAC Bug Fixed
+     A recently introduced bug in the presence test for the Kinetic Systems 3988
+     GPIB-To-CAMAC controllers has been fixed.
+

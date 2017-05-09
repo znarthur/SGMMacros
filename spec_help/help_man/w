@@ -1,0 +1,37 @@
+.TH "w" "macro" "08/01/12" "w.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBw\fP \- wait for moving and counting and then beep
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)w.rst    6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "w" "macro" "08/01/12" "w.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBw\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBw\fP macro lets you know when all moving and/or counting has
+finished by ringing the console bell when a call
+of \fBwait(0)\fP returns.
+.SH "DEFINITION"
+.rs
+.sp
+\fBdef w \(aqwait(0); beep\(aq\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%wait\fP
+

@@ -1,0 +1,55 @@
+.TH "tscan" "macro" "08/01/12" "tscan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBtscan\fP \- temperature scan
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)tscan.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "tscan" "macro" "08/01/12" "tscan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBtscan start end intervals time [sleep_time]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBtscan\fP macro scans the temperature controller set point.
+The set point starts at the value given by
+\fBstart\fP and finishes at \fBend\fP. The step size is
+\fB(start\-end)/intervals\fP.
+The number of data points collected will be \fBintervals+1\fP.
+Count time is given by \fBtime\fP, which if positive,
+specifies seconds and if negative,
+specifies monitor counts.
+.sp
+The optional \fBsleep_time\fP argument specifies
+a time in seconds to delay after each temperature
+change.
+.sp
+As with all of \fBspec\fP\(aqs temperature\-control macros,
+you need to define a \fBmeasuretemp\fP and a
+\fB_settemp\fP macro that work correctly with your instruments.
+See the \fBTemperature Control Macros\fP section in the \fBspec\fP
+\fBStandard Macro Guide\fP for details.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBtscan 1 1.2 100 10\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%te\fP
+\fI\%teramp\fP
+\fI\%dtscan\fP
+\fI\%showtemp\fP
+

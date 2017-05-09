@@ -1,0 +1,201 @@
+.TH "PC\-DIG" "hardware" "08/01/12" "pcdig.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+PC\-DIG \- Coreco Imaging (ITI) PC\-DIG Frame Grabber
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)pcdig.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2004,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "PC-DIG" "hardware" "08/01/12" "pcdig.rst 6.1  08/01/12 CSS"
+.
+.SH "INTRODUCTION"
+.rs
+.sp
+\fBspec\fP supports the PC\-DIG frame grabber on \fBLinux\fP platforms
+by way of the \fBitifg\fP driver available for download at the
+\fI\%ftp.gom.com\fP site.
+Currently, release 7.2 of the driver is supported by \fBspec\fP.
+Before attempting to use \fBspec\fP with the PC\-DIG frame grabber,
+make sure the driver installation is correct by ensuring the
+\fBtest_itifg\fP program included with the driver package
+can obtain images.
+.sp
+\fBspec\fP currently does not load the camera\-specific FPGA firmware into the
+frame\-grabber cards, nor does \fBspec\fP initialize all the driver parameters
+for a particular camera.
+Thus, you should ensure that the \fBconfig_pcdig\fP program is run to load
+the FPGA files and the \fBtest_itifg\fP program is run to initialize the
+driver parameters after rebooting the computer
+(or inserting the \fBitifg.o\fP module into the kernel)
+and before running \fBspec\fP.
+.sp
+The frame grabber is selected
+in the \fBspec\fP \fBedconf\fP configuration editor on the
+\fBA\fPcquisition devices screen as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+CCD\-like      DEVICE                                <>TYPE
+ 0  YES  /dev/ic0idI  ITI PC\-DIG Frame Grabber (read mode)
+ 1  YES  /dev/ic0idI  ITI PC\-DIG Frame Grabber (mmap mode)
+.ft P
+.fi
+.RE
+.sp
+Up to four PC\-DIG frame grabbers can be configured at a time.
+Two acquisition modes (read and memory\-mapped) are supported,
+although read mode seems to be the most useful.
+.sp
+In read mode, \fBspec\fP supplies a memory buffer that is filled by the driver.
+The buffer can contain room for multiple frames.
+After acquisition is started,
+the frame grabber will run until all the frames are filled.
+If a data array of the appropriate size is assigned to the acquisition
+device with the  \fB"livebuffer"\fP option to
+\fBimage_par()\fP, the associated memory will be used by the driver.
+Otherwise, \fBspec\fP allocates
+temporary memory from the system with a \fBmalloc()\fP call.
+.sp
+In memory\-mapped mode, the driver allocates kernel memory in
+a ring buffer and continually fills the memory with images.
+.SH "FUNCTIONS"
+.rs
+.sp
+The \fBimage_get()\fP functions copies the images associated
+with the current frame
+(see below) from the memory buffer used by the frame grabber to
+the array provided as argument.
+In live\-buffer mode (see below), the frames are written directly
+to the provided data array, so it is not necessary
+to use \fBimage_get()\fP to copy the images.
+.sp
+The \fBimage_par()\fP function controls
+the detector interface behavior as follows.
+The \fBsel\fP parameter is the image\-device number from the \fBconfig\fP file.
+.RS 0m
+.HP 5m
+."
+\fBimage_get(sel, arr\fP)
+\- 
+Copies data from the current frame into the array \fBarr\fP. Use the
+\fB"frame"\fP option of
+\fBimage_par()\fP below to set the current frame,
+if the number of frames is greater than one.
+Note, the frame grabber must be started with the \fB"run"\fP command
+before an image is available.
+.HP 5m
+."
+\fBimage_par(sel, "run")\fP
+\- 
+Starts acquisition.
+.HP 5m
+."
+\fBimage_par(sel, "halt")\fP
+\- 
+Stops acquisition.
+.HP 5m
+."
+\fBimage_par(sel, "poll")\fP
+\- 
+Returns the number of frames acquired during the current
+(or most recent) acquisition.
+.HP 5m
+."
+\fBimage_par(sel, "livebuffer" [, arg])\fP
+\- 
+When \fBarg\fP is the name a suitably sized data array,
+that array will be used for the read\-mode buffer.  If \fBarg\fP is absent,
+returns the name of the current live\-buffer array,
+or \fB"?"\fP if none is set.
+.HP 5m
+."
+\fBimage_par(sel, "stats")\fP
+\- 
+Displays acquisition statistics obtained from the driver.
+.HP 5m
+."
+\fBimage_par(sel, "frame" [, arg])\fP
+\- 
+Sets the frame number used for the next \fBimage_get()\fP
+call and for retrieving the time stamp (see below).
+.HP 5m
+."
+\fBimage_par(sel, "frames" [, arg])\fP
+\- 
+Sets the number of frames in the kernel buffer to use for acquisition.
+The frame grabber will allocate the needed kernel memory and fill
+it during acquisition.
+.HP 5m
+."
+\fBimage_par(sel, "frame_count")\fP
+\- 
+During acquisition, returns the current frame number using the
+\fBlseek()\fP system call to the driver.
+.HP 5m
+."
+\fBimage_par(sel, "timestamp")\fP
+\- 
+Returns the time stamp associated with the current frame.
+.HP 5m
+."
+\fBimage_par(sel, "hoff" [, arg])\fP
+\- 
+Sets or gets the camera horizontal offset parameter.
+.HP 5m
+."
+\fBimage_par(sel, "voff" [, arg])\fP
+\- 
+Sets or gets the camera vertical offset parameter.
+.HP 5m
+."
+\fBimage_par(sel, "rotime" [, arg])\fP
+\- 
+Sets or gets and returns the read\-out time.
+.HP 5m
+."
+\fBimage_par(sel, "extime" [, arg])\fP
+\- 
+Sets or gets and returns the exposure time using the
+\fBHIOC_PCD_SET_EXTIME\fP and \fBHIOC_PCD_GET_EXTIME ioctl()\fP system calls,
+respectively.
+.RE
+.SH "USAGE"
+.rs
+.sp
+The following commands should be sufficient to perform a quick
+test of the frame grabber.
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC.1> rows = image_par(0, "rows")
+
+SPEC.2> cols = image_par(0, "cols")
+
+SPEC.3> ushort array image[rows][cols]
+
+SPEC.4> image_par(0, "run")
+
+SPEC.5> image_get(0, image)
+
+SPEC.6> fmt_write("some_file", "pgm", image)
+
+SPEC.7> u xv some_file
+.ft P
+.fi
+.RE
+.sp
+The \fBfmt_write()\fP function here writes the data in
+\fBpgm\fP format to a file.  The last command spawns the
+\fBxv\fP image viewing program (available at \fI\%www.trilon.com\fP
+if not already installed).
+

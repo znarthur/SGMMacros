@@ -1,0 +1,153 @@
+c400                                hardware                                c400
+
+NAME
+     c400 - FMB Oxford C400
+
+DESCRIPTION
+
+     The C400 Quad Pulse Counter/Detector Controller is four-channel
+     counter/timer made by Pyramid Technical Consultants and distributed by FMB
+     Oxford.  ssppeecc uses the ASCII communication protocol available currently
+     only on the serial interface and requires the controller have recent
+     firmware (0.7.27.84 or later).
+
+     The C400 can be used with ssppeecc as counters gated by an external master
+     timer or as a master timer when counting to a time preset.  The hardware
+     does not currently support counting to a monitor preset.
+
+     In addition, ssppeecc allows programming of the C400 parameters for the high
+     voltage output, the analog voltage output and the input discriminator
+     levels associated with each of the four channels.
+
+CONFIGURATION
+
+     The C400 is configured on the DDevices screen along the following lines.
+
+        SSCCAALLEERRSS       DDEEVVIICCEE  AADDDDRR  <<>>MMOODDEE  NNUUMM                      <<>>TTYYPPEE
+            YYEESS   //ddeevv//ttttyySS00    <<>>  111155220000    55 CC440000 CCoouunntteerr//TTiimmeerr ((SSeerriiaall))
+            YYEESS //ddeevv//ttttyyUUSSBB00    <<>>  111155220000    55 CC440000 CCoouunntteerrss OOnnllyy ((SSeerriiaall))
+
+     The default baud rate for the C400 is 115200.  The number of channels is
+     set to five, as in addition to the four counter channels, there is a
+     channel allocated for the elapsed time.  When selected as "Counters Only",
+     the C400 should have the external gate enabled and be hardware gated by
+     another timer.
+
+     On the SScaler screen, choose CC440000 as the device type.
+
+        SSccaalleerr ((CCoouunntteerr)) CCoonnffiigguurraattiioonn
+
+        NNuumm      NNaammee  MMnnee  <<>>DDeevviiccee UUnniitt CChhaann  <<>>UUssee AAss  SSccaallee FFaaccttoorr
+          00   SSeeccoonnddss  sseecc      CC440000    00    00  ttiimmeebbaassee             11
+          11     CChhaann11   cc11      CC440000    00    11   ccoouunntteerr             11
+          22     CChhaann22   cc22      CC440000    00    22   ccoouunntteerr             11
+          33     CChhaann33   cc33      CC440000    00    33   ccoouunntteerr             11
+          44     CChhaann44   cc44      CC440000    00    44   ccoouunntteerr             11
+
+     The timebase channel should be assigned channel number zero.  The remaining
+     channels are 1 through 4.  The scale factor for the timebase is ignored, as
+     it is fixed in the C code.
+
+FUNCTIONS
+
+     The following ccoouunntteerr__ppaarr(()) options are available.  The first group are
+     associated with the entire controller.  The mmnnee argument identifies the
+     controller.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""sseenndd"",, mmeessssaaggee)) - Sends the string mmeessssaaggee to the C400
+          associated with the counter mmnnee.  If the message generates a response,
+          use the ""rreeaadd"" option below.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""rreeaadd"",, mmeessssaaggee)) - Sends the string mmeessssaaggee to the C400
+          associated with the counter mmnnee and returns the response.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""dduummpp"")) - Displays the raw responses for all the queryable
+          parameters for the C400 associated with mmnnee in a format as follows:
+
+                   CCOONNFF::AACCCCUUMM == 11
+                     CCOONNFF::DDAACC == 00..00000000ee++0000 VV,,00..00000000ee++0000 VV,,00..00000000ee++0000 VV,,00..00000000ee++0000 VV
+                    CCOONNFF::DDEEAADD == 00
+                     CCOONNFF::DDHHII == 22..00000000ee++0000 VV,,22..00000000ee++0000 VV,,55..00000000ee++0000 VV,,22..00000000ee++0000 VV
+                     CCOONNFF::DDLLOO == 55..00000000ee--0022 VV,,55..00000000ee--0022 VV,,22..00000000ee++0000 VV,,55..00000000ee--0022 VV
+                CCOONNFF::HHIIVVOO::SSUUPP == --22000000 VV,,--22000000 VV,,--22000000 VV,,--22000000 VV
+                CCOONNFF::HHIIVVOO::VVOOLL == --11..00000000ee++0000 VV,,--22..00000000ee++0000 VV,,--33..00000000ee++0000 VV,,--44..00000000ee++0000 VV
+                 CCOONNFF::HHIIVVOO::EENN == 00,,00,,00,,00
+                     CCOONNFF::PPEERR == 11..00000000ee--0044 SS
+                     CCOONNFF::PPOOLL == PP,,PP,,PP,,PP
+                    CCOONNFF::PPUULLSS == 110000000000 nnss,,3300 nnss
+                     TTRRIIGG::BBUUFF == 1100000000
+                     TTRRIIGG::BBUURR == 00
+                    TTRRIIGG::MMOODDEE == IINNTTeerrnnaall
+                     TTRRIIGG::PPOOLL == 00
+              TTRRIIGG::SSOOUURR::SSTTAARRTT == IINNTTeerrnnaall
+               TTRRIIGG::SSOOUURR::SSTTOOPP == IINNTTeerrnnaall
+              TTRRIIGG::SSOOUURR::PPAAUUSSEE == IINNTTeerrnnaall
+             SSYYSSTT::CCOOMMMM::IIPPMMOODDEE == DDHHCCPP
+                 SSYYSSTT::CCOOMMMM::IIPP == 119922..116688..110000..2200
+                SSYYSSTT::CCOOMMMM::NNEETT == 225555..225555..225555..00
+               SSYYSSTT::CCOOMMMM::GGAATTEE == 119922..116688..110000..11
+                SSYYSSTT::CCOOMMMM::LLOOGG == 00..00..00..00
+               SSYYSSTT::EERRRR::CCOOUUNNTT == 22
+                  SSYYSSTT::SSEERRIIAALL == 00000000000011777733
+                    SSYYSSTT::VVEERRSS == 11999999..00
+
+          Values for any of these parameters can be queried or set using the
+          command pass through options ""rreeaadd"" and ""sseenndd"" above.  Changing the
+          ""TTRRIIGG"" parameters or the ""CCOONNFF::AACCCCUUMM"" or ""CCOONNFF::PPEERR"" parameters can
+          interfere with ssppeecc's operation of the counter.  Other parameters of
+          interest can be changed using the following commands.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ddeeaaddttiimmee"" [[,, vvaalluuee]])) - Sets or returns the deadtime
+          correction to be applied to the incoming counts for all four channels
+          on the C400 associated with the counter mmnnee.  The units are
+          nanoseconds.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ggaattee__eennaabbllee"" [[,, 11||00]])) - Sets or returns whether or not to
+          use an external gate for the C400 associated with counter mmnnee.  The
+          external gate feature is only available when the controller is
+          configured as "Counters Only" (as opposed to "Counter/Timer") in the
+          configuration editor.  When enabled, TTRRIIGG::MMOODDEE is set to
+          EEXXTTEERRNNAALL__SSTTAARRTT__SSTTOOPP.  TTRRIIGG::SSOOUURR::SSTTAARRTT and TTRRIIGG::SSOOUURR::SSTTOOPP are set to
+          BBNNCC.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ggaattee__ppoollaarriittyy"" [[,, 11||00]])) - Sets or returns the gate
+          polarity for the C400 associated with counter mmnnee.  A value of 0 gates
+          on the rising edge.  A value of 1 gates on the falling edge.  The
+          setting is only meaningful when the external-gate mode is enabled.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ddaacc"" [[,, vvaalluuee]])) - Sets or returns the value for the
+          analog output associated with channel mmnnee.  The units are volts.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ddiisscc__hhiigghh"" [[,, vvaalluuee]])) - Sets or returns the discriminator
+          high level in volts for the channel associated with mmnnee.  The sign is
+          configured with ""ddiisscc__ppoollaarriittyy"" below and ignored here.  Note, the
+          value set must be higher than the current ""ddiisscc__llooww"" setting.  The
+          units are in volts.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ddiisscc__llooww"" [[,, vvaalluuee]])) - Sets or returns the discriminator
+          low level in volts for the channel associated with mmnnee.  The sign is
+          configured with ""ddiisscc__ppoollaarriittyy"" below and ignored here.  Note, the
+          value set must be lower than the current ""ddiisscc__hhiigghh"" setting.  The
+          units are in volts.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ddiisscc__ppoollaarriittyy"" [[,, vvaalluuee]])) - Sets or returns the
+          discriminator polarity for the channel associated with counter mmnnee.
+          Return values are the strings nneeggaattiivvee or ppoossiittiivvee.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""HHVV__eennaabbllee"" [[,, 11||00]])) - Sets or returns whether the high
+          voltage output is enabled for the channel associated with counter mmnnee.
+          Units are in volts.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""HHVV__mmaaxx"" [[,, vvaalluuee]])) - Sets or returns the maximum high
+          voltage value setting allowed by the C400 firmware.  Units are in
+          volts.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""HHVV"" [[,, vvaalluuee]])) - Sets or returns the current high voltage
+          setting.  Units are in volts.
+
+SEE ALSO
+
+     _w_w_w_._p_t_c_u_s_a_._c_o_m
+
+     _w_w_w_._f_m_b_-_o_x_f_o_r_d_._c_o_m
+

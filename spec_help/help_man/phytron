@@ -1,0 +1,212 @@
+.TH "phytron" "hardware" "09/25/12" "phytron.rst 6.1  09/25/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+phytron \- Phytron motor controllers
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)phytron.rst      6.1  09/25/12  CSS
+.
+.\" Copyright (c) 2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "phytron" "hardware" "09/25/12" "phytron.rst 6.1  09/25/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Phytron motor controllers come in a wide variety of models and
+firmware versions.
+Some firmware versions known to work with \fBspec\fP include the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+IXE\-A\-T ALPHA Version A94 V 1.9 D\-E
+IXE\-C\-T ALPHA version 96 V 4.33 D\-E
+IXE\-A\-T ALPHA Version A96 V 1.13 D\-E ZMP
+IXE\-C\-RS 2 SMD 101
+IXE\-C\-T ALPHA Version 97 V 5.37 D\-F
+IXE\-IEEE Version CB 8 V 1.11
+OMC/TMC V2.6_12b
+.ft P
+.fi
+.RE
+.sp
+\fBspec\fP supports GPIB and RS\-232C interfaces on the Phytron controllers.
+Select the appropriate interface on the \fBDevice\fP screen of the configuration
+editor along the following lines:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS        DEVICE   ADDR  <>MODE  NUM                           <>TYPE
+   YES    /dev/ttyS0           9600    2             Phytron IXE (Serial)
+   YES                    6            4               Phytron IXE (GPIB)
+.ft P
+.fi
+.RE
+.sp
+The corresponding entries in the \fBconfig\fP file would be:
+.sp
+.RS 4m
+.nf
+\fBRS_IXE  =  device_name  baud_rate  number_of_motors\fP
+\fBGP_IXE  =  gpib_address  number_of_motors\fP
+.fi
+.sp
+.RE
+.SH "Finding the Reference Position"
+.rs
+.sp
+The Phytron\(aqs axis initialization command \fB"0"\fP, which
+searches for the negative limit switch,
+is sent to a specific motor when
+the \fBchg_dial()\fP function is invoked with either
+the \fB"home+"\fP or \fB"home\-"\fP arguments.
+The free\-axis\-displacement commands,
+\fB"L+"\fP and \fB"L\-"\fP, are sent with
+the \fB"lim+"\fP and \fB"lim\-"\fP arguments,
+respectively.
+.sp
+There is no fixed hardware signal for a home switch on the Phytron
+controller, but there are twelve digital inputs available on the input
+connector. There is also a command which will perform a relative
+move at the base rate until one of the inputs goes high or low or
+the magnitude of the move is reached. There are four parameters in
+this command:  the direction of the move, the magnitude of the move,
+the binary input number and the sense of the input switch. All four
+parameters are set by entering a string for the \fBhome method\fP
+(or \fB"home_method"\fP via \fBmotor_par()\fP)
+optional motor parameter.
+The \fBhome method\fP can be entered on the first
+optional\-motor\-parameter screen.
+(Get there by typing \fBm\fP once from the standard motor parameter screen.)
+The string you enter will be sent to the motor when
+the \fB"home"\fP argument is used with the
+\fB"chg_dial()"\fP function.
+The string is the actual command
+sent to the Phytron, and is of the form
+.sp
+.RS 4m
+\fBSmagvEnnD\fP
+.RE
+.sp
+where \fBS\fP is a \fB+\fP or a \fB\-\fP for the
+sign of the move, \fBmag\fP is the magnitude of the move
+(maximum of 65535 steps), \fBnn\fP is the input number
+(01 through 12) and \fBD\fP is the sense of the input where
+0 means the motor stops if the input goes off and 1 means the motor
+stops if the input goes on. For example,
+.sp
+.RS 4m
+\fB+200vE071\fP
+.RE
+.sp
+would command the motor to move no more than 200 steps in the plus
+direction, or until input 7 goes ON.
+.sp
+For compatibility with older versions of \fBspec\fP,
+\fBgeneric parameter 1\fP (or \fB"misc_par_1"\fP) can instead be
+used to hold the home\-method string for the Phytron models.
+.SH "Special Commands"
+.rs
+.sp
+Some Phytron models apparently cannot keep up with
+commands sent by the computer at full speed.
+One can slow down the
+communication between \fBspec\fP and the Phytron controllers with the following commands:
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "rdelay" [,value])\fP
+\- 
+If \fBvalue\fP is given, sets the delay before reading a
+response from the Phytron to \fBvalue\fP seconds, otherwise
+returns the current value.  The default value is 0.015.
+.HP 5m
+."
+\fBmotor_par(motor, "wdelay" [,value])\fP
+\- 
+If \fBvalue\fP is given, sets the delay before sending a
+command to the Phytron to \fBvalue\fP seconds, otherwise
+returns the current value.  The default value is 0.015.
+.RE
+.sp
+Only one copy of the \fBrdelay\fP and \fBwdelay\fP parameters is kept
+for all the Phytron controllers. The motor mnemonic motor can be
+associated with any of the Phytron controllers. The values for the
+parameters are saved in the state file, so should only need to be reset
+after starting fresh.
+.sp
+Command pass through is available using the following functions.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "send", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the Phytron channel associated
+with \fBmotor\fP.
+.RE
+.HP 5m
+."
+\fBmotor_par(motor, "read", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the Phytron channel associated
+with \fBmotor\fP, as above, and returns a string containing
+the response.
+.HP 5m
+."
+\fBmotor_par(motor, "usend", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the Phytron controller associated
+with \fBmotor\fP.
+.HP 5m
+."
+\fBmotor_par(motor, "uread", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the Phytron controller associated
+with \fBmotor\fP, as above, and returns a string containing
+the response.
+.RE
+.sp
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+0.FOURC> print motor_par(tth, "read", "P20R")
+240000
+
+0.FOURC>
+.ft P
+.fi
+.RE
+.sp
+results in the string \fB"\e002XP20R\e003\er\en"\fP being sent to
+the controller. Command pass through should be used with caution to
+avoid interfering with the built\-in programming commands \fBspec\fP sends
+to the Phytron controllers.
+.sp
+The following commands are also available to help with debugging:
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "chan_init")\fP
+\- 
+Sends the initialization strings to the specified channel.
+The sames commands are sent when doing hardware configuration
+on start up or on \fBreconfig\fP.
+.RE
+.HP 5m
+."
+\fBmotor_par(motor, "dump")\fP
+\- 
+Displays the values of Phytron parameters P01 through P10 and P12
+through P17 for the channel associated with motor.
+.RE
+

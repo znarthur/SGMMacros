@@ -1,0 +1,94 @@
+move_info()                         functions                        move_info()
+
+NAME
+     move_info() - returns what would happen on a move
+
+DESCRIPTION
+
+     The mmoovvee__iinnffoo(()) function returns information about what would happen on a
+     subsequent mmoovvee__aallll command given the current motor positions and current
+     values in the AA[[]] array.  Such a function might be called, for example,
+     within the uusseerr__pprreemmoovvee macro to determine which motors will be moved to
+     allow extra limit checking can be performed involving the relative postion
+     of motors.
+
+     If called with no arguments, returns a two-dimensional associative array
+     containing the move information.  The array is indexed by motor number and
+     information keyword.  The keywords are:
+
+         ""ttoo__mmoovvee""        nonzero if motor will move
+         ""eerrrroorr""          reason the motor will not move
+         ""ccoommmmaannddeedd""      the commanded position
+         ""mmaaggnniittuuddee""      magnitude of the move in user units
+         ""ccuurrrreenntt""        current position in user units
+         ""ccuurrrreenntt__ddiiaall""   current position in dial units
+         ""ttaarrggeett""         target position in user units
+         ""ttaarrggeett__ddiiaall""    target position in dial units
+         ""bbaacckkllaasshh""       backlash for this move in user units
+         ""lleeffttoovveerr""       reminder due to motor resolution
+
+     If called with a single argument that is one of the above keywords, the
+     function returns a one-dimensional associative array indexed by motor
+     number containing values for that keyword for each motor.  If called with a
+     motor number or mnemonic as a single argument, the function returns a
+     one-dimensional associative array, indexed by the above keywords containing
+     values for the one motor.  If called with two arguments, motor number and
+     keyword, the function returns the corresponding single value.
+
+     No matter how the function is called, the internal code will calculate
+     values for all motors.  Thus, if multiple values are needed, it is most
+     efficient and recommended to call the function once selecting arguments
+     that will return all the needed values.
+
+     The ""ttoo__mmoovvee"" element will be 1 or 0, indicating whether the motor would
+     move or not.  If there is condition that prevents the move, the ""eerrrroorr""
+     element will contain one of these strings:
+
+         ""llooww lliimmiitt""             move exceeds low limit
+         ""hhiigghh lliimmiitt""            move exceeds high limit
+         ""bbuussyy""                  motor is busy
+         ""rreeaadd oonnllyy""             motor is configured as read only
+         ""pprrootteecctteedd""             motor configuration does not allow moving
+         ""ddiissaabblleedd""              motor has been disabled
+         ""eexxtteerrnnaallllyy ddiissaabblleedd""   shared motor has been disabled
+         ""uunnuussaabbllee""              motor did not respond to presence test
+
+     Otherwise, there will be no ""eerrrroorr"" array element.
+
+     The ""ttaarrggeett"" and ""ttaarrggeett__ddiiaall"" values are the final position after
+     backlash.  The ""mmaaggnniittuuddee"" value contains the distance to the target
+     position and does not include the magnitude of the backlash.
+
+     The ""lleeffttoovveerr"" value is the fractional value that is the difference between
+     the requested position and the achievable position given the finite
+     resolution of the motor.  For example, if a motor has 1000 steps per
+     degree, each step corresponds to 0.001 degrees.  If one asks to move the
+     motor to a position of 1.0004 degrees, the motor will move to 1 degree and
+     the leftover value will be 0.0004 degrees.
+
+     The ""ccoommmmaannddeedd"" value is the target position in user units to the full
+     precision requested.  The other postion-related values are rounded to the
+     motor resolution.  The ""ccoommmmaannddeedd"" position is saved after a move and is
+     available using special arguments to the built-in rreeaadd__mmoottoorrss(()) functions.
+
+     As mentioned above, if multiple values are needed, it is better to make a
+     single call of move_info() saving the return values in an array, rather
+     than making multiple calls, as each call involves calculations for all the
+     motor positions and values, even if only selected values are returned.  For
+     example,
+
+        {{
+           llooccaall ii,, mm[[]]
+           mm == mmoovvee__iinnffoo(())
+           ffoorr ((ii == 00;; ii << MMOOTTOORRSS;; ii++++))
+                iiff ((mm[[ii]][[""ttoo__mmoovvee""]])) {{
+                        ......
+                }}
+        }}
+
+     For the most part, the mmoovvee__iinnffoo(()) function will reflect what will happen
+     on the next mmoovvee__aallll command.  However, for shared motors that can be moved
+     by other processes or for motors that have positions that drift or have
+     jitter, the status and position may change between the mmoovvee__iinnffoo(()) call and
+     the mmoovvee__aallll call.
+

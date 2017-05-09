@@ -1,0 +1,126 @@
+.TH "files" "reference" "04/16/13" "files.rst 6.2  04/16/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+files \- conventions for file/device output
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)files.rst        6.2  04/16/13  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "files" "reference" "04/16/13" "files.rst 6.2  04/16/13 CSS"
+.
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.sp
+With this group of functions, the name \fB"tty"\fP, when used for
+\fBfile_name\fP, is special and refers to the user\(aqs terminal.
+.RS 0m
+.HP 5m
+."
+\fBopen()\fP
+\- 
+Lists all open files.  Returns zero.
+.HP 5m
+."
+\fBopen(file_name)\fP
+\- 
+Makes \fBfile_name\fP, which is a string constant or expression,
+available for output.  Files are opened to append.
+Returns zero for success, \-1 if the file can not be opened or if there
+are too many open files.
+.HP 5m
+."
+\fBclose(file_name)\fP
+\- 
+Closes \fBfile_name\fP and removes it from the table of files
+available for output.
+Returns zero for success, \-1 if the file wasn\(aqt open.
+Any open file should be closed before attempting to modify the file
+with other UNIX utilities.
+Otherwise the file may be corrupted
+if two processes are writing to the file.
+.HP 5m
+."
+\fBon()\fP
+\- 
+Lists all open files and indicates which ones
+are currently turned on for output.
+.HP 5m
+."
+\fBon(file_name)\fP
+\- 
+Turns on \fBfile_name\fP for output.
+All messages, except for some error and debugging messages,
+but including all \fBprint\fP and
+\fBprintf()\fP output, are sent to all turned\-on devices.
+If \fBfile_name\fP has not been made available
+for output with the \fBopen()\fP function, it will be opened.
+Returns zero for success, \-1 if the file can\(aqt be opened
+or if there are too many open files.
+.HP 5m
+."
+\fBoff(file_name)\fP
+\- 
+Turns off output to \fBfile_name\fP,
+but keeps it in the list of files available for output.
+If this was the last turned\-on file or device,
+\fBtty\fP is turned back on automatically.
+Returns zero for success, \-1 if the file wasn\(aqt open.
+.RE
+.sp
+If the user changes \fBspec\fP\(aqs current directory,
+open files may be referenced either by the name with which
+the files were opened or by the correct path name
+relative to the current directory.
+.sp
+Errors during parsing or execution of commands, or typing a
+\fB^C\fP turns off all open files except log files.
+(A log file is a file with a name beginning with the characters \fBlog\fP.)
+.sp
+Files should be closed before attempting to edit them outside of \fBspec\fP.
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBDATAFILE\fP
+\- 
+Global variable, holds name of data file.
+.RE
+.SH "MACROS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBond\fP
+\- 
+turns \fBDATAFILE\fP on.
+.HP 5m
+."
+\fBoffd\fP
+\- 
+turns \fBDATAFILE\fP off.
+.HP 5m
+."
+\fBont\fP
+\- 
+turns \fB"tty"\fP on.
+.HP 5m
+."
+\fBofft\fP
+\- 
+turns \fB"tty"\fP off.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%newfile\fP
+\fI\%startup\fP
+

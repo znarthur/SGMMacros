@@ -1,0 +1,99 @@
+.TH "set_sim" "function" "05/16/13" "set_sim.rst 6.3  05/16/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+set_sim \- set simulate (no hardware) mode
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)set_sim.rst      6.3  05/16/13  CSS
+.
+.\" Copyright (c) 1990,1991,1993,1995,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "set_sim" "function" "05/16/13" "set_sim.rst 6.3  05/16/13 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+Simulate mode allows a user to exercise the program without
+accessing any of the hardware interfaces (for the most part, see below)
+or updating the motor\-settings file.
+.sp
+The function \fBset_sim()\fP is used to turn simulate mode
+on and off.
+.RS 0m
+.HP 5m
+."
+\fBset_sim(0)\fP
+\- 
+Turns simulate mode off.  Returns previous state.
+.HP 5m
+."
+\fBset_sim(arg)\fP
+\- 
+Turns simulate mode on if \fBarg\fP is greater than zero.
+If bit 4 (0x10) is set in \fBarg\fP, the user\-level
+\fBsleep()\fP function is simulated, that is, \fBspec\fP
+does not sleep (as of \fBspec\fP release 6.00.06).
+Returns previous state.
+.HP 5m
+."
+\fBset_sim(\-1)\fP
+\- 
+Doesn\(aqt change mode, but returns current state.  Bit
+assignments in the return value are as follows:
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l l .
+Bit 0	0x01	Simulate mode by \fBset_sim()\fP command
+Bit 1	0x02	Simulate mode on start up (\fB\-s\fP flag)
+Bit 2	0x04	No write access to \fBsettings\fP file
+Bit 3	0x08	Hardware locked by another user
+Bit 4	0x10	User\-level sleep simulated
+.TE
+.RE
+.RE
+.RE
+.sp
+Both \fBset_sim(0)\fP and \fBset_sim(arg)\fP, where \fBarg\fP
+is greater than zero,
+wait for moving and
+counting to finish before changing the mode.
+Also \fBset_sim(0)\fP always rereads the
+motor settings file to restore the motor positions.
+.sp
+Access to the user\-level socket interface is disabled when
+in simulate mode, but can be left on by using the command
+\fBsock_par("ignore_sim", 1)\fP.
+See the \fI\%sockets\fP help file for details.
+.sp
+Simulate mode is turned on when \fBspec\fP
+is invoked with the \fB\-s\fP flag and can\(aqt be turned off without
+restarting \fBspec\fP.
+Also, if there is no write access to the \fBspec\fP
+\fBsettings\fP file or if the hardware is locked because another user
+is running an instance of \fBspec\fP using the same hardware
+configuration file, simulate mode is also turned on and cannot
+be turned off without restarting \fBspec\fP.
+.sp
+Users normally use the macros \fBonsim\fP and
+\fBoffsim\fP to turn simulate mode on and off.
+The macros document the changes in the data file.
+.sp
+The \fBconfig\fP macro automatically invokes
+\fBedconf\fP with the \fB\-s\fP flag when simulate mode is on.
+This means the configuration file can\(aqt be changed using
+\fBconfig\fP when in simulate mode.
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%spec\fP
+\fI\%config\fP
+

@@ -1,0 +1,108 @@
+.TH "setpowder" "macro" "08/01/12" "setpowder.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+setpowder \- configure powder\-averaged scans
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)setpowder.rst    6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2005,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "setpowder" "macro" "08/01/12" "setpowder.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBsetpowder\fP macro is used to turn the powder\-average mode on or off.
+Its usage is:
+.RS 0m
+.HP 5m
+."
+\fBsetpowder motor full_width\fP
+\- 
+turns powder mode on, sets parameters.
+.HP 5m
+."
+\fBsetpowder off\fP
+\- 
+turns powder mode off.
+.HP 5m
+."
+\fBsetpowder uni\fP
+\- 
+turns unidirectional scanning on.
+.HP 5m
+."
+\fBsetpowder \-uni\fP
+\- 
+turns bidirectional scanning on.
+.HP 5m
+."
+\fBsetpowder\fP
+\- 
+turns powder mode on, asks for parameters.
+.RE
+.sp
+When powder mode is on, the powder motor will be rocked the
+full width specified at each point in a scan.
+Counts will be accumulated while the motor is moving.
+Powder mode works with all the angle scans and the \fBHKL\fP scans.
+.sp
+The syntax for invoking scans remains unchanged.
+You must still give the count\-time parameter, although
+its value is only used to select the order in which the time
+and monitor counts
+are recorded for each data point in the data file.
+(In the future, the count\-time parameter may be used
+to set the motor velocity.)
+.sp
+By default, the motors are rocked at the base rate as configured in the
+\fBconfig\fP file.
+To accommodate a faster rocking speed that requires
+accelerating from a base rate or a powder speed
+different from the base rate, the following
+\fBmotor_par()\fP motor parameters
+are available (as of \fBspec\fP release 5.05.05\-1):
+\fB"powder_base"\fP, \fB"powder_slew"\fP and \fB"powder_acceleration"\fP.
+The values for the first two parameters are set to the motor base
+rate and the last to the motor acceleration
+when \fBspec\fP starts up and on every
+\fBreconfig\fP command (or \fBconfig\fP macro invocation).
+If the \fB"powder_slew"\fP value is less than the
+\fB"powder_base"\fP value
+both the base and slew rates are set to the
+\fB"powder_slew"\fP value.
+.sp
+(Certain motor controllers,
+namely the 18011, CM3000, CM4000,
+E500, ES_OMS, ES_VPAP, HUB9000, IP28,
+MC4, MCB, SIX19, SMC and XRGCI_M,
+do not recognize the above parameters.
+Contact CSS to discuss the feasibility of adding support for the
+parameters for any of these controllers.)
+.sp
+By default, the powder mode moves the rocked motor in opposite directions
+at successive points to save time.
+If unidirectional mode is selected, the motor is scanned in the same
+direction for each point with the direction determined by the sign
+of the \fBfull_width\fP parameter.
+The motor movements do not include backlash corrections in either case.
+At the end of the scan, or if the scan is aborted,
+the rocked motor will be returned to its position at the start of the scan,
+correcting for backlash, as of the powder\-mode macros included in
+\fBspec\fP release 5.06.01\-4.
+Prior to that,
+the rocked motor would be left at its last position
+without a backlash correction.
+.sp
+Powder mode works by redefining the macros
+\fBscan_move\fP and \fBscan_count\fP that are called at each point in a scan.
+The return to starting position of the rocked motor is
+accomplished using the \fBcleanup_once\fP and \fBspec_scan_tail\fP macros.
+

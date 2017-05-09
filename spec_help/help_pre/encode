@@ -1,0 +1,135 @@
+encode                              reference                             encode
+
+NAME
+     eennccooddee(())/ddeeccooddee(()) - data stream manipulation
+
+DESCRIPTION
+
+     The eennccooddee(()) and ddeeccooddee(()) built-in functions convert between ssppeecc data
+     objects and standard data-interchanges formats.  Such a capability may be
+     useful, for example, to pass data over sockets between ssppeecc and other
+     processes.  Currently, the JSON (JavaScript Object Notation) format is
+     supported.
+
+     The ssppeecc data objects are numbers, strings, associative arrays and data
+     arrays.  The eennccooddee(()) function takes as argument one or more spec data
+     objects and returns a string conforming to the data-interchange format
+     specifications.  The ddeeccooddee(()) functions takes a string argument which
+     contains encoded data and returns a ssppeecc data object appropriate to the
+     data.  Since ssppeecc does not have composite data types, the ddeeccooddee(()) function
+     only accepts encoded representations of one kind of value, but that value
+     can be an associative array structure or a data array containing multiple
+     items.
+
+BUILT-IN FUNCTIONS
+
+     In the eennccooddee(()) and ddeeccooddee(()) functions, the first argument is the name of
+     the format.  Currently, ""jjssoonn"" is the only recognized format.  The argument
+     is case insensitive.
+
+     eennccooddee((ffoorrmmaatt,, oobbjj [[,, ......]]))  - Returns a string representation of the ssppeecc
+          data objects in the specified ffoorrmmaatt.
+
+     ddeeccooddee((ffoorrmmaatt,, ssttrr)) - Returns a ssppeecc data object obtained from the string
+          representation in ffoorrmmaatt.
+
+FORMATS
+
+     The JSON format is documented at _j_s_o_n_._o_r_g.  In general, a JSON value can be
+     a string, a number, an object or an array.  Arbitrary white space is
+     allowed between the various elements.
+
+     Strings are always delimited by double quotes.  Within strings, octal
+     string escape sequences are not allowed.  Instead, \\uu followed by
+     ffoouurr--hheexx--ddiiggiittss is used.  Since ssppeecc only supports eight-bit characters,
+     the two high-order hex digits are ignored when decoding such sequences.
+
+     Numbers can only be in decimal format (no octal or hexadecimal), and
+     leading zeroes are not allowed.
+
+     A JSON object is a comma-delimited list of name/value pairs (separated by a
+     colon), enclosed in curly brackets.  The name is always a string.  ssppeecc
+     only supports values that are numbers or strings.  The object type is used
+     for encoding and decoding associative arrays.  ssppeecc supports conversion
+     between  both one- and two-dimensional ssppeecc associative arrays and JSON
+     objects.
+
+     The array object is a comma-delimited list of numbers or strings enclosed
+     in square brackets.  ssppeecc supports one- or two-dimensional number arrays
+     and one-dimensional string arrays.  ssppeecc can encode an array of mixed
+     values, but can only decode arrays that have one value type.
+
+EXAMPLES
+
+     The following examples illustrate JSON encoding.
+
+     ssppeecc associative arrays are encoded as a JSON oobbjjeecctt, which is a set of
+     name/value pairs, enclosed in curly brackets.  The name is always a string.
+     ssppeecc's encoded objects will only include string and number value types.  To
+     encode a ssppeecc associative array:
+
+        11..SSPPEECC>> ss == eennccooddee((""jjssoonn"",, AA))
+
+        22..SSPPEECC>> pprriinntt ss
+        {{""00"":: 112200,, ""11"":: 6600,, ""22"":: --3355..22664455,, ""33"":: --4455}}
+
+     ssppeecc number data arrays can contain signed or unsigned 8-, 16- or 32-bit
+     integers, 32-bit floats or 64-bit doubles and can have one or two
+     dimensions.  To encode a data array:
+
+        33..SSPPEECC>> uulloonngg aarrrraayy ddaattaa[[1100]],, ddaattaa[[22]][[55]]
+
+        44..SSPPEECC>> aarrrraayy__oopp((""ffiillll"",, ddaattaa))
+
+        55..SSPPEECC>> ss == eennccooddee((""jjssoonn"",, ddaattaa))
+
+        66..SSPPEECC>> pprriinntt ss
+        [[00,,11,,22,,33,,44,,55,,66,,77,,88,,99]]
+
+        77..SSPPEECC>> aarrrraayy__oopp((""ffiillll"",, ddaattaa22))
+
+        88..SSPPEECC>> pprriinntt eennccooddee((""jjssoonn"",, ddaattaa22))
+        [[[[00,,00,,00,,00,,00]],,[[11,,11,,11,,11,,11]],,[[22,,22,,22,,22,,22]]]]
+
+     A ssppeecc string data array is similar to an 8-bit array with respect to
+     storage, but the contents will be encoded as JSON strings.  A
+     one-dimensional string array will be encoded as a single string.  A
+     two-dimensional string array will be encoded as one-dimensional array of
+     strings:
+
+        99..SSPPEECC>> ssttrriinngg aarrrraayy ssddaattaa[[2200]],, ssddaattaa22[[33]][[2200]]
+
+        1100..SSPPEECC>> ssddaattaa == ""\\003333[[77mmtteesstt\\003333[[00mm""
+
+        1111..SSPPEECC>> ssddaattaa22[[00]] == ""ffiirrsstt""
+
+        1122..SSPPEECC>> ssddaattaa22[[11]] == ""mmiiddddllee""
+
+        1133..SSPPEECC>> ssddaattaa22[[22]] == ""llaasstt""
+
+        1144..SSPPEECC>> pprriinntt eennccooddee((""jjssoonn"",, ssddaattaa))
+        ""\\uu000011BB[[77mmtteesstt\\uu000011BB[[00mm""
+
+        1155..SSPPEECC>> pprriinntt eennccooddee((""jjssoonn"",, ssddaattaa22))
+        [[""ffiirrsstt"",,""mmiiddddllee"",,""llaasstt""]]
+
+     Note the octal escapes in the first example have been encoded using \\uu
+     followed by four hexadecimal digits.
+
+     A list of mixed data objects can also be encoded:
+
+        1166..SSPPEECC>> ss == eennccooddee((""jjssoonn"",, PPII,, ""hheelllloo wwoorrlldd"",, ddaattaa,, AA))
+
+        1177..SSPPEECC>> pprriinntt ss
+        [[33..1144115599226655335588997799,, ""hheelllloo wwoorrlldd"",, [[00,,11,,22,,33,,44,,55,,66,,77,,88,,99]],,
+        {{""00"":: 112200,, ""11"":: 6600,, ""22"":: --3355..22664455,, ""33"":: --4455}}]]
+
+     Here, the list is encoded as an array of values consisting of a number, a
+     string, an array and an object.
+
+     The ddeeccooddee(()) function will only accept JSON encoded strings that can be
+     decoded to one of the recognized ssppeecc data types.  Mixed data types, such
+     as combinations of scalers and arrays in the last example above, are not
+     valid for ddeeccooddee(()), since ssppeecc has no data type in which to return the
+     decoded mixed values.
+

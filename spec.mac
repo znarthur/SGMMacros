@@ -1,0 +1,45 @@
+#++++ install source file:  /home/sgm/spec/macros/README.mac
+#  @(#)README.mac	6.1  07/29/12 CSS
+#
+# Please do not edit the standard CSS macro files.  When spec is
+# updated or reinstalled, all such changes will get clobbered.  If
+# you need to change the standard macros, place the modified
+# macros in one of the following files, as appropriate.
+#
+#      SPECD/site_f.mac        (read only when starting fresh)
+#      SPECD/site.mac          (read each time each user starts)
+#      SPECD/fourc/conf.mac    (or sixc, spec, kappa, etc.)
+#      ./spec.mac              (relative to start up directory)
+#
+# None of these files are created by the spec installation.  They
+# are locally created and maintained files.  Each file, if it exists,
+# is read in the order listed above, after the standard CSS macro
+# files are read.  Macros definitions in the above files will replace any
+# macros of the same name that were read from the standard CSS macro
+# files.
+#
+# If you do need to change a standard macro for your site, please
+# contact CSS so that, if practical, future versions of the standard
+# macros will be redesigned to accommodate your needs.
+#
+#++++ install source file:  /home/sgm/spec/macros/spec.src
+#
+#  @(#)spec.src	6.1  07/29/12 CSS
+#
+#  "spec" Release 6
+#
+#  Copyright (c) 1992,1993
+#  by Certified Scientific Software.
+#  All rights reserved.
+#  Copyrighted as an unpublished work.
+#
+#########################################################################
+#
+
+# Macros for generic instrument control
+
+# Get rid of HKL stuff ...
+
+no_hkl
+
+# end

@@ -1,0 +1,43 @@
+tw                                    macro                                   tw
+
+NAME
+     ttww - "tweak" motors
+
+SYNOPSIS
+
+     ttww  mmoottoorr [[mmoottoorr22 ......]] ddeellttaa [[ddeellttaa22 ......]] [[ccttiimmee]]
+
+DESCRIPTION
+
+     The ttww macro is used to interactively move one or more motors in small
+     increments.  Each time you hit return the motor or motors specified in the
+     arguments will be moved the amount given by the corresponding ddeellttaa
+     parameters.  The delta parameters can be of different signs for the
+     different motors.  You can change directions for all the motors by typing ++
+     or -- (or pp or nn) before hitting return.  You can also enter a new (signed)
+     delta for the first motor for subsequent moves.  The delta for the other
+     motors will be changed proportionally.
+
+     If the optional ccttiimmee parameter is given, the results of counting for the
+     specified time will be displayed after each move.  If the settling-time
+     parameter __sslleeeepp (set by the sseettssccaannss macro) is nonzero, counting will be
+     delayed by the specified time.
+
+     If the global variable TTWW__BBEEEEPP is nonzero, the macro will beep when the
+     moving and counting is finished for each iteration.  By default, beeping is
+     off.
+
+     If the global variable TTWW__UUPPDDAATTEE is nonzero, the moving and counting values
+     will be updated on the screen using the value of the standard UUPPDDAATTEE
+     variable as the delay between each update.  By default, the updated mode is
+     enabled.
+
+EXAMPLE
+
+         ttww tthh ..0011
+         ttww tttthh tthh 11 ..55 22
+
+SEE ALSO
+
+     _d_s_c_a_n
+

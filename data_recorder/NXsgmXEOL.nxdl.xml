@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="nxdlformat.xsl" ?>
+<!--
+# NeXus - Neutron and X-ray Common Data Format
+# 
+# Copyright (C) 2008-2016 NeXus International Advisory Committee (NIAC)
+# 
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public
+# License as published by the Free Software Foundation; either
+# version 3 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with this library; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+#
+# For further information, see http://www.nexusformat.org
+-->
+<group type="NXentry" name="entry">
+	<field name="title" type="NX_CHAR" spec="string_shm" index="9"/>
+        <field name="start_time" type="NX_DATE_TIME" spec="string_shm" index="10"/>
+        <field name="definition" type="NX_CHAR" value="NXsgm.nxdl.xml"/>
+        <group type="NXinstrument" name="instrument">
+		<group type="NXsource" name="source">
+                	<field name="type" type="NX_CHAR" value="Synchrotron X-ray Source"/>
+                	<field name="name" type="NX_CHAR" value="Canadian Light Source - SGM"/>
+                	<field name="probe" type="NX_CHAR" value="x-ray"/>
+			<field name="current" type="NX_FLOAT" spec="float_shm" index="3">
+				<attribute type="NX_CHAR" name="units" value="milli-amperes"/>
+			</field>
+			<field name="top_up" type="NX_BOOLEAN" value="FALSE"/>
+			<field name="sr_energy" type="NX_FLOAT" value="2.9">
+				<attribute type="NX_CHAR" name="units" value="giga-electron-volts"/>
+			</field>
+            	</group>
+            	<group type="NXmonochromator" name="monochromator">
+              		<field name="en" type="NX_FLOAT" spec="motor_shm" index="6" rank="1">
+				<attribute type="NX_CHAR" name="units" value="electron-volts"/>
+				<attribute type="NX_FLOAT" name="en_start" spec="float_shm" index="4"/>
+				<attribute type="NX_FLOAT" name="en_stop" spec="float_shm" index="5"/>
+			</field>
+	      		<field name="en_err" type="NX_INT" value="5000">
+				<attribute type="NX_CHAR" name="units" value="E/dE"/>
+			</field>
+			<field name="grup" type="NX_INT" spec="counter_shm" index="12" rank="1">
+                        </field>
+			<field name="grdown" type="NX_INT" spec="counter_shm" index="13" rank="1">
+                        </field>
+		      	<group type="NXgroup" name="grating">
+				<field name="coating_material" type="NX_CHAR" spec="string_shm" index="0"/>
+				<field name="coating_roughnes" type="NX_CHAR" spec="string_shm" index="1">
+					<attribute type="NX_CHAR" name="units" value="angstroms"/>
+				</field>
+				<field name="coating_thickness" type="NX_CHAR" spec="string_shm" index="2">
+					<attribute type="NX_CHAR" name="units" value="angstroms"/>
+				</field>
+				<field name="interior_atmosphere" type="NX_CHAR" spec="string_shm" index="3"/>
+				<field name="shape" type="NXgeometry" spec="string_shm" index="4"/>
+				<field name="substrate_material" type="NX_CHAR" spec="string_shm" index="5"/>
+				<field name="deflection_angle" type="NX_FLOAT" spec="float_shm" index="0">
+					<attribute type="NX_CHAR" name="units" value="degrees"/>
+				</field>
+				<field name="exit_slit" type="NX_FLOAT" spec="float_shm" index="1">
+					<attribute type="NX_CHAR" name="units" value="millimetres"/>
+				</field>
+				<field name="period" type="NX_INT" spec="float_shm" index="2"/>
+	      		</group>
+		</group>
+		<group type="NXfluorescence" name="fluorescence">
+			<field name="sdd1" type="NX_FLOAT" spec="mca1_shm" index="0" rank="256"/>
+			<field name="sdd2" type="NX_FLOAT" spec="mca2_shm" index="0" rank="256"/>
+			<field name="sdd3" type="NX_FLOAT" spec="mca3_shm" index="0" rank="256"/>
+			<field name="sdd4" type="NX_FLOAT" spec="mca4_shm" index="0" rank="256"/>
+		</group>
+		<group type="NXluminescence" name="luminescence">
+			<field name="xeol" type="NX_FLOAT" spec="xeol_shm" index="0" rank="1024"/>
+		</group>
+		<group type="NXdetector" name="incoming_beam">
+        	    	<field name="io_r" type="NX_INT" spec="counter_shm" index="3" rank="1">
+				<attribute type="NX_CHAR" name="gain" spec="string_shm" index="13"/>
+			</field>
+ 		</group>
+   		<group type="NXdetector" name="absorbed_beam">
+   	           	<field name="tey_r" type="NX_INT" spec="counter_shm" index="2" rank="1">
+				<attribute type="NX_CHAR" name="gain" spec="string_shm" index="12"/>
+			</field>
+        	      	<field name="pd1_r" type="NX_INT" spec="counter_shm" index="1" rank="1">
+				<attribute type="NX_CHAR" name="gain" spec="string_shm" index="14"/>
+			</field>
+   	           	<field name="sdd1_1" type="NX_INT" spec="counter_shm" index="4" rank="1">
+				<attribute name="roi_dn" type="NX_INT" spec="roi_shm" index="0"/>
+				<attribute name="roi_up" type="NX_INT" spec="roi_shm" index="1"/>
+			</field>
+        	      	<field name="sdd1_2" type="NX_INT" spec="counter_shm" index="5" rank="1">
+				<attribute name="roi_dn" type="NX_INT" spec="roi_shm" index="2"/>
+				<attribute name="roi_up" type="NX_INT" spec="roi_shm" index="3"/>
+			</field>
+              		<field name="sdd2_1" type="NX_INT" spec="counter_shm" index="6" rank="1">
+				<attribute name="roi_dn" type="NX_INT" spec="roi_shm" index="0"/>
+				<attribute name="roi_up" type="NX_INT" spec="roi_shm" index="1"/>
+			</field>
+      	        	<field name="sdd2_2" type="NX_INT" spec="counter_shm" index="7" rank="1">
+				<attribute name="roi_dn" type="NX_INT" spec="roi_shm" index="2"/>
+				<attribute name="roi_up" type="NX_INT" spec="roi_shm" index="3"/>
+			</field>
+        	      	<field name="sdd3_1" type="NX_INT" spec="counter_shm" index="8" rank="1">
+				<attribute name="roi_dn" type="NX_INT" spec="roi_shm" index="0"/>
+				<attribute name="roi_up" type="NX_INT" spec="roi_shm" index="1"/>
+			</field>
+              		<field name="sdd3_2" type="NX_INT" spec="counter_shm" index="9" rank="1">
+				<attribute name="roi_dn" type="NX_INT" spec="roi_shm" index="2"/>
+				<attribute name="roi_up" type="NX_INT" spec="roi_shm" index="3"/>
+			</field>
+   	           	<field name="sdd4_1" type="NX_INT" spec="counter_shm" index="10" rank="1">
+				<attribute name="roi_dn" type="NX_INT" spec="roi_shm" index="0"/>
+				<attribute name="roi_up" type="NX_INT" spec="roi_shm" index="1"/>
+			</field>
+        	      	<field name="sdd4_2" type="NX_INT" spec="counter_shm" index="11" rank="1">
+				<attribute name="roi_dn" type="NX_INT" spec="roi_shm" index="2"/>
+				<attribute name="roi_up" type="NX_INT" spec="roi_shm" index="3"/>
+			</field>
+    		</group>
+	    	<group type="NXmirror" name="mirror">
+			<field name="kb_h_pitch" type="NX_INT" spec="motor_shm" index="11">
+				<attribute type="NX_CHAR" name="units" value="steps"/>
+			</field>
+			<field name="kb_v_pitch" type="NX_INT" spec="motor_shm" index="12">
+				<attribute type="NX_CHAR" name="units" value="steps"/>
+			</field>
+			<field name="stripe" type="NX_CHAR" spec="string_shm" index="6"/>
+	    	</group>
+        </group>
+        <group type="NXsample" name="sample">
+            	<field name="description" type="NX_CHAR" spec="string_shm" index="11"/>
+	    	<group type="NXpositioner" name="positioner">
+			<field name="hex_x" type="NX_FLOAT" spec="motor_shm" index="0" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+			<field name="hex_y" type="NX_FLOAT" spec="motor_shm" index="1" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+			<field name="hex_z" type="NX_FLOAT" spec="motor_shm" index="2" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+			<field name="hex_xp" type="NX_FLOAT" spec="motor_shm" index="3" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+			<field name="hex_yp" type="NX_FLOAT" spec="motor_shm" index="4" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+			<field name="hex_zp" type="NX_FLOAT" spec="motor_shm" index="5" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+			<field name="xps_x" type="NX_FLOAT" spec="motor_shm" index="8" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+			<field name="xps_y" type="NX_FLOAT" spec="motor_shm" index="7" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+			<field name="xps_z" type="NX_FLOAT" spec="motor_shm" index="9" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+			<field name="xps_r" type="NX_FLOAT" spec="motor_shm" index="10" rank="1">
+				<attribute type="NX_CHAR" name="units" value="millimetres"/>
+			</field>
+	    	</group>
+    	</group>
+        <group type="NXmonitor" name="monitor">
+            	<field name="clock" type="NX_FLOAT" spec="counter_shm" index="0" rank="1">
+			<attribute type="NX_CHAR" name="units" value="micro-seconds"/>
+		</field>
+        </group>
+        <group type="NXdata" name="data"/>
+	<field type="NXuser" name="user" spec="string_shm" index="7"/>
+	<field type="NXchar" name="command" spec="string_shm" index="8"/>
+</group>

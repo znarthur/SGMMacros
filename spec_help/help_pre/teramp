@@ -1,0 +1,39 @@
+teramp                                macro                               teramp
+
+NAME
+     tteerraammpp - ramp the temperature to a new set point
+
+SYNOPSIS
+
+     tteerraammpp nneeww__sseett__ppooiinntt rraammpp__ttiimmee [[sstteepp__ssiizzee]]
+
+DESCRIPTION
+
+     The tteerraammpp macro gradually changes (or ramps) the temperature from the
+     current set point to nneeww__sseett__ppooiinntt.  The ramp takes rraammpp__ttiimmee seconds to
+     complete.
+
+     If the optional sstteepp__ssiizzee parameter is given, it used to calculate the time
+     between updates of the controller setting.  If the update interval is less
+     than the value given by the global variable TTEERRAAMMPP__MMIINN (0.2 seconds, by
+     default), the sstteepp__ssiizzee will be increased to make the update interval at
+     least TTEERRAAMMPP__MMIINN seconds.
+
+     If only two arguments are given and if the rraammpp__ttiimmee parameter is less than
+     500 seconds, the controller setting is updated every two seconds.
+     Otherwise, the controller is updated every ten seconds.
+
+     As with all of ssppeecc's temperature-control macros, you need to define a
+     mmeeaassuurreetteemmpp and a __sseetttteemmpp macro that work correctly with your instruments.
+     See the TTeemmppeerraattuurree CCoonnttrrooll MMaaccrrooss section in the ssppeecc SSttaannddaarrdd MMaaccrroo GGuuiiddee
+     and the tteemmppeerr..mmaacc macro source file for details.
+
+EXAMPLE
+
+       tteerraammpp 11..33 330000
+       tteerraammpp 2233 550000 ..0011
+
+SEE ALSO
+
+     _t_e _t_s_c_a_n _d_t_s_c_a_n _s_h_o_w_t_e_m_p
+

@@ -1,0 +1,408 @@
+.TH "phymotion" "hardware" "06/09/15" "phymotion.rst 6.2  06/09/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+phymotion \- Phytron phyMOTION Motor Controllers
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)phymotion.rst    6.2  06/09/15  CSS
+.
+.\" Copyright (c) 2014,2015 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "phymotion" "hardware" "06/09/15" "phymotion.rst 6.2  06/09/15 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Phytron phyMOTION controllers are a modular series of motor controllers.
+The modules fit into
+crates of various capacities that also
+accept
+digital and analog I/O modules along with
+various modules for interfacing and providing power.
+Software control uses a instruction set
+dubbed phyLOGIC that is an extension of the programming syntax used in earlier generations
+of Phytron motor controllers.
+.sp
+\fBspec\fP currently supports communication with the phyMOTION modules
+over socket and USB interfaces.
+The USB interface appears as a serial USB device to \fBspec\fP.
+.sp
+\fBspec\fP recognizes and supports the following phyMOTION modules:
+.sp
+.RS 4m
+.nf
+I1AM01     1\-axis stepper drive 3.5A
+I1AM02     1\-axis stepper drive 5A
+DIOM01     Digital I/O
+AIOM01     Analog I/O
+AIM01      Analog In
+AOM01      Analog Out
+IDXM01     4\-axis Indexer module
+.fi
+.sp
+.RE
+.SH "CONFIGURATION"
+.rs
+.sp
+Configure the motor controllers on the
+\fBD\fPevices screen of the configuration editor as follows, choosing
+the socket or serial entry, as appropriate:
+.RS 3m
+.sp
+.nf
+.ft CB
+Motor and Counter Device Configuration (Not CAMAC)
+
+MOTORS         DEVICE ADDR <>MODE NUM                     <>TYPE
+   YES /dev/phymotion   <> 115200  10 Phytron Phymotion (Serial)
+   YES  192.168.1.100              10 Phytron Phymotion (Socket)
+.ft P
+.fi
+.RE
+.sp
+If using the USB/serial interface, the recommended baud rate is 115200.
+.sp
+On \fBLinux\fP platforms, the \fBspec\fP \fBudev\fP rules file, \fB/etc/udev/rules.d/10\-spec_usb.rules\fP,
+includes a rule to create a special device node, \fB/dev/phymotion\fP, for one connected system.
+(The current phyMOTION USB descriptor does not contain sufficient information to
+create unique device nodes for multiple systems.)
+On older \fBLinux\fP distributions, particularly Fedora 15 through 18, a bug
+in the \fBudev\fP facility results in failure of the \fBspec\fP \fBudev\fP rules in creating
+\fB/dev/phymotion\fP.
+In that case use \fB/dev/ttyUSB0\fP, \fB/dev/ttyUSB1\fP, etc.,
+as appropriate, for the DEVICE name.
+Note, though, that assignment of the \fBttyUSB\fP nodes to particular devices
+depends on the order in which
+the USB devices are connected to the computer.
+.sp
+For the socket interface, specify the IP address or a resolvable host name
+for the controller.
+An optional TCP port number can be specified by following
+the name with a colon and the port number.
+If not specified, the default
+port number, 22222, will be used.
+.sp
+On the \fBM\fPotors screen, choose \fBPHYMO\fP or \fBPHYMO_E\fP as the controller
+type.  The latter specifies an encoder is present.
+If using an encoder, be sure to configure the optional
+encoder\-steps\-per\-deg/mm parameter on the second optional\-motor\-parameter screen.
+.SH "FUNCTIONS"
+.rs
+.sp
+The following \fBmotor_par()\fP options are available for the phyMOTION controllers.
+Most are associated with the controller unit, rather than a particular motor channel.
+For those commands, \fBmne\fP is any motor mnemonic associated with the particular controller.
+.SH "Digital Input/Output Modules"
+.sp
+Commands for the digital input/output (DIO) modules follow.
+Although Phytron labels the input and output pins
+from 1 to 8, \fBspec\fP uses bit numbers 0 to 7 to maintain a consistent
+syntax with the other devices \fBspec\fP supports that have digital I/O functionality.
+.sp
+If there is more than one DIO module, the value argument is a string of the form
+\fB"mod:val"\fP, where \fBmod\fP is the DIO module number starting from one
+(not the slot number in the crate).
+That is, the first DIO module is number 1, the second DIO module is number 2 and so on.
+If there is more than one module and \fBmod\fP is missing, module number 1
+is assumed.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "set_bit", val)\fP
+\- 
+Turn on the output pin corresponding to bit number \fBval\fP.
+Bits numbers 0 to 7 correspond to output pins 1 to 8.
+If there is more than one DIO module, use \fB"mod:val"\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "clr_bit", val)\fP
+\- 
+Turn off the output pin corresponding to bit number \fBval\fP.
+Bits numbers 0 to 7 correspond to output pins 1 to 8.
+If there is more than one DIO module, use \fB"mod:val"\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "set_bits"|"put_bits"|"put_byte" [, val])\fP
+\- 
+Turn on output pins corresponding to the bits set in
+\fBval\fP and turn off output pins corresponding to the bits
+not set in \fBval\fP.
+For example,
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+motor_par(mne, "set_bits", 0x13)
+.ft P
+.fi
+.RE
+.sp
+would turn on pins 1, 2 and 5.
+If there is more than one DIO module, use \fB"mod:val"\fP.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "get_obits" [, mod])\fP
+\- 
+Returns an 8\-bit value that reflects the current setting of
+all eight output pins.
+If there is more than one DIO module, specify which with the argument \fBmod\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "get_bit", val)\fP
+\- 
+Returns 0 or 1 based on whether the input pin corresponding to bit number
+\fBval\fP is high or low.
+Bit numbers 0 to 7 correspond to output pins 1 to 8.
+If there is more than one DIO module, use \fB"mod:val"\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "get_bits"|"get_byte" [, mod])\fP
+\- 
+Returns an 8\-bit value that reflects the setting of
+all eight input pins.
+If there is more than one DIO module, specify which with the argument \fBmod\fP.
+.RE
+.SH "Analog Input/Output Modules"
+.sp
+Commands for the analog input and output (AIO) modules follow.
+Channels are numbered 1 to 4.
+.sp
+If there is more than one AIO module, the argument is a string of the form
+\fB"mod:chan"\fP, where \fBmod\fP is the AIO module number starting from one,
+not the slot number in the crate.
+That is, the first AIO module is number 1, the second is number 2 and so on.
+If there is more than one module and \fBmod\fP is missing, module number 1
+is assumed.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "get_adc_mode", chan)\fP
+\- 
+Returns a value of 0, 1 or 2 for the ADC mode for the designated channel as follows:
+.sp
+.RS 5m
+.RS 4m
+.nf
+0 unipolar voltage
+1 bipolar voltage
+2 unipolar current
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "set_adc_mode", chan, mode)\fP
+\- 
+Sets the ADC mode for the designated channel, where \fBmode\fP
+has a value of 0, 1 or 2 corresponding to the table above.
+.HP 5m
+."
+\fBmotor_par(mne, "get_adc", chan)\fP
+\- 
+Returns the current analog reading from the designated channel.
+Values are from 0 to 10 Volts in unipolar voltage mode, from \-10 to 10 Volts in
+bipolar voltage mode and from 0 to 20 milliamps in unipolar current mode.
+.HP 5m
+."
+\fBmotor_par(mne, "get_dac_mode", chan)\fP
+\- 
+Returns the DAC mode for the designated channel with values
+according to the above table.
+.HP 5m
+."
+\fBmotor_par(mne, "set_dac_mode", chan, mode)\fP
+\- 
+Sets the DAC mode for the designated channel, where \fBmode\fP
+has a value of 0, 1 or 2 corresponding to the table above.
+.HP 5m
+."
+\fBmotor_par(mne, "set_dac", chan, val)\fP
+\- 
+Sets the DAC value of the for designated channel to the specified value.
+Values are from 0 to 10 Volts in unipolar voltage mode, from \-10 to 10 Volts in
+bipolar voltage mode and from 0 to 20 milliamps in unipolar current mode.
+For example:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC> motor_par(0, "set_dac", 2, 3.33)
+SPEC> p motor_par(0, "get_dac", 2)
+3.32998
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "get_dac", chan)\fP
+\- 
+Returns the programmed value for the designated DAC channel.
+.RE
+.SH "Command Pass Through"
+.sp
+The following commands can be used to send arbitrary ASCII messages to the controller
+and read the response.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "send", cmd)\fP
+\- 
+Sends the command string \fBcmd\fP to the motor channel \fBmne\fP.
+The module and axis address will be added to the command.
+.HP 5m
+."
+\fBmotor_par(mne, "read", cmd)\fP
+\- 
+Sends a command as above and returns the reply.
+For example:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC> p motor_par(0, "read", "P20R")
+2000
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "usend", cmd)\fP
+\- 
+Sends the command string \fBcmd\fP to the controller associated with
+motor \fBmne\fP, but does not add module and axis addressing to the command.
+.HP 5m
+."
+\fBmotor_par(mne, "uread", cmd)\fP
+\- 
+Sends a command as above and returns the reply.
+For example:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC> p motor_par(0, "uread", "IVM")
+V1.1.05 (MCM01 Minilog System)
+.ft P
+.fi
+.RE
+.RE
+.RE
+.SH "Status Commands"
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "show")\fP
+\- 
+Displays the module configuration of the phyMOTION unit associated with motor \fBmne\fP
+along these lines:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+slot   0:  MCM01  (CPU and bus module)
+slot   1: I1AM02  (1\-axis stepper drive 5A)
+slot   2: I1AM02  (1\-axis stepper drive 5A)
+slot   3: I1AM02  (1\-axis stepper drive 5A)
+slot   4: I1AM02  (1\-axis stepper drive 5A)
+slot   5: I1AM02  (1\-axis stepper drive 5A)
+slot   6: I1AM02  (1\-axis stepper drive 5A)
+slot   7: I1AM02  (1\-axis stepper drive 5A)
+slot   8: I1AM02  (1\-axis stepper drive 5A)
+slot   9: I1AM02  (1\-axis stepper drive 5A)
+slot  10: I1AM02  (1\-axis stepper drive 5A)
+slot  11: IDXM01  (4\-axis Indexer module)
+slot  12: DIOM01  (Digital I/O)
+    input  = 00000000 (0x00, 0)
+    output = 00000000 (0x00, 0)
+slot  13: AIOM01  (Analog I/O)
+    ADC chan 1: unipolar voltage at 0V
+    ADC chan 2: unipolar voltage at 0V
+    ADC chan 3: unipolar voltage at 0V
+    ADC chan 4: unipolar voltage at 0V
+    DAC chan 1: unipolar voltage at 0V
+    DAC chan 2: unipolar voltage at 0V
+    DAC chan 3: unipolar voltage at 0V
+    DAC chan 4: unipolar voltage at 0V
+.ft P
+.fi
+.RE
+.sp
+In addition to displaying the module type, current settings for
+digital input and output bits are shown along with current parameters
+and values for analog input and output channels on the analog modules.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "dump")\fP
+\- 
+Displays parameters associated with specified motor axis formatted as follows:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+P01 = 0 (movement type)
+P02 = 1 (units)
+P03 = 1 (conversion factor)
+P04 = 400 (base rate)
+P07 = 20000 (emergency\-stop acceleration)
+P08 = 2000 (home\-search speed)
+P09 = 10000 (home\-search acceleration)
+P10 = 400 (home\-search low speed)
+P11 = 0 (offset between zero and +limit)
+P12 = 0 (offset between zero and \-limit)
+P13 = 20 (recovery time after homing)
+P14 = 400 (slew rate)
+P15 = 10000 (acceleration)
+P16 = 20 (recovery time after move)
+P17 = 2 (boost)
+P19 = 0 (encoder deviation)
+P20 = 2000 (mechanical zero counter)
+P21 = 2000 (absolute counter)
+P22 = 0 (encoder counter)
+P23 = 0 (software +limit)
+P24 = 0 (software \-limit)
+P25 = 0 (backlash compensation)
+P26 = 10 (encoder data transfer rate)
+P27 = 7 (limit switch type)
+P28 = 1 (axis options)
+P30 = 0 (frequency band setting)
+P31 = 3 (frequency and ramp predivider)
+P34 = 0 (encoder type)
+P35 = 10 (encoder resolution)
+P36 = 0 (encoder function)
+P37 = 0 (encoder tolerance)
+P38 = 0 (encoder preferential direction)
+P39 = 1 (encoder conversion factor)
+P40 = 20 (stop current)
+P41 = 90 (run current)
+P42 = 180 (boost current)
+P43 = 20 (current hold time)
+P44 = 0 (control pulse origin)
+P45 = 0 (step resolution)
+P49 = 400 (power stage temperature)
+P50 = 0 (divider for control pulses)
+P51 = 19 (pulse width)
+P53 = 1 (power stage monitoring)
+P54 = \-999999 (motor temperature)
+.ft P
+.fi
+.RE
+.RE
+.RE
+

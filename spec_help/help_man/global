@@ -1,0 +1,37 @@
+.TH "global" "command" "08/01/12" "global.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBglobal\fP \- declare global variables
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)global.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "global" "command" "08/01/12" "global.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBglobal name [ name ... ]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+Declares \fBname\fP to be a global symbol.
+A global symbol retains its value outside of statement blocks.
+If \fBname\fP is used as an array name, each element of the array is global.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBglobal COUNT_RATE\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%constant\fP
+

@@ -1,0 +1,51 @@
+.TH "mk" "macro" "08/01/12" "mk.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBmk\fP and \fBumk\fP \- move to the reciprocal space coordinates (\fBHKL\fP)
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mk.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mk" "macro" "08/01/12" "mk.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBmk H K L\fP
+.sp
+\fBumk H K L\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBmk\fP macro
+is used to move the diffractometer to the reciprocal space coordinates given by
+\fBH\fP, \fBK\fP and \fBL\fP.
+.sp
+The \fBumk\fP macro
+also moves the diffractometer, but provides an updated
+display of the motor positions and corresponding reciprocal space
+coordinates while the motors are moving.
+The update interval, in seconds, is set by the global variable
+\fBUPDATE\fP.
+.sp
+\fBmk\fP is synonymous with \fBbr\fP.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBmk 0 0 1\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%ca\fP
+\fI\%cal\fP
+\fI\%br\fP
+\fI\%fourc\fP
+

@@ -1,0 +1,263 @@
+phymotion                           hardware                           phymotion
+
+NAME
+     phymotion - Phytron phyMOTION Motor Controllers
+
+DESCRIPTION
+
+     The Phytron phyMOTION controllers are a modular series of motor
+     controllers.  The modules fit into crates of various capacities that also
+     accept digital and analog I/O modules along with various modules for
+     interfacing and providing power.  Software control uses a instruction set
+     dubbed phyLOGIC that is an extension of the programming syntax used in
+     earlier generations of Phytron motor controllers.
+
+     ssppeecc currently supports communication with the phyMOTION modules over
+     socket and USB interfaces.  The USB interface appears as a serial USB
+     device to ssppeecc.
+
+     ssppeecc recognizes and supports the following phyMOTION modules:
+
+         I1AM01     1-axis stepper drive 3.5A
+         I1AM02     1-axis stepper drive 5A
+         DIOM01     Digital I/O
+         AIOM01     Analog I/O
+         AIM01      Analog In
+         AOM01      Analog Out
+         IDXM01     4-axis Indexer module
+
+CONFIGURATION
+
+     Configure the motor controllers on the DDevices screen of the configuration
+     editor as follows, choosing the socket or serial entry, as appropriate:
+
+        MMoottoorr aanndd CCoouunntteerr DDeevviiccee CCoonnffiigguurraattiioonn ((NNoott CCAAMMAACC))
+
+        MMOOTTOORRSS         DDEEVVIICCEE AADDDDRR <<>>MMOODDEE NNUUMM                     <<>>TTYYPPEE
+           YYEESS //ddeevv//pphhyymmoottiioonn   <<>> 111155220000  1100 PPhhyyttrroonn PPhhyymmoottiioonn ((SSeerriiaall))
+           YYEESS  119922..116688..11..110000              1100 PPhhyyttrroonn PPhhyymmoottiioonn ((SSoocckkeett))
+
+     If using the USB/serial interface, the recommended baud rate is 115200.
+
+     On LLiinnuuxx platforms, the ssppeecc uuddeevv rules file,
+     //eettcc//uuddeevv//rruulleess..dd//1100--ssppeecc__uussbb..rruulleess, includes a rule to create a special
+     device node, //ddeevv//pphhyymmoottiioonn, for one connected system.  (The current
+     phyMOTION USB descriptor does not contain sufficient information to create
+     unique device nodes for multiple systems.)  On older LLiinnuuxx distributions,
+     particularly Fedora 15 through 18, a bug in the uuddeevv facility results in
+     failure of the ssppeecc uuddeevv rules in creating //ddeevv//pphhyymmoottiioonn.  In that case
+     use //ddeevv//ttttyyUUSSBB00, //ddeevv//ttttyyUUSSBB11, etc., as appropriate, for the DEVICE name.
+     Note, though, that assignment of the ttttyyUUSSBB nodes to particular devices
+     depends on the order in which the USB devices are connected to the
+     computer.
+
+     For the socket interface, specify the IP address or a resolvable host name
+     for the controller.  An optional TCP port number can be specified by
+     following the name with a colon and the port number.  If not specified, the
+     default port number, 22222, will be used.
+
+     On the MMotors screen, choose PPHHYYMMOO or PPHHYYMMOO__EE as the controller type.  The
+     latter specifies an encoder is present.  If using an encoder, be sure to
+     configure the optional encoder-steps-per-deg/mm parameter on the second
+     optional-motor-parameter screen.
+
+FUNCTIONS
+
+     The following mmoottoorr__ppaarr(()) options are available for the phyMOTION
+     controllers.  Most are associated with the controller unit, rather than a
+     particular motor channel.  For those commands, mmnnee is any motor mnemonic
+     associated with the particular controller.
+
+Digital Input/Output Modules
+     Commands for the digital input/output (DIO) modules follow.  Although
+     Phytron labels the input and output pins from 1 to 8, ssppeecc uses bit numbers
+     0 to 7 to maintain a consistent syntax with the other devices ssppeecc supports
+     that have digital I/O functionality.
+
+     If there is more than one DIO module, the value argument is a string of the
+     form ""mmoodd::vvaall"", where mmoodd is the DIO module number starting from one (not
+     the slot number in the crate).  That is, the first DIO module is number 1,
+     the second DIO module is number 2 and so on.  If there is more than one
+     module and mmoodd is missing, module number 1 is assumed.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseett__bbiitt"",, vvaall)) - Turn on the output pin corresponding to
+          bit number vvaall.  Bits numbers 0 to 7 correspond to output pins 1 to 8.
+          If there is more than one DIO module, use ""mmoodd::vvaall"".
+
+     mmoottoorr__ppaarr((mmnnee,, ""ccllrr__bbiitt"",, vvaall)) - Turn off the output pin corresponding to
+          bit number vvaall.  Bits numbers 0 to 7 correspond to output pins 1 to 8.
+          If there is more than one DIO module, use ""mmoodd::vvaall"".
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseett__bbiittss""||""ppuutt__bbiittss""||""ppuutt__bbyyttee"" [[,, vvaall]])) - Turn on output
+          pins corresponding to the bits set in vvaall and turn off output pins
+          corresponding to the bits not set in vvaall.  For example,
+
+             mmoottoorr__ppaarr((mmnnee,, ""sseett__bbiittss"",, 00xx1133))
+
+          would turn on pins 1, 2 and 5.  If there is more than one DIO module,
+          use ""mmoodd::vvaall"".
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__oobbiittss"" [[,, mmoodd]])) - Returns an 8-bit value that reflects
+          the current setting of all eight output pins.  If there is more than
+          one DIO module, specify which with the argument mmoodd.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__bbiitt"",, vvaall)) - Returns 0 or 1 based on whether the input
+          pin corresponding to bit number vvaall is high or low.  Bit numbers 0 to
+          7 correspond to output pins 1 to 8.  If there is more than one DIO
+          module, use ""mmoodd::vvaall"".
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__bbiittss""||""ggeett__bbyyttee"" [[,, mmoodd]])) - Returns an 8-bit value that
+          reflects the setting of all eight input pins.  If there is more than
+          one DIO module, specify which with the argument mmoodd.
+
+Analog Input/Output Modules
+     Commands for the analog input and output (AIO) modules follow.  Channels
+     are numbered 1 to 4.
+
+     If there is more than one AIO module, the argument is a string of the form
+     ""mmoodd::cchhaann"", where mmoodd is the AIO module number starting from one, not the
+     slot number in the crate.  That is, the first AIO module is number 1, the
+     second is number 2 and so on.  If there is more than one module and mmoodd is
+     missing, module number 1 is assumed.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__aaddcc__mmooddee"",, cchhaann)) - Returns a value of 0, 1 or 2 for the
+          ADC mode for the designated channel as follows:
+
+              0 unipolar voltage
+              1 bipolar voltage
+              2 unipolar current
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseett__aaddcc__mmooddee"",, cchhaann,, mmooddee)) - Sets the ADC mode for the
+          designated channel, where mmooddee has a value of 0, 1 or 2 corresponding
+          to the table above.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__aaddcc"",, cchhaann)) - Returns the current analog reading from
+          the designated channel.  Values are from 0 to 10 Volts in unipolar
+          voltage mode, from -10 to 10 Volts in bipolar voltage mode and from 0
+          to 20 milliamps in unipolar current mode.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__ddaacc__mmooddee"",, cchhaann)) - Returns the DAC mode for the
+          designated channel with values according to the above table.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseett__ddaacc__mmooddee"",, cchhaann,, mmooddee)) - Sets the DAC mode for the
+          designated channel, where mmooddee has a value of 0, 1 or 2 corresponding
+          to the table above.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseett__ddaacc"",, cchhaann,, vvaall)) - Sets the DAC value of the for
+          designated channel to the specified value.  Values are from 0 to 10
+          Volts in unipolar voltage mode, from -10 to 10 Volts in bipolar
+          voltage mode and from 0 to 20 milliamps in unipolar current mode.  For
+          example:
+
+             SSPPEECC>> mmoottoorr__ppaarr((00,, ""sseett__ddaacc"",, 22,, 33..3333))
+             SSPPEECC>> pp mmoottoorr__ppaarr((00,, ""ggeett__ddaacc"",, 22))
+             33..3322999988
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__ddaacc"",, cchhaann)) - Returns the programmed value for the
+          designated DAC channel.
+
+Command Pass Through
+     The following commands can be used to send arbitrary ASCII messages to the
+     controller and read the response.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseenndd"",, ccmmdd)) - Sends the command string ccmmdd to the motor
+          channel mmnnee.  The module and axis address will be added to the
+          command.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreeaadd"",, ccmmdd)) - Sends a command as above and returns the
+          reply.  For example:
+
+             SSPPEECC>> pp mmoottoorr__ppaarr((00,, ""rreeaadd"",, ""PP2200RR""))
+             22000000
+
+     mmoottoorr__ppaarr((mmnnee,, ""uusseenndd"",, ccmmdd)) - Sends the command string ccmmdd to the
+          controller associated with motor mmnnee, but does not add module and axis
+          addressing to the command.
+
+     mmoottoorr__ppaarr((mmnnee,, ""uurreeaadd"",, ccmmdd)) - Sends a command as above and returns the
+          reply.  For example:
+
+             SSPPEECC>> pp mmoottoorr__ppaarr((00,, ""uurreeaadd"",, ""IIVVMM""))
+             VV11..11..0055 ((MMCCMM0011 MMiinniilloogg SSyysstteemm))
+
+Status Commands
+     mmoottoorr__ppaarr((mmnnee,, ""sshhooww"")) - Displays the module configuration of the phyMOTION
+          unit associated with motor mmnnee along these lines:
+
+             sslloott   00::  MMCCMM0011  ((CCPPUU aanndd bbuuss mmoodduullee))
+             sslloott   11:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott   22:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott   33:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott   44:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott   55:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott   66:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott   77:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott   88:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott   99:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott  1100:: II11AAMM0022  ((11--aaxxiiss sstteeppppeerr ddrriivvee 55AA))
+             sslloott  1111:: IIDDXXMM0011  ((44--aaxxiiss IInnddeexxeerr mmoodduullee))
+             sslloott  1122:: DDIIOOMM0011  ((DDiiggiittaall II//OO))
+                 iinnppuutt  == 0000000000000000 ((00xx0000,, 00))
+                 oouuttppuutt == 0000000000000000 ((00xx0000,, 00))
+             sslloott  1133:: AAIIOOMM0011  ((AAnnaalloogg II//OO))
+                 AADDCC cchhaann 11:: uunniippoollaarr vvoollttaaggee aatt 00VV
+                 AADDCC cchhaann 22:: uunniippoollaarr vvoollttaaggee aatt 00VV
+                 AADDCC cchhaann 33:: uunniippoollaarr vvoollttaaggee aatt 00VV
+                 AADDCC cchhaann 44:: uunniippoollaarr vvoollttaaggee aatt 00VV
+                 DDAACC cchhaann 11:: uunniippoollaarr vvoollttaaggee aatt 00VV
+                 DDAACC cchhaann 22:: uunniippoollaarr vvoollttaaggee aatt 00VV
+                 DDAACC cchhaann 33:: uunniippoollaarr vvoollttaaggee aatt 00VV
+                 DDAACC cchhaann 44:: uunniippoollaarr vvoollttaaggee aatt 00VV
+
+          In addition to displaying the module type, current settings for
+          digital input and output bits are shown along with current parameters
+          and values for analog input and output channels on the analog modules.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp"")) - Displays parameters associated with specified
+          motor axis formatted as follows:
+
+             PP0011 == 00 ((mmoovveemmeenntt ttyyppee))
+             PP0022 == 11 ((uunniittss))
+             PP0033 == 11 ((ccoonnvveerrssiioonn ffaaccttoorr))
+             PP0044 == 440000 ((bbaassee rraattee))
+             PP0077 == 2200000000 ((eemmeerrggeennccyy--ssttoopp aacccceelleerraattiioonn))
+             PP0088 == 22000000 ((hhoommee--sseeaarrcchh ssppeeeedd))
+             PP0099 == 1100000000 ((hhoommee--sseeaarrcchh aacccceelleerraattiioonn))
+             PP1100 == 440000 ((hhoommee--sseeaarrcchh llooww ssppeeeedd))
+             PP1111 == 00 ((ooffffsseett bbeettwweeeenn zzeerroo aanndd ++lliimmiitt))
+             PP1122 == 00 ((ooffffsseett bbeettwweeeenn zzeerroo aanndd --lliimmiitt))
+             PP1133 == 2200 ((rreeccoovveerryy ttiimmee aafftteerr hhoommiinngg))
+             PP1144 == 440000 ((sslleeww rraattee))
+             PP1155 == 1100000000 ((aacccceelleerraattiioonn))
+             PP1166 == 2200 ((rreeccoovveerryy ttiimmee aafftteerr mmoovvee))
+             PP1177 == 22 ((bboooosstt))
+             PP1199 == 00 ((eennccooddeerr ddeevviiaattiioonn))
+             PP2200 == 22000000 ((mmeecchhaanniiccaall zzeerroo ccoouunntteerr))
+             PP2211 == 22000000 ((aabbssoolluuttee ccoouunntteerr))
+             PP2222 == 00 ((eennccooddeerr ccoouunntteerr))
+             PP2233 == 00 ((ssooffttwwaarree ++lliimmiitt))
+             PP2244 == 00 ((ssooffttwwaarree --lliimmiitt))
+             PP2255 == 00 ((bbaacckkllaasshh ccoommppeennssaattiioonn))
+             PP2266 == 1100 ((eennccooddeerr ddaattaa ttrraannssffeerr rraattee))
+             PP2277 == 77 ((lliimmiitt sswwiittcchh ttyyppee))
+             PP2288 == 11 ((aaxxiiss ooppttiioonnss))
+             PP3300 == 00 ((ffrreeqquueennccyy bbaanndd sseettttiinngg))
+             PP3311 == 33 ((ffrreeqquueennccyy aanndd rraammpp pprreeddiivviiddeerr))
+             PP3344 == 00 ((eennccooddeerr ttyyppee))
+             PP3355 == 1100 ((eennccooddeerr rreessoolluuttiioonn))
+             PP3366 == 00 ((eennccooddeerr ffuunnccttiioonn))
+             PP3377 == 00 ((eennccooddeerr ttoolleerraannccee))
+             PP3388 == 00 ((eennccooddeerr pprreeffeerreennttiiaall ddiirreeccttiioonn))
+             PP3399 == 11 ((eennccooddeerr ccoonnvveerrssiioonn ffaaccttoorr))
+             PP4400 == 2200 ((ssttoopp ccuurrrreenntt))
+             PP4411 == 9900 ((rruunn ccuurrrreenntt))
+             PP4422 == 118800 ((bboooosstt ccuurrrreenntt))
+             PP4433 == 2200 ((ccuurrrreenntt hhoolldd ttiimmee))
+             PP4444 == 00 ((ccoonnttrrooll ppuullssee oorriiggiinn))
+             PP4455 == 00 ((sstteepp rreessoolluuttiioonn))
+             PP4499 == 440000 ((ppoowweerr ssttaaggee tteemmppeerraattuurree))
+             PP5500 == 00 ((ddiivviiddeerr ffoorr ccoonnttrrooll ppuullsseess))
+             PP5511 == 1199 ((ppuullssee wwiiddtthh))
+             PP5533 == 11 ((ppoowweerr ssttaaggee mmoonniittoorriinngg))
+             PP5544 == --999999999999 ((mmoottoorr tteemmppeerraattuurree))
+

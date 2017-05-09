@@ -1,0 +1,35 @@
+.TH "lm" "macro" "08/01/12" "lm.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBlm\fP \- list motor software limits
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)lm.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "lm" "macro" "08/01/12" "lm.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBlm [motor ... ]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBlm\fP macro lists the current software limits
+as well as the current motor positions
+in both user and dial units for all motors.
+You can limit the printout to six or fewer motors by
+specifying motor numbers or mnemonics as arguments.
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+

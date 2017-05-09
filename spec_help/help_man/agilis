@@ -1,0 +1,139 @@
+.TH "agilis" "hardware" "04/30/15" "agilis.rst 6.2  04/30/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+Agilis \- Newport Agilis AG\-UC2 and AG\-UC8 Piezo Controllers
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)agilis.rst       6.2  04/30/15  CSS
+.
+.\" Copyright (c) 2015
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "agilis" "hardware" "04/30/15" "agilis.rst 6.2  04/30/15 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Newport Agilis AG\-UC2 and AG\-UC8 piezo controller modules are both
+supported by spec.
+The Agilis AG\-UC2 uses a USB interface while the AG\-UC8
+can use either a serial or USB interface.
+.sp
+The AG\-UC2 controller handles two axes which can be operated simultaneously.
+The AG\-UC8 has four channels, each of which functions as
+a two\-axis AG\-UC2 for a total of eight axes.
+However, only one of the two\-axis channels in the AG\-UC8 can be active at a time.
+The settings and current positions for the channels
+are not maintained in the AG\-UC8 when switching
+from one two\-axis channel to the next.
+\fBspec\fP\(aqs AG\-UC8 support handles the multiplexing transparently, making
+it is possible to specify new positions for all eight actuators on the
+AG\-UC8 in one command.
+\fBspec\fP will take care of synchronizing parameters and moving the channels in sequence.
+.SH "CONFIGURATION"
+.rs
+.sp
+Select
+"Newport Agilis (Serial)" as the controller type for both the AG\-UC2 and the AG\-UC8,
+even when using the USB connection.
+The Agilis models use an FTDI USB interface chip that
+is recognized by drivers available on both \fBLinux\fP and Mac OS X.
+The kernel driver makes
+the device appear as a serial interface to \fBspec\fP.
+.sp
+On \fBLinux\fP, the standard \fBftdi_sio\fP kernel module is required.
+Recent \fBLinux\fP kernels include recognition of the Agilis USB device IDs in the \fBftdi_sio\fP
+driver.
+For older kernels, edit a file in \fB/etc/module.d/\fP
+(a file could be created named \fBlocal.conf\fP, for example) to add the line:
+.RS 3m
+.sp
+.nf
+.ft CB
+options ftdi\-sio product=0x3000 vendor=0x104d
+.ft P
+.fi
+.RE
+.sp
+On OSX, the VCP driver available at the \fI\%ftdichip.com\fP must be installed.
+The Newport Agilis USB vendor and product IDs need to be added to
+the kernel extension \fBInfo.plist\fP file as explained in the \fI\%FTDI Technical Note 105\fP
+available at the FTDI website.
+Contact CSS for assistance, if needed.
+.sp
+If using a direct serial connection to the AG\-UC8, select a baud rate of 115200.
+If connecting the AG\-UC2 directly or using the USB port on the AG\-UC8, the baud rate should be 921600.
+.sp
+In some configurations, the serial
+communication between \fBspec\fP and the Agilis may need to be slowed.
+Non\-standard optional parameters named \fB"wdelay"\fP and \fB"rdelay"\fP
+can be set from the \fBD\fPevices screen of the configuration editor.
+These parameters set a delay time before write commands to the Agilis
+and before reading replies, respectively.
+Units for the parameters are seconds.
+A delay of 0.010 seconds has been needed in at least one installation.
+\fBspec\fP limits the delay to a maximum of 0.5 seconds.
+Type \fBp\fP from the \fBD\fPevices screen to create and edit nonstandard optional controller parameters.
+The delays can only be set in the \fBconfig\fP file.
+.sp
+The step amplitude associated with the controller\(aqs
+\fBSU\fP command can be configured as a nonstandard optional
+parameter for each motor from the \fBM\fPotor screen of \fBspec\fP\(aqs hardware configuration editor.
+There are separate parameters for positive and negative movements, named
+\fB"amplitude+"\fP and \fB"amplitude\-"\fP.
+.sp
+An additional nonstandard optional parameter named \fB"PA_target"\fP can be configured to
+set the target position used with the \fBhome\fP command, as explained in the next section.
+.sp
+Type \fBp\fP from the \fBM\fPotor screen to create and edit nonstandard optional motor parameters.
+All three parameters can also be changed and examined within \fBspec\fP using \fBmotor_par()\fP,
+whether or not they are added to the \fBconfig\fP file.
+.SH "HOMING"
+.rs
+.sp
+There are two types of home search implemented in \fBspec\fP for the Agilis
+controllers.
+The \fBchg_dial(mne, "lim+")\fP and \fBchg_dial(mne, "lim\-")\fP commands
+will use the controller\(aqs \fBMV\fP command to send the actuator to the positive or
+negative limit switches.
+Of course, the command will only work with stages that have limit switches.
+The movement can be done at four possible speeds, which are set using the
+\fBhome_method\fP optional motor parameter as follows:
+.sp
+.RS 4m
+.TS
+;
+l l .
+1	5 steps/sec at defined step amplitude
+2	100 steps/sec at maximum step amplitude
+3	1700 steps/sec at maximum step amplitude
+4	666 steps/sec at defined step amplitude
+.TE
+.RE
+.sp
+If the \fBhome_method\fP parameter is not set, method 4 will be used.
+.sp
+The second home search uses the \fBPA\fP command and is initiated with the \fB"home"\fP, \fB"home+"\fP
+and \fB"home\-"\fP options to \fBchg_dial()\fP.
+These are the options used with \fBchg_dial()\fP within \fBspec\fP\(aqs standard \fBhome\fP
+macro.
+All three options produce the same action on the Agilis.
+.sp
+With the \fBPA\fP command, the controller first moves the stage to the positive limit.
+The stage is then moved to the negative limit while steps are counted.
+The stage is moved back to the positive limit, then moved the number
+of steps needed to position the stage at a specified percentage of the total distance.
+That percentage is taken from the parameter \fB"PA_target"\fP, which can have a value from 0 to 100,
+with a precision of one part in a thousand.
+If unset, a value of 50 is used.
+.sp
+Note, the \fBPA\fP procedure can take a couple of minutes to perform.
+However, the search can be interrupted with \fB^C\fP.
+

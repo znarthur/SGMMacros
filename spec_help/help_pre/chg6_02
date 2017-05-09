@@ -1,0 +1,808 @@
+changes                      spec 6.02 Release Notes                     changes
+
+NAME
+     changes - Highlights for ssppeecc release 6.02
+
+     (Please see release 6.02 _i_n_t_r_o_d_u_c_t_i_o_n below.)
+
+December 29, 2014 - RELEASE 6.02.11
+
+Fix For Amptek MCA8000D
+     An Amptek firmware update (version 6.07.00) broke ssppeecc's support for the
+     MCA8000D by changing the command used to set the preset time from PPRREETT to
+     PPRREELL.  This ssppeecc update recognizes the new firmware and uses the new
+     command.
+
+December 15, 2014 - RELEASE 6.02.10
+
+Fix For ttaannggoo__iioo(()) Crash
+     A bug that could cause a crash when using ttaannggoo__iioo(()) with a TANGO device
+     that was not in the TANGO database has been fixed.
+
+December 4, 2014 - RELEASE 6.02.09
+
+Support For Baltic Scientific Instruments Si(Li) Detector
+     This ssppeecc release supports the Baltic Scientific Instruments Si(Li)
+     Detector type SER-25 based on the SP350 controller board.  The device is
+     configured as an MCA-type instrument and uses a serial interface.  See the
+     _b_s_i___s_p_3_5_0 help file for details.
+
+Trinamic TMCL Updates
+     The recently added Trinamic TMCL motor controller support has been updated
+     so that parameters that can be stored in EEPROM will be saved to EEPROM
+     when set using mmoottoorr__ppaarr(()) or when configured as nonstandard optional
+     parameters in the ccoonnffiigg file.  In addition, ssppeecc can now restore the
+     position registers when a power cycle has been detected.  To enable the
+     latter feature, the controller parameter ""cchheecckk__iinntteerrvvaall"" needs to be added
+     to the ccoonnffiigg file.  See the _t_m_c_l help file for details on both new
+     features.
+
+Fix For HDF5 Data Frames With 1D Arrays
+     A bug with the new HDF5 support where the frames option wasn't working for
+     one-dimensional arrays has been fixed.
+
+Update For EEssccaann Macro
+     The standard EEssccaann macro will now use the global UUPP variable to set the
+     number of decimal digits displayed on the screen for the monochromator
+     motor positions, just as is done with the standard motor scans.  The UUPP
+     default value is 4.
+
+November 7, 2014 - RELEASE 6.02.08
+
+sspplloott Updates
+     This ssppeecc release includes various improvements to the Python sspplloott
+     utility, including a new sspplloott__ccnnttll(()) ""mmaarrkkeerr"" option to create vertical
+     marker lines on the plot.  See the files in the sspplloott distribution ddooccss
+     directory for detailed descriptions, particularly the development log and
+     command server documentation.
+
+Improvement In the sseerr__ppaarr(()) ""qquueeuuee"" Option
+     Previously, the ""qquueeuuee"" option for the sseerr__ppaarr(()) command would return the
+     number of characters available in ssppeecc's read-ahead buffer.  That buffer
+     has bytes from a previous sseerr__ggeett(()) call that were returned by the system
+     rreeaadd(()) call, but beyond the specified byte count or end-of-string match.
+     The ""qquueeuuee"" option will now return that same value if it is nonzero.
+     However, if ssppeecc's read-ahead buffer is empty, the code will check if any
+     characters are available in the kernel buffer and return that value.
+
+New Serial Debugging Option For Hex Output
+     For serial device I/O, ssppeecc debug level 128 uses octal escape sequences to
+     represent unprintable characters.  If debug level 0x400000 is also set, the
+     debugging output will use a hexadecimal format for all bytes, as has been
+     possible for socket debugging since ssppeecc release 5.05.05-5.
+
+New Invocation Option For pplloottsseelleecctt
+     When invoked with arguments, the pplloottsseelleecctt macro now accepts a
+     comma-separated list of counter numbers or mnemonics to set which counters
+     are to be plotted.  This is in addition to the still supported
+     space-separated list of counter numbers or mnemonics invocation.  When
+     invoked without arguments, pplloottsseelleecctt still runs in interactive menu mode.
+
+More Robust Server-Mode Debugging
+     An issue in server mode with debug levels 0x1000 and 0x100000 (for
+     debugging server-client communications and thread locks) that could cause
+     crashes has been addressed.
+
+Updates For Trinamic TMCL Motor Controller Support
+     The preliminary support for the Trinamic TMCL motor controllers now
+     includes new commands to access the I/O ports.  See the _t_m_c_l help file for
+     more details.
+
+Support For NI GPIB Version 3.2 Libraries
+     It is now possible to link with version 3.2 of the National Instruments
+     GPIB libraries for Linux.  However, CSS still recommends using ssppeecc's
+     built-in support.  See the _n_i_g_p_i_b file for more information.
+
+Fix For NI GPIB-ENET/1000 ggppiibb__ppuutt(())
+     An old bug where a ggppiibb__ppuutt(()) of more than 500 bytes would fail when using
+     ssppeecc's built-in support for the National Instruments GPIB-ENET/1000 has
+     been fixed.
+
+Fix For Mythen 1.3 Firmware
+     Support for the older Dectris Mythen MCA version 1.3 firmware that was
+     inadvertently broken in ssppeecc release 6.00.11 is now fixed.
+
+Fix For Measurement Computing USB-CTR04 Detection
+     An issue, where ssppeecc had the wrong USB device ID coded for the Measurement
+     Computer USB-CTR04 with the result that ssppeecc did not detect that device,
+     has been fixed.  The device ID for the USB-CTR08 was correct.
+
+Fix For Crash With Incomplete tteerrmmiinnffoo Description
+     A bug, where ssppeecc could crash with the ssppeecc__mmeennuu(()) function if certain
+     function-key sequence descriptions were missing from a tteerrmmiinnffoo entry, has
+     been fixed.
+
+Preliminary Support For Seven-Circle Geometry sseevvcc
+     Preliminary support for a new seven-circle diffractometer geometry is
+     included in the source file ggeeoo__sseevvcc..cc.  Choose sseevvcc as the geometry type
+     during ssppeecc installation.  To accommodate the seven geometry motors,
+     orientation-matrix macros that were based on a maximum of six geometry
+     motors have been updated to work with seven.
+
+September 10, 2014 - RELEASE 6.02.07
+
+Fix For rreemmoottee__ppoollll(())
+     Updates in ssppeecc release 6.02 to allow more flexibility in specifying the
+     name of the ssppeecc server inadvertently broke the rreemmoottee__ppoollll(()) function.
+     That issue is now fixed.
+
+Fix For GE Fanuc SBS (Bit-3) Driverless Support
+     Optimizer improvements in ggcccc release 4.8 broke the ssppeecc driverless support
+     for the GE Fanuc (formerly SBS, formerly Bit-3) PCI-to-VME model 61x/62x
+     controller boards (in at least some configurations).  This ssppeecc release
+     fixes that issue.
+
+Preliminary Support For Saving To HDF5 FILES
+     This ssppeecc release features new functions to save data using the HDF5
+     standard.  See the new _h_d_f_5 help file for details.  In order to enable the
+     functions, ssppeecc must be linked with the HDF5 library, which can currently
+     be configured by setting the ssiittee__lliibb ("extra library flags") installation
+     parameter to include the library, as in ssiittee__lliibb==--llhhddff55.  This preliminary
+     support expects version 1.8.13 of the library, although will still function
+     if linked with an earlier 1.8 release.  Future releases will include a
+     compatible library version.  The function syntax and usage in this
+     preliminary release is subject to change.  Please contact CSS directly for
+     additional information.
+
+August 16, 2014 - RELEASE 6.02.06
+
+Fix For Struck SIS1100
+     Optimizer improvements in ggcccc release 4.8 broke the ssppeecc driverless support
+     for the Struck SIS1100 PCI and PCIe VME controller boards (in at least some
+     configurations).  This ssppeecc release fixes that issue.
+
+August 6, 2014 - RELEASE 6.02.05
+
+Updates and Fixes For Phytron phyMOTION
+     The recently introduced Phytron phyMOTION support has been updated to fix
+     issues associated with identifying the crate configuration and with
+     addressing I/O modules.  In addition, the USB interface (which appears as a
+     serial device to ssppeecc) is now supported.  Also, ssppeecc's uuddeevv rules file for
+     LLiinnuuxx platforms now includes a rule to create a //ddeevv//pphhyymmoottiioonn special
+     device when the controller is connected.
+
+Support For Micos Venus-1
+     This ssppeecc release includes support for the old Micos Venus-1 programming
+     syntax, such as used on the Corvus Eco model motor controller.  The
+     configuration is the same as for the Venus-2 and Venus-3 controllers.  The
+     ssppeecc code automatically selects the appropriate syntax version to use.
+
+Added ""iinniitt__sseeqquueennccee"" Parameter For MDrive Motors
+     The MDrive motor controller support now recognizes a parameter named
+     ""iinniitt__sseeqquueennccee"".  The parameter must be set in the ccoonnffiigg file (type pp from
+     the motor screen in the configuration editor to access nonstandard optional
+     parameters).  The string value of the parameter can contain a sequence of SS
+     and/or DD commands separated by semicolons to configure the I/O points, such
+     as:
+
+        SS11==22,,00,,11;;SS22==33,,00,,11
+
+     That string would set input 1 as the plus limit, input 2 as the minus limit
+     and both inputs as active low and current sources.
+
+     The ""iinniitt__sseeqquueennccee"" commands will be sent when reading the ccoonnffiigg file on
+     start up or after rreeccoonnffiigg.  The default initialization sequence is the
+     following:
+
+        SS11==22,,00;;SS22==33,,00;;SS33==11,,11
+
+     That command will be sent prior to any ""iinniitt__sseeqquueennccee"" commands, but the
+     assignments made using ""iinniitt__sseeqquueennccee"" will override the default sequence.
+     Only SS and DD assignments are allowed in the sequence.  See the MDrive
+     programming manual for proper syntax for using the SS and DD commands.  Also,
+     the semicolons are not part of the MDrive syntax. ssppeecc will format the
+     commands correctly when sent to the controller.
+
+July 3, 2014 - RELEASE 6.02.04
+
+Fix For --ll llooggffiillee Crash
+     A bug introduced in release 6.02 that resulted in a crash when the --ll
+     llooggffiillee start-up option was used has been fixed.
+
+Fixes For Background Subtraction With the Plotting Macros
+     Support for the background-subtraction feature in the plotting macros has
+     been updated to restore functionality which disappeared with the ssppeecc 6.02
+     release.  The ability to enable the feature is back in the sseettpplloott macro.
+     After updating the ssppeecc installation, use the nneewwmmaacc command to load the
+     revised macros.
+
+     The background-subtraction feature calculates a linear background using the
+     endpoints of the scan for the counters selected for plotting with the
+     pplloottsseelleecctt or ccoouunntteerrss commands, subtracts that background from the data in
+     SSCCAANN__DD and places the results in an array called SSCCAANN__BB.  One can use the
+     sseettpplloott macro to enable or disable background-subtraction or simply assign
+     a value to the global variable BBGG.  A nonzero value enables background
+     subtraction.  The commands sspplloott, ppttss, llpp__pplloott and pplloott use SSCCAANN__BB if BBGG is
+     nonzero.  The values CCEENN, ppll__MMIINN, ppll__MMAAXX, ppll__FFWWHHMM, etc. are calculated from
+     the SSCCAANN__BB data after calling sspplloott, ppttss, llpp__pplloott or pplloott when
+     background-subtraction is enabled.  One of those macros needs to be called
+     after setting BBGG to zero to have CCEENN, etc., calculated from SSCCAANN__DD.
+
+Fix For Display Of Macros containing Non-ASCII Text
+     The pprrddeeff command and the sshhooww__ssttaattee utility will now use octal escape
+     sequences for non-ASCII bytes in the macro definition.  Previously,
+     characters with bit 8 set would display as a backslash followed by the
+     ASCII representation of the remaining seven bits.
+
+Fix For Output File Reference After Directory Change
+     Release 5.07.03-4 (fall 2007) broke a feature associated with output files
+     and described in the ssppeecc Reference Manual as "ssppeecc remembers the directory
+     the files are in when they are first opened.  If the user changes ssppeecc's
+     current directory, open files may be referenced either by the name with
+     which the files were opened or by the correct path name relative to the
+     current directory."  That bug is now fixed.
+
+Update To Macro-Hardware Motor ""sseeaarrcchh"" Keyword
+     The macro-hardware motor __ccmmdd(()) function call for with keyword ""sseeaarrcchh"" has
+     been modified so that the pp22 parameter will only be set if the underlying
+     cchhgg__ddiiaall(()) function is called with an optional third argument or if the
+     optional ""hhoommee__ppoossiittiioonn"" parameter is set.  See the _m_a_c___h_d_w help file for
+     details.
+
+June 25, 2014 - RELEASE 6.02.03
+
+Support For Measurement Computing USB-CTR4 and USB-CTR8
+     ssppeecc supports the new USB-CTR4 and USB-CTR8 counter/timer modules from
+     Measurement Computing.  See the _u_s_b_c_t_r help file for details.
+
+Backlash Compensation Support For Phytron PhyMotion Controllers
+     ssppeecc now programs the backlash compensation parameter (P25) on the Phytron
+     PhyMotion controllers.  When this parameter is set the controller will
+     perform backlash compensation as part of a single move command.  Normally,
+     ssppeecc programs two moves when backlash is required.
+
+Updates For sspplloott Utility
+     The sspplloott utility will now create a pop-up error window if there are
+     problems opening a data file instead of silently fail.  The code for
+     identifying scan types from the scan name is now more robust.
+
+June 15, 2014 - RELEASE 6.02.02
+
+Fix For CCEENN and Related Values
+     The quantities CCEENN, ppll__MMIINN, ppll__FFWWHHMM and related values use the symbol PPLL__YY11
+     in their calculations.  PPLL__YY11 contains the detector column number in the
+     data array (usually SSCCAANN__DD).  With the updated plotting macros in ssppeecc
+     release 6.02, the column number depends on the number of motors in the
+     scan, but the macros did not update PPLL__YY11 when the number of motors
+     changed.  That issue is fixed in this release.
+
+Fix For ttaannggoo__ppuutt(()) Of Associative Arrays
+     A bug in the ssppeecc release 6.02 TANGO updates, where a ttaannggoo__ppuutt(()) of an
+     associative array did not include the last element of the array, has been
+     fixed.
+
+Fix For ccoouunntteerr__ppaarr(()) Crash with PCI Counter/Timers
+     A crash that could occur when using ccoouunntteerr__ppaarr(()) to access hardware
+     features when PCI counter/timers were configured but not installed in the
+     computer has been fixed.  Affected cards were any of the am9513 based PCI
+     cards, the National Instruments 6601 and 6602 PCI cards and the National
+     Instruments X series PCIe cards.
+
+Fixes For sspplloott Utility
+     An issue where the sspplloott utility could not read data files that contained
+     motor scans of three or more motors (aa33ssccaann, aa44ssccaann, etc.)  has been fixed.
+     Another issue, where the FWHM was displayed with a negative number for
+     scans that went from high to low values, has also been fixed.
+
+June 2, 2014 - RELEASE 6.02.01
+
+Support For HP/Agilent E2050/E5810 LAN/GPIB Gateway
+     This ssppeecc release includes initial support for the HP E2050 and Agilent
+     E5810 LAN/GPIB gateway controllers.
+
+May 20, 2014 - RELEASE 6.02
+
+Introduction
+     Welcome to ssppeecc release 6.02.  In addition to the usual assortment of new
+     hardware support and bug fixes, this release has some noteworthy new
+     features.  The notes below are divided into four sections: _n_e_w _f_e_a_t_u_r_e_s,
+     _m_a_c_r_o _u_p_d_a_t_e_s, _b_u_g _f_i_x_e_s and _h_a_r_d_w_a_r_e _s_u_p_p_o_r_t.  (The following notes are
+     consolidated and reorganized from the 6.01 beta release notes, which are in
+     the _c_h_g_6___0_1 help file.)
+
+     First of the new features is the new interactive plotting utility called
+     sspplloott.  sspplloott not only does real-time plots of scan data, but also can read
+     and display scans from ssppeecc data files.  In addition, sspplloott has controls to
+     send commands to ssppeecc to position motors and start scans.  Note, though,
+     ssppeecc must be run in server mode (use the --SS flag when starting) for sspplloott
+     to send commands to position motors or start scans.
+
+     Another added feature is the new built-in ssppeecc__mmeennuu(()) function that
+     provides interactive menu configuration capabilities.  The standard
+     sseettpplloott, pplloottsseelleecctt and sseettsshhooww macros have been replaced with versions
+     that use ssppeecc__mmeennuu(()).  A new mmssttaarrttuupp macro replaces much of the
+     configuration provided by the old ssttaarrttuupp macro.  Additional menu-ized
+     configuration macros will be forthcoming.
+
+     A new set of continuous scan macros, ccssccaann, cc22ssccaann, ccmmeesshh, etc., performs
+     rapid scans where the counters are read continuously as the motors move
+     steadily from the start to end specified positions.
+
+     Be sure to either start fresh, as in ssppeecc --ff, or run the nneewwmmaacc macro to
+     read in the updated macros.  Run sseettpplloott to choose to run the new sspplloott
+     utility.
+
+     Please read through the update notes below for a full list of updates.  We
+     at CSS look forward to your feedback.  Thanks!
+
+NEW FEATURES
+
+New sspplloott Utility
+     A new stand-alone plotting utility called sspplloott is introduced with this
+     ssppeecc release.  The sspplloott program is intended to replace the standard
+     xx1111ffiilltt window and provide additional functions.  The sspplloott program uses
+     shared-memory data arrays and ssppeecc server/client protocols to communicate
+     with the ssppeecc process.
+
+     The sspplloott program is written in Python and requires the PyQt4 and PyQwt5
+     packages.  A script called iinnssttaallll__sspplloott__nneeeeddss is included in the ssppeecc
+     distribution that will try to install the required packages and their
+     dependencies.  One can also install the needed packages using whatever
+     tools the particular LLiinnuuxx distribution includes.
+
+     To use the supplied script, go to the ssppeecc distribution directory and type:
+
+        ssuuddoo ..//iinnssttaallll__sspplloott__nneeeeddss [[--yy]]
+
+     The --yy flag means the package installation programs will assume a yes in
+     response to queries to confirm additional package installation.  The
+     package installations programs (yyuumm or aapptt--ggeett, depending on LLiinnuuxx
+     distribution) will likely download a dozen or more additional packages.
+
+     Note, the xx1111ffiilltt plotting is still available and can be used
+     simultaneously with or instead of sspplloott.  Use the sseettpplloott macro to
+     configure plotting.
+
+New sspplloott__ccnnttll(()) Built-In Function
+     To support the tight integration of the new sspplloott utility with ssppeecc, a new
+     sspplloott__ccnnttll(()) function is provided to send and receive sspplloott messages.
+
+New ssppeecc__mmeennuu(()) Function
+     A new function named ssppeecc__mmeennuu(()) is available for creating interactive
+     menus.  See the _s_p_e_c___m_e_n_u help file.
+
+aarrrraayy__pplloott(()) Will Now Plot One-Dimensional Arrays
+     The aarrrraayy__pplloott(()) function has been updated to plot one-dimensional data
+     arrays, such as may be read from an MCA device.  For such plots, the xx-axis
+     is set to the point number.
+
+Unlimited Number Of Output Files
+     Previous releases of ssppeecc limited the number of open files (using the
+     ooppeenn(()), oonn(()) or ffpprriinnttff(()) functions) to 25.  With this ssppeecc release, the
+     built-in limit is removed.  The number of files that can be opened is only
+     constrained by the system limits.
+
+     Note, it is not a good idea to run up against the system limit.  Some ssppeecc
+     commands will cease to work if no more file descriptors are available from
+     the system.  Make sure that macros that open files have provision to close
+     the files when no longer needed.  Note also, the ssppeecc__ppaarr(())
+     ""aauuttoo__ffiillee__cclloossee"" option can be set to have ssppeecc automatically close files
+     that haven't been accessed in the specified time.  See the _s_p_e_c___p_a_r help
+     file for details.
+
+New Built-In OOUUTTFFIILLEESS Associative Array
+     ssppeecc will now maintain an associative array named OOUUTTFFIILLEESS that will hold
+     information about all open output files.  OOUUTTFFIILLEESS is a two-dimensional
+     array.  The first index is the name by which the file was opened using
+     ooppeenn(()), oonn(()), ffpprriinnttff(()) or the --ll oouuttppuuttffiillee start-up option.  The element
+     value for a second index of ""nnaammee"" is the first index.  The element value
+     for a second index of ""ppaatthh"" is the full path name of the file.  Additional
+     elements may be added in the future.  For example:
+
+        11004488..FFOOUURRCC>> ffoorr ((ii iinn OOUUTTFFIILLEESS[[]][[""nnaammee""]]))
+        11004499..mmoorree>>    pprriinnttff((""%%1100ss %%ss\\nn"",, OOUUTTFFIILLEESS[[ii]][[""nnaammee""]],, OOUUTTFFIILLEESS[[ii]][[""ppaatthh""]]))
+              ddlloogg //pprriivvaattee//ttmmpp//ddlloogg
+             ddaattaa11 //pprriivvaattee//ttmmpp//ddaattaa11
+               ttttyy //ddeevv//ttttyy
+         //ddeevv//nnuullll //ddeevv//nnuullll
+
+     or
+
+        11005533..FFOOUURRCC>> pp OOUUTTFFIILLEESS[[DDAATTAAFFIILLEE]][[""ppaatthh""]]
+        //pprriivvaattee//ttmmpp//ddaattaa11
+
+     Note, the special built-in name ""ppiippee"" is not included in OOUUTTFFIILLEESS.  The
+     special built-in name ""//ddeevv//nnuullll"" includes the full path in both ""nnaammee"" and
+     ""ppaatthh"" to work with the standard macros that always refer to that special
+     file by the full path name.
+
+New Filename Completion For ddoo and qqddoo Macro Commands
+     Although ddoo and qqddoo are defined as standard user-level macros, filename
+     completion code has been added to automatically include directory paths
+     contained in the global variable DDOO__DDIIRR.  Macro support for path lists in
+     DDOO__DDIIRR was added to the standard macros in ssppeecc release 6.00.05.  Filename
+     completion is available when ssppeecc is linked with the lliibbeeddiitt or rreeaaddlliinnee
+     libraries.
+
+Support For 64-Bit Integer Data Arrays
+     New keywords lloonngg6644 and uulloonngg6644 are available to create 64-bit signed and
+     unsigned integer data arrays, respectively.  The 64-bit arrays can be used
+     in all contexts that accept array data types.  Note, though, ssppeecc will only
+     work with 52 bits of precision in some contexts, since the internal code
+     uses double-precision floating point format for many operations associated
+     with ssppeecc user-level symbols.  (Double floats use 52 bits for the
+     significand and the remaining 12 bits for sign and exponent).  The
+     ssppeecc__sshhmm..hh and ssppeecc__sseerrvveerr..hh files included in the ssppeecc distribution have
+     been updated to include definitions for 64-bit data-array data types.
+
+The ffmmtt__rreeaadd(()) and ffmmtt__wwrriittee(()) Functions Now Work With Subarrays
+     The ffmmtt__rreeaadd(()) and ffmmtt__wwrriittee(()) commands, used to read and write binary data
+     in standard and user-created formats, will now work using subarray syntax.
+     Previously, the commands only worked with full data arrays.
+
+New iinnppuutt(()) Option To Read Arrow Keys and Forward Delete
+     The ccbbrreeaakk mode for iinnppuutt(()) now has an option to return special codes when
+     arrow keys or the forward-delete key are pressed.  Type hh iinnppuutt at the ssppeecc
+     prompt or see the _f_u_n_c_s help file for details.
+
+New IISS__SSEERRVVEERR Built-In Variable
+     A new built-in variable named IISS__SSEERRVVEERR will be nonzero if ssppeecc is running
+     in server mode (invoked with the --SS option).  When in server mode,
+     IISS__SSEERRVVEERR will be set to the port number on which the ssppeecc server is
+     listening.
+
+New HHOOSSTTNNAAMMEE Built-In Variable
+     A new built-in variable named HHOOSSTTNNAAMMEE will be set to the hostname of the
+     computer running ssppeecc.
+
+New Flexibility For Identifying ssppeecc Server
+     The configuration of ssppeecc server motors and counters and the built-in
+     functions for communicating with a ssppeecc server all require an argument of
+     the form hhoosstt::ppoorrtt or hhoosstt::ssppeecc to identify the host and the port on which
+     the server is listening.  With this new release, if the hhoosstt part of the
+     string is missing, ssppeecc will use ""llooccaallhhoosstt"".  In addition, it is now
+     allowed to mix references to the same server by port number and by ssppeecc
+     process name.  See the _s_e_r_v_e_r help file for details.
+
+Improvements For rreemmoottee__ssttaatt(())
+     ssppeecc will now include a check for pending connections to ssppeecc servers
+     during a call of rreemmoottee__ssttaatt(()), making it possible for a loop that tests
+     the return value of rreemmoottee__ssttaatt(()) to determine when a server connection
+     comes up.
+
+     Also, rreemmoottee__ssttaatt(()) will no longer return ""lloosstt"" for a previously open
+     connection after a new call of rreemmoottee__ppaarr((......,, ""ccoonnnneecctt"")) for the same host
+     is made.
+
+Length Of Allowed Input Line Increased
+     The maximum length of input records has been increased from 512 to 4096
+     bytes.
+
+"SignedInteger" Recognized As an ESRF Data Format Data Type
+     Some programs that use the ESRF data format (EDF) use "SignedInteger"
+     instead of "SignedLong" to characterize the 32-bit integer data type.  The
+     ffmmtt__eessrrff..cc file included in the ssppeecc distribution that implements the EDF
+     format for the ffmmtt__rreeaadd(()) and ffmmtt__wwrriittee(()) functions now recognizes
+     "SignedInteger" as a data type.
+
+MACRO UPDATES
+
+New Continuous Scan Macros
+     New ccssccaann, cc22ssccaann, cc33ssccaann, cc44ssccaann and ccmmeesshh standard macros for on-the-fly
+     scans are included with this ssppeecc release.  With these scans, the counters
+     and motor positions are read continuously as the motors move from the start
+     to end positions.  The scan arguments include the start and finish
+     positions for each motor and the total time for the scan.  The speed of
+     each motor will be set to approximate that scan time.  An additional
+     optional argument specifies a sleep interval before each counter reading.
+     The ccmmeesshh scan does a series of single motor on-the-fly scans as an
+     additional motor is stepped through a specified range.  The scan direction
+     is reversed after each on-the-fly scan to minimize overhead time.  See the
+     comments in the ccssccaann..mmaacc source file for details.
+
+Move Macros Now Allow Variables For Motor Mnemonics
+     The __mmmmoovv internal macro used by the standard motor-move macros (mmvv, uummvv,
+     mmvvrr, uummvvrr, mmvvdd and uummvvdd) will now work if the motor number or mnemonic
+     argument is a variable.  For example:
+
+        ffoorr ((ii == 00;; ii << 55;; ii++++)) mmvv ii 1100
+
+     will move motors 0 through 4.  Similarly:
+
+        {{ ppaarr==""pphhii"";; uummvv ppaarr 44;; ppaarr==tthh;; uummvv ppaarr 11 }}
+
+     will work.  In the first instance, the symbol ppaarr is assigned a string
+     version of the motor mnemonic.  In the second, ppaarr is assigned the number
+     value of the mnemonic.
+
+Name-Space Issues with Moving and Counting Macros Addressed
+     The local variable names used within the __mmmmoovv macro (used by mmvv, uummvv, mmvvrr,
+     uummvvrr, mmvvdd and uummvvdd) now all start with an underscore to lessen the chance
+     of a name conflict with local definitions in uusseerr__ggeettaanngglleess, uusseerr__pprreemmoovvee,
+     uusseerr__ppoossttmmoovvee, etc.
+
+     In addition, ggeett__aanngglleess in the wwmm and __uuppddaattee(()) macros has been replaced
+     with a new macro function called ggeett__aanngglleess__ffuunncc(()).  The new macro function
+     serves as a wrapper to ggeett__aanngglleess, insulating local variables that appear
+     in uusseerr__ggeettaanngglleess from symbols used in the calling macros.  A
+     ggeett__ccoouunnttss__ffuunncc(()) provides a similar wrapper to ggeett__ccoouunnttss and is used in
+     the updating counting macro uucctt.
+
+Fix For Display of Disabled Counters In uucctt
+     The uucctt macro has been fixed to properly format the display when disabled
+     counters are included.
+
+Update For ccoouunntteerrss Macro
+     Counter names, in addition to counter numbers and mnemonics, are now
+     included in the list of counters displayed with the ccoouunntteerrss and
+     sshhooww__ccoouunntteerrss(()) macros.
+
+Updated and Improved Plotting Macros
+     The standard plotting macros have been updated and revised to fix some old
+     problems and to accommodate the new sspplloott utility, which is an alternative
+     to the standard ssppeecc xx1111ffiilltt plots.
+
+     The SSCCAANN__DD data array now defaults to a shared-memory object to accommodate
+     the sspplloott program.  In addition, SSCCAANN__DD now includes data for all the
+     configured counters at each data point along with HHKKLL values for motor
+     scans that include geometry motors.
+
+     New ssccaann__iinnffoo__uuppddaattee(()) and ssccaann__mmeettaa__uuppddaattee(()) macros have been worked into
+     the standard macros to fill the shared memory iinnffoo and mmeettaa region with
+     details of the spec configuration and scan status for the benefit of sspplloott.
+
+     Many of the internal macros have been reworked.  If a site's local macros
+     use internal macros from the mmaaccrrooss//pplloottaarrrraayy..mmaacc file, those local macros
+     should be checked and possibly revised to maintain compatibility.
+
+Epoch Now Saved To Data File With Added Precision
+     The default __lloooopp macro, called at each point of the standard scans, will
+     now save the epoch value for each scan point to millisecond resolution.
+     Previously, the value was saved as an integer.  The value is the difference
+     between the current time and value of the EEPPOOCCHH variable.  The value for
+     EEPPOOCCHH is set to the current time when a new data file is created and is
+     saved in the data file header.
+
+Revised sseettpplloott, pplloottsseelleecctt and sseettsshhooww Macros Use New ssppeecc__mmeennuu(())
+     The sseettpplloott macro to configure the scan plots, the pplloottsseelleecctt macro to
+     select which counters to plot and the sseettsshhooww macro to configure motor and
+     counter screen displays now use the new ssppeecc__mmeennuu(()) function.
+
+New mmssttaarrttuupp Macro
+     A new mmssttaarrttuupp macro (for menu startup) uses the new ssppeecc__mmeennuu(()) function
+     and replaces much of the functionality of the standard ssttaarrttuupp macro.
+
+New CCPP__FFIILLTTEERR__CCMMDD Option For ccpplloott__pplloott Macro
+     The standard ccpplloott__pplloott macro now recognizes a CCPP__FFIILLTTEERR__CCMMDD global
+     variable.  If it exists, the ccpplloott__pplloott macro will evaluate its string
+     value to create a dynamic CCPP__FFIILLTTEERR command.  For example, the following
+     will produce ppddff files using the CC--PPLLOOTT ppddff filter containing the current
+     scan number as part of the ppddff filename:
+
+        CCPP__FFIILLTTEERR__CCMMDD == ''sspprriinnttff((""ppddff ssccaann__%%0044dd..ppddff"",, SSCCAANN__NN))''
+
+     See the macro source file mmaaccrrooss//ccpplloott..mmaacc in the ssppeecc distribution for
+     implementation details.
+
+New CCOOUUNNTT__FFMMTT__MMAAXXCCHH Option For Updated Counting
+     The number of counters displayed while doing an updated count with the uucctt
+     macro can be limited to the number of counters in the new global variable
+     CCOOUUNNTT__FFMMTT__MMAAXXCCHH.  If the value is zero, all the counters will be displayed.
+     The sseettsshhooww macro will prompt for a value.
+
+nneewwffiillee Macro Updated and Reorganized
+     The standard nneewwffiillee macro has been reorganized and now does the bulk of
+     its work in macro functions.  The arguments are checked and the file
+     created in nneewwffiillee__ff(()).  That macro calls nneewwffiillee__hheeaadd(()) to create the file
+     header.  The nneewwffiillee__ff(()) macro is also called from the new mmssttaarrttuupp macro.
+
+     A new uusseerr__nneewwffiillee macro hook is called at the end of nneewwffiillee__ff(()).  By
+     default, the macro is empty.  Also, uusseerr__nneewwffiillee and uusseerr__ffiilleehheeaadd are now
+     wrapped in macro functions to avoid name-space conflicts with the local
+     variables in the nneewwffiillee macros.
+
+     Finally, the cchhkk__ffiillee utility that used to be used to test if an existing
+     file begins with the standard header has been replaced with calls of
+     built-in ssppeecc functions.
+
+     See the macro source file mmaaccrrooss//ffiillee..mmaacc in the ssppeecc distribution for
+     implementation details.
+
+BUG FIXES
+
+Fix For Drifting Pseudomotors
+     An old problem associated with the internal rounding of motor positions
+     calculated for pseudomotors from real motors or for real motors from
+     pseudomotors, such as with a kappa head on a ffoouurrcc, ffiivveecc or ppssiicc
+     diffractometer, has been addressed.  The rounding may have led to position
+     drift during repetitive movements in certain configurations.
+
+Fix For xx1111ffiilltt Retained-Pixmap Mode Text Garbling
+     The xx1111ffiilltt plotting utility can use either backing store or a
+     retained-pixmap to maintain content that is drawn when the plot window
+     itself is not visible.  Backing store is a server feature.  The retained
+     pixmap is implemented within the xx1111ffiilltt code.  The default mode for
+     xx1111ffiilltt is to use backing store, but on some platforms the default X server
+     configuration has backing store disabled.  In that mode, xx1111ffiilltt uses the
+     retained pixmap.  An old (twenty-one year) bug associated with writing
+     labels to the xx1111ffiilltt retained-pixmap buffer that resulted in garbled
+     labels when a window becomes visible that had been updated when hidden has
+     been fixed.
+
+Fix For aarrrraayy__ccooppyy(())
+     A bug, where an "Out of temporary cells" message would appear after
+     somewhat less than 20 calls of the new aarrrraayy__ccooppyy(()) function (but only when
+     the first argument was a subarray), has been fixed.
+
+Fixes For Server/Client Issues
+     Several old issues with ssppeecc server/client mode have been addressed.  A bug
+     where a client may not find a previously open server specified by host and
+     port number when the client is already attached to multiple servers has
+     been fixed.  A deadlock hang in server mode that could occur if a keyboard
+     ^^CC came while socket connections were being opened from both the main
+     thread and the server read thread has been eliminated.
+
+Fix For Rare Crash In Server Mode
+     When running in server mode, a mutual-exclusion lock around the code that
+     ssppeecc uses to maintain the list of socket connections now exists.
+     Previously, data corruption and a crash could sometimes occur if clients
+     were making and breaking connections to a ssppeecc server that was also making
+     socket connections from the main command loop.  This flaw has been present
+     since the introduction of ssppeecc's server mode.
+
+Fix For Detection of Invalid Octal Values In Strings
+     An old issue where strings starting with the characters ""0088"" or ""0099"" would
+     evaluate to zero in certain contexts, in particular in conditional
+     statements, has been fixed.  The problem was that the C code improperly
+     identified the strings as octal constants because of the leading zero, but
+     a scan for an octal number would return a zero value since 8 and 9 are not
+     valid octal digits.
+
+Fix For ddaattee(()) Glitch
+     A bug in the ddaattee(()) implementation where two successive values for the time
+     of day displayed using the format ddaattee((""%%ss..%%..66"")) could result in anomalous
+     values such as:
+
+        11338822665500448822..9999999999990055 11338822665500448822..0000000011009977,,
+
+     where the second invocation shows an earlier time than the first, has been
+     fixed.  Note, a more straightforward way to obtain the same information is
+     using the ttiimmee(()) function, which never had such an issue.
+
+Fix For ddeeccooddee(()) Of Two-Dimensional Associative Arrays
+     The built-in ddeeccooddee(()) function will now properly decode two-dimensional
+     associative arrays.  See the _e_n_c_o_d_e help file for details on eennccooddee(()) and
+     ddeeccooddee(()).
+
+Fixes For aarrrraayy__dduummpp(()) To File
+     A problem when calling aarrrraayy__dduummpp(()) where the specified file could not be
+     opened and ssppeecc would show the same error message repeatedly has been
+     fixed.  Also, a small memory leak when calling aarrrraayy__dduummpp(()) with the
+     optional filename argument has fixed fixed.
+
+Duplicate Port Numbers In ssoocckk__ppaarr((""sshhooww"")) Eliminated
+     The strings printed with ssoocckk__ppaarr((""sshhooww"")) and returned by ssoocckk__ppaarr((""iinnffoo""))
+     no longer list the same port number twice after the host.
+
+Fix For Counter Mnemonic Check In Configuration Editor
+     A old bug in the configuration editor, where a check for illegal use of
+     spaces in the counter mnemonics was applied to strings in row 2 of the
+     scaler screen and not the mnemonics in column 2, has been fixed.
+
+Fix For ttaannggoo__ppuutt(())
+     An old programming error in the implementation of the ttaannggoo__ppuutt(()) function
+     that has only recently manifested on 64-bit LLiinnuuxx builds has been fixed.
+     Before the fix, a ttaannggoo__ppuutt(()) call of a scalar attribute could pass an
+     incorrect value.
+
+HARDWARE SUPPORT
+
+Support For National Instruments X Series Counter/Timers
+     The National Instruments 6300 X series PCIe and PXIe 6300 boards are now
+     supported as counter/timers.  The digital I/O capabilities of the boards
+     can also be used.  The analog-to-digital and digital-to-analog capabilities
+     are not yet supported.  See the _n_i_6_3_x_x help file for details.
+
+Hardware Support For the New Focus 8742 Motor Controller
+     This release includes initial support for the New Focus (Newport) model
+     8742 Picmotor Controller/Driver.  The current support is limited to the
+     Ethernet interface.  The USB interface and RS-458 network support will be
+     added when needed.
+
+Support For SmarAct SCU Motor Controllers
+     ssppeecc now supports the SmarAct SCU model motor controller in addition to the
+     MCS model already supported.  See the _s_m_a_r_a_c_t help file for details.
+
+Support For C400 Counter/Timer
+     This ssppeecc release contains support for the C400 counter/timer made by
+     Pyramid Technical Consultants and sold by FMB-Oxford.  The ssppeecc support is
+     over the serial interface only.  See the _c_4_0_0 help file.
+
+Preliminary Support For Trinamic TMCL Motor Controllers
+     This ssppeecc release contains preliminary support for the TMCL line of motor
+     controllers from Trinamic.  Both serial and CAN interfaces are supported.
+
+Preliminary Support For Phytron PhyMotion Motor Controllers
+     This ssppeecc release contains preliminary support for the Phytron PhyMotion
+     motor controllers over a socket interface.  The configuration editor
+     controller type is PPHHYYMMOO.
+
+New Serial Baud Rate and Other Fixes
+     ssppeecc now recognizes a baud rate or 600000 for serial devices.  In addition,
+     some issues with the code to set certain non-standard baud rates (7200,
+     14400 and 28800) on LLiinnuuxx have been addressed.
+
+Updated Behavior For Several Motor Controllers
+     An update to the motor control error handling will now abort the move if an
+     error occurs during the ""pprreessttaarrtt__oonnee"" and ""pprreessttaarrtt__aallll"" phase of sending
+     the commands.  A handful of motor controllers are affected by this change,
+     namely the Oriel 18092, Advanced Control System MCU, Missouri Research
+     Reactor motors, MicroMo MVP-2001, New Focus Picomotor 875x, Newport XPS,
+     SPring-8 Equipment Manager motors, along with the macro hardware motor
+     support.  In practice, one is not likely to see any difference in behavior
+     with the real motor controllers.  However, the updated behavior may be
+     useful with the macro hardware motor support.
+
+Updates For the Newport XPS Motor Controllers
+     Previously, ssppeecc would automatically send the home-search command to a
+     Newport XPS motor group if the XPS reported that motors in the group were
+     in the not-referenced state.  When an XPS motor is in the not-referenced
+     state, nothing can be done with the motor until the home-search command has
+     been sent.  This ssppeecc release changes the default behavior so that the
+     home-search command is not sent automatically.  Instead, a message is
+     printed during hardware configuration or when a move is attempted telling
+     the user that the hhoommee command must be run.
+
+     The previous default behavior of automatic home-search can be restored on a
+     controller-wide basis by adding the non-standard optional controller
+     parameter ""aauuttoo__hhoommee"" to the hardware configuration file.  A value of 1 for
+     the parameter will allow ssppeecc to send the home-search command during
+     hardware configuration.  A value of 2 will allow ssppeecc to send the
+     home-search command any time it is needed.
+
+     The 19 additional states added to the XPS internal state machine since the
+     original ssppeecc XPS support was written are now recognized.
+
+     ssppeecc will now show warning messages if a move is halted by the controller
+     putting a motor in the disabled state because of a following error (or
+     several other conditions).
+
+     If a motor reports it is in the not-initialized state due to the error
+     "both ends of run activated", ssppeecc assumes that to mean the motor is
+     disconnected and disables access to that motor to avoid continued error
+     messages.  To re-enable access to the motor, it is necessary to fix the
+     problem and restart ssppeecc or run the rreeccoonnffiigg command.
+
+     Some problems with configuring XPS motor groups with more than one motor
+     have been addressed.  (Apparently, nobody had been using that configuration
+     with ssppeecc.)  Yet to be resolved are issues where ssppeecc sends commands to
+     perform backlash.  This issue can be worked around by configuring backlash
+     in the XPS system file and setting the ssppeecc backlash parameter to zero.
+
+     Finally, the commands to set speed and acceleration are handled more
+     efficiently.
+
+Improved Abort Handling for ACS MCB-4B Motor Controller
+     A problem with the ACS MCB-4B motor controller, where communication errors
+     occurred after sending a motor-stop command associated with a ^^CC user
+     abort, has been addressed.  ssppeecc now gives the controller motors time to
+     decelerate before sending a command after sending the stop command, as the
+     controller firmware appears to require such a delay.
+
+Several TANGO Updates
+     The ttaannggoo__ggeett(()) and ttaannggoo__ppuutt(()) functions have new usage options to read or
+     set multiple attributes in a single call.  See the updated _t_a_n_g_o help file
+     for details.
+
+     The ttaannggoo__ggeett(()) return value can now be used to check if the data quality
+     of the values read is "invalid".
+
+     Calling any of the ttaannggoo__iioo(()), ttaannggoo__ggeett(()) and ttaannggoo__ppuutt(()) functions with
+     an invalid attribute is no longer a fatal error.  Instead, ssppeecc will return
+     -1 and place a message in TTAANNGGOO__EERRRR.
+
+     The ttaannggoo__iioo(()), ttaannggoo__ggeett(()) and ttaannggoo__ppuutt(()) should now work well with
+     associative array and all data array input and output types for any array
+     (spectrum or image) TANGO data type.
+
+     If a return argument is included for ttaannggoo__iioo(()) scalar-valued commands,
+     ttaannggoo__iioo(()) will return zero on success and place the return value in the
+     supplied argument.
+
+     TTAANNGGOO__EERRRR can now be assigned a numeric -1 value rather than the string
+     "-1" to suppress error messages on the next call of the TANGO functions.
+
+     ssppeecc now supports the DEVVAR_LONG64ARRAY and DEVVAR_ULONG64ARRAY as input
+     and output types for ttaannggoo__iioo(()), as input types for ttaannggoo__ggeett(()) and as
+     output types for ttaannggoo__ppuutt(()).
+

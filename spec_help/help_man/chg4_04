@@ -1,0 +1,610 @@
+.TH "changes" "spec 4.04 Release Notes" "08/01/12" "chg4_04.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 4.04
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg4_04.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1998,1999,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 4.04 Release Notes" "08/01/12" "chg4_04.rst 6.1  08/01/12 CSS"
+.
+.SH "RELEASE 4.04.07"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.04.07 as of April 19, 1999.
+.SH "New Option To \fBscans.4\fP"
+.sp
+For scans that contain an MCA\-type spectrum at each data point, the
+\fBscans.4\fP
+\fBC\-PLOT\fP user function (or the stand\-alone
+\fBscans\fP
+utility) can now pick out individual spectra.
+The syntax is the scan number, followed by the
+\fB@\fP
+symbol, followed by the point number, where points are numbered starting
+from one.
+For example,
+\fBfn . 3@12\fP
+will read the spectra of the 12th data point of scan 3.
+Note, the spectra must follow the corresponding non\-MCA data at
+each point and the option for reading MCA data must be selected.
+.SH "Problem With Setting Dials On OMS Motor Controllers Fixed"
+.sp
+With some newer, faster PC computers, there was a problem changing the dial
+position with the OMS PC cards.
+When \fBspec\fP sent a read\-position command immediately
+after sending a load\-position command, the
+new position was not yet available,
+resulting in an error message.
+\fBspec\fP now delays ten milliseconds after loading the new dial position before
+sending any other commands, which cures the problem.
+.SH "Initial Support For Encoders On OMS Motor Controllers"
+.sp
+The
+\fBOMS_E\fP
+controller choice in the configuration file will now make a difference.
+If a motor channel is configured as having an encoder, \fBspec\fP will
+read the motor position using the
+\fBRE\fP
+(read encoder) OMS command, rather than the
+\fBRP\fP
+(read position) command.
+Additionally, the
+\fBchg_dial()\fP
+function (used by the
+\fBset_dial\fP
+macro) will update both the encoder and command register positions
+appropriately.
+Note, the
+motor parameter for encoder step size must also be configured correctly.
+(From the configuration editor motor screen, type
+\fBm\fP
+twice to reach the screen where the parameter can be entered.)
+.SH "EPICS changes"
+.sp
+Two changes were made in the EPICS support.
+The
+\fBepics_get()\fP
+function now returns the string value for ENUM data types.
+Previously, the short\-integer value was returned.
+Also, for the EPICS scaler support of the Joerger VSC16/8
+VME scaler module, as an extra precaution, all scaler
+channels are initially disabled as a gate source each time
+the
+\fBconfig\fP
+file is read.
+.SH "RELEASE 4.04.06"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.04.06 as of April 4, 1999.
+.SH "Problems With Truth Value Of the Null String Fixed"
+.sp
+In release 4.04.04, a fix for a
+bug concerning number/string comparisons
+that was
+a side effect of a fix in release 4.04.01 introduced yet another
+bug, this time concerning the evaluation of string expressions in
+conditional statements.
+With this release, the behavior for the truth value of an expression is
+as follows:
+If the expression is a number or a string representation of a number,
+such as
+\fB0\fP,
+\fB0x0\fP,
+\fB0.0e\-3\fP,
+\fB0000\fP,
+etc., the value is
+\fBfalse\fP
+(or zero).
+Otherwise, the value is
+\fBtrue\fP
+(or 1).
+If the expression is a string and not a number,
+the value of the null string
+\fB""\fP
+is
+\fBfalse\fP
+(or zero), while
+anything else is
+\fBtrue\fP
+(or 1).
+A string that contains an initial number followed by characters
+that aren\(aqt part of the number is not considered to be a number.
+Thus a string such as
+\fB"0xyz"\fP
+would evalate as a non\-null string, i.e.,
+\fBtrue\fP.
+.SH "Harmless History Numbering Bug Fixed"
+.sp
+A bug, where the main command prompt
+history number was not incremented immediately after execution of
+a macro that contained a macro function, has been fixed.
+.SH "Bug With \fBmotor_par()\fP and ESRF Motors Fixed"
+.sp
+A bug, where \fBspec\fP might dump core if the command
+\fBmotor_par(mne, "device_id")\fP
+was run with an ESRF TACO motor that was not successfully imported
+from the device server,
+has been fixed.
+.SH "Bit 3 Model 618 PCI\-to\-VME Adapter Now Detected"
+.sp
+The \fBspec\fP driver for the Bit 3 Model 616/617 PCI\-to\-VME Adapter boards
+now also recognizes the Model 618 Adapter, which has the same functionality
+but uses a fiber optic link to the VME crate.
+.SH "RELEASE 4.04.05"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.04.05 as of March 9, 1999.
+.SH "Trailing Carriage Returns In Command Files Allowed"
+.sp
+Input files can now include trailing carriage returns, such as are
+added to each line of a text file created on a DOS\-like operating systems.
+.SH "Added an \fBs1d2\fP Geometry"
+.sp
+A new geometry with two detector motions and one sample rotation is
+included.
+.SH "Jorway 73A SCSI\-CAMAC Controller Supported On Linux"
+.sp
+The Jorway 73A SCSI\-CAMAC controller is now supported on linux using
+the generic SCSI driver facility.
+Make sure the kernel file
+\fBsg.c\fP
+is compiled with
+\fBSG_BIG_BUFF\fP
+defined as 32768, that the byte\-order jumper on the 73A is set to
+X1\-X2 for big\-endian, the SCSI terminator resistors on the 73A are
+removed if the 73A is not the last device and that the SCSI ID on the 73A
+doesn\(aqt conflict with any other device.
+Use the command
+\fBcat /proc/scsi/scsi\fP
+to view the SCSI devices present.
+The first device listed is associcated with
+\fB/dev/sga\fP,
+the second with
+\fB/dev/sgb\fP,
+etc.
+.SH "Improvements For ECB Controller"
+.sp
+\fBspec\fP now handles the multiplexed power supplies that are on the RISO
+ECB motor controllers properly.
+.SH "Fixed Reversed Limit Sense On TSUJI Ccontrollers"
+.sp
+A bug, where \fBspec\fP had the sense of the
+clockwise and counter\-clockwise limits for
+the TSUJI PM16C motor controller reversed, has been fixed.
+.SH "RELEASE 4.04.04"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.04.04 as of January 21, 1999.
+.SH "Recently Introduced Bug Concerning Number/String Comparisons Fixed"
+.sp
+A side effect of the
+\fB"String\-Valued Symbols That Look Like Numbers Won\(aqt Get Changed"\fP
+fix in release 4.04.01, which broke certain relational operations
+between numbers and string representations
+of numbers, has been fixed.
+.SH "Problems In \fBsplit()\fP Fixed"
+.sp
+The code for the
+\fBsplit()\fP
+function has been rewritten to eliminate a not well\-understood
+platform\-dependent bug that caused nonsense function results.
+In addition, the splitting behavior
+has been changed to conform to the results produced by
+the standard
+\fBawk\fP
+utility.
+In particular, empty fields are always counted when the delimiter
+is other than the default space character.
+.SH "Assignment Bug Fixed"
+.sp
+A bug (introduced in release 4.03.01), where the assignment of
+the value of an element of
+an array passed as an argument to a macro function to a scaler
+within the macro function could
+cause a core dump, has been fixed.
+.SH "RELEASE 4.04.03"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.04.03 as of January 6, 1999.
+.SH "Limit On TCP \fBesrf_io()\fP Transfers Removed"
+.sp
+A previous constraint of 8,192 bytes
+on the length of data array transfers to
+TACO device servers using the
+\fBesrf_io()\fP
+function has been removed.
+There is now no limit imposed.
+.SH "Preliminary Support For RISO ECB Motor Controllers"
+.sp
+\fBspec\fP now includes support for the RISO ECB spectrometer interface
+system motor controllers.
+.SH "Bug Fixed In Assigning Values To Associative Arrays In Macro Functions"
+.sp
+The new feature in release 4.04.01 where elements of global
+associative arrays accessed only for reading were not made part of the
+array introduced a couple of obscure (for most users) bugs.
+A bug where values assigned to global associative arrays in macro functions
+did not
+\fB"stick"\fP
+when the array name was passed as an
+argument to the macro function is fixed.
+.SH "Added a \fBcalcE_local\fP to \fBcalcE\fP macro"
+.sp
+A macro named
+\fBcalcE_local\fP
+is now called from the standard
+\fBcalcE\fP
+macro after the new value for
+\fBLAMBDA\fP
+has been calculated.
+By default,
+\fBcalcE_local\fP
+is defined as a null macro, but can be defined by local sites as needed.
+.SH "Provision For NI GPIB Driver On Linux"
+.sp
+To allow users to try the GPIB driver now offered by National
+Instruments on linux platforms, the linux versions of \fBspec\fP can
+now be linked with and configured for the NI\-supplied
+\fBcib.o\fP
+file that interfaces user programs to the NI\-supplied driver.
+.SH "Support For IMS Motor Controllers"
+.sp
+Preliminary support for the Intelligent Motor Systems IM4831IE motor
+controller is now included.
+.SH "RELEASE 4.04.02"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.04.02 as of November 24, 1998.
+.SH "Recent Bug Introduced With \fBdata_pipe()\fP Fixed"
+.sp
+The improvements in the
+\fBdata_pipe()\fP
+function made in \fBspec\fP release 4.03.13 last July
+mistakenly introduced a two\-second time limit on the
+data\-pipe process response.
+That time limit has been removed.
+.SH "Improved \fBxxx_par(... \(dqdevice_id\(dq)\fP Implementation"
+.sp
+Information
+provided by
+\fBmotor_par()\fP,
+\fBcounter_par()\fP,
+\fBmca_par()\fP,
+\fBmca_spar()\fP
+and
+\fBimage_par()\fP
+with the
+\fB"device_id"\fP
+parameter is available for additional devices.
+.SH "Old (Small) Memory Leak Fixed"
+.sp
+An old (and relatively insignificant)
+internal memory leak associated with deleting or redefining
+selected portions of chained
+(\fBcdef()\fP)
+macros has been fixed.
+.SH "Fix To Restore Motor Velocity With EPICS Powder Mode Moves"
+.sp
+A bug that prevented
+the velocity parameter for EPICS motors
+to be restored to its normal value after powder\-mode scans for
+the powder\-mode motor has been fixed.
+.SH "New \fB\-N\fP Start\-Up Option"
+.sp
+Normally, \fBspec\fP uses the name by which it
+was invoked to establish the command prompt
+and the name of the directory in
+\fBSPECD\fP
+in which the configuration\-dependent files exist.
+A new
+\fB\-N my_name\fP
+start\-up option is available to use
+\fBmy_name\fP
+instead.
+This command also sets the geometry to
+\fBmy_name\fP.
+Follow this option with the
+\fB\-g\fP
+option to choose a different name for the geometry.
+.SH "Support For New Focus Picomotor Controllers"
+.sp
+The New Focus Model 8732 Picomotor controller is now supported by
+\fBspec\fP.
+.SH "RELEASE 4.04.01"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.04.01 as of November 8, 1998.
+.SH "Built\-In \fBS[]\fP and \fBA[]\fP Arrays Now Dynamically Sized"
+.sp
+The sizes of the built\-in (associative) arrays for scalers
+\fBS[]\fP
+and motors
+\fBA[]\fP
+are now set to the number of counters and motors, respectively,
+as found in the
+\fBconfig\fP
+file.
+Previously, the arrays were dimensioned to the maximum number of
+channels allowed.
+.SH "Indirection Operator (\fB@\fP) Now Works With Associative Array Elements"
+.sp
+The indirection operator
+\fB@\fP
+can now be used with associative array elements, as in
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC> a = "arr[3]"
+SPEC> arr[3] = PI
+SPEC> print a, @a
+arr[3] 3.14159
+.ft P
+.fi
+.RE
+.SH "Associative Array Elements Accessed Read\-Only Don\(aqt Become Global"
+.sp
+Previously, any reference to an array element of a global associative
+array would create a global instance of that array element, even if the
+reference was only to a value of an unset element.
+Now, such references do not create a global instance of the array element.
+The only way to make the element global is to assign it a value.
+.SH "Allow Embedded Comments in \fBdata_read()\fP and \fBarray_read()\fP Files"
+.sp
+The
+\fBdata_read()\fP
+function, which reads data from files into data groups, and
+the
+\fBarray_read()\fP
+function, which reads data from files into data arrays,
+both now allow embedded comments in the text file input.
+Previously, the comment character
+\fB#\fP
+was only allowed at the beginning of a line.
+.SH "\fB\(dqtranspose\(dq\fP Option Added to \fBarray_op()\fP"
+.sp
+A new operation to transpose rows and columns of a data array is
+available with
+\fBarray_op("transpose", arr).\fP
+.SH "Can Now Attach to Existing Shared Memory Arrays"
+.sp
+It is now possible to hook up to an existing shared memory array created
+most likely by another instance of \fBspec\fP running on the same platform.
+The syntax is
+.sp
+.RS 4m
+\fBextern shared array [spec:[pid:]]arr\fP
+.RE
+.sp
+where the optional parameter
+\fBspec\fP
+is the name of the \fBspec\fP version that created the array,
+the optional parameter
+\fBpid\fP
+is the process ID of the version and
+\fBarr\fP
+is the name of the array.
+The first two arguments can be used in case more than one instance of
+the shared array exists.
+Examples include:
+.RS 3m
+.sp
+.nf
+.ft CB
+extern shared array data
+extern shared array fourc:data
+extern shared array fourc:1234:data
+.ft P
+.fi
+.RE
+.SH "String Subarrays Now \fBprint\fP Correctly"
+.sp
+The
+\fBprint\fP
+command now prints out subarrays of string\-type data arrays correctly.
+Previously, only complete rows would be printed.
+.SH "Bug With Subarrays In Certain Array Operations Fixed"
+.sp
+A bug, where binary operations between arrays did not work properly with
+certain subarray syntax, has been fixed.
+There was no problem when the operands were complete arrays.
+.SH "Fixed Bug With \fB\(dqi_>=_value\(dq\fP In \fBarray_op()\fP and \fBdata_anal()\fP"
+.sp
+An old bug, where the
+\fB"i_>=_value"\fP
+operation didn\(aqt return the correct value for both the
+\fBdata_anal()\fP
+and
+\fBarray_op()\fP
+functions, has been fixed.
+.SH "String\-Valued Symbols That Look Like Numbers Won\(aqt Get Changed"
+.sp
+Old behavior in \fBspec\fP, where referencing the number value of a
+string variable with a value such as
+\fB"020"\fP
+would modify the string value to match the number value in decimal (16 in
+this case), has been changed.
+The string values are no longer modified.
+.SH "Hardware Lock File Changed"
+.sp
+The
+\fBsettings\fP
+file is now used to establish hardware locking, rather than
+the file named
+\fBuserfiles/hdw_lock\fP,
+which is now no longer used.
+This change makes hardware locking work
+properly with shared configurations.
+.sp
+Also,
+if a second instance of \fBspec\fP is forced into simulate mode
+due to a hardware lock, if the first process exits releasing the lock
+the second process can gain control of the hardware (using
+\fBreconfig\fP)
+without exiting.
+.SH "Simulate Mode More Robust"
+.sp
+The coding for simulate mode has been tightened up.
+It should now be quite robust in terms of avoiding
+hardware access over all the supported interfaces (GPIB, RS\-232C, CAMAC, VME,
+PC I/O port and ethernet socket) from both the built\-in C code for
+motor controllers, counter/timers, MCA\-type and 2D\-type image devices,
+and from the generic hardware access functions, such as
+\fBgpib_put()\fP,
+\fBport_get()\fP,
+etc.
+Note, though, that in simulate mode, the
+\fBmotor_par()\fP,
+\fBcounter_par()\fP,
+\fBmca_par()\fP
+and
+\fBimage_par()\fP
+functions can still change the software
+values for speeds, step\-sizes, regions of interest, etc., so such
+values should be restored on leaving simulate mode.
+.SH "New (Optional) Hardware Read Mode (For Most Motor Controllers)"
+.sp
+For most motor controllers, \fBspec\fP normally only reads the hardware
+registers when the position is known to have changed, as at the end of
+move.
+The hardware read mode
+can now be configured on the second optional motor parameter
+screen of the configuration editor.
+.SH "Another Try At Cleaning Up Orphaned \fBx11filt\fP Processes"
+.sp
+Another attempt at solving a not well understood problem where for certain
+users on certain platforms, the
+\fBx11filt\fP
+processes don\(aqt go away, is included.
+The code now include a
+\fBwatch\-dog\fP
+timer that checks for the existence of the \fBspec\fP
+process that spawned it every five minutes, and exits if that process
+is gone.
+.SH "Very Long Device Names Allowed In Configuration Editor"
+.sp
+The
+\fBedconf\fP
+configuration editor now allows device names to be up to 64 characters
+long.
+.SH "Bugs in \fBwiz_passwd\fP Fixed"
+.sp
+Bugs in the
+\fBwiz_passwd\fP
+utility where the encrypted password would be missing or the
+\fBSPECD\fP/passwd
+file would be empty have been fixed.
+.SH "New \fBsurf\fP Configuration For Kiel University"
+.sp
+A new flavor of the
+\fBsurf\fP
+geometry, as used at Kiel University,
+is included in the \fBspec\fP distribution.
+.SH "Further Development For Psi\-Circle Geometry"
+.sp
+A first (tentative) release of the new geometry code for the
+\fBpsic\fP
+geometry is included.
+.SH "Cleanup Macros Cleaned Up In \fBdscan\fP Macros and Others"
+.sp
+All references to cleanup macros in the standard macros have been
+rewritten to use the new
+\fBcleanup_once\fP
+macro defined using the
+\fBcdef()\fP
+chained\-macro function.
+The new versions are easier to read and make it safe to have multiple
+\fBdscan\fP
+macros in the same statement block.
+.SH "Various Modifications To Standard Macros"
+.sp
+Scan macros now automatically
+show as many counters as will fit on the screen.
+.sp
+A new
+\fBfcom\fP
+macro function replaces the
+\fBcom\fP
+macro and is more efficient.
+.sp
+A new
+\fBwaitacq\fP
+macro with associated
+\fBuser_waitacq\fP
+is included.
+.sp
+A new
+\fBuser_setpos\fP
+is included in the standard
+\fBset\fP
+macro.
+.sp
+A new
+\fBuser_scan_loop\fP
+macro is included in the
+standard
+\fB_loop\fP
+macro.
+.sp
+A new
+\fBuser_ct\fP
+macro is included at the end of the standard
+\fBct\fP,
+\fBuct\fP
+and related macros.
+.SH "Rigaku RINT\-2000 Hardware Support"
+.sp
+Preliminary support for the Rigaku RINT\-2000 type of instrument is
+included.
+Motors and scalers are controlled through a single serial port.
+.SH "Missing Error Messages On Import Errors With ESRF Device Servers Fixed"
+.sp
+A bug, where error messages from failure of the ESRF/TACO
+\fBdev_import()\fP
+function were not printed, has been fixed.
+.SH "EPICS Scaler Changes"
+.sp
+The support for the reportedly obsolete Mizar 8310 scaler records, which
+was removed in \fBspec\fP release 4.03.08 has been restored, to accommodate
+users who still use that device.
+.sp
+Also, the names in the
+\fBconfig\fP
+file for the EPICS scalers have been changed from
+\fBEP_SCALE\fP
+and
+\fBEP_MIZAR\fP
+to
+\fBEPICS_SC\fP
+and
+\fBEPICS_MZ\fP
+for clarity.
+The configuration editor will recognize the old names and
+automatically convert to the new names when it
+writes out the
+\fBconfig\fP
+file.
+

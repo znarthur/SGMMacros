@@ -1,0 +1,261 @@
+bsi_sp350                           hardware                           bsi_sp350
+
+NAME
+     BSI SP350 Controller Board - Baltic Scientific Instruments Si(Li) Detector
+     with Peltier Cooling type SER-25
+
+     The Baltic Scientific Instruments Si(Li) detector with Peltier cooling type
+     SER-25 uses the model SP350 circuit board for control of the device and to
+     receive external commands over a serial interface.  The instrument is
+     configured in ssppeecc as an MCA-type device using a serial interface.
+
+     In addition to the standard MCA functionality, the SP350 has eight
+     count-rate monitors that return the counts per second in defined channel
+     ranges.
+
+OPERATION
+
+     The following mmccaa__ppaarr(()) commands are available.  If more than one MCA is
+     configured, use mmccaa__sseell(()) or mmccaa__ssppaarr(()).  See the _m_c_a help file for details
+     on using multiple MCA devices.  Note, all mmccaa__ppaarr(()) arguments below are
+     case insensitive, that is, upper case, lower case or mixed case letters
+     will work.
+
+     mmccaa__ppaarr((""cclleeaarr"")) - Sends commands to the SP350 to clear the data and
+          counters.
+
+     mmccaa__ppaarr((""rruunn"")) - If ""aauuttoo__cclleeaarr"" mode is set, sends commands to clear the
+          data and counters.  Turns live-time mode on or off, if needed, to
+          match the current preset mode.  Sets leveling mode, shaping time, and
+          threshold level, if needed, to match current settings If a preset
+          value is nonzero, programs the SP350 with the preset time.  Finally,
+          sends the command to start acquisition.
+
+     mmccaa__ppaarr((""hhaalltt"")) - Sends the command to halt acquisition.
+
+     mmccaa__ppaarr((""aauuttoo__cclleeaarr"" [[,, 00||11]])) - With no arguments returns the current value
+          of auto-clear mode.  Otherwise turns auto-clear mode off or on.  When
+          auto-clear mode is on, the data and counters are cleared automatically
+          each time an acquisition is started.
+
+     mmccaa__ppaarr((""aauuttoo__rruunn"" [[,, 00||11]])) - With no arguments returns the current value
+          of auto-run mode.  Otherwise turns auto-run mode off or on.  When
+          auto-run mode is on, the SP350 is started automatically with the
+          standard ssppeecc count commands.
+
+     mmccaa__ppaarr((""ssoofftt__pprreesseett"" [[,, 00||11]])) - With no arguments, returns the current
+          value of soft-preset mode.  Otherwise turns soft-preset mode off or
+          on.  When soft-preset mode is on in conjunction with auto-run mode,
+          the SP350 will be programmed for the same preset accumulation time as
+          the master timer when counting to time.  Also, ssppeecc will poll the
+          SP350 for the end of timed counting in addition to polling the master
+          timer.
+
+     mmccaa__ppaarr((""nnppttss"" [[,, vvaalluuee]])) - With no arguments, returns the current number
+          of points configured for the SP350 data.  Otherwise sets the number of
+          points to vvaalluuee.  Allowed values are 1024, 2048, 4096, 8192 and 16384.
+
+     mmccaa__ppaarr((""ggrroouupp__ssiizzee"" [[,, vvaalluuee]])) - Has the same meaning as ""nnppttss"" above.
+
+     mmccaa__ppaarr((""pprreesseett"" [[,, vvaalluuee]])) - With no arguments, returns the current preset
+          acquisition time in seconds.  Otherwise sets the preset acquisition
+          time to vvaalluuee.  The SP350 is not programmed with the value until
+          acquisition is started.
+
+     mmccaa__ppaarr((""pprreesseett__rreeaall"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          preset acquisition time in seconds.  Otherwise sets the preset
+          acquisition time to vvaalluuee and sets the acquisition mode to real time.
+          The SP350 is not programmed with the mode or value until acquisition
+          is started.
+
+     mmccaa__ppaarr((""pprreesseett__lliivvee"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          preset acquisition time in seconds.  Otherwise sets the preset
+          acquisition time to vvaalluuee and sets the acquisition mode to live time.
+          The SP350 is not programmed with the mode or value until acquisition
+          is started.
+
+     mmccaa__ppaarr((""rreeaall"")) - Sets the acquisition mode to real time.  The SP350 is not
+          programmed with the mode until acquisition is started.
+
+     mmccaa__ppaarr((""lliivvee"")) - Sets the acquisition mode to live time.  The SP350 is not
+          programmed with the mode until acquisition is started.
+
+     mmccaa__ppaarr((""eellaappsseedd__lliivvee"")) - Returns the elapsed live time in seconds of the
+          current or most recent acquisition.
+
+     mmccaa__ppaarr((""eellaappsseedd__rreeaall"")) - Returns the elapsed real time in seconds of the
+          current or most recent acquisition.
+
+     mmccaa__ppaarr((""lleevveelliinngg"" [[,, 00||11]])) - With no arguments, returns 1 or 0 indicating
+          whether leveling mode is on or off.  Otherwise turns leveling mode off
+          or on if the argument is zero or nonzero, respectively.  Leveling mode
+          rejects double and triple peaks from the data.  The manufacturer
+          recommends having leveling mode on.
+
+     mmccaa__ppaarr((""sshhaappiinngg__ttiimmee"" [[,, 33||66]])) - With no arguments, returns the current
+          shaping-time value, which can be either 3 or 6 microseconds.
+          Otherwise sets the shaping time to the argument, which must be 3 or 6.
+          A 3 microsecond shaping time is good for count rates up to 150 kcps.
+          A 6 microsecond shaping time offers better energy resolution but is
+          only good for count rates less than 20 kcps.
+
+     mmccaa__ppaarr((""tthhrreesshhoolldd"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          threshold level.  Otherwise sets the threshold to vvaalluuee, which must be
+          from 0 to 4096.  The resolution of the value is to 0.0625 (1/16).  The
+          threshold sets the level of background noise cut off.
+
+     mmccaa__ppaarr((""AADDCC__lllldd"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          low-level discriminator value.  Otherwise sets the low-level
+          discriminator to vvaalluuee, which must be from 0 to 4096.  The resolution
+          of the value is to 0.0625 (1/16).  The low-level discriminator sets
+          the low energy border for spectrum acquisition.
+
+     mmccaa__ppaarr((""iinnppuutt__ccppss"")) - Returns the count rate at the input.
+
+     mmccaa__ppaarr((""AADDCC__ccppss"")) - Returns the count rate after the ADC processing.
+
+     mmccaa__ppaarr((""iinnppuutt__ccoouunnttss"")) - Returns the total accumulated input counts.
+
+     mmccaa__ppaarr((""AADDCC__ccoouunnttss"")) - Returns the total accumulated counts after the ADC
+          processing.
+
+     mmccaa__ppaarr((""CCRRMM"")) - Displays the current count-rate meter configuration and
+          count rates in the following format:
+
+             ##     CCPPSS   CChhaannnneellss
+             00   1144223344       00 ttoo 6644000000
+             11       00   1133776600 ttoo 1144556600
+             22    11228888    33884400 ttoo 44338844
+             33       00   1111220000 ttoo 1133444400
+             44     665566    55228800 ttoo 66117766
+             55     227711    66220088 ttoo 77004400
+             66    11775577    11228800 ttoo 11669966
+             77   1144223344       00 ttoo 6655228800
+
+     mmccaa__ppaarr((""CCRRMM__aarrrraayy"")) - Returns an eight-element data array of unsigned long
+          values containing the current count rates for each of the count-rate
+          meters.
+
+     mmccaa__ppaarr((""CCRRMM##"")) - Returns the current count rate from meter ##, where ## is
+          from 0 to 7.
+
+     mmccaa__ppaarr((""CCRRMM##"",, ""lloowweerr""||""uuppppeerr"" [[,, vvaalluuee]])) - With one argument, returns the
+          ""lloowweerr"" or ""uuppppeerr"" cutoff for count rate meter ##, where ## is from 0 to
+          7.  If vvaalluuee is specified, sets the lower or upper cutoff to vvaalluuee.
+
+     mmccaa__ppaarr((""CCRRMM##"",, llooww,, hhiigghh)) - When two numerical arguments are specified,
+          sets the lower and upper cutoff to llooww and hhiigghh for count rate meter
+          ##, where ## is from 0 to 7.
+
+     mmccaa__ppaarr((""UUHHVVPP"")) - Returns the vacuum pump voltage in Volts.
+
+     mmccaa__ppaarr((""IIHHVVPP"")) - Returns the vacuum pump current in milliamperes.
+
+     mmccaa__ppaarr((""UUHHVVDD"")) - Returns the detector voltage in Volts.
+
+     mmccaa__ppaarr((""UUcc"")) - Returns the Peltier cooler voltage in Volts.
+
+     mmccaa__ppaarr((""IIcc"")) - Returns the Peltier cooler current in milliamperes.
+
+     mmccaa__ppaarr((""UUBBAATT"")) - Returns the battery voltage in Volts.
+
+     mmccaa__ppaarr((""TTEEMMPP__BBPP"")) - Returns the power supply temperature in degrees C.
+
+     mmccaa__ppaarr((""ppaarraamm"",, 00)) - Displays parameter group 0 values in the following
+          format:
+
+                     EErrrroorr ccooddee == 00xx00
+              ddssPPIICC ssttaattuuss bbiittss == 00xx00
+                     MMooddee00 bbiittss == 00xxddaa
+                    AADDCC sseettttiinngg ==    1100 bbiittss
+                   SShhaappiinngg ttiimmee ==    ttaauu22 ((66 uuss)) ((""sshhaappiinngg__ttiimmee""))
+                  LLeevveelliinngg mmooddee ==    OONN ((""lleevveelliinngg""))
+                    AAccqquuiissiittiioonn ==    OOFFFF
+               AAccqquuiissiittiioonn mmooddee ==    RReeaall ttiimmee
+                    PPrreesseett mmooddee ==    OONN
+                     MMooddee11 bbiittss == 00xx1188
+                    AAccqquuiissiittiioonn ==    NNoott eennddeedd
+                         MMeemmoorryy ==    CClleeaarr
+              OOvveerrffllooww ddeetteecctteedd ==    NNOO
+                CCoouunntt rraattee mmooddee ==    OONN
+              CCRRMM rreeccoovveerryy mmooddee ==    OONN
+             SSppeeccttrroommeetteerr ssttaattee ==    SSwwiittcchheedd ooffff
+                      TTeesstt mmooddee ==    OOFFFF
+               IInnppuutt ccoouunntt rraattee == 119966995566 ccppss ((""iinnppuutt__ccppss""))
+                     AADDCC oouuttppuutt == 00 ccppss ((""AADDCC__ccppss""))
+              EEllaappsseedd rreeaall ttiimmee == 00 sseecc ((""eellaappsseedd__rreeaall""))
+              EEllaappsseedd lliivvee ttiimmee == 00 sseecc ((""eellaappsseedd__lliivvee""))
+
+     mmccaa__ppaarr((""ppaarraamm"",, 11)) - Displays parameter group 1 values in the following
+          format:
+
+             TToottaall iinnppuutt ccoouunntt == 00 ((""iinnppuutt__ccoouunnttss""))
+               TToottaall AADDCC CCoouunntt == 00 ((""AADDCC__ccoouunnttss""))
+                        CCRRMM[[00]] == 00
+                        CCRRMM[[11]] == 00
+                        CCRRMM[[22]] == 00
+                        CCRRMM[[33]] == 00
+                        CCRRMM[[44]] == 00
+                        CCRRMM[[55]] == 00
+                        CCRRMM[[66]] == 00
+                        CCRRMM[[77]] == 00
+
+     mmccaa__ppaarr((""ppaarraamm"",, 22)) - Displays parameter group 2 values in the following
+          format:
+
+                  WWCCSSttaatt == 00xx00
+             PPrreesseett ttiimmee == 5500
+                    UUHHVVPP == 33992211 VV
+                    IIHHVVPP == 77..66 mmAA
+                    UUHHVVDD == 440077 VV
+                      UUcc == 1111..6644 VV
+                      IIcc == 22221122 mmAA
+                    UUBBAATT == 1122..6666 VV
+                 TTEEMMPP__BBPP == 3355 CC
+                  DDaattaaiinn == 00xx443300aa
+                 DDaattaaoouutt == 00xxffffffff
+
+     mmccaa__ppaarr((""ppaarraamm"",, 33)) - Displays parameter group 3 values in the following
+          format:
+
+             CCRRMM[[00]] ==      00 ccppss  ((cchhaann      00 ttoo  6644000000))
+             CCRRMM[[11]] ==      00 ccppss  ((cchhaann  1133776600 ttoo  1144556600))
+             CCRRMM[[22]] ==      00 ccppss  ((cchhaann   33884400 ttoo   44338844))
+             CCRRMM[[33]] ==      00 ccppss  ((cchhaann  1111220000 ttoo  1133444400))
+             CCRRMM[[44]] ==      00 ccppss  ((cchhaann   55228800 ttoo   66117766))
+             CCRRMM[[55]] ==      00 ccppss  ((cchhaann   55550000 ttoo   66000000))
+             CCRRMM[[66]] ==      00 ccppss  ((cchhaann   11228800 ttoo   11669966))
+             CCRRMM[[77]] ==      00 ccppss  ((cchhaann      00 ttoo  6655228800))
+
+     mmccaa__ppaarr((""ppaarraamm"",, 44)) - Displays parameter group 4 values in the following
+          format:
+
+                VVeerr__ddssPPIICC == 00xx00
+                   DDeett__NNrr == 00xx00
+                 SSppSSeerr__NNrr == 00xx00
+             TThhrreesshh__LLeevveell == 00..00 ((""tthhrreesshhoolldd""))
+                HHLLDD__LLeevveell == 44000000..00
+               LLLLDD11__LLeevveell == 00..00 ((""AADDCC__lllldd""))
+               LLLLDD22__LLeevveell == 4400..00
+                 PPZZ__LLeevveell == 00
+               GGaaiinn__LLeevveell == 00
+
+     mmccaa__ppaarr((""ppaarraamm"",, --11)) - Displays values from all of the parameter groups.
+
+     mmccaa__ppaarr((""sseenndd"",, ccmmdd)) - Allows sending arbitrary commands to the SP350  The
+          format of ccmmdd is a 24-bit hexadecimal number containing the three-byte
+          SP350 command.  For example, to send the command to switch on leveling
+          mode, which is <50><06><00>, use:
+
+             mmccaa__ppaarr((""sseenndd"",, 00xx550000660000))
+
+          This command should not normally be needed, but allows sending SP350
+          commands that may be needed but are not implemented in the SP350 ssppeecc
+          support.
+
+     mmccaa__ppaarr((""rreesseett"")) - Restarts the SP350 by rebooting its CPU.
+
+SEE ALSO
+
+     _m_c_a
+

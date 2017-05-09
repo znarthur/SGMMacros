@@ -1,0 +1,39 @@
+.TH "set_dial" "macro" "08/01/12" "set_dial.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBset_dial\fP \- define the dial position of a motor
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)set_dial.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "set_dial" "macro" "08/01/12" "set_dial.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBset_dial motor value\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBset_dial\fP macro is used to set the dial position to
+\fBvalue\fP for one \fBmotor\fP.
+.sp
+The macro use the built\-in functions \fBchg_dial()\fP and \fBchg_offset()\fP.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBset_dial th 0\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%set\fP
+

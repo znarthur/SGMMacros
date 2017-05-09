@@ -1,0 +1,39 @@
+flow                                reference                               flow
+
+NAME
+     flow - flow control
+
+DESCRIPTION
+
+     A ssttaatteemmeenntt__bblloocckk is either a ssttaatteemmeenntt or
+
+         {{ ssttaatteemmeenntt;;  ssttaatteemmeenntt;; ...... }}
+
+     Conditionals
+
+         iiff ((ccoonnddiittiioonn)) ssttaatteemmeenntt__bblloocckk
+
+         iiff ((ccoonnddiittiioonn)) ssttaatteemmeenntt__bblloocckk eellssee ssttaatteemmeenntt__bblloocckk
+
+     Loops
+
+         wwhhiillee ((ccoonnddiittiioonn)) ssttaatteemmeenntt__bblloocckk
+
+         ffoorr ((ssttaarrtt;; ccoonnddiittiioonn;; iinnccrreemmeenntt)) ssttaatteemmeenntt__bblloocckk
+
+     Branching within loop statement_blocks:
+
+         ccoonnttiinnuuee
+
+         bbrreeaakk
+
+     To jump back to the command level (usually on errors):
+
+         eexxiitt
+
+SEE ALSO
+
+     _s_y_n_t_a_x
+
+     Kernighan and Ritchie, TThhee CC PPrrooggrraammmmiinngg LLaanngguuaaggee.
+

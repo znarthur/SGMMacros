@@ -1,0 +1,36 @@
+qdo                                   macro                                  qdo
+
+NAME
+     qqddoo - execute a command file without echo
+
+SYNOPSIS
+
+     qqddoo ccoommmmaanndd__ffiillee
+
+     qqddoo ..
+
+DESCRIPTION
+
+     The qqddoo macro reads commands contained in the ASCII file ccoommmmaanndd__ffiillee.
+     Unlike the ddoo macro, the commands from the file are not printed on the
+     screen.
+
+     If the argument is a single dot (..), the previous command file is used.
+
+     The global variable DDOO__DDIIRR may be set to the name of directory that will be
+     searched for ccoommmmaanndd__ffiillee, if ccoommmmaanndd__ffiillee is not in the current directory.
+
+EXAMPLE
+
+     ddoo ddoo..ssccaannss
+
+GLOBAL VARIABLES
+
+     DDOOFFIILLEE - Last command file used.
+
+     DDOO__DDIIRR - Name of private command file directory.
+
+SEE ALSO
+
+     _d_o _s_t_a_r_t_u_p _v_i
+

@@ -1,0 +1,30 @@
+cmAX                                hardware                                cmAX
+
+NAME
+     cmAX - Compumotor AX motor controller
+
+DESCRIPTION
+
+     The Compumotor Model AX is supported over an RS-232C interface.  From the
+     configuration editor, switch to the DDeevviiccee screen to select the following:
+
+        MMOOTTOORRSS        DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE  NNUUMM                           <<>>TTYYPPEE
+           YYEESS    //ddeevv//ttttyySS00     <<>>    99660000    44          CCoommppuummoottoorr AAXX  ((SSeerriiaall))
+
+     The corresponding entry in the ccoonnffiigg file is:
+
+         RRSS__CCMMAAXX  ==  ddeevviiccee__nnaammee  bbaauudd__rraattee  nnuummbbeerr__ooff__mmoottoorrss
+
+FUNCTIONS
+
+     Command pass through is available using the following functions.  Note, use
+     command pass through with caution to avoid interfering with the built-in
+     programming commands ssppeecc sends to the controllers.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the motor channel
+          associated with mmoottoorr.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the motor channel
+          associated with mmoottoorr, as above, and returns a string containing the
+          response.
+

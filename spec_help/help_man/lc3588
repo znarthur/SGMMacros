@@ -1,0 +1,111 @@
+.TH "lc3588" "hardware" "08/01/12" "lc3588.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+lc3588 \- LeCroy 3588 Histogramming Memory Module
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)lc3588.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1994,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "lc3588" "hardware" "08/01/12" "lc3588.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The LeCroy 3588 Histogramming Memory Module is an MCA module that is used
+in \fBspec\fP with the LeCroy 3512 Spectroscopy ADC module.
+The 3588 is chosen in the \fBconfig\fP file as
+.sp
+.RS 4m
+\fBCA_LC3588 = slot_number\fP
+.RE
+.sp
+The module can be hardware configured for either 16K of 24\-bit wide channels
+or 32K of 12\-bit wide channels.
+\fBspec\fP currently only supports the first configuration.
+.SH "FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_get(g, e)\fP
+\- 
+gets data from currently selected group on the 3588, and transfers it to
+element \fBe\fP of \fBspec\fP data group \fBg\fP.
+.HP 5m
+."
+\fBmca_put(g, e)\fP
+\- 
+writes data to the currently selected group on the
+3588, taking it from element \fBe\fP of \fBspec\fP data group \fBg\fP.
+.HP 5m
+."
+\fBmca_par("clear")\fP
+\- 
+clears the channels of the current group.
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+starts acquisition.  Note that the \fBtcount()\fP and
+\fBmcount()\fP functions (used in the counting macros) will also start
+acquisition.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+stops acquisition.  Note that the 3588 will also be halted when the
+\fBtcount()\fP and \fBmcount()\fP functions (used in the counting macros)
+complete their count intervals or are aborted.
+.HP 5m
+."
+\fBmca_par("group_size")\fP
+\- 
+returns the current group size.
+.HP 5m
+."
+\fBmca_par("group_size", size)\fP
+\- 
+sets the group size to \fBsize\fP.
+Legal values are 256, 512, 1024, 2048, 4096, 8192 and 16384.
+.HP 5m
+."
+\fBmca_par("select_group")\fP
+\- 
+returns the currently active group.  Groups are numbered starting at zero.
+.HP 5m
+."
+\fBmca_par("select_group", group)\fP
+\- 
+set the active group to \fBgroup\fP. Groups are numbered starting at zero.
+The number of possible groups depends on the group size.
+If \fBgroup\fP is greater than the maximum number of groups,
+the current group
+is set to \fBgroup\fP modulus the maximum number of groups.
+.HP 5m
+."
+\fBmca_par("readone", channel)\fP
+\- 
+returns the contents of channel number \fBchannel\fP.
+The channel number is with respect to the current group.
+.HP 5m
+."
+\fBmca_par("chan#")\fP
+\- 
+returns the contents of channel number \fB#\fP.
+The channel number is with respect to the current group.
+.HP 5m
+."
+\fBmca_par("chan#", value)\fP
+\- 
+sets channel \fB#\fP to \fBvalue\fP.
+The channel number is with respect to the current group.
+.RE
+

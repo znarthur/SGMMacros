@@ -1,0 +1,19 @@
+zero                                  macro                                 zero
+
+NAME
+     zzeerroo - search for or set a motor's mechanical zero
+
+SYNOPSIS
+
+     zzeerroo mmoottoorr [[mmoottoorr ...... ]]
+
+DESCRIPTION
+
+     The zzeerroo macro is used to set the dial angles to zero for motors equipped
+     with a home-position feature.  A search for the mechanical zero is
+     undertaken when using the Microcontrole IP28.
+
+EXAMPLE
+
+     zzeerroo tthhee oommee pphhii ppssii
+

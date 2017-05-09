@@ -1,0 +1,63 @@
+mizar                               hardware                               mizar
+
+NAME
+     Mizar - Mizar MZ 8310 Counter/Timer Module
+
+DESCRIPTION
+
+     The Mizar MZ 8310 VME module uses two Advanced Micro Devices Am9513
+     timer/counter chips.  These chips each contains five 16-bit counters.  ssppeecc
+     chains four of these counters on each chip to make two 32-bit counters on
+     each chip.  The remaining 16-bit counter on the first chip is used to keep
+     track of real time.  With ssppeecc you can count to a fixed time or to a fixed
+     number of monitor counts, under software control.
+
+     The Mizar module is selected in the ssppeecc ccoonnffiigg file by a line similar to
+
+         PPCC__MMIIAAZZRR == 00xxff880000 55 IIRRQQ44
+
+     The first parameter is the 16-bit VME address.  Next is the number of
+     counter channels, which includes the real-time counter.  Last is the VME
+     interrupt vector, or the word PPOOLLLL if not using interrupts.  The ddeevviicceess
+     (D) screen of the eeddccoonnff program (normally run from the ccoonnffiigg macro) is
+     used to assign the parameters.  On the ssccaalleerr (S) screen, be sure to assign
+     the timebase to channel 0 and the monitor to channel 1.
+
+     The Mizar chip must be wired up in particular way for use with ssppeecc.  The
+     wire-wrap pins on jumper blocks K1 and K2 can be used, or the pins on the
+     front panel connector J1 can be used.  NOTE:  Mizar mislabels the pins for
+     jumper blocks K1 and K2 on pages 3 and 4 of their manual.  The K2 jumper
+     block should be labeled with the chip 1 pins (1O1, 1O2, etc.)  and the K1
+     jumper block should be labeld with the chip 2 pins (2O1, 2O2, etc.).  The
+     manual has these designations reversed.
+
+     For ssppeecc, monitor counts must go to 1S5 (chip 1, source 5).  Detector 1 is
+     connected to 1S3 (chip 1, source 3).  Detector 2 is connected to 2S3 (chip
+     2, source 3), and detector 3 is connected to 2S5 (chip 2, source 5).
+
+     In addition, you must connect the 1O1 (chip 1, output 1) signal to the
+     following gates: 1G2, 1G4, 1G5, 2G2 and 2G4.
+
+     If using interrupts, you must also connect 1O1 to IRQD.  IRQA, IRQB and
+     IRQC should be left unconnected.  Use the K6 jumper block to connect IRQD
+     to one of the VME interrupts (IRQ4 is the most convenient).  Make sure
+     jumper block K4 is consistent with that choice.
+
+     The ggeettccoouunnttss command will place elapsed time in SS[[00]], and the monitor
+     counts in SS[[11]]. The three remaining counter channels will be assigned to
+     the remaining configured scaler channels.
+
+     The maximum count time is 286.33 minutes.  The MZ 8310 uses a 4MZ
+     oscillator.  When counting to time, the resolution of the clock depends on
+     the length of the count interval, as follows:
+
+         0.00004    for   tt < 2.5 sec
+         0.0004     for   tt < 25 sec
+         0.004      for   tt < 250 sec
+         0.04       for   tt < 2500 sec (41.67 min)
+         0.262144   for   tt < 286.33 min
+
+     When counting to monitor counts, the 0.04 second time base is used, and the
+     value returned for the time channel will be corrected to account for the
+     roll over that occurs every 655.36 seconds.
+

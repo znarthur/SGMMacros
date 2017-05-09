@@ -1,0 +1,1158 @@
+#%TITLE% hexapod850.mac
+#%NAME% 
+#   Macros for controlling the Physik Instrumente hexapod 
+#   controllers 850 and 887 
+#%CATEGORY% Positioning
+#%DESCRIPTION%
+#   The Physik Instrument Hexapod M850 is a hexapod controller with
+#   a serial line interface.
+#   The Physik Instrument Hexapod C887 is a hexapod controller with
+#   a serial line and socket interfaces. Both of them can be used with
+#   this set of macros.
+#%OVERVIEW%
+#   These macros offer full functionality to this device if connected
+#   through a Serial Line device server ( VME ). It would be possible to
+#   modify the macros for a generic SPEC serial interface but then the
+#   polling routine has to be redesigned.
+#   %BR%
+#   %BR%
+#   If a movement is stop before the final position is reached the 
+#   controller position register will always show the setpoint 
+#   value ( and not the real one ). 
+#   For security the hexapod is then marked as disabled. This state 
+#   has to be manually reset. To get to a safe position you have to move
+#   the hexapode to any position different from the saved one. This is 
+#   all done from the macro %B%hexareset%B%
+#   %BR%
+#   %BR%
+#   In normal operation we strongly recommend to include the lines
+#   %B%hexasetup%B% and the necessary %B%hexamot%B% lines in %B%setup%B%.
+#%EXAMPLE%
+#%DL%
+#%DT%hexapod
+#%DD%Opens a menu with full functionality to all hexapod functions
+#%DT%hexashow
+#%DD%Shows current state and other parameters
+#%DT%hexasetup d26h/sl001_0/2 Dubble-Hexapod
+#%DD%Sets up serial device name and description
+#%DT%hexamot hexx X
+#%DD%Defines the motor hexx as a pseudo motor on the X direction.
+#  This motor can then be use as any other motor in SPEC for moving,
+#  scanning... The motor hexx has to be previously configured in config
+#%DT%hexaon
+#%DD%Activates pseudo-motors
+#%DT%hexamove
+#%DD%Move absolute with all six coordinates
+#%DT%hexarot
+#%DD%prompts the user with parameters for new rotation point
+#%XDL%
+#
+#%END%
+#
+#
+#
+#%LOG%
+# $Log: hexapod850.mac,v $
+# Revision 1.10  2013/08/02 11:39:44  perez
+# Port 887 controller support to GCS 2
+#
+# Revision 1.9  2013/03/25 13:23:01  perez
+# Test on M850 serial controller
+# Fix bug of hexa850on;hexa850off in a same macro
+#
+# Revision 1.7  2010/11/23 14:57:12  perez
+# Fix timeout bug on large motions
+#
+# Revision 1.6  2010/11/08 14:55:51  perez
+# Add target position check (VMO==Virtual Move)
+#
+# Revision 1.5  2008/04/25 08:23:49  rey
+# documentation changes
+#
+# Revision 1.4  2007/01/22 13:37:43  perez
+# Fix bug in hexa850setup on fresh restart
+#
+# Revision 1.3  2007/01/22 13:23:39  perez
+# Use blocking reads instead of guessing delays
+#
+# Revision 1.2  2002/04/04 16:43:25  papillon
+# Correct bugs when using hexpod850on.
+# Motor position were not correct.
+#
+#%END%
+
+#%UU%
+#%MDESC%
+#def hexashow  'hexa850show'
+#%UU%
+#%MDESC%
+#def hexapod   'hexa850'
+#%UU%
+#%MDESC%
+#def hexasetup 'hexa850setup $*'
+#%UU%
+#%MDESC%
+#def hexamot 'hexa850mot $*'
+#%UU%
+#%MDESC%
+#def hexamove  'hexa850move'
+#%UU%
+#%MDESC%
+#def hexarot   'hexa850setrot'
+#%UU%
+#%MDESC%
+#def hexaon  'hexa850on'
+#%UU%
+#%MDESC%
+#def hexaoff  'hexa850off'
+#%UU%
+#%MDESC%
+#def hexastop  'hexa850stop'
+#
+
+#%UU%
+#%MDESC%
+# Opens a menu with full functionality to all hexapod functions
+#
+def hexa850 '{
+     global HEXA850CMD HEXA850_NCMD
+ 
+     hexa850init
+
+     HEXA850CMD[1] = "Show Hexapod"
+     HEXA850CMD[2] = "STOP"
+     HEXA850CMD[3] = "Soft reset ( reset disable flag )"
+     HEXA850CMD[4] = "Move absolute (x/y/z/u/v/w)"
+     HEXA850CMD[5] = "New Rotation origin"
+     HEXA850CMD[6] = "Define a new pseudo motor"
+     HEXA850CMD[7] = "Activate/Deactivate pseudo motors"
+     HEXA850CMD[8] = "Hardware Initialization and Ref.Search"
+
+     HEXA850_NCMD  = 8
+
+     while(1) {
+	newcmd = hexa850_showcmds()
+	if (newcmd) {
+	     if (substr(HEXA850CMD[newcmd],0,4) == "Show") {
+		 hexa850show 
+	     }
+	     if (substr(HEXA850CMD[newcmd],0,4) == "STOP") {
+		 hexa850stop 
+	     }
+	     if (substr(HEXA850CMD[newcmd],0,4) == "Soft") {
+		 hexa850reset 
+	     }
+	     if (substr(HEXA850CMD[newcmd],0,4) == "Move") {
+		 hexa850move 
+	     }
+	     if (substr(HEXA850CMD[newcmd],0,3) == "New") {
+		 hexa850setrot
+	     }
+	     if (substr(HEXA850CMD[newcmd],0,4) == "Defi") {
+		 hexa850mot 1 
+	     }
+	     if (substr(HEXA850CMD[newcmd],0,4) == "Acti") {
+		 hexa850body(1) 
+	     }
+	     if (substr(HEXA850CMD[newcmd],0,4) == "Hard") {
+		 hexa850hwinit
+	     }
+             bah = getval("\npress return to continue","")
+	} else {
+	     break
+	}
+     } 
+}'
+
+#%IU%
+#%MDESC%
+#
+def hexa850_showcmds() '{
+    local i
+
+    tty_cntl("md")
+    printf("\n   <%s>\n",HEXA850DESC)
+    printf("\n   Commands: \n\n")
+    tty_cntl("me")
+
+    for (i = 1;i<=HEXA850_NCMD;i++) {
+        tty_cntl("md");printf("   %d - ",i);tty_cntl("me")
+        printf("%s\n",HEXA850CMD[i])
+    }
+    tty_cntl("md");printf("\n   0 - ");tty_cntl("me")
+    printf("Quit\n")
+
+    ret = getval("\n\n     Command? ",0)
+    return(ret)
+}'
+
+#%IU%
+#%MDESC%
+#
+def hexa850body(mode) '{
+   if (mode == 1) {
+       if (HEXA850ON) {
+	    hexa850off
+       } else {
+            hexa850on
+       }
+   }
+
+   return(HEXA850ON?"On":"Off") 
+}'
+
+#%IU%
+#%MDESC%
+#
+def hexa850hwinit '{
+    print
+    tty_cntl("mb")
+    printf(" WARNING - WARNING \n")
+    tty_cntl("me")
+    tty_cntl("md")
+    printf(" WARNING:  This command will do a full reference search\n")
+    printf("           on the hexapod\n")
+    printf("           This mean a very long movement and so a possible \n")
+    printf("           collision !!!\n")
+    tty_cntl("me")
+    print
+    _yn = yesno(" proceed",0)
+    if (_yn) {
+        _yn2 = yesno(" are you sure",0)
+	if (_yn2)  {
+             cmd = (HEXA850GCS2)?"FRF X Y Z U V W":"INI"
+	     _hexa850_put(cmd)
+             printf(" waiting for the end of motion...")
+
+             # do not launch the polling to early because 
+             # the initialization takes time to start
+             sleep(1)
+
+             _hexa850wait
+             _hexa850checkerr()
+             printf("\n")
+        } else {
+             printf("\n Ufff!!\n")
+        }
+    }
+}'
+
+#%IU%
+#%MDESC%
+#
+def hexa850init '{
+  global HEXA850DEV HEXA850MOT HEXA850DESC 
+  global HEXA850ON
+  global HEXA850TYPE 
+  global HEXA850DISABLE
+  global HEXA850POS HEXA850ROT
+  global HEXA850LOW HEXA850HIGH
+  global HEXA850L
+  global HEXA850OLD
+  
+  if (whatis("HEXA850DEV") & 0x8000000 ) {
+      HEXA850DEV   = "d26h/sl001_0/2"
+      HEXA850DESC = ""
+      hexa850setup
+  }
+
+  if (whatis("HEXA850DISABLE") & 0x8000000 ) {
+      HEXA850DISABLE = 0
+  }
+
+  if (!(whatis("HEXA850MOT") & 0x1000000 )) {
+      list_init HEXA850MOT
+  }
+
+  HEXA850TYPE["X"] = 0
+  HEXA850TYPE["Y"] = 1
+  HEXA850TYPE["Z"] = 2
+  HEXA850TYPE["U"] = 3
+  HEXA850TYPE["V"] = 4
+  HEXA850TYPE["W"] = 5
+
+  HEXA850L[0] = "X"
+  HEXA850L[1] = "Y"
+  HEXA850L[2] = "Z"
+  HEXA850L[3] = "U"
+  HEXA850L[4] = "V"
+  HEXA850L[5] = "W"
+
+  HEXA850LOW[0] = -50 ; HEXA850HIGH[0] = 50
+  HEXA850LOW[1] = -50 ; HEXA850HIGH[1] = 50
+  HEXA850LOW[2] = -25 ; HEXA850HIGH[2] = 25 
+  HEXA850LOW[3] = -15 ; HEXA850HIGH[3] = 15 
+  HEXA850LOW[4] = -15 ; HEXA850HIGH[4] = 15
+  HEXA850LOW[5] = -30 ; HEXA850HIGH[5] = 30
+}'
+
+#%UU% [ device-name  description ]
+#%MDESC%
+# Define the device used to talk to the PI controller.
+# Could be a serial line TACO device server or an hostname over ethernet.
+#
+def hexa850setup '{
+  global HEXA850DEV
+  global HEXA850ITF
+  global HEXA850GCS2
+  global HEXA850DESC 
+  global HEXA850ON
+  global HEXA850TO
+
+   if (!$#) {
+       HEXA850DEV  = getval("Device name (TACO SL or hostname)",HEXA850DEV) 
+       HEXA850DESC = getval("Description",HEXA850DESC) 
+   } else {
+       HEXA850DEV  = "$1"
+       HEXA850DESC = ""
+       if ($# > 1 ) 
+          HEXA850DESC = "$2"
+   }
+
+   # try to guess the type of interface used
+   if(index(HEXA850DEV,"/")) {
+       HEXA850ITF  = "SERIAL_TACO"
+
+       # MP 23Sep10: the SPEC TACO timeout (given in sec) must be larger
+       # than the Serialds resource timeout (given in 1/256sec)
+	printf("AA")
+       esrf_io(HEXA850DEV,"timeout",15)
+	printf("BB")
+   } else {
+       HEXA850ITF  = "SOCKET"
+       if(!index(HEXA850DEV,":50000")) {
+	   printf("CC")
+           HEXA850DEV = sprintf("%s:50000",HEXA850DEV)
+       }
+
+       # MP 22Jan13: 
+       # the minimum timeout depends on internal controller activity: 
+       # -when it does nothing 50mS seems to be enough
+       # -on multiple motions or position retrieve while moving, 1sec 
+       #  is not enough
+       HEXA850TO = 2
+       sock_par(HEXA850DEV,"timeout",HEXA850TO)
+   }
+
+
+
+   # check that the controller is up
+   if(HEXA850ITF == "SOCKET") {
+       if((ans = _hexa850_putget("IDN?")) == ".error.") {
+           p "PI HEXAPOD: controller not reachable, giving up"
+           return
+       }
+       printf("PI HEXAPOD: found controler:\n%s", ans)
+       printf("PI HEXAPOD: using %s interface\n", HEXA850ITF)
+   }
+
+
+   # MP 23Jul13: try to guess which version of PI GCS we are talking to
+   # if it supports GCS 2.x then use it rather than forcing backward 
+   # compatibility with the command "CSV 1"
+   HEXA850GCS2 = 0
+   if(HEXA850ITF == "SOCKET") { 
+       _hexa850_put("CSV 2")
+       sock_par(HEXA850DEV,"timeout",0.1) 
+       err_s = _hexa850_putget("CSV?")
+       sock_par(HEXA850DEV,"timeout",HEXA850TO) 
+       if((err_s != ".error.") && (int(err_s) != 2)) {
+           printf("PI HEXAPOD: switchting to older GCS syntax version 1.x\n");
+           _hexa850_put("CSV 1")
+       } else {
+            HEXA850GCS2 = 1
+       }
+   }
+
+
+   # activate macro motors
+   _hexa850on_cdef
+   if (whatis("HEXA850ON") & 0x8000000) {
+       hexa850on
+   }
+
+}'
+
+     
+#%UU%
+#%MDESC%
+#  Resets error flag after control-C
+def hexa850reset '{
+  HEXA850DISABLE = 0
+  printf("Hexapod is now enable again\n")
+  printf("\nSet the ABSOLUTE position you want it to move now\n")
+  hexa850move
+}'
+
+
+#%UU%
+#%MDESC%
+#  Activates pseudo motors
+def hexa850on '{
+    HEXA850ON = 1
+}'
+
+#%IU%
+#%MDESC%
+#  Activates pseudo motors
+def _hexa850on_cdef '{
+    cdef("user_checkall","hexa850motorsmv\n","_hexa850_")
+    cdef("user_getpangles","hexa850motorsget\n","_hexa850_")
+    cdef("user_motorsrun","hexa850motorspoll\n","_hexa850_")
+    cdef("Fheader","hexa850header\n","_hexa850_")
+
+}'
+
+#%UU%
+#%MDESC%
+#  Deactivates pseudo motors
+def hexa850off '{
+    HEXA850ON = 0
+}'
+
+
+#%IU%
+#%MDESC%
+#  Deactivates pseudo motors
+def _hexa850off_cdef '{
+    cdef("","","_hexa850_","delete")
+}'
+
+
+#%IU%
+#%MDESC%
+#
+def hexa850header '{
+    global HEXA850ON
+
+    if(HEXA850ON) {
+
+    _hexa850getrot
+    printf("#UHEXA R=%3.4f S=%3.4f T=%3.4f\n", \
+                HEXA850ROT[0],HEXA850ROT[1],HEXA850ROT[2])
+
+    }
+}'
+
+#%IU%
+#%MDESC%
+#
+def hexa850motorsmv '{
+    global HEXA850ON
+    local  newpos
+    local  i
+
+    if(HEXA850ON) {
+
+    if (HEXA850_DEBUG) print "hexa850motorsmv";
+    _hexa850readpos
+
+    for(i=0;i<6;i++) newpos[i] = HEXA850POS[i]
+
+    HEXA850MOVING = 0
+
+    for ( i=0;i<list_n(HEXA850MOT);i++) {
+        mnemonic = list_item(HEXA850MOT,i+1)
+        type     = list_getpar(HEXA850MOT,i+1,"type")
+        motnum =  motor_num(mnemonic)
+
+	HEXA850OLD[motnum] = HEXA850POS[i]
+       
+        if (motnum != -1 ) {
+            if (A[motnum] != HEXA850OLD[motnum]) {
+               for (sttype in HEXA850TYPE) {
+                  if (type == sttype) {
+		    _bad_lim = 0
+		    _chk_lim motnum A[motnum]
+		    if (_bad_lim) {
+                       A[motnum] = HEXA850OLD[motnum]
+		    } else {
+                       newpos[HEXA850TYPE[sttype]] = A[motnum]
+                       HEXA850MOVING = 1
+		    }
+                  }
+               } 
+            }
+        }
+    }
+
+    if (HEXA850MOVING) {
+         ret = _hexa850check(newpos)
+         if (!ret) {
+            _hexa850move(newpos)
+         } else {
+            tty_cntl("md")
+            print "\nPI hexapod : position is out of limits\n\n"
+            tty_cntl("me")
+            HEXA850MOVING = 0
+         }
+    }
+
+    }
+}'
+
+#%IU%
+#%MDESC%
+#
+def hexa850motorspoll '{
+    global HEXA850ON
+
+    if(HEXA850ON) {
+
+    if(HEXA850MOVING) {
+      state = _hexa850poll()
+      if (state != 1 ) {
+        return
+      } else {
+        cdef("","","_hexa850move_","delete")
+      }
+    }
+
+    }
+}'
+
+#%IU%
+#%MDESC%
+#
+def hexa850motorsget '{
+    global HEXA850ON
+    global HEXA850OLD
+    local i
+
+    if(HEXA850ON) {
+
+    if(HEXA850_DEBUG) print "hexa850motorsget";
+    _hexa850readpos
+  
+    for ( i=0;i<list_n(HEXA850MOT);i++) {
+        mnemonic = list_item(HEXA850MOT,i+1)
+        type     = list_getpar(HEXA850MOT,i+1,"type")
+        motnum =  motor_num(mnemonic)
+       
+        if (motnum != -1 ) {
+            for (sttype in HEXA850TYPE) {
+               if (type == sttype) {
+                    A[motnum] = HEXA850POS[HEXA850TYPE[sttype]]
+                    HEXA850OLD[motnum] = A[motnum]
+               } 
+            }
+        }
+    }
+
+    }
+}'
+
+
+#%UU%
+#%MDESC%
+#  Show current state of hexapod
+def hexa850show '{
+    local i
+   
+    tty_cntl("md"); printf("\n Serial Line Name: "); tty_cntl("me")
+    printf("%s\n",HEXA850DEV)
+    tty_cntl("md"); printf(" Description:      "); tty_cntl("me")
+    printf("%s\n",HEXA850DESC)
+    if (HEXA850DISABLE) {
+       tty_cntl("mb"); printf("\n HEXAPODE IS DISABLED \n");tty_cntl("me")
+    }
+    tty_cntl("md"); printf("\n Motors        -> ");tty_cntl("me")
+    printf("%s\n",HEXA850ON?"Active":"Off")
+    tty_cntl("us");printf(" %8s    %4s     %5s \n","Mnemonic","Type","Config")
+    tty_cntl("ue")
+    for ( i=0;i<list_n(HEXA850MOT);i++) {
+        mnemonic = list_item(HEXA850MOT,i+1)
+        type     = list_getpar(HEXA850MOT,i+1,"type")
+        motnum   = motor_num(mnemonic)
+        printf("%8s    %4s     %5s \n",mnemonic,type,(motnum==-1)?"No":"Yes")
+    }
+    tty_cntl("md"); printf("\n Rotation Origin:\n"); tty_cntl("me")
+    _hexa850getrot
+    printf("     R: %3.4f  -  S: %3.4f  -  T: %3.4f \n", \
+              HEXA850ROT[0], HEXA850ROT[1], HEXA850ROT[2])
+    tty_cntl("md"); printf("\n Current Position:\n"); tty_cntl("me")
+    _hexa850showpos
+   printf("\n")
+}'
+
+#%UU% [ mnemonic type ]
+#%MDESC%
+#  Defines a pseudo motor on hexapod
+#  Withous parametes will just show help on usage   
+def hexa850mot '{
+   local mnemonic serline type
+
+   hexa850init
+
+   if ($# == 2 ) {
+        mnemonic = "$1"
+        type     = "$2"   
+   } else if ($# == 1) {
+        mnemonic = getval("  - Motor mnemonic     ","")
+        type     = getval("  - Type (X/Y/Z/U/V/W) ","")
+   } else {
+        printf("    Usage: ");
+        tty_cntl("md")
+        print "hexa850mot mnemonic type" 
+        tty_cntl("me")
+        print
+        print "    Where " 
+        print "     \"mnemonic\" is a motor mnemonic"
+        print "         configured in SPEC"
+        print
+        print "     \"type\" is one of "
+        print "          X Y Z U V W"
+        print "      X, Y and Z are tranlations on those axes "
+        print "      U, V and W are rotations on X,Y and Z respect. "
+        exit
+   }
+   hexamot850add(mnemonic,type)
+}'
+
+#%IU%
+#%MDESC%
+#
+def hexamot850add(mne,type) '{
+
+    if ( type in HEXA850TYPE ) {
+       typegood = 1
+    } else {
+       print "Wrong type for hexa850 motor. Try again"
+       exit
+    } 
+
+    if (list_item(HEXA850MOT,mne) == -1 )
+          list_add(HEXA850MOT,mne)
+
+    list_setpar(HEXA850MOT,mne,"type",type)
+
+}'
+
+#%IU%
+#%MDESC%
+#
+def hexa850move '{
+   local i
+
+   if (HEXA850DISABLE) {
+     printf("Hexapod is disabled. Sorry\n")
+   } else {
+    _hexa850readpos
+    printf("\nEnter target position:\n")
+    for (i=0;i<6;i++) {
+       newpos[i] = getval(sprintf(" - %s ",HEXA850L[i]),HEXA850POS[i])
+    }
+
+    _hexa850showpos
+    _hexa850move(newpos)
+    printf("\n moving")
+    _hexa850wait
+    _hexa850showpos
+   }
+}'
+
+#%IU%
+#%MDESC%
+#
+def _hexa850wait '{
+    while (1) {
+       state = _hexa850poll()
+       if (state == 1) break
+       sleep(0.5)
+       printf(".")
+    }
+    cdef("","","_hexa850move_","delete")
+}'
+
+#%IU%
+#%MDESC%
+#
+def _hexa850move(newpos) '{
+    local  cmd
+    local  sp
+    local  i
+
+    _hexa850clearerr()
+
+    cdef("cleanup_once","hexa850stop\n","_hexa850move_")
+    cmd = "MOV"
+    sp  = (HEXA850GCS2)?" ":""
+    for (i=0;i<6;i++) {
+       cmd = sprintf("%s %s%s%3.4f", cmd, HEXA850L[i], sp, newpos[i])
+    }
+    cmdstr=sprintf("%s\n",cmd)
+    _hexa850_put(cmd)
+    _hexa850checkerr()
+
+    # MP 22Jan13: let the controller breath a while to avoid timeouts
+    # on next requests:
+    #sleep(1)
+}'
+
+#%UU%
+#%MDESC%
+#
+def hexa850setrot '{
+    print
+
+    _hexa850readpos
+
+    posu = HEXA850POS[3]
+    posv = HEXA850POS[4]
+    posw = HEXA850POS[5]
+
+    if ( posu != 0.0  || posv != 0.0 || posw != 0.0 ) {
+       local newpos
+       printf(" ATTENTION: to set new rotation origin it is necessary to\n") 
+       printf("            move hexapod to U=0 / V=0 / W=0\n\n") 
+       _yn = yesno(" Do you want to proceed ",1)
+       if (!_yn) exit
+
+       newpos[0] = HEXA850POS[0]
+       newpos[1] = HEXA850POS[1]
+       newpos[2] = HEXA850POS[2]
+       newpos[3] = newpos[4] = newpos[5] = 0.0000
+       ret = _hexa850check(newpos)
+       if (!ret) {
+          _hexa850move(newpos)
+          _hexa850wait
+          printf("\n")
+       } else {
+          tty_cntl("md")
+          print "\nPI hexapod : position is out of limits\n\n"
+          tty_cntl("me")
+       }
+    }
+    _hexa850getrot
+    tty_cntl("md")
+    printf("\n New Rotation Origin:\n")
+    tty_cntl("me")
+    setr = getval(" - R: ",HEXA850ROT[0])
+    sets = getval(" - S: ",HEXA850ROT[1])
+    sett = getval(" - T: ",HEXA850ROT[2])
+    cmdstr = "SPI"
+    cmdstr = sprintf("%s R%f S%f T%f\n",cmdstr,setr,sets,sett)
+    p cmdstr
+    _hexa850_put(cmdstr)
+}'
+
+#%UU%
+#%MDESC%
+#
+def hexa850stop '{
+    _hexa850_put((HEXA850GCS2)?"STP":"STOP")
+
+    #tty_cntl("md")
+    #printf("WARNING - WARNING\n") 
+    #tty_cntl("me")
+    #printf("  Hexapod was stopped while moving\n")
+    #printf("  position is not valid anymore\n")
+    #printf("  all movement on hexapod are now disable.\n")
+    #printf("  To reset type \"hexa850reset\"\n")
+    #printf("  then move to an absolute position\n")
+    #HEXA850DISABLE = 1
+}'
+
+#%IU%
+#%MDESC%
+#
+def _hexa850showpos '{
+    local i
+
+    _hexa850readpos
+    print
+    tty_cntl("md")
+    printf("     X        Y        Z        U        V        W\n") 
+    tty_cntl("me")
+    for (i=0;i<6;i++) {
+        printf(" %3.5f ",HEXA850POS[i])
+    }
+}'
+
+#%UU% GCS_cmd args...
+#%MDESC%
+# Send GCS commands to controller and print answer for query
+# comamnds (ended with "?").
+# For the binary GCS commands, use "#" character. 
+# For instance "#5" (do not forget the quotes)
+#
+def hexa850cmd '{
+    print _hexa850cmd("$*")
+}'
+
+#%IU%(GCS_cmd)
+#%MDESC%
+#
+def _hexa850_put(cmd) '{
+    local arr
+
+    # flush input buffer only to save time
+    if(HEXA850ITF == "SOCKET") {
+        sock_par(HEXA850DEV,"flush")
+    } else {
+	printf("DD")
+        esrf_io(HEXA850DEV,"DevSerFlush",0)
+    }
+	
+
+
+    # treat special case of binary commands
+    if(index(cmd,"#") == 1) {
+        arr[0] = asc(substr(cmd,2,1))-0x30
+        arr[1] = 0x0a
+        if(HEXA850ITF == "SOCKET") {
+            byte array barr[2]
+            barr[0] = arr[0]
+            barr[1] = arr[1]
+            sock_put(HEXA850DEV,barr)
+        } else {
+            # MP 22Jan13: TODO: use data array instead???
+	    printf("EE")
+            esrf_io(HEXA850DEV,"DevSerWriteChar",arr)
+        }
+        return
+    }
+
+
+    # ascii commands
+    if(!index(cmd,"\n")) {
+        cmd = sprintf("%s\n",cmd)
+    }
+    if(HEXA850ITF == "SOCKET") {
+        sock_put(HEXA850DEV,cmd)
+    } else {
+	printf("FF")
+        esrf_io(HEXA850DEV,"DevSerWriteString",cmd)
+    }
+}'
+
+#%IU%(GCS_cmd)
+#%MDESC%
+#
+def _hexa850_putget(cmd) '{
+    local ans
+    local ret
+    local pdg
+
+    _hexa850_put(cmd)
+
+    # For multilines answers, the protocol does not give a way
+    # to know how many lines to read, so a wait after each line
+    # is mandatory.
+    for(ret = "";;) {
+        if(HEXA850ITF == "SOCKET") {
+            ans = sock_get(HEXA850DEV,"\n")
+        } else {
+            ESRF_ERR=-1
+	    printf("GG")
+            ans = esrf_io(HEXA850DEV,"DevSerReadString",2)
+            #if(ESRF_ERR) { ret = ".error." break }
+        }
+
+        if(ans=="") {
+            ret = ".error."
+            break
+        }
+
+        ret = sprintf("%s%s", ret, ans)
+
+        # let some time to the controller to send the next line
+        sleep(0.01)
+
+        # check if we have a multiline answer from the controller
+        if(HEXA850ITF == "SOCKET") {
+            pdg = sock_par(HEXA850DEV,"queue")
+        } else {
+	    printf("HH")
+            pdg = esrf_io(HEXA850DEV,"DevSerGetNChar")
+        }
+
+        # give up if nothing is pending, the controller had his chance to talk
+        if(pdg == 0) {
+            break
+        }
+    }
+
+    return(ret)
+}'
+
+
+#%IU%(GCS_cmd)
+#%MDESC%
+#
+def _hexa850cmd(cmd) '{
+    local ret
+
+    if(!index(cmd,"?") && !index(cmd,"#")) {
+        _hexa850_put(cmd)
+        ret = ""
+    } else {
+        ret = _hexa850_putget(cmd)
+    }
+
+    return(ret)
+
+}'
+
+#%IU%
+#%MDESC%
+# The controller keeps in memory the last error, therefore it must
+# be cleared to avoid mis-interpretation.
+#
+def _hexa850clearerr() '{
+      local err_s
+
+      # The unique way to clear error seems to read it
+      err_s = _hexa850_putget("ERR?")
+
+      # Yes, I know, I am parano
+      err_s = _hexa850_putget("ERR?")
+}'
+
+#%IU%
+#%MDESC%
+#
+def _hexa850checkerr() '{
+      local err_s
+      local err
+
+      err_s = _hexa850_putget("ERR?")
+      err   = int(err_s)
+      if(err == 0) {
+          return(err)
+      }
+      tty_cntl("md")
+      printf("\nPI hexapod : ")
+
+      if(err == 1) {
+          printf("parameter syntax error\n")
+      } else if(err == 2) {
+          printf("unknown command\n")
+      } else if(err == 5) {
+          printf("unallowed mov (missing ref, servo)\n")
+      } else if(err == 7) {
+          printf("positions out of limit\n")
+      } else if(err == 10) {
+          printf("controller was stopped by command\n")
+      } else if(err == 17) {
+          printf("parameter out of range\n")
+      } else if(err == 24) {
+          printf("incorrect number of parameter\n")
+      } else if(err == 2) {
+          printf("\n")
+      } else {
+          printf("unknown error: %d\n",err);
+      }   
+      tty_cntl("me")
+
+       
+      return(err)
+}'
+
+#%IU%
+#%MDESC%
+# Returns 0 if motor is moving, returns 1 otherwise 
+#
+def _hexa850poll() '{
+    local  state 
+    local  ret
+    local  err err_s
+    local  i
+    global ESRF_ERR
+    
+
+    if (HEXA850_DEBUG) print "_hexa850poll";
+    state = 0
+
+
+    # MP 22Jan13: on C887 the MOV? command is blocking therefore it can
+    # not be used for large motions causing a wrong error reported to user.
+    # MP 22Jan13: TODO check that "#5" command works also on M850 
+    # to remove the if() and always use "#5"
+    if(HEXA850ITF == "SOCKET") {
+       state = _hexa850_putget("#5")?0:1
+    } else {
+       state = _hexa850_putget("MOV?")
+    }
+
+    # Check end of motion
+    if (state == 1) {
+
+      err_s = _hexa850_putget("ERR?")
+      if (HEXA850_DEBUG) {
+        print "_hexa850poll: error code string : " 
+        for(i=1;i<=length(err_s);i++) { 
+          printf("0x%x\n",asc(substr(err_s,i,1))) 
+        }
+      }
+
+      # MP: err may contain a lot of things, take only the last valid char
+      for(i=length(err_s);
+        ((0x39<asc(substr(err_s,i,1)))||(asc(substr(err_s,i,1))<0x30))&&(i!=0);
+        i--);
+      err=substr(err_s,i,1)
+      if (HEXA850_DEBUG) {
+          printf("_hexa850poll: error code : %s (0x%x)\n",err,asc(err))
+      }
+      
+      if ( err != "0" ) {      
+          if ( err == "5" ) {
+                tty_cntl("md")
+                print "\nPI hexapod : Not initialised or servo is off!\n\n"
+                tty_cntl("me")
+          } else {
+                tty_cntl("md")
+                print "\nPI hexapod : motion range exceeded!\n\n"
+                tty_cntl("me")
+                printf("_hexa850poll: error code : %s (0x%x)\n",err,asc(err))
+                print "_hexa850poll: error code string : "
+                for(i=1;i<=length(err_s);i++) { 
+                    printf("0x%x\n",asc(substr(err_s,i,1))) 
+                }
+          }
+          # MP: cleanup does not exist
+          # cleanup
+          exit
+      }
+    }
+    return(state)
+}'
+
+#%IU%
+#%MDESC%
+#
+def _hexa850readpos '{
+    local answer[]
+    local answer_lines
+    local i 
+    local p
+
+
+    if (HEXA850_DEBUG) print "_hexa850readpos";
+    
+
+# MP 05Sep06: well, need to let time to the controler when chaining
+#   commands only
+    sleep(0.05)
+
+
+    p[0]="X="
+    p[1]="Y="
+    p[2]="Z="
+    p[3]="U="
+    p[4]="V="
+    p[5]="W="
+
+    # MP 05Feb13: on C887 the POS? command is blocking therefore it can
+    # not be used for large motions causing a wrong error reported to user.
+    # MP 05Feb13: TODO check that "#3" command works also on M850 
+    # to remove the if() and always use "#3"
+    # MP 05Feb13: the "#3" command does not return a changing position
+    # while the motion takes place, but only the start position. Of course
+    # at the end of the motion, it returns the final position.
+    if(HEXA850ITF == "SOCKET") {
+      answer_lines = _hexa850_putget("#3")
+    } else {
+      answer_lines = _hexa850_putget("POS?")
+    }
+    if(answer_lines == ".error.") {
+      printf("_hexa850readpos: error waiting for answer\n")
+      exit
+    }
+ 
+    split(answer_lines,answer,"\n")
+    for (i=0;i<6;i++) {
+     if(sscanf(answer[i],sprintf("%s%%s",p[i]), HEXA850POS[i]) != 1) {
+      printf("_hexa850readpos: error parsing answer [%d]: \"%s\"\n",i,answer[i])
+      exit
+     }
+    }
+    
+
+    if (HEXA850_DEBUG) print HEXA850POS
+
+}'
+
+#%IU%
+#%MDESC%
+#
+def _hexa850getrot '{
+    local answer
+    local i
+    local values
+    values[0] = 0
+
+    answer = _hexa850_putget("SPI?")
+    split(answer,values,"\n")
+
+    for (i=0;i<3;i++) {
+        HEXA850ROT[i] = substr(values[i],3,length(values[i])-2)
+    }
+
+}'
+
+#%IU%
+#%MDESC%
+#
+def _hexa850check(newpos) '{
+    local cmd
+    local err_s
+    local ok
+    local sp
+    local i
+
+    _hexa850clearerr()
+
+    # Virtual motion to check if the target position is reachable
+    cmd = (HEXA850GCS2)?"VMO?":"VMO"
+    sp  = (HEXA850GCS2)?" ":""
+   
+    for (i=0;i<6;i++) {
+       cmd = sprintf("%s %s%s%3.4f", cmd, HEXA850L[i], sp, newpos[i])
+    }
+    ok    = (HEXA850GCS2)?"1":"0"
+    err_s = _hexa850_putget(cmd)
+    _hexa850checkerr()
+    if(err_s != ok) {
+          return(-1)
+    }
+
+
+    for ( i=0;i<6;i++) {
+     if ( newpos[i] > HEXA850HIGH[i] || newpos[i] < HEXA850LOW[i]) {
+          return(-1)
+     }
+    }
+
+}'
+
+
+#%UU% [on|off]
+#%MDESC%
+#
+def hexa850debug '{
+    global HEXA850_DEBUG
+
+    if ($#) {
+ 	if ("$1" == "ON" || "$1" == "on" || "$1" == "On") {
+	    HEXA850_DEBUG=1
+	} else {
+	    HEXA850_DEBUG=0
+	}
+    } else {
+	HEXA850_DEBUG= yesno("Add debug messages", HEXA850_DEBUG)
+    }
+}'
+
+#%UU%
+#%MDESC% remove cdefs of pi hexapod
+def hexa850unsetup '{
+    _hexa850off_cdef
+    # hasta la vista, baby
+}'
+
+#%MACROS%
+#%IMACROS%
+#%AUTHOR%  V.Rey - Dubble/SpLine - ESRF 2000
+# %BR%$Revision: 1.10 $ / $Date: 2013/08/02 11:39:44 $
+#%TOC%

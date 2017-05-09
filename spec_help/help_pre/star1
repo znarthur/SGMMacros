@@ -1,0 +1,172 @@
+star1                               hardware                               star1
+
+NAME
+     star1 - Photometrics STAR 1 CCD Camera and Controller
+
+DESCRIPTION
+
+     The Photometrics STAR 1 System is supported as a GPIB device.  The
+     controller is selected in the ccoonnffiigg file with the line
+
+         GGPP__SSTTAARR11 == ggppiibb__aaddddrreessss
+
+     When running the configuration editor, switch to  the device configuration
+     screen to select the STAR 1 as an MCA device.
+
+PARAMETERS AND CONTROLS
+
+     The mmccaa__ppaarr(()) function controls the STAR 1 behavior as follows:
+
+     mmccaa__ppaarr((""aauuttoo"",, vvaalluuee)) - Selects whether the lookup table will be
+          automatically adjusted by the STAR 1 after each exposure.  Valid
+          arguments are 0 to turn auto mode off and 1 to turn it on.
+
+     mmccaa__ppaarr((""aauuttoo"")) - Returns the current auto mode (0 or 1).
+
+     mmccaa__ppaarr((""bbiiaass"")) - Initiates a bias integration.  All charge is cleared from
+          the CCD, and then it is immediately read out.  Provides measure of the
+          DC offset and inherent structure of the CCD array.  Resets the ROI to
+          the entire image area.
+
+     mmccaa__ppaarr((""bbiinnss"",, vvaalluuee)) - Sets the binning value.  Pixel values in the
+          specified number of adjacent columns will be combined with the
+          resulting image compressed horizontally.
+
+     mmccaa__ppaarr((""bbiinnss"")) - Returns the binning value.
+
+     mmccaa__ppaarr((""cclleeaarr"")) - Clears the video image.  Resets the ROI to the entire
+          image area.
+
+     mmccaa__ppaarr((""ddaarrkk"")) - Initiates a dark integration for the programmed exposure
+          time.  Resets the ROI to the entire image area.
+
+     mmccaa__ppaarr((""ddxx"",, vvaalluuee)) - Sets the width of the box cursor.
+
+     mmccaa__ppaarr((""ddxx"")) - Returns the width of the box cursor.
+
+     mmccaa__ppaarr((""ddyy"",, vvaalluuee)) - Sets the height of the box cursor.
+
+     mmccaa__ppaarr((""ddyy"")) - Returns the height of the box cursor.
+
+     mmccaa__ppaarr((""eexxppoossee"")) - Opens the shutter for the programmed exposure time.
+          Resets the ROI (region of interest) to the entire image area.
+
+     mmccaa__ppaarr((""eexxppoossee__ttiimmee"",, vvaalluuee)) - Sets the exposure time in units of tenths
+          of seconds.  Valid arguments are between 1 and 999 (0.1 and 99.9
+          seconds).
+
+     mmccaa__ppaarr((""eexxppoossee__ttiimmee"")) - Returns the current exposure time.
+
+     mmccaa__ppaarr((""ffooccuuss"")) - Takes one 100x100 pixel exposure from the center of the
+          image area.  (Uses the ccaalliibbrraattee STAR 1 command, rather than the ffooccuuss
+          command, as the latter starts a continuous acquisition mode that can't
+          be halted from the remote computer.)
+
+     mmccaa__ppaarr((""ggaaiinn"",, vvaalluuee)) - Sets the gain.  Valid arguments are 0 and 1, which
+          set x1 and x4 gain, respectively.
+
+     mmccaa__ppaarr((""ggaaiinn"")) - Returns the gain value (0 or 1).
+
+     mmccaa__ppaarr((""ggeettbbooxx"")) - Updates the retrievable box cursor coordinates within
+          the display.
+
+     mmccaa__ppaarr((""lliinneeaarr__lluutt"")) - Creates a linear lookup table using the ""lluutt__mmiinn""
+          and ""lluutt__mmaaxx"" values.
+
+     mmccaa__ppaarr((""llooaadd"")) - Reads in the image from the current data file and sends
+          it to the STAR 1 controller to be displayed on the video monitor.
+          Only full-screen images saved in the ""rraaww"" format can be read and
+          loaded.
+
+     mmccaa__ppaarr((""lluutt##"",, vvaalluuee)) - Sets element number ## of the user-defined lookup
+          table to vvaalluuee. The user-defined lookup table is sent to the STAR 1
+          using the ""sseenndd__lluutt"" command.  Valid element numbers are from 0 to
+          4095.  Valid lookup table values are from 0 to 255.
+
+     mmccaa__ppaarr((""lluutt##"")) - Returns the value of element ## of the user-defined lookup
+          table.
+
+     mmccaa__ppaarr((""lluutt__mmaaxx"",, vvaalluuee)) - Sets the maximum pixel value for the
+          ""lliinneeaarr__lluutt"" command.  Valid arguments are from 0 to 4095.
+
+     mmccaa__ppaarr((""lluutt__mmaaxx"")) - Returns the maximum pixel value.
+
+     mmccaa__ppaarr((""lluutt__mmiinn"",, vvaalluuee)) - Sets the minimum pixel value for the
+          ""lliinneeaarr__lluutt"" command.  Valid arguments are from 0 to 4095.
+
+     mmccaa__ppaarr((""lluutt__mmiinn"")) - Returns the minimum pixel value.
+
+     mmccaa__ppaarr((""mmoouussee__xx"")) - Sets the delta xx value for the next cursor movement.
+          The cursor is moved with the ""mmoouussee__yy"" command.
+
+     mmccaa__ppaarr((""mmoouussee__yy"")) - Sets the delta yy value for cursor movement, and moves
+          the cursor using this value and the value set with the ""mmoouussee__xx""
+          command.
+
+     mmccaa__ppaarr((""rrooii"",, vvaalluuee)) - Sets the number of ROIs for the ""rrooii__aaccqquuiirree""
+          command.
+
+     mmccaa__ppaarr((""rrooii"")) - Returns the number of ROIs.
+
+     mmccaa__ppaarr((""rrooii__aaccqquuiirree"")) - Initiates acquisition of the region defined by the
+          box cursor.  Will acquire multiple regions if the ""rrooii"" value is
+          greater than one and the size of the box cursor allows more than one
+          region to be displayed on the video monitor.
+
+     mmccaa__ppaarr((""rrooii__ddeellaayy"",, vvaalluuee)) - Sets the delay (in tenths of a second)
+          between ROI acquisitions when the ""rrooii"" value is greater than one, and
+          the ""rrooii__aaccqquuiirree"" command is sent.
+
+     mmccaa__ppaarr((""rrooii__ddeellaayy"")) - Returns the ROI delay.
+
+     mmccaa__ppaarr((""ssaavvee"")) - Reads the image from the STAR 1 (either the entire image
+          area, or the ROI array(s), depending on the last used acquisition
+          command), and writes to the current image file, using the current
+          image format and the current save image parameters.  Only one save
+          image is allowed per file file.  The existing contents of the file
+          will be erased.
+
+     mmccaa__ppaarr((""ssaavvee__uussiinngg__lluutt"")) - As above, but saves the image using the
+          user-defined lookup table to transform pixel values.
+
+     mmccaa__ppaarr((""sseenndd__lluutt"")) - Sends the user-defined lookup table to the STAR 1.
+          Element 0 is first set to zero and element 4095 to 255 in order to
+          preserve the contrast in the annotation text of the display.
+
+     mmccaa__ppaarr((""sseettbbooxx"")) - Displays the box cursor.
+
+     mmccaa__ppaarr((""sshhaaddee"")) - Displays a test image on the video monitor.
+
+     mmccaa__ppaarr((""ttrriiggggeerr"")) - Opens the shutter and continually clears the CCD array
+          of charge until an external trigger signal is received.  There is no
+          way to reset the shutter from the remote computer if an external
+          trigger signal is not received by the STAR 1.
+
+     mmccaa__ppaarr((""xx00"",, vvaalluuee)) - Sets the lower left xx coordinate of the box cursor.
+
+     mmccaa__ppaarr((""xx00"")) - Returns the value of the lower left xx coordinate of the box
+          cursor.
+
+     mmccaa__ppaarr((""yy00"",, vvaalluuee)) - Sets the lower left yy coordinate of the box cursor.
+
+     mmccaa__ppaarr((""yy00"")) - Returns the value of the lower left yy coordinate of the box
+          cursor.
+
+     mmccaa__ppaarr((""zzoooomm"",, vvaalluuee)) - Sets the zoom factor.  Valid values are 0, 1 and 2
+          for x1, x2 and x4 zoom factors, respectively.
+
+     mmccaa__ppaarr((""zzoooomm"")) - Returns the current zoom value (0, 1 or 2).
+
+     iimmaaggee__ppaarr((""bbiittss"",, vvaalluuee)) - Sets the number of bits per pixel to use when
+          the image is saved to a (tiff) file.  Valid arguments are 4, 8 or 12.
+
+     iimmaaggee__ppaarr((""bbiittss"")) - Returns the bits-per-pixel value.
+
+     iimmaaggee__ppaarr((""ffoorrmmaatt"",, ttyyppee)) - Sets the save file format to be used for the
+          image data file.  Valid formats are currently ""ttiiffff"" and ""rraaww"".
+
+     iimmaaggee__ppaarr((""ffoorrmmaatt"")) - Returns the current save file format.
+
+     iimmaaggee__ppaarr((""ffiillee"",, ffiillee__nnaammee)) - Sets the data file name to be used for the
+          next ""ssaavvee"", ""ssaavvee__wwiitthh__lluutt"" or ""llooaadd"" command.
+

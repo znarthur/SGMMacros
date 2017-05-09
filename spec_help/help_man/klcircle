@@ -1,0 +1,63 @@
+.TH "klcircle" "macro" "08/01/12" "klcircle.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBklcircle\fP \- scan along an arc in the \fBKL\fP\-plane in reciprocal space
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)klcircle.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "klcircle" "macro" "08/01/12" "klcircle.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBklcircle radius angle_start angle_end
+intervals time [ expression]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBklcircle\fP macro scans along a circular arc in the
+\fBKL\fP\-plane in reciprocal space.  The radius of the arc is given by
+\fBradius\fP and the arc runs from \fBangle_start\fP to
+\fBangle_end\fP. The number of data points collected will be
+\fBintervals+1\fP.
+Count time is given by \fBtime\fP, which if positive, specifies seconds
+and if negative,
+specifies monitor counts.
+.sp
+The optional last argument can supply expressions to be evaluated
+after \fBK\fP and \fBL\fP are calculated for each point.
+You may, for example, supply an expression to calculate values for
+\fBH\fP or include expressions to offset the values of \fBK\fP and \fBL\fP.
+.SH "EXAMPLES"
+.rs
+.sp
+.RS 4m
+.nf
+\fBklcircle 1 0 90 10 60 "K += .5; L += .5"\fP
+\fBklcircle 1 0 90 10 60 H=L/.125\fP
+\fBklcircle 1 0 360 10 60 H=0\fP
+.fi
+.sp
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%hklscan\fP
+\fI\%hscan\fP
+\fI\%kscan\fP
+\fI\%lscan\fP
+\fI\%hkcircle\fP
+\fI\%hlcircle\fP
+\fI\%hkradial\fP
+\fI\%hlradial\fP
+\fI\%klradial\fP
+

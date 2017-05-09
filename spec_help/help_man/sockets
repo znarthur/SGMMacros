@@ -1,0 +1,258 @@
+.TH "sockets" "function" "05/01/13" "sockets.rst 6.4  05/01/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+sockets \- Connect to sockets
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)sockets.rst      6.4  05/01/13  CSS
+.
+.\" Copyright (c) 1997,1998,1999,2001,2002,2010,2012,2013
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "sockets" "function" "05/01/13" "sockets.rst 6.4  05/01/13 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP user\-level socket functions allow you to
+connect and communicate with sockets created by other processes
+on the local platform or on a remote host.
+The user\-level access  is through
+the functions \fBsock_get()\fP, \fBsock_put()\fP and
+\fBsock_par()\fP. (These functions were introduced in \fBspec\fP release 5.01.01,
+replacing the now deprecated \fBsock_io()\fP function.)
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.sp
+Most of the function calls require a string in the form
+\fB"host:port"\fP as the first argument to specify the socket.
+The \fBhost\fP can be specified by a symbolic name or by an IP address.
+The \fBport\fP number is assigned by the process creating the socket.
+.RS 0m
+.HP 5m
+."
+\fBsock_get("host:port")\fP
+\- 
+Reads and returns as many characters as are already available.
+If no characters are immediately available, waits for input and returns
+the first character(s) that show up, or
+returns a null string if no characters arrive
+before the time\-out expires.
+The maximum number of characters
+that can be read at a time is this mode is 8191 characters.
+.HP 5m
+."
+\fBsock_get("host:port", n)\fP
+\- 
+Reads up to \fBn\fP characters or until a timeout.
+If \fBn\fP is zero, the routine reads up to a newline or
+the maximum of 8191 characters, whichever comes first.
+In any case, if the read is not satisfied before a timeout,
+the routine returns the null string.
+.HP 5m
+."
+\fBsock_get("host:port", eos)\fP
+\- 
+Reads characters until a portion of the input matches the string
+\fBeos\fP and returns the string so obtained, including the end\-of\-string
+characters.
+If no match to the end\-of\-string characters is found within the
+timeout period, the null string is returned.
+.HP 5m
+."
+\fBsock_get("host:port", d)\fP
+\- 
+Reads incoming bytes into the data array \fBd\fP. The size of
+\fBd\fP determines how many bytes are to be read.
+Sub\-array syntax can be used to limit the number of bytes.
+The function returns the number of array elements read, or zero
+if the read times out.
+Note, no byte re\-ordering is done for short\- or long\-integer data, and
+no format conversions are done for float or double data.
+.HP 5m
+."
+\fBsock_get("host:port", mode)\fP
+\- 
+If \fBmode\fP is the string
+\fB"byte"\fP, reads and returns one unsigned binary byte.
+If \fBmode\fP is the string \fB"short"\fP, reads two binary
+bytes and returns the short integer so formed.
+If \fBmode\fP is the string \fB"long"\fP, reads four binary
+bytes and returns the long integer so formed.
+The last two modes work the same on both
+\fBbig\-endian\fP and \fBlittle\-endian\fP platforms.
+On both, the incoming data is treated as
+\fBbig endian\fP. If the incoming data is \fBlittle endian\fP, use
+\fB"short_swap"\fP or
+\fB"long_swap"\fP. (For \fBspec\fP versions prior to release 5.01.01, use
+\fBint2\fP for \fBshort\fP and \fBint4\fP for \fBlong\fP.)
+.HP 5m
+."
+\fBsock_put("host:port", s)\fP
+\- 
+Writes the string \fBs\fP to the socket described by
+\fB"host:port"\fP. Returns the number of bytes written.
+.HP 5m
+."
+\fBsock_put("host:port", d [, cnt])\fP
+\- 
+Writes the contents of the data array \fBd\fP to the socket described by
+\fB"host:port"\fP.
+By default, the entire array (or subarray, if specified) will be sent.
+The optional third argument
+\fBcnt\fP can be used to specify the number of array elements to send.
+For short and long integer arrays, the data will be sent using native
+byte order.
+The \fB"swap"\fP option of the
+\fBarray_op()\fP function can be used to change the byte order, if necessary.
+No format conversions are available for float or double data.
+Returns the number of bytes written.
+.HP 5m
+."
+\fBsock_par("?")\fP
+\- 
+Lists the available commands.
+.HP 5m
+."
+\fBsock_par("show")\fP
+\- 
+Lists the existing sockets along with additional information, such as
+whether the socket is UDP type, whether
+the socket is internal (as opposed to a user\-level socket created by one of the functions
+described in this document) and whether the socket is set up for listening.
+The command does not check whether the connection is still alive.
+.HP 5m
+."
+\fBsock_par("info")\fP
+\- 
+Returns a string that contains the information displayed by the \fB"show"\fP command
+described above.
+.HP 5m
+."
+\fBsock_par("host:port", "connect" [, "silent"])\fP
+\- 
+Opens a socket to the specified host and port.
+Returns \fBtrue\fP for success and \fBfalse\fP for failure.
+With the \fB"silent"\fP option, error messages won\(aqt be shown (as of \fBspec\fP release 6.00.02).
+.HP 5m
+."
+\fBsock_par("host:port", "connect_udp" [, "silent"])\fP
+\- 
+Opens a socket to the specified host and port using the UDP
+protocol.  Returns \fBtrue\fP for success and \fBfalse\fP for failure.
+With the \fB"silent"\fP option, error messages won\(aqt be shown (as of \fBspec\fP release 6.00.02).
+.HP 5m
+."
+\fBsock_par("host:port", "listen")\fP
+\- 
+Sets up a socket for listening, allowing another instance of \fBspec\fP or
+some other program to make a connection.
+.HP 5m
+."
+\fBsock_par("host:port", "close")\fP
+\- 
+Closes the socket associated with the specified host and port.
+.HP 5m
+."
+\fBsock_par("host:port", "flush")\fP
+\- 
+Flushes \fBspec\fP\(aqs input queue for the socket at
+\fB"host:port"\fP. The input queue may contain characters if a
+\fBsock_get()\fP times out before the read
+is satisfied, or if more characters arrive than are requested.
+.HP 5m
+."
+\fBsock_par("host:port", "ignore_sim" [, 1|0])\fP
+\- 
+Turns \fBignore\-simulate\fP mode on or off, or returns the current state.
+When \fBignore\-simulate\fP mode is on, the \fBsock_get()\fP, \fBsock_put()\fP and
+\fBsock_par()\fP commands will work even when simulate mode is on.
+Note, simulate mode must be off to create a new socket connection.
+.HP 5m
+."
+\fBsock_par("host:port", "queue")\fP
+\- 
+Returns the number of characters in the socket\(aqs input queue.
+The input queue may contain characters if a
+\fBsock_get()\fP times out before the read
+is satisfied, or if more characters arrive than are requested.
+.HP 5m
+."
+\fBsock_par("host:port", "timeout" [, t])\fP
+\- 
+Returns or sets the read timeout for the socket described by
+\fB"host:port"\fP. The units are seconds.
+A value of zero indicates no timeout \- a
+\fBsock_get()\fP will wait until the read is satisfied or is interrupted by a
+\fB^C\fP. The smallest allowed value of 0.001 will cause the
+\fBsock_get()\fP to return immediately.
+A negative value resets the timeout to the default of five seconds.
+.HP 5m
+."
+\fBsock_par("host:port", "nodelay" [, 1|0])\fP
+\- 
+Returns or sets the state of the \fBTCP_NODELAY\fP socket option.
+Normally, the underlying TCP protocol sends data along as it is
+made available.
+However, if the previous data packet has not yet received acknowledgment
+from the client, the protocol holds onto and gathers small amounts of data
+into a single packet which will be sent once the pending acknowledgment
+is received or the size of the packet exceeds a threshold.
+This algorithm increases network efficiency.
+For some clients that send a stream of short packets that receive
+no replies, this algorithm may cause unwanted delays.
+Set the \fB"nodelay"\fP option to 1 to turn off the algorithm,
+which corresponds to setting
+the \fBTCP_NODELAY\fP option at the system level.
+.RE
+.sp
+All the \fBsock_get()\fP calls will store leftover bytes in a queue.
+Contents from the queue will be returned on a
+subsequent \fBsock_get()\fP call.
+Bytes are leftover if the read finishes with a timeout, if more
+bytes have arrived than are asked for
+or if more bytes are available after an
+end\-of\-string match.  Use the \fB"flush"\fP option of
+\fBsock_par()\fP to clear the input queue, if needed.
+.sp
+To transfer binary byte streams containing null bytes, use
+the data\-array versions of \fBsock_get()\fP and \fBsock_put()\fP with byte arrays.
+Null bytes mark the end of a normal string.
+.sp
+Note, the \fB"connect"\fP command isn\(aqt required to open a TCP connection, as the
+\fBsock_get()\fP and \fBsock_put()\fP functions will automatically open the
+connection if it doesn\(aqt already exist.  The return value from the
+\fB"connect"\fP command, however, may be useful as a test on whether a
+given socket can be created.
+To create a UDP connection, however, the \fB"connect_udp"\fP command must be used.
+.sp
+Connections remain open until closed with the \fB"close"\fP option to
+\fB"spec_par()"\fP. Sockets created at user level are not closed on a hardware
+\fBreconfig\fP.
+.sp
+The following example connects to the \fBecho\fP service
+on port 7 of the local host:
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC.1> sock_put("localhost:7", "This is a test.\en")
+
+SPEC.2> print sock_get("localhost:7")
+This is a test.
+.ft P
+.fi
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%gpib\fP
+\fI\%serial\fP
+

@@ -1,0 +1,596 @@
+.TH "changes" "spec 6.03 Release Notes" "07/30/15" "chg6_03.rst 6.7  07/30/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- Highlights for \fBspec\fP release 6.03
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg6_03.rst      6.7  07/30/15  CSS
+.
+.\" Copyright (c) 2015
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 6.03 Release Notes" "07/30/15" "chg6_03.rst 6.7  07/30/15 CSS"
+.
+.SH "July 30, 2015 \- RELEASE 6.03.06"
+.rs
+.SH "Can Return Sub\-second File Times with \fBfile_info()\fP"
+.sp
+The \fB"atime"\fP, \fB"mtime"\fP and \fB"ctime"\fP options to \fBfile_info()\fP
+will now return file times to sub\-second resolution on platforms and file
+systems that support the feature.
+\fBLinux\fP platforms with \fBglib\fP version 2.12 or greater support the feature.
+All
+\fBMac OSX\fP versions supported by \fBspec\fP support the feature, although the
+HFS and HFS+ file systems do not.
+.SH "Broken \fBor_swap\fP Macro Fixed"
+.sp
+Updates to the orientation matrix macros
+in \fBspec\fP release 6.02.08
+to accommodate a new seven\-circle
+geometry
+introduced a bug in the \fBor_swap\fP
+macro used to swap the two orientation vectors.
+That bug is fixed in this release.
+.SH "Fix For Server Crash"
+.sp
+A rare crash that could occur in a \fBspec\fP server when the socket
+connection to a client was unexpectedly lost while there were pending
+events for that client has been fixed.
+.SH "Improved Handling Of Communication Errors With Tsuji PM16C Motor Controllers"
+.sp
+The \fBspec\fP support for the Tsuji PM16C motor controllers now includes
+code to better detect and deal with communication errors.
+Previously, if the communication interface was error prone, it was possible for
+the messages between the controller and \fBspec\fP
+to get out of sync, with responses getting associated with the wrong command.
+One symptom of the out\-of\-sync problem would be a spurious message that a motor
+hit a limit switch.
+The code now does consistency checking on the responses to the read\-position
+and get\-status commands.  If the responses are in the wrong format for the
+particular command, \fBspec\fP
+will attempt to resynchronize communications.
+.SH "Fix For Kontron PCIDCC5 Digital I/O"
+.sp
+A bug in the code that prevented the \fBcounter_par()\fP commands for setting
+and reading the digital I/O on the Kontron (ICS Advent) PCIDCC5/5\-P model Am9513\-based
+PCI counter/timer card has been fixed.
+See the \fI\%am9513\fP help file for details on the commands.
+.SH "Fix For Agilis Configuration Crash"
+.sp
+A recently introduced bug, where the code for the Newport Agilis motor controller
+could cause a crash if a controller was configured but not present, has been
+fixed.
+.SH "July 7, 2015 \- RELEASE 6.03.05"
+.rs
+.SH "Unlimited Line Length for \fBgetline()\fP and \fBarray_read()\fP"
+.sp
+The \fBgetline()\fP function to read a line of text from a file
+and the \fBarray_read()\fP function to fill a data array with
+values from a text file have been updated to allow reading
+from files with unlimited line lengths.
+Previously, \fBgetline()\fP would read up to a maximum of 4095
+characters and \fBarray_read()\fP would allow input lines up to
+2047 characters.
+.SH "New \fBGETLINE_EOF\fP Built\-in Symbol For \fBgetline()\fP"
+.sp
+To distinguish between an end of file, an error or a literal
+\-1, the \fBgetline()\fP function now assigns a value to a new
+built\-in variable named \fBGETLINE_EOF\fP.  After each call of
+\fBgetline()\fP, the value of \fBGETLINE_EOF\fP will be 1 if there
+was an end\-of\-file condition on the read of the file, \-1 if
+there was an error reading the file or if the file couldn\(aqt be
+opened and zero if the read was successful.
+For backward compatibility, the \fBgetline()\fP return value
+will continue to be \-1 on end of file or an error, or if the current line
+of the file is the string \-1.
+.SH "New \fBarray_read()\fP Option To Skip Initial Columns"
+.sp
+A new optional \fB"C=#"\fP argument to array_read()
+can be used to specify from which column in the file to
+start assigning data.
+See the \fI\%arrays\fP help file for details.
+.SH "Restored Capability For Fixed\-Ranged Updated Plots"
+.sp
+Release 6.02 of \fBspec\fP included new plotting macros that
+auto\-ranged the \fBx\fP axis in the updated plot displayed
+during scans.
+This \fBspec\fP release now includes an option to configure
+the behavior as either fixed or auto\-ranged
+via the \fBsetplot\fP macro.
+.SH "Updates For New Focus 8742 Motor Controller"
+.sp
+The \fBspec\fP support for the New Focus 8742 controller now
+works with its USB and RS\-485 (via RS\-232C) interfaces.
+In addition, daisy\-chained units connected in series with
+a master (gateway) controller using the RS\-485 connections
+are now supported.
+When using daisy\-chained units, set the "crate" address in
+the motor configuration to the module address.
+Finally, the socket connection code will now automatically
+attempt to reconnect when connections are dropped by the
+controller.
+.SH "Fix For Mythen When Specifying a TrimMo Settings File"
+.sp
+An old typo in the \fBspec\fP Dectris Mythen MCA support that
+translated the deprecated (in firmware version 2)
+\fB"\-trimfile TrimMo"\fP command to the
+\fB"\-settings StdmMo"\fP command has been corrected by
+removing the surplus lower case \fBm\fP.
+In addition, the deprecated (in firmware version 3) \fB"\-settings"\fP
+arguments that begin with Hg, Std, and Fast have those prefixes
+automatically removed when using firmware version 4.
+.SH "Fix For Reporting Trinamic TMCL Parameter Values"
+.sp
+All the Trinamic TMCL motor controller parameters can
+be accessed via the \fBmotor_par()\fP function using
+generic numbered names, such as \fB"par6"\fP.
+Some of these parameters have aliases such as
+\fB"PeakCurrent"\fP which corresponds to parameter 6.
+Previously, if the parameter value was changed using the
+generic name (\fB"par6"\fP), the value reported by
+\fBmotor_par()\fP for the alias (\fB"PeakCurrent"\fP) would
+not reflect the new value.
+That issue is corrected in this release.
+.SH "Fix For Server Mode Interactive Command Echoing"
+.sp
+An issue where characters typed at the keyboard of a \fBspec\fP
+server session could be echoed twice to the screen if typed
+while the server
+was executing a client command has been fixed.
+.SH "Updates For \fBsplot\fP Utility"
+.sp
+The \fBsplot\fP utility now supports \fBx\fP\-axis logarithmic plotting.
+Also, an issue with \fBy\fP\-axis logarithmic plotting in shared\-data mode, where
+data was not always plotted, has been fixed.
+In addition, a new \fBsplot_cntl()\fP command \fB"plotrange"\fP provides
+the same functionality as the \fBplot_range()\fP function for the traditional
+plotting and is used in the standard plotting macros to implement the
+\fBsetplot\fP options to force the \fBy\fP\-axis minimum to zero and to use
+fixed ranges for the \fBx\fP axis during scans.
+.sp
+A new \fBsplot_cntl()\fP command \fB"showstats"\fP can be used to toggle
+the display of the peak, center\-of\-mass and full\-width\-at\-half\-max
+markers.
+.sp
+A new \fBsplot_cntl()\fP command \fB"showmotor"\fP can be used to toggle
+the display of a marker showing the current position of the
+.SH "Fixes and Updates For \fBnewscans.mac\fP"
+.sp
+The previous release included a file named \fBnewscans.mac\fP
+that contains a new implementation of the standard macros that
+will replace the standard macros in a forthcoming update.
+There are a few updates to these new scan macros as follows:
+.sp
+The \fBHEADING\fP string (used in the screen display, data file and plots)
+for the \fBdscan\fP macros had showed incorrect
+start and end positions, but is now fixed.
+.sp
+The new \fBfscan\fP (file scan) macro has been updated to allow the count time
+to be optionally assigned at the end of each row of motor positions.
+If invoked
+without a count\-time option, and if the file contains a count time at the
+end of each row of motor positions, the
+file count times will be used at each point.
+If the scan is invoked with a count\-time argument, the file count times will
+be ignored.
+Also, the motor mnemonics for the scan must now be proceeded by a \fB#M\fP
+and a space
+rather than a lone \fB#\fP to allow for comments in the file and future \fB#\fP directives.
+A single \fB#\fP followed by a space introduces a comment.
+.SH "May 11, 2015 \- RELEASE 6.03.04"
+.rs
+.SH "New String\-Handling Functions With Regular Expressions"
+.sp
+New built\-in string\-handling functions
+use an extended regular expression as an argument
+as follows:
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBrsplit()\fP
+\- 
+like \fBsplit()\fP in that it splits a string and places the parts into
+an array, but the delimiter can be a regular expression.
+.HP 5m
+."
+\fBmatch()\fP
+\- 
+finds the position in a string where a regular expression occurs, and
+optionally places matched subexpressions into an array.
+.HP 5m
+."
+\fBsub()\fP
+\- 
+replaces a single instance of text in a string that matches a regular expression.
+.HP 5m
+."
+\fBgsub()\fP
+\- 
+replaces all instances of text in a string that match a regular expression.
+.HP 5m
+."
+\fBgensub()\fP
+\- 
+replaces selected instances of text that match a regular expression.
+.RE
+.RE
+.sp
+See the entries for each function in the \fI\%funcs\fP help file for further
+details and features.
+.SH "New Macro Special Symbol \fB$@\fP"
+.sp
+It is often useful when parsing macro arguments, particularly when the macro
+is called with a variable number of arguments, to use the \fBsplit()\fP
+function to place the arguments into an associative array.
+The normal syntax is:
+.RS 3m
+.sp
+.nf
+.ft CB
+{
+  local ac, av[]
+  ac = split("$*", av)
+}
+.ft P
+.fi
+.RE
+.sp
+However, that usage
+does not respect quoted arguments, since \fB$*\fP removes quotation marks when
+concatenating the macro arguments.
+This \fBspec\fP release introduces a new
+sequence \fB$@\fP.
+When an ordinary macro with arguments is expanded, \fB$@\fP will be replaced with
+the concatenated arguments delimited
+by the special character \fB\ea\fP (the audible bell, \fB^G\fP, ASCII 7).
+The string can then be split as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+{
+  local ac, av[]
+  ac = split("$@", av, "\ea")
+}
+.ft P
+.fi
+.RE
+.sp
+The elements of \fBav[]\fP will respect the quoted arguments in the macro invocation.
+There is no syntax to escape the \fB\ea\fP.
+.SH "New \fB\(dqlines\(dq\fP Option For \fBfile_info()\fP"
+.sp
+A new \fB"lines"\fP option for the \fBfile_info()\fP function
+returns the number of newline characters in the specified file.
+See the \fBfile_info()\fP entry in the \fI\%funcs\fP help file for a
+description of all the available options.
+.SH "New Flexibility For the Indirection Operator \fB@\fP"
+.sp
+The \fBspec\fP parser now allows the indirection operator \fB@\fP to be
+applied to a parenthesized variable or associative array element.
+The priority of \fB@\fP is higher than the square brackets of the array,
+so parenthesis must be used if the array element contains the string
+which points to the symbol.
+For example:
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC> arr[0] = "PI"; s = "arr"
+SPEC> print @s[0], @(arr[0]), @(@s[0])
+PI 3.14159 3.14159
+.ft P
+.fi
+.RE
+.sp
+The expanded syntax allows cascaded usage as shown above.
+.SH "\fBstrdef()\fP Can Now Return Chained Macro Segments"
+.sp
+The \fBstrdef()\fP function, which returns the string definition
+of the macro name given as an argument, can now return segments
+of a chained macro as specified by the associated key given
+as a second argument.
+See the \fBstrdef()\fP entry in the \fIfuncs\fP help file for a
+detailed description.
+.SH "\fBget_lim()\fP Can Now Take Backlash Into Account"
+.sp
+The \fBget_lim()\fP function to return software motor limits
+will return the limit corrected for backlash if the magnitude of the
+second argument is greater than 1.
+For example, for a motor
+with sign of user*dial positive, backlash positive and steps per degree
+positive, the corresponding return values might be:
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC> p get_lim(tth, \-1), get_lim(tth, \-10)
+\-180 \-179.99
+.ft P
+.fi
+.RE
+.sp
+That is, although the actual soft limit is \-180,
+when taking account the configured backlash, the effective
+limit is \-179.99.
+.SH "Move Macros Now Allow Variables For Motor Mnemonics (Really)"
+.sp
+The feature announced with release 6.02 that allowed motor mnemonics
+to be given as variables for the motor\-move macros
+(\fBmv\fP, \fBumv\fP, \fBmvr\fP, \fBumvr\fP, \fBmvd\fP and \fBumvd\fP)
+didn\(aqt actually work when the release came out.
+The parser
+modification for the indirection operator (\fB@\fP) that enabled
+the feature was problematic and immediately reverted.
+This \fBspec\fP release fixes the problems and restores the behavior.
+Thus, usage such as:
+.RS 3m
+.sp
+.nf
+.ft CB
+for (i = 0; i < 5; i++) mv i 10
+.ft P
+.fi
+.RE
+.sp
+and:
+.RS 3m
+.sp
+.nf
+.ft CB
+{ par="phi"; umv par 4; par=th; umv par 1 }
+.ft P
+.fi
+.RE
+.sp
+will work.
+.SH "New Return Value For \fBsrand()\fP"
+.sp
+The \fBsrand()\fP function, used to set the seed value
+for the pseudo\-random
+number generator now has a return value, namely the value of
+the previous seed.
+.SH "\fBdelete\fP Can Now Be Used On Entire Associative Array"
+.sp
+The \fBdelete\fP built\-in command can now be used to delete
+all elements from an associative array.
+Previously, \fBdelete\fP
+would only remove one element.
+Note, \fBdelete\fP doesn\(aqt
+remove the array or change its type, it just removes all the elements.
+Use \fBunglobal\fP to remove the array from the symbol table.
+.SH "Preliminary Release of Updated Scan Macro Package"
+.sp
+A file named \fBnewscans.mac\fP is included in the distribution that
+contains a preliminary release of a new array\-based scan engine
+and several new standard scans.
+These scans will replace the
+standard scans in \fBscans.mac\fP in a subsequent release.
+The new scan engine uses a pre\-filled array of motor positions
+for the scan points, which allows better pre\-scan limit checks
+and enables new scan types.
+Existing scans that are replaced
+include \fBascan\fP through \fBa5scan\fP, \fBdscan\fP through \fBd5scan\fP,
+\fBlup\fP, \fBth2th\fP, \fBmesh\fP, \fBhscan\fP, \fBkscan\fP, \fBlscan\fP,
+\fBhklscan\fP, \fBhklmesh\fP,
+\fBhkcircle\fP, \fBhlcircle\fP, \fBklcircle\fP, \fBhkradial\fP, \fBhlradial\fP and \fBklradial\fP.
+The standard \fB_ascan\fP macro will no longer be used, but will continue to
+be included in the distribution for the benefit of local scans that use it.
+.sp
+The macros in \fBnewscans.mac\fP are not installed with this release, but
+can be activated by reading the file with \fBqdofile()\fP or \fBqdo\fP.
+.sp
+New scans in \fBnewscans.mac\fP include:
+.sp
+A new \fBfscan\fP does motor scans based on positions in a
+file.
+The first line of the file contains a list of motor mnemonics
+as a comment.
+Subsequent lines contain corresponding motor positions.
+Each line is one point in the scan.
+.sp
+A new \fBdmesh\fP scan, which is a
+delta \fBmesh\fP scan, similar to a delta motor scan.
+Endpoints
+are specified relative to the starting positions and motors are
+returned to the starting positions as the end of the scan.
+.sp
+A series of expanded motor scans named \fBxascan\fP through \fBxa4scan\fP
+and \fBxdscan\fP through \fBxd4scan\fP add a configurable number of
+points at the beginning and end of regular motor scans at a
+lower point density.
+.sp
+A region scan named \fBrscan\fP allows specifying a
+single motor scan with various point densities in consecutive
+segments.
+.sp
+See the comments in the \fBnewscans.mac\fP file in the \fBspec\fP
+distribution for additional details.
+.SH "Fix For \fBsplit()\fP In Macro Functions"
+.sp
+An old bug, where an "Illegal reference to array" error would occur
+when using a local associative array as a return value in a macro function
+when the array had been used with the \fBsplit()\fP function but where elements
+had not otherwise
+been assigned any values, has been fixed.
+.SH "Fix For \fBarray_read()\fP"
+.sp
+The return value of \fBarray_read()\fP
+is the number of points read from the file.
+A bug, where the value
+did not include points assigned when the number of columns
+in the data file was less than the array dimension, has
+been fixed.
+\fBspec\fP has always assigned as many elements to the array
+as are available in the file, but had not been including
+points in the return value when a line of data from the file did not have values
+to fill every column (or row for a column\-wise array).
+.SH "Fix For \fBcounters\fP/\fBplotselect\fP Macro"
+.sp
+An issue with the interactive \fBspec_menu()\fP versions of the
+\fBcounters\fP/\fBplotselect\fP macro introduced in \fBspec\fP release 6.02,
+where the wrong value would
+be assigned to \fBDET\fP or \fBMON\fP if there were any lower\-numbered
+disabled counters, has been fixed.
+.SH "Fixes And Updates For \fBsplot\fP Utility"
+.sp
+Arguments in the \fBscan_info_update()\fP macro function in the standard \fB_tail\fP
+and \fB_scanabort\fP macros along with the \fBsplot\fP Python code have been fixed
+to correct an issue where the last point of scans wasn\(aqt always drawn.
+Another issue with the \fBsplot\fP utility, where plots sometimes did not
+refresh correctly when switching between types of scans, has been fixed.
+New options for the \fBsplot_cntl()\fP \fB@marker@\fP command are available.
+A new \fBsplot\fP option to display the current motor position is available
+from the PLOT menu of the \fBsplot\fP window.
+.SH "Fixes For Trinamic TMCL Support"
+.sp
+An issue with \fBspec\fP\(aqs support for the Trinamic TMCL motor controllers,
+where it was not possible to update certain global parameters, has been fixed.
+.SH "New Timing Parameters For Agilis Communication"
+.sp
+New non\-standard optional parameters named \fB"wdelay"\fP and \fB"rdelay"\fP
+are available for the Agilis motor controller.
+These parameters can set a delay for writing commands to the Agilis
+and reading replies from the Agilis.
+See the \fI\%agilis\fP help file for details.
+.SH "Fixes For \fBsevc\fP Geometry"
+.sp
+The preliminary support for the \fBsevc\fP seven\-circle diffractometer
+geometry has been updated with several fixes in the \fBsevc.src\fP macros.
+.SH "April 1, 2015 \- RELEASE 6.03.03"
+.rs
+.SH "Fix For \fBtango_put()\fP With String Array"
+.sp
+A segmentation fault that occurred with \fBtango_put()\fP
+when called with an empty associative array
+for a data type that required a string array has
+been fixed.
+.SH "More Fixes For \fBspec_menu()\fP Issues"
+.sp
+A bug, where a call to \fBspec_menu()\fP with a menu that
+had no editable items would cause a segmentation fault,
+has been fixed.
+.SH "Correction For Recent \fBwhatis()\fP Fix"
+.sp
+A fix in release 6.03.01 for an old bug in the \fBwhatis()\fP function
+that inadvertently broke another aspect of the function
+has been corrected.
+.SH "Support For Newport Agilis AG\-UC8"
+.sp
+This \fBspec\fP release includes support
+for the Newport Agilis AG\-UC8 piezo controller.
+The update to the existing code for the Agilis AG\-UC2
+model includes support for the absolute positioning
+command and setting the step\-amplitude parameter.
+See the new \fI\%agilis\fP help file for details.
+Note, the update code has only been tested with
+the serial interface on the AG\-UC8.
+Please contact CSS if any problems using the
+USB interface on either the AG\-UC2 or AG\-UC8.
+.SH "March 22, 2015 \- RELEASE 6.03.02"
+.rs
+.SH "Macro Hardware Support For CCD\-type (2D) Devices"
+.sp
+The macro hardware facility now includes support for CCD\-type (2D)
+detectors.
+See the updated \fI\%mac_hdw\fP help file for details.
+.SH "Updated Support For Mythen Firmware 3 and Mythen2 Firmware 4 Models"
+.sp
+The \fBspec\fP support for the Dectris Mythen MCA has been revised and
+updated to work with firmware version 3 and the new Mythen2 models
+that use firmware version 4.
+See the updated \fI\%mythen\fP help file for details.
+.SH "Fix For \fBspec_menu()\fP Issues"
+.sp
+The relatively new \fBspec_menu()\fP function has
+been updated to fix a couple of issues.
+A crash that could occur when passing an uninitialized symbol
+as the first argument has been fixed.
+A crash that could occur when scrolling with a menu that
+included \fB"desc"\fP keywords
+for items that had no editable elements has been fixed.
+In addition, if there is a \fB"desc"\fP keyword with no
+editable elements, the \fBspec_menu()\fP function will now
+treat the entry as a \fB"subhead"\fP so that the cursor
+does not stop on the item.
+.SH "\fBsync\fP Command Fixed To Halt Multiple Timers"
+.sp
+The \fBsync\fP command, normally used to make sure
+motor hardware and software are synchronized,
+also aborts the current move and
+active counting.
+Previous versions of \fBspec\fP only halted one active timer
+or acquisition device, even if multiple master timers or
+acquisition devices were configured.
+The \fBsync\fP command will now force stop all active timers.
+.SH "New Indenting Option For \fBconfig\fP File"
+.sp
+The configuration editor \fBedconf\fP now takes optional arguments \fB+w\fP or
+\fB\-w\fP to add or remove a single character white\-space indentation in the \fBconfig\fP file
+on lines beginning with the words \fBSTATE\fP, \fBCONPAR\fP, \fBMOTPAR\fP
+and \fBCNTPAR\fP.
+Adding the space aids in readability of the file.
+The \fB+w\fP adds the indenting when writing out the file.
+The \fB\-w\fP removes the indenting.
+If the option is unspecified, the existing indenting (or lack thereof)
+is maintained.
+.SH "February 12, 2015 \- RELEASE 6.03.01"
+.rs
+.SH "Updates In the HDF5 Support"
+.sp
+The standard \fBspec\fP distribution now includes static \fBlibhdf5.a\fP and
+\fBlibz.a\fP
+files that can be linked
+with \fBspec\fP during installation to provide HDF5 support.
+The libraries have been built from the open\-source
+HDF5 and ZLIB source packages.
+The \fBspec\fP \fBInstall\fP script now prompts for HDF5 linking specifications.
+.sp
+New options are available to set the raw\-data chunk\-cache
+parameters used for writing data to the HDF5 file, either per dataset
+or for all datasets in an opened file.
+.sp
+A new \fBh5_link()\fP function can be used to create soft links to
+HDF5 objects in an external file.
+.sp
+A new \fB"flush"\fP option to \fBh5_file()\fP can be used to tell the
+library to write existing data out to disk.
+.sp
+The format used to save string\-valued associative arrays has
+been changed from using variable\-length strings to using fixed\-length strings.
+.sp
+One\-dimensional arrays can now be set to unlimited size.
+One scalar
+value at a time can be added using the frame syntax of \fBh5_data()\fP.
+.sp
+\fBspec\fP is now built against release 1.8.14 of the HDF5 libraries.
+.sp
+See the
+\fBspec\fP \fI\%hdf5\fP help file for details on the updates.
+.SH "Support For ARM Platforms"
+.sp
+The \fBspec\fP package can now be built to run on ARM platforms such as
+the Raspberry PI or BeagleBone Black.
+Contact CSS for details on OS support.
+.SH "Fix To Enable Support For Baltic Scientific Instruments Si(Li) Detector"
+.sp
+The BSI detector support documented in the \fBspec\fP release 6.02.09
+release notes was not actually available due to a coding error.
+That issue has now been corrected.
+.SH "Fix For \fBwhatis()\fP"
+.sp
+A old bug in the built\-in \fBwhatis()\fP function that
+could incorrectly identify a local variable as a macro has been fixed.
+Although unlikely, if a user defined a macro named \fBf\fP,
+the \fBshow_motor_info()\fP macro function used by \fBwa\fP, \fBlm\fP, etc.
+would fail due to this \fBwhatis()\fP bug.
+

@@ -1,0 +1,1490 @@
+.TH "changes" "spec 4.05 Release Notes" "08/25/12" "chg4_05.rst 6.2  08/25/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 4.05
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg4_05.rst      6.2  08/25/12  CSS
+.
+.\" Copyright (c) 1999,2000,2001 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 4.05 Release Notes" "08/25/12" "chg4_05.rst 6.2  08/25/12 CSS"
+.
+.SH "RELEASE 4.05.10\-4"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.10\-4 as of November 6, 2000.
+.SH "PCA\-3/PCA\-Multiport MCS\-Mode Fix"
+.sp
+A bug, dating from the original 1993 version of the code,
+where the number\-of\-passes preset in
+multi\-channel scaling (MCS) mode was not set correctly, has been fixed.
+.SH "RELEASE 4.05.10\-3"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.10\-3 as of October 29, 2000.
+.SH "New Home Option For \fBchg_dial()\fP"
+.sp
+The
+\fBchg_dial()\fP
+function for motors
+now takes an optional third argument when used with
+the home\-search options.
+If present, the value of the third argument is used to set the motor\(aqs
+dial position when the home or limit position is reached.
+(A home\-search is initiated on motors that support them
+when the second argument to
+\fBchg_dial()\fP
+is
+\fB"home"\fP,
+\fB"home+"\fP,
+\fB"home\-"\fP,
+\fB"lim+"\fP
+or
+\fB"lim\-"\fP.)
+The
+\fBhome\fP
+macro now also takes an optional third argument, which, if present,
+is the dial position to use with
+\fBchg_dial()\fP.
+.SH "Home Commands Implmented For OMS Controllers"
+.sp
+\fBspec\fP now implements home commands for the
+Oregon Microsystems motor controllers.
+See the
+\fI\%oms\fP help file for details.
+.SH "RELEASE 4.05.10\-2"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.10\-2 as of October 25, 2000.
+.SH "New Binary Output Options For \fBser_put()\fP and \fBgpib_put()\fP"
+.sp
+The
+\fBser_put()\fP
+and
+\fBgpib_put()\fP
+functions can now take a data array as the second argument.
+The binary values in the array will be output.
+By default, the entire array (or subarray, if specified) will
+be sent.
+An optional third argument can be used to specify the number of array
+elements to send.
+For short and long integer arrays, the data will be sent using native
+byte order.
+The
+\fB"swap"\fP
+option of the
+\fBarray_op()\fP
+function can be used to change the byte order, if necessary.
+For the typical string\-valued second arguments, an optional third argument
+would specify how many bytes to write.
+.SH "New String\-To\-Data\-Array Assignment Implemented"
+.sp
+It is now possible to assign strings to any type of data array.
+The ASCII value of each character in the string is assigned to
+successive elements of the array.
+Only as many characters of the string as will fit in one row of
+the array will
+be assigned.
+The null byte at the end of the string is not assigned.
+.SH "New Options For \fBimage_par()\fP and Fix For \fBimage_get()\fP"
+.sp
+Three new options are available for
+\fBimage_par()\fP.
+The
+\fB"info"\fP
+option
+prints the native data type, the number of rows and columns, the
+current binning values and the current region\-of\-interest values.
+The
+\fB"bin"\fP
+option can be used to set row\- and column\-binning to the same value.
+When used to get a value, it returns the current binning if row\-
+and column\-binning are the same, or \-1 if they are different.
+The
+\fB"roi"\fP
+option can be used to set all four region\-of\-interest values in one
+call.
+The values should be given in the order:  beginning row, ending row,
+beginning column, ending column.
+Also, an oversight in the code for
+\fBimage_get()\fP
+that prevented sub\-array arguments to work properly has been remedied.
+.SH "Small Problem Fixed For Ortec Counters"
+.sp
+A problem with the Ortec NIM\-bin counters, where the
+\fB"display"\fP
+option of
+\fBcounter_par()\fP
+(used to read the number of the channel being displayed)
+could cause a segmentation fault
+when used with certain versions of the National Instrument GPIB driver,
+has been corrected.
+.SH "RELEASE 4.05.10\-1"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.10\-1 as of September 28, 2000.
+.SH "Fix To Restore Tty State When \fBspec\fP Is Killed"
+.sp
+If \fBspec\fP is linked with the
+\fBreadline\fP
+library, then the
+\fBreadline\fP
+input routine
+changes the tty modes, including turning off echo.
+Previously, \fBspec\fP did not restore the tty state changed by
+\fBreadline\fP
+when killed via a
+\fBSIGQUIT\fP
+or
+\fBSIGTERM\fP
+signal sent by another
+process.
+That problem has been fixed.
+.SH "More Multiplexors Allowed With CAMAC E500 Motor Controller"
+.sp
+Support for the homemade multiplexor used with the CAMAC E500 motor
+controllers has been modified to allow up to three of the 16\-motor
+multiplexors to be run from the same E500 channel.
+Contact CSS for details.
+.SH "RELEASE 4.05.10"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.10 as of September 27, 2000.
+.SH "Support For Burleigh 6200ULN Inchworm Controller"
+.sp
+The Burleigh 6200ULN Inchworm motor controller is now supported
+over the Burleigh 671 ISA PC\-card interface.
+See the
+\fI\%burleigh\fP help file for details.
+.SH "New \fBem_io()\fP Function For SPring\-8"
+.sp
+The new built\-in function
+\fBem_io()\fP
+is available when \fBspec\fP is linked with the SPring\-8
+\fBEquipment Manager\fP
+RPC\-based hardware support.
+See the new
+\fI\%equipman\fP help file for details.
+.SH "Support For NI GPIB\-ENET on \fBLinux\fP"
+.sp
+\fBspec\fP now supports configuration of the National Instruments GPIB\-ENET
+hardware on
+The NI software and the
+\fBLinux\fP
+system must first be configured correctly.
+\fBspec\fP must also be linked with the
+\fBcib.o\fP
+file included with the NI distribution.
+.SH "Support For FAST ComTec MCD/PC Board MCA"
+.sp
+Initial support for
+the FAST ComTec MCD/PC Board MCA is now included with \fBspec\fP.
+The MCA communicates using a PC parallel port.
+.SH "Bug Fix For Rigaku Controllers"
+.sp
+A bug in the code for the Rigaku RINT\-2000 motor controllers,
+where moves of the AC/DC motors used to control the sample changers,
+slits, etc., caused problems such as read timeouts on subsequent
+commands, has been fixed.
+.SH "RELEASE 4.05.09\-6"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.09\-6 as of August 27, 2000.
+.SH "New Calculations For \fBkappa\fP and \fBpsic\fP Geometries"
+.sp
+A
+\fBcalc()\fP
+function is now available in the
+\fBkappa\fP
+and
+\fBpsic\fP
+geometries to calculate pseudomotor positions from real motor
+positions and vice versa.
+The macro
+\fBcalcP_fromR\fP
+is defined as
+\fBcalc(8, 0)\fP
+and fills in the pseudomotor positions
+\fBA[]\fP
+array with angles calculated from the real motors values in
+\fBA[]\fP.
+The macro
+\fBcalcR_fromP\fP
+is defined as
+\fBcalc(8, 1)\fP
+and calculates real motor positions
+from the pseudomotor positions.
+.SH "New Error Behavior For \fBkappa\fP Geometry"
+.sp
+The
+\fBkappa\fP
+geometry code has been revised to no longer return to the main prompt
+in the event of an error associated with the reciprocal space
+calculations.
+Instead, the
+\fBcalc()\fP
+functions underlying the definitions of
+\fBcalcHKL\fP,
+\fBcalcA\fP,
+etc., return a nonzero value on errors.
+The code for the other geometries will be modified
+similarly in the near future.
+.SH "RELEASE 4.05.09\-5"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.09\-5 as of August 6, 2000.
+.SH "Support For the JVL Motor Controller"
+.sp
+The JVL Industri Elektronik (Denmark) Model SMI20\-B stepper motor indexer
+is now supported.
+.SH "Tsuji Motor Controller Support Expanded"
+.sp
+\fBspec\fP now supports the Tsuji Electronics (Japan)
+new model PM16C\-04 motor controller.
+In addition, the ethernet interface, available on both the \-02 and \-04
+models, is now also supported (in addition to the
+already supported GPIB and RS\-232C interfaces).
+.SH "Phytron Motor Controller Initialization Changed"
+.sp
+\fBspec\fP now uses a more robust scheme for insuring the Phytron parameters
+are set correctly.
+.SH "RELEASE 4.05.09\-4"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.09\-4 as of July 6, 2000.
+.SH "Old \fBedconf\fP Bug Fixed"
+.sp
+An old and rarely seen bug that caused the configuration editor
+\fBedconf\fP
+to core dump upon failure of a terminal data\-base library call
+has been fixed.
+.SH "RELEASE 4.05.09\-3"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.09\-3 as of July 5, 2000.
+.SH "New Option For Motor \fBslop\fP Parameter"
+.sp
+Normally, if the optional motor parameter
+\fBslop\fP
+is set, \fBspec\fP silently resolves discrepancies between the hardware motor
+reading and \fBspec\fP in favor of the hardware.
+Now, if the
+\fBslop\fP
+parameter is set to a negative number of steps, \fBspec\fP resolves discrepancies
+smaller than the absolute number of steps in favor of \fBspec\fP\(aqs position by
+modifying the hardware position register.
+.SH "RELEASE 4.05.09\-2"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.09\-2 as of June 16, 2000.
+.SH "Internal Bookkeeping Bug Fixed With \fBarray_op(\(dqswap\(dq)\fP"
+.sp
+An old bug where twenty calls of
+\fBarray_op()\fP
+with the
+\fB"swap"\fP
+argument within the same statement block would result in an
+\fB"Out of temporary cells"\fP
+message has been fixed.
+.SH "RELEASE 4.05.09\-1"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.09\-1 as of June 13, 2000.
+.SH "Compumotor SX Controller Support Updated"
+.sp
+The \fBspec\fP code for the Compumotor SX Indexer has
+been updated to work properly with encoderless motor configurations.
+.SH "RELEASE 4.05.09"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.09 as of June 7, 2000.
+.SH "The \fBgpib_get()\fP Function Can Read More"
+.sp
+The
+\fBgpib_get()\fP
+function can now read up to 8,192 bytes.
+The previous limit was 512 bytes.
+.SH "Associative Arrays Can Now Be Assigned"
+.sp
+\fBspec\fP now allows associative arrays to be assigned to and
+to be returned by macro functions.
+When an existing associative array is assigned to,
+all previous elements of the array are deleted.
+.SH "The \fBdcb()\fP Function Is Upgraded To 32 Bits"
+.sp
+The little\-used
+\fBdcb()\fP
+function that returns the decimal equivalent of its
+binary\-coded\-decimal
+argument now handles 32\-bit arguments.
+Prior behavior was to limit arguments to 24 bits, dating from
+the old CAMAC days.
+.SH "ESRF CCD Support Updated"
+.sp
+This \fBspec\fP release includes the current ESRF CCD camera built\-in support.
+.SH "RELEASE 4.05.08\-7"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.08\-7 as of May 10, 2000.
+.SH "New \fBcdef\fP\(aqed \fBuser_Fheader\fP and \fBuser_Pheader\fP Macros"
+.sp
+New macros called
+\fBuser_Fheader\fP
+and
+\fBuser_Pheader\fP
+are included in the standard
+\fB_head\fP
+macro.
+They are designed as hooks for users to insert commands to print
+to the data file and printer, respectively.
+Unlike the traditional
+\fBFheader\fP
+and
+\fBPheader\fP
+macros, these new macros are to be maintained using the chained\-macro
+function
+\fBcdef()\fP,
+so that portions of the definitions can be selectively
+added and removed.
+.SH "Motor and Counter Mnemonics Checked"
+.sp
+Previously, neither
+the \fBspec\fP executable nor the
+\fBedconf\fP
+hardware configuration editor checked whether motor and counter mnemonics
+contained disallowed characters.
+Mnemonics containing disallowed characters are now rejected.
+.SH "NT\-2400 Bug Fix"
+.sp
+An old bug in the code for the LEC NT\-2400 motor controller, where
+the
+\fBconfig\fP
+file backlash parameter was used as the base\-rate parameter,
+has been fixed.
+.SH "New Command to Set DXP Gate Behavior"
+.sp
+The external gate on the the XIA DXP modules can now be enabled.
+See the
+\fI\%dxp\fP help file for details.
+.SH "Sleeping Message Cleared in do_sleep"
+.sp
+The
+\fBdo_sleep\fP
+macro now clears the last
+\fB"Sleeping 1"\fP
+message from the screen after the sleep has finished.
+.SH "RELEASE 4.05.08\-6"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.08\-6 as of April 19, 2000.
+.SH "\fBPAGER\fP Detection Fixed (Again)"
+.sp
+Another bug that prevented proper detection of the version of
+\fBless\fP
+and subsequent assignment of the proper string to the
+\fBPAGER\fP
+variable has been fixed.
+Symptoms appeared on platforms with
+version 332 or earlier of the
+\fBless\fP
+utility.
+.SH "RELEASE 4.05.08\-5"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.08\-5 as of April 15, 2000.
+.SH "Minor Improvements For \fBsock_io()\fP"
+.sp
+\fBspec\fP now sets the
+\fBSO_KEEPALIVE\fP
+socket option on all sockets created by
+\fBsock_io()\fP.
+Also, the host name part of the
+\fBhostname:port\fP
+argument no longer has to be an actual host name for a socket opened in
+\fB"listen"\fP
+mode.
+The host name part can now be any string
+and is used only to identify the connection
+for subsequent
+\fBsock_io()\fP
+calls.
+Also, for sockets opened in
+\fB"listen"\fP
+mode, \fBspec\fP now sets the
+\fBSO_REUSEADDR\fP
+socket option, which does away with the several minute delay often
+observed to be needed before a socket could be reopened
+for listening after a \fBspec\fP restart.
+.SH "RELEASE 4.05.08\-4"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.08\-4 as of April 13, 2000.
+.SH "Fixes For Multiple VME Controllers"
+.sp
+On\-site testing revealed a few minor bugs that prevented
+a second VME controller from completely working correctly.
+Those bugs have been fixed.
+.SH "RELEASE 4.05.08\-3"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.08\-3 as of April 3, 2000.
+.SH "Local Associative Array Bug Fixed"
+.sp
+A problem with local associative arrays declared within
+macro functions that are called more than once within a statement block
+has been fixed.
+Previously, the commands
+\fBprint\fP,
+\fBfor (var in arr)\fP
+and
+\fBif (var in arr)\fP
+would show any associative array elements previously referred to
+in prior calls to the macro during execution of the surrounding
+statement blocks.
+Although the elements shouldn\(aqt have been recalled at all, they would
+be recalled with a number value of zero, or a string value of the null
+string.
+Now any previously used array elements will not be included in the array
+commands above, unless, of course, they have been set within the current
+macro function invocation.
+.SH "\fBsock_io()\fP Bug Fixed"
+.sp
+A bug introduced in \fBspec\fP release 4.05.05, where the implicit
+newline end\-of\-string character was often not recognized during a
+\fBsock_io()\fP
+\fB"read"\fP,
+has been fixed.
+.SH "POLL Option For Software Timer For Buggy Sun"
+.sp
+The software timer on
+Solaris platforms in \fBspec\fP versions built using threads has a new
+implementation to work around operating system bugs.
+The software timer can now be configured as
+\fBINTR\fP
+or
+\fBPOLL\fP
+mode in the configuration editor.
+When in
+\fBINTR\fP
+mode on Solaris with threads, only integral counts times are allowed.
+In
+\fBPOLL\fP
+mode, any count time is allowed, but accuracy in count times is sacrificed.
+Note,
+\fBPOLL\fP
+mode can be selected on any platform, but should not be, due to the
+accuracy problem.
+.SH "Small \fBedconf\fP Bug Fixed"
+.sp
+An old and insignificant bug in the configuration editor, where the
+display of the user position with non\-zero offset did not update correctly
+on the screen when the step\-size parameter was changed, has been fixed.
+.SH "ESRF TACO MAXE Bug Fixed"
+.sp
+A small bug in the code for the ESRF TACO MAXE device server for motors
+with encoders, where the values were truncated rather than rounded to
+integers when converting from encoder reading to motor position, has
+been fixed.
+.SH "RELEASE 4.05.08\-2"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.08\-2 as of March 30, 2000.
+.SH "Support For SPring\-8 \fBEquipment Manager\fP RPC\-based Counters"
+.sp
+Prelimiary support for the
+counter/timers built and used at the SPring\-8 synchrotron in Japan
+is now included in \fBspec\fP.
+.SH "RELEASE 4.05.08\-1"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.08\-1 as of March 17, 2000.
+.SH "\fBsock_io()\fP Fix For HP Platform"
+.sp
+A bug, which prevented the
+\fB"listen"\fP
+mode of the
+\fBsock_io()\fP
+function from working on HP platforms,
+has been fixed.
+.SH "RELEASE 4.05.08"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.08 as of March 9, 2000.
+.SH "Fixed Some Old Input Parsing Problems"
+.sp
+A very old problem related to using a backslash
+\fB\e\fP
+to continue a line or to escape a space
+or tab character on input has been fixed.
+The problem only occurred when typing
+arguments to a macro, where the macro definition
+referred to the arguments
+by argument number
+(\fB$1\fP,
+\fB$2\fP,
+etc.).
+.SH "\fBpsic\fP Geometry Fixes"
+.sp
+Several more numerical problems in the calculations for certain
+\fBpsic\fP
+geometry modes have been fixed.
+.SH "Bit\-3 \fBLinux\fP Drivers Now Supported"
+.sp
+\fBspec\fP now supports use of the SBS Bit\-3 PCI\-to\-VME adapters on
+\fBLinux\fP
+using the drivers provided by SBS Bit\-3.
+Note, currently the SBS driver is known to work only on Red Hat 6.0
+and 6.1 systems.
+.SH "Phytron IXE\-A Motor Controllers Supported"
+.sp
+The Phytron IXE\-A motor controllers work very similarly to the IXE\-C
+controllers that \fBspec\fP already supports.
+However, the IXE\-A controllers require a multiplier factor for
+time\-related quantities,
+such as motor speed and acceleration.
+\fBspec\fP now includes that factor.
+The controller type is detected automatically from the version string
+returned by the instrument.
+.SH "Home Search Added For Tsuji PMC\-16C Controllers"
+.sp
+\fBspec\fP now supports home search on the Tsuji PMC\-16C Motor controllers.
+.SH "Recently Introduced OMS VME\-58 Bug Fixed"
+.sp
+A bug, introduced in the recent VME modification for \fBspec\fP release
+4.05.06\-2 and that made the Oregon
+Micro Systems VME\-58 unusable, has been fixed.
+.SH "RELEASE 4.05.07\-1"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.07\-1 as of February 25, 2000.
+.SH "KS\-3929 SCSI\-To\-CAMAC Now Supported On \fBLinux\fP"
+.sp
+The Kinetic Systems 3929 SCSI\-to\-CAMAC controller is now supported
+on
+\fBLinux\fP
+platforms.
+.SH "Clarified Error Message With I/O Port Access"
+.sp
+Previously, if no I/O ports were configured, access with the
+\fBport_get()\fP
+and
+\fBport_put()\fP
+functions would neither access the given port nor produce an error
+message.
+\fBspec\fP now prints the missing error message.
+.SH "RELEASE 4.05.07"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.07 as of February 23, 2000.
+.SH "\fBwiz_passwd\fP Improved"
+.sp
+The
+\fBwiz_passwd\fP
+utility, used to make changes to the
+\fBspec_wiz\fP
+password,
+now prints an error message and exits immediately if the user
+doesn\(aqt have permission to write the
+\fBSPECD/\fPpasswd
+file.
+Also, the super user no longer
+needs to enter the current
+\fBspec_wiz\fP
+password in order to change it.
+.SH "Warning In \fBgethelp()\fP When \fBPAGER\fP Is Bad"
+.sp
+If the program assigned to the
+\fBPAGER\fP
+variable returns an error code, \fBspec\fP now prints an explanatory
+error message that suggests what the the user should do to view the
+\fBspec\fP help files.
+.SH "\fBLinux\fP Drivers Adapted For Greater Range Of Kernel Versions"
+.sp
+The \fBspec\fP kernel\-level drivers for
+\fBLinux\fP
+now compile and install on a wider range of kernel versions.
+Note, for most installations, the
+\fBLinux\fP
+kernel\-level drivers aren\(aqt required, as \fBspec\fP offers user\-level support
+for the specific hardware involved.
+.SH "Support For Compumotor AX Motor Controllers"
+.sp
+The old Compumotor AX motor controller is now supported.
+.SH "Support For PMC Corporation DCX\-100 Motor Controllers"
+.sp
+The PMC Corporation DCX\-100 motor controllers are supported in
+a number of configurations as both
+PC boards and as RS\-232C devices.
+These boards are used as OEM components in motor controllers made by
+Dynaoptic Motion.
+.SH "Support For Pacific Scientific MA\-6420 Motor Controllers"
+.sp
+The Pacific Scientific model MA\-6420 motor controller is now supported
+over the RS\-232C interface.
+.SH "Support For SCIPE Detectors"
+.sp
+The SCIPE detectors, as used at the APS DND CAT, are now supported.
+.SH "RELEASE 4.05.06\-3"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.06\-3 as of February 4, 2000.
+.SH "Bug In Presence Test For SBS Bit\-3 On HP and Sun"
+.sp
+A bug, associated with the new feature which allows multiple VME controllers
+and that prevented \fBspec\fP from working with the SBS Bit\-3 drivers on
+HP and Sun platforms, has been fixed.
+.SH "Bug With Joerger VME Scaler Fixed"
+.sp
+Another bug, associated with the recent VME changes and that resulted in
+a segmentation fault when counting using the
+Joerger VSC16/8 VME scaler, has been fixed.
+.SH "RELEASE 4.05.06\-2"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.06\-2 as of January 18, 2000.
+.SH "Bug In \fBsscanf()\fP Function Fixed"
+.sp
+An old bug in \fBspec\fP\(aqs
+\fBsscanf()\fP
+function,
+where the
+\fB"Out of temporary cells"\fP
+error message would appear if too many data\-array items were
+given as arguments, has been fixed.
+.SH "RELEASE 4.05.06"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.06 as of January 5, 2000.
+.SH "Multiple VME Controllers Allowed"
+.sp
+It is now possible to have more than one VME controller in use simultaneously.
+In the configuration editor, use ^F and ^B to display additional entries
+on the interfaces screen for the up\-to\-four controllers.
+The default controller is controller zero.
+To specify VME addresses for
+motor controllers and counters that use the additional VME controllers,
+enter the address in the configuration as the controller number
+followed by a colon and the module address, as in
+\fB2:0xfc00\fP
+for a module using VME controller number 2 at address 0xfc00.
+For the user\-level functions
+\fBvme_get()\fP,
+\fBvme_put()\fP
+and
+\fBvme_move()\fP
+use the same notation as above for entering the controller unit number.
+Note, though, the address arguments will have to be passed as strings, as
+in
+\fBvme_put("2:0xFE00", 0x12)\fP.
+Note also, the CSS
+\fBbit3.o\fP
+driver used on
+\fBLinux\fP
+systems
+still only supports one 616/7/8 module.
+CSS awaits the imminent release of the
+SBS Bit\-3 driver for
+\fBLinux\fP,
+which
+will support multiple modules.
+.SH "Support For the Orsim MCA 7700 Included"
+.sp
+Initial support for the Seiko EG&G Ortec model Orsim MCA 7700 is included
+with this release of \fBspec\fP.
+Both the ethernet and GPIB interfaces on the MCA are supported.
+.SH "Support For Meteor Frame Grabber On \fBLinux\fP Updated"
+.sp
+The support for the Matrox Meteor PCI frame grabber card has been improved.
+See the
+\fI\%meteor\fP help file for details of the current functionality.
+.SH "Updates For XIA DXP MCA CAMAC Modules"
+.sp
+The code for the XIA DXP MCA CAMAC modules has been updated.
+\fBspec\fP now includes the XIA library functions in the \fBspec\fP distribution.
+It is no longer necessary to enter the names of the XIA object files during
+installation.
+Several bugs in the XIA library have been fixed, allowing new
+DXP configuration
+files to be loaded without restarting \fBspec\fP.
+See the
+\fI\%dxp\fP help file for information.
+.SH "Presence Test For Jorway 73A Improved"
+.sp
+The presence test for the Jorway 73A SCSI\-to\-CAMAC module previously
+gave false positives.
+That behavior has been corrected.
+.SH "Workaround For EPICS Motor Record \fBRES\fP Not Posting"
+.sp
+Previously, \fBspec\fP had been monitoring the
+\fBRES\fP
+process variable,
+intending to handle motors
+with and without encoders in a simple way.
+That was ineffective as changes to
+\fBRES\fP
+are in fact not posted by the EPICS motor record.
+\fBspec\fP now instead monitors both
+\fBMRES\fP
+and
+\fBERES\fP
+and fetches the new
+\fBRES\fP
+value when either of the two change.
+.SH "Typo In \fBpsic.src\fP Fixed"
+.sp
+The definitions for the
+\fBF_QAZ\fP
+and
+\fBF_NAZ\fP
+macros were reversed and have been corrected.
+.SH "Old Bug With \fBsleep()\fP Fixed"
+.sp
+A bug, where the deprecated use of
+\fBsleep()\fP
+with a negative integer argument (for the number of clock
+ticks) resulted in a pause for the time
+specified by the argument, followed by a pause of random (perhaps very long)
+duration, has been fixed.
+Use of negative arguments is still
+deprecated \- use fractional arguments to specify sleep times
+of sub\-second precision.
+.SH "Bug With \fBPAGER\fP Detection Fixed"
+.sp
+The check in the start\-up command files that
+assigns a default value to the
+new
+\fBPAGER\fP
+variable introduced in \fBspec\fP release 4.05.02 contained a number of
+errors, making the check useless.
+The commands have been fixed.
+.SH "Bug Fix For Wizard Mode"
+.sp
+A bug introduced in release 4.05.04, where the
+\fBspec_par("specwiz", 1)\fP
+function that prompts for the \fBspec\fP wizard password was broken,
+has been fixed.
+.SH "Bug Fix For \fBca_cntl()\fP"
+.sp
+A bug, where the
+\fBca_cntl()\fP
+function was completely ineffective in sending the
+\fB"init"\fP
+(or
+\fB"Z"\fP)
+and
+\fB"clear"\fP
+(or
+\fB"C"\fP)
+commands,
+has been fixed.
+The bug has been present since
+\fBca_cntl()\fP
+was introduced in \fBspec\fP
+release 3.02.01 (ca. 1995).
+.SH "RELEASE 4.05.05"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.05 as of November 8, 1999.
+.SH "Number Of Motors Increased From 99 to 160"
+.sp
+The built\-in limit on the number of configured
+motors has been increased from 99
+to 160.
+Note, this limit is not a fundamental constraint.
+If there are sites that require more than 160, please contact CSS \-
+the limit can be easily
+raised.
+Eventually, the
+artificial limit on the number of motors will be removed altogether.
+.SH "New EOS Option For Socket Reads"
+.sp
+The
+\fB"read"\fP
+mode of the
+\fBsock_io()\fP
+function now accepts an optional end\-of\-string (EOS) argument.
+If present, characters will be read from the socket until either characters
+that match the EOS arrive or the read timeout expires.
+See the
+\fI\%sock_io\fP help file for details.
+.SH "Minor Bug Fix For Riso ECB Controller"
+.sp
+A bug, where the message displayed on
+ECB\-motor hardware errors
+was slightly garbled, has been fixed.
+.SH "RELEASE 4.05.04"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.04 as of October 14, 1999.
+.SH "Contents of \fBA[]\fP and \fBS[]\fP Restored On Start Up"
+.sp
+The contents of the motor position array
+\fBA[]\fP
+and scaler value array
+\fBS[]\fP
+are now restored from the state file on start up, as was the
+case prior to release 4.04.01.
+.SH "Debug Level Changes Can Take Effect Within Statement Blocks"
+.sp
+Values assigned to the debug variable
+\fBDEBUG\fP
+now take affect immediately.
+Previously, the level of the debugging messages would only reflect
+changes to
+\fBDEBUG\fP
+after a return to the main interactive prompt.
+.SH "Better Input Processing While Reading Strings From Keyboard"
+.sp
+The character processing done when the keyboard is read for the
+\fBinput()\fP,
+\fByesno()\fP
+and
+\fBgetval()\fP
+functions now handles the special erase, kill and EOF characters
+consistently,
+with both backspace and delete recognized as erase characters.
+.SH "Raw Mode Turned Off On Exit"
+.sp
+\fBspec\fP now makes sure terminal
+\fBraw\fP
+mode is turned off
+when exiting.
+Previously, if \fBspec\fP exited via a
+\fBquit\fP
+or
+\fBterminate\fP
+signal
+while still in raw mode (as from an
+\fBinput(0)\fP
+call), raw mode did not get turned off.
+.SH "\fB$$\fP Recognized As Documented"
+.sp
+The \fBspec\fP manual has long documented that
+\fB$$\fP
+would produce a single
+\fB$\fP
+in a macro.
+That behavior is now implemented.
+.SH "Behavior Of \fBFRESH\fP Variable Modified"
+.sp
+The
+\fBFRESH\fP
+variable introduced in release 4.04.05 is still nonzero
+while reading the start\-up command files and executing the
+start\-up macros if
+\fBspec\fP is starting fresh,
+but its value is reset to zero before the first main interactive
+prompt.
+That insures the start\-up macro files that do initializations
+using
+\fBif (FRESH)\fP
+will not do the initializations (possibly resetting parameter values already
+modified by the user)
+if the macro files are read a second time.
+.SH "Optional Type Argument For \fBepics_get()\fP"
+.sp
+The EPICS\-related function
+\fBepics_get()\fP
+can now take a second argument to specify what type of data
+to retrieve via channel access.
+Such a feature may be useful when a number
+value for a process variable of type
+\fBENUM\fP
+is needed, as otherwise the string value is returned.
+See the
+\fI\%epics\fP help file for details.
+.SH "Generic Serial Device Support Through EPICS Available"
+.sp
+\fBspec\fP now supports the EPICS generic serial record.
+Thus, the EPICS serial record can be selected for use
+with \fBspec\fP\(aqs generic
+\fBser_get()\fP
+and
+\fBser_put()\fP
+functions.
+In addition, any motor controller, timer/counter, etc. which runs
+over a serial interface for which \fBspec\fP already has built\-in code
+can be configured to use the EPICS generic serial record.
+.SH "RELEASE 4.05.03"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.03 as of September 20, 1999.
+.SH "Recent Bug in \fBport_get()\fP/\fBport_put()\fP Functions Fixed"
+.sp
+A bug, introduced in release 4.05.01, which resulted in segmentation
+violations if the functions
+\fBport_get()\fP,
+\fBport_get2()\fP,
+\fBport_put()\fP
+or
+\fBport_put2()\fP
+were called, has been fixed.
+.SH "Some Minor Enhancements To Install Program"
+.sp
+The
+\fBinstall_data\fP
+file, which contains the site\-dependent installation parameters,
+is now used as dependency for
+\fBu_hdw.o\fP
+and
+\fBu_hook.o\fP
+in the
+\fBmake\fP\-file,
+to help insure that \fBspec\fP gets
+rebuilt when the installation specifications are changed.
+Also, the
+\fBget_opts\fP
+program now accepts a
+\fB^D\fP
+command to jump out of the specifications queries at any time.
+.SH "Fixes For Stand\-Alone Help Utility"
+.sp
+The stand\-alone help utility
+\fBchelp\fP
+will no longer change tty modes if the output is to a file or a pipe, and
+will no longer include the
+character sequences that indicate highlighted text if output is to
+a file.
+.SH "The \fBgpset\fP Comments No Longer Are Written To Screen"
+.sp
+The standard
+\fBgpset\fP
+macro that documents changes to geometry parameters
+no longer prints messages to the screen, but does still write
+comments to the data file if one is opened and to the printer if one is
+configured.
+.SH "Additional Standard Macro File For \fBsurf\fP Geometries"
+.sp
+In order to allow multiple versions of the
+\fBsurf\fP
+geometry to exist in the same installation directory,
+\fBspec\fP now recognizes an additional standard macro file with a name
+of the form
+\fBconf/conf4.mac\fP
+(where
+\fBconf\fP
+is the name by which \fBspec\fP was invoked and
+\fBconf4\fP
+is the first four letters of that name.
+.SH "Further Developments For the \fBpsic\fP Geometry"
+.sp
+Further work on the
+\fBpsic\fP
+geometry includes the following:
+The cut points for all the diffractometer angles can now be set by the user.
+A preliminary implementation of sector transformations is available.
+Also, the first draft of the
+\fI\%psic\fP help file is included.
+.SH "Support Non\-encoder Version of IMS Motor Controller"
+.sp
+The initial version of the code for the Intelligent Motion Systems
+motor controllers assumed use of an encoder.
+Users can now choose
+\fBIMS\fP
+or
+\fBIMS_E\fP
+in the configuration editor to select whether particular motor channels
+have encoders available.
+The difference in the code is whether the current position is read back
+from the IMS module with a
+\fBz\fP
+or
+a
+\fBZ\fP
+command.
+.SH "Workaround Implemented For OMS Firmware Limit Bug"
+.sp
+A workaround for an OMS motor controller firmware bug
+that prevented a
+clean recovery after hitting a limit switch is included.
+After hitting a hardware limit, the first command \fBspec\fP would send to
+move to a position in the opposite direction did not always work.
+The workaround is to explicitly send a command to move in the opposite
+direction, then to send the command to move to the specific position.
+.SH "Support For a Channel Multiplexor With OMS Motor Controllers"
+.sp
+Preliminary support for a one\-to\-sixteen channel multiplexor is now
+included with the OMS motor controller support.
+Contact CSS for implementation details.
+.SH "Support For SPring\-8 \fBEquipment Manager\fP RPC\-based Motors"
+.sp
+A motor controller built and used at the SPring\-8 synchrotron in Japan
+is now supported in \fBspec\fP.
+.SH "New \fBspec_par()\fP Option To Set Default EPICS Timeouts"
+.sp
+The default timeout for the EPICS channel access
+\fBca_pend_io()\fP
+call can now be set using
+\fBspec_par()\fP.
+See the
+\fI\%epics\fP and
+\fI\%spec_par\fP help files for details.
+.SH "RELEASE 4.05.02"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.02 as of July 11, 1999.
+.SH "Modified \fB_updateHKL\fP Macro"
+.sp
+The
+\fB_updateHKL\fP
+macro, used by the
+\fBubr\fP
+and
+\fBumk\fP
+macros to display the updated position of motors and reciprocal space
+position during moves, has been modified to print as many of the
+diffractometer motors as is possible to fit in the width of the screen.
+Previously, no more than five motors were shown.
+.SH "New \fBuser_scan_tail\fP Hook In Standard Macros"
+.sp
+The standard
+\fB_tail\fP
+macro, called at the end of each scan, now includes a call of
+\fBuser_scan_tail\fP,
+which local users can define to perform special actions at the
+end of scans.
+By default,
+\fBuser_scan_tail\fP
+is defined
+as an empty macro
+using
+\fBcdef()\fP.
+.SH "Fix For Certain GPIB Driver and Motor Controller Combinations"
+.sp
+A problem with internal buffer overruns with certain motor controllers
+when used with some GPIB drivers
+has been fixed.
+Affected motor controllers include the Huber SMC 9000,
+the Newport/Microcontrole ITL09 and MM2500,
+the Advanced Control Systems MCB, the custom
+controller MMC\-32 used at NSLS and the custom MURR controller used at the
+Missouri Research reactor.
+The National Instruments GPIB driver version for
+\fBLinux\fP
+was confirmed to
+exhibit the behavior, although
+other drivers may behave similarly.
+Symptoms of buffer overruns often appear as
+random crashes or unexpectedly flaky behavior in the software.
+.SH "RELEASE 4.05.01"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.05.01 as of June 13, 1999.
+.SH "New Go\-To Feature For Command Files"
+.sp
+The
+\fBdofile()\fP
+and
+\fBqdofile()\fP
+functions, used by the
+\fBdo\fP
+and
+\fBqdo\fP
+macros, now take an additional optional argument to specify a
+starting line in the command file.
+If the argument is an integer, the number specifies at which line
+to start reading the file.
+(Currently, only positive integers are allowed.)
+If the argument is anything else, it is considered a search string, and
+text is read from the file starting
+at the first line containing that search string.
+The metacharacters
+\fB*\fP,
+which matches any string, and
+\fB?\fP,
+which matches any single character, are allowed in the search string.
+Initial and trailing white space is ignored in the file.
+.SH "New Option To Keep Going After An Error In a Command File"
+.sp
+You can now tell \fBspec\fP to keep reading and executing commands from
+a command file no matter what errors occur.
+The new
+\fB"keep_going"\fP
+option
+to
+\fBspec_par()\fP,
+if set, will tell \fBspec\fP not to return to command level and the
+main interactive prompt on any type
+of error.
+Instead, the next line from the current command file will be read.
+Note, depending on where the error is in a file, reading subsequent
+lines may generate more errors, particularly if the error occurs
+inside a statement block.
+.SH "New Error Recovery Options For GPIB and Other I/O"
+.sp
+It is now possible to arrange that various hardware errors will not cause
+\fBspec\fP to reset to command level.
+If the variable
+\fBHDW_ERR\fP
+exists, it will be assigned a
+hardware error number, currently defined as follows:
+.sp
+.RS 4m
+.nf
+1 \- Generic error
+2 \- GPIB no listener
+3 \- Timeout
+4 \- A non\-fatal error
+5 \- Function called with bad argument
+6 \- Trying to access unconfigured hardware
+7 \- Function called with bad address
+.fi
+.sp
+.RE
+.sp
+If the value of
+\fBHDW_ERR\fP
+is \-1 before the call to the user\-level hardware access function,
+no reset to command level
+will take place for any errors.
+Otherwise, traditionally
+fatal errors (all errors other than timeouts or the explicitly
+\fB"non\-fatal"\fP
+errors) will still be fatal.
+The following functions currently may set
+\fBHDW_ERR\fP:
+\fBca_get()\fP,
+\fBca_put()\fP,
+\fBgpib_get()\fP,
+\fBgpib_put()\fP,
+\fBgpib_poll()\fP,
+\fBgpib_cntl()\fP,
+\fBport_get()\fP,
+\fBport_getw()\fP,
+\fBport_put()\fP,
+\fBport_putw()\fP,
+\fBser_get()\fP
+and
+\fBser_put()\fP.
+.SH "New \fBshow_state\fP Utility"
+.sp
+A new utility called
+\fBshow_state\fP
+that can display the more interesting contents of the saved state files
+(command history, variable assignments and macro definitions)
+is available.
+Note, the state file is only updated when a \fBspec\fP session is terminated
+or the user types the
+\fBsavstate\fP
+command.
+The utility is designed to be able to read state files from all
+platforms, regardless of native byte order.
+Type
+\fBshow_state \-\fP
+to see usage options.
+.SH "Backwards Compatibility For Previous State File Versions"
+.sp
+\fBspec\fP will now try to maintain a measure of compatibility with prior
+versions of the saved state files, such that updates to new releases
+of \fBspec\fP will less often require a fresh start.
+.SH "New Option For Error\-Log Files"
+.sp
+A new kind of log file is available that records typed commands,
+error messages and optional time stamps.
+The file is intended to be useful to administrators trying to diagnose
+user problems.
+A file opened for output named
+\fBelog\fP
+or that ends in
+\fB.elog\fP
+is such a file.
+Commands entered at the \fBspec\fP prompt are logged prefixed by a
+\fB#C\fP.
+Error messages produced by the built\-in C code, or generated by the
+new
+\fBeprint\fP
+or
+\fBeprintf()\fP
+built\-in keywords (described below), are logged prefixed by a
+\fB#E\fP.
+If time stamps are enabled (via the new
+\fBspec_par()\fP
+option described below), the UNIX epoch and the corresponding date string
+are logged (at the time\-stamp interval) prefixed by a
+\fB#T\fP.
+.SH "New \fBeprint\fP and \fBeprintf()\fP Built\-In Commands"
+.sp
+A built\-in command
+\fBeprint\fP
+and built\-in function
+\fBeprintf()\fP
+are available that can be used with the new error\-log files.
+The behavior is exactly the same as
+\fBprint\fP
+and
+\fBprintf()\fP,
+respectively, except that if an error\-log file is open, the generated
+strings will also be written to that file, in addition to any other
+files or devices turned on for output, as usual.
+The strings written to the error\-log files will be prefixed with the
+\fB#E\fP
+characters.
+If the error message is more than one line, only the first line will have
+the special prefix.
+.SH "Macros Revised To Use \fBeprint\fP and \fBeprintf()\fP"
+.sp
+Most (but not yet all) of the standard macros have been modified to
+use the new
+\fBeprint\fP
+and
+\fBeprintf()\fP
+output commands for printing error messages.
+There is no difference in behavior, except that if an error\-log file
+is open and turned\-on, the error messages will also be logged to that
+file.
+.SH "New \fB\(dqelog_timestamp\(dq\fP Option For \fBspec_par()\fP"
+.sp
+The time interval for the optional time stamps for the new error\-log
+file capability is set using the
+\fBspec_par("elog_timestamp", value)\fP
+where the units of
+\fBvalue\fP
+are minutes.
+The default value is 5 minutes.
+Note, time stamps are only added
+before a command or error message is logged, so that the interval
+between time stamps can be greater than that specified if no commands
+are being typed or errors generated.
+.SH "New \fBarray_op()\fP Option To Tag Shared\-Array Type"
+.sp
+Shared arrays can be tagged with a type that will be available to
+other processes accessing the array.
+Usage is
+\fBarray_op("tag", arr, arg)\fP
+where
+\fBarr\fP
+is the array and
+\fBarg\fP
+is
+\fB"mca"\fP,
+\fB"image"\fP,
+\fB"scan"\fP
+or
+\fB"info"\fP.
+Use
+\fBarray_op("untag", arr)\fP
+to remove the tag information.
+.SH "New \fBarray_op()\fP Option To Swap Bytes"
+.sp
+The command
+\fBarray_op("swap", arr)\fP
+will swap the bytes of the array
+\fBarr\fP.
+The command can change big\-endian short\- or long\-integer data to
+little\-endian and vice versa.
+For most built\-in data collection, \fBspec\fP automatically swaps bytes as
+appropriate, but this new function is available for other cases that
+may come up.
+.SH "New Option To Set Help File Pager Program"
+.sp
+\fBspec\fP will now examine the environment variables
+\fBSPEC_PAGER\fP
+and
+\fBPAGER\fP,
+in turn, to obtain the name of a program to use for paging through
+\fBspec\fP help files.
+Such a program can be
+an alternative to \fBspec\fP\(aqs built\-in paging code, allowing searching
+and line\-by\-line perusal.
+A new built\-in variable
+\fBPAGER\fP
+can be also be assigned to directly, overriding the environment variables.
+If a version of
+\fBless\fP
+greater than version 332 is installed on the \fBspec\fP platform,
+the standard macros will assign the
+\fBPAGER\fP
+variable a string that invokes the
+\fBless\fP
+utility with some special flags if the
+\fBPAGER\fP
+variable is otherwise unset.
+.SH "New \fBmotor_par()\fP Options To Retrieve \fBconfig\fP File Values"
+.sp
+New options to the
+\fBmotor_par()\fP
+function,
+\fB"config_step_size"\fP,
+\fB"config_acceleration"\fP,
+\fB"config_velocity"\fP,
+\fB"config_base_rate"\fP
+and
+\fB"config_backlash"\fP,
+return the values for the associated parameters as were originally
+read from the
+\fBconfig\fP
+file.
+Such a feature might be useful for restoring these values after macros
+had made some changes for a particular scan.
+.SH "Warning Message On Moving Motors With Wizard Powers Suppressed"
+.sp
+The warning printed when motors are moved using wizard powers has
+been turned into a debugging message printed when the warning\-message
+debug level is turned on.
+.SH "Warning Message On Output Left On Suppressed"
+.sp
+The warning messages about output files being left on after errors
+has been eliminated as it seemed to confuse some users.
+.SH "Scan Header Warns If No Data File Open"
+.sp
+The scan header information printed to the screen with the standard
+macros now warns that no data files is open if the
+\fBDATAFILE\fP
+variable have either the value
+\fB"null"\fP
+or
+\fB"/dev/null"\fP.
+.SH "Bug In Optional Read Mode For Motors Fixed"
+.sp
+A bug, where the new feature introduced with release 4.04.01
+that allowed control of when
+motor position\-register were read by \fBspec\fP by selecting a read mode
+on the optional motor configuration screen of the configuration editor
+didn\(aqt have actually have any effect, has been fixed.
+.SH "Bug In Contents Display In \fBscans.4.c\fP Fixed"
+.sp
+A recently introduced bug in the data file contents displayed with the
+\fBcontents\fP
+utility and the
+\fBscans.4\fP
+\fBC\-PLOT\fP
+user function, where the month was off by one,
+has been fixed.
+.SH "Improved External Signal Handling"
+.sp
+When the \fBspec\fP process is sent a
+\fBSIGINT\fP
+signal from another process while the \fBspec\fP process is waiting for user
+input in the
+\fBreadline\fP
+library routines,
+\fBspec\fP now does complete
+\fB^C\fP\-type
+processing.
+Previously, moving, counting and other acquisition would be aborted, but
+the other
+\fB^C\fP\-type
+processing, such as executing
+\fBcleanup\fP
+macros or closing output files would not be done.
+.SH "\fBLinux\fP Drivers Updated For 2.2.x Kernels"
+.sp
+The four kernel drivers
+\fBpca.c\fP,
+\fBbit3.c\fP,
+\fBdsp.c\fP
+and
+\fBpio.c\fP
+that are sometimes used with \fBspec\fP have been modified to be compatible
+with the
+\fBLinux\fP
+2.2.x series kernels.
+.SH "Fixes For Newport PM500 Motor Controller"
+.sp
+Some fixes in the code supporting the Newport PM500 motor controller
+are included.
+.SH "New CCD Support in ESRF Distribution"
+.sp
+Some new CCD device support is included in the ESRF version of \fBspec\fP.
+.SH "Fixes For \fBpsic\fP Geometry"
+.sp
+A number of fixes in the geometry calculations for the new
+\fBpsic\fP
+geometry are included.
+More fixes are expected in the future.
+.SH "Updates To \fBsurf\fP Geometries"
+.sp
+A new CMC configuration is included for the
+\fBsurf\fP
+geometry for the diffractometer to be installed at the CMC CAT at the APS.
+.SH "New Support for Opaque Data Type In \fBesrf_io()\fP"
+.sp
+The
+\fB"opaque"\fP
+data type is now supported by the
+\fBesrf_io()\fP
+function, but only in transferring data to \fBspec\fP and only to
+the data\-type array variables.
+One must be sure to declare an array of the type appropriate to the data
+and also to arrange for byte swapping, if necessary.
+.SH "Fix For ESRF TACO Device Initialization"
+.sp
+A one second delay has been added between successive
+\fBdev_free()\fP
+and
+\fBdev_import()\fP
+library calls
+in \fBspec\fP\(aqs ESRF TACO support to workaround a bug in the OS/9 system that
+is not otherwise handled by the device server library or drivers.
+The delay should fix the problem with the message
+\fB"Can not import device ID/foo/0"\fP
+appearing on every other
+\fBreconfig\fP.
+

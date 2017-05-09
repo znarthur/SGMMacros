@@ -1,0 +1,224 @@
+spec_par                            function                            spec_par
+
+NAME
+     spec_par() - sets internal parameters
+
+DESCRIPTION
+
+     The ssppeecc__ppaarr(()) function allows access to certain internal parameters of
+     ssppeecc as described below.  Most parameters can be set using the --oo start-up
+     option (see the _s_p_e_c help file).  Some parameters can only be set using the
+     start-up option.  As of ssppeecc release 5.03.01, some hardware-related
+     parameters can also be set in the ccoonnffiigg file, using the following syntax:
+
+         SSPPEECC__PPAARR:: eeppiiccss__ttiimmeeoouutt == 22
+
+     The declarations have to be entered manually, but will be maintained by the
+     eeddccoonnff configuration editor.  The declaration can be located anywhere in
+     the file.
+
+     ssppeecc__ppaarr((""??""))  - Displays all the parameters and their values.  If the
+          current value differs from the default value, the default value is
+          displayed in parenthesis (as of release 5.08.02-8).
+
+     ssppeecc__ppaarr((""sseett__ddeeffaauullttss"")) - Sets all parameters to their default values.
+
+     ssppeecc__ppaarr((ppaarr) - Returns the current value of the parameter ppaarr.
+
+     ssppeecc__ppaarr((ppaarr,, vvaalluuee) - Sets the internal parameter ppaarr to vvaalluuee.
+
+     The ssppeecc__ppaarr(()) parameters are:
+
+     ""aannkkaa__rreemmoottee__hhoosstt"", ""aannkkaa__rreemmoottee__nnooddee"", ""aannkkaa__llooccaattee__nnooddee"" - This
+          parameters are only visible when the ANKA RST Gamma hardware is
+          configured.  See the _a_n_k_a help file for an explanation of what they
+          mean.  These parameters can be set in the ccoonnffiigg file.
+
+     ""aauuttoo__ffiillee__cclloossee"" - The auto-file-close option is available to
+          automatically close output files that haven't been accessed for some
+          interval of time.  The parameter units are hours, and the parameter
+          can have nonintegral values.  When the auto-close option is enabled,
+          each time an oonn(()), ooffff(()), ooppeenn(()), cclloossee(()) or ffpprriinnttff(()) function is
+          called, ssppeecc will check its list of opened output files.  Any files
+          which have not been written to for the length of time given by vvaalluuee
+          hours will be closed.  Enabling this option can help prevent errors
+          when your macros or commands do not close files when appropriate,
+          resulting in ssppeecc running out of resources to open additional files.
+
+          As files are opened automatically when sent output, auto-close mode
+          operates transparently for the most part.  However, if you change to a
+          different working directory between the time the file is first opened
+          and subsequently automatically closed, and if the file is not opened
+          by an absolute path name, the next time you refer to the file, ssppeecc
+          will reopen it using a relative path based on the current directory.
+
+          If vvaalluuee is zero, the mode is disabled.  By default, the mode is
+          initially disabled.
+
+     ""aauuttoo__hhddww__ppoollll"" - When automatic hardware polling is turned on, ssppeecc will
+          automatically poll busy motor controllers, timers and acquisition
+          devices to determine when they are finished.  For some polled devices,
+          ssppeecc needs to perform an action, such as starting a motor backlash
+          move, when the device is finished with its current business.  Without
+          automatic hardware polling, a call to the wwaaiitt(()) function is
+          necessary.  The default is for this mode to be on.  A reason to turn
+          it off may be to reduce the amount of debugging output during hardware
+          debugging.  Early versions of ssppeecc made more frequent use of
+          interrupt-driven devices (certain motor controllers and timers), for
+          which this mode is irrelevant.
+
+     ""cchheecckk__ffiillee__nnaammeess"" - The check-file-names option can prevent you from
+          (accidentally) creating files with names containing nonstandard
+          characters.  When enabled, if a file name passed to the oonn(()), ooppeenn(())
+          or ffpprriinnttff(()) functions contains any of the characters
+          (())[[]]{{}}||$$''``**??;;!!&&<<>>\\\\@@, the space character, any control characters or
+          any characters with the eighth bit set, and the file doesn't already
+          exist, ssppeecc will print a error messages and reset to command level.
+          By default, this mode is on.
+
+     ""ccoonnffiirrmm__qquuiitt"" - If set, ssppeecc prompts with a "Really quit?" message when
+          the qquuiitt or ^^DD commands are entered.  The question must be answered in
+          the affirmative to exit the program.  The value for ""ccoonnffiirrmm__qquuiitt"" is
+          not saved in the state file.  The option must be set again on each
+          ssppeecc invocation.
+
+     ""eelloogg__lleevveell"" - The level at which commands are saved to the eelloogg error
+          files is set using this option.  At level 1, the default, only
+          commands typed at the keyboard are logged.  At level 2, the commands
+          read from command files are also logged.
+
+     ""eelloogg__ttiimmeessttaammpp"" - The time interval for the optional time stamps for the
+          eelloogg error file capability is set using this option.  The units of the
+          ""eelloogg__ttiimmeessttaammpp"" parameter are minutes.  The default value is 5
+          minutes.  Note, time stamps are only added before a command or error
+          message is logged, so that the interval between time stamps can be
+          greater than that specified if no commands are being typed or errors
+          generated.  However, for time-stamp intervals less than 1 second (or
+          0.1666 min), every command and error message will be preceded by a
+          time stamp, and the time stamp will include fractional seconds in the
+          epoch value.
+
+     ""eeppiiccss__ttiimmeeoouutt"" - Sets the default timeout for channel access ccaa__ppeenndd__iioo(())
+          calls on EPICS.  The default value is 0.5 seconds.  This option
+          appears only when ssppeecc is linked with the EPICS channel access
+          libraries.  Timeout values for individual process variables can still
+          be changed with the eeppiiccss__ppaarr(()) function.  This parameter can be set
+          in the ccoonnffiigg file.
+
+     ""ffaasstt__hhddww__cchheecckkss"" - When in server-mode, if set, the ssppeecc server will use
+          an adaptive algorithm for polling hardware status.  If the interval
+          between client messages is less than one second, the server will use a
+          faster polling frequency for checking for both hardware status and the
+          next client message, thus providing a client with faster notifications
+          of changes in hardware state.  This parameter can be set in the ccoonnffiigg
+          file.  With its (documented) introduction in ssppeecc release 5.08.06-2,
+          the mode is off by default.
+
+     ""fflluusshh__iinntteerrvvaall"" - The flush-interval parameter controls how often ssppeecc
+          flushes output to the hard disk or other output devices.
+          Traditionally, ssppeecc flushed output after each print command.  However,
+          as some users report that this frequent flushing introduces
+          considerable delays when the output device is to an NFS-mounted file
+          system, the flushing interval can now be controlled.  The
+          ""fflluusshh__iinntteerrvvaall"" parameter specifies how many seconds to allow between
+          output buffer flushing.  The default value is 0.5 seconds.  If the
+          interval is set to zero, the traditional frequent-flushing behavior
+          will be restored.  Output to the screen is still flushed immediately.
+          Output is also flushed each time the main ssppeecc prompt is issued.
+
+     ""HHKKLL__rroouunnddiinngg"" - Traditionally, ssppeecc rounded values for HH, KK and LL (and
+          other geometry values derived from motor positions) to five
+          significant digits for configurations using reciprocal space
+          calculations.  As of release 4.03.01, the rounding is now turned off
+          by default.  It can be turned on using the command
+          ssppeecc__ppaarr((""HHKKLL__rroouunnddiinngg"",, 11ee55)) where the argument indicates the
+          magnitude of the rounding, i.e., one part in 1e5, for example.  Note,
+          values with an absolute value less than 1e-10 are still rounded to
+          zero whether or not the optional rounding is turned on.
+
+     ""hhddww__ppoollll__iinntteerrvvaall"" - When the wwaaiitt(()) function is called to wait for polled
+          motors, timers or other acquisition devices to finish, ssppeecc sleeps for
+          a small interval between each check of the hardware.  Use this
+          ssppeecc__ppaarr(()) option to change that interval.  The units of the parameter
+          are milliseconds, and the default sleep time is 10msec.  A value of
+          zero is allowed, though not recommended if the computer is being used
+          for anything else.
+
+     ""kkeeeepp__ggooiinngg"" - Normally, when taking commands from a command file, ssppeecc
+          resets to command level and the main interactive prompt when there are
+          syntax errors in the file, certain floating point exceptions,
+          references to unconfigured hardware, hardware access errors, along
+          with a number of other errors.  When the ""kkeeeepp__ggooiinngg"" option is set,
+          ssppeecc will keep reading and executing commands from a command file no
+          matter what errors occur.  When there is an error, the next line from
+          the current command file will be read.  Note, depending on where the
+          error is in a file, reading subsequent lines may generate more errors,
+          particularly if the error occurs inside a statement block.
+
+     ""mmooddiiffyy__sstteepp__ssiizzee"" - Normally, ssppeecc doesn't allow users to modify the motor
+          step-size parameter with the mmoottoorr__ppaarr(()) function, as the consequences
+          are generally undesirable.  However, in the rare circumstance that it
+          is necessary, this parameter allows you to enable such modifications.
+
+     ""oolldd__sshhaarreedd"" - With ssppeecc release 5.02.01, the structure of the shared array
+          header was changed so that the data portion of the array would lie on
+          a memory page boundary.  To allow compatibility with applications
+          built with the old header structure, the ""oolldd__sshhaarreedd"" option can be
+          set.  However, this option can only be set as a --oo command line
+          start-up option, and the parameter is not saved in the state file.  It
+          must be set each time ssppeecc is invoked.
+
+     ""ppaarrssee__uunniittss"" - When parsing of units is turned on, numbers typed as input
+          to ssppeecc's parser with one of the following suffixes appended will
+          automatically be multiplied by the corresponding factor.
+          11rr  == 5577..22995588       rraaddiiaann
+          11mmrr == 00..00557722995588     mmiilllliirraaddiiaann
+          11dd  == 11             ddeeggrreeee
+          11mmdd == 00..000011         mmiilllliiddeeggrreeee
+          11mmmm == 11             mmiilllliimmeetteerr
+          11uumm == 00..000011         mmiiccrroommeetteerr
+          11mm  == 00..00116666666677     mmiinnuuttee
+          11ss  == 00..000000227777777788   sseeccoonndd
+
+          Note, however, suffixes on numbers converted from strings or entered
+          using the ggeettvvaall(()) function are not parsed.  The only known use for
+          unit-suffix parsing is with the user-contributed macros in the file
+          mmaaccrrooss//uunniittss..mmaacc. These macros require that unit suffixes be supplied
+          for all motor position arguments in the standard ssppeecc macros.  The
+          default is for this mode to be off.
+
+     ""sshhooww__pprrddeeff__ffiilleess"" - When this mode is on, the source file for each macro
+          definition is displayed with the pprrddeeff command.  The default is for
+          this mode to be on.
+
+     ""ssppeeccwwiizz"" - Allows ssppeecc administrators to gain access to motors locked out
+          in the ccoonnffiigg file to ordinary users.  This feature allows the
+          administrator to position the motors without having first to go into
+          the configuration editor to change access modes.  Entering
+          ssppeecc__ppaarr((""ssppeeccwwiizz"",, 11)) causes ssppeecc to prompt for the "Wizard's
+          password". If entered correctly, the characters __WWIIZZ are appended to
+          the ssppeecc prompt to remind the administrator of the special powers, and
+          motors configured with protected status can be moved.  Entering
+          ssppeecc__ppaarr((""ssppeeccwwiizz"",, 00)) disables the special mode.
+
+          ssppeecc looks for the encrypted password belonging to the spec_wiz (or
+          specwiz) user in the files SSPPEECCDD//ppaasssswwdd, //eettcc//sshhaaddooww, and //eettcc//ppaasssswwdd
+          in turn.  If a shadow password file is used, ordinary users won't be
+          able to read it, and the normal password file won't contain the
+          encrypted password.  The ssppeecc distribution includes a wwiizz__ppaasssswwdd
+          utility (as of release 4.03.07) the can be used to create a ppaasssswwdd
+          file in the ssppeecc auxiliary file directory that contains just the entry
+          for the spec_wiz user.  The SSPPEECCDD//ppaasssswwdd file should probably be owned
+          and writable only by root or the ssppeecc administrator.
+
+          Note, the standard macros oonnwwiizz and ooffffwwiizz are convenient wrappers for
+          the spec_wiz feature.
+
+     ""uussee__sseemm__uunnddoo"" - This flag relates to whether the SSEEMM__UUNNDDOO flag is set when
+          semaphores are used.  It exists to get around a memory leak bug
+          observed with some releases of the Solaris 2 operating system.  The
+          flag should be ignored unless you are instructed otherwise by CSS.
+
+     ""wwaarrnn__nnoott__aatt__ppooss"" - When enabled, ssppeecc prints a warning message whenever a
+          motor doesn't reach its final position (as of release 5.08.02-8).
+

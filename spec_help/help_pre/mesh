@@ -1,0 +1,30 @@
+mesh                                  macro                                 mesh
+
+NAME
+     mmeesshh - 2d grid scan
+
+SYNOPSIS
+
+     mmeesshh mmoottoorr11 ssttaarrtt11 eenndd11 iinntteerrvvaallss11 mmoottoorr22 ssttaarrtt22 eenndd22 iinntteerrvvaallss22 ttiimmee
+
+DESCRIPTION
+
+     The mmeesshh scan traces out a grid using mmoottoorr11 and mmoottoorr22. The first motor
+     scans from ssttaarrtt11 to eenndd11 using the specified number of intervals.  The
+     second motor similarly scans from ssttaarrtt22 to eenndd22. Each point is counted for
+     for ttiimmee seconds (or monitor counts).
+
+     The scan of mmoottoorr11 is done at each point scanned by mmoottoorr22.  That is, the
+     first motor scan is nested within the second motor scan.
+
+     A mmeesshh scan creates only one scan entry in the ssppeecc data file with a total
+     of ((iinntteerrvvaallss11++11)) ** ((iinntteerrvvaallss22++11)) points.
+
+EXAMPLE
+
+     mmeesshh tthh 00 11 1100 pphhii 00 22 1100 1100
+
+SEE ALSO
+
+     _a_s_c_a_n _a_2_s_c_a_n _a_3_s_c_a_n _d_s_c_a_n _d_2_s_c_a_n _d_3_s_c_a_n
+

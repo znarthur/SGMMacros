@@ -1,0 +1,66 @@
+wait                                function                                wait
+
+NAME
+     wwaaiitt - synchronization with moving, counting and other activity
+
+SYNOPSIS
+
+     wwaaiitt((mmooddee))
+
+DESCRIPTION
+
+     The function wwaaiitt(()) is used to synchronize the flow of commands in ssppeecc
+     with moving, counting and other activity.  Since the built-in commands and
+     functions mmoovvee__aallll, mmoovvee__ccnntt, ttccoouunntt(()) and mmccoouunntt(()) return immediately
+     after starting moving or counting, macros need to include some form of
+     wwaaiitt(()) if the next command requires the previous move or count to complete.
+
+     The argument mmooddee specifies what is to be waited for:
+
+         0    - moving, counting and other acquisition
+         1    - (bit 0) moving
+         2    - (bit 1) counting (by the master timer)
+         4    - (bit 2) other acquisition (MCAs, CCDs, etc.)
+         8    - (bit 3) remote connections and remote asynchronous events
+         32   - (bit 5) return zero or nonzero to indicate if busy
+
+     If mmooddee is a negative number, wwaaiitt(()) will behave as for mmooddee = 0, but a
+     message will be printed showing what is being waited on.
+
+     For acquisition devices with ""aauuttoo__rruunn"" mode enabled (such devices are
+     started automatically during counting), waiting for counting will also
+     include waiting for those devices (as of ssppeecc release 5.09.01-1).
+
+     When ssppeecc is running as client to a ssppeecc server, bit 3 checks if
+     rreemmoottee__aassyynncc(()) replies have all arrived.  In addition, bit 3 also checks if
+     all configured ssppeecc servers have connected and if all ssppeecc server and EPICS
+     remote motors have connected.
+
+     Waiting for ssppeecc server and remote motor  connections is mainly an issue on
+     start up or after rreeccoonnffiigg. One might use wwaaiitt((88)) or wwaaiitt((00xx2288)) in the
+     built-in special macro ccoonnffiigg__mmaacc if it is important to delay until all
+     connections are up.  Note, until remote ssppeecc server and EPICS motors are
+     fully connected and usable, the positions reported for those motors will be
+     the last saved positions from ssppeecc's sseettttiinnggss file.
+
+     Also, note that wwaaiitt((00)) does not check for the remote events flagged by bit
+     3.  To wait for remote events requires explicitly setting bit 3 in mmooddee.
+     Also, a ^^CC interrupts a wwaaiitt((88)) but doesn't change the conditions that
+     caused wwaaiitt((88)) to block.  That is, the next wwaaiitt((88)) will still block if
+     there are still pending connections.
+
+     If bit 5 (0x20) in mmooddee is set, wwaaiitt(()) returns true (1) if the activities
+     flagged by bits 0, 1, 2 or 3 are still going on, otherwise wwaaiitt(()) returns
+     false (0).
+
+EXAMPLES
+
+       ddeeff wwaaiittaallll   ''wwaaiitt((00))''
+       ddeeff wwaaiittmmoovvee  ''wwaaiitt((11))''
+       ddeeff wwaaiittccoouunntt ''wwaaiitt((22))''
+       ddeeff ww   ''wwaaiitt((00));; bbeeeepp''
+
+SEE ALSO
+
+     _w _s_e_r_v_e_r _e_p_i_c_s
+

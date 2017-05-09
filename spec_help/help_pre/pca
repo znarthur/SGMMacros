@@ -1,0 +1,178 @@
+pca                                 hardware                                 pca
+
+NAME
+     pca - Oxford/Tennelec/Nucleus PCA II, PCA-3, PCA Multiport MCA
+
+DESCRIPTION
+
+     The PCA II and PCA-3 are ISA (PC card) multichannel analyzers.  The PCA
+     Multiport is a standalone MCA that ssppeecc currently supports using GPIB.  The
+     PCA-3 and PCA Multiport both support counting to live-time and real-time
+     presets and both return dead-time information.  The PCA II only supports
+     presets and dead-time corrections when used in conjunction with a CSS
+     provided driver, which is only available on selected PC UNIX platforms.
+     Otherwise, the PCA II can be used in user-level I/O mode, with the timing
+     performed by some other hardware timer or the software clock.
+
+     The PCA-3 and PCA Multiport come with 16384 channels, while the PCA II only
+     supports up to 8192 channels.  When acquiring data, the channels can be
+     partitioned into groups of 256, 512, 1024, ... channels up to a single
+     group that contains all the channels.  Thus, the PCA-3 and PCA Multiport
+     allows a maximum of 64 groups of 256 channels, 32 groups of 512 channels,
+     etc.  The maximum number of groups on the PCA II depends on the amount of
+     memory installed on the board.
+
+DEVICE CONFIGURATION
+
+     MCA device configuration is entered on AAquisition device screen of the
+     configuration editor along the following lines:
+
+        MMCCAA-- aanndd CCCCDD--AAccqquuiissiittiioonn TTyyppee DDeevviiccee CCoonnffiigguurraattiioonn
+
+        MMCCAA--lliikkee       DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE                             <<>>TTYYPPEE
+         00  YYEESS                00xx11ee00    PPOOLLLL       TThhee NNuucclleeuuss PPCCAA IIII MMCCAA BBooaarrdd
+         11  YYEESS      //ddeevv//ppccaa  00xx11ee00    IINNTTRR       TThhee NNuucclleeuuss PPCCAA IIII MMCCAA BBooaarrdd
+         22  YYEESS                00xx221100                TThhee NNuucclleeuuss PPCCAA--33 MMCCAA BBooaarrdd
+         33  YYEESS                    77           TThhee NNuucclleeuuss PPCCAA MMuullttiippoorrtt ((GGPPIIBB))
+
+     Corresponding ccoonnffiigg file entries are of the sort:
+
+         PPCC__PPCCAAIIII  ==  aannyytthhiinngg  ppoorrtt__aaddddrreessss  PPOOLLLL  @@mmccaa__00
+         PPCC__PPCCAAIIII  ==  //ddeevv//ppccaa  ppoorrtt__aaddddrreessss  IINNTTRR  @@mmccaa__11
+         PPCC__PPCCAA33  ==  ppoorrtt__aaddddrreessss  @@mmccaa__22
+         GGPP__PPCCAA__MM  ==  ggppiibb__aaddddrreessss  @@mmccaa__33
+
+     The first entry selects the PCA II in user-level polled mode.  The second
+     entry uses interrupt-driven mode which requires a kernel driver.  See the
+     ddrriivveerrss//RREEAADDMMEE file in the ssppeecc distribution for information on installing
+     the driver.  The third entry is for the PCA-3 device.  The fourth entry is
+     for the GPIB PCA Multiport.
+
+     If using the interrupt-driven mode with the PCA II, note the following:
+     Apparently, the PCA II doesn't trigger an interrupt on some PC mother
+     boards.  This problem can be fixed by changing the value of the resistor
+     labeled R12 on the "PCA2 Memory Card" circuit diagram.  This resistor is
+     located near the lower left corner of the main board when viewed from the
+     component side with the connector fingers pointing down and the input BNC
+     to the right.  R12 is about a centimeter down and to the left of the U26
+     IC.  The circuit diagram indicates the resistor's value is 2K, however the
+     boards seem to be shipped with a 1K resistor (brown-black-red stripes).
+     Soldering a second 1K resistor alongside R12 and in parallel electrically
+     will lower the resistance to 0.5K, which seems to work.  (This modification
+     was suggested by the manufacturer.)
+
+FUNCTIONS
+
+     mmccaa__ggeett((aarrrr)) or mmccaa__ggeett((gg,, ee)) - Gets data from the currently selected
+          MCA-type device, and transfers it to the array aarrrr or to element ee of
+          data group gg. Use of arrays rather than data groups is recommended.
+          The native data type is uulloonngg.
+
+     mmccaa__ppaarr((""ddiissaabbllee"",, aarrgg)) - If aarrgg is 1, prevents the PCA from being started
+          and stopped by the standard counting functions ttccoouunntt(()) and mmccoouunntt(()).
+          If aarrgg is 0, the PCA will be started and stopped with the standard
+          counting functions (which is the default behavior).
+
+     mmccaa__ppaarr((""cclleeaarr"")) - Clears the channels of the current group.
+
+     mmccaa__ppaarr((""rruunn"")) - Programs the board with the current parameters and starts
+          acquisition.  For the PCA-3 and Multiport, acquisition time will be to
+          the selected preset in real time or live time in PHA mode or the
+          selected preset in number of passes in MCS mode.  Note that the
+          ttccoouunntt(()) and mmccoouunntt(()) functions, as used in the various counting
+          macros, will also start PCA acquisition, however the PCA will free run
+          until the count time passed to those functions has expired.
+
+     mmccaa__ppaarr((""hhaalltt"")) - Stops acquisition.  Note that the PCA will also be halted
+          when the ttccoouunntt(()) and mmccoouunntt(()) functions (as used in the various
+          counting macros) complete their count intervals or are aborted.
+
+     mmccaa__ppaarr((""ggrroouupp__ssiizzee"")) - Returns the current group size.
+
+     mmccaa__ppaarr((""ggrroouupp__ssiizzee"",, ssiizzee)) - Sets the group size to ssiizzee. Legal values are
+          256, 512, 1024, 2048, 4096, 8192 and 16384.  On the PCA II, values
+          above 1024 may not be legal if insufficient memory is installed on the
+          board.
+
+     mmccaa__ppaarr((""sseelleecctt__ggrroouupp"")) - Returns the currently active group.  Groups are
+          numbered starting at zero.
+
+     mmccaa__ppaarr((""sseelleecctt__ggrroouupp"",, ggrroouupp)) - Set the active group to ggrroouupp.  The
+          maximum number of groups equals the number of channels divided by the
+          group size.  If the ggrroouupp passed to the function is greater than the
+          maximum number of groups, the current group selected is ggrroouupp modulus
+          the maximum number of groups.
+
+     mmccaa__ppaarr((""pphhaa"")) - Selects pulse-height analysis mode.
+
+     mmccaa__ppaarr((""ggaaiinn"")) - Returns the current gain value used in pulse-height
+          analysis mode.
+
+     mmccaa__ppaarr((""ggaaiinn"",, vvaalluuee)) - Sets the pulse-height analysis gain to vvaalluuee.
+          Legal values are 256, 512, 1024, 2048, 4096 and 8192.
+
+     mmccaa__ppaarr((""ooffffsseett"")) - Returns the current digital conversion offset used in
+          pulse-height analysis mode.
+
+     mmccaa__ppaarr((""ooffffsseett"",, vvaalluuee)) - Sets the pulse-height analysis digital
+          conversion offset to vvaalluuee. Legal values are multiples of 256 from 0
+          to 7936.  An offset value shifts the channel contents.
+
+     mmccaa__ppaarr((""mmccss"")) - Selects multichannel scaling mode.
+
+     mmccaa__ppaarr((""ddwweellll"")) - Returns the current multichannel scaling dwell time.
+
+     mmccaa__ppaarr((""ddwweellll"",, vvaalluuee)) - Set the multichannel scaling dwell time.  Allowed
+          values are numbers between 1e-6 and 60 seconds with mantissa of 1, 2,
+          4 or 8.  A value of -1 selects external dwell.  If vvaalluuee isn't an
+          allowed value, it is rounded to the nearest allowed value.
+
+     mmccaa__ppaarr((""mmooddee"")) - Returns two if the PCA is in PHA live-time mode, one if
+          the PCA is in PHA real-time mode and zero if the PCA is in MCS mode.
+
+     mmccaa__ppaarr((""rreeaaddoonnee"",, cchhaannnneell)) - Returns the contents of channel number
+          cchhaannnneell.  The channel number is with respect to the current group.
+
+     mmccaa__ppaarr((""cchhaann##"")) - Returns the contents of channel number ##. The channel
+          number is with respect to the current group.
+
+     mmccaa__ppaarr((""cchhaann##"",, vvaalluuee)) - Sets channel ## to vvaalluuee. The channel number is
+          with respect to the current group.
+
+     The following mmccaa__ppaarr(()) functions are valid for the PCA-3 and PCA Multiport
+     devices, but are only valid for the PCA II when the board is used with the
+     interrupt-driven driver.
+
+     mmccaa__ppaarr((""pprreesseett"")) - In PHA mode, returns the current live-time or real-time
+          preset value in seconds.
+
+     mmccaa__ppaarr((""pprreesseett"",, vvaalluuee)) - In PHA mode, sets the current live-time or
+          real-time preset value to vvaalluuee seconds.  The PCA counts to the preset
+          using mmccaa__ppaarr((""rruunn"")). When using mmccoouunntt(()) or ttccoouunntt(()) the PCA acquires
+          until halted by ssppeecc.
+
+     mmccaa__ppaarr((""ppaasssseess"")) - In MCS mode, returns the number of preset passes.
+
+     mmccaa__ppaarr((""ppaasssseess"",, vvaalluuee)) - In MCS mode, sets the number of passes to vvaalluuee.
+          When using mmccoouunntt(()) or ttccoouunntt(()) the PCA acquires until halted by ssppeecc.
+
+     mmccaa__ppaarr((""lliivvee"")) - In PHA mode, selects live-time counting.
+
+     mmccaa__ppaarr((""rreeaall"")) - In PHA mode, selects real-time counting.
+
+     mmccaa__ppaarr((""ddeeaadd"")) - In PHA mode, returns the percent dead time, if
+          accumulating in live-time mode.
+
+     mmccaa__ppaarr((""eellaappsseedd__lliivvee"")) - In PHA live-time mode, returns the elapsed live
+          time in seconds.
+
+     mmccaa__ppaarr((""eellaappsseedd__rreeaall"")) - In PHA mode, returns the elapsed real time in
+          seconds.
+
+     mmccaa__ppaarr((""eellaappsseedd__ppaasssseess"")) - In MCS mode, returns the elapsed number of
+          passes.
+
+SEE ALSO
+
+     _w_a_i_t
+

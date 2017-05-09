@@ -1,0 +1,52 @@
+.TH "d2scan" "macro" "08/01/12" "d2scan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBd2scan\fP \- two\-motor scan relative to the starting positions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)d2scan.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "d2scan" "macro" "08/01/12" "d2scan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBd2scan motor1 start1 end1 motor2 start2 end2 intervals time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBd2scan\fP scans two motors, as specified by \fBmotor1\fP and
+\fBmotor2\fP. Each motor moves the same number of intervals.
+If each motor is at a position
+\fBX\fP before the scan begins, it will be scanned from
+\fBX+start\fP to \fBX+end\fP.
+The step size for each motor is
+\fB(start\-end)/intervals\fP.
+The number of data points collected will be \fBintervals+1\fP.
+Count time is given by \fBtime\fP, which if positive, specifies
+seconds and if negative, specifies monitor counts.
+.sp
+Upon termination, the motors are returned to their starting positions.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBd2scan th \-1 1 phi \-2 2 20 10\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%ascan\fP
+\fI\%a2scan\fP
+\fI\%a3scan\fP
+\fI\%dscan\fP
+\fI\%d3scan\fP
+\fI\%mesh\fP
+

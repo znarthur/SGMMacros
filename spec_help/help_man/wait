@@ -1,0 +1,101 @@
+.TH "wait" "function" "01/29/14" "wait.rst 6.2  01/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBwait\fP \- synchronization with moving, counting and other activity
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)wait.rst 6.2  01/29/14  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2004,2010,2012,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "wait" "function" "01/29/14" "wait.rst 6.2  01/29/14 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBwait(mode)\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The function \fBwait()\fP is used to synchronize
+the flow of commands in \fBspec\fP with
+moving, counting and other activity.  Since
+the built\-in commands and functions \fBmove_all\fP,
+\fBmove_cnt\fP, \fBtcount()\fP and
+\fBmcount()\fP return immediately after starting moving or counting,
+macros need to include some form of
+\fBwait()\fP if the next command requires the previous move or count
+to complete.
+.sp
+The argument \fBmode\fP specifies what is to be waited for:
+.sp
+.RS 4m
+.TS
+;
+l l .
+0	\- moving, counting and other acquisition
+1	\- (bit 0) moving
+2	\- (bit 1) counting (by the master timer)
+4	\- (bit 2) other acquisition (MCAs, CCDs, etc.)
+8	\- (bit 3) remote connections and remote asynchronous events
+32	\- (bit 5) return zero or nonzero to indicate if busy
+.TE
+.RE
+.sp
+If \fBmode\fP is a negative number,
+\fBwait()\fP will behave as for \fBmode\fP = 0,
+but a message will be printed showing what is being waited on.
+.sp
+For acquisition devices with \fB"auto_run"\fP mode enabled (such devices
+are started automatically during counting), waiting for counting
+will also include waiting for those devices (as of \fBspec\fP release 5.09.01\-1).
+.sp
+When \fBspec\fP is running as client to a \fBspec\fP server, bit 3
+checks if \fBremote_async()\fP replies have all arrived.
+In addition, bit 3 also checks if all configured \fBspec\fP servers have connected
+and if all \fBspec\fP server and EPICS remote motors have connected.
+.sp
+Waiting for \fBspec\fP server and remote motor  connections is mainly an issue
+on start up or after \fBreconfig\fP. One might use \fBwait(8)\fP or
+\fBwait(0x28)\fP in the built\-in special macro
+\fBconfig_mac\fP if it is important to delay until all connections are up.
+Note, until remote \fBspec\fP server and EPICS motors
+are fully connected and usable, the positions reported for those motors
+will be the last saved positions from \fBspec\fP\(aqs \fBsettings\fP file.
+.sp
+Also, note that \fBwait(0)\fP does not check
+for the remote events flagged by bit 3.
+To wait for remote events requires explicitly setting bit 3 in
+\fBmode\fP. Also, a \fB^C\fP interrupts a \fBwait(8)\fP but doesn\(aqt
+change the conditions that caused \fBwait(8)\fP to block.
+That is, the next \fBwait(8)\fP will still block
+if there are still pending connections.
+.sp
+If bit 5 (0x20) in \fBmode\fP is set, \fBwait()\fP returns true (1)
+if the activities flagged by bits 0, 1, 2 or 3 are still going on,
+otherwise \fBwait()\fP returns false (0).
+.SH "EXAMPLES"
+.rs
+.nf
+
+.in +2
+\fBdef waitall   \(aqwait(0)\(aq\fP
+\fBdef waitmove  \(aqwait(1)\(aq\fP
+\fBdef waitcount \(aqwait(2)\(aq\fP
+\fBdef w   \(aqwait(0); beep\(aq\fP
+.in -2
+.fi
+.sp
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%w\fP
+\fI\%server\fP
+\fI\%epics\fP
+

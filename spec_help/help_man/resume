@@ -1,0 +1,35 @@
+.TH "resume" "macro" "08/01/12" "resume.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBresume\fP \- continue an aborted scan
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)resume.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "resume" "macro" "08/01/12" "resume.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBresume [n|\-n]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBresume\fP macro (also called \fBscan_on\fP) resumes
+a scan that was previously aborted.
+With a positive argument, \fBn\fP points are skipped.
+A negative argument redoes the previous \fBn\fP points.
+.sp
+For example, \fBresume \-1\fP redoes the previous point, while
+\fBresume 3\fP skips the next three points.
+Giving a very large number will force the end\-of\-scan plots, etc.,
+without taking any more data points.
+

@@ -1,0 +1,67 @@
+changes                      spec 2.5 Release Notes                      changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.5
+
+DESCRIPTION
+
+     These notes summarize the modifications made for ssppeecc release 2.5, as
+     finalized on May 11, 1988.
+
+CHANGES
+
+     Each motor now has three levels of security: 1) no protection, 2) limits
+     cannot be changed and 3) motor cannot be moved.
+
+     When using edconf to alter the configuration file, limits no longer track
+     changes to the accumulator, however they still follow changes to the dial
+     setting.
+
+     The name of the standard macro file has been changed from
+     //uussrr//lliibb//ssppeecc..dd//ssppeecc..mmaacc to //uussrr//lliibb//ssppeecc..dd//ssttaannddaarrdd..mmaacc.
+
+     The DSP CAMAC driver has been fixed to enable slot 16 to work.  In
+     addition, each time a process opens the driver when no other process has it
+     open, a CAMAC ZZ (initialization command) is issued.
+
+     A new macro wwmm, ""wwhheerree mmoottoorr"", prints positions and limits for up to six
+     motors.
+
+     A new macro vvii invokes the editor called vvii.
+
+     A new macro mmaaiill invokes the mailer called mmaaiillxx.
+
+     A new macro bbuugg lets the user enter a message that is then mailed to the
+     administrator, ssppeecc__aaddmm.
+
+     A new macro sspplloott plots the current data on the video screen.
+
+     The geometry status macros wwhh, ccaa, ccii, etc., will now only print the
+     positions of the four-circle motors.
+
+     MMOOTTOORRSS is now a built-in symbol, automatically set to the number of
+     configured motors when the ccoonnffiigg file is read.
+
+     On first reading of the standard macros, if the four-circle motors are not
+     configured in the standard positions (0-3), the motor indirection array
+     (__AA[[]]) is automatically initialized.
+
+     The four-circle diffractometer macro set and C code has been improved,
+     including better diagnostics when trying to go to unreachable positions and
+     bug fixes.  The RReeffeerreennccee MMaannuuaall now contains a complete description of the
+     four-circle interface.  Among the new four-circle macros to set geometry
+     parameters (each will prompt if invoked without arguments) are sseettmmooddee to
+     set the mode, sseettsseeccttoorr to set the sector, sseettllaatt to set the crystal
+     lattice parameters and sseettaazz to set the azimuthal reference vector.
+
+     The state file is no longer saved if the user exits using ^^ZZ.
+
+     The plotting interface has been revised.  Consult the RReeffeerreennccee MMaannuuaall for
+     details.
+
+     The wwaaiitt(()) function can now be invoked to return a value indicating if any
+     asynchronous activity is going on.
+
+     New built-in functions eexxpp1100((xx)) and ppooww((xx,, yy)) are available.  The former
+     returns 10 to the xx, the latter, xx to the yy.
+

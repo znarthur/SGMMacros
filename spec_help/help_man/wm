@@ -1,0 +1,42 @@
+.TH "wm" "macro" "08/01/12" "wm.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBwm\fP \- print information about one or more motors
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)wm.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "wm" "macro" "08/01/12" "wm.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBwm motor [motor ...]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBwm\fP (where motors)
+macro lists names, mnemonics, limits and current positions
+for each of the motors given as arguments.
+The arguments may be motor numbers or mnemonics.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBwm 0 1 2 3 4 5\fP
+.sp
+\fBwm tth th chi phi\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%wh\fP
+\fI\%wa\fP
+

@@ -1,0 +1,459 @@
+.TH "syntax" "reference" "08/01/12" "syntax.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+syntax \- interpreter syntax
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)syntax.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1993,1994,1995,2003,2004,2007,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "syntax" "reference" "08/01/12" "syntax.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+This syntax summary attempts to present all the built\-in keywords, operators
+and commands of \fBspec\fP.
+The grammar rules listed below are very similar to those given
+in the standard manuals describing the C language.
+Operators are listed in order of precedence, with
+the highest precedence operators listed first.
+.sp
+The following terms are used:
+.RS 0m
+.HP 5m
+."
+\fBlvalue\fP
+\- 
+"\fBleft value\fP", something that can go on the left side
+of the equals sign.
+.HP 5m
+."
+\fBbinop\fP
+\- 
+binary operator (+, \-, etc.)
+.HP 5m
+."
+\fBasgnop\fP
+\- 
+assignment operator (=, +=, etc.)
+.HP 5m
+."
+\fBidentifier\fP
+\- 
+a variable
+.HP 5m
+."
+\fBidentifier\-list\fP
+\- 
+a space\- or comma\-separated list of identifiers
+.HP 5m
+."
+\fBpattern\fP
+\- 
+An alphanumeric string possibly containing
+the meta characters \fB?\fP or \fB*\fP.
+.HP 5m
+."
+\fBpattern\-list\-opt\fP
+\- 
+An optional space\-separated list of patterns.
+.HP 5m
+."
+\fBexpr\-opt\fP
+\- 
+an optional expression
+.HP 5m
+."
+\fBexpr\-list\-opt\fP
+\- 
+an optional expression list
+.HP 5m
+."
+[\fB;\fP]
+\- 
+A semicolon or a newline.  (A semicolon after a statement
+is optional if the statement is followed by a newline.)
+.RE
+.SH "EXPRESSIONS"
+.rs
+.sp
+\fBexpression\fP:
+.sp
+.RS 4m
+.nf
+\fBlvalue\fP
+\fBnumeric\-constant\fP
+\fBstring\-constant\fP
+( \fBexpression\fP )
+\fBfunction\fP ( \fBexpression\-list\fP  )
+\- \fBexpression\fP
+! \fBexpression\fP
+~ \fBexpression\fP
+++ \fBlvalue\fP
+\-\- \fBlvalue\fP
+\fBlvalue\fP ++
+\fBlvalue\fP \-\-
+\fBexpression\fP ?  \fBexpression\fP : \fBexpression\fP
+\fBexpression\fP \fBbinop\fP \fBexpression\fP
+\fBlvalue\fP \fBasgnop\fP \fBexpression\fP
+.fi
+.sp
+.RE
+.sp
+\fBexpression\-list\fP:
+.sp
+.RS 4m
+.nf
+\fBexpression\fP , \fBexpression\fP
+.fi
+.sp
+.RE
+.sp
+\fBlvalue\fP:
+.sp
+.RS 4m
+.nf
+\fBidentifier\fP
+\fBidentifier\fP [ \fBexpression\fP ]
+.fi
+.sp
+.RE
+.sp
+\fBbinop\fP:
+.sp
+.RS 4m
+.nf
+\fB* /  %\fP
+\fB+ \-\fP
+\fB>> <<\fP
+\fB> <  <=  >=\fP
+\fB== !=\fP
+\fB&\fP
+\fB^\fP
+\fB|\fP
+\fB&&\fP
+\fB||\fP
+.fi
+.sp
+.RE
+.sp
+\fBasgnop\fP:
+.sp
+.RS 4m
+.nf
+\fB= +=  \-=  *=  /=  %=  >>=  <<=  &=  ^=  |=\fP
+.fi
+.sp
+.RE
+.sp
+\fBarray_type\fP:
+.sp
+.RS 4m
+.nf
+\fBbyte\fP
+\fBubyte\fP
+\fBshort\fP
+\fBushort\fP
+\fBlong\fP
+\fBulong\fP
+\fBfloat\fP
+\fBdouble\fP
+\fBstring\fP
+.fi
+.sp
+.RE
+.sp
+\fBarray_decl\fP:
+.sp
+.RS 4m
+.nf
+[ \fBarray_type\fP ] \fBarray\fP \fBidentifier\fP ] [ \fBexpr\fP ]
+[ \fBarray_type\fP ] \fBarray\fP \fBidentifier\fP ] [ \fBexpr\fP ] [ \fBexpr\fP ]
+.fi
+.sp
+.RE
+.sp
+\fBarray_decl\-list\fP:
+.sp
+.RS 4m
+.nf
+\fBarray_decl\fP [ , ] \fBarray_decl\fP
+.fi
+.sp
+.RE
+.SH "Statements"
+.rs
+.sp
+\fBcompound\-statement\fP:
+.sp
+.RS 4m
+.nf
+{ \fBstatement\-list\fP }
+.fi
+.sp
+.RE
+.sp
+\fBstatement\-list\fP:
+.sp
+.RS 4m
+.nf
+\fBstatement\-list\fP
+\fBstatement\fP \fBstatement\-list\fP
+.fi
+.sp
+.RE
+.sp
+\fBstatement\fP:
+.sp
+.RS 4m
+.nf
+\fBcompound\-statement\fP
+\fBexpression\fP [ \fB;\fP ]
+\fBif\fP ( \fBexpression\fP ) \fBstatement\fP
+\fBif\fP ( \fBexpression\fP ) \fBstatement\fP \fBelse\fP \fBstatement\fP
+\fBwhile\fP ( \fBexpression\fP ) \fBstatement\fP
+\fBfor\fP ( \fBexpr\-list\-opt\fP; \fBexpr\-opt\fP;  \fBexpr\-list\-opt\fP ) \fBstatement\fP
+\fBfor\fP ( \fBidentifier\fP \fBin\fP \fBidentifier\fP ) \fBstatement\fP
+
+\fBbreak\fP [ \fB;\fP ]
+\fBcontinue\fP [ \fB;\fP ]
+\fBexit\fP [ \fB;\fP ]
+\fBreturn\fP \fBexpr\-opt\fP [ \fB;\fP ]
+
+\fBhistory\fP \fBexpr\-opt\fP [ \fB;\fP ]
+\fBlscmd\fP \fBpattern\-list\-op\fP [ \fB;\fP ]
+\fBsyms\fP \fBpattern\-list\-op\fP [ \fB;\fP ]
+
+\fBprint\fP \fBexpression\-list\fP [ \fB;\fP ]
+\fBeprint\fP \fBexpression\-list\fP [ \fB;\fP ]
+
+\fBglobal\fP \fBidentifier\-list\fP [ \fB;\fP ]
+\fBconstant\fP \fBidentifier\fP \fBexpression\fP [ \fB;\fP ]
+\fBunglobal\fP \fBidentifier\-list\fP [ \fB;\fP ]
+\fBlocal\fP \fBidentifier\-list\fP [ \fB;\fP ]
+\fBdelete\fP \fBidentifier\fP [ \fBexpression\fP ] [ \fB;\fP ]
+
+\fBarray_decl\-list\fP [ \fB;\fP ]
+\fBlocal\fP \fBarray_decl\-list\fP [ \fB;\fP ]
+\fBglobal\fP \fBarray_decl\-list\fP [ \fB;\fP ]
+\fBshared\fP \fBarray_decl\-list\fP [ \fB;\fP ]
+\fBextern shared\fP \fBarray_decl\-list\fP [ \fB;\fP ]
+
+\fBdef\fP \fBidentifier\fP \fBstring\-constant\fP [ \fB;\fP ]
+\fBrdef\fP \fBidentifier\fP \fBexpression\fP [ \fB;\fP ]
+\fBundef\fP \fBidentifier\-list\fP [ \fB;\fP ]
+\fBprdef\fP \fBpattern\-list\-op\fP [ \fB;\fP ]
+\fBlsdef\fP \fBpattern\-list\-op\fP [ \fB;\fP ]
+
+\fBmemstat\fP [ \fB;\fP ]
+\fBsavstate\fP [ \fB;\fP ]
+\fBreconfig\fP [ \fB;\fP ]
+\fBgetcounts\fP [ \fB;\fP ]
+\fBmove_all\fP [ \fB;\fP ]
+\fBmove_cnt\fP [ \fB;\fP ]
+\fBsync\fP [ \fB;\fP ]
+\fBquit\fP [ \fB;\fP ]
+.fi
+.sp
+.RE
+.SH "FUNCTIONS"
+.rs
+.sp
+0 or 1 arguments:
+.TS
+;
+l l l l .
+\fBxchdir()\fP	\fBinput()\fP	\fBon()\fP	\fBopen()\fP
+\fBrand()\fP	\fBstop()\fP	\fBtime()\fP	\fBwait()\fP
+.TE
+.sp
+0 to 2 arguments:
+.sp
+.RS 4m
+\fBdate()\fP
+.RE
+.sp
+0 to 3 arguments:
+.sp
+.RS 4m
+\fBunix()\fP
+.RE
+.sp
+1 argument:
+.TS
+;
+l l l l l .
+\fBacos()\fP	\fBasc()\fP	\fBasin()\fP	\fBatan()\fP	\fBbcd()\fP
+\fBclose()\fP	\fBcnt_mne()\fP	\fBcnt_name()\fP	\fBcnt_num()\fP	
+\fBcos()\fP	\fBdcb()\fP	\fBdeg()\fP	\fBexp10()\fP	\fBexp()\fP
+\fBfabs()\fP	\fBgetenv()\fP	\fBgethelp()\fP	\fBgpib_poll()\fP	
+\fBint()\fP	\fBlength()\fP	\fBlog10()\fP	\fBlog()\fP	
+\fBmcount()\fP	\fBmotor_mne()\fP	\fBmotor_name()\fP	\fBmotor_num()\fP	
+\fBoff()\fP	\fBplot_cntl()\fP	\fBport_get()\fP	\fBport_getw()\fP	
+\fBrad()\fP	\fBset_sim()\fP	\fBsin()\fP	\fBsleep()\fP	
+\fBsqrt()\fP	\fBsrand()\fP	\fBtan()\fP	\fBtcount()\fP	\fBtty_cntl()\fP
+.TE
+.sp
+1 or more arguments:
+.sp
+.RS 4m
+\fBarray_dump()\fP \fBarray_op()\fP \fBarray_plot()\fP
+\fBdata_dump()\fP \fBdata_plot()\fP \fBeprintf()\fP
+\fBprintf()\fP \fBsock_io()\fP \fBsock_par()\fP \fBsprintf()\fP
+\fBvme_get()\fP \fBvme_get32()\fP
+.RE
+.sp
+1 or 2 arguments:
+.sp
+.RS 4m
+\fBanka_par()\fP \fBca_cntl()\fP \fBcalc()\fP \fBdofile()\fP
+\fBem_io()\fP \fBeval()\fP \fBfbus_get()\fP \fBfile_info()\fP
+\fBgetline()\fP \fBgetsval()\fP \fBgetval()\fP \fBgpib_get()\fP
+\fBmca_sel()\fP \fBqdofile()\fP \fBread_motors()\fP
+\fBremote_poll()\fP \fBremote_stat()\fP
+\fBser_get()\fP \fBsock_get()\fP \fBspec_par()\fP
+\fBwhatis()\fP \fByesno()\fP
+.RE
+.sp
+1 to 3 arguments:
+.sp
+.RS 4m
+\fBepics_get()\fP \fBepics_put()\fP \fBmca_par()\fP
+.RE
+.sp
+1 to 4 arguments:
+.sp
+.RS 4m
+\fBarray_pipe()\fP \fBcdef()\fP \fBdata_pipe()\fP
+\fBesrf_dc()\fP \fBmca_get()\fP \fBmca_put()\fP
+.RE
+.sp
+1 to 5 arguments:
+.sp
+.RS 4m
+\fBesrf_io()\fP
+.RE
+.sp
+1 to 17 arguments:
+.sp
+.RS 4m
+\fBfbus_put()\fP
+.RE
+.sp
+2 arguments:
+.sp
+.RS 4m
+\fBarray_read()\fP \fBatan2()\fP
+\fBca_get()\fP \fBchg_offset()\fP \fBclone()\fP
+\fBdata_info()\fP \fBdial()\fP \fBfmt_close()\fP
+\fBget_lim()\fP \fBgpib_cntl()\fP
+\fBimage_get()\fP \fBimage_put()\fP \fBindex()\fP
+\fBport_put()\fP \fBport_putw()\fP
+\fBpow()\fP \fBprop_get()\fP \fBprop_watch()\fP
+\fBremote_cmd()\fP \fBremote_eval()\fP \fBuser()\fP
+.RE
+.sp
+2 or more arguments:
+.sp
+.RS 4m
+\fBarray_fit()\fP \fBdata_fit()\fP \fBfprintf()\fP
+\fBprop_send()\fP \fBsscanf()\fP
+\fBvme_move()\fP \fBvme_put()\fP \fBvme_put32()\fP
+.RE
+.sp
+2 or 3 arguments:
+.sp
+.RS 4m
+\fBchg_dial()\fP \fBepics_par()\fP \fBesrf_db()\fP
+\fBgpib_put()\fP \fBremote_async()\fP \fBser_par()\fP \fBser_put()\fP
+\fBsock_put()\fP \fBsplit()\fP \fBsubstr()\fP \fBtty_move()\fP
+.RE
+.sp
+2 to 4 arguments:
+.sp
+.RS 4m
+\fBcounter_par()\fP \fBdata_read()\fP
+\fBmca_spar()\fP \fBmotor_par()\fP \fBplot_move()\fP
+.RE
+.sp
+2 to 5 arguments:
+.sp
+.RS 4m
+\fBmca_sget()\fP \fBmca_sput()\fP
+.RE
+.sp
+2 to 6 arguments:
+.sp
+.RS 4m
+\fBimage_par()\fP
+.RE
+.sp
+3 arguments:
+.sp
+.RS 4m
+\fBca_put()\fP \fBdata_get()\fP \fBdata_grp()\fP \fBprop_put()\fP \fBset_lim()\fP
+.RE
+.sp
+3 or more arguments:
+.sp
+.RS 4m
+\fBdata_nput()\fP
+.RE
+.sp
+3 or 4 arguments:
+.sp
+.RS 4m
+\fBanka_get()\fP \fBca_fna()\fP
+.RE
+.sp
+3 to 5 arguments:
+.sp
+.RS 4m
+\fBfmt_read()\fP \fBfmt_write()\fP
+.RE
+.sp
+4 arguments:
+.sp
+.RS 4m
+\fBdata_put()\fP \fBplot_range()\fP \fBtty_fmt()\fP
+.RE
+.sp
+4 or 5 arguments:
+.sp
+.RS 4m
+\fBanka_put()\fP
+.RE
+.sp
+5 or 6 arguments:
+.sp
+.RS 4m
+\fBdata_uop()\fP
+.RE
+.sp
+6 or 7 arguments:
+.sp
+.RS 4m
+\fBdata_anal()\fP
+.RE
+.sp
+7 arguments:
+.sp
+.RS 4m
+\fBdata_bop()\fP
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%funcs\fP
+\fI\%flow\fP
+

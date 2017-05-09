@@ -1,0 +1,270 @@
+data_pipe                       using data_pipe()                      data_pipe
+
+NAME
+     ddaattaa__ppiippee(()) or aarrrraayy__ppiippee(()) - integrate external programs into ssppeecc
+
+DESCRIPTION
+
+     ssppeecc's ddaattaa__ppiippee(()) and aarrrraayy__ppiippee(()) functions allow integration of external
+     code with ssppeecc.  With the data-pipe facility, ssppeecc sends information to the
+     external program, allows the external program to execute for a time, and
+     then receives information back from the external program.  The information
+     can be in the form of a string or a number, and can also include the
+     contents of a ssppeecc data group or data array.  The handshaking and data
+     transfer between ssppeecc and the data-pipe program is done in an overhead
+     module included in the ssppeecc distribution that is linked with the external
+     code.
+
+     Although ddaattaa__ppiippee(()) was originally designed to work with the data group
+     facility (see the _d_a_t_a help file), both ddaattaa__ppiippee(()) and aarrrraayy__ppiippee(()) can be
+     used with data group or data array arguments (see the _a_r_r_a_y_s  help file)
+     interchangeably.  There is no difference in implementation.  In the
+     following discussion, the ddaattaa__ppiippee(()) name will be used.
+
+THE ssppeecc SIDE
+
+     From ssppeecc, access to the data-pipe facility is through the ddaattaa__ppiippee(())
+     function called from the user level.
+
+     The timeout feature was implemented in release 5.07.01-1.  If a timeout is
+     set and the data-pipe process doesn't respond within the given timeout
+     value, the process is terminated and the ddaattaa__ppiippee(()) call returns -1.  If
+     the data-pipe process terminates on its own, ssppeecc display a message to that
+     effect and the ddaattaa__ppiippee(()) call returns -1.
+
+     ddaattaa__ppiippee((""??""))  - Lists the currently running data-pipe processes with name
+          and process id.
+
+     ddaattaa__ppiippee((""ttiimmeeoouutt"")) - Returns the global timeout value.  When the timeout
+          is zero, the data-pipe process can take as long as it needs.
+
+     ddaattaa__ppiippee((pprrooggrraamm,, ""ttiimmeeoouutt"")) - Returns the timeout value for the named
+          data-pipe pprrooggrraamm.
+
+     ddaattaa__ppiippee((""ttiimmeeoouutt"",, sseecc)) - Set the global timeout to sseecc seconds.  A value
+          of zero means no timeout is in effect.  The global timeout is used for
+          each new ddaattaa__ppiippee(()) program.
+
+     ddaattaa__ppiippee((pprrooggrraamm,, ""ttiimmeeoouutt"",, sseecc)) - Set the timeout for the data-pipe
+          process pprrooggrraamm to sseecc seconds, overriding the global default value.
+
+     ddaattaa__ppiippee((pprrooggrraamm,, ""kkiillll"")) - Kills the process associated with pprrooggrraamm.
+
+     ddaattaa__ppiippee((pprrooggrraamm [[,, aarrggss [[,, ggrrpp__oouutt||aarrrr__oouutt [[,, ggrrpp__iinn||aarrrr__iinn]]]]]])) -
+          Initiates or resumes synchronous execution of the special process
+          named pprrooggrraamm. If pprrooggrraamm contains a // character, then it contains the
+          complete absolute or relative path name of the program to run.
+          Otherwise the program must be in the SSPPEECCDD/ddaattaa__ppiippee directory, where
+          SSPPEECCDD is the built-in ssppeecc variable containing the path name of ssppeecc's
+          auxiliary file directory.  You can use the string "".."" for pprrooggrraamm as
+          an abbreviation for the same program name as used in the last call to
+          ddaattaa__ppiippee(()).
+
+          The string value of aarrggss is made available to the user code in the
+          program as described in the next section.
+
+          The optional arguments ggrrpp__oouutt and ggrrpp__iinn are data group numbers.  If
+          ggrrpp__oouutt is present, the contents of that group are sent to the
+          data-pipe program.  If ggrrpp__iinn is present, it is the number of the data
+          group that will receive values from the data-pipe program.  The
+          data-pipe program configures the size of ggrrpp__iinn for an implicit call
+          to ddaattaa__ggrrpp(()) within ddaattaa__ppiippee(()).  If the ggrrpp__iinn argument is absent,
+          ssppeecc will not receive data-group data from the data-pipe program.  If
+          ggrrpp__oouutt is also absent, group data won't be sent to the data-pipe
+          program.  Even without group arguments, the data-pipe program can
+          still return values to ssppeecc in the form of assigning a number or
+          string return value to ddaattaa__ppiippee(()).
+
+          Either or both of the data group arguments can be replaced with the
+          array arguments aarrrr__oouutt and aarrrr__iinn.  The arrays referred to by these
+          arguments must be the data arrays declared explicitly with the aarrrraayy
+          keyword.  When sending array data to the data-pipe program, the array
+          data is first converted to double precision floating point format.
+          The received data is always double, but is converted to fit the
+          declared data type of aarrrr__iinn.  Only as much data as will fit into the
+          array will be assigned.  The number of columns in aarrrr__iinn should match
+          the width of the data sent over by the data-pipe program.  If not, the
+          data will still be assigned to the array, but will be misaligned.
+
+     Prior to ssppeecc release 4.03.13, only one ddaattaa__ppiippee(()) function could be
+     active at a time.
+
+THE PROGRAM SIDE
+
+     The user C code can be complied and linked using the command:
+
+        ddppmmaakkee pprrooggrraamm [[ UUOOBBJJ==...... ]] [[ LLIIBBSS==...... ]] [[ oopptt__mmaakkee__aarrggss ]]
+
+     The command ddppmmaakkee is a short shell script which invokes the mmaakkee utility
+     using the makefile ddaattaa__ppiippee..mmaakk in the SSPPEECCDD/ddaattaa__ppiippee directory.  The
+     file pprrooggrraamm.c will be compiled and linked with the data-pipe overhead
+     module, and the result placed in an executable file named pprrooggrraamm.  If
+     additional object modules or libraries need to be linked, they can be
+     specified with the UUOOBBJJ== or LLIIBBSS== parameters.  If the tools provided are
+     not sufficient, you can create custom makefiles based on the distributed
+     ddaattaa__ppiippee..mmaakk.
+
+     After linking pprrooggrraamm, move it to the SSPPEECCDD/ddaattaa__ppiippee directory for easy
+     access by all users.
+
+     The subroutines available from the user C code portion of the data-pipe
+     program are described below.
+
+The User C Code
+
+     The skeleton user C-code part of the data-pipe program should contain the
+     following:
+
+        ##iinncclluuddee <<uusseerr__ppiippee..hh>>
+
+        uusseerr__ccooddee((aarrggcc,, aarrggvv))
+        cchhaarr    ****aarrggvv;;
+        {{
+              ......
+        }}
+
+     The include file uusseerr__ppiippee..hh contains declarations of the subroutines
+     available in the C code.  The file resides in the SSPPEECCDD/ddaattaa__ppiippee
+     directory.
+
+     The subroutine uusseerr__ccooddee(()) is called by the overhead part of the data-pipe
+     program each time ddaattaa__ppiippee(()) is invoked in ssppeecc.  The parameter aarrggcc is
+     set to the number of space-delimited words present in the string value of
+     the aarrggss parameter to ddaattaa__ppiippee(()).  The parameter aarrggvv is an array of
+     character pointers that point to each of the aarrggcc space-delimited words in
+     the aarrggss string.  Alternatively, the ggeett__iinnppuutt__ssttrriinngg(()) function (see
+     below) returns the aarrggss string in its entirety.
+
+     The uusseerr__ccooddee(()) routine will be called every time the ddaattaa__ppiippee(()) function
+     is called from ssppeecc.  The data-pipe program does not exit between calls of
+     uusseerr__ccooddee(()), so you should be careful about allocating memory or opening
+     files each time uusseerr__ccooddee(()) is called without freeing the memory or closing
+     the files each time uusseerr__ccooddee(()) returns.  Alternatively, you can make sure
+     such things are only done the first time uusseerr__ccooddee(()) is called.
+
+Accessing Command Line Arguments
+
+     Besides the aarrggcc, aarrggvv technique for accessing the aarrggss typed in the
+     ddaattaa__ppiippee(()) call, the following function is available (as of ssppeecc release
+     4.03.13):
+
+     cchhaarr **ggeett__iinnppuutt__ssttrriinngg(()) - Returns a pointer to memory holding a copy of
+          the second argument aarrggss entered with the call to ddaattaa__ppiippee(()).
+
+Reading the Group/Array Data In the C Code
+
+     If ddaattaa__ppiippee(()) is sending a data group or array to the user code, the
+     following subroutines provide access to the data parameters and values.
+
+     iinntt ggeett__ggrroouupp__nnuummbbeerr(()) - Returns the group number specified as the
+          ddaattaa__ppiippee(()) ggrrpp__oouutt argument.  A -2 is returned if an array was
+          specified.  A -1 is returned if neither data group or array was
+          specified.
+
+     iinntt ggeett__ggrroouupp__nnppttss(()) - Returns the number of points in the ddaattaa__ppiippee(())
+          ggrrpp__oouutt or the number of rows in aarrrr__oouutt.
+
+     iinntt ggeett__ggrroouupp__wwiiddtthh(()) - Returns the number of elements per point in the
+          ddaattaa__ppiippee(()) ggrrpp__oouutt or the number of columns in aarrrr__oouutt.
+
+     iinntt ggeett__iinnppuutt__ddaattaa((ddoouubbllee **xx,, iinntt ppttss,, iinntt wwiidd)) - Transfers data from the
+          ggrrpp__oouutt or aarrrr__oouutt specified in the call to ddaattaa__ppiippee(()) to the memory
+          area indicated by the pointer xx.  The pointer xx is treated as an array
+          dimensioned as xx[[ppttss]][[wwiidd]].  If the data group/array has more
+          points/rows than ppttss or more elements/columns than wwiidd, only as many
+          points/rows or elements/columns as are available in the data
+          group/array are copied.  Data from only a single element/column may be
+          retrieved using one or more calls of ggeett__iinnppuutt__eelleemm(()) below.  If the
+          data in the data group from ssppeecc is float rather than double (which
+          depends on ssppeecc's installation configuration), float-to-double
+          conversion is done within the call to ggeett__iinnppuutt__ddaattaa(()). The return
+          value is the number of points/rows copied.
+
+     iinntt ggeett__iinnppuutt__eelleemm((ddoouubbllee **xx,, iinntt ppttss,, iinntt eell)) - Transfers one element of
+          the data from the ggrrpp__oouutt or aarrrr__oouutt specified in the call to
+          ddaattaa__ppiippee(()) to the memory area indicated by the pointer xx. No more
+          than ppttss points are copied from element/column eell of the the data
+          group/array.  If the data in the data group from ssppeecc is float rather
+          than double (which depends on ssppeecc's installation configuration),
+          float-to-double conversion is done within the call to
+          ggeett__iinnppuutt__ddaattaa(()).  The return value is the number of points/rows
+          copied.
+
+Sending Group/Array Data Back To ssppeecc
+
+     The following subroutines allow you to send group/array data back to ssppeecc
+     when ddaattaa__ppiippee(()) is invoked with a ggrrpp__iinn or aarrrr__iinn argument.  For a data
+     group, the call to ddaattaa__ppiippee(()) will implicitly call ddaattaa__ggrrpp(()) to configure
+     the size of the return group according to the parameters set in the
+     following subroutines.  For an array, the array must already be declared
+     and dimensioned.
+
+     There are two ways to send group/array data back to ssppeecc.  The subroutine
+     sseett__rreettuurrnn__ddaattaa(()) allows you to send the entire data group in one call that
+     passes both a pointer to the data and the data group size to the data-pipe
+     program overhead code.  Alternatively, you can use the sseett__rreettuurrnn__ggrroouupp(())
+     subroutine to configure the data group/array size, followed by one or more
+     calls to sseett__rreettuurrnn__eelleemm(()) to set one element/column of the data
+     group/array at a time.
+
+     iinntt ggeett__rreettuurrnn__ggrroouupp__nnuummbbeerr(()) - Returns the group number specified as the
+          ddaattaa__ppiippee(()) ggrrpp__iinn argument.  A -2 is returned if an array was
+          specified.  A -1 is returned if neither data group or array was
+          specified.
+
+     vvooiidd sseett__rreettuurrnn__ddaattaa((ddoouubbllee **xx,, iinntt ppttss,, iinntt wwiidd,, iinntt llaasstt)) - Configures
+          the return data group and copies the data at the same time.  The
+          pointer xx is considered as an array of dimension xx[[ppttss]][[wwiidd]] for the
+          purpose of transferring data to the data group.  The argument llaasstt
+          sets the index number of the last element added to the group, which is
+          used by the various data analysis and plotting functions available in
+          ssppeecc.
+
+     vvooiidd sseett__rreettuurrnn__ggrroouupp((iinntt ppttss,, iinntt wwiidd)) - Configures the size of the return
+          data group without copying data.  This subroutine must be called once
+          before calling sseett__rreettuurrnn__eelleemm(()) below.
+
+     iinntt sseett__rreettuurrnn__eelleemm((ddoouubbllee **xx,, iinntt ppttss,, iinntt eell,, iinntt llaasstt)) - Copies one
+          element to the return data group, which must have been previously
+          configured by a call of sseett__rreettuurrnn__ggrroouupp(()), above.  If the parameters
+          ppttss or eell exceed the values configured, or if the return group hasn't
+          been configured, the subroutine returns -1.  Otherwise zero is
+          returned.
+
+Setting ddaattaa__ppiippee(()) Return Values From C Code
+
+     You can set the value that the ddaattaa__ppiippee(()) function returns in ssppeecc from
+     the user C code in your ddaattaa--ppiippee process.  You can have ddaattaa__ppiippee(()) return
+     a number or a string or, if necessary, reset to command level.  If no
+     explicit return value is assigned in the user C code, ddaattaa__ppiippee(()) returns
+     zero.
+
+     iinntt sseett__rreettuurrnn__ssttrriinngg((cchhaarr **ss)) - Sets the return value of ddaattaa__ppiippee(()) to
+          the string ss.  This subroutine returns -1 if memory could not be
+          obtained for the string ss, otherwise it returns zero.
+
+     vvooiidd sseett__rreettuurrnn__vvaalluuee((ddoouubbllee vv)) - Sets the return value of ddaattaa__ppiippee(()) to
+          the value vv.
+
+     vvooiidd ddoo__eerrrroorr__rreettuurrnn(()) - Calling this subroutine from the user C code
+          causes control to pass back to ssppeecc without returning data group or
+          array values, if they have been set.  The return value of ddaattaa__ppiippee(())
+          will be the value set by sseett__rreettuurrnn__vvaalluuee(()) above, if such a value has
+          been set, otherwise the return value of ddaattaa__ppiippee(()) will be -1.  This
+          subroutine does not return.
+
+     vvooiidd ddoo__aabboorrtt__rreettuurrnn(()) - Calling this subroutine from the user C code
+          causes control to pass back to ssppeecc without returning data group or
+          array values, if they has been set.  In ssppeecc, there is no return from
+          ddaattaa__ppiippee(()), rather ssppeecc resets to command level.  This subroutine
+          does not return.
+
+     vvooiidd ddoo__qquuiitt__rreettuurrnn(()) - Calling this subroutine from the user C code causes
+          control to pass back to ssppeecc normally as if uusseerr__ccooddee(()) returned
+          normally, but the data-pipe program will then exit.  This subroutine
+          does not return.
+
+SEE ALSO
+
+     _d_a_t_a
+

@@ -1,0 +1,989 @@
+.TH "array" "reference" "07/07/15" "arrays.rst 6.8  07/07/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBarray\fP \- declare a data array
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)arrays.rst       6.8  07/07/15 CSS
+.
+.\" Copyright (c) 1995-1999,2003,2004,2008,2009,2010,2012,2013
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "array" "reference" "07/07/15" "arrays.rst 6.8  07/07/15 CSS"
+.
+.SH "Description"
+.rs
+.sp
+Unlike the "associative" arrays that have always been part of \fBspec\fP,
+data arrays (introduced in \fBspec\fP release 4) are more like those used
+in math and in programming. While associative arrays are indexed
+by arbitrary strings or numbers and can store either strings or numbers,
+data arrays are indexed by consecutive integers (starting from zero,
+as is the C convention) and hold a specific data type,
+such as short integer, float, double, etc.
+.sp
+Data arrays must be specifically declared and dimensioned
+using the \fBarray\fP keyword (unlike associative arrays,
+which can come into existence when used in an expression).
+The arrays can have one or two dimensions.
+The \fBmca_get()\fP and \fBimage_get()\fP functions can directly fill
+the arrays with data from one\- or two\-dimensional detectors.
+.sp
+Data arrays can be used in expressions containing
+the standard arithmetic operators to perform simultaneous operations
+on each element of the array.
+In addition, a subarray syntax provides a method for performing assignments,
+operations and functions on only portions of the array.
+.sp
+The functions \fBarray_dump()\fP, \fBarray_fit()\fP, \fBarray_op()\fP, \fBarray_copy()\fP,
+\fBarray_plot()\fP, \fBarray_pipe()\fP and \fBarray_read()\fP
+handle special array operations.
+The functions \fBfmt_read()\fP and \fBfmt_write()\fP provide a means
+to transfer array data to and from binary\-format data files.
+Also, the functions \fBmca_get()\fP, \fBmca_put()\fP,
+\fBimage_get()\fP and \fBimage_put()\fP accept array arguments.
+(See the \fI\%data\fP help file for an explanation of data groups.)
+.sp
+The \fBprint\fP command will print data arrays
+in a concise format on the screen,
+giving a count of repeated columns and rows,
+rather than printing each array element.
+.sp
+Array data can be placed in shared memory,
+making the data accessible to other processes,
+such as image\-display or data\-crunching programs.
+The shared arrays can both be read and written by the other processes.
+The implementation includes a number of special aids for making
+the processes work smoothly with \fBspec\fP.
+.SH "Usage"
+.rs
+.sp
+Data arrays must be declared with the \fBarray\fP key word.
+One\- and two\-dimensional arrays are declared as:
+.RS 3m
+.sp
+.nf
+.ft CB
+[shared] [type] array var[cols]
+[shared] [type] array var[rows][cols]
+.ft P
+.fi
+.RE
+.sp
+On platforms that support System V Interprocess Communication (IPC) calls,
+the shared keyword causes \fBspec\fP to place the array in shared memory
+(see below).
+The type keyword specifies the storage type of the array and may be one
+of \fBbyte\fP, \fBubyte\fP, \fBshort\fP, \fBushort\fP, \fBlong\fP,
+\fBulong\fP, \fBlong64\fP, \fBulong64\fP, \fBfloat\fP, \fBdouble\fP or \fBstring\fP.
+An initial \fBu\fP denotes the "unsigned" version of the data type.
+The \fBshort\fP and \fBushort\fP types are 16\-bit (two\-byte) integers.
+The \fBlong\fP and \fBulong\fP types are 32\-bit (four\-byte) integers.
+The \fBlong64\fP and \fBulong64\fP types are 64\-bit (eight\-byte) integers.
+The \fBfloat\fP type uses four bytes per element.
+The \fBdouble\fP type uses eight bytes per element.
+The default data type is \fBdouble\fP.
+.sp
+The array name \fBvar\fP is an ordinary \fBspec\fP variable name.
+Arrays are global by default, although they may also be declared local
+within statement blocks.
+.sp
+Unlike traditional \fBspec\fP associative arrays,
+which can store and be indexed by arbitrary strings or numbers,
+a data array  is indexed by consecutive integers (starting from zero),
+and can hold only numbers, or in the case of \fBstring\fP arrays, only strings.
+.sp
+Operations on these arrays can be performed on all elements
+of the array at once, or on one or more blocks of elements.
+Consider the following example:
+.RS 3m
+.sp
+.nf
+.ft CB
+array a[20]
+a = 2
+a[3] = 3
+a[10:19] = 4
+a[2,4,6,10:15] = 5
+.ft P
+.fi
+.RE
+.sp
+The first expression assigns the value 2 to all twenty elements of the array.
+The second expressions assigns 3 to one element.
+The third assign the value 4 to the tenth through last element.
+The final expression assigns the value 5 to the elements listed.
+.sp
+A negative number as an array index counts elements from the end of the array,
+with \fBa[\-1]\fP referring to the last element of \fBa\fP.
+.sp
+As per the usual conventions, the first index is row and the second is column.
+Note, however, \fBspec\fP considers arrays declared with one dimension
+to be a single row. For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+array a[20]
+.ft P
+.fi
+.RE
+.sp
+is a one\-row, twenty\-column array. Use
+.RS 3m
+.sp
+.nf
+.ft CB
+array a[20][1]
+.ft P
+.fi
+.RE
+.sp
+to declare a 20\-row, one\-column array.
+.sp
+Also note well, all operations between two arrays
+are defined as element\-by\-element operations,
+not matrix operations, which are currently unimplemented in \fBspec\fP.
+In the following example:
+.RS 3m
+.sp
+.nf
+.ft CB
+array a[5][5], b[5][5], c[5][5]
+c = a * b
+.ft P
+.fi
+.RE
+.sp
+\fBc[i][j]\fP is the product \fBa[i][j] * b[i][j]\fP for each \fBi\fP and \fBj\fP.
+.sp
+When two array operands have different dimensions the operations
+are performed on the elements that have dimensions in common. In the case
+.RS 3m
+.sp
+.nf
+.ft CB
+array a[5][5], b[5], c[5][5]
+c = a * b
+.ft P
+.fi
+.RE
+.sp
+only the first row of \fBc\fP will have values assigned, since \fBb\fP
+only has one row.
+The remaining elements of \fBc\fP are unchanged by the assignment.
+.sp
+Portions of the array can be accessed using the subarray syntax,
+which uses colons and commas, as in the following examples:
+.RS 3m
+.sp
+.nf
+.ft CB
+array a[10][10]
+a[1]                # second row of a
+a[2:4][]            # rows 2 to 4
+a[][2:]             # all rows, cols 2 to last
+a[1,3,5,7,9][3:7]   # odd rows and cols 3 to 7
+.ft P
+.fi
+.RE
+.sp
+The elements of an array can be accessed in reverse order, as in:
+.RS 3m
+.sp
+.nf
+.ft CB
+a = x[\-1:0]
+.ft P
+.fi
+.RE
+.sp
+which will assign to a the reversed elements of \fBx\fP.
+Note, though, that presently, an assignment such as \fBx = x[\-1:0]\fP
+will not work properly, as \fBspec\fP will not make a temporary copy
+of the elements. However, \fBx = x[\-1:0]+0\fP will work.
+.sp
+The functions \fBfabs()\fP, \fBint()\fP, \fBcos()\fP, \fBacos()\fP,
+\fBsin()\fP, \fBasin()\fP, \fBtan()\fP, \fBatan()\fP,
+\fBexp()\fP, \fBexp10()\fP, \fBlog()\fP, \fBlog10()\fP,
+\fBpow()\fP and \fBsqrt()\fP can all take arrays as an argument.
+The functions perform the operation on each element
+of the array argument and return the results in an array
+of the same dimension as the argument array.
+.sp
+The operations \fB<\fP, \fB<=\fP, \fB!=\fP, \fB==\fP, \fB>\fP and \fB>=\fP
+can be used with array arguments. The Boolean result (0 or 1)
+will be assigned to each element of an array returned
+as the result of the operation,
+based on the element\-by\-element comparison of the operands.
+.sp
+The bit\-wise operators \fB~\fP, \fB|\fP, \fB&\fP, \fB>>\fP
+and \fB<<\fP can also be used with array operands.
+.sp
+Note, \fBspec\fP generally uses double\-precision floating point
+for storing intermediate values and for mathematical operations.
+Double\-precision floating point has only 52 bits for the significand
+(the remaining 12 bits are for sign and exponent).
+Thus, for most operations the 64\-bit types will only maintain 52 bits
+of significance.
+(The 64\-bit integer types were added in \fBspec\fP release 6.01.)
+.SH "String Arrays"
+.rs
+.sp
+Arrays of type \fBstring\fP are identical to \fBbyte\fP arrays in terms
+of storage requirements and behavior in most operations.
+However, when used as described below,
+the string arrays do behave differently.
+.sp
+If a row of a string array represents a number and is used in
+a conditional expression, then the value of the conditional expression
+will be the number. For example, the strings \fB"0.00"\fP or \fB"0x000"\fP
+will evaluate as zero or false in a conditional expression.
+In contrast, for number arrays, a conditional evaluates as zero
+only if every element of the array is zero.
+.sp
+Functions that take string arguments, such as \fBon()\fP, \fBlength()\fP,
+\fBunix()\fP, etc., will allow a row of a string array
+to be used as an argument.
+Use of a number array is invalid and produces an error.
+.sp
+The \fBprint\fP command will print string arrays as ASCII text,
+while byte arrays display each byte as a number.
+.sp
+In assignments to a row of a string array,
+the right hand side is copied to the byte elements
+of the string array as a string, even if the right hand side is a number.
+Any remaining elements of the string array row are set to zero.
+Thus, the results differ in the assignments below:
+.RS 3m
+.sp
+.nf
+.ft CB
+string array arr_string[20]
+arr_string = 3.14159
+print arr_string
+3.14159
+
+byte array arr_byte[20]
+arr_byte = 3.14159
+print arr_byte
+{3 <20 repeats>}
+.ft P
+.fi
+.RE
+.sp
+In the first example, the string representation
+of the number is copied to the row of the string array,
+while in the second, each element of the array
+is assigned the (truncated) value of the number.
+.SH "Row\-wise and Column\-wise Sense"
+.rs
+.sp
+For the functions \fBarray_dump()\fP, \fBarray_fit()\fP, \fBarray_pipe()\fP,
+\fBarray_plot()\fP and \fBarray_read()\fP it matters whether each row
+or each column of a two\-dimensional array corresponds to a data point.
+By default, \fBspec\fP takes the larger dimension to correspond to point number,
+and if both dimensions are the same, to use the rows as data points.
+The \fB"row_wise"\fP and \fB"col_wise"\fP arguments to \fBarray_op()\fP,
+described below, can be used to force the sense of an array
+one way or the other, regardless of the array dimensions.
+If an array has row\-wise sense, the contents of each row correspond
+to a data point, and one might then plot the contents
+of column two of each row versus column one, for example.
+.SH "Shared Memory Arrays"
+.rs
+.sp
+When created with the \fBshared\fP keyword,
+the array data and a header structure are stored in shared memory.
+For each shared memory array, \fBspec\fP creates an immutable global
+variable named \fBSHMID_var\fP whose value is the shared memory ID
+associated with the shared memory segment and where where var
+is the name of the array.
+This ID is used by other programs that wish to access the shared memory.
+.sp
+\fBspec\fP can connect to an existing shared memory array created
+by another process running on the same platform,
+perhaps created by another instance of \fBspec\fP. The syntax is
+.RS 3m
+.sp
+.nf
+.ft CB
+extern shared array [spec:[pid:]]arr
+.ft P
+.fi
+.RE
+.sp
+where the optional parameter \fBspec\fP is the name of the \fBspec\fP
+version that created the array, the optional parameter \fBpid\fP
+is the process ID of the version and \fBarr\fP is the name of the array.
+The first two arguments can be used in case more than one instance
+of the shared array exists. Examples include:
+.RS 3m
+.sp
+.nf
+.ft CB
+extern shared array data
+extern shared array fourc:data
+extern shared array fourc:1234:data
+.ft P
+.fi
+.RE
+.sp
+The shared array segments include a header that describes the array.
+Two features of the header that are primarily associated
+with shared arrays that can accessed from \fBspec\fP user level
+are tags and frames.
+Shared arrays tags can be manipulated with the \fBarray_op()\fP
+\fB"tag"\fP and \fB"untag"\fP options, as described in the next section.
+.sp
+Frame\-size and latest\-frame header elements allow a shared 2D array
+to be described as a series of 1D or 2D acquisitions (or frames).
+The frame size is the number of rows in a single frame.
+The latest frame is the most recently updated frame number.
+The latest frame value should allow an auxiliary program
+that maintains a live display to update the display efficiently.
+The frame values are also accessed via \fBarray_op()\fP, below.
+Currently, the frame values are unused by \fBspec\fP in array operations,
+although specific hardware support may modify frames values.
+(Frames were added in \fBspec\fP release 5.08.06\-1.)
+.sp
+The structure used for the shared memory data is given
+in the file \fBSPECD\fP\fB/include/spec_shm.h\fP.
+A C file containing an API for accessing the \fBspec\fP shared memory arrays
+is included in the \fBspec\fP distribution and is named sps.c.
+.SH "Built\-in Functions"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBarray_op("cmd", a [, args ...])\fP
+\- 
+Performs the following operations on the arguments as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"fill"\fP
+\- 
+Fills the array \fBa\fP with values. For a two\-dimensional array,
+.sp
+.RS 5m
+.RS 4m
+\fBarray_op("fill", a, u, v)\fP
+.RE
+.sp
+produces
+.sp
+.RS 4m
+\fBa[i][j] = u * i +  v * j\fP
+.RE
+.sp
+With subarrays, \fBi\fP and \fBj\fP refer to the subarray index.
+Also, \fBi\fP and \fBj\fP always increase, even for reversed subarrays, so
+.sp
+.RS 4m
+\fBarray_op("fill", a[\-1:0][\-1:0], 1, 1)\fP
+.RE
+.sp
+fills \fBa\fP in reverse order.
+.RE
+.HP 5m
+."
+\fB"contract"\fP
+\- 
+Returns a new array with dimensions contracted by a factor of \fBu\fP
+in rows and \fBv\fP columns. Elements of the new array are formed
+by averaging every \fBu\fP elements of each row
+with every \fBv\fP elements of each column.
+If there are leftover rows or columns, they are averaged also.
+.HP 5m
+."
+\fB"min"\fP or \fB"gmin"\fP
+\- 
+Returns the minimum value contained in the array.
+.HP 5m
+."
+\fB"max"\fP or \fB"gmax"\fP
+\- 
+Returns the maximum value contained in the array.
+.HP 5m
+."
+\fB"i_at_min"\fP or \fB"i_at_gmin"\fP
+\- 
+Returns the \fBindex\fP number of the minimum value of the array.
+For a two\-dimensional array dimensioned as \fBD[N][M]\fP,
+the index number of element \fBD[i][j]\fP is \fB(i * M) + j\fP.
+.HP 5m
+."
+\fB"i_at_max" or "i_at_gmax"\fP
+\- 
+Returns the index number of the maximum value of the array. See above.
+.HP 5m
+."
+\fB"row_at_min" or "rmin"\fP
+\- 
+Returns the row number containing the minimum value of the array.
+.HP 5m
+."
+\fB"row_at_max" or "rmax"\fP
+\- 
+Returns the row number containing the maximum value of the array.
+.HP 5m
+."
+\fB"col_at_min" or "cmin"\fP
+\- 
+Returns the column number containing the minimum value of the array.
+.HP 5m
+."
+\fB"col_at_max" or "cmax"\fP
+\- 
+Returns the column number containing the maximum value of the array.
+.HP 5m
+."
+\fB"i_<=_value"\fP
+\- 
+Returns the \fBindex\fP number of the nearest element
+of the array with a value at or less than \fBu\fP.
+For a two\-dimensional array dimensioned as \fBD[N][M]\fP,
+the index number of element \fBD[i][j]\fP is \fB(i * M) + j\fP.
+.HP 5m
+."
+\fB"i_>=_value"\fP
+\- 
+Returns the \fBindex\fP number of the nearest element
+of the array with a value at or greater than \fBu\fP,
+starting from the last element.
+For a two\-dimensional array dimensioned as \fBD[N][M]\fP,
+the index number of element \fBD[i][j]\fP is \fB(i * M) + j\fP.
+.HP 5m
+."
+\fB"fwhm"\fP
+\- 
+Requires two array arguments, each representing a single row
+or single column. Returns the full\-width in the first array
+at half the maximum value of the second array.
+.HP 5m
+."
+\fB"cfwhm"\fP
+\- 
+Requires two array arguments, each representing a single row
+or single column. Returns the center of the full\-width
+in the first array at half the maximum value of the second array.
+.HP 5m
+."
+\fB"uhmx"\fP
+\- 
+Requires two array arguments, each representing a single row
+or single column. Returns the value in the first array
+corresponding to half the maximum value in the second array
+and at a higher index.
+.HP 5m
+."
+\fB"lhmx"\fP
+\- 
+Requires two array arguments, each representing a single row
+or single column. Returns the value in the first array
+corresponding to half the maximum value in the second array
+and at a lower index.
+.HP 5m
+."
+\fB"com"\fP
+\- 
+Requires two array arguments, each representing a single row
+or single column. Returns the center of mass in the first array
+with respect to the second array.
+The value is the sum of the products of each element
+of the first array and the corresponding element of the second array,
+divided by the number of points.
+.HP 5m
+."
+\fB"x_at_min"\fP
+\- 
+Requires two array arguments, each representing a single row
+or single column. Returns the element in the first array
+that has the corresponds to the minimum value in the second array.
+.HP 5m
+."
+\fB"x_at_max"\fP
+\- 
+Requires two array arguments, each representing a single row
+or single column. Returns the element in the first array
+that has the corresponds to the maximum value in the second array.
+.HP 5m
+."
+\fB"sum"\fP or \fB"gsum"\fP
+\- 
+Returns the sum of the elements of the array.
+If there is a third argument greater than zero,
+the array is considered as a sequence of frames,
+with the third argument the number of rows in each frame.
+The return value is a new array with that number of rows
+and the same number of columns as the original array.
+Each element of the returned array is the sum
+of the corresponding elements of each frame.
+For example, if the original array is dimensioned
+as \fBdata[N][M]\fP, the return value for
+.sp
+.RS 5m
+.RS 4m
+\fBa = array_op("sum", data, R)\fP
+.RE
+.sp
+is a new array of dimension \fBa[N/R][M]\fP,
+where each element \fBa[i][j]\fP is the sum
+of \fBk\fP from \fB0\fP to \fBR \- 1\fP of \fBdata[i + k * N / R][j]\fP.
+.RE
+.HP 5m
+."
+\fB"sumsq"\fP
+\- 
+Returns the sum of the squares of the elements of the array.
+If there is a third argument and it is greater than zero,
+the interpretation is the same as above for \fB"sum"\fP,
+except the elements in the returned array are sums of squares
+of the elements in the original array.
+.HP 5m
+."
+\fB"transpose"\fP
+\- 
+Returns a new array of the same type with the rows and columns switched.
+.HP 5m
+."
+\fB"updated?"\fP
+\- 
+Returns nonzero if the data in the array has been accessed for
+writing since the last check, otherwise returns zero.
+.HP 5m
+."
+\fB"rows"\fP
+\- 
+Returns the number of rows in the array.
+.HP 5m
+."
+\fB"cols"\fP
+\- 
+Returns the number of columns in the array.
+.HP 5m
+."
+\fB"row_wise"\fP
+\- 
+With a nonzero third argument, forces the \fBarray_dump()\fP,
+\fBarray_fit()\fP, \fBarray_pipe()\fP, \fBarray_plot()\fP
+and \fBarray_read()\fP functions to treat the array as row\-wise,
+meaning each row corresponds to a data point.
+With only two arguments, returns nonzero if the array
+is already set to row\-wise mode.
+.HP 5m
+."
+\fB"col_wise"\fP
+\- 
+As above, but sets or indicates the column\-wise sense of the array.
+.HP 5m
+."
+\fB"sort"\fP
+\- 
+Returns an ascending sort of the array.
+.HP 5m
+."
+\fB"swap"\fP
+\- 
+Swaps the bytes of the named array.
+The command can change big\-endian short\- or long\-integer data
+to little\-endian and vice versa.
+For most built\-in data collection, \fBspec\fP automatically
+swaps bytes as appropriate, but this function
+is available for other cases that may come up.
+.HP 5m
+."
+\fB"frame_size"\fP
+\- 
+The number of rows in a frame.
+The frame size is part of the shared array header
+and may be useful to auxiliary programs,
+although the value is maintained for non\-shared arrays.
+Note, setting the frame size to zero
+will clear the \fB"frames"\fP tag.
+Setting the frame size to a non\-zero value
+will set the \fB"frames"\fP tag.
+.HP 5m
+."
+\fB"latest_frame"\fP
+\- 
+The most recently updated frame.
+The latest frame is part of the shared array header
+and may be useful to auxiliary programs,
+although the value is maintained for non\-shared arrays.
+.HP 5m
+."
+\fB"tag"\fP
+\- 
+Shared arrays can be tagged with a type
+that will be available to other processes accessing the array.
+Usage is \fBarray_op("tag", arr, arg)\fP
+where \fBarr\fP is the array
+and \fBarg\fP is \fB"mca"\fP, \fB"image"\fP,
+\fB"frames"\fP, \fB"scan"\fP or \fB"info"\fP.
+.HP 5m
+."
+\fB"untag"\fP
+\- 
+Removes tag information.
+.HP 5m
+."
+\fB"info"\fP
+\- 
+Returns or sets the \fBinfo\fP field of a shared array segment.
+The field can be contain up to 512 bytes of arbitrary
+text.
+When setting the field, if the string argument is
+longer than 512 bytes, the first 512 bytes will be copied.
+The function returns the number of bytes copied, \-1 if \fBa\fP
+is not a shared array or 0 if \fBa\fP is a shared array that
+doesn\(aqt support the \fB"info"\fP field.
+The \fB"info"\fP field is included in
+\fBSHM_VERSION\fP version 6 headers,
+added in \fBspec\fP release 6.00.08.
+.HP 5m
+."
+\fB"meta"\fP
+\- 
+Returns or sets the \fBmeta\fP area of a shared array segment.
+With \fBspec\fP, the field can contain up to 8,192 bytes of arbitrary
+text.
+When setting the field, if the string argument is
+longer than 8,192 bytes, the first 8,192 bytes will be copied.
+The function returns the number of bytes copied, \-1 if \fBa\fP
+is not a shared array or 0 if \fBa\fP is a shared array that
+doesn\(aqt support the \fB"meta"\fP field.
+The \fB"meta"\fP field is included in
+\fBSHM_VERSION\fP version 6 headers,
+added in \fBspec\fP release 6.00.08.
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBarray_copy(a, b [, c, ...])\fP
+\- 
+Fills consecutive bytes in the destination array (or subarray) \fBa\fP with
+bytes from the arrays or strings in the subsequent arguments.
+The arrays can be of
+different types, which allows creating a binary data stream of mixed types.
+If a source argument is not a data array, the string value of the
+argument is copied.
+.sp
+As an example of how \fBarray_copy()\fP might be useful, consider a device
+that sends and receives a binary stream consisting of four
+floats followed by two integers then seven more floats.
+Here is how to prepare a byte array containing the mixed
+binary data types:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+float array float_d[11]
+ulong array long_d[2]
+ubyte array ubyte_d[52]
+
+# ... assign values to float_d and long_d, then ...
+
+array_copy(ubyte_d, float_d[0:3], long_d, float_d[4:])
+sock_put("host", ubyte_d)
+.ft P
+.fi
+.RE
+.sp
+The source array is not erased prior to the copy.  The above
+assignment could also be carried out as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+array_copy(ubyte_d[0:15,24:], float_d)
+array_copy(ubyte_d[16:], long_d)
+.ft P
+.fi
+.RE
+.sp
+Four floats consume sixteen bytes. Two integers consume eight
+bytes.  The subarray notation selects the first sixteen bytes of \fBubyte_d\fP
+for the first four floats,
+then skips eight bytes for where the integers will go, then copies the remainder
+of the floats.
+Since only as much data will be copied as is contained in the source array
+and since the source arrays are fixed size, it is not necessary to
+specify the final byte position in the destinations.
+.sp
+If the returned data uses the same format, floats and integers can
+be extracted using similar syntax:
+.RS 3m
+.sp
+.nf
+.ft CB
+sock_get("host", ubyte_d)
+array_copy(float_d, ubyte_d[0:15], ubyte_d[24:])
+array_copy(long_d, ubyte_d[16:23])
+.ft P
+.fi
+.RE
+.sp
+The function will only copy as many bytes as fit into the preallocated
+space of the destination array.
+.sp
+If the source arguments are not data arrays, \fBspec\fP will take the string
+value of the argument and copy the ASCII value of each byte to corresponding
+bytes in the destination.  The
+terminating null byte is not copied.  If the argument is a number, the
+string value of the number is what one would see on the display with the
+\fBprint\fP command.
+.sp
+The function returns the updated array \fBa\fP.  If \fBa\fP is a subarray,
+the full array is returned.  A \-1 is returned if \fBa\fP is not a
+data array.
+.sp
+Note, this function allows arbitrary bytes to be copied to the
+elements of float and double arrays, which can result in undefined or
+not a number (NaN) values for those elements.
+.sp
+The \fBarray_copy()\fP function appeared in \fBspec\fP release 6.00.07.
+.RE
+.HP 5m
+."
+\fBarray_fit(pars, a [, b, ...])\fP
+\- 
+Performs a linear fit of the data in the array \fBa\fP.
+The fitted parameters are returned in the array \fBpars\fP.
+The function returns the \fBchi\-squared\fP value of the fit,
+if the fit was successful.
+A \-1 is returned if the covariance matrix is singular.
+The fit algorithm is along the same lines as the \fBlfit()\fP routine
+in \fBNumerical Recipes\fP
+(W.H. Press, et al., Cambridge University Press, 1986, page 512).
+.HP 5m
+."
+\fBarray_dump([file, ] a [, b, ...] [, options, ...])\fP
+\- 
+Efficiently writes the data in the array \fBa\fP
+and optionally arrays \fBb\fP, ..., etc.
+If the initial optional \fBfile\fP argument is given,
+the output is just to the named file or device.
+Otherwise, output is to all "on" output devices.
+The additional \fBoptions\fP arguments are strings
+that each start with a percent sign as follows:
+.sp
+An optional format argument can specify a \fBprintf()\fP\-style format
+for the values. The default format is \fB"%.9g"\fP,
+which prints nine digits of precision using fixed point
+or exponential format, choosing whichever is more appropriate
+to the value\(aqs magnitude.
+Recognized alternate format characters are \fBe\fP or \fBE\fP (exponential),
+\fBf\fP (fixed point),
+\fBg\fP or \fBG\fP (fixed or exponential based on magnitude),
+\fBd\fP (decimal integer),
+\fBu\fP (unsigned integer),
+\fBo\fP (octal integer),
+\fBx\fP or \fBX\fP (hexadecimal integer).
+(The last two as of release 5.08.01\-1, and d, u and o as of
+release 5.08.03\-6.)
+All formats accept standard options such as precision and field width.
+For example, \fB"%15.8f"\fP uses fixed\-point format with eight digits
+after the decimal point and a fifteen\-character\-wide field.
+For the integer formats, double values will be converted to integers.
+Also, initial characters can be included in the format string,
+for example, \fB"0x%08x"\fP is valid.
+.sp
+The option \fB"%D=c"\fP, specifies
+an alternate delimiter character \fBc\fP
+to replace the default space character delimiter
+that is placed between each element in a row of output.
+For example, one might use a comma, a colon or the tab character
+with \fB"%D=,"\fP, \fB"%D=:"\fP or \fB"%D=\et"\fP, respectively.
+Use \fB"%D="\fP for no delimiter.
+.sp
+Also, by default, the output is one data row per line.
+Thus, for one\-dimensional row\-wise arrays,
+all elements will be printed on one line,
+while one\-dimensional column\-wise array will have
+just one data element per line.
+For two\-dimensional arrays, each line will contain one row of data.
+The number of elements per line can be controlled
+with the option \fB"%#[C|W]"\fP.
+For one\-dimensional arrays, the number \fB#\fP is the number of elements
+to print per line.
+For two\-dimensional arrays, \fB#\fP is the number of rows to print per line.
+If an optional \fBW\fP is added, the number becomes
+the number of elements to print per line,
+which can split two\-dimensional arrays at different points in the rows.
+If an optional \fBC\fP is added to the option string,
+a backslash will be added to each line where a row is split.
+(The \fBC\-PLOT\fP \fBscans.4\fP user function can properly interpret
+such "continued" lines for one\-dimensional MCA\-type array data.)
+.sp
+Finally, the various options can be combined in a single string.
+For example,
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+a = array_dump(data, "%15.4f", "%D=:", "%8W")
+.ft P
+.fi
+.RE
+.sp
+and
+.RS 3m
+.sp
+.nf
+.ft CB
+a = array_dump(data, "%15.4f%D=:%8W")
+.ft P
+.fi
+.RE
+.sp
+work the same.
+.RE
+.HP 5m
+."
+\fBarray_plot(a [, b, ...])\fP
+\- 
+Plots the data in the array \fBa\fP.
+Depending on whether \fBa\fP is a row\-wise or column\-wise array,
+the first column or first row elements are used for \fBx\fP.
+Subsequent elements (up to a maximum of 64)
+are plotted along the \fBy\fP axis.
+If preceded by a call of \fBplot_cntl("addpoint")\fP
+and the ranges have not changed, only the last point in the array is drawn.
+If preceded by a call of \fBplot_cntl("addline")\fP the current plot
+will not be erased, and the plot ranges will not be changed.
+The plotting area is not automatically erased
+by a call of \fBarray_plot()\fP \- \fBuse plot_cntl("erase")\fP for that.
+The axis ranges are set using the \fBplot_range()\fP function.
+See \fBplot_cntl()\fP for other options that affect drawing the plot.
+.HP 5m
+."
+\fBarray_read(file_name, a [, options])\fP
+\- 
+Reads data from the ASCII file \fBfile_name\fP,
+and stuffs the data into the array \fBa\fP.
+For a row\-wise array, the values on each line of the file
+are assigned into successive columns for each row of the array.
+If there are more items on a line in the file than columns in the array,
+or if there are more points in the file than rows in the array, the extra
+values are ignored.
+For a column\-wise array, each row of the data file
+is assigned to successive columns of the array.
+Lines beginning
+with the \fB#\fP character are ignored.
+There is no limit on the length of the input line.
+Prior to \fBspec\fP release 6.03.05, the maximum
+length was 2,048 characters.
+.sp
+The only currently recognized option
+is a \fB"C=#"\fP, where \fB#\fP is the starting column number
+in the file to use when making assignments (as of \fBspec\fP release 6.03.05).
+.sp
+Returns \-1 if the file can\(aqt be opened,
+otherwise returns the number of points read.
+.HP 5m
+."
+\fBfmt_read(file, format, array [, header [, flags]])\fP
+\- 
+Reads data from \fBfile\fP using the indicated \fBformat\fP into \fBarray\fP,
+possibly assigning elements to \fBheader\fP which can be an associative array or a string.
+Possible values for \fBflags\fP are below.
+.HP 5m
+."
+\fBfmt_write(file, format, array [, header [, flags]])\fP
+\- 
+Saves data from \fBarray\fP to \fBfile\fP using the indicated \fBformat\fP,
+possibly also writing elements of \fBheader\fP, which can be an associative array or string.
+Possible values for \fBflags\fP are below.
+.sp
+The standard \fBspec\fP distribution includes
+support for the following binary formats:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"raw"\fP
+\- 
+The array data is read or written as is.
+.HP 5m
+."
+\fB"pgm"\fP
+\- 
+Binary \fBPortable PixMap\fP output formatted
+for gray scale images is read or created.
+Only works with 8\-bit or 16\-bit array elements.
+.HP 5m
+."
+\fB"tiff"\fP
+\- 
+Creates a TIFF file with \fBfmt_write()\fP.
+Contains code for reading TIFF files with \fBfmt_read()\fP,
+but the \fBfmt_tiff.c\fP file needs to be recompiled with
+the code activated and \fBspec\fP needs to be relinked to
+include the TIFF library.
+.PD
+.RE
+.sp
+The \fBheader\fP argument is implementation dependent.  None of the above
+format types use it.
+.sp
+The \fBflags\fP argument is a string, currently recognizing the following
+options.  Multiple options are separated by commas or spaces.
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"append"\fP
+\- 
+Append data to the file.
+.RE
+.HP 5m
+."
+\fB"overwrite"\fP
+\- 
+Overwrite the file with the data.
+.HP 5m
+."
+\fB"#num"\fP
+\- 
+The value of \fBnum\fP is passed to the implementation\(aqs \fBwrite\fP or \fBread\fP
+function.
+.PD
+.RE
+.sp
+The default behavior for the above formats, \fB"raw"\fP, \fB"pgm"\fP and \fB"tiff"\fP,
+is to overwrite the file with the new data.  Note, a place\-holder argument is
+needed for \fBheader\fP if using \fBflags\fP.
+.sp
+Contact CSS directly for more information on the \fBfmt_read()\fP and \fBfmt_write()\fP
+functions.  Also, examine the C files \fBfmt_*.c\fP included in the \fBspec\fP
+distribution.  Besides the source files that implement the above formats,
+files named \fBfmt_esrf.c\fP and \fBfmt_immcat.c\fP implement more complicated
+formats used at particular sites.  The file \fBfmt_test.c\fP contains some
+simple usage examples.
+.RE
+.HP 5m
+."
+\fBfmt_close(file, format)\fP
+\- 
+Calls the file close routine associated with \fBformat\fP for \fBfile\fP.
+.RE
+

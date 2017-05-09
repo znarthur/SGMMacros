@@ -1,0 +1,130 @@
+amptek                              hardware                              amptek
+
+NAME
+     amptek - Amptek Pocket MCA 8000/8000A
+
+INTRODUCTION
+
+     (See the _d_p_5 help file for information on the DP5, PX5, DP5G and MCA8000D
+     Amptek MCA devices.  See the _p_x_4 help file for information on the Amptek
+     PX4 MCA.)
+
+     ssppeecc communicates with the Amptek MCA-8000 and MCA-8000A pocket MCA devices
+     over an RS-232C interface.  The serial communication is nonstandard and
+     requires ssppeecc to set the DTR and RTS modem-control outputs and read the DSR
+     and CTS modem-control inputs.  Thus ssppeecc only supports this MCA on
+     platforms with serial ports that respond to the standard modem-control
+     iiooccttll(()) calls.
+
+     ssppeecc supports the newer (but still nonstandard) MCA-8000A protocol included
+     on models with serial number 3660 and higher.  The new protocol allows the
+     MCA to be used over most USB-to-serial adapters, but currently only on
+     LLiinnuuxx platforms.  Do not run the older protocol over a USB-to-serial
+     adapter. If it works at all, there will be heavy CPU usage and much slower
+     communications.  Note, Amptek can update the firmware of older models.  The
+     MCA 8000A currently will not work on a Mac in native mode, although the MCA
+     will work running spec on a LLiinnuuxx virtual machine on a Mac if one connects
+     directly to the USB-to-serial adapter through the LLiinnuuxx virtual machine.
+     The new protocol requires ssppeecc release 5.08.05-6 or higher.
+
+     The MCA can be used with baud rates up to 115200, although maximum
+     effective transfer rates seem to be about half that.
+
+     The MCA can collect data in up to 16,384 active channels and has memory for
+     32,768 channels.  Memory group sizes can be configured from 256 to 16,384
+     channels in powers of two, and the number of groups is 32,768 divided by
+     the group size.
+
+     The number of usable channels is reduced slightly, though, due to "the
+     sliding scale linearization technique" employed by the MCA ADC.  The number
+     of channels in a group is reduced by 1/32 of the group size.  For a
+     256-channel group, the last 8 channels are not useful.  For a
+     16,384-channel group, the last 512 channels are not useful.  ssppeecc fills
+     those locations with zeroes.
+
+     The MCA can be powered by either batteries or an external power source.
+     The power can be turned on remotely by sending a special sequence of
+     signals over the DTR and RTS modem control lines.  When ssppeecc starts up or
+     on a ""rreeccoonnffiigg"" command, ssppeecc sends the signals that will turn on the MCA
+     if had been turned off.  When operating on battery, the MCA turns itself
+     off after two minutes of inactivity.  While the MCA is acquiring data, ssppeecc
+     will normally poll the MCA to check its status, which will keep the MCA
+     from shutting off.  If the MCA does shut itself off, ssppeecc will send the
+     signals to turn the MCA back on and then retry the command.
+
+FUNCTIONS
+
+     The standard MCA commands supported by ssppeecc are described in the _m_c_a help
+     file.  Of the standard functions, the Amptek MCA supports mmccaa__ggeett(()) (but
+     not mmccaa__ppuutt(())). The standard mmccaa__ppaarr(()) options ""iinnffoo"", ""cchhaannss"",
+     ""mmaaxx__cchhaannss"", ""mmaaxx__cchhaannnneellss"", ""ddiissaabbllee"", ""aauuttoo__rruunn"", ""ssoofftt__pprreesseett"",
+     ""aauuttoo__cclleeaarr"", ""nnaattiivvee__ttyyppee"", ""pprreesseett"", ""lliivvee"", ""rreeaall"", ""eellaappsseedd__lliivvee"",
+     ""eellaappsseedd__rreeaall"", ""ddeeaadd"", ""rruunn"", ""hhaalltt"", ""cclleeaarr"", ""ggrroouupp__ssiizzee"",
+     ""sseelleecctt__ggrroouupp"", ""ggaaiinn"" and ""cchhaann##"", are supported by the Amptek MCA.
+
+     The options, ""ggrroouupp__ssiizzee"" and ""ggaaiinn"" are synonyms as are ""mmaaxx__cchhaannss"" and
+     ""mmaaxx__cchhaannnneellss"".
+
+     Legal values for the ""ggrroouupp__ssiizzee"" argument are 256, 512, 1024, 2048, 4096,
+     8192 and 16384.  Legal values for the ""sseelleecctt__ggrroouupp"" argument are from 0 to
+     (32768/ggrroouupp__ssiizzee) - 1.
+
+     The native data type for the MCA is uulloonngg, i.e., unsigned long (32-bit)
+     integers.
+
+     The ""aauuttoo__cclleeaarr"" mode is on by default.  Note, however, it takes time
+     (proportional to the group size) to clear the data.  Thus, count times not
+     using a preset will be affected.
+
+     Additional mmccaa__ppaarr(()) options are as follows:
+
+     mmccaa__ppaarr((""sshhooww__ssttaattuuss"")) - Reads and displays the current parameters from the
+          MCA status word.
+
+     mmccaa__ppaarr((""ttiimmee__ssttaammpp"")) - Reads the time stamp of the current data group and
+          returns a value in UNIX time format (the number of seconds since the
+          start of Jan 1, 1970).  The ASCII representation is available as:
+          ddaattee((mmccaa__ppaarr((""ttiimmee__ssttaammpp"")))).
+
+     mmccaa__ppaarr((""ttiimmee__ssttaammpp"",, vvaalluuee)) - Updates the time stamp to match the time
+          passed in UNIX time format via vvaalluuee. If vvaalluuee is zero, the current
+          system time is used.
+
+     mmccaa__ppaarr((""tthhrreesshhoolldd"")) - Reads the MCA status and returns the current
+          threshold value.
+
+     mmccaa__ppaarr((""tthhrreesshhoolldd"",, vvaalluuee)) - Sets the MCA threshold to vvaalluuee.  The
+          threshold is the channel number of the lowest channel to be used for
+          data collection.  Channels below the threshold channel don't collect
+          data.
+
+     mmccaa__ppaarr((""bbaatttteerryy__ttyyppee"")) - Returns the state of the battery-type flag in the
+          MCA.  The battery type is used to calculate the remaining battery
+          power.  Battery type zero is 1.5 Volt alkaline cells.  Battery type
+          one is for 1.2 Volt NiCad cells.
+
+     mmccaa__ppaarr((""bbaatttteerryy__ttyyppee"",, vvaalluuee)) - Sets the battery-type flag in the MCA.  A
+          value of zero selects 1.5 Volt alkaline cells.  A nonzero value
+          selects 1.2 Volt NiCad cells.  The battery type is only used for
+          choosing which scale to use to calculate the remaining battery
+          capacity.
+
+     mmccaa__ppaarr((""bbaatttteerryy"")) - Returns the remaining battery capacity as a percentage
+          based on the battery type and the battery value returned in the MCA
+          status word.
+
+     If the magnitude of the counts is known to be less than 65536 in each
+     channel, the read-out time can be cut in half by only reading the two
+     low-order bytes for each data point.  ssppeecc implements a ""rreeaadd__sshhoorrtt"" mode
+     to implement the faster read.  Note, the native data type remains uulloonngg.
+
+     mmccaa__ppaarr((""rreeaadd__sshhoorrtt"")) - Returns nonzero if ""rreeaadd__sshhoorrtt"" mode is on,
+          otherwise returns zero.
+
+     mmccaa__ppaarr((""rreeaadd__sshhoorrtt"",, vvaalluuee)) - Sets ""rreeaadd__sshhoorrtt"" mode to on or off
+          according to whether vvaalluuee is nonzero or zero.
+
+SEE ALSO
+
+     _m_c_a _w_w_w_._a_m_p_t_e_k_._c_o_m
+

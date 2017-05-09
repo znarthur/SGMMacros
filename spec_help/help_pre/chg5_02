@@ -1,0 +1,564 @@
+changes                      spec 5.02 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 5.02
+
+March 2, 2003 - RELEASE 5.02.04-9
+
+Fix For Parsing Of vvmmee__xxxxxx(()) Options
+     An old bug, where a single argument containing a comma-separated list of
+     options for the vvmmee__ggeett(()), vvmmee__ppuutt(()), vvmmee__ggeett3322(()), vvmmee__ppuutt3322(()) and
+     vvmmee__mmoovvee(()) functions wasn't parsed correctly, has been fixed.  Options
+     contained in a comma-separated list of arguments were not a problem.
+
+Fix For ESRF TACO MAXE Motor Limits
+     ssppeecc now recognizes the case where a motor interfaced using the ESRF TACO
+     MAXE device server has both limits active.  Previously, only the case where
+     one limit was active was recognized.
+
+February 21, 2003 - RELEASE 5.02.04-8
+
+New aarrrraayy__oopp(()) Option
+     The ""ssuumm"" and ""ssuummssqq"" options of aarrrraayy__oopp(()) can now take a third argument
+     to specify a frame size for return values that are arrays of sums of
+     elements.  See the _a_r_r_a_y_s help file for details.
+
+Support For Struck SIS1100/3100 PCI to VME
+     ssppeecc now supports the Struck model SIS1100/3100 PCI to VME bus coupler on
+     LLiinnuuxx platforms.
+
+Fix For Channel Numbering For PI C-804
+     An off-by-one numbering problem for the the Physik Instrumente C-804 motor
+     controller, introduced in ssppeecc release 5.01.01, has been fixed.
+
+February 11, 2003 - RELEASE 5.02.04-7
+
+Crash On Certain Array Errors Fixed
+     A bug introduced in ssppeecc release 5.02.03, where the error messages that
+     were to be displayed on certain array operations (divide by zero or an
+     assignment of an array to a scaler) instead produced segmentation faults on
+     certain platforms, has been fixed.
+
+February 6, 2003 - RELEASE 5.02.04-6
+
+New Debug Option For Socket I/O
+     If the bit 0x400000 is added to the global DDEEBBUUGG level when bit 0x40
+     (hardware debugging) is also set, the messages sent and received over
+     sockets will be displayed in an all-hexadecimal format, rather than the
+     normal ASCII with backslash escapes for non-printable characters.
+
+Shared Memory Fix For HP Platforms
+     One of the shared memory improvements in ssppeecc release 5.02.01-1 apparently
+     resulted in a bug on HP platforms, in that shared memory segments created
+     within one ssppeecc process would not be visible to other processes.  That
+     problem has been corrected, although the automatic deletion of shared
+     segments is back to its pre-release 5.02.01-1 level of robustness for HP
+     platforms.
+
+February 3, 2003 - RELEASE 5.02.04-5
+
+Obscure eevvaall(()) Bug Fixed
+     An obscure bug, where the usage eevvaall((""##"")) would cause ssppeecc to crash, has
+     been fixed.
+
+MCS Support For Seiko EG&G MCA 7700
+     ssppeecc now supports multichannel scaling on the Seiko EG&G MCA 7700 device.
+     New arguments for mmccaa__ppaarr(()) to support MCS mode are ""mmccss"" to set
+     multichannel scaling mode, ""ddwweellll"" to set the dwell time (with a value of
+     -1 setting external dwell), ""ppaasssseess"" to set the number of MCS passes and
+     ""eellaappsseedd__ppaasssseess"" to read the numbers of MCS passes completed.
+
+Retry Feature For EPICS Reads
+     This version of ssppeecc will retry EPICS channel-access reads that fail with a
+     timeout.  The new ""rreettrriieess"" argument to eeppiiccss__ppaarr(()) can be used to read or
+     set the number of retries.  Although a process variable name must be
+     provided to eeppiiccss__ppaarr(()), the setting is currently global to all process
+     variables.  The default value is two, and the default is restored each time
+     ssppeecc is run.  Messages will be printed when the channel access reads are
+     retried.  Users are requested to inform CSS if retries prove successful (or
+     not).
+
+February 2, 2003 - RELEASE 5.02.04-4
+
+Some Obscure Memory-Related Bugs Fixed
+     A couple of problems that caused memory faults on some platforms, related
+     to the display of help files with ssppeecc's built-in pager and the release of
+     shared arrays when ssppeecc quits, have been fixed.
+
+January 30, 2003 - RELEASE 5.02.04-3
+
+Fix For eeddccoonnff Configuration Editor
+     A bug in the eeddccoonnff hardware configuration editor, where a motor's
+     unit/channel information would be lost when a motor was inserted or deleted
+     and adjacent motor columns did not have unit/channel information turned on,
+     has been fixed.
+
+New Feature For the eeddccoonnff Configuration Editor
+     When in the list menus of the eeddccoonnff hardware configuration editor, typing
+     a letter will scroll to the first item in the menu that begins with that
+     letter.  The letters are case insensitive.  However, the command characters
+     jj and kk are still recognized as moves down and up, respectively.  However,
+     typing JJ or KK will cause a jump to the items matching those letters.
+
+January 27, 2003 - RELEASE 5.02.04-2
+
+Fix For Four GPIB Controllers
+     A bug that prevented GPIB controller unit four from being recognized has
+     been fixed.
+
+Word Access for ISA DAC Motors
+     ISA digital-to-analog modules can now be configured for either byte or word
+     access.  Previously, only byte access was used.  Also, see the new _d_a_c help
+     file for a description of the DAC motor interface.
+
+Fixes For Recent Update To ESRF TACO Maxe Motor Controller Support
+     Problems with excessive hardware reads in the revised Maxe code included in
+     ssppeecc release 5.02.03-4 have been fixed.
+
+January 17, 2003 - RELEASE 5.02.04-1
+
+nneewwffiillee Macro Fix
+     The nneewwffiillee macro will now write the ##FF control line that contains the file
+     name for new data files, no matter what the starting scan number is.
+     Previously, the file name was only written for new files when the starting
+     scan was number one.
+
+Fix For Geometry-less Installations
+     The installation procedure will now create a start-up command file for the
+     ssppeecc-type geometry-less configurations that aren't named ssppeecc.  The
+     start-up file will be named with the first four letters of the
+     configuration name, appended with ..mmaacc and contain a call of the nnoo__hhkkll
+     macro.
+
+Updated MXC Hardware Support
+     Support for the Bruker (formerly MAC Science) MXC motor controllers and
+     counter/timers has been updated to work with another version of the
+     controller.
+
+ESRF UDP Transfer Size Increased
+     The maximum data size for eessrrff__iioo(()) UDP transfers has been increased from
+     8,192 to 32,768 bytes.
+
+December 12, 2002 - RELEASE 5.02.04
+
+Pseudomotor Improvements
+     The sseett macro now works with pseudomotors.  For the kind of pseudomotor
+     where the motor position is calculated from the positions of one or more
+     real motors, such as with the kkaappppaa configurations of the ffoouurrcc or ppssiicc
+     geometries, the cchhgg__ooffffsseett(()) function, as called by sseett, will now
+     automatically adjust the offsets of the real motors on which the
+     pseudomotor depends.  ssppeecc also now enforces the rule that for this type of
+     pseudomotor the user and dial positions must be the same.  Thus, the
+     cchhgg__ddiiaall(()) function, as used in the sseett__ddiiaall macro, will produce an error
+     if an attempt is made to change the pseudomotor dial position.  Note, the
+     definitions of the sseett and sseett__ddiiaall macros have been modified as part of
+     the update.
+
+December 5, 2002 - RELEASE 5.02.03-6
+
+Fix For MM4005/4006 Limit Search
+     A bug, where negative limit searches on Newport MM4005/4006 motors
+     controllers didn't work, has been fixed.
+
+November 22, 2002 - RELEASE 5.02.03-5
+
+New Signal Handling On Exit
+     ssppeecc's exit behavior on receiving the signals SIGTERM (the default signal
+     sent with the kkiillll command) and SIGQUIT (the signal sent with a keyboard
+     ^^\\, at least on most platforms) has been changed.  Previously, ssppeecc would
+     wait for the current moving and counting to finish, or wait for an
+     additional signal, such as a SIGINT from a keyboard ^^CC, that would stop the
+     acquisition.  Now ssppeecc will halt the hardware activity when the first
+     signal arrives.  Also, ssppeecc now catches SIGHUP (the hang-up signal, as sent
+     by a window manager when the window manager exits) and halts hardware
+     activity as with SIGQUIT and SIGTERM.  ssppeecc will save the user state file
+     on SIGHUP, but still will not with SIGQUIT and SIGTERM.
+
+Fix For eevvaall(())
+     A bug, where an eevvaall(()) call of a macro function that contained a loop that
+     called a macro function that had no return value and where that call would
+     cause the loop to break after one iteration, has been fixed.
+
+Fix For Motor Round Off
+     An obscure bug with motor position rounding has been fixed.  With certain
+     step size values, if the user-position offset was set to exactly one half
+     step beyond the configured step size, under some conditions, such a motor
+     would move a step when other motors were commanded to move.
+
+November 20, 2002 - RELEASE 5.02.03-4
+
+Motor Power Control For Tsuji Controllers
+     If the optional motor parameter ""ggeenneerriicc ppaarraammeetteerr 11"" is set for a Tsuji
+     PM16C-02/04 motor channel, ssppeecc will issue commands to turn the motor hold
+     current off when the motor is not moving.  The parameter value is the delay
+     time (in seconds) both between the time the power is turned on and the move
+     is started and between the end of the move and the time the power is turned
+     off.  A value of zero will skip the delay.  If the field in the
+     configuration editor is blank (type ^^DD to blank the field), then the motor
+     hold current will remain on all the time.
+
+New Version for ESRF TACO Maxe Motor Controllers
+     The code to support the ESRF TACO Maxe motor controllers has been
+     reorganized as part of a modernization effort.  Functionality should remain
+     as before, but if anomalies are noticed, please contact your ssppeecc
+     administrator or CSS HQ.
+
+November 18, 2002 - RELEASE 5.02.03-3
+
+Fix For xx1111ffiilltt Fonts
+     ssppeecc now accepts a parameter of either cc (character cell) or mm (monospace)
+     in the ssppaacciinngg field of the X Logical Font Descriptor (XLFD) string.
+     Previously, only mm was accepted (unless overwritten by specific font
+     choices using an XXddeeffaauullttss resource file or a pplloott__ccnnttll(()) call).
+
+October 26, 2002 - RELEASE 5.02.03-2
+
+Support For ppssiicc Azimuthal Detector Rotation
+     ssppeecc will now calculate detector rotation in the ppssiicc geometry according to
+     the E. Vlieg 2+3 diffractometer configuration.  See the _p_s_i_c help file for
+     more information.
+
+Support For Parallel-Rail 3-Axis Four-Circle Geometry
+     The ffoouurrcc geometry code now includes preliminary support for a new
+     configuration that has monochromator, sample circles, analyzer and detector
+     circles mounted on four parallel rails, perpendicular to the incident beam.
+     See the ggeeoo__ffoouurrcc..cc and mmaaccrrooss//ffoouurrcc..ssrrcc files for additional information.
+
+Updated Geometry Code
+     The remaining geometry code has been revised to use the current ssppeecc
+     convention of returning an error rather than resetting to command level
+     when a calculation fails.  The affected geometries in this revision are
+     ggmmccii, ss22dd22, ssuurrff, ttwwoocc, ww2211hh and ww2211vv.  (The other geometries were updated
+     in prior releases.)  Also, the standard macros bbrr, mmkk, ccaa and ccaall have been
+     revised to exit if the function call embedded in the ccaallccAA macro (to
+     calculate motor positions given the HHKKLL of the scattering vector) fails.
+
+Support For Velmex VXM Motor Controllers
+     ssppeecc now supports the Velmex, Inc. VXM-1 and VXM-2 motor controllers over a
+     serial interface.
+
+Support For IMS MDrive Motor Controllers
+     ssppeecc contains preliminary support for Intelligent Motion Systems, Inc.
+     MDrive 17/23/34 motor controllers over a serial interface.
+
+Upgrade to Gomm Controllers
+     The code for the Uni-Erlangen Gomm motor and counter controllers now
+     supports controllers on more than one serial line.
+
+October 20, 2002 - RELEASE 5.02.03-1
+
+Fix and Enhancement For Rigaku Controllers
+     ssppeecc now works properly with a variant firmware version in a Rigaku RINT or
+     D/MAX type motor controller.  Rigaku version numbers are unknown.  The
+     manifestation of the problem was that motor positions weren't read
+     correctly during or just after a move.  That problem is fixed.  Also,
+     Rigaku firmware has never allowed a remote program to read motor positions
+     while motors are moving.  ssppeecc will now estimate the current position based
+     on motor speed and acceleration and display the estimated position during
+     updated moves.
+
+October 13, 2002 - RELEASE 5.02.03
+
+Fix For aarrrraayy__dduummpp(()) and aarrrraayy__ppiippee(())
+     A bug introduced in release 5.01.01 (as an unintended consequence of
+     another fix), which limited the output of aarrrraayy__dduummpp(()) and aarrrraayy__ppiippee(()) to
+     64 columns of the array argument, has been fixed.
+
+Improved ^^CC Responsiveness During Array Printing
+     A ^^CC interrupt during output of a large data array with the pprriinntt command
+     will now more likely stop the output.
+
+New mmoottoorr__ppaarr(()) Options To Set Limits
+     The new options ""llooww__lliimmiitt"" and ""hhiigghh__lliimmiitt"" are available to set and
+     retrieve motor limits.  The sseett__lliimm(()) and ggeett__lliimm(()) built-in functions
+     continue to be available.
+
+Fix For Very Large Arrays
+     A recently introduced bug, where a negative data array dimension in an
+     aarrrraayy declaration would be interpreted as a very large number rather than
+     produce an error, has been fixed.
+
+New Command Character in eeddccoonnff
+     The double quote character "" is now recognized by the configuration editor
+     eeddccoonnff as equivalent to the single quote character '' as a command to begin
+     string-entry mode.
+
+September 30, 2002 - RELEASE 5.02.02-12
+
+Fix For Compumotor 3000 and 4000 Motor Controllers
+     A bug, where ssppeecc could segmentation fault when trying to use the old
+     Compumotor CM3000 or CM4000 motor controllers with recent versions of the
+     National Instruments GPIB driver, has been fixed.
+
+September 20, 2002 - RELEASE 5.02.02-11
+
+Fix For Detecting EPICS Motor Configuration Error
+     A bug, where ssppeecc could segmentation fault when EPICS motors were
+     configured on the Motor screen of the configuration editor but the number
+     of motors on the Devices screen was zero, has been fixed.
+
+Fix For Setting TACO Serial Line Parity
+     A bug, where ssppeecc didn't adjust the number of data bits from eight to seven
+     on the TACO serial line driver when setting parity to even or odd, has been
+     fixed.
+
+September 6, 2002 - RELEASE 5.02.02-10
+
+Bug In Serial and Socket EOS-mode Reads Fixed
+     A bug introduced in release 5.02.02 (May 20, 2002), where when reading
+     serial devices in end-of-string (EOS) mode, a false EOS match was sometimes
+     reported, has been fixed.  The bug affected both built-in hardware code and
+     user-level sseerr__ggeett(()) and ssoocckk__ggeett(()) functions.
+
+September 2, 2002 - RELEASE 5.02.02-9
+
+Plot Ranging Bug Fixed
+     A bug, where the high-resolution plotting in ssppeecc would hang on certain
+     platforms or display peculiar axis labels on others if all the data points
+     for the xx or yy axis were an identical very large number (such as 1e38), has
+     been fixed.
+
+Newport MM4000/4005/4006 Updates
+     A number of fixes and updates have been made for the Newport
+     MM4000/4005/4006 motor controller support.  For the 4005/4006, the commands
+     (unavailable on the 4000) to set the base rate, the home base rate and the
+     home acceleration are now implemented.  Also, it is now possible to set the
+     dial (home) position to an arbitrary value on all three models.  An
+     alternate home command (generally ""OORR22""), rather than the default ""OORR11"" can
+     be selected by entering the command as Generic Parameter 1 on the second
+     optional motor parameter screen of the configuration editor.  Also, limit
+     searches are now properly implemented on the 4005 and 4006 models (although
+     unavailable on the 4000 model).  In addition, problems with doing a move
+     after hitting a hard limit have been fixed.  Finally, the settle-time
+     feature is now supported with these controllers.
+
+August 21, 2002 - RELEASE 5.02.02-8
+
+Shared Memory Fix For Solaris Platforms
+     One of the shared memory improvements in ssppeecc release 5.02.01-1 resulted in
+     a bug on Solaris platforms, in that shared memory segments created within
+     one ssppeecc process would not be visible to other processes.  That problem has
+     been corrected, although for Solaris platforms only, the automatic deletion
+     of shared segments is back to its pre-release 5.02.01-1 level of
+     robustness.
+
+August 11, 2002 - RELEASE 5.02.02-7
+
+MCA Interface Additions
+     A new MMCCAASS global variable is available that is set to the total number of
+     configured MCA devices.  The mmccaa__sseell(()) function can return one line of
+     information about a particular MCA using the syntax mmccaa__sseell((nn,, ""??"")), where
+     nn is the MCA device number.
+
+Update to Roentec MCA Support
+     A couple of features have been added to the Roentec XFlash MAX MCA support.
+     The device can now be configured to run at any baud rate.  Previously, the
+     reset command sent by ssppeecc would reset the baud rate to 38400.  A new
+     mmccaa__ppaarr(()) option ""bbiinn"" can be used to set the number of channels averaged
+     together within the device during the data read out.  For hardware
+     configurations that support live-time presets and readouts, the standard
+     live-time and dead-time mmccaa__ppaarr(()) commands are now available.
+
+Support For Ortec MCS-PCI Multichannel Scaler
+     ssppeecc now supports the Ortec MCS-PCI multichannel scaler module.  See the
+     _m_c_s_p_c_i help file for details.
+
+Help Display Bugs Fix
+     A bug introduced in release 5.01.03, where display of a long help file
+     using either the ggeetthheellpp(()) function or the cchheellpp shell utility would cause
+     a segmentation fault on some platforms, has been fixed.  Also, the bb
+     command to move backwards a page when using the built-in pager was left out
+     of that release, but is now restored.
+
+July 23, 2002 - RELEASE 5.02.02-6
+
+Fix For Macro Functions Returning Arrays
+     A bug remaining from the release 5.02.02-2 fixes for data arrays used with
+     macro functions has been fixed.  Specifically, a macro function can now
+     return a data array declared as a local in the macro function without
+     causing a segmentation fault or bad values in the returned array.
+
+Fix For Plot Macro Setup
+     A bug in the plot macros, where the SSCCAANN__DD data array would not be
+     configured correctly if the symbol did not already exist as a
+     two-dimensional array, has been fixed.
+
+July 16, 2002 - RELEASE 5.02.02-5
+
+Extern Shared Array Fix
+     A bug, where declaring an eexxtteerrnn sshhaarreedd aarrrraayy more than once for the same
+     array would result in a segmentation fault, has been fixed.
+
+July 10, 2002 - RELEASE 5.02.02-4
+
+Fix For IMS Controllers
+     A bug introduced in ssppeecc release 5.01.03 that broke party-line mode for IMS
+     motor controllers has been fixed.
+
+July 3, 2002 - RELEASE 5.02.02-3
+
+Support For Ortec 996 Counter/Timer
+     The Ortec 996 one-channel counter/timer is now supported in ssppeecc as either
+     a single channel counter or a single channel counter with blind timer.  See
+     the _o_r_t_e_c help file for details.
+
+Fix For Setting EPICS Timeout
+     It is now possible to set the timeout value for an EPICS process variable
+     using eeppiiccss__ppaarr(()) before connecting to the variable in the remote IOC.
+     Previously, the timeout could be set only after the connection was made,
+     which would be impossible if the default timeout was too short to make the
+     connection.
+
+Fix For Setting TACO Timeout
+     An old bug that affected setting the RPC timeout for TACO (ESRF) device
+     server connections has been fixed.  The bug had little impact except when
+     attempting to set a timeout of less than one second.
+
+June 21, 2002 - RELEASE 5.02.02-2
+
+Fixes For Macro Functions With Data Arrays
+     Bugs in recent ssppeecc releases involving memory leaks and memory corruption
+     errors when passing data arrays to macro functions as arguments or from
+     macro functions as return values appear to be fixed.  Also, behavior when
+     passing subarrays as macro function arguments is now well defined.  A
+     subarray will be passed by value.  That is, new memory will be allocated
+     for the data, and modifications to the data won't change the array in the
+     calling function.
+
+Support For OMS Servo-Motor Controllers
+     ssppeecc now includes preliminary support for OMS servo-motor controllers.
+     Select motor type OOMMSS__SS in the ccoonnffiigg editor.  The optional DC-motor
+     parameters for proportional, derivative and integral gain (KP, KD and KI)
+     are implemented.  Selecting the servo-motor type automatically enables
+     encoder capability.
+
+June 2, 2002 - RELEASE 5.02.02-1
+
+New Ignore-Simulate Mode For Sockets
+     To accommodate the client-server macros, sockets can now be made immune to
+     simulate mode with the new ""iiggnnoorree__ssiimm"" option to ssoocckk__ppaarr(()).  See the
+     _s_o_c_k_e_t_s help file for usage.  The macros in sseerrvveerr..mmaacc have been modified
+     to use this new mode.
+
+May 20, 2002 - RELEASE 5.02.02
+
+Memory Leaks Fixed
+     A number of small memory leaks have been fixed.  A leak that occurred when
+     command file input was interrupted by an error or ^^CC has been fixed.  A
+     leak that occurred when a macro function was used and then redefined within
+     a statement block has been fixed.  A leak that occurred when a data
+     subarray was passed to a macro function as an argument has been fixed.
+
+Improvements To the uunngglloobbaall Command
+     Several improvements and fixes have made in the behavior of uunngglloobbaall
+     command.  Use of uunngglloobbaall within a statement block will now clear the
+     current values of symbols and mark them as unset.  Use of uunngglloobbaall on a
+     ccoonnssttaanntt symbol within a statement block will remove the ccoonnssttaanntt
+     attribute.  Use of uunngglloobbaall in a macro function on a data array passed as
+     an argument will clear the values in the array to zero, but will not remove
+     the array.
+
+cclloonnee(()) Improvement
+     The cclloonnee(()) function can now be used to redefine an existing macro.
+
+Looping Bug In eevvaall(()) Fixed
+     A bug that caused an endless stream of error messages when the eevvaall(())
+     function was passed an unterminated string has been fixed.
+
+General Improvements To eevvaall(())
+     A significant code rearrangement to create separate data structures for
+     each eevvaall(()) invocation should increase the robustness of the function.
+
+Fix Of ffoorr ((vvaarr iinn aarrrr)) Syntax
+     A bug, where the ffoorr ((vvaarr iinn aarrrr[[nnuumm]])) syntax didn't properly loop through
+     the elements of the two-dimensional associative array when nnuumm was a number
+     constant, has been fixed.
+
+Array Alignment Extended
+     The automatic array alignment to put the start of data on memory page
+     boundaries for arrays used with iimmaaggee__ggeett(()) and iimmaaggee__ppuutt(()) has been
+     extended.  Now all data arrays greater than 0.5 Mbyte will be aligned to a
+     page boundary when they are created.
+
+Expanded Galil Motor Controller Support
+     ssppeecc now supports the Galil Optima series motor controllers, including the
+     DMC-2x00 models, over ethernet and serial interfaces.
+
+Fix For Four VME Controllers
+     A bug that prevented VME controller unit four from being recognized has
+     been fixed.
+
+Multiple Driver-less SBS PCI Controllers Implemented
+     ssppeecc can now support multiple (up to four) SBS 616/617/618 PCI-to-VME bus
+     adapters in ""ddrriivveerrlleessss"" mode on LLiinnuuxx platforms In this mode, ssppeecc
+     controls the PCI card directly, rather than going through the kernel driver
+     supplied by SBS.
+
+Support For XIA X10P Parallel Port MCA
+     ssppeecc now supports the XIA model X10P parallel Port MCA on LLiinnuuxx platforms.
+
+Update To New XIA Libraries
+     This release of ssppeecc requires linking with the current release (0.0.6) of
+     the XIA libraries to use the DXP4C, DXP4C2X and the X10P modules.
+
+May 2, 2002 - RELEASE 5.02.01-1
+
+New Optional Scaler Parameter Screen
+     The configuration editor now includes a new screen to configure optional
+     scaler parameters.  The optional screen is accessed with the command ss from
+     the main Scaler screen.  Currently, the only optional scaler parameter used
+     is for the new EPICS process-variable counters.
+
+New EPICS Process-Variable Counters
+     Arbitrary EPICS process-variables may now be configured as counters.  Their
+     values will be read with the ggeettccoouunnttss command, called by the standard
+     counting macros, with the EPICS channel access get commands.  No other
+     commands are issued.  The process-variable name will be formed from the
+     prefix given on the Controllers screen of the configuration editor and the
+     string entered as miscellaneous parameter 1 from the new optional Scaler
+     parameter screen.
+
+April 29, 2002 - RELEASE 5.02.01
+
+Memory Alignment For iimmaaggee__ggeett(()) and iimmaaggee__ppuutt(()) Data Arrays
+     In order to accommodate image acquisition devices that transfer data
+     directly to memory and that require the data to be aligned on memory page
+     boundaries (memory addresses that are multiples of 4096), data arrays used
+     with the iimmaaggee__ggeett(()) and iimmaaggee__ppuutt(()) functions will now be automatically
+     aligned on memory page boundaries (in most cases).
+
+Shared Array Updates
+     A number of updates and improvements have been made to the shared array
+     facility:
+
+     +o The size of the header of the shared segment has been increased to put
+       the start of the data array on a page boundary to accommodate acquisition
+       hardware that requires page-aligned data.
+
+     +o The new start-up option --oo oolldd__sshhaarreedd==11 will tell ssppeecc to create shared
+       segments using the old-size headers to accommodate applications that have
+       not yet been recompiled for the new header size.
+
+     +o The eexxtteerrnn sshhaarreedd array feature can be used with both old and new header
+       sizes, even when using the oolldd__sshhaarreedd option above.
+
+     +o Shared segments will automatically disappear when the last attached
+       process detaches or exits, even if ssppeecc exits abnormally.  Previously,
+       ssppeecc only removed the segment when exiting normally.
+
+     +o If ssppeecc creates a shared array, exits while another process is attached
+       and then restarts with the previous state file, ssppeecc will reconnect to
+       the existing array.  In prior releases, ssppeecc would always create a new
+       segment.
+
+New State File
+     The state file format needed modification to accommodate the
+     array-alignment feature, making the current state file incompatible with
+     previous releases.  The current ssppeecc version can read state files from
+     previous versions, but will write state files that will not be readable by
+     previous ssppeecc versions.
+
+Support For Alternate ttwwoocc Configuration
+     The ggeeoo__ttwwoocc..cc code has been modified to support an alternate configuration
+     where the tthh and tttthh rotations are coupled.
+

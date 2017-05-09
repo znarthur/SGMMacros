@@ -1,0 +1,51 @@
+.TH "newmac" "macro" "08/01/12" "newmac.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBnewmac\fP \- re\-read the standard macro definitions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)newmac.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "newmac" "macro" "08/01/12" "newmac.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBnewmac\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+This macro is used to re\-read the standard macro definitions
+without starting fresh and thus losing one\(aqs current state.
+It can be used after installing a new version of the macros,
+or if you want to recover the original definitions of any standard
+macros you may have redefined.
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBSPECD\fP
+\- 
+the name of \fBspec\fP\(aqs auxiliary file directory.
+.HP 5m
+."
+\fBSPEC\fP
+\- 
+the name of the current geometry, as in
+\fBfourc\fP, \fBzaxis\fP, etc.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%do\fP
+\fI\%qdo\fP
+

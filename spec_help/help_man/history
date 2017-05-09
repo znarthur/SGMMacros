@@ -1,0 +1,83 @@
+.TH "history" "command" "01/29/14" "history.rst 6.2  01/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBhistory\fP \- command recall facility (basic)
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)history.rst      6.2  01/29/14  CSS
+.
+.\" Copyright (c) 1990,1991,1993,1994,1995,2012,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "history" "command" "01/29/14" "history.rst 6.2  01/29/14 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBhistory [n|\-n]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBhistory\fP command lists the 1000 most recently entered commands.
+With the option \fBn\fP, only the \fBn\fP most recent commands are listed.
+A \fB\-n\fP lists the commands in reverse order.
+.sp
+The history is saved when \fBspec\fP exits and restored when
+\fBspec\fP restarts with the same state files.
+.sp
+The rest of this document describes the CSS\-provided
+version of the history syntax.
+If your site administrator has chosen to include the optional GNU
+\fBreadline\fP history code when \fBspec\fP was installed, refer to the
+\fBreadline\fP help file, instead.
+.sp
+The history feature lets you recall previous commands.
+The syntax is a subset of that of the
+\fBcsh\fP history command.  Examples of the recognized syntax are:
+.sp
+.RS 4m
+.nf
+\fB!!\fP   \- redo the previous command.
+\fB!14\fP  \- redo command number 14.
+\fB!\-2\fP  \- redo the second to previous command.
+\fB!asc\fP \- redo the last command that began with \fBasc\fP.
+\fB!asc \-10000\fP  \- As above and append \fB\-10000\fP to the command.
+.fi
+.sp
+.RE
+.sp
+The command number is prepended to the \fBspec\fP prompt as an aid
+in using the history feature.
+Only commands typed at the keyboard are remembered for history,
+and no more than 1000 commands are retained.
+The history feature cannot be used in command files.
+.sp
+Command recall must occur at the beginning of a line.
+Text may follow the command\-recall word to extend that command.
+.sp
+Appending \fB:s/left/right/\fP to a recalled command
+will modify the first occurrence of
+the string \fBleft\fP in the recalled command to the characters
+\fBright\fP. The delimiter of the left and right strings may be any character.
+The final delimiter is optional.
+If \fBleft\fP is empty, the last entered left string
+is used as the pattern to match.
+.sp
+In addition, \fB^left^right^\fP at the start of a line is shorthand for
+\fB!\-1:s/left/right/\fP.
+In this case, the circumflex (\fB^\fP)
+must be used as the delimiter.  The final delimiter is optional.
+.SH "SEE ALSO"
+.rs
+.nf
+
+\fBcsh\fP in the \fBUNIX User\(aqs Manual\fP
+\fI\%readline\fP
+.fi
+.sp
+

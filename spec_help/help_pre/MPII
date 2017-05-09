@@ -1,0 +1,331 @@
+MPII                                hardware                                MPII
+
+NAME
+     MPII - Canberra Multiport II USB/Socket MCA
+
+INTRODUCTION
+
+     The Canberra Multiport II (MPII) is a NIM module containing from one to six
+     independent multichannel analyzer (MCA) devices.  The MPII can be used with
+     ssppeecc over both socket and USB interfaces.  Each MCA device can be
+     configured for up to 16,384 channels and can be operated in either
+     pulse-height analysis (PHA) or multichannel scaling (MCS) mode.
+
+CONFIGURATION
+
+     Each MPII module interfaced to spec over a socket interface can be uniquely
+     identified by its assigned IP address.  USB units cannot be assigned
+     addresses, so if more than one MPII is used with spec over USB, assignment
+     of specific modules is done by including the module's unique serial number
+     in ssppeecc's hardware ccoonnffiigg file.  If the serial number is entered as zero,
+     ssppeecc will simply assign the MCA units in the order in which they are found.
+
+     In the eeddccoonnff configuration editor, possible MPII configurations include:
+
+        MMCCAA-- aanndd CCCCDD--AAccqquuiissiittiioonn TTyyppee DDeevviiccee CCoonnffiigguurraattiioonn
+
+        MMCCAA--lliikkee      DDEEVVIICCEE  AADDDDRR  <<>>MMOODDEE                         <<>>TTYYPPEE
+         00  YYEESS   hhoosstt11::66000000               CCaannbbeerrrraa MMuullttiippoorrtt IIII ((SSoocckkeett))
+         11  YYEESS  119922..116688..11..55               CCaannbbeerrrraa MMuullttiippoorrtt IIII ((SSoocckkeett))
+         22  YYEESS              1122334455            CCaannbbeerrrraa MMuullttiippoorrtt IIII ((UUSSBB))
+         33  YYEESS                  00            CCaannbbeerrrraa MMuullttiippoorrtt IIII ((UUSSBB))
+         44  YYEESS                  00            CCaannbbeerrrraa MMuullttiippoorrtt IIII ((UUSSBB))
+
+     The first entry configures a socket-based MCA using a resolvable host name
+     and an explicit port number.  Note, the default port for the MPII is 6000,
+     and doesn't need to be specified.  The second entry specifies an IP address
+     without the optional port number.  Three USB configurations follow, the
+     first with an explicit module serial number.  The last two entries are also
+     for USB units, but with the serial number set to zero.  For those two
+     units, it won't be possible to know in advance which MPII will be assigned
+     to MCA unit number 3 and which to MCA unit number 4.
+
+ADDRESSING
+
+     The ssppeecc mmccaa__ggeett(()), mmccaa__ppuutt(()) and mmccaa__ppaarr(()) functions work with the default
+     MCA unit.  If there is only one MCA unit configured, that unit is the
+     default.  Otherwise, the mmccaa__sseell(()) function can be used to select the
+     default unit number.  The mmccaa__ssppaarr(()), mmccaa__ssggeett(()) and mmccaa__ssppuutt(()) take an
+     initial argument that specifies a specific MCA unit number, independent of
+     the default MCA unit number.  See the _m_c_a help file for more details.
+
+     Because each MPII can have up to 6 independent MCA devices, the MCA
+     selection syntax for the commands mmccaa__ssppaarr(()), mmccaa__ssggeett(()), and mmccaa__ssppuutt(()) is
+     expanded. To select a specific MCA device on an MPII, address arguments may
+     be given as 00..11, 00..22, ..., 00..66, where the first digit is the MCA unit
+     number from the ccoonnffiigg file, and the digit right of the decimal point is
+     the MCA device, where the devices are numbered from 1 to 6.  The syntax
+     ""00::11"", ""00::22"", ..., ""00::66"" is also recognized, where the arguments are
+     strings.
+
+     For writing data to the MCA with mmccaa__ssppuutt(()) and for setting parameter
+     values with mmccaa__ssppaarr(()), if no subaddress is specified, the command will
+     apply to all of the up-to-six MCA devices available.  That is, the same
+     data or parameters can be written to all MCA devices on a Canberra module
+     with one command.  For reading data or reading parameters values, only one
+     MCA device can be accessed since only one set of data or a single value can
+     be returned.  Thus, a subaddress needs to be specified for commands that
+     return data if there is more than one MCA device on the MPII unit.
+
+     If no subaddress is specified for any of the commands, subaddress 1 is
+     assumed.  If the subaddress doesn't specify a valid MCA device for any
+     command, subaddress 1 is still assumed.  If there is only one MCA device on
+     the unit, no subaddress is necessary.  If the MPII is the default MCA and
+     there is only one MCA device, mmccaa__ggeett(()), mmccaa__ppuutt(()) and mmccaa__ppaarr(()) functions
+     can be used unambiguously.  Although the mmccaa__sseell(()) function can select the
+     default unit, it is not possible to assign a default subaddress.
+
+FUNCTIONS
+
+     The standard MCA commands supported by ssppeecc are described in the _m_c_a help
+     file.  Refer to that document for more details on usage of the mmccaa__ggeett(()),
+     mmccaa__ssggeett(()), mmccaa__ppuutt(()) and mmccaa__ssppuutt(()) functions.  Also, refer to the _m_c_a
+     help file for a description of the standard mmccaa__ppaarr(()) and mmccaa__ssppaarr(())
+     options ""iinnffoo"", ""cchhaannss"", ""mmaaxx__cchhaannss"", ""ddiissaabbllee"", ""aauuttoo__rruunn"", ""ssoofftt__pprreesseett"",
+     ""aauuttoo__cclleeaarr"" and ""nnaattiivvee__ttyyppee"".
+
+     The default settings for the MPII are for ""aauuttoo__rruunn"" and ""ssoofftt__pprreesseett"" to
+     be disabled and ""aauuttoo__cclleeaarr"" to be enabled.  These default settings are
+     restored on start up and hardware reconfiguration.  When ""aauuttoo__rruunn"" and
+     ""ssoofftt__pprreesseett"" modes are in effect, the available MPII devices will be
+     programmed with a time preset when counting to time and with the
+     gross-counts preset when counting to monitor.  When counting to time, the
+     mode will be real-time or live-time depending on whether the MPII is in
+     real- or live-preset mode.  That mode is set by using mmccaa__ppaarr(()) with
+     ""pprreesseett__lliivvee"" or ""pprreesseett__rreeaall"".
+
+     Of the preset modes, real, live and gross counts, only one can be active at
+     a time.
+
+     Note, of the parameters described below, the following are saved in the
+     state file and will maintain values between ssppeecc invocations:
+     ""xxssttaarrtt__eennaabbllee"", ""xxssttoopp__eennaabbllee"", ""mmccss__xxssyynncc"", ""mmccss__ssttaarrtt__cchhaann"",
+     ""mmccss__ssttoopp__cchhaann"", ""oovveerrffllooww__eennaabbllee"", ""pprreesseett__ppaasssseess"", ""pprreesseett__rreeaall"",
+     ""pprreesseett__lliivvee"" and ""pprreesseett__ccoouunnttss"".  When starting fresh, values will be
+     restored to defaults.  All other MPII parameters are retained in the
+     module's flash memory, and ssppeecc will use those values, including the values
+     for ""nnppttss"" (or ""aaddcc__ggaaiinn"").
+
+     Additional options for the MPII are described below.  The string arguments
+     are case insensitive.
+
+Basic Operation
+
+     mmccaa__ppaarr((""cclleeaarr"")) - Clears the current data and the elapsed real-time,
+          live-time, gross-counts and sweep-counts registers.
+
+     mmccaa__ppaarr((""rruunn"")) - Sets the current acquisition parameters and starts
+          acquisition.  If ""aauuttoo__cclleeaarr"" mode is set, clears the existing data
+          first.  Otherwise, if the device hasn't been explicitly cleared, new
+          data will be added to the existing.
+
+     mmccaa__ppaarr((""hhaalltt"")) - Halts acquisition.
+
+     mmccaa__ppaarr((""pphhaa"")) - Sets pulse-height analysis mode.
+
+     mmccaa__ppaarr((""nnppttss"" [[,, vvaalluuee]])) - With no arguments, returns the current number
+          of points.  Otherwise, sets the number of points by setting the ADC
+          gain to the vvaalluuee specified.  Synonymous with ""aaddcc__ggaaiinn"".  Allowed
+          values are 256, 512, 1024, 2048, 4096, 8192 and 16384.
+
+     mmccaa__ppaarr((""pprreesseett__rreeaall"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          PHA-mode real (true) time preset in seconds.  Otherwise, sets the
+          real-time preset to vvaalluuee.
+
+     mmccaa__ppaarr((""pprreesseett__lliivvee"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          PHA-mode live-time preset in seconds.  Otherwise, sets the live-time
+          preset to vvaalluuee.
+
+     mmccaa__ppaarr((""pprreesseett__ccoouunnttss"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          PHA-mode gross-counts preset.  Otherwise, sets the gross-counts preset
+          to vvaalluuee.
+
+     mmccaa__ppaarr((""oovveerrffllooww__eennaabbllee"" [[,, vvaalluuee]])) - If no arguments, returns 0 if
+          channel overflows are ignored and 1 if channel overflows halt
+          acquisition.  Otherwise sets the overflow-enable mode according to
+          vvaalluuee.
+
+     mmccaa__ppaarr((""xxssttaarrtt__eennaabbllee"" [[,, vvaalluuee]])) - With no arguments, returns nonzero if
+          the XXIINNPPUUTT signal is to be used to start acquisition.  Otherwise sets
+          external-start enable mode according to vvaalluuee.
+
+     mmccaa__ppaarr((""xxssttoopp__eennaabbllee"" [[,, vvaalluuee]])) - With no arguments, returns nonzero if
+          the XXIINNPPUUTT signal is to be used to stop acquisition.  Otherwise sets
+          external-stop enable mode according to vvaalluuee.
+
+     mmccaa__ppaarr((""ssaavvee__iinntteerrvvaall"" [[,, vvaalluuee]])) - With no arguments, returns the
+          interval in minutes at which the Mulitport II saves its parameters to
+          built-in flash memory.  Otherwise sets the interval as specified by
+          vvaalluuee.  Allowed values are from 1 to 60 minutes.
+
+Status
+
+     mmccaa__ppaarr((""dduummpp"")) - Displays all the parameters and settings.
+
+     mmccaa__ppaarr((""eellaappsseedd__rreeaall"")) - Returns the elapsed real (or true) time in
+          seconds.
+
+     mmccaa__ppaarr((""eellaappsseedd__lliivvee"")) - Returns the elapsed live time in seconds.
+
+     mmccaa__ppaarr((""eellaappsseedd__ccoouunnttss"")) - Returns the total elapsed counts.
+
+     mmccaa__ppaarr((""ssttaarrtt__ttiimmee"")) - Returns the starting time of the most recent
+          acquisition in seconds since January 1, 1970, 00:00:00 GMT.  The value
+          can be converted to an ASCII string using ssppeecc's ddaattee(()) function.
+
+     mmccaa__ppaarr((""ssttoopp__ttiimmee"")) - Returns the stopping time of the most recent
+          acquisition in seconds since January 1, 1970, 00:00:00 GMT.  The value
+          can be converted to an ASCII string using ssppeecc's ddaattee(()) function.
+
+     mmccaa__ppaarr((""ssttoopp__eevveenntt"")) - Returns a code with bits indicating the type of
+          event that halted the most recent acquisition as follows:
+
+              0x00   None
+              0x01   Real-time preset reached
+              0x02   Live-time preset reached
+              0x04   Total-counts preset reached
+              0x08   External input
+              0x10   MCS-preset passes reached
+              0x20   Power lost
+              0x40   Channel overflow
+
+     mmccaa__ppaarr((""oovveerrffllooww__cchhaann"")) - If acquisition was stopped by an overflow,
+          returns the channel number that overflowed.
+
+     mmccaa__ppaarr((""ssuussppeenndd__aaccttiivvee"")) - Returns nonzero if the XSUSPEND input is
+          active, otherwise returns zero.
+
+     mmccaa__ppaarr((""ccoolllleeccttiinngg"")) - Returns nonzero if the MCA device is busy
+          collecting data.
+
+     mmccaa__ppaarr((""wwaaiittiinngg__xxiinnppuutt"")) - Returns nonzero if the MCA is waiting for the
+          XINPUT to become active.
+
+     mmccaa__ppaarr((""ssttaarrtt__ddeellaayy"")) - Returns the internal delay time in seconds for the
+          MCA to begin the most recent acquisition.  This is a measure of
+          latency within the MCA device.
+
+     mmccaa__ppaarr((""cchhaannggeerr__ssttaattee"")) - Returns the sample-changer state, where nonzero
+          indicates the sample changer is active.
+
+External Connection Configuration
+
+     mmccaa__ppaarr((""xxccooiinncc__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no arguments,
+          returns 0 (for active low) or 1 (for active high) to indicate the
+          polarity of the XXCCOOIINNCC input signal.  Otherwise, sets the polarity.
+
+     mmccaa__ppaarr((""xxddtt__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no arguments, returns 0
+          (for active low) or 1 (for active high) to indicate the polarity of
+          the XXDDTT pileup-reject dead-time input signal.  Otherwise, sets the
+          polarity.
+
+     mmccaa__ppaarr((""xxllgg__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no arguments, returns 0
+          (for active low) or 1 (for active high) to indicate the polarity of
+          the XXLLGG pileup-reject linear-gate output signal, which is active when
+          the ADC acquires an input pulse.  Otherwise, sets the polarity.
+
+     mmccaa__ppaarr((""xxrreejj__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no arguments, returns
+          0 (for active low) or 1 (for active high) to indicate the polarity of
+          the XXRREEJJ pileup-reject input signal.  Otherwise, sets the polarity.
+
+     mmccaa__ppaarr((""xxccoolllleeccttssttaattuuss__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no
+          arguments, returns 0 (for active low) or 1 (for active high) to
+          indicate the polarity of the XXCCOOLLLLEECCTTSSTTAATTUUSS external acquire status
+          output signal.  Otherwise, sets the polarity.
+
+     mmccaa__ppaarr((""xxiinnppuutt__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no arguments,
+          returns 0 (for active low) or 1 (for active high) to indicate the
+          polarity of the XXIINNPPUUTT external start/stop and sample-changer ready
+          input signal.  Otherwise, sets the polarity.
+
+     mmccaa__ppaarr((""xxoouuttppuutt__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no arguments,
+          returns 0 (for active low) or 1 (for active high) to indicate the
+          polarity of the XXOOUUPPUUTT advance-sample-changer output signal.
+          Otherwise, sets the polarity.
+
+ADC Configuration
+
+     mmccaa__ppaarr((""aaddcc__ggaaiinn"" [[,, vvaalluuee]])) - With no arguments, returns the ADC gain.
+          Otherwise, sets the ADC gain (and the number of points) to the vvaalluuee
+          specified.  Synonymous with ""nnppttss"".  Allowed values are 256, 512,
+          1024, 2048, 4096, 8192 and 16384.
+
+     mmccaa__ppaarr((""aaddcc__LLLLDD"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          setting of the low-level discriminator as a percent.  Otherwise, set
+          the low-level discriminator to the vvaalluuee given as a percent from 0 to
+          100.
+
+     mmccaa__ppaarr((""aaddcc__UULLDD"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          setting of the upper-level discriminator as a percent.  Otherwise, set
+          the upper-level discriminator to the vvaalluuee given as percent from 0 to
+          110.
+
+     mmccaa__ppaarr((""aaddcc__zzeerroo"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          zero-discriminator setting as a percent.  Otherwise, sets the zero
+          discriminator to the vvaalluuee given as a percent from -2.5 to 2.5.
+
+     mmccaa__ppaarr((""aaddcc__ccooiinncciiddeennccee"" [[,, vvaalluuee]])) - With no arguments, returns the
+          current ADC coincidence mode, where 0 indicates normal and 1 indicates
+          anti-coincidence mode.  Otherwise, sets the ADC coincidence mode as
+          specified by vvaalluuee.
+
+     mmccaa__ppaarr((""aaddcc__hhiigghh__ppuullssee__aaccttiioonn"" [[,, vvaalluuee]])) - If no arguments, returns zero
+          if input pulses above the upper-level discriminator are rejected and
+          nonzero if such pulses are added to the last channel.  Otherwise sets
+          the high-pulse action based on vvaalluuee.
+
+     mmccaa__ppaarr((""aaddcc__ccooiinncc__ttrriiggggeerr"" [[,, vvaalluuee]])) - If no arguments, returns zero if
+          the coincidence trigger is level sensitive and nonzero if the trigger
+          is edge sensitive.  Otherwise sets the trigger mode according to
+          vvaalluuee.
+
+Multichannel Scaler
+
+     mmccaa__ppaarr((""mmccss"")) - Set multi-channel scaling mode.
+
+     mmccaa__ppaarr((""ddwweellll"" [[,, vvaalluuee]])) - With no arguments, returns the MCS-mode dwell
+          time in seconds.  Otherwise, sets the dwell time to vvaalluuee.  A negative
+          argument selects external dwell.
+
+     mmccaa__ppaarr((""mmccss__ssttaarrtt__cchhaann"" [[,, vvaalluuee]])) - With no arguments, returns the start
+          channel in MCS mode.  Otherwise, sets the MCS start channel to vvaalluuee.
+
+     mmccaa__ppaarr((""mmccss__ssttoopp__cchhaann"" [[,, vvaalluuee]])) - With no arguments, returns the stop
+          channel in MCS mode.  Otherwise, sets the MCS stop channel to vvaalluuee.
+
+     mmccaa__ppaarr((""pprreesseett__ppaasssseess"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          MCS-mode pass-preset value.  Otherwise, sets the number of passes.
+
+     mmccaa__ppaarr((""eellaappsseedd__ppaasssseess"")) - Returns the elapsed number of passes in MCS
+          mode.
+
+     mmccaa__ppaarr((""ccuurrrreenntt__cchhaann"")) - In MCS mode, returns the current channel of the
+          current sweep.
+
+     mmccaa__ppaarr((""eellaappsseedd__ddwweellll"")) - In MCS mode, returns the elapsed dwell of the
+          current channel of the current sweep.
+
+     mmccaa__ppaarr((""mmccss__xxssyynncc"" [[,, vvaalluuee]])) - With no arguments, returns 0 if MCS-mode
+          external sync is disabled or 1 if enabled.  Otherwise, sets the MCS
+          external sync as specified by vvaalluuee.
+
+     mmccaa__ppaarr((""ppuullssee__ssoouurrccee"" [[,, vvaalluuee]])) - In MCS mode, with no arguments, returns
+          zero if the input pulses are taken from the LLD/ULD filtered PHA input
+          or nonzero if the input pulses are taken as TTL pulses from the
+          XXMMCCSSPPUULLSSEE input.  Otherwise, sets the pulse source according to vvaalluuee.
+
+     mmccaa__ppaarr((""xxmmccssaaddvvaannccee__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no arguments,
+          returns 0 (for active low) or 1 (for active high) to indicate the
+          polarity of the XXMMCCSSAADDVVAANNCCEE external channel advance input signal.
+          Otherwise, sets the polarity.
+
+     mmccaa__ppaarr((""xxmmccssppuullssee__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no arguments,
+          returns 0 (for active low) or 1 (for active high) to indicate the
+          polarity of the XXMMCCSSPPUULLSSEE MCS input signal.  Otherwise, sets the
+          polarity.
+
+     mmccaa__ppaarr((""xxmmccssrreessttaarrtt__ppoollaarriittyy"" [[,, ""llooww""||""hhiigghh""||00||11]])) - With no arguments,
+          returns 0 (for active low) or 1 (for active high) to indicate the
+          polarity of the XXMMCCSSRREESSTTAARRTT MCS sweep advance input signal.
+          Otherwise, sets the polarity.
+

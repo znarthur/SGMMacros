@@ -1,0 +1,235 @@
+.TH "changes" "spec 2.12 Release Notes" "08/01/12" "chg2_12.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.12
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_12.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.12 Release Notes" "08/01/12" "chg2_12.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes summarize the modifications made for \fBspec\fP release 2.12,
+as finalized on May 23, 1989.
+.SH "CHANGES"
+.rs
+.sp
+A new scan\-plotting option has been added at the macro level.
+You can choose to have a continuously updated plot made on the video screen
+as the points of the scan are collected.
+Use the
+\fBsetplot\fP
+macro to select this mode.
+.sp
+The history\-substitution
+mechanism has been expanded a bit.
+You may now append text to recalled items.
+.sp
+History is now retained when you exit the program and restored when
+you restart.
+The
+\fBsavstate\fP
+command will include command history in the state file, and the
+\fBgetstate\fP
+command will restore the command history from the last issued
+\fBsavstate\fP.
+.sp
+A new powder\-averaging mode for scans is available.
+When
+powder
+mode is on, the selected powder\-average motor
+is run
+at its base rate
+a selected width about each point in each
+scan.
+The scalers are automatically enabled for counting during the time
+the motor is in motion.
+Powder mode works with all the angle scans and HKL scans.
+Use the macro
+\fBsetpowder\fP
+to turn powder mode on and off.
+See the
+\fBpowder\fP
+help file for details.
+.sp
+The command
+\fBmove_cnt\fP
+has been added to make
+powder
+mode
+work.
+This command works similarly to
+\fBmove_all\fP
+except the motors
+are moved at the base rate, no backlash is performed and
+the scalers are automatically gated while the motors move.
+.sp
+All the scan macros required slight modifications
+to make
+powder
+mode work.
+New global variables,
+\fB_stype0\fP
+and
+\fB_stype1\fP
+are assigned
+values to indicate the type of scan in progress.
+In addition,
+some of the statements in each scan loop have been gathered
+into a new macro named
+\fBscan_move\fP.
+The
+\fBscan_move\fP
+macro is assigned a
+different definition in
+powder
+mode.
+Also, the
+\fBcount\fP
+macro called by all the scans has been
+made redefinable to accommodate
+powder
+mode.
+Study the macro files
+\fBscans.mac\fP,
+\fBcount.mac\fP
+and
+\fBpowder.mac\fP
+to see just how
+these things are done.
+.sp
+A new four\-circle geometry mode has been added called
+\fBphi fixed\fP.
+This mode
+is similar to the existing three\-circle (phi\-zero) mode,
+except the value of
+\fBphi\fP
+no longer needs to be fixed at zero.
+.sp
+A new geometry configuration, named
+\fBr2d2\fP
+after the high\-vacuum surface chamber that it describes,
+is included in the distribution.
+The geometry code is in the file
+\fBgeo_r2d2.c\fP.
+.sp
+\fBspec\fP has
+two distinct phases during the process of interpreting user commands:
+the parse phase and the execution phase.
+Previously,
+a macro definition assigned with
+\fBdef\fP
+would be carried out in the execution phase,
+making the definition unavailable until the entire
+enclosing statement block had been read in and parsed.
+This method of handling macro definitions
+made it impossible to enclose any of the
+recently (release 2.10) redesigned standard
+scan macros within a statement block, since the same macro
+was both defined and invoked with the scan macro.
+To solve this problem,
+macro\-definition assignments are now made as they are encountered during
+the parse phase.
+However, since several \fBspec\fP macros still require
+macro definitions to be made during the execution (or run) phase,
+a new command called
+\fBrdef\fP
+has been introduced.
+This new command behaves now like
+\fBdef\fP
+used to.
+See the macros
+\fBsetplot\fP,
+\fBsetpowder\fP,
+\fBlup\fP
+or
+\fB_head\fP
+for examples
+of the use of
+\fBrdef\fP.
+.sp
+The maximum macro length has been increased a bit
+from 1536 to 1920 bytes.
+.sp
+Clock\-tick
+sleeps are now available with \fBspec\fP on non\-VENIX systems.
+Clock\-tick sleeps are sleeps with sixtieth of a second resolution.
+New versions of
+either of the drivers
+\fBdsp.c\fP
+or
+\fBoms.c\fP
+must be installed, though,
+and the clock\-tick sleeps will only work when the corresponding device
+has been opened.
+Clock\-tick sleeps work well with the sleep\-time variable
+\fBUPDATE\fP
+used in updated\-move
+macros such as
+\fBumv\fP,
+\fBumk\fP
+and
+\fBuwm\fP.
+.sp
+\fBspec\fP is now supported on the AT&T 6386 platform running UNIX version 3.2.
+.sp
+The National Instruments GPIB boards are now supported for
+VENIX 286 and for the various 386 systems.
+Drivers for the 386 systems must be obtained directly from
+National Instruments.
+.sp
+The Scientific Solutions (Tecmar) GPIB support code has been
+rewritten following the sample programs provided by the manufacturer.
+In addition, this board can now be used on the 386 systems.
+On the 386 systems a supplied program called
+\fBio_enable\fP
+is automatically run the first time the board is used in order
+to enable the IO ports used by the board to be accessible from
+user\-level programs.
+.sp
+The code to support the Kinetic Systems CAMAC GPIB board (KS3388)
+has been fixed.
+A timing problem in the code that rarely, if ever, manifested itself
+on the PDP and
+80286 systems had made the module unusable on the 386 systems.
+.sp
+The driver files, formerly
+distributed in the subdirectories
+\fBcamac\fP
+and
+\fBoms\fP
+are
+now distributed in the subdirectory
+\fBdrivers\fP.
+Three master installation scripts,
+\fBinstall_vnx\fP,
+\fBinstall_386\fP,
+and
+\fBinstall_att\fP,
+are supplied that
+are invoked by driver\-specific scripts, such as
+\fBinstall_dsp\fP
+for the DSP CAMAC driver,
+\fBinstall_oms\fP
+for
+the Oregon Micro Systems PCX driver and
+\fBinstall_gpib\fP
+for
+the National Instruments PCII GPIB driver.
+.sp
+A problem on the 386 systems, where using
+a number larger than
+the largest long integer in a print statement or expression
+would cause a floating exception and possibly a core dump,
+has been fixed.
+

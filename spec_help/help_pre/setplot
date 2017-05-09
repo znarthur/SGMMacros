@@ -1,0 +1,125 @@
+setplot                               macro                              setplot
+
+NAME
+     sseettpplloott - set plotting options
+
+SYNOPSIS
+
+     sseettpplloott [[vvaalluuee]]
+
+DESCRIPTION
+
+     The sseettpplloott macro asks the following questions:
+
+           11)) DDoo rreeaall--ttiimmee pplloottss dduurriinngg ssccaannss ((YYEESS))??
+           22)) DDoo ssccrreeeenn pplloott aafftteerr ssccaann ((YYEESS))??
+           88)) RRaannggee xx aaxxiiss wwiitthh ssccaann mmiinn aanndd mmaaxx ((NNOO))??
+          1166)) FFoorrccee yy--aaxxiiss mmiinniimmuumm ttoo zzeerroo ((NNOO))??
+          3322)) UUssee llooggaarriitthhmmiicc yy--aaxxiiss ((NNOO))??
+          6644)) UUssee bbaacckkggrroouunndd ssuubbttrraaccttiioonn ((NNOO))??
+         112288)) UUssee hhiigghh rreessoolluuttiioonn pplloottttiinngg ddeevviiccee ((YYEESS))??
+                WWhhaatt kkiinndd ooff hhiigghh--rreess ggrraapphhiiccss ((xx1111))??
+         225566)) DDrraaww llaarrggee ddoottss aatt ppooiinnttss ((YYEESS))??
+         551122)) CCoonnnneecctt ppooiinnttss wwiitthh lliinneess ((YYEESS))??
+        11002244)) DDrraaww eerrrroorr bbaarrss ((YYEESS))??
+              SSuumm ooff sseelleeccttiioonnss iiss 113311..
+
+     The numbers before each question are added and printed after all options
+     are selected.  You can quickly select the same set of options by invoking
+     sseettpplloott with that number.
+
+     Selecting option 1 causes the otherwise null macro ssccaann__pplloott to be defined
+     as rrpplloott. The rrpplloott macro creates updated plots during scans using the
+     internal plotting functions.
+
+     The various combinations of options 2 and 4 are used to select a definition
+     for the pplloott macro, which is invoked at the end of each scan.  The pplloott
+     macro will be defined to possibly include the macros sspplloott and llpp__pplloott.
+     The sspplloott macro uses the internal plotting and screen formatting functions
+     to plot the current data on the screen, while the llpp__pplloott macro uses the
+     internal plotting functions to plot data on a 132-column printer.  In any
+     case, the pplloott macro includes the pplloott__rreess macro, which prints out summary
+     information from the scan.
+
+     Selecting option 8 forces the scan data to encompass the entire xx axis.
+     Otherwise the xx-axis ranges are rounded out to rational numbers.
+
+     Option 16 forces logarithmic scaling for the yy axis.
+
+     Option 32 forces the minimum for the yy axis to be zero, no matter where the
+     data points lie.
+
+     Option 64 selects a different method of doing the scan analysis.  When this
+     option is selected, a linear background is calculated for each scan using
+     the scan endpoints.  The number of endpoints that are averaged together is
+     given by the global variable bbgg__ppttss (default is 1).  The resulting linear
+     background is subtracted from each point.  The quantities printed out as
+     the peak position, sum, FWHM and center of the FWHM are calculated after
+     the background is subtracted.
+
+     Option 128 selects high-resolution graphics mode.  If selected, you will be
+     prompted for the high-resolution device you are using.  Recognized device
+     names include vvggaa, eeggaa, hheerrcc, ssuunn and xx1111. By default, the high-resolution
+     plots are drawn with large dots around each point and lines connecting the
+     points.  Options 256 and 512 allow you to turn the dots and lines off.
+     Also by default, error bars are drawn, with the height of each error bar
+     proportional to the square root of the yy values, as appropriate for
+     counting statistics.  Option 1024 lets you turn off error-bar mode.  ssppeecc
+     initially uses the value of the environment variable GGTTEERRMM, which can be
+     set in your ..llooggiinn file, to select the type of high resolution display you
+     are using.  (You can, however, change GGTTEERRMM while ssppeecc is running.
+
+GLOBALS
+
+     PPLL__GG - global variable holding data group used for plotting, normally zero.
+
+     PPLL__GG11 - global variable holding data group used to hold
+          background-subtracted data, normally one.
+
+     PPLL__XX - global variable holding data element used for xx axis, normally zero.
+
+     PPLL__YY - global variable holding data element used for yy axis, normally one.
+
+     sspplloott__ccooll - global variable holding string describing colors for
+          end-of-scan plots on high-res devices, may default to ""66::55::99::33::22"",
+          corresponding to cyan outer background, yellow inner background, black
+          text, red axis and blue symbols.
+
+     rrpplloott__ccooll - global variable holding string describing colors for runtime
+          plots on high-res devices, may default to ""55::66::99::33::22"", corresponding
+          to yellow outer background, cyan inner background, black text, red
+          axis and blue symbols.
+
+     BBGG - global variable holding a flag that if set, indicates to use the
+          background-subtracted data in the analysis results and plots produced
+          by the pplloott macro.  It is important to make sure the ddoo__bbgg macro is
+          called to calculate the background-subtracted data before using macros
+          such as ppll__FFWWHHMM that look at the value of BBGG to determine which data
+          group to analyze.  The various standard definitions for the pplloott macro
+          will call ddoo__bbgg when appropriate.
+
+     PPLLOOTT__MMOODDEE - global variable containing the code representing the current
+          plotting options.
+
+     bbgg__ppttss - global variable that holds the number of endpoints of a scan to
+          average together to calculate the linear background.
+
+MACROS
+
+     pplloott - defined according to the selected options, and invoked by the scan
+          macros to do the end-of-scan plotting and analysis.
+
+     ssccaann__pplloott - defined either as rrpplloott or nothing, and invoked after each
+          point in a scan is taken to do the real-time scan plotting.
+
+     YYMMIINN - defined either as ""00"" or ""aauuttoo"" and determines how the yy-axis
+          minimum range is set.
+
+EXAMPLE
+
+     sseettpplloott 33
+
+SEE ALSO
+
+     _p_l_o_t _s_p_l_o_t _l_p___p_l_o_t
+

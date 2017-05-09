@@ -1,0 +1,28 @@
+changes                      spec 2.10 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.10
+
+DESCRIPTION
+
+     These notes summarize the modifications made for ssppeecc release 2.10, as
+     finalized on October 21, 1988.
+
+CHANGES
+
+     Typing ssccaann__oonn continues a scan that was aborted.  Presently, mmeesshh scans
+     cannot be restarted.  Also restarted delta scans (lluupp ddssccaann and dd22ssccaann)
+     will not return the scanned motors to the center position after the
+     restarted portion of the scan completes.
+
+     Four-circle users may now assign cut points for angles set by the geometry
+     calculation code.  The macro ccuuttss does the assignment.  Presently, cut
+     points are used with tthh, pphhii, cchhii and oommeeggaa.  The user specifies the lesser
+     cut point in degrees (integers only), and the angles will be set between
+     that point and that point plus 360 degrees.  The aazziimmuutthh has a pseudo-cut
+     point.  If its value is less than zero, the calculated azimuth will be
+     between -180 and 0, otherwise the azimuth will be between 0 and +180.
+
+     This release supports the old VENIX operating system on PDP 11/73
+     computers.  See the ppddpp help file.
+

@@ -1,0 +1,922 @@
+.TH "changes" "spec 5.01 Release Notes" "08/01/12" "chg5_01.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 5.01
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg5_01.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2001,2002,2009 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 5.01 Release Notes" "08/01/12" "chg5_01.rst 6.1  08/01/12 CSS"
+.
+.SH "April 20, 2002 \- RELEASE 5.01.03"
+.rs
+.SH "Updated Help Viewer"
+.sp
+The \fBspec\fP help viewer has been updated.
+The viewer can now jump to keyword locations
+given by line numbers in the
+\fBSPECD\fP/help/.links
+file.
+Also, new commands to move forward and back by single lines and by
+half a screen
+are availble when the viewer is used directly (rather than sending output
+through a pager).
+.SH "Addition To Standard Scan Header"
+.sp
+The default
+\fB_head\fP
+macro now also writes the contents of the
+\fBUB[]\fP
+and
+\fBQ[]\fP
+arrays in the scan headers prefixed by
+\fB#G3\fP
+and
+\fB#G4\fP
+respectively.
+The obsolete
+\fBM[]\fP
+array, previously written prefixed by
+\fB#G2\fP,
+has been eliminated.
+Also, the output format for all
+\fB#G\fP
+parameters has been changed
+in the
+\fB_head_par\fP
+from
+\fB%g\fP
+to
+\fB%.10g\fP
+macro, which increases the number of significant figures from six to ten.
+.SH "Small Fix For \fBkappa\fP Code"
+.sp
+A bug in the
+\fBkappa\fP
+geometry code
+where the cut points for the
+\fBchi\fP
+and
+\fBphi\fP
+angles were not applied to the calculations of the angles
+has been fixed.
+.SH "Support For Alternate \fBzaxis\fP Configuration"
+.sp
+The
+\fBgeo_zaxis.c\fP
+code has been modified to support an alternate configuration
+that includes a refraction correction on
+\fBALPHA\fP
+and
+\fBBETA\fP.
+The correction only occurs if the new geometry parameter
+\fBALPHA_C\fP
+(defined as
+\fBQ[21]\fP)
+is nonzero.
+.SH "Alternative EPICS Motor Naming Convention"
+.sp
+An alternative to the motor naming convention used at APS
+for the EPICS motor record
+process variables is now available.
+See the
+\fI\%epics\fP help file for details.
+.SH "Support For Socket\-based Serial Interface"
+.sp
+\fBspec\fP now supports Ethernet\-to\-serial devices such as the
+ATOP Technologies TigerLink.
+Only the device\-independent
+sending and receiving of serial data over sockets is implemented.
+Configuration of baud rate, parity and other parameters must be taken
+care of outside of \fBspec\fP.
+To configure such a device,
+select
+\fBSOCKET\fP
+in the
+\fBADDR\fP
+(for controllers)
+or
+\fBTYPE\fP
+(for a generic user\-level serial interface)
+fields and enter the host name and port number separated by a colon in
+the
+\fBDEVICE\fP
+field.
+.SH "Support For VME DAC Motors"
+.sp
+The DAC motor support now includes VME DAC modules that use A16
+addressing to set a single DAC 12\- or 16\-bit output register.
+.SH "Support For ACS MCB\-4B Motor Controller"
+.sp
+The new Advanced Control Systems MCB\-4B motor controller with RS\-232C
+interface is now supported.
+.SH "Support For Ortec Trump\-PCI MCA"
+.sp
+\fBspec\fP now supports the Ortec Trump\-PCI MCA on
+\fBLinux\fP
+platforms.
+.SH "Upgrade For Orsim MCA\-7700 and Ortec Trump MCA"
+.sp
+The support for the Orsim MCA\-7700 and Ortec Trump MCA now implements
+counting to a peak preset.
+Use the new
+\fB"peak_mode"\fP
+\fBmca_par()\fP
+option to select.
+Also, some problems with setting and clearing the region\-of\-interest (ROI)
+have been fixed.
+In addition, a new
+\fB"auto_clear"\fP
+\fBmca_par()\fP
+option is available.
+When set, the MCA will be cleared before starting.
+The auto\-clear mode is on by default.
+.SH "Preliminary Support For Roentec MCA"
+.sp
+The Roentec XFlash MAX MCA is now supported.
+This MCA uses a serial interface.
+.SH "Upgrade For IMS Motor Controllers"
+.sp
+\fBspec\fP now supports the Intelligent Motion Systems (IMS)
+motor controllers in non\-party\-line mode.
+Previously, only the daisy\-chained party\-line mode was implemented.
+.SH "Fix For Riso ECB Motor Controllers"
+.sp
+A buffer overflow bug that resulted in segmentation faults with
+the RISO ECB motor controllers on some platforms has been fixed.
+.SH "Fix For GPIB Devices"
+.sp
+A buffer overflow bug that could causes segmentation faults with
+\fBspec\fP\(aqs built\-in support for a few GPIB devices
+on some platforms has been fixed.
+.SH "March 22, 2002 \- RELEASE 5.01.02\-9"
+.rs
+.SH "Kappa Geometry Installation Bug Fixed"
+.sp
+A bug, where the
+\fBkappa\fP
+geometry wouldn\(aqt be installed correctly if the
+\fBfourc\fP
+geometry wasn\(aqt also installed, has been fixed.
+.SH "\fBsetplot\fP Revised"
+.sp
+The
+\fBsetplot\fP
+macro has been revised to eliminate confusing prompts.
+.SH "\fBesrf_io()\fP Associative Array Bug Fixed"
+.sp
+A bug, where
+\fBesrf_io()\fP
+would fail to correctly pass the elements of an associative
+array returned by a macro function,
+has been fixed.
+.SH "February 26, 2002 \- RELEASE 5.01.02\-8"
+.rs
+.SH "New Serial Configuration Options"
+.sp
+All serial devices can now be configured for the additional baud rates
+57600, 115200, 230400 and
+460800.
+Generic serial devices
+can now be configured for hardware flow control.
+.SH "Multiple EPICS Scaler Modules Supported"
+.sp
+\fBspec\fP now allows configuration of EPICS generic scalers as either
+counter/timer units
+or as a counter\-only units.
+Only one module can be counter/timer, as \fBspec\fP only allow one master
+timer.
+Additional modules must be configured as counters only.
+.SH "New Doc String Syntax"
+.sp
+As a prelude to new documentation tools for macros and command files,
+\fBspec\fP now recognizes a special character sequence to delimit extended
+comment text.
+Now, everything between pairs of triple double quotes
+\fB"""\fP
+is a comment.
+The comment block can span lines, but not files.
+Unlike comments that begin with a pound sign
+\fB#\fP,
+the doc string comments will not be saved
+with a macro if input as part of the macro definition.
+.SH "Bug With Shared Arrays and Unglobal Fixed"
+.sp
+A bug, where using the
+\fBshared array\fP,
+\fBglobal\fP
+and
+\fBunglobal\fP
+declarations in a statement block
+could lead to a segmentation fault,
+as in
+.RS 3m
+.sp
+.nf
+.ft CB
+{ shared array data[100];  unglobal data;  global data }
+.ft P
+.fi
+.RE
+.sp
+has been fixed.
+.SH "February 5, 2002 \- RELEASE 5.01.02\-7"
+.rs
+.SH "\fBx11filt\fP Enhancements"
+.sp
+A number of enhancements have been made to the X11 plotting.
+The
+\fBx11filt\fP
+window will now respond to a close operation from the window manager,
+as might be initiated by a title\-bar button or window\-ops menu item.
+A static detached copy of the window can be created by
+simultaneously pressing the control key
+and any mouse button while the mouse cursor is over an
+active plot window.
+Also, a new
+\fBplot_cntl("cmd=numb")\fP
+command provides access to a number of special operations, including
+creating a detached window.
+See the
+\fI\%x11\fP help file for more information.
+.SH "February 3, 2002 \- RELEASE 5.01.02\-6"
+.rs
+.SH "Fixes For \fBpsic\fP Geometry"
+.sp
+A bug in the
+\fBpsic\fP
+geometry code, where
+the azimuthal
+reference vector was calculated incorrectly when specified by angles
+(\fBsigma\fP
+and
+\fBtau\fP)
+rather than components, has been fixed.
+Another bug, which disallowed user\-entered azimuthal references vectors
+where the sum of the squares of the components was less than one,
+has been fixed.
+Also, the sectors calculations now check that the allowed sectors
+don\(aqt violate
+\fBnaz\fP\-fixed
+or
+\fBqaz\fP\-fixed
+conditions.
+Also, for kappa\-mode
+\fBpsic\fP,
+the sectors code
+will display the motor positions for the real motors
+(\fBketa\fP,
+\fBkap\fP
+and
+\fBkphi\fP)
+rather than the pseudo motors
+(\fBeta\fP,
+\fBchi\fP
+and
+\fBphi\fP)
+by default.
+Both and real pseudo motors will be displayed for each sector
+in verbose format
+(\fBShowSect 2\fP
+along with the corresponding values for
+\fBomega\fP,
+\fBqaz\fP
+and
+\fBnaz\fP.
+.SH "January 28, 2002 \- RELEASE 5.01.02\-5"
+.rs
+.SH "Clarification Of Array Behavior"
+.sp
+The recent enhancements that included implementation of the
+relational (<, <=, ==, !=, >, >=) and Boolean (!, &&, ||)
+operators for data arrays
+gave ambiguous results in several cases, particularly when
+comparing an array with a scaler.
+Such a comparison
+now unambiguously
+produces a scaler value.
+The result is
+\fBtrue\fP
+if and only if the relation is
+true for each element of the array and the scaler.
+Otherwise, the result is
+\fBfalse\fP.
+In the case of Boolean operations,
+an array is considered
+\fBtrue\fP
+if any element is nonzero.
+If all elements are zero, the Boolean value of an array is
+\fBfalse\fP.
+In the case of string arrays, only single rows are allowed as Boolean
+operands, and an empty string or a  string representation
+of zero evaluates as
+\fBfalse\fP,
+while anything else is considered
+\fBtrue\fP.
+.SH "Improved Version of \fBx11filt\fP"
+.sp
+The code in the
+\fBx11filt\fP
+program
+that draws the X graphics plot
+window for \fBspec\fP has been
+reorganized to better exclude unsuitable fonts \- only fonts with
+registry iso8859\-1 are now allowed.
+In addition, the event handling has been reorganized such that only
+one process per window will ever be created.
+Previously, for displays with no backing store, a second process was
+created for reasons not to be explained here.
+.SH "January 24, 2002 \- RELEASE 5.01.02\-4"
+.rs
+.SH "Expansion of PC DAC Motor Support"
+.sp
+Support for selected PCI cards for use as DAC motors is now included.
+Currently, the Measurement Computing PCI\-DDA08/16 and the CyberResearch
+CYDDA02/04/08HRP boards are supported in this manner.
+.SH "January 20, 2002 \- RELEASE 5.01.02\-3"
+.rs
+.SH "Refinement Of String Array Behavior"
+.sp
+Various aspects of the treatment of string arrays have been
+modified due to popular demand.
+The
+\fBprint\fP
+command no longer indicates trailing null bytes for each row
+of a string array, but does continue
+to display embedded null bytes.
+When assigning to a complete row of a string array, bytes in the
+row unfilled by the assignment will be set to zero.
+Also, when assigning to a complete row, numbers are assigned as strings.
+.SH "Addendum to Serial/Socket Timeout Behavior"
+.sp
+A fast poll for
+\fBser_get()\fP
+and
+\fBsock_get()\fP
+has been implemented and is recognized by setting the timeout value
+to the minimum of 0.001 second, for example, as
+\fBser_par(0, "timeout", .001)\fP.
+.SH "Fix For OMS Motor Controller Limit Search"
+.sp
+A bug with OMS motor controller, where the end of the
+\fB"lim+"\fP
+and
+\fB"lim\-"\fP
+searches was not properly detected, has been fixed.
+.SH "January 15, 2002 \- RELEASE 5.01.02\-2"
+.rs
+.SH "Wizard Mode Fix"
+.sp
+A problem with wizard mode on Solaris platforms has been fixed.
+.SH "January 10, 2002 \- RELEASE 5.01.02\-1"
+.rs
+.SH "New Server Macros"
+.sp
+A new set of macros provides a simple interface to
+enable one instance of \fBspec\fP to send commands to another
+via the user\-level socket functions.
+The macros are distributed in the file
+\fBserver.mac\fP
+in the
+\fBmacros\fP
+subdirectory of the \fBspec\fP distribution.
+See comments in that file for details.
+.SH "Fix For Socket Timeout and Close"
+.sp
+The behavior for sockets waiting for
+a connection in
+\fB"listen"\fP
+mode with the timeout parameter set to zero
+has been fixed to block indefinitely rather than return immediately.
+The
+\fB"close"\fP
+option to
+\fBsock_par()\fP
+will now close both of the sockets associated with a
+\fB"listen"\fP\-mode
+socket.
+Previously,
+\fBsock_par()\fP
+with
+\fB"close"\fP
+would need to be issued twice.
+.SH "January 7, 2002 \- RELEASE 5.01.02"
+.rs
+.SH "New \fBfourc\fP Parameter"
+.sp
+The four\-circle C code module
+\fBgeo_fourc.c\fP
+distributed with \fBspec\fP has long contained a couple of
+optionally compiled lines of code that
+affected the sector where
+the
+\fBchi\fP
+motor would be located in the
+\fBomega\fP\-zero
+and
+\fBomega\fP\-fixed
+modes.
+A new geometry parameter
+\fBg_omsect\fP
+along with a new macro
+\fBsetomsect\fP
+have been added to the distribution
+that allow this sector option to be selected without
+recompiling the code.
+The default value of zero for
+\fBg_omsect\fP
+maintains the prior default behavior.
+If
+\fBg_omsect\fP
+is nonzero, the value for
+\fBchi\fP
+will be reflected about the
+\fBx\fP\-\fBy\fP
+plane if
+\fBQ\fP[\fBx\fP]
+is negative, i.e., the transformation becomes
+\fBchi\fP
+=
+180 \-
+\fBchi\fP.
+.SH "Improvements To the Serial and Socket Interface"
+.sp
+The code for the socket and and serial (RS\-232C) interfaces has
+been reorganized and features have been added.
+The
+\fBser_get()\fP/\fBsock_get()\fP,
+\fBser_put()\fP/\fBsock_put()\fP
+and
+\fBser_par()\fP/\fBsock_par()\fP
+functions now have the same consistent syntax and behavior.
+The buffer size for reads without a byte count is increased
+from 511 to 8191 bytes.
+New commands to
+\fBser_par()\fP/\fBsock_par()\fP
+are available
+to check if there are left\-over characters in the input queue
+and to flush the queue.
+See the
+\fI\%serial\fP and
+\fI\%sockets\fP help files for more information.
+.SH "\fBedconf\fP Box Outline Change"
+.sp
+A new
+\fB\-b\fP
+flag to the
+\fBedconf\fP
+configuration editor forces the use of text characters to draw a box
+around menus and subwindows using standard ASCII characters.
+Otherwise, special line\-drawing characters available with some fonts
+will be used.
+Previously, the ASCII characters were always used with
+\fBxterm\fP
+windows.
+Since some X fonts do provide the line\-drawing
+characters, but since there is no way
+to detect that from the program, this new option is available.
+A new
+\fBEDCONF_BOX_FLAG\fP
+global variable is also included in the standard macros.
+If nonzero,
+the configuration editor,
+\fBedconf\fP,
+invoked by the
+\fBconfig\fP
+macro, will use the
+\fB\-b\fP
+flag.
+.SH "\fBedconf\fP Backup File Permissions Fixed"
+.sp
+A bug, where the read/write permissions of the backup
+\fBconfig\fP
+and
+\fBsettings\fP
+files were not always maintained by the configuration editor,
+\fBedconf\fP,
+has been fixed.
+.SH "December 15, 2001 \- RELEASE 5.01.01\-10"
+.rs
+.SH "Associative Array Looping Bug Fixed"
+.sp
+A bug, where the usage
+.RS 3m
+.sp
+.nf
+.ft CB
+for (var in arr)
+    delete arr[var]
+.ft P
+.fi
+.RE
+.sp
+resulted in occasional segmentation faults, has been fixed.
+.SH "December 6, 2001 \- RELEASE 5.01.01\-9"
+.rs
+.SH "Kappa Diffractometer \fBcalcP_fromR\fP C Code Fixed"
+.sp
+A bug in the new feature that calculated pseudomotor positions
+from real motors for
+the kappa versions of the
+\fBfourc\fP,
+\fBfivec\fP
+and
+\fBpsic\fP
+geometries
+has been fixed.
+The feature was accessed with the
+\fBcalcP_fromR\fP
+macro.
+.SH "SCIPE Code Fixed"
+.sp
+The recent
+overhaul of the internal socket code in \fBspec\fP broke the
+SCIPE support.
+The
+SCIPE support has now been repaired.
+.SH "December 5, 2001 \- RELEASE 5.01.01\-8"
+.rs
+.SH "Preliminary Support For Newport ESP\-300"
+.sp
+Preliminary support for the Newport ESP\-300 motor controller is
+included in this \fBspec\fP release.
+The controller is supported over
+both GPIB and RS\-232C interfaces.
+.SH "November 22, 2001 \- RELEASE 5.01.01\-7"
+.rs
+.SH "\fBclone()\fP Bug Fix"
+.sp
+An unfortunate programming lapse, which
+resulted in a segmentation fault on some platforms
+when using the new
+\fBclone()\fP
+function to make a copy of a macro, has been corrected.
+.SH "November 17, 2001 \- RELEASE 5.01.01\-6"
+.rs
+.SH "\fBfourc\fP Bug Fixed"
+.sp
+A bug in the
+\fBfourc\fP
+geometry code for
+locating the cut point for the
+\fBtth\fP
+motor has been fixed.
+On
+\fBLinux\fP
+and
+\fBHP\fP
+platforms, the bug resulted in the cut point always being treated
+as zero.
+On
+\fBSolaris\fP
+platforms, the bug resulted in impossibly large values for the
+\fBtth\fP
+motor.
+The bug was in all previous \fBspec\fP release 5 versions.
+.SH "Technoland C\-KP 402 Counter Bugs Fixed"
+.sp
+Two bugs found in the new code for
+the CAMAC Technoland C\-KP 402 Counter have been fixed.
+The first bug limited the 48\-bit counters to 32 bits.
+The second bug prevented the last two channels of
+the eight available channels from being accessed.
+.SH "Preliminary Support For the MBraun PSD\-50m MCA"
+.sp
+\fBspec\fP now supports the old MBraun PSD\-50m MCA.
+This MCA uses an RS\-232C interface.
+.SH "Support For Keithley KPCI 3140 As Counters Only"
+.sp
+\fBspec\fP now supports the Keithley KPCI\-3140 PCI counter card, but only
+as four 32\-bit counters.
+The card cannot be used with \fBspec\fP as a timer or preset counter.
+.SH "November 6, 2001 \- RELEASE 5.01.01\-5"
+.rs
+.SH "Plotting Bug Fixed"
+.sp
+A bug introduced in release 5.01.01\-1 that would often make it impossible
+to get plots of the data has been fixed.
+.SH "New Time Scan Macros"
+.sp
+Macros to scan detectors over time are now
+included with the standard \fBspec\fP macros.
+The new macros are called
+\fBtimescan\fP,
+which scans continuously and
+\fBloopscan\fP,
+which scans for a finite number of points.
+See the macro definitions for details.
+These macros are from the
+\fI\%ESRF\fP collection.
+.SH "Bug Fix in \fBhome\fP Macro"
+.sp
+A bug in the
+\fBhome\fP
+macro introduced in release 4.05.10\-3, which would produce syntax errors
+when the
+macro was used with the optional
+\fB"+"\fP
+or
+\fB"\-"\fP
+arguments, has been fixed.
+.SH "PCI Timer/Counter Found and Supported"
+.sp
+An Am9513 type PCI counter has been found that does
+not suffer from the
+flaw contained in the Measurement Computing PCI\-CTR05.
+This release of \fBspec\fP supports the ICS Advent PCIDCC5/10/20\-P
+timer/counter cards.
+See the vendor\(aqs pages at
+\fI\%www.icsadvent.com\fP for more information.
+.SH "Driver For PCA\-II Updated For \fBLinux\fP 2.4 Kernels"
+.sp
+The CSS
+\fBpca.c\fP
+driver for the obsolete Nucleus PCA\-II MCA card
+has been updated to work with
+\fBLinux\fP
+2.4 series kernels.
+.SH "October 29, 2001 \- RELEASE 5.01.01\-4"
+.rs
+.SH "Overhaul Of User\-Level Socket Access"
+.sp
+New
+\fBsock_get()\fP
+and
+\fBsock_put()\fP
+built\-in functions
+have been added to replace the
+\fB"read"\fP
+and
+\fB"send"\fP
+options to
+\fBsock_io()\fP.
+A new
+\fBsock_par()\fP
+function replaces the other uses of
+\fBsock_io()\fP.
+(Use of
+\fBsock_io()\fP
+is still supported, but is now deprecated.)
+See the
+\fI\%sockets\fP help file for details.
+.SH "New Names For \fBser_get()\fP and \fBgpib_get()\fP Options"
+.sp
+The options
+\fB"short"\fP,
+\fB"short_swap"\fP,
+\fB"long"\fP
+and
+\fB"long_swap"\fP
+are now recognized as synonyms for
+\fB"int2"\fP,
+\fB"int2_swap"\fP,
+\fB"int4"\fP
+and
+\fB"int4_swap"\fP
+in the
+\fBser_get()\fP
+and
+\fBgpib_get()\fP
+functions.
+.SH "October 29, 2001 \- RELEASE 5.01.01\-3"
+.rs
+.SH "VME A24 Address Space Supported"
+.sp
+\fBspec\fP now supports the A24 addressing mode through the
+\fBvme_get()\fP,
+\fBvme_put()\fP
+and
+\fBvme_move()\fP
+functions.
+The optional modifier argument must include the string
+\fB"A24"\fP.
+.SH "Bug Fix For Serial Devices With Hardware Handshake"
+.sp
+A old bug, where \fBspec\fP would hang when closing unresponsive
+serial devices configured
+for hardware handshake,
+has been fixed.
+.SH "Bug Fix For Crash On Macro Function Syntax Error"
+.sp
+A bug, where \fBspec\fP could crash when executing a macro
+function that had a syntax error involving
+the macro function argument,
+has been fixed.
+.SH "October 16, 2001 \- RELEASE 5.01.01\-2"
+.rs
+.SH "Fix For Indirection Operator \fB@\fP"
+.sp
+The code for handling array elements as arguments to the indirection operator
+\fB@\fP,
+as in
+\fB{ a = "x[10]";\fP
+\fB@a = 1 }\fP
+has been fixed.
+Previously, the operator only worked correctly with existing elements of
+existing associative arrays.
+Other cases produced segmentation faults.
+Elements of associative arrays are now handled correctly, whether
+existing or not.
+Elements of data arrays are not yet supported, but use produces an
+error message, not a core dump.
+.SH "October 3, 2001 \- RELEASE 5.01.01\-1"
+.rs
+.SH "Fix For MCA \fBsoft_preset\fP Mode"
+.sp
+Previously, when counting to a monitor preset with an MCA in
+\fB"soft_preset"\fP
+mode, the MCA would not stop at the end of the count period.
+Now, when counting to monitor, the MCA is started and stopped via
+software commands just as
+if
+\fB"soft_preset"\fP
+mode was disabled.
+.SH "Fix For Several Timers"
+.sp
+A missing bit of C code that would halt all
+counters and acquisition devices
+when an EPICS, SCIPE, ESRF CAEN 560 or MURR timer stopped has been added.
+Previously,
+although the counters associated with the particular timer would
+be stopped, unrelated counters were not.
+.SH "New \fBmca_par()\fP Options"
+.sp
+New
+\fB"chans"\fP
+and
+\fB"max_chans"\fP
+options to
+\fBmca_par()\fP
+return the current number of channels and the maximum number of channels
+available, respectively.
+.SH "October 2, 2001 \- RELEASE 5.01.01"
+.rs
+.SH "Modifications and Fixes For User\-Level Serial Access"
+.sp
+The user\-level generic access to RS\-232C devices through the functions
+\fBser_get()\fP,
+\fBser_put()\fP
+and
+\fBser_par()\fP
+has been modified and enhanced.
+The
+\fBser_get()\fP
+function can now take a
+data\-array argument, which allows reading
+binary data, including null bytes.
+All forms of
+\fBser_get()\fP
+now use the current
+\fB"timeout"\fP
+value, which defaults to two seconds, but can be modified with
+\fBser_par()\fP.
+Previously,
+\fBser_get()\fP
+with just the device address argument would not timeout.
+Also, leftover characters (up to 512) from a
+\fBser_get()\fP
+that has been satisfied with a byte count or
+an end\-of\-string match are now
+retained for the
+next
+\fBser_get()\fP.
+There is a new
+\fB"flush"\fP
+option to
+\fBser_par()\fP
+to flush any buffered characters.
+See the
+\fI\%serial\fP help file for details.
+.SH "Enhancements For User\-Level GPIB Access"
+.sp
+The
+\fBgpib_get()\fP
+function can now take a
+data\-array argument, which allows reading
+binary data, including null bytes.
+See the
+\fI\%gpib\fP help file for details.
+.SH "Preliminary Support For Physik Instrumente C\-860"
+.sp
+Preliminary
+support for the Physik Instrumente C\-860
+\fB"Mercury"\fP
+single axis DC\-motor controller is included.
+Several of these controllers can be daisy\-chained over an RS\-232C
+interface.
+.SH "Data Array Enhancements"
+.sp
+Previous restrictions on the usage of the string\-array data type have been
+removed.
+In most situations, a string array is handled the same as a byte array.
+Exceptions to that rule include the treatment of string arrays by the
+\fBprint\fP
+command, where the arrays are written as strings rather than a list of
+numbers, and
+the
+\fBsscanf()\fP
+function, where a scanned number can be stored as a string
+in a string array.
+Most functions that accept strings as arguments will now
+also accept a single row
+of a string array.
+.sp
+Also, the
+\fB"row_wise"\fP
+and
+\fB"col_wise"\fP
+arguments to
+\fBarray_op()\fP
+now return the correct values for arrays where the mode hasn\(aqt been
+set explicitly.
+.SH "Hardware Locking Fixed On Solaris and HP Platforms"
+.sp
+Hardware locking now works again on Solaris and HP platforms.
+It had been ineffective on those platforms
+since release 4.04.01 about three years ago.
+.SH "\fBinput(\-1)\fP Bug On Solaris Platforms Fixed"
+.sp
+An old bug, where the
+\fBinput(\-1)\fP
+function didn\(aqt work correctly on Solaris platforms (the function
+returned the EOF character, rather than 0 if no input was available),
+has been fixed.
+.SH "\fBrdef\fP Of Macro Function Bug Fixed"
+.sp
+A bug, where using
+\fBrdef\fP
+to define a macro function that has no arguments resulted in
+an ordinary macro being created,
+has been fixed.
+.SH "\fBcplot_plot\fP Macro Update For Release 5"
+.sp
+An oversight, where the
+\fBcplot_plot\fP
+macro didn\(aqt work correctly with the new data\-array based plotting
+macros in \fBspec\fP release 5, has been corrected.
+.SH "PCI Detection Bug Fixed"
+.sp
+A bug, where \fBspec\fP would not find the last PCI card in a
+\fBLinux\fP
+system, has been fixed.
+.SH "Debugging Bug Fixed"
+.sp
+A bug in the run\-time context debugging display (level 0x40000),
+which could sometimes produce a segmentation fault, has been fixed.
+.SH "Overhaul Of Alternate SBS (Bit3) VME Support"
+.sp
+The release of the SBS (Bit3)
+\fBLinux\fP
+driver model 1003 v1.0 for the 616/617/618 PCI\-VME adapters
+has made the CSS
+kernel\-level driver
+\fBbit3.c\fP
+obsolete.
+However, at this time the SBS model 1003 driver
+is not ported to
+\fBLinux\fP
+2.4 kernels, such as are installed with Red Hat 7.1
+\fBLinux\fP.
+Rather than update the old
+CSS
+\fBbit3.c\fP
+driver,
+\fBspec\fP now offers support for the SBS PCI cards using
+user\-level code only, independent of kernel version.
+The new code allows access to any part of the A32 address space,
+unlike the old CSS driver\-based code, which had to be configured to
+use a particular 4 Mbyte window.
+The CSS user\-level code is adequate for register\-based VME devices such
+as the OMS motor controllers and the Joerger scalers, but does not support
+DMA transfers.
+The old CSS
+\fBbit3\fP
+driver and the
+\fB/dev/bit3\fP
+device node can be eliminated from the system when this new release of
+\fBspec\fP is installed.
+.SH "\fBZ\-Axis\fP Code Updated"
+.sp
+The
+\fBz\-axis\fP
+geometry code has been updated to use the current conventions.
+Among other changes,
+singularities in the calculations and other errors no longer cause
+the code to reset to command level.
+Instead, the
+\fBcalc()\fP
+functions (included in the definitions of
+\fBcalcA\fP
+and
+\fBcalcHKL\fP)
+return nonzero when there is an error.
+In addition, there are now cut\-point parameters for each geometry motor.
+

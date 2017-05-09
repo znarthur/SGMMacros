@@ -1,0 +1,199 @@
+am9513                              hardware                              am9513
+
+NAME
+     am9513 - PC board and USB counter/timers based on the AMD Am9513 chip
+
+DESCRIPTION
+
+     ssppeecc supports counter/timer PC cards and USB devices based on the Advanced
+     Micro Devices Am9513 chip.  Although production of the original AMD chip
+     ended in 1995 (after twenty years), compatible chips from other
+     manufactures continued to be available for many years.  Unfortunately, as
+     of late 2012 it appears production of the compatible chips has ceased, and
+     vendors have discontinued the counter/timer products based on the chips.
+     The extremely cost-effective counter/timers based on the Am9513 chip will
+     continue to be supported by ssppeecc.  These devices work quite well, and if
+     one can find a module on a vendor's back shelf or in the second-hand
+     market, it would be worth grabbing.
+
+     Counter/timer models supported by ssppeecc include: Measurement Computing
+     (formerly ComputerBoards) model CIO-CTR05/10/20 ISA cards,
+     PCI-CTR05/10/20HD PCI cards, and the USB-4300 series; Keithley-Metrabyte
+     Model CTM-05/10 ISA cards, Scientific Solutions Labmaster series ISA and
+     PCI cards, Kontron's PCIDCC5/20-P PCI card.
+
+     The Am9513 chip contains five 16-bit counters that can be programmed in a
+     wide range of configurations.  Although boards may contain more than one of
+     the chips, the first chip on the timer/counter board is used as the master
+     timer.  ssppeecc's programming uses two of the counters of the master timer for
+     a 32-bit detector counter, two for a 32-bit monitor counter and one for a
+     16-bit elapsed time counter.  On boards with two or four chips, the
+     additional chips are each programmed for two more 32-bit detector counters.
+     ssppeecc supports the Am9513 chip as both a time preset counter using the
+     ttccoouunntt(()) function or a monitor-count preset using mmccoouunntt(()).
+
+     Note, ssppeecc release 5.06.03 includes several updates to the Am9513 support.
+     With the update, more than one Am9513-type card can be configured at a
+     time, where the additional cards must be configured as counters only.
+     Also, the code was changed to improve the timer gating, although an
+     additional jumper is required to make the change effective.  Previously,
+     the timer was started in one instruction, followed by another instruction
+     that released the gate signal that inhibited the counters.  In the new
+     code, the timer will also be gated by the gate signal, but only if the
+     additional jumper from oouuttppuutt 11 to ggaattee 11 is installed.  (See the _H_A_R_D_W_A_R_E
+     _C_O_N_F_I_G_U_R_A_T_I_O_N section below).  ssppeecc will test for the presence of the
+     additional jumper.  If it is missing, ssppeecc will program the timer for no
+     gate, as before, and print a message suggesting the jumper be added.
+
+     Note also, ssppeecc release 5.09.02 includes several significant updates to
+     Am9513 support.  The Am9513-compatible counter/timer chips used by
+     Measurement Computing in PCI cards and USB devices behave slightly
+     differently than the original chips.  This difference prevented the chips
+     working in counting-to-monitor mode using ssppeecc's original code.  This
+     release includes a work around in the ssppeecc support, and counting-to-monitor
+     mode now works.
+
+     In addition, ssppeecc release 5.09.02 includes ccoouunntteerr__ppaarr(()) commands to access
+     the digital I/O ports on all versions of the device.  See the FFUUNNCCTTIIOONNSS
+     section below.
+
+SOFTWARE CONFIGURATION
+
+     Use ssppeecc's configuration editor (eeddccoonnff, normally invoked by the ccoonnffiigg
+     macro) to select the timer and to configure the scaler channels.  For ISA
+     cards, enter the base address on the DDeevviiccee screen.  For all cards, enter
+     the number of counters to be used on the board:
+
+        SSCCAALLEERRSS  DDEEVV  AADDDDRR  <<>>MMOODDEE  NNUUMM                        <<>>TTYYPPEE
+            YYEESS      00xx334400            33    AAmm99551133 CCoouunntteerr//TTiimmeerr ((IISSAA))
+            YYEESS        00::00            33    AAmm99551133 CCoouunntteerr//TTiimmeerr ((PPCCII))
+            YYEESS          00            33    AAmm99551133 CCoouunntteerr//TTiimmeerr ((UUSSBB))
+            YYEESS      00xx334400            22     AAmm99551133 CCoouunntteerr--OOnnllyy ((IISSAA))
+            YYEESS        00::00            22     AAmm99551133 CCoouunntteerr--OOnnllyy ((PPCCII))
+            YYEESS          00            22     AAmm99551133 CCoouunntteerr--OOnnllyy ((UUSSBB))
+
+     The corresponding entries in the ccoonnffiigg file would be:
+
+         PPCC__AAMM99551133  ==  iissaa__aaddddrreessss  nnuummbbeerr__ooff__cchhaannnneellss
+         PPCCII__AAMM99551133  ==  nnuummbbeerr__ooff__cchhaannnneellss  ppccii==bbuuss::sslloott
+         UUSSBB__AAMM99551133  ==  sseerriiaall__nnuummbbeerr  nnuummbbeerr__ooff__cchhaannnneellss
+         PPCC__AAMM99551133CC  ==  iissaa__aaddddrreessss  nnuummbbeerr__ooff__cchhaannnneellss
+         PPCCII__AAMM99551133CC  ==  nnuummbbeerr__ooff__cchhaannnneellss  ppccii==bbuuss::sslloott
+         UUSSBB__AAMM99551133CC  ==  sseerriiaall__nnuummbbeerr  nnuummbbeerr__ooff__cchhaannnneellss
+
+     Note that for the Labmaster board, the base address of the counter chip is
+     eight plus the base address of the board itself.  For PCI cards, the
+     address is determined automatically.  The address field can be used to
+     enter the serial number of USB devices if more than one is to be
+     configured.  If the address is zero, the USB devices will be assigned in
+     the order found.
+
+     For each additional chip on a board, add 2 to the value in the NNUUMM field.
+
+     If more than one PCI Am9513 board is installed, the unit numbers are
+     assigned to the boards, starting with unit 0, in the same order as the PCI
+     bus/slot/function IDs are assigned by the computer.  (The LLiinnuuxx command
+     //ssbbiinn//llssppccii lists the PCI identifiers.)
+
+     As of ssppeecc release 5.06.03, the command
+
+         ccoouunntteerr__ppaarr((mmnnee,, ""ddeevviiccee__iidd""))
+
+     where mmnnee is the mnemonic of a counter associated with a PCI Am9513 card,
+     will return a string containing the I/O base address of the PCI
+     counter/timer cards, which may useful in writing macros that access other
+     features of the card, such as digital I/O, A/D converters, etc.  (With ssppeecc
+     release 5.09.02, the digital I/O is accessible via ccoouunntteerr__ppaarr(()). See
+     below.)
+
+     On the SSccaalleerr screen, the channel assignments must have the timebase as
+     channel 0 and the monitor as channel 1, as shown below:
+
+        NNUUMMBBEERR      NNAAMMEE  MMNNEEMMOONNIICC  <<>>DDEEVVIICCEE  UUNNIITT  CCHHAANN   <<>>UUSSEE AASS  SSCCAALLEE
+             00   SSeeccoonnddss       sseecc    AAMM99551133     00     00   ttiimmeebbaassee      11
+             11   MMoonniittoorr       mmoonn    AAMM99551133     00     11    mmoonniittoorr      11
+             22  DDeetteeccttoorr       ddeett    AAMM99551133     00     22    ccoouunntteerr      11
+             33 CCoouunntteerr 22      ccnntt22    AAMM99551133     00     33    ccoouunntteerr      11
+             44 CCoouunntteerr 33      ccnntt33    AAMM99551133     00     44    ccoouunntteerr      11
+             55 CCoouunntteerr 44      ccnntt44    AAMM99551133     11     00    ccoouunntteerr      11
+             66 CCoouunntteerr 55      ccnntt55    AAMM99551133     11     11    ccoouunntteerr      11
+
+     The timebase scale factor is ignored.  Counters on unit 0, channels 3 and 4
+     would only be available if there are at least two Am9513 chips on the card.
+     Counters on unit 1 correspond to a second Am9513 card.
+
+HARDWARE CONFIGURATION
+
+     Connect the detector to the input connector pin labeled ssoouurrccee 33. Counts
+     received from the monitor go to the pin labeled ssoouurrccee 55. In addition, wire
+     the connector pin labeled oouuttppuutt 11 to the pins ggaattee 11, ggaattee 22, ggaattee 44 and
+     ggaattee 55.  (In the more recent Keithley-Metrabyte CTM-05A manual, the ssoouurrccee
+     pins are now labeled AACCLLKKIINN, the oouuttppuutt pins are now labeled AATTIIMMEERROOUUTT, and
+     the ggaattee pins are now labeled AAGGAATTEE.)
+
+     For a two- or four-chip board, or for additional counter-only boards,
+     additional detectors can be connected to the ssoouurrccee 33 and ssoouurrccee 55 pins of
+     the chips.  In addition, the oouuttppuutt 11 from the first chip of the
+     timer/counter board must be connected to ggaattee 22 and ggaattee 44 of the
+     additional chips.
+
+     The counter boards are accessed from user level and are polled to determine
+     when count intervals have elapsed.  Thus, interrupts should be disabled on
+     the boards.
+
+     When counting to time, the resolution of the clock depends on the length of
+     the count interval.  The maximum count time is 71.5 minutes.  The time base
+     resolution (in seconds) is set according to the following table:
+
+         0.00001   for   tt < 0.6 sec
+         0.0001    for   tt < 6 sec
+         0.001     for   tt < 60 sec
+         0.01      for   tt < 655.35 sec (10.9 min)
+         0.0655    for   tt < 71.5 min
+
+     When counting to monitor counts, the 0.01 second time base is used, and the
+     value returned for the time channel will be corrected to account for the
+     rollovers that occur every 655.36 seconds.
+
+FUNCTIONS
+
+     The following ccoouunntteerr__ppaarr(()) options are available.  Note, some models have
+     8 bits each of input and output and some models have 16 bits each.  Also,
+     some models allow the output bit settings to be read, while some models do
+     not.  For models that do not allow reading of the output registers, ssppeecc
+     keeps track of the values that have been written, so that it is possible to
+     set and clear individual bits without disturbing settings on other bits.
+     Note, though, that after reinitializing the hardware during startup or
+     rreeccoonnffiigg, the previous state of read-only output registers will be lost.
+
+     The digital I/O is associated with a counter card or device, not with a
+     counter channel.  However, the ssppeecc ccoouunntteerr__ppaarr(()) function requires a
+     counter-channel argument.  In the calls below, mmnnee is any counter channel
+     associated with the particular card or device having the digital I/O ports
+     being addressed.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""sseett__bbiitt"",, vvaall)) - Set output line corresponding to bit
+          number vvaall to high, where bits and lines are numbered from 0 to 7 or 0
+          to 15.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ccllrr__bbiitt"",, vvaall)) - Set output line corresponding to bit
+          number vvaall to low, where bits and lines are numbered from 0 to 7 or 0
+          to 15.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ppuutt__bbyyttee"",, vvaall)) - Sets output lines corresponding to the
+          bits set in vvaall to high and bits not set in vvaall to low.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ppuutt__wwoorrdd"",, vvaall)) - On devices with 16 bits of output, sets
+          output lines corresponding to the bits set in vvaall to high and bits not
+          set in vvaall to low.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ggeett__bbiitt"",, vvaall)) - Returns 0 or 1 based on whether the
+          input line corresponding to bit number vvaall is high or low, where lines
+          and bits are numbered from 0 to 7 or 0 to 15.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ggeett__bbyyttee"")) - Returns an 8-bit value that reflects the
+          setting of the input lines 0 to 7.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ggeett__wwoorrdd"")) - On devices with 16 bits of input, returns a
+          16-bit value that reflects the setting of the input lines 0 to 15.
+

@@ -1,0 +1,581 @@
+.TH "config_adm" "reference" "08/01/12" "config_adm.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+configuration \- administer hardware configuration file
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)config_adm.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1994,1995,1999,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "config_adm" "reference" "08/01/12" "config_adm.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+Each spectrometer has an associated file named \fBconfig\fP
+that describes the hardware interfaces and devices being used.
+There is also a binary\-format file named \fBsettings\fP
+that holds motor positions, user\-unit offsets and software limits.
+The program \fBedconf\fP (invoked by the \fBspec\fP macro \fBconfig\fP)
+is used to maintain these files.
+.sp
+This note describes the ASCII format of the \fBconfig\fP file.
+Although the \fBconfig\fP file can be edited by hand,
+you will be safer using the \fBedconf\fP program to make modifications
+as \fBedconf\fP insures the \fBconfig\fP file obeys the structuring rules
+required by \fBspec\fP.
+.sp
+Without arguments, \fBedconf\fP will use the \fBconfig\fP and \fBsettings\fP files
+in the current directory. If given a directory name as an argument,
+it will use the files in that directory.
+If invoked with the \fB\-s\fP flag, \fBedconf\fP will run in "simulate" mode,
+allowing the user to view but not modify the files.
+If the user doesn\(aqt have write permission for the \fBconfig\fP file,
+\fBedconf\fP will automatically run in "simulate" mode.
+.sp
+Comment lines begin with a \fB#\fP in the \fBconfig\fP file.
+Other lines contain key words, such as \fBCDEV\fP or \fBMOT00\fP,
+followed by an equals sign and one or more parameters.
+.SH "DEVICE KEY WORDS"
+.rs
+.sp
+The following table summarizes the key words that select
+particular hardware devices.
+.RS 3m
+.sp
+.nf
+.ft CB
+Keyword      Parameters
+===========  ======================================
+CDEV         device_name
+SDEV_#       device_name  baud_rate  opt_modes
+PC_PORT_#    base_address #_of_ports rw_mode
+SW_SFTWARE   1
+PC_AM9513    base_address
+PC_DAC_B12   base_address #_of_motors
+PC_DAC_B16   base_address #_of_motors
+PC_DAC_T12   base_address #_of_motors
+PC_DAC_T16   base_address #_of_motors
+PC_DSP6001   base_address
+PC_GPIB11    device_name
+PC_GPIBPC    device_name
+PC_GPIBPC_L  device_name
+PC_GPIBPC2   device_name
+PC_GPIBPC2_L device_name
+PC_GPIBPC3   device_name
+PC_GPIBPC3_L device_name
+PC_GPIBPC4   device_name
+PC_GPIBPC4_L device_name
+PC_IOTECH    device_name
+PC_MIZAR     vme_address  #_of_counters IRQ#_or_POLL
+PC_KS2926    base_address
+PC_MM2000    base_address #_of_motors
+PC_NIVME     /dev/null
+PC_OMS       device_name  #_of_motors INTR_or_POLL
+PC_OMSP      base_address #_of_motors
+PC_OMSV      vme_address  #_of_motors IRQ#_or_POLL
+PC_PCA3      base_address
+PC_PCAII     device_name  base_address INTR_or_POLL
+PC_SICL_H    device_name
+PC_SICL_HP   device_name
+PC_TEC488    base_address
+PC_TEC488_L  base_address
+RS_18011     device_name  baud_rate #_of_motors
+RS_18092     device_name  baud_rate #_of_motors
+RS_CATO      device_name  baud_rate
+RS_CM3000    device_name  baud_rate #_of_motors
+RS_CM4000    device_name  baud_rate #_of_motors
+RS_CMSX      device_name  baud_rate #_of_motors
+RS_INEL      device_name  baud_rate #_of_counters
+RS_IP28      device_name  baud_rate #_of_motors
+RS_ITL09     device_name  baud_rate #_of_motors
+RS_MC4       device_name  baud_rate #_of_motors
+RS_MCB       device_name  baud_rate #_of_motors
+RS_MCU       device_name  baud_rate #_of_motors
+RS_MCU_E     device_name  baud_rate #_of_motors
+RS_MM2000    device_name  baud_rate #_of_motors
+RS_NSK       device_name  baud_rate #_of_motors
+RS_OR9XB     device_name  baud_rate #_of_counters
+RS_OR9XC     device_name  baud_rate #_of_counters
+RS_OR9XT     device_name  baud_rate #_of_counters
+RS_SIX19     device_name  base_rate #_of_motors
+RS_TC100     device_name  base_rate #_of_channels
+RS_XRGCI_M   device_name  baud_rate #_of_motors
+RS_XRGCI_T   device_name  baud_rate #_of_counters
+GP_CC488     gpib_address INTR_or_POLL
+GP_CM3000    gpib_address #_of_motors
+GP_CM4000    gpib_address #_of_motors
+GP_HUB9000   gpib_address #_of_motors
+GP_IFE2D     gpib_address
+GP_IP28      gpib_address #_of_motors
+GP_ITL09     gpib_address #_of_motors
+GP_K2001     gpib_address
+GP_KS3988    gpib_address INTR_or_POLL
+GP_MC4       gpib_address #_of_motors
+GP_MCB       gpib_address #_of_motors
+GP_MM2000    gpib_address #_of_motors
+GP_MMC32     gpib_address #_of_motors
+GP_OR918A    gpib_address
+GP_OR9XB     gpib_address #_of_counters
+GP_OR9XT     gpib_address #_of_counters
+GP_OR9XC     gpib_address #_of_counters
+GP_PCA_M     gpib_address
+GP_PI        gpib_address #_of_motors
+GP_ST116     gpib_address
+GP_STAR1     gpib_address
+.ft P
+.fi
+.RE
+.sp
+\fBCDEV\fP specifies the CAMAC device accessed through a \fBspec\fP
+CAMAC driver. For example, \fBCDEV = /dev/ca00\fP.
+.sp
+\fBSDEV_0\fP specifies the name and baud rate of the
+serial device with \fBspec\fP device\-address 0 to be used
+with the \fBser_get()\fP and \fBser_put()\fP functions.
+The \fBopt_modes\fP are optional arguments that set the line modes.
+For example, \fBSDEV_0 = /dev/com2 9600 raw\fP.
+Choices for \fBopt_modes\fP are \fBraw\fP, \fBcooked\fP,
+\fBevenp\fP, \fBoddp\fP, \fBnoflow\fP and \fBigncr\fP.
+Several of these can be combined.
+See the \fI\%serial\fP help file for more information.
+The default mode is \fBcooked\fP. \fBSDEV_1\fP,
+\fBSDEV_2\fP, ... specify additional serial devices.
+.sp
+\fBPC_PORT_0\fP identifies a range of PC IO port addresses
+for use with the \fBport_get()\fP and \fBport_put()\fP functions.
+The board\(aqs hexadecimal base address is the first argument.
+The number of contiguous ports (maximum of 16) that can be accessed is next.
+If \fBrw_mode\fP is 0, the ports are read only, if 1,
+the ports are both readable and writable.
+For example, \fBPC_PORT_0 = 0x300 3 1\fP.
+.sp
+\fBSW_SFTWARE\fP selects the software timer. The parameter is unused.
+.SH "PC BOARD DEVICES"
+.rs
+.sp
+Key words with the \fBPC_\fP prefix select devices that generally
+are on adapter boards that fit into a PC computer E/ISA slot.
+.sp
+\fBPC_AM9513\fP selects either of two boards that use the Am9513 counter chip.
+Both the Metrabyte Model CTM\-05 interface board
+and the Scientific Solutions (formerly Tecmar) Labmaster board
+are supported.
+The hexadecimal base address of the counter\-chip registers
+on the board must be given as a parameter, as in \fBPC_AM9513 = 0x348\fP.
+.sp
+\fBPC_GPIB11\fP selects the National Instruments GPIB11V board
+for GPIB control on a MicroVax computer.
+Only a \fBdevice_name\fP parameter is needed.
+.sp
+\fBPC_GPIBPC\fP selects the National Instruments PCII board
+for GPIB control.
+Only a \fBdevice_name\fP parameter is needed.
+.sp
+\fBPC_PCAII\fP selects the Tennelec/Nucleus PCA II MCA board.
+The board\(aqs base address is given as an argument.
+.sp
+\fBPC_OMS\fP gives information about an Oregon Micro Systems PCX/PC38
+board for motor control.
+The number of motors and a key word, either \fBINTR\fP
+or \fBPOLL\fP must also be given, as in \fBPC_OMS = /dev/oms 4 INTR\fP.
+.sp
+\fBPC_TEC488\fP selects the TECMAR (or Scientific Solutions) IEEE\-488 board
+for GPIB control.
+The board\(aqs hexadecimal base address must be given as a parameter.
+.SH "RS\-232C DEVICES"
+.rs
+.sp
+Key words that begin with the \fBRS_\fP prefix describe devices
+that reside on a serial (RS\-232C) interface.
+All serial devices require device name and baud rate parameters.
+.sp
+\fBRS_CATO\fP selects the Silena MCA.
+.sp
+\fBRS_CM3000\fP selects the Compumotor 3000 motor controller.
+A number\-of\-motors parameter is required.
+.sp
+\fBRS_CM4000\fP selects the Compumotor 4000 motor controller.
+A number\-of\-motors parameter is required.
+.sp
+\fBRS_INEL\fP selects the Inel 715 dual counter.
+A number\-of\-counters parameter is expected.
+.sp
+\fBRS_IP28\fP chooses the Microcontrole IP28 stepper motor controller.
+This device also requires a number\-of\-motors parameter,
+as in
+.RS 3m
+.sp
+.nf
+.ft CB
+RS_IP28 = /dev/com2 9600 4
+.ft P
+.fi
+.RE
+.sp
+\fBRS_MCB\fP chooses the Advanced Control Systems MCB stepper motor controller.
+This device also requires a number\-of\-motors parameter.
+.sp
+\fBRS_MCU\fP chooses the Advanced Control Systems MCU stepper motor controller.
+This device also requires a number\-of\-motors parameter.
+.sp
+\fBRS_MCU_E\fP is the same as above,
+except that the motor controllers use encoders.
+The only difference from the standard behavior is that during
+the synchronization of software motors positions
+with the hardware registers,
+if the discrepancy is less than some fixed number of steps,
+the hardware register are automatically assumed to contain
+the correct position.
+The number of steps is taken from field eight of
+the motor parameter configuration (see below).
+.sp
+\fBRS_MC4\fP chooses the Klinger MC\-4 stepper motor controller.
+This device also requires a number\-of\-motors parameter.
+.sp
+\fBRS_OR9XT\fP or \fBRS_OR9XC\fP select Ortec 900 series counters
+or counter/timers. A number\-of\-counters parameter is required.
+.sp
+\fBRS_SIX19\fP selects the Microcontrole SIX19 motor controller.
+.sp
+\fBTC100\fP selects the Nicomp TC\-100 autocorrelator.
+The number of channels is given as a parameter.
+.sp
+\fBRS_XRGCI_M\fP selects the Inel XRGCI motor controller/timer instrument
+and specifies the number of motors that are used with it.
+.sp
+\fBRS_XRGCI_T\fP selects the Inel XRGCI motor controller/timer instrument
+and specifies the number of counters that are used with it.
+.SH "GPIB DEVICES"
+.rs
+.sp
+Key words that begin with the \fBGP_\fP prefix describe devices
+that use the GPIB interface.
+All such devices require a GPIB address parameter.
+.sp
+\fBGP_CM3000\fP selects the Compumotor 3000 motor controller.
+.sp
+\fBGP_CM4000\fP selects the Compumotor 4000 motor controller.
+.sp
+\fBGP_IP28\fP chooses the Microcontrole IP28 stepper motor controller
+on a GPIB interface.
+This device requires a GPIB address and a number\-of\-motors parameter,
+as in \fBGP_IP28 = 12 4\fP.
+.sp
+\fBGP_KS3988\fP selects the Kinetic Systems Model 3988\-G2A GPIB CAMAC crate
+controller. The National Instruments GPIB controller (\fBPC_GPIBPC\fP)
+must also be selected.
+The GPIB address is specified as an argument,
+along with either of the key words, \fBINTR\fP or \fBPOLL\fP.
+(Interrupt\-driven mode is recommended,
+but switch to polled mode if there are problems and contact CSS.)
+.sp
+\fBGP_MCB\fP chooses the Advanced Control Systems MCB stepper motor controller.
+This device also requires a number\-of\-motors parameter.
+.sp
+\fBGP_MC4\fP chooses the Klinger MC\-4 stepper motor controller.
+This device also requires a number\-of\-motors parameter.
+.sp
+\fBGP_MMC32\fP chooses the NSLS\-made stepper motor controller.
+This device also requires a number\-of\-motors parameter.
+.sp
+\fBGP_OR9XT\fP or \fBGP_OR9XC\fP select Ortec 900 series counters
+or counter/timers. A number\-of\-counters is required.
+.sp
+\fBGP_OR974T\fP or \fBGP_OR974C\fP select the Ortec 974 device
+to be used as a counter/timer or just a counter.
+A number\-of\-counters is required.
+.SH "CAMAC MODULES"
+.rs
+.sp
+CAMAC slot assignments consist of a module code on the left
+and a slot number on the right. For example,
+.sp
+.RS 4m
+\fBCA_KS3610 = 2\fP
+.RE
+.sp
+tells the program a Kinetic Systems 3610 hex scaler is in slot 2.
+.sp
+The following modules names are recognized by \fBspec\fP
+(KS is Kinetic Systems, DSP is DSP Technology):
+.TS
+;
+l l .
+\fBCA_DSP2190\fP	DSP 2190 MCS Averager
+\fBCA_E250*\fP	DSP E250A 12\-bit D/A (as motor controller)
+\fBCA_E500*\fP	DSP E500A Stepper Motor Controller
+\fBCA_IO*\fP	Any module using F codes of 0 or 16
+\fBCA_IOM1\fP	BiRa 2601 I/O For E500 Multiplexing
+\fBCA_IOM2\fP	F16,A0 I/O For E500 Multiplexing
+\fBCA_IOM3\fP	F16,A1 I/O For E500 Multiplexing
+\fBCA_KS3112*\fP	KS 3112 D/A (as motor controller)
+\fBCA_KS3116*\fP	KS 3116 D/A (as motor controller)
+\fBCA_KS3195*\fP	KS 3195 D/A (as motor controller)
+\fBCA_KS3388\fP	KS 3388 GPIB interface
+\fBCA_KS3512*\fP	KS 3512 ADC (as counters)
+\fBCA_KS3610*\fP	KS 3610 6\-Channel, 50 MHz Counter
+\fBCA_KS3640C*\fP	KS 3640 Up/Down Counter as Counter
+\fBCA_KS3640M*\fP	KS 3640 Up/Down Counter (for SMC\(aqs)
+\fBCA_KS3640T\fP	KS 3640 Up/Down Counter as Timer
+\fBCA_KS3655\fP	KS 3655 8\-Channel Timing Generator
+\fBCA_KS3929\fP	KS 3929 SCSI Crate Controller on Sun
+\fBCA_KS3929_HP\fP	KS 3929 SCSI Crate Controller on HP
+\fBCA_KSC\fP	KS Crate Controller with KS Software
+\fBCA_LC2301\fP	LeCroy 2301 interface for QVT MCA
+\fBCA_LC3512\fP	LeCroy 3512 Spectroscopy ADC
+\fBCA_LC3521\fP	LeCroy 3521A Multichannel Scaling
+\fBCA_LC3588\fP	LeCroy 3588 Multi Channel Scaler
+\fBCA_LC8206\fP	LeCroy MM8206A Histogramming Memory
+\fBCA_QS450\fP	DSP QS\-450 4\-Channel Counter
+\fBCA_RTC018\fP	DSP RTC\-018 Real Time Clock
+\fBCA_SMC*\fP	Joerger Motor Controller SMC\-L or SMC\-24
+\fBCA_TS201\fP	DSP TS\-201 Dual Timer/Scaler
+.TE
+.sp
+* More than one of these modules are allowed.
+Append \fB_#\fP to number modules consecutively, where \fB#\fP is 0, 1, 2, etc.
+.SH "MOTOR PARAMETERS"
+.rs
+.sp
+Motor parameter assignment consists of key words of
+the form \fBMOT00\fP, \fBMOT01\fP, ... followed by 11 values.
+The \fBMOT\fP key words must be numbered consecutively starting at zero.
+The values are
+.sp
+.RS 4m
+.TS
+;
+l l .
+1	Controller type (\fBE500\fP, \fBSMC\fP, \fBOMS\fP, ...)
+2	Steps per unit (sign changes direction of motion)
+3	Sign between user and dial units (+1 or \-1)
+4	Steady state rate (Hz) (must be positive)
+5	Base rate (Hz) (must be positive) (also is backlash rate)
+6	Steps for backlash (sign changes direction of motion)
+7	Acceleration time (msec)
+8	Not used
+9	Motor flags (protection, units, etc.)
+10	Motor mnemonic (\fBth\fP, \fBphi\fP, \fBsl1\fP, ...)
+11	Motor name (\fBTheta\fP, \fBPhi\fP, \fBSlit 1\fP, ...)
+.TE
+.RE
+.sp
+An example is:
+.RS 3m
+.sp
+.nf
+.ft CB
+#Fields   1     2 3    4   5  6   7 8 9 10 11
+MOT00 = OMS \-2000 1 2000 200 50 125 0 3 th Theta
+.ft P
+.fi
+.RE
+.sp
+Valid controller types are currently:
+.TS
+;
+l l l l l .
+\fB18011\fP	\fB18092\fP	\fBCM3000\fP	\fBCM4000\fP	\fBCMSX\fP
+\fBCMSX_E\fP	\fBDAC_B12\fP	\fBDAC_B16\fP	\fBDAC_T12\fP	\fBDAC_T16\fP
+\fBE250\fP	\fBE500\fP	\fBE500_M\fP	\fBEP_OMS\fP	\fBES_OMS\fP
+\fBES_PIE\fP	\fBES_VPAP\fP	\fBHUB9000\fP	\fBIP28\fP	\fBITL09\fP
+\fBITL09_E\fP	\fBKS3112\fP	\fBKS3116\fP	\fBKS3195\fP	\fBMAXE\fP
+\fBMAXE_E\fP	\fBMAXE_S\fP	\fBMC4\fP	\fBMCB\fP	\fBMCU\fP
+\fBMCU_E\fP	\fBMM2000\fP	\fBMMC32\fP	\fBNONE\fP	\fBNSK\fP
+\fBOMS\fP	\fBOMS_E\fP	\fBPI\fP	\fBSIX19\fP	\fBSMC\fP
+\fBXRGCI_M\fP				
+.TE
+.sp
+Field 2, the steps per unit, may be non\-integral,
+and the units can be in degrees, millimeters or whatever.
+The rest of the numeric fields must be integral.
+The motor names should be kept to nine characters or less,
+as the standard macros truncate them
+to fit a nine\-character field when printing them out.
+.sp
+Field 8 is reserved.
+.sp
+Field 9, the flags field, contains several kinds of information.
+The lowest order two bits are used to enable particular operations
+on the selected motor.
+If bit 0 is set, the user can move the motor.
+If bit 1 is set, the user can change the software limits of the motor.
+Bits 2 and 3 are used by the \fBedconf\fP program to prevent users
+from changing certain configuration information.
+Bits 8 through 12 are used with the shared \fBconfig\fP file
+feature described below.
+.SH "COUNTER PARAMETERS"
+.rs
+.sp
+Counter parameter assignment consists of key words
+of the form \fBCNT00\fP, \fBCNT01\fP, ...
+followed by 6 values.
+The \fBCNT\fP key words must be numbered consecutively starting at zero.
+The values are
+.sp
+.RS 4m
+.TS
+;
+l l .
+1	Controller type (\fBKS3610\fP, \fBKS3640M\fP, \fBTS201\fP, ...)
+2	Controller unit number (0, 1, ...)
+3	Channel number in unit (0, 1, ...)
+4	Counter function (\fBT\fP, \fBM\fP or \fBC\fP \- Timer, Monitor or Counter)
+5	Counter mnemonic (\fBsec\fP, \fBmon\fP, \fBdet\fP, ...)
+6	Counter name (\fBSeconds\fP, \fBMonitor\fP, \fBDetector\fP, ...)
+.TE
+.RE
+.sp
+Examples are:
+.RS 3m
+.sp
+.nf
+.ft CB
+#Fields        1  2  3  4        5  6
+CNT00 =   KS3610  0  0  T      sec  Seconds
+CNT01 =   KS3610  0  1  M      mon  Monitor
+CNT02 =   KS3610  0  2  C      det  Detector
+.ft P
+.fi
+.RE
+.sp
+Valid controller types are currently:
+.TS
+;
+l l l l l .
+\fBAM9513\fP	\fBCAEN\fP	\fBINEL\fP	\fBKS3512\fP	\fBKS3610\fP
+\fBKS3640C\fP	\fBKS3640T\fP	\fBLC1151\fP	\fBMIZAR\fP	\fBNONE\fP
+\fBOR9XB\fP	\fBOR9XC\fP	\fBOR9XT\fP	\fBOR9XC\fP	\fBOR9XT\fP
+\fBQS450\fP	\fBSFTWARE\fP	\fBTS201\fP	\fBVCT6\fP	\fBXRGCI_T\fP
+.TE
+.sp
+In field 4 (counter function), only one \fBT\fP and one \fBM\fP is allowed.
+.SH "LINKED CONFIGURATIONS"
+.rs
+.sp
+An installation such as a synchrotron beamline uses many motors
+with most associated with beamline control.
+Spectrometers used for particular experiments have motors
+that aren\(aqt used in other experiments.
+To avoid having to merge the motor configurations
+and settings from one set of files to another
+when the spectrometer is changed,
+you can set things up so that a single version
+of the \fBconfig\fP and \fBsettings\fP files will describe
+a number of different spectrometers. Here is how to set up the files:
+.sp
+1) If you already have several geometry configurations installed,
+you should make backup copies of the \fBconfig\fP and \fBsettings\fP files
+from the current geometries.
+.sp
+2) If you already have several geometry configurations installed,
+remove the \fBconfig\fP and \fBsettings\fP files from all but one of the
+geometry directories. Save the \fBconfig\fP from the other geometries
+to the remaining \fBconfig\fP file.
+.sp
+3) Set up hard links in all the geometry directories so that
+the \fBconfig\fP and \fBsettings\fP in all the geometry directories
+refer to the same file.
+For example, if the files already exist in the \fBfourc\fP directory,
+use the commands
+.sp
+.RS 4m
+.nf
+\fBln fourc/config surf/config\fP
+\fBln fourc/settings surf/settings\fP
+.fi
+.sp
+.RE
+.sp
+to create hard links in the surf directory. Don\(aqt use symbolic links.
+.sp
+4) Edit the \fBconfig\fP file by hand to add new control lines
+that assign numbers to the different geometries.
+These control lines must be before the lines
+that assign motor information.
+The format of the geometry control lines is as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+GEO0 = common
+GEO1 = fourc
+GEO2 = surf
+GEO3 = fivec
+etc.
+.ft P
+.fi
+.RE
+.sp
+The parameter \fBGEO0\fP always refers to the motors
+that are common to all the geometries.
+Subsequent lines assign consecutive numbers to the other geometries.
+.sp
+5) Now run \fBedconf\fP.
+The motor screen will have a new field that lets you assign
+a spectrometer geometry to each motor or to make the motor
+in common with all the spectrometers.
+.sp
+The hard links must be maintained for the shared \fBconfig\fP
+and \fBsettings\fP file scheme to work.
+You can safely use \fBvi\fP and \fBcp\fP to manipulate the files.
+However, using \fBmv\fP will destroy the links.
+Also, the editor \fBned\fP will destroy the links.
+.sp
+When running \fBedconf\fP with a geometry directory
+as an argument or when invoking the \fBconfig\fP macro
+from \fBspec\fP, use the new \fBG\fP command to toggle
+between displaying all the motors
+in the \fBconfig\fP file and just those motors used by the given geometry.
+.SH "EXTRA PROTECTION"
+.rs
+.sp
+At some \fBspec\fP installations,
+the administrators need to prevent users from accessing
+or modifying the configuration of certain motors.
+The \fBedconf\fP program supports a wizard mode that allows such protection.
+If you type \fB^W\fP while running \fBedconf\fP you will be prompted
+for the wizard\(aqs password.
+If you enter it properly, you will be able
+to select additional levels of configuration protection.
+.sp
+While running \fBspec\fP, it is possible to enter a command
+that prompts for the wizard password, giving the current user access
+to the protected motors until the wizard mode is disabled.
+(See the \fI\%spec_par\fP help file for details on the \fB"specwiz"\fP option.)
+.sp
+Use the \fBwiz_passwd\fP utility provided with the \fBspec\fP package
+to set or change the wizard password, stored in a file named \fBpasswd\fP
+in the \fBspec\fP auxiliary file directory (normally \fB/usr/local/lib/spec.d)\fP.
+.sp
+To prevent users from disabling the wizard protections
+by editing the \fBconfig\fP file by hand, you can use file protection
+features built into UNIX.
+One possibility is to make the \fBedconf\fP program
+set\-user id \fBspecwiz\fP or \fBspecadm\fP, change the ownership
+of the \fBconfig\fP files to \fBspecwiz\fP or \fBspecadm\fP,
+and change the modes of the \fBconfig\fP
+files to \fBrw\-r\-\-r\-\-\fP.
+Do that using commands (as super user) like:
+.RS 3m
+.sp
+.nf
+.ft CB
+chown specadm edconf fourc/config surf/config ...
+chmod u+s edconf
+chmod 644 fourc/config surf/config ...
+.ft P
+.fi
+.RE
+.sp
+At present, reinstalling \fBspec\fP will undo the above mode changes,
+so that they will have to be repeated when \fBspec\fP is updated.
+

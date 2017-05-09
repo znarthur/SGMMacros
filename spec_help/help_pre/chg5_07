@@ -1,0 +1,819 @@
+changes                      spec 5.07 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 5.07
+
+March 4, 2008 - RELEASE 5.07.04-9
+
+Fix For Crashes With Unresponsive Motor Controller
+     A bug, where ssppeecc would crash when a motor hit a limit or a move was
+     aborted with ^^CC with some models of motor controller, but only when
+     multiple controllers were configured but not all units were present, has
+     been fixed.  The problem was first noted with socket-based Galil motor
+     controllers.
+
+February 17, 2008 - RELEASE 5.07.04-8
+
+New mmoottoorr__ppaarr(())/ccoouunntteerr__ppaarr(()) Option
+     A new ""aaddddeedd??"" option for the mmoottoorr__ppaarr(()) and ccoouunntteerr__ppaarr(()) functions will
+     return a value of 1 if the parameter passed as the third argument has been
+     added as an optional parameter.  Both built-in optional parameters, such as
+     ""hhoommee__sslleeww__rraattee"" and non-built-in parameters, added with the ""aadddd"" option
+     or configured on the new parameter screen of the configuration editor, are
+     recognized.  The ""aaddddeedd??"" option is the first argument after the mnemonic.
+
+Update For the Delta-Tau PMAC/PMAC2 Controller
+     It is now possible to configure many of the II variables for the Delta-Tau
+     PMAC/PMAC2 controllers as non-built-in optional parameters using ssppeecc's
+     configuration editor.  These values will be programmed in the controller
+     during hardware initialization.  For parameters named in the range ""II0000"" to
+     ""II9999"", the motor channel number will be inserted between the ""II"" and
+     variable number.  For parameters in the range ""II77mmnn00"" to ""II77mmnn99"", the mm
+     will be replaced with the channel number divided by 4, and the nn will be
+     replaced with the channel number modulus 4 plus 1 (that is, values in the
+     range 1 to 4).  For parameters that are named with an II followed by a
+     number greater than or equal to 100, no substitutions are made with respect
+     to the II variable name.  In addition, II variables associated with the
+     non-built-in optional parameter screen of the controller entry will be sent
+     to the controller with no substitutions made to the parameter name.
+
+Fix For Newport XPS Motor Controller
+     A bug in the code to support the Newport XPS motor controller, which
+     prevented having more than two motor groups and having more than two motors
+     in a motor group, has been fixed.
+
+February 15, 2008 - RELEASE 5.07.04-7
+
+Micos Controller Fix
+     A minor update to the recent rewrite of the Micos support addresses a
+     problem in passing very small values to the ""sseettccllwwiinnddooww"" command.
+
+Update For Newport ESP-300 Motor Controller
+     ssppeecc no longer considers an axis reported by the Newport ESP-300 motor
+     controller with IIDD type ""uunnkknnoowwnn"" as unusable.
+
+February 4, 2008 - RELEASE 5.07.04-6
+
+Fix For Detel S21DC Counter/Timer
+     A bug in the recently added support for the Detel S21DC counter/timer from
+     GE Inspection Technologies, where counting to fractions of a second was
+     broken, has been fixed.
+
+Fix For Compumotor ViX Motor Controller
+     A bug in the recently added support for the Compumotor ViX motor
+     controller, where setting the dial position (to zero - the only possible
+     setting) would generate a spurious time-out error message, has been fixed.
+
+February 2, 2008 - RELEASE 5.07.04-5
+
+Updates For Micos Motor Controllers
+     A number of problems with the ssppeecc support for the Micos Pegasus, Pollux
+     and Pollux2 motor controllers have been addressed.  Setting of the optional
+     ""ddcc__sseettttllee__ttiimmee"" and ""ddcc__ddeeaadd__bbaanndd"" parameters (via the Micos ""sseettccllttiimmee""
+     and ""sseettccllwwiinnddooww"" commands) has been fixed.  A new non-builtin parameter
+     ""hhoommee__ddiissttaannccee"" is recognized and will be used as the argument to the
+     ""nnrreeffmmoovvee"" command, if set.  Otherwise, the default value of +/-100 is
+     used.  A number of other issues have been addressed, mostly concerned with
+     syntax differences in the Venus-2 language among different models.
+
+Fix For Configuration Editor New Parameter Screen
+     A problem where non-integers could only be entered in string mode in the
+     value field of the new parameter screen on the eeddccoonnff configuration editor
+     has been fixed.
+
+January 30, 2008 - RELEASE 5.07.04-4
+
+Fix For Screen Plot Inconsistency When Plotting Multiple Counters
+     Previously, if more than one counter was chosen to be plotted via the
+     pplloottsseelleecctt macro, the last counter specified was used to calculate the
+     derived values displayed on the screen plots (full width at half max,
+     maximum value, center of mass), while the macros which refer to
+     corresponding values, such as ppll__CCFFWWHHMM (also known as CCEENN), ppll__CCOOMM, ppll__MMAAXX,
+     etc., would use the first counter, leading to confusion.  The plotting
+     macros have been revised so that the first counter specified with
+     pplloottsseelleecctt is used to calculate the values displayed at the top of the
+     screen plots.
+
+Merged ccoouunntteerrss and pplloottsseelleecctt Macros
+     The functionality of the ccoouunntteerrss and pplloottsseelleecctt macros has been combined,
+     so that when invoked without arguments, both ask for which counters to plot
+     and which counters to assign to the DDEETT and MMOONN global variables.  Note,
+     though, when invoked with arguments the behavior of the two macros is
+     unchanged in order to preserve backward compatibility.  As a reminder, the
+     counter assigned to DDEETT will be the last column in the data file during
+     scans.  The MMOONN counter will appear as the ##MM data file entry, and will be
+     the second to last column in the scan data file.  Also, the MMOONN counter is
+     used to calculate the value for the MMOONN__RRAATTEE global variable.
+
+Fixed Issues With ttttyy__ffmmtt(())
+     Long standing (but unreported) formatting issues with the ttttyy__ffmmtt(())
+     command, such as it breaking lines prematurely under certain combinations
+     of text and space characters, have been addressed.
+
+New Server Mode For Alternate Motor-Limit Behavior
+     The standard behavior of ssppeecc when a motor hits a limit is to stop all
+     currently moving motors, clear the input buffers and reset to the high
+     level prompt.  In the original server mode, however, when a motor hits a
+     limit, the server  does not stop other motors and reset to the top input
+     level.  A new server mode is now available that behaves as normal
+     non-server mode with respect to motor limits.  This new server mode (called
+     a ""mmooddee--22 sseerrvveerr"") is activated by starting ssppeecc with a --SS22 flag rather
+     than the original --SS flag.  Note, a --SS11 flag will also now be recognized
+     and is equivalent to a plain --SS.
+
+Macro Motor ""ggeett__ssttaattuuss"" Update
+     Additional bits are interpreted in the macro motor ""ggeett__ssttaattuuss"" return
+     value.  Returning a value with bit 0x10 set indicates an emergency-stop
+     situation and bit 0x20 set indicates a motor fault, which are both
+     currently treated in a similar manner to hitting a limit, with all motors
+     stopped and control returned to the top level prompt.  See the _m_a_c___h_d_w help
+     file.
+
+New Support For FZD Sergen Motor Controller
+     Support for a new motor controller developed at the Foschungzentrum Dresden
+     Rossendorf is included in this ssppeecc release.  The name of the controller is
+     Sergen, and communication is over a serial interface.
+
+Fixes For ffiivveecc and ssiixxcc Geometry Calculations
+     A very old sign error in the calculation of the AAZZIIMMUUTTHH variable from motor
+     positions (via the ccaallccHHKKLL macro) in the ffiivveecc and ssiixxcc geometries has been
+     fixed.  Note, the error only affected the value displayed on the screen or
+     printed to the data file.  The value used to calculate motor positions (via
+     the ccaallccAA macro) wasn't affected.  Also, the sign of the CCHHII angle found
+     via the ccaallccAA macro at a particular singular point in the PPHHII-fixed mode
+     was also sometimes incorrect, and that has been fixed.
+
+Renaming From ESRF To TACO
+     The built-in functions eessrrff__iioo(()), eessrrff__ddbb(()) and eessrrff__ddcc(()) are now available
+     as ttaaccoo__iioo(()), ttaaccoo__ddbb(()) and ttaaccoo__ddcc(()), although the original names will
+     remain supported.  Also, the library named lliibbEESSRRFF..aa, included with the
+     ssppeecc distribution, has been renamed lliibbTTAACCOO..aa.
+
+Fix For ACS MCB-4B Motor Controller
+     A spurious error message with the text ""MMoottoorr iiss ssttooppppeedd"" that sometimes
+     appeared when aborting a move on the ACS MCB-4B motor controllers has been
+     eliminated.
+
+November 8, 2007 - RELEASE 5.07.04-3
+
+Timing Adjustment For Built-In PCI-GPIB Support
+     A small increase in the length of a delay during the I/O port programming
+     for GPIB write operations seems to have fixed a time-out problem on at
+     least one system that uses a PCI-GPIB rev 1 board.
+
+November 4, 2007 - RELEASE 5.07.04-2
+
+Update For Compumotor SX Encoder Option
+     The support for the Compumotor SX motor controller has been updated to work
+     properly with a relative encoder.  When configured for an encoder (CCMMSSXX__EE
+     in the ccoonnffiigg file), moves will be relative rather than absolute, position
+     read back will be from the encoder and the sseett__ddiiaall command will set both
+     the encoder and the commanded position.
+
+November 1, 2007 - RELEASE 5.07.04-1
+
+New Parameter Screen For Configuration Editor
+     A new configuration screen is available in the eeddccoonnff hardware
+     configuration editor to add values for motor and counter parameters and
+     device controller parameters that aren't built into ssppeecc or aren't included
+     as standard optional parameters.  The new pp command displays the additional
+     parameter screen.  Usage is available from that screen with the ??  and HH
+     commands.  The ability to edit additional optional parameters will be
+     useful with macro hardware and with future built-in support for
+     non-standard configuration parameters.
+
+New oouuttppuutt Property For ssppeecc Server
+     A new oouuttppuutt property is available in the ssppeecc server.  A client can
+     register to have string events sent that mirror output sent to specific
+     files or to the screen.  This property is not useful for ssppeecc clients, but
+     may be of interest to third party client programs that communicate with a
+     ssppeecc server.  See the _s_e_r_v_e_r help file for details.
+
+Redundant Server Motor Position Events Eliminated
+     The ssppeecc server will now only send motor position events to clients when
+     the value of the position changes.  Previously, position events were sent
+     more frequently.
+
+sseettttiinnggss File Now Updated After ssyynncc
+     After executing the ssyynncc command from user level, ssppeecc will update the
+     motor sseettttiinnggss file whether or not any values have changed.  The motivation
+     is to insure positions of calculational pseudomotors will be updated before
+     a subsequent invocation of the eeddccoonnff hardware configuration editor, as is
+     the sequence in the standard ccoonnffiigg macro.
+
+Fix For Short Integer Array Assignment
+     A compiler bug on a number of Linux platforms, where assignments of values
+     greater than 32768 to data array elements of type sshhoorrtt were improperly
+     truncated rather than converted to negative values, has been addressed.
+
+Updates To Trinamic Support
+     The support for the Trinamic QUADpack and SIXpack motor controllers has
+     been updated.  ssppeecc now supports configuration of most of the controller's
+     parameters, making most home search operations possible.  See the new
+     _t_r_i_n_a_m_i_c help file for details.
+
+Update To Accommodate OMS Position Maintenance
+     Although ssppeecc doesn't currently include commands to program an OMS motor
+     controller for position maintenance, it is possible for users to activate
+     the mode via the mmoottoorr__ppaarr(()) command pass-through feature.  To accommodate
+     such users, ssppeecc will now program OMS moves (on controllers that support
+     it) with the IIPP (interrupt when in position) command rather than the IIDD
+     (interrupt when done) command for axes configured with encoders.  When not
+     using encoders, the IIPP command behaves the same as IIDD.
+
+Update For TACO ESRF General CCD Device Server
+     ssppeecc's built-in support for the the TACO general CCD device server has been
+     updated to work with three-bytes-per-pixel cameras.  Previously, ssppeecc would
+     crash if used with such a camera.
+
+October 16, 2007 - RELEASE 5.07.03-5
+
+Micos Update For Encoder
+     When a Micos motor controller channel is configured to use an encoder, ssppeecc
+     will now check bit 0x20 of the status (position out of target window) in
+     addition to the busy bit (0x01) for move completion.  In addition, the
+     ""ddcc__ddeeaadd__bbaanndd"" parameter will now set the Micos sseettccllwwiinnddooww value and the
+     ""ddcc__sseettttllee__ttiimmee"" parameter will now set the Micos sseettccllttiimmee value.
+
+Fix For Mclennan Segmentation Fault
+     A bug, where ssppeecc could crash if configured for a Mclennan motor controller
+     on a serial interface that couldn't be opened, has been fixed.
+
+September 21, 2007 - RELEASE 5.07.03-4
+
+Support For XIA DXP USB Interface
+     This ssppeecc release supports the USB interface on the XIA Saturn DXP device.
+
+Hangup Signals (After the First) Masked On Exit
+     In release 5.02.03-5, the ssppeecc code was modified to catch the SSIIGGHHUUPP
+     (hang-up) signal generated, for example, by window managers when the
+     terminal window containing the ssppeecc process was closed.  On receipt of the
+     signal, ssppeecc saves its state to the state files and exits.  In some
+     environments multiple hang-up signals arrive, which could end up corrupting
+     the state file.  In this release, subsequent hang-up signals are blocked.
+
+Better Time-Out Recovery For Built-In GPIB-ENET
+     Due to reports that the recently introduced built-in support for the
+     National Instruments GPIB-ENET had problems with subsequent communications
+     after a timeout while attempting to communicate at an address not present
+     on the bus, this ssppeecc release now issues an interface-clear (IFC) message
+     after timeouts, which clears the problem.  Note, this IFC-after-timeout
+     feature has only been added to the built-in GPIB-ENET support.
+
+New GPIB Feature For Detecting Listeners
+     For selected GPIB controllers (currently NI GPIB-ENET and PCI-GPIB),
+     writing a null string to a GPIB device with ggppiibb__ppuutt((aaddddrr,, """")), will now
+     return 1 if a listener is present at address aaddddrr or zero if no listener is
+     present.  A -1 is returned if the feature is not available with the
+     configured GPIB controller.
+
+Fix For Phytron Segmentation Faults
+     A bug, where ssppeecc could crash if configured for a Phytron controller but no
+     controller was present, has been fixed.
+
+Improved Error Recovery For Mclennan Multiplexed Controllers
+     The support for the Mclennan PM381 and PM608 multiplexed motor controllers
+     has been updated to avoid certain communication errors and to better
+     recover from those that do occur.
+
+August 29, 2007 - RELEASE 5.07.03-3
+
+New Argument For Macro Hardware Functions
+     When more than one instance of a macro-hardware counter or motor controller
+     was configured, calls to the macro function that apply to all channels
+     would be made for each such unit with the mnemonic argument set to the
+     string ""...."".  However, all such calls looked identical.  ssppeecc now includes
+     the controller unit number as the last argument in such calls.  See the
+     _m_a_c___h_d_w help file for details.
+
+Fix For Phytron Motor Controllers Over Ethernet-Serial Connection
+     A problem that prevented Phytron motor controllers to be accessed via
+     Ethernet-to-serial devices has been fixed.
+
+Bug Fixes For Built-In PCI-GPIB Support
+     A bug in the new built-in support for the National Instruments PCI-GPIB
+     cards, where the end-of-string character for EOS-mode reads was not always
+     programmed correctly, has been fixed.  Another bug, where the ggppiibb__ppuutt(())
+     function didn't return the number of bytes written, has also been fixed.
+
+Another Fix For Built-In GPIB-ENET Support
+     A bug in the recently added built-in support for the National Instruments
+     GPIB-ENET module, where reading a message longer than 255 bytes could
+     produce a segmentation fault, has been fixed.
+
+July 26, 2007 - RELEASE 5.07.03-2
+
+Fix For Built-In GPIB-ENET Support
+     A bug in the recently added built-in support for the National Instruments
+     GPIB-ENET module, where reads having a byte count with bits 7 or 15 set
+     (128 or 32768) could produce errors or segmentation faults, has been fixed.
+
+Preliminary Support For AllMotion EZStepper Motor Controllers
+     This ssppeecc release contains initial support for the AllMotion, Inc.
+     EZStepper motor controllers.  Steppers and steppers with encoders are
+     supported over a serial interface.
+
+July 20, 2007 - RELEASE 5.07.03-1
+
+Assignment Allowed To Built-In Associative Arrays
+     In the associative-array assignment feature introduced in ssppeecc release
+     4.05.09 that allowed usage such AA00 == AA, where both AA00 and AA are associative
+     arrays, assignment to the built-in associative arrays such as AA[[]], SS[[]] and
+     UUBB[[]] was forbidden.  Now such assignment is possible.  Only elements that
+     match existing elements of the built-in array can be assigned, and only
+     number values are allowed.  Elements of the right-hand side array that
+     don't exist in the built-in array or are string valued are silently
+     ignored.
+
+Fix For cchhgg__ooffffsseett(()) For EPICS and ssppeecc Server Motors
+     A problem in changing the user offset for calculational pseudomotors (see
+     the _m_a_c___h_d_w help file) where the associated real motors were EPICS motors
+     or ssppeecc server motors has been fixed.  Previously the cchhgg__ooffffsseett(()) call (as
+     used by the sseett macro) did not send commands to the EPICS data base or the
+     ssppeecc server to indicate the user-offset change to the real motors when the
+     cchhgg__ooffffsseett(()) was invoked for the calculational pseudomotor.
+
+Fix For Detecting ssppeecc Server Connections From Self
+     The code added in ssppeecc release 5.07.02-4 to detect a ssppeecc server connecting
+     to itself as a client (which is not allowed) produced false positives under
+     some conditions when the server and client were on the same host.  That
+     problem should be fixed in this release.
+
+Debouncing Filters for NI 6601/6602
+     This ssppeecc release implements support for the digital debouncing filters
+     available on the National Instruments PCI 6601/6602 counter/timer cards.
+     See the _n_i_6_6_0_x help file for details.
+
+Update For Tsuji Counter/Timers
+     The support for the Tsuji counter/timers has been extended to include model
+     NCT08-01 in addition to model CT16-01B.  In addition, a bug which reported
+     incorrect elapsed time for intervals over 2,147 seconds has been fixed.
+
+Update For GE Fanuc VME Driver Support
+     The support for the Linux kernel drivers for the GE Fanuc (formerly SBS,
+     formerly Bit-3) PCI-to-VME model 61x/62x controllers (and compatible
+     models) has been updated to work with the version 3 drivers.  Note, ssppeecc
+     still includes driverless support (no kernel drivers are installed) for
+     these controllers.
+
+June 30, 2007 - RELEASE 5.07.02-10
+
+EPICS Monitors Available
+     Process variable monitors for user-level eeppiiccss__ggeett(()) calls are now
+     available using the new eeppiiccss__ppaarr(()) ""mmoonniittoorr__sseett"", ""mmoonniittoorr__cchheecckk"" and
+     ""mmoonniittoorr__cclleeaarr"" options.  Monitors eliminate unnecessary network traffic
+     for process variables that are checked often but change seldom.  See the
+     _e_p_i_c_s help file for details.
+
+EPICS Put Callbacks Implemented
+     A new wait-time option for the user-level eeppiiccss__ppuutt(()) function allows ssppeecc
+     to wait until the specified channel-access put has been processed.  The
+     optional third argument to eeppiiccss__ppuutt(()) specifies the maximum wait time.
+     See the _e_p_i_c_s help file for details.
+
+EPICS 3.14 Signal Handling Improved
+     Previously, due to the threaded implementation used with EPICS 3.14, signal
+     handling in ssppeecc, particularly that associated with a ^^CC interrupt from the
+     keyboard, could easily cause ssppeecc to hang in the EPICS library code.  ssppeecc
+     now blocks signals during key calls to the EPICS channel access library,
+     which should prevent most, if not all, such problems.
+
+June 7, 2007 - RELEASE 5.07.02-9
+
+New ""ddiissaabbllee__lliimmiitt__cchheecckkss"" Optional Motor Parameter
+     A new ""ddiissaabbllee__lliimmiitt__cchheecckkss"" optional motor parameter is available.  Its
+     value can be set on the second optional motor parameter screen of the
+     configuration editor or with the mmoottoorr__ppaarr(()) function.  A nonzero value
+     disables software limit checks for the designated motor.
+
+New CCCCDDSS Built-In Global Variable
+     A new read-only CCCCDDSS built-in global variable is available.  Its value is
+     the number of CCD-type devices in the ccoonnffiigg file, similar to the existing
+     MMCCAASS, MMOOTTOORRSS and CCOOUUNNTTEERRSS global variables.
+
+Increase In Number of GPIB Controllers
+     Up to eight GPIB controllers can now be configured.  The previous limit was
+     four.
+
+Limit Values Limited
+     The eeddccoonnff configuration editor tests for corruption of the sseettttiinnggss file
+     by checking that none of the dial limits or user offset values are greater
+     than 1e40 in absolute value.  Previously, if a user explicitly set the
+     motor limits or offset to values outside that range, the next time the
+     configuration editor was invoked, it would discard the sseettttiinnggss file.  Now,
+     both ssppeecc and the configuration editor silently limit the values of the
+     limits and the user/dial offset to a magnitude of 1e20.
+
+Macro Hardware Value Precision Fixed
+     Previously, numbers returned by macro-hardware macro functions for commands
+     such as ""ppoossiittiioonn"" and ""ccoouunnttss"" were rounded to six significant digits.
+     The precision is now kept to fifteen significant digits.
+
+Fix For Newport NSC200/PZC200 Motor Controllers
+     A bug that would misassign unit/crate/channel numbers for Newport
+     NSC200/PZC200 motor controllers if the motors weren't numbered
+     consecutively in the ccoonnffiigg file has been fixed.
+
+Preliminary Support For Detel S21DC Counter/Timer
+     This ssppeecc release includes preliminary support for a counter/timer from GE
+     Inspection Technologies, model Detel S21DC, for use over a serial
+     interface.
+
+May 4, 2007 - RELEASE 5.07.02-8
+
+Fix For Macro Hardware Config Bug In Recent Release
+     A new feature introduced in release 5.07.02-6 associated with the eeddccoonnff
+     hardware configuration editor had the unintended consequence of changing
+     the order in which parameters associated with macro-motor and macro-counter
+     controllers were saved.  The order has been restored in this release.
+
+April 27, 2007 - RELEASE 5.07.02-7
+
+Non-backwards Compatible Update For Trinamic Motor Controllers
+     The units of the optional generic motor parameter mmiisscc__ppaarr__11, have been
+     changed from mA to percent of maximum for the Trinamic motor controller
+     peak current setting.  Percent of peak current is a more logical choice for
+     the parameter, as both the old QUADpack and the new SIXpack-2 models have
+     switch-selectable peak-current settings which can't be read by software, so
+     the actual mA value was a best guess by ssppeecc in any case.
+
+Fix For CANnes Bug In Last Release
+     A bug introduced in release 5.07.02-6, where the CANnes PCI card CAN baud
+     rate wasn't set from the value in the ccoonnffiigg file, has been fixed.
+
+April 23, 2007 - RELEASE 5.07.02-6
+
+Built-In Support for National Instruments PCI-GPIB Modules
+     This ssppeecc release contains a preliminary version of built-in support for
+     both the rev 01 and rev 02 National Instruments PCI-GPIB cards.  The rev 01
+     support introduced in release 5.07.02-1 has been replaced with the new
+     support that works with both revisions.  With the built-in support, there
+     is no need to install kernel drivers for GPIB.  See the _n_i_g_p_i_b help file
+     for details.
+
+New Configuration Option For PCI Cards
+     Most PCI cards do not have switches to select an address.  Previously, for
+     such cards, if more than one of the same type was configured, ssppeecc assigned
+     the cards unit numbers in the order the cards were discovered.  It is now
+     possible to configure bus:slot numbers in the AADDDDRR field of the
+     configuration editor to distinguish among identical PCI cards.  If the AADDDDRR
+     is set to zero, ssppeecc will behave as before.  In this ssppeecc release, only the
+     NI PCI-GPIB (built-in) and CANnes PCI cards support the bus:slot
+     addressing.  Subsequent ssppeecc releases will include support for the feature
+     for other PCI cards.
+
+Updated Support the XIA DXP Modules
+     Several updates have been made to the support for the XIA DXP modules (both
+     the CAMAC and the parallel port models).  The dead-time calculation
+     returned by the mmccaa__ppaarr(()) ""ddeeaadd"" option has been modified based on
+     information provided by a user who did a careful reading of the XIA
+     documentation.  The value returned is now
+
+         100 * [1 - (ooccrr * lliivveettiimmee) / (iiccrr * rreeaallttiimmee)]
+
+     where ooccrr is the output count rate and iiccrr is the input count rate.  The
+     previous calculation was
+
+         100 * (1 - lliivveettiimmee / rreeaallttiimmee)
+
+     In addition, mmccaa__ppaarr(()) options ""eellaappsseedd__rreeaall"" and ""eellaappsseedd__lliivvee"" have been
+     introduced as synonyms for the current ""rreeaall"" and ""lliivvee"", respectively.
+
+Fixes For Trinamic Motor Controller
+     Problems identifying the Trinamic model (QUADpack vs. SIXpack vs.
+     SIXpack-2) have been addressed.  Also, support for ssppeecc's ""lliimm++"" and ""lliimm--""
+     cchhgg__ddiiaall(()) homing options has been added.
+
+April 5, 2007 - RELEASE 5.07.02-5
+
+Fix For Newport XPS Controller
+     A bug in the code for the Newport XPS motor controller, where the list of
+     configured positioners obtained from the controller was not parsed
+     correctly, has been fixed.
+
+April 1, 2007 - RELEASE 5.07.02-4
+
+Built-In Support For National Instruments GPIB-ENET
+     This ssppeecc release includes experimental built-in support for the National
+     Instruments GPIB-ENET Ethernet-to-GPIB modules.  With the built-in support,
+     it is not necessary to link ssppeecc with any NI modules or install any
+     additional drivers.  See the _n_i_g_p_i_b help file for more information.
+
+Installable On 64-Bit Platforms
+     ssppeecc should now install cleanly on 64-bit platforms, assuming the 32-bit
+     compatible library packages are installed.  Note, though, ssppeecc remains a
+     32-bit application.
+
+ssppeecc Client/Server Updates
+     Previously, if a ssppeecc client's initial connection to a ssppeecc server was by
+     port number, then that server exited and a new server with a different ssppeecc
+     name became available at the same port number, the client could refer to
+     the new server by the old name.  That behavior is no longer allowed.  Note,
+     if the initial connection is by name and not by port number, a server
+     reconnecting with the same name at a different port will be considered the
+     same server.
+
+     Also fixed, an attempt by a ssppeecc server to connect to itself as a client
+     (which wouldn't work well, in any case) is detected and prevented with an
+     error message displayed.
+
+New Sync Option For Certain Motor Controllers
+     A new option is available to deal with limits when there is a position
+     discrepancy on the few models of motor controllers that only allow the
+     position registers to be set to zero and don't retain the current position
+     if the power is cycled.  If the controller position register is zero
+     (likely due to a power reset) and the ssppeecc software dial position is
+     nonzero, if the user chooses the option to adjust the user offset (to
+     maintain the user position), there is a new option available to offset the
+     dial limits by the same amount.  ssppeecc suggests not offsetting the limits,
+     but rather after adjusting the user offset, move the motor to zero and
+     reset the dial position to zero (or do a home search).  Such a procedure
+     will restore the dial positions to what they were before the motor
+     controller was reset.
+
+Multiple CANnes PCI Cards Should Now Work
+     Support for the CANnes PCI cards has been fixed to allow more than one card
+     to be used at a time.
+
+Updates For Trinamic SIXpack-2
+     The support for the Trinamic QUADpack and SIXpack motor controllers has
+     been updated to accommodate the newer SIXpack-2 model.  The 0x45 command
+     (to set power-down mode) is no longer used.  (The command isn't supported
+     by the SIXpack-2 and can possibly cause problems with the EEPROM data
+     integrity on the older models.)
+
+Fix For ggmmccii, ww2211vv, iidd1100bb, ggoonniioo and ppii11ggoo Geometries
+     Code that incorrectly restricted reciprocal space access in the ggmmccii, ww2211vv,
+     iidd1100bb, ggoonniioo and ppii11ggoo geometries with the message ""QQ >> 22kk"" has been fixed.
+     A factor-of-two error resulted in QQ magnitudes greater than kk, rather than
+     greater than 22kk being rejected.
+
+Bug Fix For ESRF TACO MAR Image Plate Scanner
+     An old bug in the support for the ESRF TACO MAR image plate scanner where
+     ssppeecc would crash unless a particular preventive iimmaaggee__ppaarr(()) command was
+     issued has been fixed.
+
+Fix For ESRF TACO MAXE Motor Device Server
+     The acceleration calculation in ssppeecc for the ESRF TACO MAXE device server
+     has been updated so that the higher slew rates used with motor controllers
+     newly supported by the MAXE no longer result in an integer overflow.
+
+March 16, 2007 - RELEASE 5.07.02-3
+
+Increase In Maximum Number Of Serial Devices
+     The maximum number of serial devices that can be associated with ssppeecc's
+     built-in hardware support has been increased from twenty to forty.
+
+Fix For Software Timer On ssppeecc Server
+     A problem when using the software timer in interrupt mode on a ssppeecc server
+     where macro-hardware counters are also configured, where the server command
+     thread would hang at the end of a count period, has been fixed.
+
+Fix For Recent Multiport II Support
+     Problems in the Canberra Multiport II MCA support introduced in release
+     5.07.01-11 and associated with setting the number of points (and possibly
+     other parameters) on modules with more than one MCA device have been fixed.
+
+Fix For ESRF TACO/TANGO Camera Device Server
+     Problems in using a new TANGO device server with the iimmaaggee__ppaarr(()) commands
+     ""ffiillee__ddiirr"", ""ffiillee__pprreeffiixx"", ""ffiillee__ssuuffffiixx"", ""ffiillee__iinnuumm"" and ""oovveerrwwrriittee"",
+     associated with the ESRF general-CCD and image-plate support in ssppeecc, have
+     been fixed.
+
+Fix For XIA Huber Slit Controllers (HSC)
+     ssppeecc support for the XIA HSC motor controllers has been updated to
+     accommodate the changed serial number format used in the device's more
+     recent firmware releases.
+
+March 6, 2007 - RELEASE 5.07.02-2
+
+Multiple GPIB Controller Syntax Update
+     When using multiple GPIB controllers with the generic GPIB functions
+     ggppiibb__ppuutt(()), ggppiibb__ggeett(()), etc., a new addressing option uunniitt..aaddddrreessss is
+     available in addition to the existing ""uunniitt::aaddddrreessss"" syntax.  See the _g_p_i_b
+     help file for details.
+
+Multiple GPIB Controller Improved Presence Tracking
+     ssppeecc now keeps better track of the presence of individual GPIB controllers
+     of the same type.  Previously, a segmentation fault was possible if a
+     configured controller of a particular type was accessed but not installed,
+     while another of the same type was configured and usable.
+
+New Option To Set Data Bits For Generic Serial Devices
+     A new sseerr__ppaarr(()) option ""ddaattaa__bbiittss"" can be used to set the number of data
+     bits for generic serial devices.  Although the default values set by ssppeecc
+     work for almost all serial devices, specific values can be set, if
+     necessary, with this new option.  See the _s_e_r_i_a_l help file for details.
+
+Preventive Fix For ESRF/TACO Error Message Display
+     The code that prints error messages from the ESRF TACO device servers has
+     been updated to avoid segmentation faults possible when unexpectedly long
+     error messages are returned by the TACO devices.
+
+Old Motor Position Rounding Bug Fixed
+     An old bug, where a very particular combination of motor step size,
+     position and user offset could lead to a motor being moved by single steps
+     while other motors are commanded to move, has been fixed.
+
+Recently Introduced Bug With MCA ""aauuttoo__rruunn"" Fixed
+     A bug introduced in release 5.07.1-11 and associated with the new support
+     for the Canberra Multiport II MCA, but affecting the behavior when using
+     mmccaa__ppaarr(()) to set ""aauuttoo__rruunn"" mode for any MCA, has been fixed.
+
+February 4, 2007 - RELEASE 5.07.02-1
+
+Built-In Support For Additional Older NI GPIB cards
+     This release of ssppeecc contains the option to use built-in support for the
+     National Instruments PCI-GPIB (rev 01) and AT-GPIB (ISA) controllers.  With
+     the built-in support, there is no need to install kernel drivers from
+     National Instruments or the open source drivers from Source Forge.  See the
+     _n_i_g_p_i_b help file for details.
+
+January 29, 2007 - RELEASE 5.07.01-11
+
+Support For the Canberra Multiport II MCA
+     Support for the Canberra Multiport II MCA over both Ethernet and USB
+     interfaces is included is this ssppeecc release.  See the _M_P_I_I help file for
+     details.
+
+January 11, 2007 - RELEASE 5.07.01-10
+
+Support Compumotor AX/OEM750 Updated
+     The support for the Compumotor AX and OEM750 motor controllers has been
+     updated to use separate configuration entries (CCMMAAXX and CCMM775500 controller
+     types) so that ssppeecc can handle the small differences between the
+     controllers correctly.  Choosing the OEM750 controller type will allow ssppeecc
+     to properly set the motor speed.
+
+November 28, 2006 - RELEASE 5.07.01-9
+
+Support For Newport PZC200 Motor Controllers
+     Preliminary support for Newport's PZC200 motor controller is included in
+     this ssppeecc release.
+
+Encoder Support For Galil Controllers
+     Encoder support is now available for Galil motor controllers.  Choose
+     controller type GGAALLIILL__EE on the motor screen of the configuration editor,
+     and set the optional encoder steps-per-degree parameter if the encoder step
+     size differs from the commanded-position step size.
+
+Further Fixes For Hecus ASA-32 MCA
+     Problems reading back data from the Hecus ASA-32 MCA ISA cards on fast
+     computers are addressed in this ssppeecc release by performing a series of
+     heuristic tests on the data and retrying the read if any of the tests fail.
+     Due to limitations within the board's firmware, there is no fail-safe way
+     to ensure the data has been read back correctly.
+
+Update For IMS MDrive Plus Controllers
+     The support for the IMS MDrive motor controllers has been updated to be
+     compatible with the newer firmware on the MDrive Plus models.
+
+November 24, 2006 - RELEASE 5.07.01-8
+
+Fix For Trinamic Motor Controller Serial Interface
+     A problem using the serial interface on the Trinamic motor controllers has
+     been fixed.
+
+Additional Fix For ssttaarrtt__aallll Macro Motor Calls
+     A problem with the update in ssppeecc release 5.07.01-4 that eliminated
+     unnecessary ""ssttaarrtt__aallll"" calls of the macro motor __ccmmdd(()) function had an
+     unwanted side effect of preventing the calls when the ""rreeaadd__mmooddee"" optional
+     motor parameter was set to include the PPRREEMMOOVVEE flag.  That problem has been
+     fixed.
+
+November 7, 2006 - RELEASE 5.07.01-7
+
+Fix For Hecus ASA-32 MCA
+     Problems using the Hecus ASA-32 ISA card MCA on faster computers have been
+     addressed with this ssppeecc release by slowing down the I/O port access.
+
+mmoottoorr__ppaarr(()) Bug Fix
+     A bug, where an out-of-range motor number used as the first argument to
+     mmoottoorr__ppaarr(()) could cause a crash with the new ""aadddd"" option, has been fixed.
+
+November 3, 2006 - RELEASE 5.07.01-6
+
+Preliminary Support For IMS MicroLYNX Motor Controllers
+     This ssppeecc release includes preliminary support for the IMS MicroLYNX motors
+     controllers over a serial interface.
+
+Home Search Improvement
+     For motor controllers with home-search support where the direction of the
+     home search can be specified, if the ""hhoommee"" option (rather than ""hhoommee++"" or
+     ""hhoommee--"") to cchhgg__ddiiaall(()) is used, ssppeecc chooses the direction of the home
+     search based on the current dial position.  Previously, ssppeecc chose the
+     search direction to be towards zero.  With this release, the the search
+     direction is chosen to be towards the home position given as the optional
+     third argument to cchhgg__ddiiaall(()) or if that is unset, the ""hhoommee__ppoossiittiioonn""
+     optional parameter from the ccoonnffiigg file.  If neither is set, then the
+     search is towards zero, as before.
+
+November 1, 2006 - RELEASE 5.07.01-5
+
+Server Events Added For mmoottoorr__ppaarr((""ddiissaabbllee""))
+     The ssppeecc server will now send events to clients when the ""ddiissaabbllee"" argument
+     to mmoottoorr__ppaarr(()) is used on the server to change the enabled/disabled state
+     of the associated motor.  The ssppeecc client will keep track of the
+     enabled/disabled state from both local commands and remote events, and the
+     motor must be enabled with both in order to be moved.  The return value of
+     mmoottoorr__ppaarr(()) with the ""ddiissaabbllee"" argument will have bit two set if the motor
+     has been disabled by a remote event.
+
+Home Search Update Delta-Tau Controllers
+     Home searches are now implemented for the Delta-Tau PMAC motor controller.
+
+New uusseerr__ffiilleecchheecckk(()) Hook In nneewwffiillee
+     The standard nneewwffiillee macro contains a new macro hook uusseerr__ffiilleecchheecckk(()) which
+     can be used to test or modify the file name to be used as the data file.
+     See the mmaaccrrooss//ffiillee..mmaacc file in the ssppeecc distribution for an example.
+
+Debugging Crash Fixed
+     A bug, where ssppeecc might crash when the debug level was set to 0x40000
+     (print input context on execution-time errors), has been fixed.
+
+XIA-HSC Bug Fix
+     A bug introduced in ssppeecc release 5.06.02-8, where a rreeccoonnffiigg could cause
+     ssppeecc to crash if a serial node associated with XIA HSC-1 Huber slit
+     controllers couldn't be opened, has been fixed.
+
+October 22, 2006 - RELEASE 5.07.01-4
+
+Improvement For Macro-Hardware Motors
+     A problem associated with configurations with multiple macro-hardware motor
+     controllers, where all the pprreeffiixx__ccmmdd(()) functions were called with the
+     ""pprreessttaarrtt__aallll"" and ""ssttaarrtt__aallll"" commands when any of the macro-hardware
+     motors were moved, even if no motors associated with a particular pprreeffiixx
+     were being moved, has been fixed.
+
+October 13, 2006 - RELEASE 5.07.01-3
+
+Fix For Recently Broken cchhgg__ddiiaallss(()) With Macro Motors
+     A programming error in ssppeecc release 5.06.05-9 that made it impossible to
+     change dial positions for macro motors has been fixed.
+
+EPICS Install Updated
+     The path for the directory containing the EPICS libraries (the eeppiiccss__hhoommee
+     parameter in the iinnssttaallll__ddaattaa file) can now either be the directory
+     containing the subdirectory named bbaassee (as before), or the base directory
+     containing the subdirectory named lliibb.
+
+October 4, 2006 - RELEASE 5.07.01-2
+
+New Check For Calculational Pseudomotor Limits
+     ssppeecc now checks whether moves of real motors will send any associated
+     calculational pseudomotors outside of the configured limits.  Calculational
+     pseudomotors motors are either associated with geometry code (such as the
+     pseudomotors associated with kappa geometries) or implemented via the macro
+     hardware feature (see the _m_a_c___h_d_w help file).  In previous releases, limits
+     for calculational pseudomotors were ignored.
+
+Update For xx1111ffiilltt
+     The xx1111ffiilltt process uses the X library XXLLiissttFFoonnttss(()) call to obtain a list
+     of possible fonts matching a pattern, using either the default built-in
+     pattern or one obtained from the FFoonntt property, as explained in the _x_1_1
+     help file.  Previously, the returned list was limited to 512 items.  That
+     limit has been raised to 8192 to accommodate the increased number of
+     possible fonts on a modern X installation.  Also, a new font debugging
+     property, FFoonnttDDeebbuugg, is available for the xx1111ffiilltt program.  See the _x_1_1
+     help file for details.
+
+Fix For Old Mac Science (Now Bruker) MXC Controllers
+     Code added for support of a new model of the Mac Science (now Bruker) MXC
+     controller in ssppeecc release 5.02.04-1 generates an error with prior models
+     that don't support an added MXC command PPMM (which sets speed and
+     acceleration).  ssppeecc now silently checks whether the command is available
+     and and will stop sending it if the device doesn't support it.
+
+Preliminary Support For Compumotor ViX Motor Controller
+     This ssppeecc release contains preliminary support for the Parker Compumotor
+     ViX motor controllers over a serial interface.
+
+September 20, 2006 - RELEASE 5.07.01-1
+
+New Invocation Option To Specify Start-Up Command Files
+     A new --CC ffiillee start-up option is available to specify command files to be
+     read after all the standard start-up commands files, but before the
+     optional ssppeecc..mmaacc file in the current directory.  Up to 32 such files may
+     be specified on the command line.  See the _s_p_e_c help file for details.
+
+Fixed Timeout Behavior For ddaattaa__ppiippee(())
+     The ""ttiimmeeoouutt"" parameter added to the ddaattaa__ppiippee(()) function in release
+     5.06.04-1 was not implemented correctly.  This release fixes that problem.
+     By default, the ddaattaa__ppiippee(()) processes block as long as necessary.  With
+     this release, setting the ""ttiimmeeoouutt"" parameter will prevent the process from
+     taking any longer than the timeout value.  Also, if the process exits on
+     its own (perhaps due to a crash), ssppeecc will print a message indicating that
+     is what happened.  The default timeout of zero will maintain the
+     traditional blocking behavior.  See the _d_a_t_a___p_i_p_e help file for details.
+
+One More Fix For Updated mmoottoorr__ppaarr(())
+     A remaining bug, where some of the standard optional motors parameters
+     could not have values set if the parameters weren't configured in the
+     ccoonnffiigg file, associated with the new mmoottoorr__ppaarr(()) features added in release
+     5.06.04-1 and mostly fixed in release 5.06.04-9, is completely fixed in
+     this release.
+
+Update For Compumotor 6K Motor Controller
+     The support for the Compumotor 6K motor controllers has been made a bit
+     more robust by flushing out the read buffers before new commands are sent.
+

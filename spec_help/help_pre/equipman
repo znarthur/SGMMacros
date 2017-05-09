@@ -1,0 +1,80 @@
+equipman                            hardware                            equipman
+
+NAME
+     equipman - SPring-8 Equipment Manager RPC interface
+
+DESCRIPTION
+
+     Developers at SPring-8 (the 8-GeV Super Photon Ring in Hyogyo, Japan) are
+     developing an remote procedure call (RPC) protocol for controlling motors,
+     counters and other hardware.  ssppeecc includes initial support for the motors
+     and counters and (as of release 4.05.10) a built-in function for sending
+     arbitrary commands.
+
+THE eemm__iioo(()) FUNCTION
+
+     Arbitrary Equipment Manager commands can be sent using the eemm__iioo(([[hhoosstt,, ]]
+     vvoocc)) function.  When invoked with two arguments, the first argument hhoosstt is
+     a string containing the host name, such as ""bbll3355vvmmee00"", while the second
+     argument is the vvoocc part of the command (verb-object-command?).  If called
+     with just the vvoocc argument, the same host name as the previous eemm__iioo(()) call
+     is used.  If the command  is a "get" vvoocc, the reply is returned as a
+     string.  Otherwise the return value is a zero.  If there is an error, the
+     return value is -1.
+
+EQUIPMENT MANAGER MOTORS
+
+     Configuration of the Equipment Manager (EM) motors is complicated by the
+     length of the string needed to identify each motor.  In fact, two strings
+     are needed to identify each motor.  One is the host name (associated with
+     an IP address) for each VME crate.  The other string identifies the motor,
+     for example as bbll__3355iinn__sstt11__mmoottoorr__11. ssppeecc assumes that for a particular
+     crate, the first components of the motor strings will all be the same.
+     This assumption lets the strings be specified within the current
+     constraints of ssppeecc's configuration editor.
+
+     To configure EM motors, on the DDeevviicceess screen, select the type of motor
+     controller as "SPring-8 Equipment Manager (RPC)".  One controller entry is
+     for an entire VME crate.  For the DDEEVVIICCEE, enter a string in the form
+     hhoossttnnaammee::pprreeffiixx. The field width for this string is about 64 bytes, so very
+     long strings can be accommodated.  An example for DDEEVVIICCEE would be
+     bbll3355vvmmee00::bbll__3355iinn__sstt11. For the NNUUMM field, enter as many motors as will be
+     used in the particular crate.  It is alright for the value to be bigger
+     than necessary.
+
+     By default, the unique part of the name will be mmoottoorr__nnuumm where nnuumm is
+     motor number.  To configure an arbitrary string for the unique part of the
+     name, use the optional motor-parameter screen of the configuration editor,
+     accessed by typing mm (twice) from the main motor screen.  Enter the rest of
+     the EM motor name (minus the intervening underscore __) as a string under
+     "Generic Parameter 1". The field length there is only 18 bytes.  (That
+     constraint is why the rest of the pprreeffiixx is entered with the crate host
+     name.)  In the above example, the string would be mmoottoorr__11.
+
+     Note, the division between what is prefix and what is the unique part for
+     each motor is arbitrary, but must be consistent for each motor crate, with
+     the unique part of the name fitting in the 18-character field on the second
+     optional motor screen.
+
+     With the Equipment Manager identification done, the ssppeecc motor names and
+     mnemonics can be chosen as desired.
+
+     Note, ssppeecc sets the software motor limits in the RPC server for each motor
+     to agree with the software limits in the ssppeecc sseettttiinnggss file.  That is to
+     say, the current software motor limits that could be obtained from the RPC
+     server are ignored.
+
+EQUIPMENT MANAGER COUNTERS
+
+     To configure EM counters and counter/timers, first go to the DDeevviicceess screen
+     of ssppeecc's hardware configuration editor.  In the scalers section, select
+     the type of counter as either "SPring-8 EM Counters (RPC)" or "SPring-8 EM
+     Counter/Timer (RPC)".
+
+     For the DDEEVVIICCEE, enter a string in the form hhoossttnnaammee::pprreeffiixx. For the AADDDDRR,
+     enter the module number of the counter in the crate.  The counter name will
+     be formed by appending __ccoouunntteerr__AA or __ccoouunntteerr__AA__CC to the prefix (depending
+     on whether the command is for the unit or an individual channel), where AA
+     is the value of the AADDDDRR field and CC is the channel number of the counter
+     from the scalers screen.
+

@@ -1,0 +1,49 @@
+.TH "ct" "macro" "08/01/12" "ct.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBct\fP \- count and print results
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)ct.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "ct" "macro" "08/01/12" "ct.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBct [time]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBct\fP macro counts for \fBtime\fP. If
+\fBtime\fP is negative, counting is to monitor counts, otherwise
+\fBtime\fP specifies seconds.
+If there is no argument, the count time is taken from the
+global symbol \fBCOUNT\fP.
+If interrupted with \fB^C\fP, the counts accumulated to that time are shown.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBct 10\fP
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBCOUNT\fP
+\- 
+default counting time
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%counting\fP
+

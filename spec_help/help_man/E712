@@ -1,0 +1,461 @@
+.TH "E712" "hardware" "08/01/12" "E712.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+E712 \- Physik Instrumente E\-712 Piezo Controller
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)E712.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2011,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "E712" "hardware" "08/01/12" "E712.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Physik Instrument E\-712 is a modular digital piezo controller
+available in 3\- and 6\-channel configurations.
+\fBspec\fP supports the controller\(aqs serial and Ethernet interfaces.
+.sp
+Use the \fBD\fPevice screen of \fBspec\fP\(aqs hardware configuration editor, the
+\fBedconf\fP program (normally run from the
+\fBconfig\fP macro), to select the controller type and to
+assign the interface parameters:
+.RS 3m
+.sp
+.nf
+.ft CB
+Motor and Counter Device Configuration (Not CAMAC)
+
+MOTORS     DEVICE ADDR <>MODE NUM                       <>TYPE
+   YES /dev/ttyS1   <> 115200   3 PI E\-712 Controller (Serial)
+   YES   E712host               3 PI E\-712 Controller (Socket)
+.ft P
+.fi
+.RE
+.sp
+For the socket configuration, the \fBDEVICE\fP column contains an IP address or
+resolvable host name.  A optional port number can be specified as in
+\fB192.168.1.123:50000\fP. If not specified, the default port of 50000 is used.
+(That is currently the only port supported by the controller.)
+.sp
+The piezo stages supported by the E\-712 can be operated
+in servo or open\-loop mode.
+When \fBspec\fP makes a connection to the controller,
+\fBspec\fP queries the current setting of each stage.
+If in open\-loop mode, \fBspec\fP uses the
+\fBSVA\fP command to move the motor
+and the \fBVOL?\fP command to read the position.
+In servo mode, the commands \fBMOV\fP and \fBPOS?\fP are used.
+The mode can be changed using the \fB"servo_mode"\fP option to \fBmotor_par()\fP.
+The \fB"servo_mode"\fP parameter can be also added to the hardware
+\fBconfig\fP file as a nonstandard optional parameter, as described below.
+.sp
+When in open\-loop mode, there is no status available from the
+controller as to whether the move has completed or if the stage
+is on target, so moves are considered complete virtually
+immediately after sending the move command.
+Configure the settle time and dead band parameters, described below,
+if delays are needed.
+.sp
+On the \fBM\fPotor
+screen of the configuration editor, choose the controller type as
+\fBPI_E712\fP. An appropriate value for the steps\-per\-degree parameter is 1e6.
+The slew rate, base rate and acceleration time are not used by \fBspec\fP
+for this controller.  However, some of the standard optional motor parameters,
+reached by typing a lower case \fBm\fP from the main motor configuration screen,
+are recognized and may be useful.
+.sp
+To configure a settling time at the end of each move, set the optional
+parameters DC dead band (\fB"dc_dead_band"\fP)
+and DC settle time (\fB"dc_settle_time"\fP).
+If those parameters are configured, after the
+controller reports the move is complete, \fBspec\fP will continue to wait
+an additional time given by the settle time before reporting the move complete.
+In addition, \fBspec\fP will also wait
+for the difference between the target position and
+the actual position to be within the dead band.
+If the motor doesn\(aqt settle within five seconds, \fBspec\fP reports an error.
+Note, the dead band and settling time parameters
+set here are not associated with the controller\(aqs internal
+on\-target tolerance parameter (0x07000900)
+and settling time parameter (0x07000901).
+.sp
+Additionally, the read\-back slop parameter (\fB"slop"\fP) and/or
+the hardware read\-mode parameter (\fB"read_mode"\fP)
+can be used as needed to suppress position discrepancy messages.
+If the slop parameter is set to some number of steps,
+\fBspec\fP will not report position discrepancies
+smaller than that value and will instead silently accept the reported
+hardware value as the position.
+The read\-mode parameter controls how often the position is read
+from the hardware and can also tell \fBspec\fP to always accept the reported
+hardware value, no matter how large.
+\fBspec\fP normally assumes a motor is at its last position.
+If the \fBPREMOVE\fP read\-mode option is set,
+\fBspec\fP will always read the hardware before
+moving the motor.  If the
+\fBALWAYS\fP option is set, \fBspec\fP will read the hardware whenever the
+\fBget_angles\fP command is run from user level.
+If the \fBNO QUERY\fP option is set,
+\fBspec\fP will always assume the hardware is correct and not query
+the user as to how to resolve the discrepancy
+if the returned hardware position differs from the current software position.
+If the \fBNO QUERY\fP option is set, the \fB"slop"\fP parameter is not used.
+.SH "PARAMETER CLASSES"
+.rs
+.sp
+The E\-712 has hundreds of parameters which are described in more detail
+in the Physik Instrumente user manual for the controller.
+Physik Instrumente assigns the parameters to nine classes, each associated
+with a particular function, as follows:
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fBServo\fP	logical axis
+\fBInput\fP	input channel
+\fBOutput\fP	output channel
+\fBSystem\fP	whole system
+\fBDDL\fP	Dynamic Digital Linearization
+\fBStdIF\fP	standard interfaces
+\fBWaveGen\fP	wave generator
+\fBRecorder\fP	data recorder
+\fBFW_Update\fP	firmware
+.TE
+.RE
+.sp
+For any given class, there are values
+for a varying number of channel or index identifiers.
+For example, there are as many \fBServo\fP indices as there are logical axes.
+The number of \fBInput\fP, \fBOutput\fP
+and \fBFW_Update\fP indices depends on the hardware model.
+Some \fBSystem\fP parameters have only one index
+while the number of indices for other
+\fBSystem\fP parameters depends on the hardware model.
+There is only one index for \fBDDL\fP, \fBStdIF\fP, \fBWaveGen\fP and
+\fBRecorder\fP parameters for all hardware models.
+.sp
+Each parameter is associated with a unique hexadecimal number code,
+an axis (or index) identifier number from 1 to the maximum number of indices,
+a class as listed above, an attribute that indicates what privileges
+are need to modify the parameter and a description of the parameter.
+\fBspec\fP only allows modification to unprotected parameters.
+For other parameters, the controller requires a password to make changes.
+.SH "PARAMETER DISPLAY"
+.rs
+.sp
+Various parameter attributes can be displayed with options to the
+\fBmotor_par()\fP function, as described below.
+For example the following displays non\-zero parameters associated
+with axis 1 of the controller:
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC.1> p motor_par(z, "dump_servo")
+Servo parameters:
+           Range Limit max  [1] (0x07000001) : 50
+      Servo Loop Slew\-Rate  [1] (0x07000200) : 5000
+       Open Loop Slew\-Rate  [1] (0x07000201) : 1e+06
+         Servo\-loop P\-Term  [1] (0x07000300) : 0.031
+         Servo\-loop I\-Term  [1] (0x07000301) : 0.000363552
+    Position from Sensor 1  [1] (0x07000500) : 0.5
+    Position from Sensor 2  [1] (0x07000501) : 0.5
+                 Axis Name  [1] (0x07000600) : Z
+                 Axis Unit  [1] (0x07000601) : um
+                       ...
+.ft P
+.fi
+.RE
+.sp
+The following options are available.
+Note, the argument is case insensitive \- upper and/or lower case
+letters can be used interchangeably.
+All commands are directed to the controller associated with motor \fBmne\fP.
+Only commands in the \fBServo\fP class are automatically associated
+with the particular motor axis \fBmne\fP.
+Some forms of the commands suppress displaying parameters
+that have a value of zero for ease of viewing.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "dump")\fP
+\- 
+Display all parameters from all classes.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_all")\fP
+\- 
+Display all parameters from all classes, but suppress
+printing parameters with values of zero.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_Servo")\fP
+\- 
+Display non\-zero parameters associated with the motor \fBmne\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_Servo", n)\fP
+\- 
+Display all parameters associated with the axis \fBn\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_Input")\fP
+\- 
+Display non\-zero parameters associated with all input channels.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_Input", n)\fP
+\- 
+Display all parameters associated with input channel \fBn\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_Output")\fP
+\- 
+Display non\-zero parameters associated with all output channels.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_Output", n)\fP
+\- 
+Display all parameters associated with output channel \fBn\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_System")\fP
+\- 
+Display non\-zero system parameters.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_System", n)\fP
+\- 
+Display all system parameters with index \fBn\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_FW_Update")\fP
+\- 
+Display all non\-zero firmware\-related parameters.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_FW_Update", n)\fP
+\- 
+Display all firmware\-related parameters with index \fBn\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_StdIF")\fP
+\- 
+Display all non\-zero interface\-related parameters.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_DDL")\fP
+\- 
+Display all non\-zero dynamic digital linearization parameters.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_WaveGen")\fP
+\- 
+Display all non\-zero wave generator parameters.
+.HP 5m
+."
+\fBmotor_par(mne, "dump_Recorder")\fP
+\- 
+Display all non\-zero recorder parameters.
+.RE
+.SH "INDIVIDUAL PARAMETERS"
+.rs
+.sp
+Individual parameters can be displayed
+or set using the hexadecimal parameter code.
+A particular parameter code may be associated with more than one parameter,
+as differentiated by index number.
+For \fBServo\fP class parameters, the index number can come from the motor number.
+For all classes of parameters, the index number can be specified using
+a string in the form \fB"hexpar:index"\fP.
+For example, to print the stage type (a
+\fBSystem\fP class parameter) associated with axis 2, use:
+.sp
+.RS 4m
+\fBp motor_par(mne, "0x0f000100:2")\fP
+.RE
+.sp
+For \fBServo\fP class parameters, if the index number is missing,
+it will be derived from the motor number.
+If the index count for the parameter is one, no index need be given.
+Otherwise, an error message is displayed.
+If an index is not needed, the parameter number
+does not need to be passed as a string.
+For example, to print the axis name, the following works:
+.sp
+.RS 4m
+\fBp motor_par(mne, 0x07000600)\fP
+.RE
+.sp
+Parameter values are set by supplying the value in the third argument:
+.sp
+.RS 4m
+\fBmotor_par(mne, 0x7000200, 5000)\fP
+.RE
+.sp
+The abovet sets the servo loop slew\-rate for motor \fBmne\fP to 5000.
+.SH "NONSTANDARD OPTIONAL PARAMETERS"
+.rs
+.sp
+Nonstandard optional parameters are hardware parameters that are
+not part of \fBspec\fP\(aqs device\-independent hardware support.
+The parameters can be recognized by \fBspec\fP\(aqs device\-dependent support,
+as documented for the particular controller.
+.sp
+From the \fBspec\fP hardware configuration editor, nonstandard optional
+parameters are created by typing the
+\fBp\fP command when a device row or motor column contains the highlighted cell.
+For the E\-712, parameters can be associated either
+with the controller unit on the \fBD\fPevices screen
+or with individual motors on the \fBM\fPotor screen.
+.sp
+Nonstandard optional parameters recognized by the E\-712 support
+are the parameter \fB"servo_mode"\fP and all the hexadecimal parameter codes
+recognized by the controller.
+The \fB"servo_mode"\fP parameter and hexadecimal parameters in the
+\fBServo\fP class are associated with an individual motor axis.
+The rest of the hexadecimal parameters are associated with the
+controller entry.
+.sp
+The configuration screen for nonstandard optional parameters for
+a motor channel looks like this
+(reached by typing the \fBp\fP command from the main \fBM\fPotor screen):
+.RS 3m
+.sp
+.nf
+.ft CB
+Custom Parameters for Motor "Xrot" (xrot)          2/2 configured
+
+NAME                      VALUE
+servo_mode                1
+0x7000300                 .031
+
+Type p when done               Type ? and H for help, ^C to quit
+.ft P
+.fi
+.RE
+.sp
+For the controller entry on the \fBD\fPevices screen,
+the nonstandard optional parameter screen looks like this:
+.RS 3m
+.sp
+.nf
+.ft CB
+Custom Parameters for "PI E\-712 Piezo Controller"  6/6 configured
+
+NAME                      VALUE
+0x02000100:1                  1
+0x02000100:2                  1
+0x02000101:1                  1
+0x02000101:2                  1
+0x02000102:1                 16
+0x02000102:2                 16
+.ft P
+.fi
+.RE
+.sp
+The nonstandard optional parameters can also be accessed via the
+\fBmotor_par()\fP command, although if the parameters are given values in the
+\fBconfig\fP file, the \fBconfig\fP file
+values will be reprogrammed when the hardware is reinitialized on
+startup or with the \fBreconfig\fP command.
+.SH "PARAMETER ACCESS VIA \fBmotor_par()\fP"
+.rs
+.sp
+The nonstandard optional parameters may be accessed via
+\fBmotor_par()\fP, whether or not the parameters have been entered into the
+\fBconfig\fP file, as described above.  When using
+\fBmotor_par()\fP to access parameters not associated with a particular axis,
+such as all of the hexadecimal parameters that are not in the
+\fBServo\fP class, the \fBmne\fP argument
+simply identifies the controller to which the parameter belongs.
+.sp
+Note, values for nonstandard optional parameters associated
+with the controller device in the \fBconfig\fP file cannot be modified using
+\fBmotor_par()\fP.
+Their values can only be changed through the configuration editor.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "servo_mode")\fP
+\- 
+Returns one or zero, indicating whether servo mode is on or off
+for the specified axis.
+.HP 5m
+."
+\fBmotor_par(mne, "servo_mode", 1|0)\fP
+\- 
+Sets or clears servo motor for motor \fBmne\fP.
+.HP 5m
+."
+\fBmotor_par(mne, hexpar)\fP
+\- 
+Returns current value for \fBhexpar\fP. If associated with the
+\fBServo\fP class, returns for motor \fBmne\fP.
+Otherwise, if only one "item" associated with the parameter,
+returns that item.
+Otherwise, returns an error.
+.HP 5m
+."
+\fBmotor_par(mne, "hexpar:index")\fP
+\- 
+Returns current value for \fBhexpar\fP associated with item
+\fBindex\fP. Item numbers start at one.
+.HP 5m
+."
+\fBmotor_par(mne, hexpar, value)\fP
+\- 
+Set value for \fBhexpar\fP. If associated with the
+\fBServo\fP class, sets value for motor \fBmne\fP.
+Otherwise, if only one "item" associated with the parameter, sets that item.
+Otherwise, returns an error.
+.HP 5m
+."
+\fBmotor_par(mne, "hexpar:index", value)\fP
+\- 
+Set value for \fBhexpar\fP associated
+with item \fBindex\fP. Item numbers start at one.
+.RE
+.SH "COMMAND PASS THROUGH"
+.rs
+.sp
+Command pass through is available using the following functions.
+Command pass through should be used with caution to avoid interfering with
+the built\-in programming commands \fBspec\fP sends to the controllers.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "send", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the channel associated with \fBmne\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "read", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the channel associated with \fBmne\fP,
+as above, and returns a string containing the response.
+.HP 5m
+."
+\fBmotor_par(mne, "usend", cmd)\fP
+\- 
+Sends the \fBcmd\fP to the controller associated with \fBmne\fP.
+Unlike the \fB"send"\fP option above,
+no channel address is added to the string.
+.HP 5m
+."
+\fBmotor_par(mne, "uread", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the controller associated with \fBmne\fP,
+as above, and returns a string containing the response.  Again, unlike the
+\fB"read"\fP option above, no channel address is added to the string.
+.RE
+

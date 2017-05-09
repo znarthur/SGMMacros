@@ -1,0 +1,28 @@
+te                                    macro                                   te
+
+NAME
+     ttee - read or set the temperature
+
+SYNOPSIS
+
+     ttee [[nneeww__sseett__ppooiinntt]]
+
+DESCRIPTION
+
+     With an argument, the ttee macro changes the temperature-controller set
+     point.  With or without an argument, the macro reads and displays the
+     current temperature and the current set point.
+
+     As with all of ssppeecc's temperature-control macros, you need to define a
+     mmeeaassuurreetteemmpp and a __sseetttteemmpp macro that work correctly with your instruments.
+     See the TTeemmppeerraattuurree CCoonnttrrooll MMaaccrrooss section in the ssppeecc SSttaannddaarrdd MMaaccrroo GGuuiiddee
+     for details.
+
+EXAMPLE
+
+     ttee 11..33
+
+SEE ALSO
+
+     _t_e_r_a_m_p _t_s_c_a_n _d_t_s_c_a_n _s_h_o_w_t_e_m_p
+

@@ -1,0 +1,34 @@
+l                                     macro                                    l
+
+NAME
+     ll - UNIX file listing
+
+SYNOPSIS
+
+     ll [[ooppttiioonnss]] [[ffiilleess ...... ]]
+
+DESCRIPTION
+
+     The ll macro executes the UNIX command llss --ll in the current directory.  Some
+     of the more useful options to llss are:
+
+     --tt Sort by last-modification time.
+
+     --uu Sort by last-access time.
+
+     --rr Reverse the sort order.
+
+     --RR Recursively descend directories and list.
+
+DEFINITION
+
+     ddeeff ll ''uunniixx((""llss --ll $$**""))''
+
+EXAMPLE
+
+     ll --uutt ddoo..**
+
+SEE ALSO
+
+     UUNNIIXX UUsseerr RReeffeerreennccee MMaannuuaall
+

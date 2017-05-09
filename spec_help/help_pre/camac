@@ -1,0 +1,126 @@
+camac                               hardware                               camac
+
+NAME
+     camac - CAMAC interface
+
+INTRODUCTION
+
+     CAMAC was the first hardware interface supported by ssppeecc.
+
+     Supported CAMAC crate controllers include:
+
+         DSP CC-488 (GPIB)
+         Kinetic Systems 3988 (GPIB)
+
+         DSP 6001 with PC004 (ISA Board)
+         Kinetic Systems 2926 with 3922 (ISA Board)
+
+         Jorway 73A (SCSI, supported on Linux and HP)
+         Kinetic Systems 3929 (SCSI, supported on Linux, HP and Sun)
+
+         Kinetic Systems 3929 (SCSI, via KSC's kernel driver) (obsolete)
+         DSP-6001/DCC-11/KS-3912 (via CSS's kernel driver) (obsolete)
+
+         Simulated Camac (for debugging)
+
+     Supported CAMAC modules include:
+
+         BiRa 5302 ADC as counters
+         DSP 2190 MCS Averager
+         DSP E250 12-Bit D/A as Motor Controller
+         DSP E500 Stepper Motor Controller
+         DSP QS-450 4-Channel Counter
+         DSP RTC-018 Real Time Clock
+         DSP TS-201 Dual Timer/Scaler
+         Generalized CAMAC I/O (any F=0/F=16 module)
+         Joerger Single Motor Controller
+         Kinetic Systems 3112 12-Bit D/A as Motor Controller
+         Kinetic Systems 3116 16-Bit D/A as Motor Controller
+         Kinetic Systems 3195 16-Bit D/A as Motor Controller
+         Kinetic Systems 3388 GPIB Interface
+         Kinetic Systems 3512/14 ADC as counters
+         Kinetic Systems 3610 6-Channel 50 MHz Counter
+         Kinetic Systems 3640 Counter used as Counter
+         Kinetic Systems 3640 Counter used as Timer
+         Kinetic Systems 3655 8-Channel Timing Generator
+         LeCroy 2301 interface for qVT MCA
+         LeCroy 3512 Spectroscopy ADC
+         LeCroy 3521A Multichannel Scaling
+         LeCroy 3588 Fast Histogram Memory
+         LeCroy 4434 32-Channel Scaler
+         Technoland 8 Channel 48-bit Counter
+         XIA DXP-4C/4C2X MCA
+
+     Support for additional controllers and modules can be added as needed.
+
+BUILT-IN FUNCTIONS
+
+     ccaa__ggeett((ii,, aa)) - Returns the 24-bit value read (using F = 0) from the ii-th (ii
+          = 0, 1, ... ) CAMAC I/O device (from the ccoonnffiigg file) using subaddress
+          aa.
+
+     ccaa__ppuutt((xx,, ii,, aa)) - Writes the 24-bit value xx (using F = 16) to the ii-th (ii =
+          0, 1, ... ) CAMAC I/O device (from the ccoonnffiigg file) using subaddress
+          aa. Returns the value written.
+
+     ccaa__ffnnaa((ff,, nn,, aa [[,, vv]])) - Sends the arbitrary FNA command to the module in
+          slot nn. If the dataway command given by ff is a write function, the
+          24-bit value to be written is contained in vv. If the dataway command
+          given by ff is a read command, the function returns the 24-bit value
+          obtained from the module.  The user should avoid issuing commands that
+          would cause a LAM and should certainly avoid issuing commands to slots
+          that are being used for motor or counter control by ssppeecc's internal
+          hardware code.
+
+     ccaa__ccnnttll((ccmmdd [[,, aarrgg]) - Performs the selected CAMAC crate command according
+          to the parameter ccmmdd, as follows:
+
+          ""ZZ"" or ""iinniitt"" - performs a crate initialize (reset).
+          ""CC"" or ""cclleeaarr"" - performs a crate clear.
+          ""iinnhhiibbiitt"" - set crate inhibit if aarrgg is 1 and clears crate inhibit if
+               aarrgg is 0.
+
+          During normal operation, you should not need to issue these commands.
+          You should probably issue a rreeccoonnffiigg after sending a crate initialize
+          or clear.
+
+MULTIPLE CRATE CONTROLLERS
+
+     As of ssppeecc release 5.06.02-1, up to four CAMAC crate controllers can be
+     configured at a time.  Currently, use of more than one instance of a
+     particular controller is supported only for the Jorway 73A, the KS-3929 and
+     the DSP 6001 controller models.  Otherwise, only only one instance of a
+     particular type or model of a controller can be used at a time.
+
+     Also, the only CAMAC modules that currently can be installed in other than
+     the first crate (crate 0) are the E250, KS-3655, KS-3610, KS-3112, KS-3116,
+     KS-3195, QS-450, RTC-018 and XIA DXP-4C/4C2X MCA modules.
+
+     In addition, the user-level functions ccaa__ggeett(()), ccaa__ppuutt(()), ccaa__ffnnaa(()) and
+     ccaa__ccnnttll(()) currently only work with the first crate.
+
+     The multiple crate support will be extended for multiple identical
+     controllers, additional modules and to the user-level functions in the
+     future as needed.
+
+     To configure additional controllers from the eeddccoonnff configuration editor
+     (invoked by the ccoonnffiigg macro), use ^^FF or ^^BB on the CAMAC entry of the
+     IInterfaces screen.
+
+     To configure modules in the additional crates, type CC from the CAMAC crate
+     screen to cycle through the crates associated with each controller.
+
+     For scaler modules installed in other than the first CAMAC crate, the crate
+     number must be entered in the same field as the unit number on the SScaler
+     screen of the configuration editor using the crate/unit notation, as in 1/0
+     for crate 1, unit 0.
+
+     For motor modules installed in other than the first CAMAC crate, the crate
+     number is entered as [crate/]unit/channel in the unit/[module/]channel
+     field of the motor screen.
+
+     If only one crate is configured, the ccoonnffiigg file syntax is the same as
+     before.  When multiple crates are configured, additional information
+     specifying crate number for each module and controller is added to the
+     ccoonnffiigg file.
+

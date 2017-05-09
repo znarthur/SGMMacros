@@ -1,0 +1,140 @@
+counting                            hardware                            counting
+
+NAME
+     counting - timer/scaler/mca commands and variables
+
+BUILT-IN COMMANDS AND FUNCTIONS
+
+     mmccoouunntt((tt)) - Begins counting for tt monitor counts. Returns ttrruuee.
+
+     ttccoouunntt((tt)) - Begins counting for tt seconds. Returns ttrruuee.
+
+     ccnntt__mmnnee((ii)) - Returns the string mnemonic of counter ii as given in the
+          configuration file.
+
+     ccnntt__nnaammee((ii)) - Returns the string name of counter ii as given in the
+          configuration file.
+
+     ccnntt__nnuumm((mmnnee)) - Returns the counter number corresponding to the counter
+          mnemonic mmnnee, or -1 if there is no such counter configured.
+
+     ccoouunntteerr__ppaarr((ii,, ss [[,, vv]])) - Returns or sets configuration parameters for
+          counter ii.  Recognized values for the string ss include:
+
+          ""mmoonniittoorr"" - Reassigns the scaler channel used as the monitor-preset
+               counter to the channel associated with counter mmnnee.  Rereading
+               the hardware configuration file with the ccoonnffiigg macro or rreeccoonnffiigg
+               command will restore the monitor channel to that set in the
+               ccoonnffiigg file.  This feature is only available with certain
+               counters.  Counters that currently support this feature include
+               the KS 3640 CAMAC counter, the Joerger VSC16/8 VME scaler and the
+               generic EPICS scaler.
+          ""ttiimmeerr"" - Reassigns the scaler channel used as the time-preset counter
+               to the channel associated with counter mmnnee.  Rereading the
+               hardware configuration file with the ccoonnffiigg macro or rreeccoonnffiigg
+               command will restore the time channel to that set in the ccoonnffiigg
+               file.  Currently no timers support this feature.
+          ""ccoonnttrroolllleerr"" - returns a string containing the controller name of the
+               specified counter.  The controller names are those used in ssppeecc's
+               ccoonnffiigg files.
+          ""uunniitt"" - returns the unit number of the specified counter.  Each
+               counter controller unit may contain more than one counter
+               channel.
+          ""cchhaannnneell"" - returns the channel number of the specified counter.
+          ""rreessppoonnssiivvee"" - returns a nonzero value if the counter responded to an
+               initial presence test or appears otherwise to be working.
+          ""ddiissaabbllee"" - returns a nonzero value if the counter has been disabled
+               by software.  If vv is given and is nonzero, then the counter is
+               disabled.  If vv is given and is zero, the counter becomes no
+               longer disabled.  A disabled counter channel will not be accessed
+               by any of ssppeecc's commands.  Any ccddeeff(())-defined macros will
+               automatically exclude the portions of the macro keyed to the
+               particular counter when the counter is software disabled.
+
+     ggeettccoouunnttss - Loads the built-in array SS[[]] with the scaler counts.
+
+VARIABLES
+
+     SS[[]] - Built-in array that holds scaler contents after a ggeettccoouunnttss command.
+
+     CCOOUUNNTT - Global variable that holds the default count time used by the cctt,
+          uucctt and uuccttnn macros.
+
+     CCOOUUNNTT__TTIIMMEE - Global variable that holds the actual count time used by the
+          cctt, uucctt and uuccttnn macros.
+
+     DDEETT - Global variable that is set to the channel to be used as the detector
+          during scans, usually set to ddeett.
+
+     MMOONN - Global variable that is set to channel to be treated as the monitor
+          during scans, usually set to mmoonn.
+
+     MMOONN__RRAATTEE - Global variable that holds the value SS[[MMOONN]]//SS[[sseecc]] and is
+          updated in the count macro.
+
+     Scaler channel assignments and scaler mnemonics are set in the ccoonnffiigg file.
+     The standard assignments for the first three channels are:
+
+         sseecc = channel 0
+         mmoonn = channel 1
+         ddeett = channel 2
+
+MACROS
+
+     ccoouunntteerrss [[nneeww__mmoonn nneeww__ddeett]] - With scaler channel arguments, this macro
+          assigns those channels to the MMOONN and DDEETT symbols and displays the
+          changed scaler assignment.  Without arguments, the macro displays the
+          current counter assignments, then prompts for new counter channels for
+          MMOONN and DDEETT.
+
+     cctt - A macro that counts for CCOOUUNNTT time if invoked without arguments, or
+          for the time given as an argument.  After counting, the macro prints
+          the scaler contents.  If interrupted with a ^^CC, the counts at the time
+          of the interrupt are displayed.
+
+     uucctt - As above, but updates the screen with the scaler contents while
+          counting.  The screen is updated every UUPPDDAATTEE seconds.  Only the first
+          six counter channels are displayed.
+
+     uuccttnn - As above, but uses cursor control commands to update a multiple line
+          display at the bottom of the screen and will work with more than six
+          counters.
+
+     sshhooww__ccnnttss - A macro that reads counters and displays the scaler contents on
+          the screen.
+
+     ssccaann__ccoouunntt - Normally defined as __ccoouunntt, it is called by all the scan
+          macros.  It is redefined in powder mode to be __ppccoouunntt.
+
+     __ccoouunntt - Normally defined as ccoouunntt, redefined by the sseettssccaannss macro when
+          updated counting during scans is in effect.
+
+     ccoouunntt - Default routine for counting during scans.  It waits for moving to
+          end, counts, waits and reads scalers.  It also uses the cchhkk__bbeeaamm
+          macro.
+
+     cchhkk__bbeeaamm - A hhooookk macro, normally defined as bbrreeaakk.  Can be used to wait
+          for sufficient counts during scans.  See the macro source file
+          ccoouunntt..mmaacc for details.
+
+     uusseerr__ggeettccoouunnttss - A hhooookk macro that allows the user to insert code, if
+          necessary, after the call to ggeettccoouunnttss either to postprocess the
+          counter values, or to implement user-level counters.  For example, in
+          a configuration where the distance between the detector and the sample
+          varies with the cosine of an angle, uusseerr__ggeettccoouunnttss is defined to
+          multiply SS[[DDEETT]] by an appropriate factor.
+
+     uusseerr__pprreeccoouunntt - A hhooookk macro that allows the user to insert code to be run
+          before the call to ttccoouunntt(()) or mmccoouunntt(()).
+
+     uusseerr__ppoossttccoouunntt - A hhooookk macro that allows the user to insert code to be run
+          after the call to ttccoouunntt(()) or mmccoouunntt(()).
+
+     A negative argument to cctt, uucctt, uuccttnn or ccoouunntt means count to monitor
+     counts.
+
+SEE ALSO
+
+     _c_t _w_a_i_t
+     Hardware notes in the ssppeecc Reference Manual
+

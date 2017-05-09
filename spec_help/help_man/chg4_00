@@ -1,0 +1,238 @@
+.TH "changes" "spec 4.00 Release Notes" "08/01/12" "chg4_00.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 4
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg4_00.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1996,1997 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 4.00 Release Notes" "08/01/12" "chg4_00.rst 6.1  08/01/12 CSS"
+.
+.SH "RELEASE 4 \- text in preparation"
+.rs
+.sp
+These
+notes describe the general features added to \fBspec\fP for release 4.
+.SH "Introduction"
+.sp
+\fBspec\fP release 4 has been in the works for many months.
+It includes many new features
+to make the program easier to use and to support new hardware devices.
+One of the main reasons for the new release is to accommodate
+two\-dimensional detectors.
+To that end, a new array data type has been added, along with
+functions and operators to work on the arrays.
+.sp
+Preliminary support for a number of CCD cameras is already available,
+including models from Princeton Instruments and Photometrics.
+.sp
+Descriptions of the new features in release 4 follow.
+.SH "New Macro Functions"
+.sp
+Macro function are now available.
+Macros
+can now be defined to return values and can be used as operands in
+expressions.
+The macro definition can include function arguments, which then
+become available to the
+body of the macro function.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+def factorial(n) \(aq{
+        if (n <= 1)
+                return(1);
+        return(n * factorial(n\-1))
+}\(aq
+.ft P
+.fi
+.RE
+.SH "New Array Data Type"
+.sp
+A new type of data array has been created.
+Besides eventually replacing the never\-popular data groups in the
+standard macros, the new arrays add new capabilities to \fBspec\fP.
+Unlike \fBspec\fP\(aqs traditional
+\fBassociative\fP
+arrays,
+which can be indexed by arbitrary numbers or strings and
+which store elements in no particular order and not particularly
+efficiently, the
+new array data types are indexed by consecutive integers starting from zero
+and store data in contiguous memory, allowing efficient access.
+The new arrays must be declared and dimensioned with the new
+\fBarray\fP
+keyword
+to allow \fBspec\fP to allocate memory for the array and to distinguish
+the new arrays from the associative arrays.
+See the
+\fI\%arrays\fP help file for detailed information.
+.SH "New CCD Camera Support"
+.sp
+Support for image acquisition using CCD cameras is now part of \fBspec\fP.
+Currently hardware support is available for a Photometrics model
+on an HP 700 platform, several Princeton Instruments models on
+Sun platforms using
+an S\-Bus SDV interface card and for the ESRF Frelon camera over several
+interfaces.
+Support for additional cameras will be added as user needs are made
+known to CSS.
+.sp
+The
+\fBimage_get()\fP,
+\fBimage_put()\fP
+and
+\fBimage_par()\fP
+functions are available for reading the image and controlling
+the hardware.
+Also, the new functions
+\fBfmt_write()\fP
+and
+\fBfmt_read()\fP
+allow the array data from the CCD cameras to be written to and read from
+binary data files.
+.SH "New Password Protection For Designated Motors"
+.sp
+A new option to the
+\fBspec_par()\fP
+function allows \fBspec\fP administrators to gain access to motors
+locked out in the
+\fBconfig\fP
+file to ordinary users.
+This features allows the administrator to position the motors
+without having first to go into the configuration
+editor to change access modes.
+Entering
+\fBspec_par("specwiz", 1)\fP
+causes \fBspec\fP to prompt for the
+\fB"Wizard\(aqs password"\fP.
+If entered correctly, the characters
+\fB_WIZ\fP
+are appended to the prompt to remind the user of the special powers,
+and motors configured with protected status can be moved.
+Entering
+\fBspec_par("specwiz", 0)\fP
+disables the special mode.
+The encrypted
+specwiz
+password is taken from the
+\fB/etc/passwd\fP
+file, just as with the
+specwiz feature for the configuration editor.
+.SH "New \fBsrand()\fP Function"
+.sp
+The new function
+\fBsrand(value)\fP
+sets the seed value for the random number generator used by the
+\fBrand()\fP
+function to the integer
+\fBvalue\fP.
+This feature allows the same sequence of random numbers to
+be generated reproducibly by resetting the seed to the same value.
+.SH "\fBwhatis()\fP Function Enhanced"
+.sp
+The
+\fBwhatis()\fP
+function now produces a text description of the object
+specified by its first argument, if a second nonzero argument
+is supplied.
+The
+\fBwhats\fP
+macro takes advantage of the new syntax.
+.SH "New MCA Features"
+.sp
+.RS 4m
+.nf
+mca_par("disable")
+mca_get(array)
+mca_put(array)
+mca_spar(), mca_sput(), mca_sget()
+numbering is fixed in config file with @
+numbering needn\(aqt be consecutive
+mca_sel("?")
+ROI support
+.fi
+.sp
+.RE
+.sp
+PCA\-II, PCA\-3, PCA Multiport implements array get/put
+.SH "Can Dynamically Assign Monitor Channel"
+.sp
+For certain counters, the scaler channel used for the monitor preset
+can be changed using the command
+\fBcounter_par(mne, "monitor")\fP.
+Counters that currently support this feature are the
+KS 3640 CAMAC counter, the Joerger VSC16/8 VME scaler and the
+generic EPICS scaler.
+.SH "Unlimited String Length For \fBprintf()\fP Family"
+.sp
+There is no longer a limit to the lengths of strings that can be
+printed or formatted using the
+\fBprint\fP,
+\fBprintf()\fP,
+\fBsprintf()\fP
+and
+\fBfprintf()\fP
+functions.
+.SH "\fBser_get()\fP, \fBser_put()\fP Revised"
+.sp
+The
+\fBser_get()\fP
+function has been
+revised, rationalized
+ser_par(sel, "timeout")
+.SH "Macro Facility Internals Rewritten"
+.sp
+The internal code for handling macros has been entirely rewritten.
+Also, the internal copies of the
+macros are now saved in the same file with the other state
+information.
+There are no more
+\fBuserfiles/user_tty#M\fP
+in the auxiliary file directory
+.SH "New Version of GNU Readline Library Bundled"
+.sp
+A newer version of the GNU readline library is now bundled with \fBspec\fP.
+.SH "Obsolete Functions and Commands Are Gone"
+.sp
+The long\-obsolete
+\fBfixstate\fP
+and
+\fBgetstate\fP
+commands are gone (although the once\-related
+\fBsavstate\fP
+command still exists).
+The obsolete functions
+\fBpl_xget()\fP,
+\fBpl_yget()\fP,
+\fBpl_put()\fP,
+\fBpl_anal()\fP,
+\fBpl_dump()\fP
+and
+\fBplot_pts()\fP
+have been eliminated from the program, although, for the sake of
+way\-backwards compatibility, the file
+\fBmacros/compat.mac\fP
+contains replacement definitions for the functions.
+.SH "New Hardware Support"
+.sp
+Highland Tech VME HLV 544 motor controller
+.sp
+BI9000 correlator support
+.sp
+Many improvements to ESRF support
+.sp
+new config screen for MCA/CCD
+.sp
+other config changes ....
+

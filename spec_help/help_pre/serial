@@ -1,0 +1,236 @@
+serial                              hardware                              serial
+
+NAME
+     serial - RS-232C interface functions
+
+DESCRIPTION
+
+     Generic user-level access to the serial ports is through the sseerr__ggeett(()),
+     sseerr__ppuutt(()) and sseerr__ppaarr(()) functions described in the following sections.  The
+     generic serial devices are configured on the IInterfaces screen of the
+     configuration editor, as in the example below:
+
+        SSEERRIIAALL       DDEEVVIICCEE <<>>TTYYPPEE  <<>>BBAAUUDD                       <<>>MMOODDEE
+        00  YYEESS   //ddeevv//ttttyySS00     <<>>   1199220000                          rraaww
+        11  YYEESS   //ddeevv//ttttyySS11     <<>>    99660000                 ccooookkeedd iiggnnccrr
+
+     Each serial device is numbered, starting from zero, and that number is the
+     first parameter aaddddrr in the functions below.  Up to 21 serial devices can
+     be configured, numbered from 0 to 20.  Only three devices are displayed at
+     a time.  Use the ^^FF and ^^BB commands to display additional rows.
+
+     Do not configure a generic serial device when the associated device node is
+     for a motor controller, counter/timer or other acquisition device that uses
+     ssppeecc's built-in support.  The serial device associated with such
+     controllers is specified as part of the controller configuration on either
+     the DDevices screen or the AAcquisition screen of the configuration editor.
+
+     The default serial interface is through the built-in standard UNIX serial
+     driver.  The TTYYPPEE menu allows optional selection of additional serial
+     interfaces, namely EEPPIICCSS, TTAACCOO or SSOOCCKKEETT. (TTAACCOO was previously labeled
+     EESSRRFF.) For EEPPIICCSS, the DDEEVVIICCEE field should contain the base name of the
+     serial record process variables.  For TTAACCOO, the DDEEVVIICCEE field should contain
+     the name of the associated device server.  The SSOOCCKKEETT serial interface
+     connects to Ethernet-to-serial devices using the IP address (or resolvable
+     host name) and port number entered in the DDEEVVIICCEE field, such as
+     119922..116688..11..110000::77889900.
+
+     Supported BBAAUUDD settings are 300, 600, 1200, 1800, 2400, 4800, 7200, 9600,
+     14400, 19200, 28800, 38400, 57600, 115200, 230400, 460800, 921600, 1000000,
+     1152000, 1500000, 2000000, 2500000, 3000000, 3500000 and 4000000 baud.
+     However, not all baud rates are supported by all platforms and by all
+     serial interface hardware.
+
+     The baud rate setting is ignored for the SSOOCCKKEETT type of interface.  See the
+     documentation associated with a particular Ethernet-to-serial device for
+     procedures to set the serial port parameters.
+
+     The behavior of the serial interface depends on a number of configurable
+     parameters, set by the MMOODDEE menu, described next.  The seldom-used
+     data-bits and stop-bits parameters can only be adjusted at run time using
+     the sseerr__ppaarr(()) function, described further below.
+
+TTY MODES
+
+     The serial device tty modes refer to the kind of character processing the
+     UNIX kernel inserts between the serial device and the ssppeecc program.
+     (Depending on the platform, tty modes descriptions might be found in the
+     tteerrmmiiooss((33)), tteerrmmiioo((77)) or ttttyy((44)) sections of the UNIX man pages.)  ssppeecc sets
+     the tty modes for a particular serial device according to the selection in
+     ssppeecc's hardware ccoonnffiigg file.
+
+     There are many more tty-mode parameters recognized by the serial device
+     drivers than ssppeecc offers as configuration options.  Only the parameters
+     that have been found to be needed by ssppeecc users can be configured.
+
+     The standard serial ports can be configured in either rraaww mode or several
+     flavors of ccooookkeedd mode.  In rraaww mode, the kernel does minimal processing of
+     the bytes transmitted and received, generally passing all of the 256
+     possible values through.  Also, the received bytes are available to ssppeecc as
+     soon as they are received by the kernel.  For transferring binary data, rraaww
+     mode is essential.  On some platforms, a seven-bit raw mode is available,
+     where the eighth bit is used for parity.
+
+     In ccooookkeedd mode, the kernel buffers the incoming data.  The input data only
+     becomes available to be read by ssppeecc when a newline or carriage return is
+     received.  Also, the kernel may do some processing of the data, such as
+     converting tabs to spaces on output or processing delete or line-erase
+     characters on input.  The character processing makes ccooookkeedd mode
+     inappropriate for receiving binary data.  The various flavors of ccooookkeedd
+     mode implemented in ssppeecc set whether to use even or odd parity or no
+     parity, whether to disable software flow control and whether to ignore
+     carriage returns on input.
+
+     ssppeecc does turn off input echoing in both rraaww and ccooookkeedd modes.
+
+     Note, the TTAACCOO, EEPPIICCSS and SSOOCCKKEETT interface types only support rraaww mode.
+
+BUILT-IN FUNCTIONS
+
+     sseerr__ggeett((aaddddrr)) - If the serial device aaddddrr is in ccooookkeedd mode, reads and
+          returns a string of bytes, up to and including a newline character, or
+          returns the null string if the read times out.  If the device is in
+          rraaww mode, the function reads and returns as many characters as are
+          already available in the queue.  If no characters are available, waits
+          for a character and returns it, or returns a null string if no
+          characters become available within the time-out period.  The maximum
+          string length in this mode is 8191 characters.
+
+     sseerr__ggeett((aaddddrr,, nn)) - If the serial device aaddddrr is in ccooookkeedd mode, reads up to
+          a newline, but no more than nn bytes from the serial device with
+          address aaddddrr and returns the string so obtained.  In ccooookkeedd mode, no
+          characters can be read until a newline is received.  In rraaww mode,
+          reads up to nn characters or until a timeout.  If nn is zero, the
+          routine reads up to a newline or the maximum of 8191 characters,
+          whichever comes first.  In both cases, if the read is not satisfied
+          before a timeout, the routine returns the null string.
+
+     sseerr__ggeett((aaddddrr,, eeooss)) - Reads characters until a portion of the input matches
+          the string eeooss and returns the string so obtained, including the
+          end-of-string characters.  If no match to the end-of-string characters
+          is found within the timeout period, the null string is returned.
+
+     sseerr__ggeett((aaddddrr,, dd)) - Reads incoming bytes into the data array dd. The size of
+          dd determines how many bytes are to be read.  Sub-array syntax can be
+          used to limit the number of bytes.  The function returns the number of
+          array elements read, or zero if the read times out.  Note, no byte
+          re-ordering is done for short- or-long integer data, and no format
+          conversions are done for float or double data.
+
+     sseerr__ggeett((aaddddrr,, mmooddee)) - If mmooddee is the string ""bbyyttee"", reads and returns one
+          unsigned binary byte.  If mmooddee is the string ""sshhoorrtt"", reads two binary
+          bytes and returns the short integer so formed.  If mmooddee is the string
+          ""lloonngg"", reads four binary bytes and returns the long integer so
+          formed.  The last two modes work the same on both bbiigg--eennddiiaann and
+          lliittttllee--eennddiiaann platforms.  On both, the incoming data is treated as bbiigg
+          eennddiiaann. If the incoming data is lliittttllee eennddiiaann, use ""sshhoorrtt__sswwaapp"" or
+          ""lloonngg__sswwaapp"". (For ssppeecc versions prior to release 5.01.01, use iinntt22 for
+          sshhoorrtt and iinntt44 for lloonngg.)
+
+     sseerr__ppuutt((aaddddrr,, ss)) - Writes the string ss to the serial device with address
+          aaddddrr. Returns the number of bytes written.
+
+     sseerr__ppuutt((aaddddrr,, dd [[,, ccnntt]) - Writes the contents of the data array dd to the
+          serial device with address aaddddrr. By default, the entire array (or
+          subarray, if specified) will be sent.  The optional third argument ccnntt
+          can be used to specify the number of array elements to send.  For
+          short and long integer arrays, the data will be sent using native byte
+          order.  The ""sswwaapp"" option of the aarrrraayy__oopp(()) function can be used to
+          change the byte order, if necessary.  No format conversions are
+          available for float or double data.  Returns the number of bytes
+          written.
+
+     sseerr__ppaarr((aaddddrr,, ""ddeevviiccee__iidd"")) - Returns the name of the associated serial
+          device or -1 if there is no serial device configured as aaddddrr (as of of
+          ssppeecc release 5.05.05-7).
+
+     sseerr__ppaarr((aaddddrr,, ""rreessppoonnssiivvee"")) - Returns 1 if the associated serial device is
+          open, 0 if the device could not be opened and -1 if there is no serial
+          device configured as aaddddrr (as of of ssppeecc release 5.05.05-7).
+
+     sseerr__ppaarr((aaddddrr,, ""ddrraaiinn"")) - Waits for pending output on the associated serial
+          device to be transmitted (as of ssppeecc release 5.09.01-1), but can be
+          interrupted with ^^CC. Use the ""fflluusshh"" option, described next, to empty
+          the output queue.  Does nothing and returns immediately for SSOOCCKKEETT,
+          EEPPIICCSS and TTAACCOO serial interfaces.
+
+     sseerr__ppaarr((aaddddrr,, ""fflluusshh"" [[,, hhooww]])) - Flushes the input and/or output queues for
+          the serial device with address aaddddrr. If hhooww is zero or absent, the
+          input queue is flushed.  If hhooww is one, the output queue is flushed.
+          Otherwise, both queues are flushed.  The input queue may contain
+          characters if a sseerr__ggeett(()) times out before the read is satisfied, or
+          if more characters arrive than are requested.
+
+     sseerr__ppaarr((aaddddrr,, ""qquueeuuee"")) - Returns the number of characters in the serial
+          device's input queue.  The input queue may contain characters if a
+          sseerr__ggeett(()) times out before the read is satisfied, or if more
+          characters arrive than are requested.
+
+     sseerr__ppaarr((aaddddrr,, ""ttiimmeeoouutt"" [[,, tt]])) - Returns or sets the read timeout for the
+          serial device with address aaddddrr. The units are seconds.  A value of
+          zero indicates no timeout - a sseerr__ggeett(()) will wait until the read is
+          satisfied or is interrupted by a ^^CC. The smallest allowed value of
+          0.001 will cause the sseerr__ggeett(()) to return immediately.  A negative
+          value resets the timeout to the default of two seconds.
+
+     sseerr__ppaarr((aaddddrr,, ""bbaauudd"" [[,, vvaalluuee]])) - Returns or sets the baud rate for the
+          serial device with address aaddddrr (as of ssppeecc release 5.08.6-4).  Valid
+          baud rates are from 300 to 4000000.  The function returns the device's
+          baud rate.  If vvaalluuee isn't valid or if there was an error, the
+          function returns -1.  Reading the hardware ccoonnffiigg file resets the baud
+          rate to the value in the file.  ssppeecc cannot set the baud rate on
+          SSOOCCKKEETT interfaces.
+
+     sseerr__ppaarr((aaddddrr,, ""ssttoopp__bbiittss"" [[,, bbiittss]])) - Returns or sets the stop-bits value
+          for the serial device with address aaddddrr (as of ssppeecc release
+          5.06.05-7).  Normal values are one or two.  The default value of one
+          is appropriate for nearly every serial device, and this command should
+          very rarely be needed.  Note, to set the non-default value, this
+          command will need to be issued each time after reading the hardware
+          ccoonnffiigg file.  This mode is not supported on SSOOCCKKEETT interfaces.
+
+     sseerr__ppaarr((aaddddrr,, ""ddaattaa__bbiittss"" [[,, bbiittss]) - Returns or sets the data-bits value
+          for the serial device with address aaddddrr (as of of ssppeecc release
+          5.07.02-2).  Accepted values are 5, 6, 7 and 8.  The default values of
+          seven if parity is enabled and eight if parity is disabled should work
+          for nearly every serial device, and this command should very rarely be
+          needed.  Note, to override the default value, this command needs to be
+          issued after reading the hardware ccoonnffiigg file (on start up and on
+          rreeccoonnffiigg).  This mode is not supported on SSOOCCKKEETT interfaces.
+
+     sseerr__ppaarr((aaddddrr,, ""ddttrr"" [[,, 11||00]])) - Returns the current setting or sets or
+          clears the Data Terminal Ready (DTR) control line (as of ssppeecc release
+          5.08.03-4).  Only available on standard serial interfaces.  Reset on
+          hardware reconfiguration.
+
+     sseerr__ppaarr((aaddddrr,, ""rrttss"" [[,, 11||00]])) - Returns the current setting or sets or
+          clears the Request To Send (RTS) control line (as of ssppeecc release
+          5.08.03-4).  Only available on standard serial interfaces.  Reset on
+          hardware reconfiguration.
+
+     sseerr__ppaarr((aaddddrr,, ""ddssrr"")) - Returns the current setting of the Data Set Ready
+          (DSR) control line (as of ssppeecc release 5.08.03-4).  Only available on
+          standard serial interfaces.
+
+     Values for any combination of the parameters ""ttiimmeeoouutt"", ""bbaauudd"",
+     ""ssttoopp__bbiittss"", ""ddaattaa__bbiittss"", ""ddttrr"", and ""rrttss"" can be set in one call of
+     sseerr__ppaarr(()) by combining assignments in a comma-separated list (as of ssppeecc
+     release 5.08.03-4), as in:
+
+         sseerr__ppaarr((aaddddrr,, ""ttiimmeeoouutt==11..55,,bbaauudd==2288880000,,ssttoopp__bbiittss==22,,ddaattaa__bbiittss==88""))
+
+     All the sseerr__ggeett(()) calls will store leftover bytes in a queue.  Contents
+     from the queue will be returned on a subsequent sseerr__ggeett(()) call.  Bytes are
+     leftover if the read finishes with a timeout, if more bytes have arrived
+     than are asked for or if more bytes are available after an end-of-string
+     match.  Use the ""fflluusshh"" option of sseerr__ppaarr(()) to clear the input queue, if
+     needed.
+
+     To transfer binary byte streams containing null bytes, use the data-array
+     versions of sseerr__ggeett(()) and sseerr__ppuutt(()) with byte arrays.  Null bytes mark the
+     end of a normal string.
+
+SEE ALSO
+
+     _g_p_i_b _s_o_c_k_e_t_s _c_o_n_f_i_g___a_d_m
+

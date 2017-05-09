@@ -1,0 +1,63 @@
+.TH "flow" "reference" "08/01/12" "flow.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+flow \- flow control
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)flow.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "flow" "reference" "08/01/12" "flow.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+A \fBstatement_block\fP is either a \fBstatement\fP or
+.sp
+.RS 4m
+\fB{ statement;  statement; ... }\fP
+.RE
+.sp
+Conditionals
+.sp
+.RS 4m
+\fBif (condition) statement_block\fP
+.sp
+\fBif (condition) statement_block else statement_block\fP
+.RE
+.sp
+Loops
+.sp
+.RS 4m
+\fBwhile (condition) statement_block\fP
+.sp
+\fBfor (start; condition; increment) statement_block\fP
+.RE
+.sp
+Branching within loop statement_blocks:
+.sp
+.RS 4m
+\fBcontinue\fP
+.sp
+\fBbreak\fP
+.RE
+.sp
+To jump back to the command level (usually on errors):
+.sp
+.RS 4m
+\fBexit\fP
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%syntax\fP
+.sp
+Kernighan and Ritchie, \fBThe C Programming Language\fP.
+

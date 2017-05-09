@@ -1,0 +1,116 @@
+nicomp                              hardware                              nicomp
+
+NAME
+     nicomp - Nicomp Model TC-100 Autocorrelator
+
+DESCRIPTION
+
+     The Nicomp TC-100 Autocorrelator is selected in the config file as
+
+         RRSS__TTCC110000 == //ddeevv//ttttyyXXXX  bbaauudd__rraattee
+
+     When running eeddccoonnff (or the ccoonnffiigg macro), use the MMCCAAss section of the
+     DDeevviicceess screen to select the Nicomp autocorrelator.
+
+FUNCTIONS
+
+     The mmccaa__ppaarr(()) function controls the correlator behavior as follows:
+
+     mmccaa__ppaarr((""cclloocckk"")) - returns the value of the current clock time parameter in
+          microseconds.
+
+     mmccaa__ppaarr((""cclloocckk"",, vvaalluuee)) - sets the clock time parameter.  The units for
+          vvaalluuee are microseconds.  Valid clock times are of the form XX..XXeeYY where
+          XX..XX ranges from 0.1 to 1.6 and YY ranges from 0 to 5.  Values outside
+          these bounds will be rounded to the closest allowed value.  The new
+          value takes effect on the next rruunn command.
+
+     mmccaa__ppaarr((""pprreessccaallee"")) - returns the value of the prescale factor.
+
+     mmccaa__ppaarr((""pprreessccaallee"",, vvaalluuee)) - sets the value of the prescale factor.  Valid
+          prescale values are from 1 to 99.  The new value takes effect on the
+          next rruunn command.
+
+     mmccaa__ppaarr((""ddbbaassee__mmooddee"")) - returns the state of the baseline mode.  A return
+          value of 1 means delayed baseline mode is in effect.  A return value
+          of 0 means delayed baseline mode is off.
+
+     mmccaa__ppaarr((""ddbbaassee__mmooddee"",, 11||00)) - sets the state of the baseline mode.  A value
+          of 1 turns on delayed-baseline mode.  A value of 0 turns it off.  The
+          new mode takes effect on the next rruunn command.
+
+     mmccaa__ppaarr((""ddbbaassee"")) - returns the value of the delayed baseline from the last
+          data obtained using mmccaa__ggeett(()).
+
+     mmccaa__ppaarr((""ccbbaassee"")) - returns the value of the calculated baseline from the
+          last data obtained using mmccaa__ggeett(()).
+
+     mmccaa__ppaarr((""ttccnnttss"")) - returns the value of the total-counts monitor channel
+          from the last data obtained using mmccaa__ggeett(()).
+
+     mmccaa__ppaarr((""ppccnnttss"")) - returns the value of the total-prescaled-counts monitor
+          channel from the last data obtained using mmccaa__ggeett(()).
+
+     mmccaa__ppaarr((""rrttiimmee"")) - returns the value of the run-time monitor channel from
+          the last data obtained using mmccaa__ggeett(()) in seconds.
+
+     mmccaa__ppaarr((""cclleeaarr"")) - clears the correlator.
+
+     mmccaa__ppaarr((""rruunn"")) - sends the current clock-time, prescale and
+          delayed-baseline parameters to the correlator and starts the
+          correlator.  The ttccoouunntt(()) and mmccoouunntt(()) functions also start the
+          correlator.
+
+     mmccaa__ppaarr((""hhaalltt"")) - stops the correlator.  The correlator is also halted when
+          count intervals specified by ttccoouunntt(()) or mmccoouunntt(()) have elapsed, or
+          when counting is aborted using a ^^CC.
+
+     mmccaa__ppaarr((""pplloott"")) - reads off the real-time data plot from the running
+          correlator.  The data obtained is a very low resolution version of the
+          correlation function.
+
+     mmccaa__ggeett((gg,, ee)) - reads the current data from the correlator, and stuffs the
+          data into the data group gg element ee.
+
+MACROS
+
+     ccllrr - clears the correlator.
+
+     rruunn - starts the correlator.
+
+     hhaalltt - stops the correlator.
+
+     ggeett - reads the correlator data and plots it.
+
+     ccllkk [[cclloocckk__ttiimmee]] - sets the clock time.  The macro prompts for a value if
+          it is not given as an argument.
+
+     pprree [[pprreessccaallee__ffaaccttoorr]] - sets the prescale factor.  The macro prompts for a
+          value if it is not given as an argument.
+
+     ddbbaassee [[00||11]] - sets delayed-baseline mode.  The macro prompts for a value if
+          it is not given as an argument.
+
+     ccbbaassee - prints the value of the calculated baseline from the last data
+          read.
+
+     cctt [[ccoouunntt__ttiimmee]] - accumulates correlation function for ccoouunntt__ttiimmee seconds.
+          Plots the data at the end of count_time.
+
+     uucctt [[ccoouunntt__ttiimmee]] - accumulates correlation function for ccoouunntt__ttiimmee seconds.
+          Updates a low resolution display of the correlation function while
+          counting.
+
+     qqeellsspplloott - does a screen plot of the current data using labels appropriate
+          for a correlation function.
+
+     qqeellssffiillee - saves the current data to the datafile.  After the data points
+          are saved, two lines of information are saved as
+          ##UU22 cclloocckk__ttiimmee pprreessccaallee ccbbaassee ddbbaassee
+          ##UU33 ddbbaassee__mmooddee ttccnnttss ppccnnttss rrttiimmee
+
+     where the parameters are, in order: the clock time, the prescale factor,
+     the values of the calculated and delayed baselines, a zero or one to
+     indicate if the delayed baseline was used, the total counts, the total
+     prescaled counts and the elapsed time from the correlator.
+

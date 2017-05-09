@@ -1,0 +1,487 @@
+changes                      spec 5.01 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 5.01
+
+April 20, 2002 - RELEASE 5.01.03
+
+Updated Help Viewer
+     The ssppeecc help viewer has been updated.  The viewer can now jump to keyword
+     locations given by line numbers in the SSPPEECCDD/help/.links file.  Also, new
+     commands to move forward and back by single lines and by half a screen are
+     availble when the viewer is used directly (rather than sending output
+     through a pager).
+
+Addition To Standard Scan Header
+     The default __hheeaadd macro now also writes the contents of the UUBB[[]] and QQ[[]]
+     arrays in the scan headers prefixed by ##GG33 and ##GG44 respectively.  The
+     obsolete MM[[]] array, previously written prefixed by ##GG22, has been
+     eliminated.  Also, the output format for all ##GG parameters has been changed
+     in the __hheeaadd__ppaarr from %%gg to %%..1100gg macro, which increases the number of
+     significant figures from six to ten.
+
+Small Fix For kkaappppaa Code
+     A bug in the kkaappppaa geometry code where the cut points for the cchhii and pphhii
+     angles were not applied to the calculations of the angles has been fixed.
+
+Support For Alternate zzaaxxiiss Configuration
+     The ggeeoo__zzaaxxiiss..cc code has been modified to support an alternate
+     configuration that includes a refraction correction on AALLPPHHAA and BBEETTAA.  The
+     correction only occurs if the new geometry parameter AALLPPHHAA__CC (defined as
+     QQ[[2211]]) is nonzero.
+
+Alternative EPICS Motor Naming Convention
+     An alternative to the motor naming convention used at APS for the EPICS
+     motor record process variables is now available.  See the _e_p_i_c_s help file
+     for details.
+
+Support For Socket-based Serial Interface
+     ssppeecc now supports Ethernet-to-serial devices such as the ATOP Technologies
+     TigerLink.  Only the device-independent sending and receiving of serial
+     data over sockets is implemented.  Configuration of baud rate, parity and
+     other parameters must be taken care of outside of ssppeecc.  To configure such
+     a device, select SSOOCCKKEETT in the AADDDDRR (for controllers) or TTYYPPEE (for a
+     generic user-level serial interface) fields and enter the host name and
+     port number separated by a colon in the DDEEVVIICCEE field.
+
+Support For VME DAC Motors
+     The DAC motor support now includes VME DAC modules that use A16 addressing
+     to set a single DAC 12- or 16-bit output register.
+
+Support For ACS MCB-4B Motor Controller
+     The new Advanced Control Systems MCB-4B motor controller with RS-232C
+     interface is now supported.
+
+Support For Ortec Trump-PCI MCA
+     ssppeecc now supports the Ortec Trump-PCI MCA on LLiinnuuxx platforms.
+
+Upgrade For Orsim MCA-7700 and Ortec Trump MCA
+     The support for the Orsim MCA-7700 and Ortec Trump MCA now implements
+     counting to a peak preset.  Use the new ""ppeeaakk__mmooddee"" mmccaa__ppaarr(()) option to
+     select.  Also, some problems with setting and clearing the
+     region-of-interest (ROI) have been fixed.  In addition, a new ""aauuttoo__cclleeaarr""
+     mmccaa__ppaarr(()) option is available.  When set, the MCA will be cleared before
+     starting.  The auto-clear mode is on by default.
+
+Preliminary Support For Roentec MCA
+     The Roentec XFlash MAX MCA is now supported.  This MCA uses a serial
+     interface.
+
+Upgrade For IMS Motor Controllers
+     ssppeecc now supports the Intelligent Motion Systems (IMS) motor controllers in
+     non-party-line mode.  Previously, only the daisy-chained party-line mode
+     was implemented.
+
+Fix For Riso ECB Motor Controllers
+     A buffer overflow bug that resulted in segmentation faults with the RISO
+     ECB motor controllers on some platforms has been fixed.
+
+Fix For GPIB Devices
+     A buffer overflow bug that could causes segmentation faults with ssppeecc's
+     built-in support for a few GPIB devices on some platforms has been fixed.
+
+March 22, 2002 - RELEASE 5.01.02-9
+
+Kappa Geometry Installation Bug Fixed
+     A bug, where the kkaappppaa geometry wouldn't be installed correctly if the
+     ffoouurrcc geometry wasn't also installed, has been fixed.
+
+sseettpplloott Revised
+     The sseettpplloott macro has been revised to eliminate confusing prompts.
+
+eessrrff__iioo(()) Associative Array Bug Fixed
+     A bug, where eessrrff__iioo(()) would fail to correctly pass the elements of an
+     associative array returned by a macro function, has been fixed.
+
+February 26, 2002 - RELEASE 5.01.02-8
+
+New Serial Configuration Options
+     All serial devices can now be configured for the additional baud rates
+     57600, 115200, 230400 and 460800.  Generic serial devices can now be
+     configured for hardware flow control.
+
+Multiple EPICS Scaler Modules Supported
+     ssppeecc now allows configuration of EPICS generic scalers as either
+     counter/timer units or as a counter-only units.  Only one module can be
+     counter/timer, as ssppeecc only allow one master timer.  Additional modules
+     must be configured as counters only.
+
+New Doc String Syntax
+     As a prelude to new documentation tools for macros and command files, ssppeecc
+     now recognizes a special character sequence to delimit extended comment
+     text.  Now, everything between pairs of triple double quotes """""" is a
+     comment.  The comment block can span lines, but not files.  Unlike comments
+     that begin with a pound sign ##, the doc string comments will not be saved
+     with a macro if input as part of the macro definition.
+
+Bug With Shared Arrays and Unglobal Fixed
+     A bug, where using the sshhaarreedd aarrrraayy, gglloobbaall and uunngglloobbaall declarations in a
+     statement block could lead to a segmentation fault, as in
+
+        {{ sshhaarreedd aarrrraayy ddaattaa[[110000]];;  uunngglloobbaall ddaattaa;;  gglloobbaall ddaattaa }}
+
+     has been fixed.
+
+February 5, 2002 - RELEASE 5.01.02-7
+
+xx1111ffiilltt Enhancements
+     A number of enhancements have been made to the X11 plotting.  The xx1111ffiilltt
+     window will now respond to a close operation from the window manager, as
+     might be initiated by a title-bar button or window-ops menu item.  A static
+     detached copy of the window can be created by simultaneously pressing the
+     control key and any mouse button while the mouse cursor is over an active
+     plot window.  Also, a new pplloott__ccnnttll((""ccmmdd==nnuummbb"")) command provides access to
+     a number of special operations, including creating a detached window.  See
+     the _x_1_1 help file for more information.
+
+February 3, 2002 - RELEASE 5.01.02-6
+
+Fixes For ppssiicc Geometry
+     A bug in the ppssiicc geometry code, where the azimuthal reference vector was
+     calculated incorrectly when specified by angles (ssiiggmmaa and ttaauu) rather than
+     components, has been fixed.  Another bug, which disallowed user-entered
+     azimuthal references vectors where the sum of the squares of the components
+     was less than one, has been fixed.  Also, the sectors calculations now
+     check that the allowed sectors don't violate nnaazz-fixed or qqaazz-fixed
+     conditions.  Also, for kappa-mode ppssiicc, the sectors code will display the
+     motor positions for the real motors (kkeettaa, kkaapp and kkpphhii) rather than the
+     pseudo motors (eettaa, cchhii and pphhii) by default.  Both and real pseudo motors
+     will be displayed for each sector in verbose format (SShhoowwSSeecctt 22 along with
+     the corresponding values for oommeeggaa, qqaazz and nnaazz.
+
+January 28, 2002 - RELEASE 5.01.02-5
+
+Clarification Of Array Behavior
+     The recent enhancements that included implementation of the relational (<,
+     <=, ==, !=, >, >=) and Boolean (!, &&, ||) operators for data arrays gave
+     ambiguous results in several cases, particularly when comparing an array
+     with a scaler.  Such a comparison now unambiguously produces a scaler
+     value.  The result is ttrruuee if and only if the relation is true for each
+     element of the array and the scaler.  Otherwise, the result is ffaallssee.  In
+     the case of Boolean operations, an array is considered ttrruuee if any element
+     is nonzero.  If all elements are zero, the Boolean value of an array is
+     ffaallssee.  In the case of string arrays, only single rows are allowed as
+     Boolean operands, and an empty string or a  string representation of zero
+     evaluates as ffaallssee, while anything else is considered ttrruuee.
+
+Improved Version of xx1111ffiilltt
+     The code in the xx1111ffiilltt program that draws the X graphics plot window for
+     ssppeecc has been reorganized to better exclude unsuitable fonts - only fonts
+     with registry iso8859-1 are now allowed.  In addition, the event handling
+     has been reorganized such that only one process per window will ever be
+     created.  Previously, for displays with no backing store, a second process
+     was created for reasons not to be explained here.
+
+January 24, 2002 - RELEASE 5.01.02-4
+
+Expansion of PC DAC Motor Support
+     Support for selected PCI cards for use as DAC motors is now included.
+     Currently, the Measurement Computing PCI-DDA08/16 and the CyberResearch
+     CYDDA02/04/08HRP boards are supported in this manner.
+
+January 20, 2002 - RELEASE 5.01.02-3
+
+Refinement Of String Array Behavior
+     Various aspects of the treatment of string arrays have been modified due to
+     popular demand.  The pprriinntt command no longer indicates trailing null bytes
+     for each row of a string array, but does continue to display embedded null
+     bytes.  When assigning to a complete row of a string array, bytes in the
+     row unfilled by the assignment will be set to zero.  Also, when assigning
+     to a complete row, numbers are assigned as strings.
+
+Addendum to Serial/Socket Timeout Behavior
+     A fast poll for sseerr__ggeett(()) and ssoocckk__ggeett(()) has been implemented and is
+     recognized by setting the timeout value to the minimum of 0.001 second, for
+     example, as sseerr__ppaarr((00,, ""ttiimmeeoouutt"",, ..000011)).
+
+Fix For OMS Motor Controller Limit Search
+     A bug with OMS motor controller, where the end of the ""lliimm++"" and ""lliimm--""
+     searches was not properly detected, has been fixed.
+
+January 15, 2002 - RELEASE 5.01.02-2
+
+Wizard Mode Fix
+     A problem with wizard mode on Solaris platforms has been fixed.
+
+January 10, 2002 - RELEASE 5.01.02-1
+
+New Server Macros
+     A new set of macros provides a simple interface to enable one instance of
+     ssppeecc to send commands to another via the user-level socket functions.  The
+     macros are distributed in the file sseerrvveerr..mmaacc in the mmaaccrrooss subdirectory of
+     the ssppeecc distribution.  See comments in that file for details.
+
+Fix For Socket Timeout and Close
+     The behavior for sockets waiting for a connection in ""lliisstteenn"" mode with the
+     timeout parameter set to zero has been fixed to block indefinitely rather
+     than return immediately.  The ""cclloossee"" option to ssoocckk__ppaarr(()) will now close
+     both of the sockets associated with a ""lliisstteenn""-mode socket.  Previously,
+     ssoocckk__ppaarr(()) with ""cclloossee"" would need to be issued twice.
+
+January 7, 2002 - RELEASE 5.01.02
+
+New ffoouurrcc Parameter
+     The four-circle C code module ggeeoo__ffoouurrcc..cc distributed with ssppeecc has long
+     contained a couple of optionally compiled lines of code that affected the
+     sector where the cchhii motor would be located in the oommeeggaa-zero and
+     oommeeggaa-fixed modes.  A new geometry parameter gg__oommsseecctt along with a new
+     macro sseettoommsseecctt have been added to the distribution that allow this sector
+     option to be selected without recompiling the code.  The default value of
+     zero for gg__oommsseecctt maintains the prior default behavior.  If gg__oommsseecctt is
+     nonzero, the value for cchhii will be reflected about the xx-yy plane if QQ[xx] is
+     negative, i.e., the transformation becomes cchhii = 180 - cchhii.
+
+Improvements To the Serial and Socket Interface
+     The code for the socket and and serial (RS-232C) interfaces has been
+     reorganized and features have been added.  The sseerr__ggeett(())/ssoocckk__ggeett(()),
+     sseerr__ppuutt(())/ssoocckk__ppuutt(()) and sseerr__ppaarr(())/ssoocckk__ppaarr(()) functions now have the same
+     consistent syntax and behavior.  The buffer size for reads without a byte
+     count is increased from 511 to 8191 bytes.  New commands to
+     sseerr__ppaarr(())/ssoocckk__ppaarr(()) are available to check if there are left-over
+     characters in the input queue and to flush the queue.  See the _s_e_r_i_a_l and
+     _s_o_c_k_e_t_s help files for more information.
+
+eeddccoonnff Box Outline Change
+     A new --bb flag to the eeddccoonnff configuration editor forces the use of text
+     characters to draw a box around menus and subwindows using standard ASCII
+     characters.  Otherwise, special line-drawing characters available with some
+     fonts will be used.  Previously, the ASCII characters were always used with
+     xxtteerrmm windows.  Since some X fonts do provide the line-drawing characters,
+     but since there is no way to detect that from the program, this new option
+     is available.  A new EEDDCCOONNFF__BBOOXX__FFLLAAGG global variable is also included in
+     the standard macros.  If nonzero, the configuration editor, eeddccoonnff, invoked
+     by the ccoonnffiigg macro, will use the --bb flag.
+
+eeddccoonnff Backup File Permissions Fixed
+     A bug, where the read/write permissions of the backup ccoonnffiigg and sseettttiinnggss
+     files were not always maintained by the configuration editor, eeddccoonnff, has
+     been fixed.
+
+December 15, 2001 - RELEASE 5.01.01-10
+
+Associative Array Looping Bug Fixed
+     A bug, where the usage
+
+        ffoorr ((vvaarr iinn aarrrr))
+            ddeelleettee aarrrr[[vvaarr]]
+
+     resulted in occasional segmentation faults, has been fixed.
+
+December 6, 2001 - RELEASE 5.01.01-9
+
+Kappa Diffractometer ccaallccPP__ffrroommRR C Code Fixed
+     A bug in the new feature that calculated pseudomotor positions from real
+     motors for the kappa versions of the ffoouurrcc, ffiivveecc and ppssiicc geometries has
+     been fixed.  The feature was accessed with the ccaallccPP__ffrroommRR macro.
+
+SCIPE Code Fixed
+     The recent overhaul of the internal socket code in ssppeecc broke the SCIPE
+     support.  The SCIPE support has now been repaired.
+
+December 5, 2001 - RELEASE 5.01.01-8
+
+Preliminary Support For Newport ESP-300
+     Preliminary support for the Newport ESP-300 motor controller is included in
+     this ssppeecc release.  The controller is supported over both GPIB and RS-232C
+     interfaces.
+
+November 22, 2001 - RELEASE 5.01.01-7
+
+cclloonnee(()) Bug Fix
+     An unfortunate programming lapse, which resulted in a segmentation fault on
+     some platforms when using the new cclloonnee(()) function to make a copy of a
+     macro, has been corrected.
+
+November 17, 2001 - RELEASE 5.01.01-6
+
+ffoouurrcc Bug Fixed
+     A bug in the ffoouurrcc geometry code for locating the cut point for the tttthh
+     motor has been fixed.  On LLiinnuuxx and HHPP platforms, the bug resulted in the
+     cut point always being treated as zero.  On SSoollaarriiss platforms, the bug
+     resulted in impossibly large values for the tttthh motor.  The bug was in all
+     previous ssppeecc release 5 versions.
+
+Technoland C-KP 402 Counter Bugs Fixed
+     Two bugs found in the new code for the CAMAC Technoland C-KP 402 Counter
+     have been fixed.  The first bug limited the 48-bit counters to 32 bits.
+     The second bug prevented the last two channels of the eight available
+     channels from being accessed.
+
+Preliminary Support For the MBraun PSD-50m MCA
+     ssppeecc now supports the old MBraun PSD-50m MCA.  This MCA uses an RS-232C
+     interface.
+
+Support For Keithley KPCI 3140 As Counters Only
+     ssppeecc now supports the Keithley KPCI-3140 PCI counter card, but only as four
+     32-bit counters.  The card cannot be used with ssppeecc as a timer or preset
+     counter.
+
+November 6, 2001 - RELEASE 5.01.01-5
+
+Plotting Bug Fixed
+     A bug introduced in release 5.01.01-1 that would often make it impossible
+     to get plots of the data has been fixed.
+
+New Time Scan Macros
+     Macros to scan detectors over time are now included with the standard ssppeecc
+     macros.  The new macros are called ttiimmeessccaann, which scans continuously and
+     llooooppssccaann, which scans for a finite number of points.  See the macro
+     definitions for details.  These macros are from the _E_S_R_F collection.
+
+Bug Fix in hhoommee Macro
+     A bug in the hhoommee macro introduced in release 4.05.10-3, which would
+     produce syntax errors when the macro was used with the optional ""++"" or ""--""
+     arguments, has been fixed.
+
+PCI Timer/Counter Found and Supported
+     An Am9513 type PCI counter has been found that does not suffer from the
+     flaw contained in the Measurement Computing PCI-CTR05.  This release of
+     ssppeecc supports the ICS Advent PCIDCC5/10/20-P timer/counter cards.  See the
+     vendor's pages at _w_w_w_._i_c_s_a_d_v_e_n_t_._c_o_m for more information.
+
+Driver For PCA-II Updated For LLiinnuuxx 2.4 Kernels
+     The CSS ppccaa..cc driver for the obsolete Nucleus PCA-II MCA card has been
+     updated to work with LLiinnuuxx 2.4 series kernels.
+
+October 29, 2001 - RELEASE 5.01.01-4
+
+Overhaul Of User-Level Socket Access
+     New ssoocckk__ggeett(()) and ssoocckk__ppuutt(()) built-in functions have been added to replace
+     the ""rreeaadd"" and ""sseenndd"" options to ssoocckk__iioo(()).  A new ssoocckk__ppaarr(()) function
+     replaces the other uses of ssoocckk__iioo(()).  (Use of ssoocckk__iioo(()) is still
+     supported, but is now deprecated.)  See the _s_o_c_k_e_t_s help file for details.
+
+New Names For sseerr__ggeett(()) and ggppiibb__ggeett(()) Options
+     The options ""sshhoorrtt"", ""sshhoorrtt__sswwaapp"", ""lloonngg"" and ""lloonngg__sswwaapp"" are now
+     recognized as synonyms for ""iinntt22"", ""iinntt22__sswwaapp"", ""iinntt44"" and ""iinntt44__sswwaapp"" in
+     the sseerr__ggeett(()) and ggppiibb__ggeett(()) functions.
+
+October 29, 2001 - RELEASE 5.01.01-3
+
+VME A24 Address Space Supported
+     ssppeecc now supports the A24 addressing mode through the vvmmee__ggeett(()), vvmmee__ppuutt(())
+     and vvmmee__mmoovvee(()) functions.  The optional modifier argument must include the
+     string ""AA2244"".
+
+Bug Fix For Serial Devices With Hardware Handshake
+     A old bug, where ssppeecc would hang when closing unresponsive serial devices
+     configured for hardware handshake, has been fixed.
+
+Bug Fix For Crash On Macro Function Syntax Error
+     A bug, where ssppeecc could crash when executing a macro function that had a
+     syntax error involving the macro function argument, has been fixed.
+
+October 16, 2001 - RELEASE 5.01.01-2
+
+Fix For Indirection Operator @@
+     The code for handling array elements as arguments to the indirection
+     operator @@, as in {{ aa == ""xx[[1100]]"";; @@aa == 11 }} has been fixed.  Previously, the
+     operator only worked correctly with existing elements of existing
+     associative arrays.  Other cases produced segmentation faults.  Elements of
+     associative arrays are now handled correctly, whether existing or not.
+     Elements of data arrays are not yet supported, but use produces an error
+     message, not a core dump.
+
+October 3, 2001 - RELEASE 5.01.01-1
+
+Fix For MCA ssoofftt__pprreesseett Mode
+     Previously, when counting to a monitor preset with an MCA in ""ssoofftt__pprreesseett""
+     mode, the MCA would not stop at the end of the count period.  Now, when
+     counting to monitor, the MCA is started and stopped via software commands
+     just as if ""ssoofftt__pprreesseett"" mode was disabled.
+
+Fix For Several Timers
+     A missing bit of C code that would halt all counters and acquisition
+     devices when an EPICS, SCIPE, ESRF CAEN 560 or MURR timer stopped has been
+     added.  Previously, although the counters associated with the particular
+     timer would be stopped, unrelated counters were not.
+
+New mmccaa__ppaarr(()) Options
+     New ""cchhaannss"" and ""mmaaxx__cchhaannss"" options to mmccaa__ppaarr(()) return the current number
+     of channels and the maximum number of channels available, respectively.
+
+October 2, 2001 - RELEASE 5.01.01
+
+Modifications and Fixes For User-Level Serial Access
+     The user-level generic access to RS-232C devices through the functions
+     sseerr__ggeett(()), sseerr__ppuutt(()) and sseerr__ppaarr(()) has been modified and enhanced.  The
+     sseerr__ggeett(()) function can now take a data-array argument, which allows reading
+     binary data, including null bytes.  All forms of sseerr__ggeett(()) now use the
+     current ""ttiimmeeoouutt"" value, which defaults to two seconds, but can be modified
+     with sseerr__ppaarr(()).  Previously, sseerr__ggeett(()) with just the device address
+     argument would not timeout.  Also, leftover characters (up to 512) from a
+     sseerr__ggeett(()) that has been satisfied with a byte count or an end-of-string
+     match are now retained for the next sseerr__ggeett(()).  There is a new ""fflluusshh""
+     option to sseerr__ppaarr(()) to flush any buffered characters.  See the _s_e_r_i_a_l help
+     file for details.
+
+Enhancements For User-Level GPIB Access
+     The ggppiibb__ggeett(()) function can now take a data-array argument, which allows
+     reading binary data, including null bytes.  See the _g_p_i_b help file for
+     details.
+
+Preliminary Support For Physik Instrumente C-860
+     Preliminary support for the Physik Instrumente C-860 ""MMeerrccuurryy"" single axis
+     DC-motor controller is included.  Several of these controllers can be
+     daisy-chained over an RS-232C interface.
+
+Data Array Enhancements
+     Previous restrictions on the usage of the string-array data type have been
+     removed.  In most situations, a string array is handled the same as a byte
+     array.  Exceptions to that rule include the treatment of string arrays by
+     the pprriinntt command, where the arrays are written as strings rather than a
+     list of numbers, and the ssssccaannff(()) function, where a scanned number can be
+     stored as a string in a string array.  Most functions that accept strings
+     as arguments will now also accept a single row of a string array.
+
+     Also, the ""rrooww__wwiissee"" and ""ccooll__wwiissee"" arguments to aarrrraayy__oopp(()) now return the
+     correct values for arrays where the mode hasn't been set explicitly.
+
+Hardware Locking Fixed On Solaris and HP Platforms
+     Hardware locking now works again on Solaris and HP platforms.  It had been
+     ineffective on those platforms since release 4.04.01 about three years ago.
+
+iinnppuutt((--11)) Bug On Solaris Platforms Fixed
+     An old bug, where the iinnppuutt((--11)) function didn't work correctly on Solaris
+     platforms (the function returned the EOF character, rather than 0 if no
+     input was available), has been fixed.
+
+rrddeeff Of Macro Function Bug Fixed
+     A bug, where using rrddeeff to define a macro function that has no arguments
+     resulted in an ordinary macro being created, has been fixed.
+
+ccpplloott__pplloott Macro Update For Release 5
+     An oversight, where the ccpplloott__pplloott macro didn't work correctly with the new
+     data-array based plotting macros in ssppeecc release 5, has been corrected.
+
+PCI Detection Bug Fixed
+     A bug, where ssppeecc would not find the last PCI card in a LLiinnuuxx system, has
+     been fixed.
+
+Debugging Bug Fixed
+     A bug in the run-time context debugging display (level 0x40000), which
+     could sometimes produce a segmentation fault, has been fixed.
+
+Overhaul Of Alternate SBS (Bit3) VME Support
+     The release of the SBS (Bit3) LLiinnuuxx driver model 1003 v1.0 for the
+     616/617/618 PCI-VME adapters has made the CSS kernel-level driver bbiitt33..cc
+     obsolete.  However, at this time the SBS model 1003 driver is not ported to
+     LLiinnuuxx 2.4 kernels, such as are installed with Red Hat 7.1 LLiinnuuxx.  Rather
+     than update the old CSS bbiitt33..cc driver, ssppeecc now offers support for the SBS
+     PCI cards using user-level code only, independent of kernel version.  The
+     new code allows access to any part of the A32 address space, unlike the old
+     CSS driver-based code, which had to be configured to use a particular 4
+     Mbyte window.  The CSS user-level code is adequate for register-based VME
+     devices such as the OMS motor controllers and the Joerger scalers, but does
+     not support DMA transfers.  The old CSS bbiitt33 driver and the //ddeevv//bbiitt33
+     device node can be eliminated from the system when this new release of ssppeecc
+     is installed.
+
+ZZ--AAxxiiss Code Updated
+     The zz--aaxxiiss geometry code has been updated to use the current conventions.
+     Among other changes, singularities in the calculations and other errors no
+     longer cause the code to reset to command level.  Instead, the ccaallcc(())
+     functions (included in the definitions of ccaallccAA and ccaallccHHKKLL) return nonzero
+     when there is an error.  In addition, there are now cut-point parameters
+     for each geometry motor.
+

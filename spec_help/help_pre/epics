@@ -1,0 +1,334 @@
+epics                               hardware                               epics
+
+NAME
+     epics - EPICS specific functions
+
+DESCRIPTION
+
+     ssppeecc can be used in the EPICS (Experimental Physics and Industrial Control
+     System) environment when linked with the EPICS channel access libraries.
+     When so linked, the three functions eeppiiccss__ggeett(()), eeppiiccss__ppuutt(()) and
+     eeppiiccss__ppaarr(()) provide generic cchhaannnneell aacccceessss to EPICS process variables.  In
+     addition, the built-in support for the standard EPICS motor, scaler, MCA
+     and generic-serial records becomes available through ssppeecc's
+     hardware-independent functions and commands.
+
+CONFIGURATION
+
+     To link ssppeecc with the EPICS libraries, the path to the libraries must be
+     specified for the ssppeecc IInnssttaallll script.  The path is stored as the parameter
+     eeppiiccss__hhoommee in ssppeecc's iinnssttaallll__ddaattaa file.  The path can specify the location
+     of a bbaassee or lliibb directory or the complete path to the actual libraries.
+     For example, on a 32-bit Linux platform, ssppeecc will look for the libraries
+     in the following locations:
+
+        $$eeppiiccss__hhoommee
+        $$eeppiiccss__hhoommee//lliibb//lliinnuuxx--xx8866
+        $$eeppiiccss__hhoommee//bbaassee//lliibb//lliinnuuxx--xx8866
+
+     ssppeecc supports both EPICS 3.13 and 3.14 releases.  The EPICS source can be
+     downloaded from the EPICS home page at _w_w_w_._a_p_s_._a_n_l_._g_o_v_/_e_p_i_c_s .
+
+     On Linux platforms, the default installation makes ssppeecc a set-user-id root
+     program.  With that permission setting, all shared libraries used by ssppeecc,
+     such as the EPICS libraries, must be configured system wide.  That can be
+     accomplished by creating (or editing if it already exists) a file called,
+     for example:
+
+         //eettcc//lldd..ssoo..ccoonnff..dd//llooccaall..ccoonnff
+
+     The file should contain a line with the complete path name of the EPICS
+     libraries, such as:
+
+         //oopptt//EEPPIICCSS//bbaassee//lliibb//lliinnuuxx--xx8866
+
+     Run the following command (as root) to update the shared library
+     information on the system:
+
+         //ssbbiinn//llddccoonnffiigg
+
+     See the LLiinnuuxx man pages for _l_d_c_o_n_f_i_g and _l_d_._s_o for further information.
+
+     Note, the set-user-id root setting allows ssppeecc to access the I/O resources
+     associated with PC cards and USB devices used in many ssppeecc configurations.
+     If no such hardware is present, the set-user-id mode is not required.
+
+FUNCTIONS
+
+     In the eeppiiccss__ggeett(()) and eeppiiccss__ppuutt(()) functions below, note the special
+     considerations given when the process variable is a byte array (EPICS type
+     DDBBFF__CCHHAARR).  The special treatment is given as these arrays are often used
+     to hold strings since the maximum length of the EPICS DDBBFF__SSTTRRIINNGG type is
+     only 40 bytes.  Many EPICS records use arrays of DDBBFF__CCHHAARR where longer
+     strings are needed.  (The special treatment for DDBBFF__CCHHAARR arrays is as of
+     ssppeecc release 5.08.06-5.)
+
+     Note also that prior to EPICS 3.14, the maximum size of a data transfer was
+     16,384 bytes.  With release 3.14 and later, one can set the
+     EEPPIICCSS__CCAA__MMAAXX__AARRRRAAYY__BBYYTTEESS environment variable to larger values to overcome
+     that limit.
+
+     The following functions for generic EPICS access are available:
+
+     eeppiiccss__ggeett((ccaa__nnaammee [[,, ttyyppee]] [[,, ccoouunntt]])) - Returns the result of a
+          channel-access get of the process variable ccaa__nnaammee, as in pprriinntt
+          eeppiiccss__ggeett((""iioocc::mm11..VVAALL"")).  By default, the native data type of the
+          process variable will be retrieved over channel access.  However, a
+          different data type can be specified using the optional second
+          argument.  Possible types are ""cchhaarr"", ""sshhoorrtt"", ""lloonngg"", ""ffllooaatt"",
+          ""ddoouubbllee"", ""eennuumm"" and ""ssttrriinngg"".  For DDBBFF__EENNUUMM data types, the string
+          value of the process variable is returned, unless another type is
+          specified.  For array types, the entire array is retrieved and
+          returned, unless the optional argument ccoouunntt specifies fewer elements
+          (as of ssppeecc release 5.00.04).  When requesting ""ssttrriinngg"" for types
+          other than DDBBFF__CCHHAARR, arrays will be returned as a ssppeecc string data
+          array consisting of 40-byte rows, with as many rows as elements in the
+          EPICS array.  Each row will contain an ASCII representation of the
+          corresponding value, with the rest of the row padded with null bytes.
+          For DDBBFF__CCHHAARR data, the return value will be converted to an ordinary
+          string (as of release 5.10.01-8).  Note, any bytes following a null
+          byte in the DBF_CHAR array will be lost.  If a ""mmoonniittoorr"" has been set
+          for the process variable using the ""mmoonniittoorr__sseett"" option below, the
+          returned result will be the most recent value as set by the monitor
+          call back.  Otherwise (or if there has been no monitor call back),
+          ssppeecc will access the process variable value using the standard channel
+          access ccaa__aarrrraayy__ggeett(()).
+
+     eeppiiccss__ppuutt((ccaa__nnaammee,, vvaalluuee [[,, wwaaiitt__ttiimmee]])) - Does a channel-access put of
+          vvaalluuee, which can be either a string or a number, to the process
+          variable ccaa__nnaammee.  If the optional wwaaiitt__ttiimmee argument is set, ssppeecc
+          will wait for a channel-access ""ccaallllbbaacckk"" to indicate the value has
+          been sent.  ssppeecc will wait up to the specified number of seconds for
+          that response.  Such a feature might come in handy if the
+          channel-access put is to start an acquisition device and one wants to
+          insure the device is started before continuing.  If the process
+          variable is an array of a DDBBFF__CCHHAARR type, any non-array vvaalluuee, whether
+          number or string, will be sent via channel access as a string, filling
+          as many elements of the array as the string is long.
+
+     eeppiiccss__ppaarr((ccaa__nnaammee,, wwhhaatt)) - Returns parameters associated with the process
+          variable ccaa__nnaammee, according to the value of the string wwhhaatt, which may
+          have the following values:
+
+          ""ccoonnnneecctt"" - Queues the call to make the initial connection for the
+               designated process variable, but doesn't force a network packet
+               to be sent.  If many process variables are to be accessed from
+               user level, it will be more efficient in terms of network access
+               to use this ""ccoonnnneecctt"" option for each, before the individual
+               eeppiiccss__ggeett(()) and eeppiiccss__ppuutt(()) calls.  (Available as of ssppeecc release
+               5.08.01-4.)
+          ""rreeffrreesshh"" - Closes then reopens the channel access connection.  If a
+               monitor has been set, it will be restored.  (Available as of ssppeecc
+               release 6.00.02.)
+          ""ccoouunntt"" - Returns the element count associated with ccaa__nnaammee.
+          ""hhoosstt"" - Returns the host name for ccaa__nnaammee (EPICS 3.12 and above).
+          ""mmoonniittoorr__sseett"" - Creates a "monitor" for the indicated process
+               variable.
+          ""mmoonniittoorr__cchheecckk"" - If the indicated process variable has a monitor,
+               returns the value 1 if the value of the process variable has
+               changed since last read with eeppiiccss__ggeett(()).  Returns -1 if no
+               monitor has been created and for other EPICS errors.  Otherwise
+               returns zero.
+          ""mmoonniittoorr__cclleeaarr"" - Removes the monitor for the indicated process
+               variable.
+          ""rreeaadd__aacccceessss"" - Returns nonzero if ccaa__nnaammee has read access (EPICS 3.12
+               and above).
+          ""ttiimmeeoouutt"" - Returns the value ssppeecc uses for the ccaa__ppeenndd__iioo(()) time-out
+               parameter.
+          ""ttiimmeessttaammpp"" - Returns the EPICS timestamp associated with the
+               indicated process variable.  The value is converted to the
+               seconds since the UNIX epoch (00:00:00 Jan 1, 1970 UTC - also the
+               ssppeecc epoch - the EPICS epoch is marked exactly twenty years
+               later) and includes the fractional part to nanosecond resolution.
+               The value returned here can be used as an argument to ssppeecc's
+               ddaattee(()) function to print the time of day associated with the
+               timestamp value.  Note, for array EPICS process variables, the
+               timestamp associated with the first element of the array is
+               returned.  (Available as of ssppeecc release 5.10.02-11.)
+          ""ttyyppee"" - Returns a string (such as ""ssttrriinngg"", ""ddoouubbllee"", ""sshhoorrtt"", etc.)
+               indicating the data type of ccaa__nnaammee.
+          ""wwrriittee__aacccceessss"" - Returns nonzero if ccaa__nnaammee has write access (EPICS
+               3.12 and above).
+
+     eeppiiccss__ppaarr((ccaa__nnaammee,, wwhhaatt,, vvaalluuee)) - Sets parameters associated with the
+          process variable ccaa__nnaammee, according to the value of the string wwhhaatt,
+          which may have the following values:
+
+          ""ttiimmeeoouutt"" - Sets the value ssppeecc uses for the ccaa__ppeenndd__iioo(()) time-out
+               parameter.
+
+ERRORS
+
+     When linked with the EPICS channel-access libraries, ssppeecc creates two
+     built-in global variables, EEPPIICCSS__EERRRR and EEPPIICCSS__EERRRR__MMSSGG (as of ssppeecc release
+     5.08.01-1).  If one of the above functions results in an error generated by
+     the channel-access calls, the value of the error will be assigned to
+     EEPPIICCSS__EERRRR and the corresponding message, as provided by the ccaa__mmeessssaaggee(())
+     function, will be assigned to EEPPIICCSS__EERRRR__MMSSGG.  In addition, for certain
+     errors at the ssppeecc level, including errors associated with failure to
+     connect to an EPICS server, will result in a -1 assigned to EEPPIICCSS__EERRRR and,
+     in some cases, a message assigned to EEPPIICCSS__EERRRR__MMSSGG.
+
+MONITORS
+
+     To avoid excess network traffic, monitors can be created for selected
+     process variables.  With a monitor, eeppiiccss__ggeett(()) calls will return a cached
+     value of the process variable, rather than calling out over the network to
+     fetch a value.  The EPICS database will update ssppeecc when the value of the
+     process variable changes.  The ""mmoonniittoorr__cchheecckk"" option to eeppiiccss__ppaarr(()) allows
+     for testing whether the value has changed since the last time the process
+     variable was read with eeppiiccss__ggeett(()).
+
+     Note, a rreeccoonnffiigg (or ccoonnffiigg) call reinitializes the hardware connections
+     and clears all monitors.  Use the ccoonnffiigg__mmaacc feature to set up macros to
+     have monitors automatically created when hardware is initialized or
+     reinitialized.
+
+DEFAULT TIMEOUT
+
+     The default timeout for the channel access calls is 0.5 seconds.  The
+     timeout for individual process variables can be changed using the
+     eeppiiccss__ppaarr(()) function, as described above.  It also possible to change the
+     default timeout for all newly created connections using the ssppeecc__ppaarr(())
+     function with the ""eeppiiccss__ttiimmeeoouutt"" option.  (See the _s_p_e_c___p_a_r help file.)
+     The parameters set with ssppeecc__ppaarr(()) are saved in the user's state file, so
+     will be restored when ssppeecc is restarted, except, of course when starting
+     fresh (with the --ff flag).
+
+USING EPICS SCALERS
+
+     ssppeecc supports counter/timers using the standard EPICS scaler record.  In
+     addition, ssppeecc allows configuration of arbitrary process variables as
+     counters.  For process-variable counters, the value of the PV will be
+     fetched as a DDBBFF__DDOOUUBBLLEE and assigned to the corresponding element of the
+     built-in scaler array SS[[]] when the ssppeecc ggeettccoouunnttss command is executed.
+
+     EPICS counter-related controllers are configured on DDevices screen of the
+     configuration editor as follows:
+
+        SSCCAALLEERRSS     DDEEVVIICCEE AADDDDRR <<>>MMOODDEE NNUUMM                         <<>>TTYYPPEE
+            YYEESS   iioocc11::sscc11              1122  EEPPIICCSS SSccaalleerr aass CCoouunntteerr//TTiimmeerr
+            YYEESS   iioocc22::sscc22              1166   EEPPIICCSS SSccaalleerr aass CCoouunntteerr oonnllyy
+            YYEESS iioocc::ppvv..VVAALL               11            EEPPIICCSS PPVV aass CCoouunntteerr
+            YYEESS      iioocc11::              1100            EEPPIICCSS PPVV aass CCoouunntteerr
+            YYEESS       iioocc::              1166               EEPPIICCSS MMIIZZAARR 88331100
+
+     The first entry selects a master timer with counter channels supported by
+     the standard EPICS scaler record.  The second entry selects the same record
+     support, but used only as counters.  (Prior to ssppeecc release 5.09.01-1, only
+     one master timer could be configured.)  In each case, the DEVICE field
+     contains the prefix of the process variables associated with the records.
+
+     The third and fourth entries configure arbitrary process variables to be
+     used as counters.  The first of these supplies the entire PV name in the
+     DEVICE field.  The second example is for multiple PV counters that share
+     the prefix given in the DEVICE field.  The reminder of the PV name is
+     specified on the SScaler screen as described below.
+
+     The last line configures the legacy EPICS Mizar 8310 counter/timer record.
+
+     Individual counter channels are configured on the SScaler screen of the
+     configuration editor along the following lines:
+
+        NNuummbbeerr      NNaammee MMnneemmoonniicc  <<>>DDeevviiccee UUnniitt CChhaann  <<>>UUssee AAss  SSccaallee FFaaccttoorr
+             00   SSeeccoonnddss      sseecc  EEPPIICCSS__SSCC    00    00  ttiimmeebbaassee       11000000000000
+             11   MMoonniittoorr      mmoonn  EEPPIICCSS__SSCC    00    11   mmoonniittoorr             11
+             22  DDeetteeccttoorr      ddeett  EEPPIICCSS__SSCC    11    00   ccoouunntteerr             11
+             33       PPVV00      ppvv00  EEPPIICCSS__PPVV    00    00   ccoouunntteerr             11
+             44       PPVV11      ppvv11  EEPPIICCSS__PPVV    11    00   ccoouunntteerr             11
+             55       PPVV22      ppvv22  EEPPIICCSS__PPVV    11    11   ccoouunntteerr             11
+             66      DDeett22     ddeett22  EEPPIICCSS__MMZZ    00    11   ccoouunntteerr             11
+
+     The device-type EEPPIICCSS__SSCC selects counter channels from the standard EPICS
+     scaler record.  The unit numbers start at zero and count off the ""EEPPIICCSS
+     SSccaalleerr"" entries on the DDevices screen.
+
+     The process variable counters are selected with EEPPIICCSS__PPVV.  Again, unit
+     numbers start at zero and correspond to the order of the ""EEPPIICCSS PPVV"" entries
+     on the DDevices screen.  The process variable name is formed from the name
+     given in the DEVICE field on the DDevices screen, optionally appended by the
+     string set as miscellaneous parameter 1 on the standard optional scaler
+     parameter screen, accessed by typing the ss command:
+
+        NNuummbbeerr      NNaammee MMnneemmoonniicc     MMiisscc 11   MMiisscc 22   MMiisscc 33   MMiisscc 44
+             00   SSeeccoonnddss      sseecc
+             11   MMoonniittoorr      mmoonn
+             22  DDeetteeccttoorr      ddeett
+             33       PPVV00      ppvv00
+             44       PPVV11      ppvv11   ppvv11..VVAALL
+             55       PPVV22      ppvv22   ppvv22..VVAALL
+             66      DDeett22     ddeett22
+
+     The device-type EEPPIICCSS__MMZZ selects a channel from the legacy EPICS Mizar
+     record.
+
+USING EPICS MOTORS
+
+     ssppeecc supports motors under EPICS using the standard EPICS motor record.
+     ssppeecc provides two flavors of support.  With the first (the EEPPIICCSS__MM11
+     motors), ssppeecc takes all the motor parameters, such as step size, velocity,
+     acceleration, etc., from ssppeecc's own configuration file.  With the second
+     (the EEPPIICCSS__MM22 motors), the parameters are taken from the EPICS data base,
+     and the parameters in the ssppeecc configuration file are ignored.  Most sites
+     configure the ssppeecc motors as EEPPIICCSS__MM22 so that ssppeecc will not cause conflicts
+     with other EPICS utilities.
+
+     Note, EEPPIICCSS__MM11 motors write all the parameters configured in the ssppeecc
+     configuration file to the EPICS data base when ssppeecc reads its configuration
+     file, ignoring values currently set in the EPICS data base.  However, ssppeecc
+     will accept the position of the motor when first connecting to the data
+     base, if the motor position is nonzero.  If the motor position is zero and
+     ssppeecc's settings file contains a nonzero position, ssppeecc will ask which
+     position should be used.
+
+     For EEPPIICCSS__MM22 motors, ssppeecc will only change motor parameters in the EPICS
+     data base with the mmoottoorr__ppaarr(()) function.  (See the _m_o_t_o_r_s help file.)
+
+     Each set of motors with the same EPICS prefix should be entered on a
+     separate line on the DDevices screen of the configuration editor:
+
+        MMOOTTOORRSS     DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE  NNUUMM                     <<>>TTYYPPEE
+           YYEESS      iioocc11::                  4444     EEPPIICCSS MMoottoorr CCoonnttrroolllleerr
+           YYEESS      iioocc22::                  1122     EEPPIICCSS MMoottoorr CCoonnttrroolllleerr
+
+     The NNUUMM field should be set to the highest channel number expected.  On the
+     mmotor screen of the configuration editor, motors are assigned by choosing
+     EEPPIICCSS__MM11 or EEPPIICCSS__MM22 in the controller field, as in:
+
+        NNuummbbeerr:: <<>>CCoonnttrroolllleerr  00::EEPPIICCSS__MM22 11::EEPPIICCSS__MM22 22::EEPPIICCSS__MM22 33::EEPPIICCSS__MM22
+        UUnniitt//CChhaannnneell                 00//11        00//22        00//33        00//44
+        NNaammee                   TTwwoo TThheettaa      TThheettaa        CChhii        PPhhii
+        MMnneemmoonniicc                     tttthh         tthh        cchhii        pphhii
+
+     The optional unit/channel numbering is turned on for all EPICS motors by
+     entering a unit/channel for any of the EPICS motors.  The feature is
+     disabled by typing ^^DD when the unit/channel data is highlighted for any of
+     the EPICS motors.  When the feature is disabled, channel numbers are
+     assigned consecutively.  Unit numbers are assigned according to the order
+     the EPICS motor controllers appear on the DDevices screen, starting from
+     zero.  Note, though, channel numbers start at one, to match the APS EPICS
+     motor record convention.
+
+     The APS EPICS motor naming convention appends mm11, mm22, etc., to the prefix
+     defined on the motor controller DDevices screen.
+
+     An alternative naming scheme can be selected by entering a string value for
+     the optional ""GGeenneerriicc PPaarraammeetteerr 11"" on the second optional motor parameter
+     screen.  That string value will be appended to the prefix string defined on
+     the motor controller DDevices screen.
+
+     With the following configuration:
+
+        MMOOTTOORRSS     DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE  NNUUMM                     <<>>TTYYPPEE
+           YYEESS XX0044SSAA--EESS22--                  4444     EEPPIICCSS MMoottoorr CCoonnttrroolllleerr
+
+        NNuummbbeerr:: <<>>CCoonnttrroolllleerr  00::EEPPIICCSS__MM22 11::EEPPIICCSS__MM22 22::EEPPIICCSS__MM22 33::EEPPIICCSS__MM22
+        UUnniitt//CChhaannnneell                 00//11        00//22        00//33        00//44
+        NNaammee                   TTwwoo TThheettaa      TThheettaa        CChhii        PPhhii
+        MMnneemmoonniicc                     tttthh         tthh        cchhii        pphhii
+             ......
+        GGeenneerriicc ppaarraammeetteerr 11      SSAAMM::TTTTHH     SSAAMM::TTHH    SSAAMM::CCHHII    SSAAMM::PPHHII
+
+     The process variable prefixes would be XX0044SSAA--EESS22--SSAAMM::TTTTHH, XX0044SSAA--EESS22--SSAAMM::TTHH,
+     etc.
+

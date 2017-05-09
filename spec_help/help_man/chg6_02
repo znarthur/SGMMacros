@@ -1,0 +1,1121 @@
+.TH "changes" "spec 6.02 Release Notes" "02/26/15" "chg6_02.rst 6.16  02/26/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- Highlights for \fBspec\fP release 6.02
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg6_02.rst      6.16  02/26/15  CSS
+.
+.\" Copyright (c) 2014,2015
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 6.02 Release Notes" "02/26/15" "chg6_02.rst 6.16  02/26/15 CSS"
+.
+.sp
+(Please see release 6.02 \fI\%introduction\fP below.)
+.SH "December 29, 2014 \- RELEASE 6.02.11"
+.rs
+.SH "Fix For Amptek MCA8000D"
+.sp
+An Amptek firmware update (version 6.07.00) broke \fBspec\fP\(aqs support
+for the MCA8000D by changing the command used to set the preset time from
+\fBPRET\fP to \fBPREL\fP.
+This \fBspec\fP update recognizes the new firmware and uses the new command.
+.SH "December 15, 2014 \- RELEASE 6.02.10"
+.rs
+.SH "Fix For \fBtango_io()\fP Crash"
+.sp
+A bug that could cause a crash when using \fBtango_io()\fP with a
+TANGO device that was not in the
+TANGO database has been fixed.
+.SH "December 4, 2014 \- RELEASE 6.02.09"
+.rs
+.SH "Support For Baltic Scientific Instruments Si(Li) Detector"
+.sp
+This \fBspec\fP release supports
+the Baltic Scientific Instruments Si(Li) Detector type SER\-25
+based on the SP350 controller board.
+The device is configured as an MCA\-type instrument
+and uses a serial interface.
+See the \fI\%bsi_sp350\fP help file for details.
+.SH "Trinamic TMCL Updates"
+.sp
+The recently added Trinamic TMCL motor controller support has been updated
+so that parameters that can be stored in EEPROM will be saved to EEPROM
+when set using \fBmotor_par()\fP or when configured as nonstandard
+optional parameters in the \fBconfig\fP file.
+In addition, \fBspec\fP can now
+restore the position registers
+when a power cycle has been detected.
+To enable the latter feature, the controller parameter \fB"check_interval"\fP
+needs to be added to the \fBconfig\fP file.
+See the \fI\%tmcl\fP help file for details on both new features.
+.SH "Fix For HDF5 Data Frames With 1D Arrays"
+.sp
+A bug with the new HDF5 support where
+the frames option wasn\(aqt working for one\-dimensional
+arrays has been fixed.
+.SH "Update For \fBEscan\fP Macro"
+.sp
+The standard \fBEscan\fP macro will now use the global \fBUP\fP variable
+to set the number of decimal digits displayed on the screen for the
+monochromator motor positions, just as is done with the standard
+motor scans.
+The \fBUP\fP default value is 4.
+.SH "November 7, 2014 \- RELEASE 6.02.08"
+.rs
+.SH "\fBsplot\fP Updates"
+.sp
+This \fBspec\fP release includes
+various improvements to the Python \fBsplot\fP utility,
+including a new \fBsplot_cntl()\fP \fB"marker"\fP option to
+create vertical marker lines on the plot.
+See the files in the \fBsplot\fP distribution \fBdocs\fP
+directory for detailed descriptions, particularly
+the development log and command server documentation.
+.SH "Improvement In the \fBser_par()\fP \fB\(dqqueue\(dq\fP Option"
+.sp
+Previously, the \fB"queue"\fP option for the \fBser_par()\fP
+command would return the number of characters available in
+\fBspec\fP\(aqs read\-ahead buffer.  That buffer has bytes
+from a previous \fBser_get()\fP call that were returned by
+the system \fBread()\fP call, but
+beyond the specified
+byte count or end\-of\-string match.  The \fB"queue"\fP option
+will now return that same value if it is nonzero.
+However, if \fBspec\fP\(aqs
+read\-ahead buffer is empty, the code will check
+if any characters are available in
+the kernel buffer and return that value.
+.SH "New Serial Debugging Option For Hex Output"
+.sp
+For serial device I/O, \fBspec\fP debug level 128 uses octal escape sequences
+to represent unprintable characters.  If debug level 0x400000
+is also set, the debugging output will use a hexadecimal format for all bytes,
+as has been possible for socket debugging since \fBspec\fP release 5.05.05\-5.
+.SH "New Invocation Option For \fBplotselect\fP"
+.sp
+When invoked with arguments,
+the \fBplotselect\fP macro now accepts
+a comma\-separated list of counter numbers or mnemonics to set
+which counters are to be plotted.
+This is
+in addition to the still supported space\-separated list of counter numbers
+or mnemonics invocation.
+When invoked without arguments, \fBplotselect\fP still runs in interactive
+menu mode.
+.SH "More Robust Server\-Mode Debugging"
+.sp
+An issue in server mode with
+debug levels 0x1000 and 0x100000 (for debugging server\-client communications
+and thread locks) that could cause crashes has been addressed.
+.SH "Updates For Trinamic TMCL Motor Controller Support"
+.sp
+The preliminary support for the Trinamic TMCL motor controllers now
+includes new commands to access the I/O ports.
+See the \fI\%tmcl\fP help file for more details.
+.SH "Support For NI GPIB Version 3.2 Libraries"
+.sp
+It is now possible to link with version 3.2 of the National
+Instruments GPIB libraries for Linux.
+However, CSS still recommends using \fBspec\fP\(aqs built\-in support.
+See the \fI\%nigpib\fP file for more information.
+.SH "Fix For NI GPIB\-ENET/1000 \fBgpib_put()\fP"
+.sp
+An old bug where a \fBgpib_put()\fP of more than 500 bytes
+would fail when using \fBspec\fP\(aqs built\-in support for the
+National Instruments GPIB\-ENET/1000 has been fixed.
+.SH "Fix For Mythen 1.3 Firmware"
+.sp
+Support for the older Dectris Mythen MCA version 1.3 firmware that was
+inadvertently broken
+in \fBspec\fP release 6.00.11 is now fixed.
+.SH "Fix For Measurement Computing USB\-CTR04 Detection"
+.sp
+An issue, where \fBspec\fP had the wrong USB device ID coded
+for the Measurement Computer USB\-CTR04
+with the result that \fBspec\fP did
+not detect that device, has been fixed.
+The device ID for the USB\-CTR08 was correct.
+.SH "Fix For Crash With Incomplete \fBterminfo\fP Description"
+.sp
+A bug, where \fBspec\fP could crash with the \fBspec_menu()\fP
+function
+if certain function\-key sequence descriptions were missing
+from a \fBterminfo\fP entry,
+has been fixed.
+.SH "Preliminary Support For Seven\-Circle Geometry \fBsevc\fP"
+.sp
+Preliminary support for a new seven\-circle diffractometer geometry
+is included
+in the source file \fBgeo_sevc.c\fP.
+Choose \fBsevc\fP as the geometry type during \fBspec\fP installation.
+To accommodate the seven geometry motors, orientation\-matrix
+macros that were based on a maximum of six geometry motors have
+been updated to work with seven.
+.SH "September 10, 2014 \- RELEASE 6.02.07"
+.rs
+.SH "Fix For \fBremote_poll()\fP"
+.sp
+Updates in \fBspec\fP release 6.02 to allow more flexibility in
+specifying the name of the \fBspec\fP server
+inadvertently broke the \fBremote_poll()\fP
+function.
+That issue is now fixed.
+.SH "Fix For GE Fanuc SBS (Bit\-3) Driverless Support"
+.sp
+Optimizer improvements in \fBgcc\fP release 4.8 broke the \fBspec\fP
+driverless support for the GE Fanuc (formerly SBS, formerly Bit\-3) PCI\-to\-VME
+model 61x/62x controller
+boards (in at least some configurations).
+This \fBspec\fP release fixes that issue.
+.SH "Preliminary Support For Saving To HDF5 FILES"
+.sp
+This \fBspec\fP release features new functions to
+save data using the HDF5 standard.  See the new
+\fI\%hdf5\fP help file for details.  In order to enable
+the functions, \fBspec\fP must be linked with the
+HDF5 library, which can currently be configured
+by setting the \fBsite_lib\fP ("extra library flags")
+installation
+parameter to include the library, as in
+\fBsite_lib=\-lhdf5\fP.
+This preliminary support expects version 1.8.13
+of the library, although will still function if
+linked with an earlier 1.8 release.
+Future releases will include a compatible library
+version.
+The function syntax and usage in this preliminary release
+is subject to change.
+Please contact CSS directly for additional information.
+.SH "August 16, 2014 \- RELEASE 6.02.06"
+.rs
+.SH "Fix For Struck SIS1100"
+.sp
+Optimizer improvements in \fBgcc\fP release 4.8 broke the \fBspec\fP
+driverless support for the Struck SIS1100 PCI and PCIe VME controller
+boards (in at least some configurations).
+This \fBspec\fP release fixes that issue.
+.SH "August 6, 2014 \- RELEASE 6.02.05"
+.rs
+.SH "Updates and Fixes For Phytron phyMOTION"
+.sp
+The recently introduced Phytron phyMOTION support
+has been updated to fix issues
+associated with identifying the crate configuration and with addressing
+I/O modules.  In addition, the USB interface (which
+appears as a serial device to \fBspec\fP) is now supported.  Also, \fBspec\fP\(aqs
+\fBudev\fP rules file for \fBLinux\fP platforms now includes a rule to
+create a \fB/dev/phymotion\fP special device when the controller is connected.
+.SH "Support For Micos Venus\-1"
+.sp
+This \fBspec\fP release includes support for the old Micos
+Venus\-1 programming syntax, such as used on the Corvus Eco model
+motor controller.
+The configuration is the same as for the Venus\-2 and Venus\-3
+controllers.  The \fBspec\fP code automatically selects the appropriate
+syntax version to use.
+.SH "Added \fB\(dqinit_sequence\(dq\fP Parameter For MDrive Motors"
+.sp
+The MDrive motor controller support
+now recognizes a parameter named \fB"init_sequence"\fP.
+The parameter must be set in the \fBconfig\fP
+file (type \fBp\fP from the motor screen in the configuration editor to access
+nonstandard optional parameters).
+The string value of the parameter can contain a sequence of \fBS\fP and/or
+\fBD\fP commands separated by semicolons to configure the I/O points, such as:
+.RS 3m
+.sp
+.nf
+.ft CB
+S1=2,0,1;S2=3,0,1
+.ft P
+.fi
+.RE
+.sp
+That string would set input 1 as the plus limit,
+input 2 as the minus limit and both inputs as active low and
+current sources.
+.sp
+The \fB"init_sequence"\fP commands will be sent when reading the \fBconfig\fP file on start up or
+after \fBreconfig\fP.  The default initialization sequence is the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+S1=2,0;S2=3,0;S3=1,1
+.ft P
+.fi
+.RE
+.sp
+That command will be sent prior to any \fB"init_sequence"\fP commands, but
+the assignments made using \fB"init_sequence"\fP will override
+the default sequence.
+Only \fBS\fP and \fBD\fP assignments are allowed in the sequence.  See
+the MDrive programming manual for proper syntax for using the
+\fBS\fP and \fBD\fP commands.
+Also, the semicolons are not part of the MDrive syntax. \fBspec\fP
+will format the commands correctly when sent to the controller.
+.SH "July 3, 2014 \- RELEASE 6.02.04"
+.rs
+.SH "Fix For \fB\-l logfile\fP Crash"
+.sp
+A bug introduced in release 6.02 that resulted in a crash
+when the \fB\-l logfile\fP start\-up option was used has been fixed.
+.SH "Fixes For Background Subtraction With the Plotting Macros"
+.sp
+Support for the background\-subtraction feature in the
+plotting macros has been updated to restore functionality which
+disappeared with the \fBspec\fP 6.02 release.
+The ability to enable the feature is back in the
+\fBsetplot\fP macro.
+After updating the \fBspec\fP installation, use the \fBnewmac\fP
+command to load the revised macros.
+.sp
+The background\-subtraction feature calculates a linear background
+using the endpoints of the scan for the counters selected for plotting with
+the \fBplotselect\fP or \fBcounters\fP commands,
+subtracts
+that background from the data in \fBSCAN_D\fP and places the results in
+an array called \fBSCAN_B\fP.
+One can use the \fBsetplot\fP macro to enable
+or disable background\-subtraction or simply assign a value to
+the global variable \fBBG\fP.  A nonzero value enables background
+subtraction.  The commands \fBsplot\fP, \fBpts\fP, \fBlp_plot\fP and \fBplot\fP
+use \fBSCAN_B\fP if \fBBG\fP is nonzero.
+The values \fBCEN\fP, \fBpl_MIN\fP, \fBpl_MAX\fP, \fBpl_FWHM\fP, etc. are
+calculated from the \fBSCAN_B\fP data after calling
+\fBsplot\fP, \fBpts\fP, \fBlp_plot\fP or \fBplot\fP
+when background\-subtraction
+is enabled.  One of those macros needs to be called after
+setting \fBBG\fP to zero to have \fBCEN\fP, etc., calculated from
+\fBSCAN_D\fP.
+.SH "Fix For Display Of Macros containing Non\-ASCII Text"
+.sp
+The \fBprdef\fP command and the \fBshow_state\fP utility
+will now use octal escape sequences for non\-ASCII
+bytes in the macro definition.
+Previously, characters with bit 8 set would display as
+a backslash followed by the ASCII representation of the
+remaining seven bits.
+.SH "Fix For Output File Reference After Directory Change"
+.sp
+Release 5.07.03\-4 (fall 2007) broke a feature associated with output files and
+described in the \fBspec\fP Reference Manual as
+"\fBspec\fP remembers the directory the files are in when they are first opened.
+If the user changes \fBspec\fP\(aqs current directory,
+open files may be referenced either by the name with which the
+files were opened or by the correct path name relative
+to the current directory."
+That bug is now fixed.
+.SH "Update To Macro\-Hardware Motor \fB\(dqsearch\(dq\fP Keyword"
+.sp
+The macro\-hardware motor \fB_cmd()\fP function call for with keyword
+\fB"search"\fP has been modified so that the \fBp2\fP
+parameter will only be set if the underlying \fBchg_dial()\fP
+function is called with an optional third argument or if the
+optional \fB"home_position"\fP parameter is set.
+See the \fI\%mac_hdw\fP help file for details.
+.SH "June 25, 2014 \- RELEASE 6.02.03"
+.rs
+.SH "Support For Measurement Computing USB\-CTR4 and USB\-CTR8"
+.sp
+\fBspec\fP supports the new USB\-CTR4 and USB\-CTR8 counter/timer
+modules from Measurement Computing.  See the \fI\%usbctr\fP help file for details.
+.SH "Backlash Compensation Support For Phytron PhyMotion Controllers"
+.sp
+\fBspec\fP now programs the backlash compensation parameter (P25)
+on the Phytron PhyMotion controllers.  When this parameter is
+set the controller will perform backlash compensation as part
+of a single move command.  Normally, \fBspec\fP programs two moves when backlash
+is required.
+.SH "Updates For \fBsplot\fP Utility"
+.sp
+The \fBsplot\fP utility will now create a pop\-up error window if there
+are problems opening a data file instead of silently fail.
+The code for identifying scan
+types from the scan name is now more robust.
+.SH "June 15, 2014 \- RELEASE 6.02.02"
+.rs
+.SH "Fix For \fBCEN\fP and Related Values"
+.sp
+The quantities \fBCEN\fP, \fBpl_MIN\fP, \fBpl_FWHM\fP and related values
+use the symbol \fBPL_Y1\fP in their calculations.
+\fBPL_Y1\fP contains the detector column number in the data array (usually \fBSCAN_D\fP).
+With the updated plotting macros in \fBspec\fP release 6.02, the
+column number depends on the number of motors in the
+scan, but the macros did not update \fBPL_Y1\fP when the
+number of motors changed.
+That issue is fixed in this release.
+.SH "Fix For \fBtango_put()\fP Of Associative Arrays"
+.sp
+A bug in the \fBspec\fP release 6.02 TANGO updates, where a \fBtango_put()\fP
+of an associative array did not include the last element of the
+array, has been fixed.
+.SH "Fix For \fBcounter_par()\fP Crash with PCI Counter/Timers"
+.sp
+A crash that could occur when using \fBcounter_par()\fP to access hardware features
+when PCI counter/timers were configured but not installed in the computer has
+been fixed.
+Affected cards were any of the am9513 based PCI cards, the National Instruments 6601
+and 6602 PCI cards and the National Instruments X series
+PCIe cards.
+.SH "Fixes For \fBsplot\fP Utility"
+.sp
+An issue where the \fBsplot\fP utility could not read data files that
+contained motor scans of three or more motors (\fBa3scan\fP, \fBa4scan\fP, etc.)
+has been fixed.
+Another issue, where the FWHM was displayed with a negative number for scans
+that went from high to low values, has also been fixed.
+.SH "June 2, 2014 \- RELEASE 6.02.01"
+.rs
+.SH "Support For HP/Agilent E2050/E5810 LAN/GPIB Gateway"
+.sp
+This \fBspec\fP release includes initial support for the
+HP E2050 and Agilent E5810 LAN/GPIB gateway controllers.
+.SH "May 20, 2014 \- RELEASE 6.02"
+.rs
+.SH "Introduction"
+.sp
+Welcome to \fBspec\fP release 6.02.
+In addition to the usual assortment of new hardware support and bug fixes,
+this release has some noteworthy new features.
+The notes below are divided into four sections: \fI\%new features\fP, \fI\%macro updates\fP,
+\fI\%bug fixes\fP and \fI\%hardware support\fP.
+(The following notes are consolidated and reorganized from the 6.01 beta release notes,
+which are in the \fI\%chg6_01\fP help file.)
+.sp
+First of the new features
+is the new interactive plotting utility called \fBsplot\fP.
+\fBsplot\fP not only does real\-time plots of scan data, but also can read and display
+scans from \fBspec\fP data files.
+In addition, \fBsplot\fP has controls to
+send commands to \fBspec\fP to position motors
+and start scans.
+Note, though, \fBspec\fP must be run in server mode (use the \fB\-S\fP flag when starting)
+for \fBsplot\fP to send commands
+to position motors or start scans.
+.sp
+Another added feature is the new built\-in \fBspec_menu()\fP function that provides
+interactive menu configuration capabilities.
+The standard \fBsetplot\fP, \fBplotselect\fP
+and \fBsetshow\fP macros have been replaced with versions that use \fBspec_menu()\fP.
+A new \fBmstartup\fP macro replaces much of the configuration
+provided by the old \fBstartup\fP macro.
+Additional menu\-ized configuration macros will be forthcoming.
+.sp
+A new set of continuous scan macros, \fBcscan\fP, \fBc2scan\fP, \fBcmesh\fP, etc.,
+performs rapid scans where the counters are
+read continuously as the motors move steadily from the start to end specified positions.
+.sp
+Be sure to either start fresh, as in \fBspec \-f\fP, or run the \fBnewmac\fP macro to read
+in the updated macros.  Run \fBsetplot\fP to choose to run the new \fBsplot\fP
+utility.
+.sp
+Please read through the update notes below for a full list of updates.
+We at CSS look forward to your feedback.
+Thanks!
+.SH "NEW FEATURES"
+.rs
+.SH "New \fBsplot\fP Utility"
+.sp
+A new stand\-alone plotting utility called \fBsplot\fP
+is introduced with this \fBspec\fP release.
+The \fBsplot\fP program is intended to replace the standard
+\fBx11filt\fP window and provide additional functions.
+The \fBsplot\fP program uses shared\-memory data arrays
+and \fBspec\fP server/client protocols to communicate
+with the \fBspec\fP process.
+.sp
+The \fBsplot\fP program is written in Python and requires the PyQt4 and PyQwt5 packages.
+A script called \fBinstall_splot_needs\fP is included in the \fBspec\fP distribution that
+will try to install the required packages and their dependencies.
+One can also install the needed packages using whatever tools the particular \fBLinux\fP
+distribution includes.
+.sp
+To use the supplied script, go to the \fBspec\fP distribution directory and type:
+.RS 3m
+.sp
+.nf
+.ft CB
+sudo ./install_splot_needs [\-y]
+.ft P
+.fi
+.RE
+.sp
+The \fB\-y\fP flag means the package installation programs will
+assume a yes in response to queries to confirm additional package installation.
+The package installations
+programs (\fByum\fP or \fBapt\-get\fP, depending on \fBLinux\fP distribution) will likely download
+a dozen or more additional packages.
+.sp
+Note, the \fBx11filt\fP plotting is still available and can
+be used simultaneously with or instead of \fBsplot\fP.
+Use the \fBsetplot\fP
+macro to configure plotting.
+.SH "New \fBsplot_cntl()\fP Built\-In Function"
+.sp
+To support the tight integration of the new \fBsplot\fP utility with \fBspec\fP,
+a new \fBsplot_cntl()\fP function is provided to send and receive \fBsplot\fP messages.
+.. See the \fI\%splot_cntl\fP help file for details.
+.SH "New \fBspec_menu()\fP Function"
+.sp
+A new function named \fBspec_menu()\fP is available for
+creating interactive menus.
+See the \fI\%spec_menu\fP help file.
+.SH "\fBarray_plot()\fP Will Now Plot One\-Dimensional Arrays"
+.sp
+The \fBarray_plot()\fP function has been updated to plot
+one\-dimensional data arrays, such as may be read from an MCA device.
+For such plots, the \fBx\fP\-axis is set to the point number.
+.SH "Unlimited Number Of Output Files"
+.sp
+Previous releases of \fBspec\fP limited the number of open files
+(using the \fBopen()\fP, \fBon()\fP or \fBfprintf()\fP functions) to 25.
+With this \fBspec\fP release, the built\-in limit is removed.
+The number
+of files that can be opened is only constrained by the
+system limits.
+.sp
+Note, it is not a good idea to run up against the system limit.
+Some \fBspec\fP commands will cease to work if no more
+file descriptors are available from the system.
+Make sure that
+macros that open files have provision to close the files when
+no longer needed.
+Note also, the \fBspec_par()\fP
+\fB"auto_file_close"\fP option can be set to have \fBspec\fP
+automatically close files that haven\(aqt been accessed in the specified
+time.
+See the \fI\%spec_par\fP help file for details.
+.SH "New Built\-In \fBOUTFILES\fP Associative Array"
+.sp
+\fBspec\fP will now maintain an associative array named \fBOUTFILES\fP
+that will hold information about all open output files.
+\fBOUTFILES\fP is a two\-dimensional array.
+The first index is the
+name by which the file was opened using \fBopen()\fP, \fBon()\fP, \fBfprintf()\fP
+or the \fB\-l outputfile\fP start\-up option.
+The element value
+for a second index of \fB"name"\fP is the first
+index.
+The element value
+for a second index of \fB"path"\fP is the full path name of the file.
+Additional elements may be added in the future.
+For example:
+.RS 3m
+.sp
+.nf
+.ft CB
+1048.FOURC> for (i in OUTFILES[]["name"])
+1049.more>    printf("%10s %s\en", OUTFILES[i]["name"], OUTFILES[i]["path"])
+      dlog /private/tmp/dlog
+     data1 /private/tmp/data1
+       tty /dev/tty
+ /dev/null /dev/null
+.ft P
+.fi
+.RE
+.sp
+or
+.RS 3m
+.sp
+.nf
+.ft CB
+1053.FOURC> p OUTFILES[DATAFILE]["path"]
+/private/tmp/data1
+.ft P
+.fi
+.RE
+.sp
+Note, the special built\-in name \fB"pipe"\fP is not
+included in \fBOUTFILES\fP.
+The special built\-in name \fB"/dev/null"\fP includes
+the full path in both \fB"name"\fP and \fB"path"\fP to work with
+the standard macros that always refer to that special file by the full path name.
+.\" New Variable Argument Feature For Macro Functions
+.
+.\" +++++++++++++++++++++++++++++++++++++++++++++++++
+.
+.\" 
+.
+.\" New local variables now exist within macro functions.
+.
+.\" The variables are named ``argc``, ``arg0`` and possibly
+.
+.\" ``arg1``, ``arg2``, etc., and represent
+.
+.\" parameters used in the invocation of the macro
+.
+.\" function that were not declared in the definition of the macro function.
+.
+.\" The variable ``argc`` is a count of the additional parameters.
+.
+.\" The variable ``arg0`` is a string with the name of the macro function.
+.
+.\" The additional variables ``arg1``, ``arg2``, etc., contain
+.
+.\" the values of the additional arguments and will have the same
+.
+.\" data type -- number, string, associative array or data array -- as
+.
+.\" the parameter in the call to the macro function.
+.
+.\" 
+.
+.\" Note, ``argc`` and the ``arg*#*`` parameters apply only to arguments
+.
+.\" after the declared arguments.
+.
+.\" Consider this macro function::
+.
+.\" 
+.
+.\" def test(par1, par2) '{ ... }
+.
+.\" 
+.
+.\" When called as ::
+.
+.\" 
+.
+.\" test(1, 2, 3, 4)
+.
+.\" 
+.
+.\" the value of ``argc`` will be 2, ``arg1`` will be 3 and ``arg2`` will be 4.
+.
+.\" 
+.
+.\" If a parameter or local variable of the same name is used
+.
+.\" in the definition of the macro function,
+.
+.\" that instance
+.
+.\" will override these automatically created ``argc``/``arg*#*`` variables.
+.
+.SH "New Filename Completion For \fBdo\fP and \fBqdo\fP Macro Commands"
+.sp
+Although \fBdo\fP and \fBqdo\fP are defined as standard user\-level macros,
+filename completion code has been added to automatically include
+directory paths contained in the global variable \fBDO_DIR\fP.
+Macro support for path lists in \fBDO_DIR\fP was added to the standard macros in
+\fBspec\fP release 6.00.05.
+Filename completion is available when \fBspec\fP is linked with the \fBlibedit\fP or
+\fBreadline\fP libraries.
+.SH "Support For 64\-Bit Integer Data Arrays"
+.sp
+New keywords \fBlong64\fP and \fBulong64\fP are available to create 64\-bit signed
+and unsigned integer data arrays, respectively.
+The 64\-bit arrays can be used in all contexts that accept array data types.
+Note, though, \fBspec\fP will only work with
+52 bits of precision in some contexts, since the internal code uses double\-precision
+floating point format for many operations associated with \fBspec\fP user\-level
+symbols.
+(Double floats use 52 bits for the significand
+and the remaining 12 bits for sign and exponent).
+The \fBspec_shm.h\fP and \fBspec_server.h\fP files
+included in the \fBspec\fP distribution have been updated to include definitions
+for 64\-bit data\-array data types.
+.SH "The \fBfmt_read()\fP and \fBfmt_write()\fP Functions Now Work With Subarrays"
+.sp
+The \fBfmt_read()\fP and \fBfmt_write()\fP commands, used to read and write
+binary data in standard and user\-created formats, will now work using
+subarray syntax.
+Previously, the commands only worked with full data arrays.
+.SH "New \fBinput()\fP Option To Read Arrow Keys and Forward Delete"
+.sp
+The \fBcbreak\fP mode for \fBinput()\fP now has an option
+to return special codes when arrow keys or the forward\-delete key are pressed.
+Type \fBh input\fP at the \fBspec\fP prompt
+or see the \fI\%funcs\fP help file for details.
+.SH "New \fBIS_SERVER\fP Built\-In Variable"
+.sp
+A new built\-in variable named \fBIS_SERVER\fP will be nonzero
+if \fBspec\fP is running in server mode (invoked with the \fB\-S\fP option).
+When in server mode, \fBIS_SERVER\fP will be set to the port number
+on which the \fBspec\fP server is listening.
+.SH "New \fBHOSTNAME\fP Built\-In Variable"
+.sp
+A new built\-in variable named \fBHOSTNAME\fP will be set to the
+hostname of the computer running \fBspec\fP.
+.SH "New Flexibility For Identifying \fBspec\fP Server"
+.sp
+The configuration of \fBspec\fP server motors and counters and
+the built\-in functions for communicating with a \fBspec\fP server
+all require an
+argument of the form \fBhost:port\fP or \fBhost:spec\fP to
+identify the host and the port on which the server is listening.
+With this new release, if the \fBhost\fP part of the string is
+missing, \fBspec\fP will use \fB"localhost"\fP.
+In addition, it is now allowed to mix references to the same server
+by port number and by \fBspec\fP process name.
+See the \fI\%server\fP help file for details.
+.SH "Improvements For \fBremote_stat()\fP"
+.sp
+\fBspec\fP will now include a check
+for pending connections to \fBspec\fP servers
+during a call of \fBremote_stat()\fP, making it possible
+for a loop that tests the return value of \fBremote_stat()\fP
+to determine when a server connection comes up.
+.sp
+Also, \fBremote_stat()\fP will no longer return
+\fB"lost"\fP for a previously open connection after a new call of
+\fBremote_par(..., "connect")\fP for the same host is made.
+.SH "Length Of Allowed Input Line Increased"
+.sp
+The maximum length of input records has been increased from 512 to
+4096 bytes.
+.SH "\(dqSignedInteger\(dq Recognized As an ESRF Data Format Data Type"
+.sp
+Some programs that use the ESRF data format (EDF) use
+"SignedInteger" instead of "SignedLong" to characterize the 32\-bit integer data type.
+The \fBfmt_esrf.c\fP file included in the \fBspec\fP distribution that implements
+the EDF format for the
+\fBfmt_read()\fP and \fBfmt_write()\fP functions now recognizes "SignedInteger"
+as a data type.
+.SH "MACRO UPDATES"
+.rs
+.SH "New Continuous Scan Macros"
+.sp
+New \fBcscan\fP, \fBc2scan\fP, \fBc3scan\fP, \fBc4scan\fP and \fBcmesh\fP standard
+macros for on\-the\-fly scans are included with this \fBspec\fP release.
+With these scans, the
+counters and motor positions are read continuously
+as the motors move from the start to end positions.
+The scan arguments include the start and finish positions for each
+motor and the total time for the scan.
+The speed of each motor
+will be set to approximate that scan time.
+An additional
+optional argument specifies a sleep interval before each counter
+reading.
+The \fBcmesh\fP scan does a series of single motor on\-the\-fly
+scans as an additional motor is stepped through a specified range.
+The scan direction is reversed after each on\-the\-fly scan to minimize
+overhead time.
+See the
+comments in the \fBcscan.mac\fP source file for details.
+.SH "Move Macros Now Allow Variables For Motor Mnemonics"
+.sp
+The \fB_mmov\fP internal macro used by the standard motor\-move macros
+(\fBmv\fP, \fBumv\fP, \fBmvr\fP, \fBumvr\fP, \fBmvd\fP and \fBumvd\fP) will now
+work if the motor number or mnemonic argument
+is a variable.  For example:
+.RS 3m
+.sp
+.nf
+.ft CB
+for (i = 0; i < 5; i++) mv i 10
+.ft P
+.fi
+.RE
+.sp
+will move motors 0 through 4.  Similarly:
+.RS 3m
+.sp
+.nf
+.ft CB
+{ par="phi"; umv par 4; par=th; umv par 1 }
+.ft P
+.fi
+.RE
+.sp
+will work.  In the first instance, the symbol \fBpar\fP is assigned a
+string version of the motor
+mnemonic.  In the second, \fBpar\fP is assigned the number value of the mnemonic.
+.SH "Name\-Space Issues with Moving and Counting Macros Addressed"
+.sp
+The local variable names used within the \fB_mmov\fP macro (used by
+\fBmv\fP, \fBumv\fP, \fBmvr\fP, \fBumvr\fP, \fBmvd\fP and \fBumvd\fP) now all
+start with an underscore to lessen the chance of a name conflict
+with local definitions in \fBuser_getangles\fP,
+\fBuser_premove\fP, \fBuser_postmove\fP, etc.
+.sp
+In addition, \fBget_angles\fP in the \fBwm\fP and \fB_update()\fP
+macros has been replaced with a new macro function called \fBget_angles_func()\fP.
+The new macro function
+serves as a wrapper to \fBget_angles\fP, insulating local variables that
+appear in \fBuser_getangles\fP from symbols used in the calling macros.
+A \fBget_counts_func()\fP provides a similar wrapper to \fBget_counts\fP and is
+used in the updating counting macro \fBuct\fP.
+.SH "Fix For Display of Disabled Counters In \fBuct\fP"
+.sp
+The \fBuct\fP macro has been fixed to properly format the display
+when disabled counters are included.
+.SH "Update For \fBcounters\fP Macro"
+.sp
+Counter names, in addition to counter numbers and mnemonics,
+are now included in the list of counters displayed with the \fBcounters\fP and
+\fBshow_counters()\fP macros.
+.SH "Updated and Improved Plotting Macros"
+.sp
+The standard plotting macros have been updated and revised to fix some old
+problems and to accommodate the new \fBsplot\fP utility, which is an
+alternative to the standard \fBspec\fP \fBx11filt\fP plots.
+.sp
+The \fBSCAN_D\fP data array now defaults to a shared\-memory object
+to accommodate the \fBsplot\fP program.
+In addition, \fBSCAN_D\fP now includes data for all the configured
+counters at each data point along with \fBHKL\fP values for motor
+scans that include geometry motors.
+.sp
+New \fBscan_info_update()\fP and \fBscan_meta_update()\fP macros have
+been worked into the standard macros to fill the shared memory
+\fBinfo\fP and \fBmeta\fP region with details of the spec configuration and
+scan status for the benefit of \fBsplot\fP.
+.sp
+Many of the internal macros have been reworked.
+If a site\(aqs local macros
+use internal macros from the \fBmacros/plotarray.mac\fP file, those local
+macros should be checked and possibly revised to maintain compatibility.
+.SH "Epoch Now Saved To Data File With Added Precision"
+.sp
+The default \fB_loop\fP macro, called at each point of the
+standard scans, will now save the epoch value for each scan point
+to millisecond resolution.
+Previously, the value was saved as an integer.
+The value is the difference between
+the current time and value of the \fBEPOCH\fP variable.
+The value for \fBEPOCH\fP is set to the current time when a new
+data file is created and is saved in the data file header.
+.SH "Revised \fBsetplot\fP, \fBplotselect\fP and \fBsetshow\fP Macros Use New \fBspec_menu()\fP"
+.sp
+The \fBsetplot\fP macro to configure the scan plots,
+the \fBplotselect\fP macro to select which counters to plot
+and the \fBsetshow\fP
+macro to configure motor and counter screen displays now
+use the new \fBspec_menu()\fP function.
+.SH "New \fBmstartup\fP Macro"
+.sp
+A new \fBmstartup\fP macro (for menu startup) uses the new
+\fBspec_menu()\fP function and
+replaces much of the
+functionality of the standard \fBstartup\fP macro.
+.SH "New \fBCP_FILTER_CMD\fP Option For \fBcplot_plot\fP Macro"
+.sp
+The standard \fBcplot_plot\fP macro now recognizes a \fBCP_FILTER_CMD\fP global
+variable.
+If it exists, the \fBcplot_plot\fP macro will evaluate
+its string value to create a dynamic \fBCP_FILTER\fP command.
+For example, the following will produce \fBpdf\fP files using the
+\fBC\-PLOT\fP \fBpdf\fP filter containing the current scan number as
+part of the \fBpdf\fP filename:
+.RS 3m
+.sp
+.nf
+.ft CB
+CP_FILTER_CMD = \(aqsprintf("pdf scan_%04d.pdf", SCAN_N)\(aq
+.ft P
+.fi
+.RE
+.sp
+See the macro source file \fBmacros/cplot.mac\fP in the \fBspec\fP distribution
+for implementation details.
+.SH "New \fBCOUNT_FMT_MAXCH\fP Option For Updated Counting"
+.sp
+The number of counters displayed while doing an updated count with
+the \fBuct\fP macro can be limited to the number of counters in the
+new global variable \fBCOUNT_FMT_MAXCH\fP.
+If the value is zero, all the counters will be displayed.
+The \fBsetshow\fP macro will prompt for a value.
+.SH "\fBnewfile\fP Macro Updated and Reorganized"
+.sp
+The standard \fBnewfile\fP macro has been reorganized and now
+does the bulk of its work in macro functions.
+The arguments are checked and the file created in
+\fBnewfile_f()\fP.
+That macro calls
+\fBnewfile_head()\fP to create the file header.
+The
+\fBnewfile_f()\fP macro is also called from the new \fBmstartup\fP
+macro.
+.sp
+A new \fBuser_newfile\fP macro hook is called at the end of
+\fBnewfile_f()\fP.  By default, the macro is empty.
+Also, \fBuser_newfile\fP and
+\fBuser_filehead\fP are now wrapped in macro functions
+to avoid name\-space
+conflicts with the local variables in the \fBnewfile\fP
+macros.
+.sp
+Finally, the \fBchk_file\fP utility that used to be used
+to test if an existing file begins with the standard
+header has been replaced with calls of built\-in \fBspec\fP functions.
+.sp
+See the macro source file \fBmacros/file.mac\fP in the \fBspec\fP distribution
+for implementation details.
+.SH "BUG FIXES"
+.rs
+.SH "Fix For Drifting Pseudomotors"
+.sp
+An old problem associated with the internal rounding of motor positions
+calculated for pseudomotors from real motors or for real motors from pseudomotors,
+such as with a kappa head on a \fBfourc\fP, \fBfivec\fP or \fBpsic\fP diffractometer,
+has been addressed.
+The rounding may have led to position drift during repetitive movements
+in certain configurations.
+.SH "Fix For \fBx11filt\fP Retained\-Pixmap Mode Text Garbling"
+.sp
+The \fBx11filt\fP plotting utility can use either backing store
+or a retained\-pixmap to maintain content that is drawn when
+the plot window itself is not visible.
+Backing store is
+a server feature.
+The retained pixmap is implemented
+within the \fBx11filt\fP code.
+The default mode for \fBx11filt\fP is to use backing store, but
+on some platforms the default X server configuration has
+backing store disabled.
+In that mode, \fBx11filt\fP uses the
+retained pixmap.
+An old (twenty\-one year) bug associated with writing labels
+to the \fBx11filt\fP retained\-pixmap buffer that resulted in
+garbled labels when a window becomes visible that had been updated when hidden
+has been fixed.
+.SH "Fix For \fBarray_copy()\fP"
+.sp
+A bug, where an "Out of temporary cells" message would
+appear after somewhat less than 20 calls of the new \fBarray_copy()\fP
+function (but only when the first argument was a subarray), has been fixed.
+.SH "Fixes For Server/Client Issues"
+.sp
+Several old issues with \fBspec\fP server/client mode have
+been addressed.
+A bug where a client may not find a previously open server specified
+by host and port number when the client is
+already attached to multiple servers has been fixed.
+A deadlock hang in server mode that could occur
+if a keyboard \fB^C\fP came
+while socket connections were being opened from both the main thread and the
+server read thread has been eliminated.
+.SH "Fix For Rare Crash In Server Mode"
+.sp
+When running in server mode,
+a mutual\-exclusion lock around the code that \fBspec\fP
+uses to maintain the list of socket connections now exists.
+Previously, data corruption and a crash could sometimes occur
+if clients were making and breaking connections to a \fBspec\fP
+server that was also making socket connections from the main command loop.
+This flaw has been present since the introduction of \fBspec\fP\(aqs
+server mode.
+.SH "Fix For Detection of Invalid Octal Values In Strings"
+.sp
+An old issue where strings starting with the characters
+\fB"08"\fP or \fB"09"\fP would evaluate to zero in certain contexts,
+in particular in conditional statements, has been fixed.
+The problem was that the C code improperly identified the
+strings as octal constants because of the leading zero, but
+a scan for an octal number would return a zero value since
+8 and 9 are not valid octal digits.
+.SH "Fix For \fBdate()\fP Glitch"
+.sp
+A bug in the \fBdate()\fP implementation where
+two successive values for the time of day displayed
+using the format \fBdate("%s.%.6")\fP could result in anomalous values
+such as:
+.RS 3m
+.sp
+.nf
+.ft CB
+1382650482.99999905 1382650482.00001097,
+.ft P
+.fi
+.RE
+.sp
+where the second invocation shows an earlier time than the first,
+has been fixed.
+Note, a more
+straightforward way to obtain the same information is using
+the \fBtime()\fP function, which never had such an issue.
+.SH "Fix For \fBdecode()\fP Of Two\-Dimensional Associative Arrays"
+.sp
+The built\-in \fBdecode()\fP function will now properly decode
+two\-dimensional associative arrays.
+See the \fI\%encode\fP
+help file for details on \fBencode()\fP and \fBdecode()\fP.
+.SH "Fixes For \fBarray_dump()\fP To File"
+.sp
+A problem when calling \fBarray_dump()\fP where
+the specified file could not be opened and
+\fBspec\fP would show the same error message repeatedly
+has been fixed.
+Also, a small memory leak when calling \fBarray_dump()\fP
+with the optional filename
+argument has fixed fixed.
+.SH "Duplicate Port Numbers In \fBsock_par(\(dqshow\(dq)\fP Eliminated"
+.sp
+The strings printed with \fBsock_par("show")\fP and returned
+by \fBsock_par("info")\fP no longer list the same port number
+twice after the host.
+.SH "Fix For Counter Mnemonic Check In Configuration Editor"
+.sp
+A old bug in the configuration editor, where a check for
+illegal use of spaces in the counter mnemonics was applied to
+strings in row 2 of the scaler screen and not the mnemonics in
+column 2, has been fixed.
+.SH "Fix For \fBtango_put()\fP"
+.sp
+An old programming error in the implementation of the \fBtango_put()\fP function
+that has only recently manifested on 64\-bit \fBLinux\fP builds has been fixed.
+Before the fix, a \fBtango_put()\fP call of a scalar attribute could pass an incorrect
+value.
+.SH "HARDWARE SUPPORT"
+.rs
+.SH "Support For National Instruments X Series Counter/Timers"
+.sp
+The National Instruments 6300 X series PCIe and PXIe 6300
+boards are now supported
+as counter/timers.  The digital I/O capabilities of the boards can also
+be used.  The analog\-to\-digital and digital\-to\-analog capabilities are
+not yet supported.  See the \fI\%ni63xx\fP help file for details.
+.SH "Hardware Support For the New Focus 8742 Motor Controller"
+.sp
+This release includes initial support for the New Focus (Newport)
+model 8742 Picmotor Controller/Driver.
+The current support is limited to the Ethernet interface.
+The USB interface and RS\-458 network support will be added when
+needed.
+.SH "Support For SmarAct SCU Motor Controllers"
+.sp
+\fBspec\fP now supports the SmarAct SCU model motor controller in addition to
+the MCS model already supported.
+See the \fI\%smaract\fP help file for details.
+.SH "Support For C400 Counter/Timer"
+.sp
+This \fBspec\fP release contains support for the C400
+counter/timer made by Pyramid Technical Consultants and sold by
+FMB\-Oxford.
+The \fBspec\fP support is over the serial interface only.
+See the \fI\%c400\fP help file.
+.SH "Preliminary Support For Trinamic TMCL Motor Controllers"
+.sp
+This \fBspec\fP release contains preliminary support for the TMCL
+line of motor controllers from Trinamic.
+Both serial and CAN interfaces are supported.
+.SH "Preliminary Support For Phytron PhyMotion Motor Controllers"
+.sp
+This \fBspec\fP release contains preliminary support for the Phytron
+PhyMotion motor controllers over a socket interface.
+The configuration editor controller type is \fBPHYMO\fP.
+.SH "New Serial Baud Rate and Other Fixes"
+.sp
+\fBspec\fP now recognizes a baud rate or 600000 for serial
+devices.
+In addition, some issues with the code to set
+certain non\-standard baud rates
+(7200, 14400 and 28800) on \fBLinux\fP have been addressed.
+.SH "Updated Behavior For Several Motor Controllers"
+.sp
+An update to the motor control error handling will now
+abort the move if an error occurs
+during the \fB"prestart_one"\fP and \fB"prestart_all"\fP
+phase of sending the commands.
+A handful of motor controllers are affected by this change,
+namely
+the Oriel 18092,
+Advanced Control System MCU, Missouri Research Reactor motors, MicroMo MVP\-2001,
+New Focus Picomotor 875x, Newport XPS, SPring\-8 Equipment Manager motors, along
+with the macro hardware motor support.
+In practice, one is not likely to see any difference in behavior with the real
+motor controllers.
+However, the updated behavior may be useful
+with the macro hardware motor
+support.
+.SH "Updates For the Newport XPS Motor Controllers"
+.sp
+Previously, \fBspec\fP would automatically send the home\-search
+command to a Newport XPS motor group if the XPS
+reported that motors in the group were in the not\-referenced state.
+When an XPS motor is in the not\-referenced state, nothing can be done
+with the motor until the home\-search command has been sent.
+This \fBspec\fP release changes the default behavior so that the
+home\-search command is not sent automatically.
+Instead,
+a message is printed during hardware configuration or
+when a move is attempted telling the user that the \fBhome\fP
+command must be run.
+.sp
+The previous default behavior of automatic home\-search can
+be restored on a controller\-wide basis by adding the
+non\-standard optional controller parameter \fB"auto_home"\fP
+to the hardware configuration file.
+A value of 1 for the
+parameter will allow \fBspec\fP to send the home\-search
+command during hardware configuration.
+A value of 2 will
+allow \fBspec\fP to send the home\-search command any time
+it is needed.
+.sp
+The 19 additional states added to the
+XPS internal state machine since the original \fBspec\fP XPS
+support was written are now recognized.
+.sp
+\fBspec\fP will now show warning messages if a move is halted
+by the controller putting a motor in the disabled state
+because of a following error (or several other conditions).
+.sp
+If a motor reports it is in the not\-initialized state
+due to the error "both ends of run activated", \fBspec\fP assumes
+that to mean the motor is disconnected and disables access to
+that motor to avoid continued error messages.
+To re\-enable access to the motor, it is necessary to
+fix the problem and restart \fBspec\fP or run the \fBreconfig\fP
+command.
+.sp
+Some problems with configuring XPS motor groups with more than one
+motor have been addressed.
+(Apparently, nobody had been
+using that configuration with \fBspec\fP.)
+Yet to be resolved are issues where
+\fBspec\fP sends commands to perform backlash.  This issue can be
+worked around by configuring backlash in the XPS system file and
+setting the \fBspec\fP backlash parameter to zero.
+.sp
+Finally, the commands to set speed and acceleration
+are handled more efficiently.
+.SH "Improved Abort Handling for ACS MCB\-4B Motor Controller"
+.sp
+A problem with the ACS MCB\-4B motor controller, where
+communication errors occurred after sending a motor\-stop
+command associated with a \fB^C\fP user abort, has been
+addressed.
+\fBspec\fP now gives the controller motors time to decelerate
+before sending a command after sending the stop command,
+as the controller firmware appears to require such a delay.
+.SH "Several TANGO Updates"
+.sp
+The \fBtango_get()\fP and \fBtango_put()\fP functions have new
+usage options to read or set multiple attributes in a single call.
+See the updated \fI\%tango\fP help file for details.
+.sp
+The \fBtango_get()\fP return value can now be used to check if the data
+quality of the values read is "invalid".
+.sp
+Calling any of the \fBtango_io()\fP, \fBtango_get()\fP and \fBtango_put()\fP
+functions with an invalid attribute is no longer a fatal error.  Instead,
+\fBspec\fP will return \-1 and place a message in \fBTANGO_ERR\fP.
+.sp
+The \fBtango_io()\fP, \fBtango_get()\fP and \fBtango_put()\fP should now
+work well with associative array and all data array input and output
+types for any array (spectrum or image) TANGO data type.
+.sp
+If a return argument is included for \fBtango_io()\fP scalar\-valued
+commands, \fBtango_io()\fP will return zero on success and place the
+return value in the supplied argument.
+.sp
+\fBTANGO_ERR\fP can now be assigned a numeric \-1 value rather than the string
+"\-1" to suppress error messages on the next call of the TANGO functions.
+.sp
+\fBspec\fP now supports the DEVVAR_LONG64ARRAY and DEVVAR_ULONG64ARRAY as input
+and output types for \fBtango_io()\fP, as input types for \fBtango_get()\fP and
+as output types for \fBtango_put()\fP.
+

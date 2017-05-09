@@ -1,0 +1,227 @@
+.TH "oms" "hardware" "08/01/12" "burleigh.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+burleigh \- Burleigh 6200ULN with 671 interface
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)burleigh.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2000,2001,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "oms" "hardware" "08/01/12" "burleigh.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Burleigh 6200ULN Inchworm Controller operates
+the Burleigh Inchworm motors in closed\-loop mode.
+\fBspec\fP supports this controller using
+the Burleigh Model 671 ISA PC card interface.
+Currently, only one 671 card at a time is supported,
+but support for multiple cards will be added
+when required by a \fBspec\fP user.
+The 671 card supports three 6200ULN controllers
+with each controller supporting up to three motors.
+.SH "CONFIGURATION"
+.rs
+.sp
+The motor controller type is \fBBURL671\fP on the motor screen
+of the configuration editor.
+The steps\-per\-degree parameter is only used
+to determine the resolution at which you can specify moves.
+A value of 100 is appropriate for a 0.02 um encoder resolution.
+.sp
+To avoid frequent messages regarding position discrepancies,
+choose a reasonable number of steps for the motor "slop" parameter
+on the optional motor\-parameter screen of the configuration editor.
+.SH "CALIBRATE"
+.rs
+.sp
+To achieve well\-defined speeds, it is necessary
+to calibrate each motor\(aqs movement.
+The \fBmotor_par()\fP option \fB"calibrate"\fP, described below, does that.
+A motor is moved at a series of speeds,
+and the distance traveled and time taken is measured.
+The measured values are fit to a simple power law described by two constants,
+with separate parameters calculated in forward
+in reverse directions for high and low speeds.
+Thus, eight parameters are found for each motor.
+.sp
+Note, the calibration operation takes a couple of minutes.
+\fBspec\fP turns off stall detection, if on, during calibration,
+and restores it afterwards.
+.sp
+The calibration parameters for nine motors can be saved
+in ASCII format to a file according to Burleigh conventions.
+\fBspec\fP will automatically load calibrations from a file
+if it exists and can be found using the following rules.
+If the environment variable \fBBURLEIGH_CALIB\fP set,
+its value is taken as the pathname of the calibration file.
+If it is not set, \fBspec\fP looks for a file named \fB671calib.txt\fP
+in the current directory.
+The parameters are loaded from the calibration file, if it exists,
+when the controller is initialized at program start up
+and on hardware reconfiguration.
+.sp
+While running \fBspec\fP, the \fBmotor_par()\fP options \fB"calib_file"\fP,
+\fB"load_calib"\fP and \fB"save_calib"\fP, also described below,
+can be used to change the name of the file
+and to load or save calibration parameters.
+.SH "STALL"
+.rs
+.sp
+The controller has the ability to detect a stalled motor.
+The \fBmotor_par()\fP option \fB"stall"\fP is used
+to turn stall\-detection on or off.
+When stall detection is turned on,
+the controller makes a configurable number of checks
+that the encoder has sent a configurable number of pulses
+over a configurable interval.
+If stall is detected, the controller stops the motor
+and returns a status indication.
+The above three parameters can be entered directly
+using the \fBmotor_par()\fP options \fB"stall_tests"\fP,
+\fB"stall_interval"\fP and \fB"stall_tolerance"\fP described below.
+Since the stall detection depends on the motor speed,
+the above parameters need to be changed to match the speed.
+.sp
+\fBspec\fP provides an alternative method for setting the stall parameters
+that automatically adjusts to the motor speed.
+The \fBmotor_par()\fP options \fB"stall_time"\fP and \fB"stall_percent"\fP,
+described below, are used.
+The \fB"stall_time"\fP parameter is the number of seconds in total
+to spend doing the stall tests, while \fB"stall_percent"\fP
+is the percentage value of the current speed below
+which the motor is considered stalled.
+.sp
+Setting any of the first three parameters switches
+to the mode where the parameters are set directly.
+Setting either of the last two parameters switches to the alternative mode.
+.SH "SPECIAL COMMANDS"
+.rs
+.sp
+The following special commands are available
+through the \fBmotor_par()\fP function.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "calib_file" [, file])\fP
+\- 
+Sets or returns the pathname of the calibration file.
+The same calibration file is used for all motors.
+The file name is not reset during hardware reconfiguration.
+The \fBmotor\fP parameter is any motor associated with the 671 controller.
+.HP 5m
+."
+\fBmotor_par(motor, "load_calib" [, file])\fP
+\- 
+Loads calibration parameters for all motors
+from the current calibration file
+or from the \fBfile\fP specified as the optional argument.
+The \fBmotor\fP parameter is any motor associated with the 671 controller.
+.HP 5m
+."
+\fBmotor_par(motor, "save_calib" [, file])\fP
+\- 
+Writes calibration parameters for all motors
+to the current calibration file or to the \fBfile\fP specified
+as the optional argument.
+The \fBmotor\fP parameter is any motor associated with the 671 controller.
+.HP 5m
+."
+\fBmotor_par(motor, "calibrate")\fP
+\- 
+Runs the calibration test for the specified motor.
+Use the \fB"save_calib"\fP option
+to save the calibration parameters to a file.
+.HP 5m
+."
+\fBmotor_par(motor, "maint" [, how])\fP
+\- 
+Turns position maintenance on or off for \fBmotor\fP
+if the optional argument \fBhow\fP is nonzero or zero.
+Without the arguments, returns nonzero
+or zero reflecting the current state of maintenance mode.
+.HP 5m
+."
+\fBmotor_par(motor, "dwell" [, how])\fP
+\- 
+If the optional argument is present enables the dwell test
+for \fBmotor\fP.
+Otherwise returns a status indicating
+whether the dwell\-test mode is active.
+Consult the Burleigh documentation for details.
+.HP 5m
+."
+\fBmotor_par(motor, "stall" [, how])\fP
+\- 
+If the optional argument is present,
+turns stall detection on or off for \fBmotor\fP depending on
+whether \fBhow\fP is nonzero or zero.
+Otherwise, returns the value matching the current state of stall detection.
+.HP 5m
+."
+\fBmotor_par(motor, "stall_tests" [, value])\fP
+\- 
+Sets or returns the numbers of consecutive tries
+for the stall detection to consider \fBmotor\fP stalled.
+The default value is 5.
+.HP 5m
+."
+\fBmotor_par(motor, "stall_interval" [, value])\fP
+\- 
+Sets or returns the time interval for each stall test
+in seconds for \fBmotor\fP.
+The default value is 0.05 seconds.
+.HP 5m
+."
+\fBmotor_par(motor, "stall_tolerance" [, value])\fP
+\- 
+Sets or returns the number of encoder counts expected
+during each stall test for \fBmotor\fP.
+The default value is 30.
+.HP 5m
+."
+\fBmotor_par(motor, "stall_time" [, value])\fP
+\- 
+Sets or returns the total stall time
+for the alternative stall parameter calculation for \fBmotor\fP.
+The default value is 0.2 seconds.
+.HP 5m
+."
+\fBmotor_par(motor, "stall_percent" [, value])\fP
+\- 
+Sets or returns the percent of current speed
+below which \fBmotor\fP is considered stalled.
+The default value is 50 for fifty percent.
+.HP 5m
+."
+\fBmotor_par(motor, "mvsubstep", substeps])\fP
+\- 
+Moves motor the selected number of \fBsubsteps\fP
+and returns when the movement is complete.
+The motor position is updated at the end of the move.
+.HP 5m
+."
+\fBmotor_par(motor, "display" [, how])\fP
+\- 
+If \fBhow\fP is present, selects the units
+for the front panel display for \fBmotor\fP as follows:
+.TS
+;
+l l .
+1	inches
+2	millimeters
+4	microns
+.TE
+.sp
+Without the optional argument,
+the value corresponding to the current display setting is returned.
+.RE
+

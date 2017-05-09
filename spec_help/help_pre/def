@@ -1,0 +1,26 @@
+def                                  command                                 def
+
+NAME
+     ddeeff and rrddeeff - define a macro
+
+SYNOPSIS
+
+     ddeeff mmaaccnnaammee ssttrriinngg__ccoonnssttaanntt
+     rrddeeff mmaaccnnaammee eexxpprreessssiioonn
+
+DESCRIPTION
+
+     The command ddeeff defines a macro named mmaaccnnaammee to be ssttrriinngg__ccoonnssttaanntt. Each
+     time mmaaccnnaammee occurs on input, it will be replaced by ssttrriinngg__ccoonnssttaanntt.  The
+     definition is made at the time the command is first read, so the macro can
+     be used later in the same statement block in which it is defined and can be
+     redefined within the same statement block.
+
+     The command rrddeeff is similar to ddeeff, but the macro assignment is not made
+     until the encompassing statements are parsed and executed.  Also, although
+     eexxpprreessssiioonn is usually a string constant, it needn't be.
+
+SEE ALSO
+
+     _m_a_c_r_o_s _u_n_d_e_f _l_s_d_e_f
+

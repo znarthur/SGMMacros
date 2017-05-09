@@ -1,0 +1,509 @@
+changes                      spec 3.01 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 3.01
+
+RELEASE 3.01.06
+
+     These notes summarize the cumulative changes made for ssppeecc release 3.01.06
+     as of December 18, 1994.
+
+mmccaa__sseell(()) Changes
+     The rreeccoonnffiigg command no longer performs an automatic mmccaa__sseell((00)), unless the
+     currently selected MCA-type device is no longer configured.  Also,
+     mmccaa__sseell(()) now returns the number of selectable MCA-type devices when passed
+     a valid argument.
+
+Block-Mode CAMAC Transfer Implementation
+     ssppeecc now has its first implementation of CAMAC block-mode transfers for
+     reading MCA-type CAMAC modules.  Currently, block mode is only implemented
+     for the Kinetic Systems 3929 SCSI CAMAC controller on HP platforms using
+     either the Kinetic Systems software or the CSS software.  Currently, only
+     the LeCroy 3588 Histogramming Memory Module makes use of block-mode
+     transfers.  Other CAMAC controllers and CAMAC MCA modules will be converted
+     to use block mode transfers in the future.
+
+New mmccaa__ppuutt(()) Function
+     A new function mmccaa__ppuutt((gg,, ee)) is available to load values from ssppeecc data
+     group gg, element ee into the currently selected MCA.  Currently, this
+     function is only implemented for the LeCroy 3588 Histogramming Memory
+     Module.
+
+New ddaattaa__iinnffoo(()) Function
+     The new ddaattaa__iinnffoo((ggrrpp,, ss)) function returns data group configuration
+     information.  See the ddaattaa help file for more information.
+
+Comments Allowed In ddaattaa__rreeaadd(()) Files
+     The ddaattaa__rreeaadd(()) function will now ignore lines in the input file that begin
+     with the character ##.
+
+Motors and Counters Can Be Disabled for ccddeeff(())
+     A new option for the ccoouunntteerr__ppaarr(()) and mmoottoorr__ppaarr(()) functions allows
+     individual motors and counters to be disabled, presently, only for the
+     purposes of having portions of a ccddeeff(()) macro keyed to the motor or counter
+     mnemonic selectively included or excluded in the ccddeeff(())-macro definition.
+     The function mmoottoorr__ppaarr((mmoott,, ""ddiissaabbllee"",, [[11||00]])) disables the motor mmoott if the
+     third argument is nonzero.  Otherwise a disabled motor is enabled.  If only
+     two arguments are present, the functions returns 0 if the motor is enabled
+     and 1 if the motor is disabled.  A -1 is returned if the mmoott is not a valid
+     motor.  Rereading the ccoonnffiigg file reenables all motors and counters.
+     Similar syntax applies to ccoouunntteerr__ppaarr(())..  In the near future, motors and
+     counters that are disabled will not be accessed by ssppeecc.
+
+The Nucleus PCA-3 Supported and PCA-Multiport Improved
+     The Oxford/Tennelec/Nucleus PCA-3 multichannel analyzer PC board is now
+     supported in ssppeecc.  This board is a replacement for the PCA II, and is the
+     board of the choice for new purchases.  Unlike the PCA II, the PCA-3 does
+     not require a kernel driver to count to presets or perform dead-time
+     correction.  In addition, ssppeecc now includes additional functionality for
+     the PCA Multiport module.  See the ppccaa help file for more information.
+
+Support For KS 3116 16-bit D/A
+     The Kinetic Systems 3116 16-bit can now be used as a DAC motor.
+
+E/ISA Bus Support On HP 700
+     ssppeecc now supports E/ISA port access on suitably equipped HP 700 platforms.
+     ssppeecc's port access functions ppoorrtt__ggeett(()), ppoorrtt__ppuutt(()), etc., and the built-in
+     support for all the PC card motor controllers, counters, etc., that don't
+     require a driver on PC UNIX systems, are now available on the HP.  See the
+     file aauuxx//RREEAADDMMEE..hhpp for information on setting up the system configuration
+     files.
+
+National Instruments GPIB now supported on HP 700
+     ssppeecc can be linked with National Instruments GPIB support modules (cciibb..oo
+     files) on HP 700 platforms.  Currently, only the GPIB-ENET module and
+     software has been tested.
+
+Improved Support For the KS3929 SCSI-To-CAMAC on HP 700
+     ssppeecc now includes direct support for the KS3929 SCSI-to-CAMAC controller on
+     the HP 700 platforms.  It is no longer necessary to purchase the expensive
+     KS software package.
+
+Can Use 19200 and 38400 To Indicate Baud Rate
+     The strings 1199220000 and 3388440000 are now recognized by ssppeecc and the
+     configuration editor as synonyms for the baud rates previously specified by
+     eexxttaa and eexxttbb.
+
+New Version Info File
+     ssppeecc distributions now include a VVeerrssiioonn file that contains version numbers
+     for all the files used to create the ssppeecc distribution.  This information
+     should aid in the communication between CSS and local ssppeecc administrators
+     in determining exactly what version of the package is installed.
+
+vi-Mode Code Now Included With GNU Readline Library
+     The optional GNU readline library source code aggregated with the ssppeecc
+     distribution now also includes the modules to support vi-editing mode.  Use
+     EESSCC--^^JJ or EESSCC--^^MM to switch between emacs- and vi-editing modes while
+     running ssppeecc.  To start up in vi-editing mode, put the line
+
+        sseett eeddiittiinngg--mmooddee vvii
+
+     in the ..ssppeecc__kkeeyyss file in your home directory.
+
+Bug In Creation Mode of hhddww__lloocckk Fixed
+     A bug in the per-diffractometer hardware-locking feature, whereby the
+     initial copy of the hhddww__lloocckk file was created with the wrong access modes,
+     has been fixed.  With the wrong modes, hardware locking would be in place
+     only for the same user who created the initial hhddww__lloocckk file.  The mode of
+     existing hhddww__lloocckk files will be corrected when ssppeecc is updated.  To fix
+     existing installations, change the mode of each uusseerrffiilleess//hhddww__lloocckk file to
+     0666.  Per-diffractometer hardware locking was introduced in ssppeecc release
+     3.00.07.
+
+RELEASE 3.01.05
+
+     These notes summarize the changes made for ssppeecc release 3.01.05 as of
+     September 14, 1994.
+
+Protection Against Funny Characters In File Names
+     ssppeecc can now optionally prevent you from (accidentally) creating files with
+     names containing nonstandard characters.  By default, this protection is
+     enabled.  Use the function ssppeecc__ppaarr((""cchheecckk__ffiillee__nnaammeess"",, 00)) to disable the
+     feature.  When the feature is enabled, if a file name passed to the oonn(()) or
+     ooppeenn(()) functions contains any of the characters (())[[]]{{}}||$$''``**??;;!!&&<<>>\\@@, the
+     space character, any control characters or any characters with the eighth
+     bit set, and the file doesn't already exist, ssppeecc will print a error
+     messages and reset to command level.
+
+Some Old Problems In Four-Circle Phi-Fixed Mode Fixed
+     Some singularities in the angle calculations in phi-fixed mode for the
+     four-circle geometry, particularly at pphhii = 0, are now avoided.
+
+Fixed Some Recent Bugs In the Installation Program
+     Versions of the ssppeecc installation script dating from April 1994 until now
+     weren't installing the high-resolution filter programs properly.  That bug
+     has been fixed.
+
+Some Fixes To xx-axis Labels In Plots
+     A bug in the automatic ranging of the xx-axis numbering for reversed ranges
+     that caused the ranges not to encompass all the data points has been fixed.
+     In addition, incomplete erasure of previous numbers when the xx-axis ranges
+     change in updated plots has been mostly fixed.
+
+Small Improvement to High-Res Plot yy-Axis Labels
+     The formatting of the yy-axis labels has been modified to prevent truncation
+     of long label strings.
+
+Bug In Using Two High-Res Filters Fixed
+     A bug where not doing a pplloott__ccnnttll((""ooppeenn"")) after a pplloott__ccnnttll((""ffiilltteerr22""))
+     could cause a segmentation violation has been fixed.  Now, when the second
+     high-resolution filter isn't explicitly opened, ASCII plots will be drawn
+     by the plotting functions when the second filter is selected.
+
+Bug In Data Group Code Fixed
+     A difficult-to-manifest bug in the data group code where the data points
+     could become scrambled when data groups were freed should now be fixed.
+
+More Serial Devices Allowed
+     The number of user-level serial devices allowed in ssppeecc has been increased
+     from three to eight.
+
+Small Improvement To Ortec 9XX Timer Code
+     Code has been added to help prevent the Ortec timer from hanging when
+     operating in updated counting mode.
+
+Bug In Ortec 994 Blind Timer Mode Code Fixed
+     A bug, where when counting to monitor counts using the blind timer mode,
+     the number of elapsed seconds at the end of the count time was not
+     correctly estimated from the software clock, has been fixed.
+
+Fix For ACS MCB-4 Bug
+     A bug in the Advanced Control Systems MCB-4 motor controller, where the
+     controller occasionally and unexpectedly sends a null byte at the start of
+     a string has been accommodated in ssppeecc.
+
+Support For the MicroControle ITL09 Motor Controller
+     Initial support for the MicroControle ITL09 motor controller on GPIB and
+     RS-232C interfaces is now available.
+
+Optional Angular Unit Parsing Available
+     The command ssppeecc__ppaarr((""ppaarrssee__uunniittss"",, 11)) enables parsing of unit suffixes.
+     By default, unit-suffix parsing is disabled.  Numbers typed as input to
+     ssppeecc's parser with one of suffixes in the table below appended will
+     automatically be multiplied by the corresponding factor.
+
+        11rr  == 5577..22995588      rraaddiiaann
+        11mmrr == 00..00557722995588    mmiilllliirraaddiiaann
+        11dd  == 11            ddeeggrreeee
+        11mmdd == 00..000011        mmiilllliiddeeggrreeee
+        11mmmm == 11            mmiilllliimmeetteerr
+        11uumm == 00..000011        mmiiccrroommeetteerr
+        11mm  == 00..00116666666677    mmiinnuuttee
+        11ss  == 00..000000227777777788  sseeccoonndd
+
+     Note, however, suffixes on numbers converted from strings or entered using
+     the ggeettvvaall(()) function are not parsed.  The only known use for unit-suffix
+     parsing is with the user-contributed macros in the file mmaaccrrooss//uunniittss..mmaacc.
+     These macros require that unit suffixes be supplied for all motor position
+     arguments in the standard ssppeecc macros.
+
+SSPPEECCDD Environment Variable Used By Utilities
+     The utilities sshhoowwssccaannss and ttiiddyy__ssppeecc will now use the value of the
+     environment variable SSPPEECCDD, if it is set.
+
+ttiiddyy__ssppeecc Revised
+     The ttiiddyy__ssppeecc utility that reports on and cleans up user state files has
+     been revised so that any user can use the utility to report on state-file
+     disk usage and clean up one's own state files.  The owner of ssppeecc's
+     auxiliary file directory (normally ssppeeccaaddmm) and the super user may clean up
+     anybody's state files using ttiiddyy__ssppeecc.  Type ttiiddyy__ssppeecc -- from the shell to
+     see ttiiddyy__ssppeecc's usage.
+
+RELEASE 3.01.04
+
+     These notes summarize the changes made for ssppeecc release 3.01.04 as of June
+     12, 1994.
+
+New mmoottoorr__nnuumm(()) and ccnntt__nnuumm(()) Functions
+     New functions mmoottoorr__nnuumm((mmnnee)) and ccnntt__nnuumm((mmnnee)) that return the motor or
+     counter number corresponding to the mnemonic or number given as as argument
+     have been added.  If no motor or counter is configured with the given
+     mnemonic, the function returns -1.  The argument can either be a string or
+     a number.
+
+New Automatic Hardware Polling
+     On platforms with polled motor controllers, timers or acquisition devices,
+     ssppeecc can now automatically poll the devices to determine when they are
+     finished.  The polling occurs while waiting for keyboard input at the main
+     prompt.  When using the GNU readline library, the polling occurs while
+     waiting for each character to be typed.  When using the standard ssppeecc
+     history, the polling occurs only before the first character is typed.
+     Automatic hardware polling can be disabled using the ""aauuttoo__hhddww__ppoollll"" option
+     to the new ssppeecc__ppaarr(()) function described below.
+
+New ssppeecc__ppaarr(()) Function To Set Internal Parameters
+     A new function ssppeecc__ppaarr((ooppttiioonn [[,, vvaalluuee]])) is available to set miscellaneous
+     internal operating parameters of ssppeecc.  Typing ssppeecc__ppaarr((""??""))  lists the
+     available parameters and their current values.  Option settings are saved
+     in the state file.
+
+Default Plot Options Changed
+     The startup default colors for high resolution plots have been changed from
+     those appropriate to VGA terminals to those appropriate for X11 windows.
+     You can still type ddeeff__ccoolloorrss after the global variable GGTTEERRMM has been set
+     to select the default colors appropriate to the current graphics device.
+     Also, the startup default plotting options have been changed to enable
+     low-resolution screen plots during and after each scan and to disable
+     printer plots after each scan.
+
+Renamed Startup Macro File
+     The name of one of the startup macro files that ssppeecc will read if it exists
+     has been changed from ccoonnff//ssiittee..mmaacc to ccoonnff//ccoonnff..mmaacc, where the directory
+     ccoonnff is the name by which ssppeecc was invoked, while the second ccoonnff is
+     literal.
+
+New ccddeeff Function
+     A new function to create ""cchhaaiinneedd"" macros has been introduced.  See the
+     ffuunnccss help file for more information.
+
+Improvements Made In wwaaiitt(())
+     Previously, the wwaaiitt(()) function would poll all busy devices, even when
+     asked to wait for only moving or counting to finish.  Now, only hardware
+     that is busy doing that which wwaaiitt(()) is being asked to wait for will be
+     polled.
+
+New qquuiitt Command
+     There is now a command called qquuiitt that will cause ssppeecc to terminate, just
+     as ^^DD does.  The command must be at the beginning of a line either typed on
+     the keyboard or read from a command file.  Including qquuiitt in a macro
+     definition will not work.
+
+New Workaround To Configure Extra Devices
+     Some installations require more motor controllers or serial devices than
+     ssppeecc's configuration editor eeddccoonnff allows.  Now eeddccoonnff has been changed so
+     that ssppeecc administrators can add extra devices to the ccoonnffiigg file by hand.
+     Although the extra devices won't appear on the eeddccoonnff screens, they won't
+     be eliminated from the ccoonnffiigg file as before, and will be available to
+     ssppeecc.  Eventually, eeddccoonnff will be upgraded to handle as many devices as
+     needed.
+
+Code For Scientific Solutions GPIB Board Improved
+     The user-level code in ssppeecc that drives the Scientific Solutions (Tecmar)
+     GPIB board has been tightened up and made to run faster.  Note that this is
+     the only GPIB board supported on lliinnuuxx platforms.
+
+Code For Compumotor 4000 Motor Controller Improved
+     Problems with the code for the Compumotor 4000 motor controller when
+     running on a GPIB interface faster CPUs have been fixed.
+
+Support for Kinetic Systems 3512/3514 ADC
+     The Kinetic Systems 3512/3514 16-channel ADC CAMAC modules may now be used
+     as counters with ssppeecc.  When configuring these counters on the scaler
+     screen of the configuration editor, selecting a negative scale factor will
+     treat the ADC contents as twos-complement data.  A positive scale factor
+     means to treat the ADC contents as unsigned binary data.
+
+Driverless Support for KS 2926 CAMAC Controller
+     Joining the trend of using user-level, polled code rather than kernel
+     drivers for ssppeecc hardware devices, the Kinetic Systems 2926 can now be used
+     in a driverless configuration.  The board interrupt should be disabled in
+     this case.
+
+Support For the NSK Megatorque Motor Controller
+     The Nippon-Seiko Megatorque DC motor controller is now supported by ssppeecc
+     over a RS-232C interface.
+
+Support For the Physik Instrumente DC Motor Controller
+     The Physik Instrumente C-804/C-812 DC-Motor Controller is now supported by
+     ssppeecc over a GPIB interface.
+
+The kkaappppaa Geometry Is Now Usable
+     The geometry code for the kkaappppaa configuration is now available.
+
+Software Timer on SYSVR3 Platforms Improved
+     The software timer on System V/386 3.2 now reports updated time with
+     subsecond resolution.  Note, however, the accuracy of alarms on the version
+     of UNIX fluctuates by almost a second.
+
+More Install Options
+     The IInnssttaallll program now prompts for additional parameters relating to
+     special hardware options, namely whether an SICL GPIB driver is being used
+     and whether the Kinetic Systems SCSI-CAMAC driver is being used.
+
+Bug in IInnssttaallll Fixed
+     A bug in the new multiple geometry installation feature introduced in the
+     previous release, that made the feature not work if the target name
+     differed from the standard name, has been fixed.
+
+Bugs in MotionMaster 2000 Fixed
+     A couple of bugs in the most recent versions of the Klinger MotionMaster
+     2000 code have been fixed.
+
+iinnppuutt((00)) From Pipe Works
+     The function iinnppuutt((00)) when used with ssppeecc invoked with the --pp flag can be
+     used to see if any input characters are available on the input pipe.  When
+     the input is from the pipe, the function returns the number of characters
+     available to be read.  When the input if from the keyboard, the function
+     returns the null string if no characters are available, or the first
+     character available if the user has typed something.
+
+Messages Used With the Pipe Input Option Changed
+     The messages sent back to a program (such as a GUI) that run ssppeecc through a
+     pipe are being reorganized.  Contact CSS for details.
+
+RELEASE 3.01.03
+
+     These notes summarize the changes made for ssppeecc release 3.01.03 as of May
+     9, 1994.
+
+New Macro Hooks Available
+     New hooks into the standard macros are now available.  The macros wwaaiittaallll,
+     wwaaiittmmoovvee and wwaaiittccoouunntt now include calls to uusseerr__wwaaiittaallll, uusseerr__wwaaiittmmoovvee and
+     uusseerr__wwaaiittccoouunntt respectively.  These are defined as empty macros when ssppeecc
+     starts fresh.  In addition, the new macros
+
+        ddeeff cchhkk__mmoovvee  ''((wwaaiitt((00xx2211)) |||| UUSSEERR__CCHHKK__MMOOVVEE))''
+        ddeeff cchhkk__ccoouunntt ''((wwaaiitt((00xx2222)) |||| UUSSEERR__CCHHKK__CCOOUUNNTT))''
+        ddeeff cchhkk__aaccqq   ''((wwaaiitt((00xx2244)) |||| UUSSEERR__CCHHKK__AACCQQ))''
+
+     replace the wwaaiitt(()) calls in the updated moving and counting macros, with
+     the new standard global UUSSEERR__CCHHKK__ variables available to the user.  Also,
+     the mmoovvee__eemm macro is now defined by default to include the new user hook
+     macros as follows:
+
+        ddeeff mmoovvee__eemm ''
+            uusseerr__pprreemmoovvee
+            mmoovvee__aallll
+            uusseerr__ppoossttmmoovvee
+        ''
+
+New CCOOUUNNTT__TTIIMMEE Global Variable
+     The ccoouunntt__eemm macro now saves the count time in the new standard global
+     variable CCOOUUNNTT__TTIIMMEE to make the value available to any other interested
+     macros.  The ccoouunntt__eemm macro is the lowest level counting macro called by
+     the standard macros.
+
+Installation Now Supports Multiple Geometries
+     ssppeecc's installation program now allows you to specify the geometries and
+     names of up to 32 configurations that are to be installed together.  One
+     binary file will be created that includes the code for all the specified
+     configurations.  Each name configuration will be a hard link to that file.
+
+More Plot Points Per Group
+     The maximum number of total plot points per group has been increased from
+     32,768 to 65,536.  The total number of points allowed in all groups is now
+     262,144.
+
+Plot Points File Now Truncated When Starting Fresh
+     The plot data file saved with the user's state file in the uusseerrffiilleess
+     directory is now truncated when the user starts fresh or when the data in
+     the file appears corrupted.  Previously, the file would have to be removed
+     to decrease its size.  Note, the file can grow as large as the total number
+     of allowed plot points times the number of bytes per point.  For the
+     default data format (single precision), the maximum size is currently one
+     megabyte per user state file.
+
+New Serial Device Configuration Option
+     To support serial devices that don't use the standard UNIX tty interface,
+     (such as a serial board in a VME crate accessed through ESRF ddeevv__ppuuttggeett(())
+     functions or EPICS channel access), the configuration editor provides a new
+     field for serial devices.  For the traditional serial devices, the
+     characters <> appear in the field.  Other serial interfaces can be selected
+     by stepping through the choices.  In the ccoonnffiigg file itself, the type of
+     serial interface is indicated by prepending characters such as EESSRRFF:: or
+     EEPPIICCSS:: to the device name.
+
+RELEASE 3.01.02
+
+     These notes summarize the changes made for ssppeecc release 3.01.02 as of March
+     31, 1994.
+
+Closing X11 Plot Window From Window Manager Works
+     Previously, it was necessary to type pplloott__ccnnttll((""kkiillll"")) to clean up after
+     closing the X11 plot window.  Also, it was often necessary to kill xx1111ffiilltt
+     processes that were left over after closing the window.  ssppeecc now will
+     automatically recreate the plot window the next time data is plotted if the
+     plot window has been closed or killed from outside of ssppeecc.  Also, the
+     processes that create the window now trap ""wwiinnddooww--ddeessttrrooyy"" events and are
+     much more likely to exit no matter how the windows are closed.
+
+GPIB Sharing Improved
+     The code to share one National Instruments board with multiple copies of
+     ssppeecc running on the same computer has been improved, particularly with
+     respect to the code for the GPIB-to-CAMAC controllers.  When a new process
+     first accesses the GPIB driver, the driver resets the board, Although ssppeecc
+     can not prevent that reset, the error checking and command retry in ssppeecc
+     has been much improved, eliminating many of the problems observed by users.
+
+Long Input Lines Won't Crash ssppeecc with rreeaaddlliinnee
+     Previously, when using the optional GNU rreeaaddlliinnee command line editing and
+     history library, input lines longer than 512 characters would cause ssppeecc to
+     crash.  Now, input lines longer than 512 characters are safely truncated.
+     In the future, there will be no restriction on input line length.
+
+New ssttoopp(()) Function
+     A new hardware control function, ssttoopp((ww)), has been introduced to
+     synchronously halt moving, counting or other asynchronous data acquisition.
+     If the bit corresponding to ww=1 is set, moving is halted.  if the bit
+     corresponding to ww=2 is set, counting and other data acquisition is halted.
+     If ww is zero or missing all asynchronous activity is halted.
+
+New aattaann22(()) Function
+     The math function aattaann22((yy,, xx)) returns the arc tangent of yy//xx using the
+     signs of the arguments to determine the quadrant of the return value.  The
+     return value is in the range -PI to PI.
+
+New ppoorrtt__ppuuttww(()) and ppoorrtt__ggeettww(()) Functions
+     New functions for 16-bit I/O port access on AT-bus computers are available.
+
+New Motor Parameters
+     The motor screen of the configuration editor now has additional subscreens
+     for entering optional motor parameters.  The optional parameters are used
+     with some of the supported motor controllers.  The parameter subscreens are
+     accessed by typing the new mm command.  Optional parameters are entered by
+     typing in a value.  Parameters are deleted with the new ^^DD command.  The
+     additional parameters are added to the ccoonnffiigg file after the line that
+     describes the basic motor parameters using:
+
+        MMOOTTPPAARR::ddcc__ggaaiinn == 11550000
+
+     All of these parameters can be changed or assigned with the mmoottoorr__ppaarr(())
+     function.
+
+Klinger Motion Master 2000 Changes
+     The Klinger Motion Master 2000 motor controller can now be used with the PC
+     port interface.  The ccoonnffiigg file identifiers has been changed from KKLL22000000
+     to MMMM22000000.  All of the optional parameters are now taken from the ccoonnffiigg
+     file.
+
+yy-axis Significant Digits Adjusted
+     The number of significant digits shown on the yy-axis numbers is now
+     automatically adjusted to match the range in the data.
+
+Help Links
+     A new ..lliinnkkss file in the help file directory is consulted by the ggeetthheellpp(())
+     function for associating arbitrary topic names with an existing file.
+
+ACS MCU2 Changes
+     The sslloopp parameter is now taken from the optional motor parameters
+     available in the ccoonnffiigg file.
+
+Huber SMC 9000 Supported
+     The Huber SMC 9000 GPIB motor controller is now supported.
+
+RELEASE 3.01.01
+
+     These notes summarize the changes made for ssppeecc release 3.01.01 as of
+     February 23, 1994.
+
+VME Support
+     ssppeecc now supports VME.  Currently, the only supported VME controller is the
+     National Instruments VME controllers for SunOS 4.1.x S-Bus systems and
+     System V/386 and System VR4.x PC platforms.  The supported VME modules are
+     the Oregon Micro Systems motor controllers and the Mizar MZ 8310
+     timer/counter.
+
+Revised Signal Handling
+     Code to handle asynchronous signals from hardware and user interrupts has
+     been revised (again).  Signal blocking around hardware access has been
+     improved.
+
+Revised Sleep Handling
+     The implementation of the sslleeeepp(()) function has been redone to avoid the use
+     of alarm signals and/or the interval timer, resulting in more robust
+     performance.
+
+HP SICL for GPIB Support
+     ssppeecc now supports the HP Standard Instrument Control Library (SICL) for its
+     GPIB cards.
+

@@ -1,0 +1,96 @@
+.TH "mizar" "hardware" "08/01/12" "mizar.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+Mizar \- Mizar MZ 8310 Counter/Timer Module
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mizar.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1994,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mizar" "hardware" "08/01/12" "mizar.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Mizar MZ 8310 VME module uses two Advanced Micro Devices Am9513
+timer/counter chips.
+These chips each contains five 16\-bit counters.
+\fBspec\fP chains four of these counters on each chip
+to make two 32\-bit counters on each chip.
+The remaining 16\-bit counter on the first chip
+is used to keep track of real time.
+With \fBspec\fP you can count to a fixed time or to a fixed number of monitor
+counts, under software control.
+.sp
+The Mizar module is selected in the \fBspec\fP \fBconfig\fP file by a line similar to
+.sp
+.RS 4m
+\fBPC_MIAZR = 0xf800 5 IRQ4\fP
+.RE
+.sp
+The first parameter is the 16\-bit VME address.
+Next is the number of counter channels, which includes the real\-time counter.
+Last is the VME interrupt vector, or the word
+\fBPOLL\fP if not using interrupts.
+The \fBdevices\fP (D) screen of the
+\fBedconf\fP program (normally run from the \fBconfig\fP macro)
+is used to assign the parameters.
+On the \fBscaler\fP (S) screen, be sure to assign the
+timebase to channel 0 and the monitor to channel 1.
+.sp
+The Mizar chip must be wired up in particular way for use with \fBspec\fP.
+The wire\-wrap pins on jumper blocks K1 and K2 can be used, or the
+pins on the front panel connector J1 can be used.
+NOTE:  Mizar mislabels the pins for jumper blocks K1 and K2 on pages
+3 and 4 of their manual.
+The K2 jumper block should be labeled with the chip 1 pins (1O1, 1O2, etc.)
+and the K1 jumper block should be labeld with the
+chip 2 pins (2O1, 2O2, etc.).
+The manual has these designations reversed.
+.sp
+For \fBspec\fP, monitor counts must go to 1S5 (chip 1, source 5).
+Detector 1 is connected to 1S3 (chip 1, source 3).
+Detector 2 is connected to 2S3 (chip 2, source 3), and
+detector 3 is connected to 2S5 (chip 2, source 5).
+.sp
+In addition, you must connect the 1O1 (chip 1, output 1) signal to
+the following gates: 1G2, 1G4, 1G5, 2G2 and 2G4.
+.sp
+If using interrupts, you must also connect 1O1 to IRQD.
+IRQA, IRQB and IRQC should be left unconnected.
+Use the K6 jumper block to connect IRQD to one of the VME interrupts
+(IRQ4 is the most convenient).
+Make sure jumper block K4 is consistent with that choice.
+.sp
+The \fBgetcounts\fP command will place elapsed time in \fBS[0]\fP,
+and the monitor counts in
+\fBS[1]\fP. The three remaining counter channels will be assigned to the remaining
+configured scaler channels.
+.sp
+The maximum count time is 286.33 minutes.  The MZ 8310 uses a 4MZ oscillator.
+When counting to time, the resolution of the clock depends on the length
+of the count interval, as follows:
+.sp
+.RS 4m
+.TS
+;
+l l l .
+0.00004	for	\fBt\fP < 2.5 sec
+0.0004	for	\fBt\fP < 25 sec
+0.004	for	\fBt\fP < 250 sec
+0.04	for	\fBt\fP < 2500 sec (41.67 min)
+0.262144	for	\fBt\fP < 286.33 min
+.TE
+.RE
+.sp
+When counting to monitor counts, the 0.04 second time base is used, and
+the value returned for the time channel will be corrected
+to account for the roll over that occurs every 655.36 seconds.
+

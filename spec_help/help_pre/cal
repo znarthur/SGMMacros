@@ -1,0 +1,25 @@
+cal                                   macro                                  cal
+
+NAME
+     ccaall - calculate motor settings for a given point in reciprocal space
+
+SYNOPSIS
+
+     ccaall HH KK LL
+
+DESCRIPTION
+
+     The ccaall macro prints out the calculated motor settings for the reciprocal
+     space position given by the arguments HH, KK and LL. In contrast to the ccaa
+     macro, the ccaall macro does not restore the values in the AA[[]] array and the
+     values of the reciprocal space coordinates to the current diffractometer
+     position.
+
+EXAMPLE
+
+     ccaall 11 11 11
+
+SEE ALSO
+
+     _c_a _m_k
+

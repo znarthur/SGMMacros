@@ -1,0 +1,26 @@
+pwd                                   macro                                  pwd
+
+NAME
+     ppwwdd - print ssppeecc's current working directory
+
+SYNOPSIS
+
+     ppwwdd
+
+DESCRIPTION
+
+     The ppwwdd macro prints the current working directory used by ssppeecc.
+
+DEFINITION
+
+     ddeeff ppwwdd ''pprriinntt CCWWDD''
+
+GLOBALS
+
+     CCWWDD - A built-in variable that contains the name of the current working
+          directory.
+
+SEE ALSO
+
+     _c_d _u
+

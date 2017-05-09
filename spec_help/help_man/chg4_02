@@ -1,0 +1,350 @@
+.TH "changes" "spec 4.02 Release Notes" "08/01/12" "chg4_02.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 4.02
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg4_02.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1997 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 4.02 Release Notes" "08/01/12" "chg4_02.rst 6.1  08/01/12 CSS"
+.
+.SH "RELEASE 4.02.04"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.02.04 as of May 12, 1997.
+.SH "New Tty Control In \fBtty_move()\fP and \fBtty_fmt()\fP"
+.sp
+All the tty attribute\-control strings available with the
+\fBtty_cntl()\fP
+function can now be included in special character sequences (as in
+\fB\e[md]\fP
+and
+\fB\e[me]\fP
+to start and end bold mode, for example) in the strings passed to the
+\fBtty_move()\fP
+and
+\fBtty_fmt()\fP
+functions.
+.SH "New \fBend_mac\fP Built\-In Macro"
+.sp
+If a macro named
+\fBend_mac\fP
+is defined, its contents will be executed when \fBspec\fP
+exits in normal fashion.
+The
+\fBend_mac\fP
+macro will not be run if \fBspec\fP is killed or exits due to a fatal error.
+If there is an error while executing the commands in
+\fBend_mac\fP,
+\fBspec\fP will exit anyway, and the
+\fBend_mac\fP
+macro will remain defined.
+.SH "2D Associative Arrays Enhanced"
+.sp
+The following syntax using 2D associative arrays is now available:
+.RS 3m
+.sp
+.nf
+.ft CB
+test["index1"]["val0"] = "data0"
+test["index1"]["val2"] = "data2"
+test["index2"]["val1"] = "data1"
+test["index2"]["val3"] = "data3"
+
+for (i in test["index1"])
+        print i, test["index1"][i]
+
+if ("val2" in test["index1"])
+        print "yes"
+.ft P
+.fi
+.RE
+.SH "GPIB and CAMAC Sharing Fixed"
+.sp
+The HP SICL GPIB controller can now be configured as a shared controller.
+GPIB problems that occurred when the KS 3929 SCSI\-to\-CAMAC
+controller was configured as shared but the GPIB controller was not
+have been fixed.
+.SH "Fixed Motion Bug With Large Backlash and Move Magnitudes"
+.sp
+A very old bug, where motor backlash movements didn\(aqt get done when
+the product of the backlash magnitude and the move magnitude exceeded
+the maximum value for a long integer, has been fixed.
+.SH "Code For Princeton Instruments ST116 PDA Fixed"
+.sp
+Support for the ST116 PDA has been updated to work with \fBspec\fP release
+4.
+The
+\fBmca_get()\fP
+routine now returns the number of points read, as is the current convention.
+The status byte sent by the instrument at the end of the data stream
+and formerly returned by
+\fBmca_get()\fP
+is now available
+using
+\fBmca_par("status_byte")\fP.
+.SH "Command Completion Tuned"
+.sp
+\fBspec\fP now does context\-dependent command completion for the
+\fBlsdef\fP,
+\fBundef\fP,
+\fBprdef\fP,
+\fBlscmd\fP,
+\fBsyms\fP
+and
+\fBunglobal\fP
+commands when linked with the GNU readline library.
+(Command completion lists the possible valid completions or fills in
+a unique completion when the
+\fB<tab>\fP
+key is pressed after partial input.)
+.SH "\fBx11filt\fP Core Dump Fixed"
+.sp
+A bug that sometimes caused a core dump from the X11 filter program
+\fBx11filt\fP
+when
+\fBDISPLAY\fP
+could not be opened has been fixed.
+.SH "RELEASE 4.02.03"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.02.03 as of April 18, 1997.
+.SH "Wizard Password Can Be In a \fBSPECD\fP\fB/passwd\fP File"
+.sp
+The \fBspec\fP wizard password can now be located in
+a file named
+\fBpasswd\fP
+in the \fBspec\fP auxiliary file directory (useful if
+shadow passwords are used, as the shadow file containing the encrypted
+password can be read only by root).
+The format of the file is the same as in the conventional
+\fBpasswd\fP
+file, although this file need only contain the one line for the
+\fBspecwiz\fP
+user.
+The wizard password is used with the
+\fB^W\fP
+command in the
+\fBedconf\fP
+configuration editor and with wizard mode with the
+\fBspec_par("specwiz", 1)\fP
+function.
+.SH "The \fBuct\fP and \fBcounters\fP Macros Fixed Up"
+.sp
+The
+\fBcounters\fP
+macro will now check that the scaler channels are within range.
+The
+\fBuct\fP
+macro will now print only the first six counters, if there are more than six
+counters configured.
+Note, the
+\fBuctn\fP
+macro can provide an updated display of more than six counters.
+.SH "Support For Bit 3 VME Workstation Controllers Fleshed Out"
+.sp
+\fBspec\fP now supports access to the full A32 and dual\-port memory address
+space, including
+DMA transfers to and from \fBspec\fP data arrays, with the
+Bit 3 Model 466\-1/467\-1 VME controllers on Sun platforms and the Model
+487\-1 VME controller on HP platforms.
+.SH "Support For Princeton Instruments CCD Camera Controllers Improved"
+.sp
+The code for the Princeton Instruments CCD camera controllers has been
+revised a bit.
+\fBKinetics\fP
+mode is now supported.
+The
+\fBimage_par()\fP
+function argument
+\fB"kinetics"\fP
+is used to turn the mode on or off.
+The argument
+\fB"kinwinsize"\fP
+is used to set the number of rows in the kinetics\-mode window.
+.SH "Bug Fixed With 0xFF Printed After Parsing Macro Functions"
+.sp
+Odd behavior, introduced with the recent fix of an obscure bug dealing
+with parsing macro functions, where a character with ASCII value 255
+would be sent to the screen after a macro function was parsed, has been
+corrected.
+.SH "RELEASE 4.02.02"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.02.02 as of March 31, 1997.
+.SH "New \fBvme_move()\fP Function"
+.sp
+A new
+\fBvme_move()\fP
+function copies data between VME A32 address space and \fBspec\fP data arrays.
+See the
+\fI\%vme\fP help file for more information.
+.SH "Macro Source Files Displayed With \fBprdef\fP"
+.sp
+The
+\fBprdef\fP
+command will now display (as a comment)
+the name of the source file in which the
+macro was defined.
+This feature, which is on by default, can be disabled using
+\fBspec_par("show_prdef_files", 0)\fP.
+.SH "Can Now Configure Parity For \fBraw\fP Serial Interface"
+.sp
+The options
+\fBraw evenp\fP
+and
+\fBraw oddp\fP
+can now be selected on the Interfaces screen of the configuration
+editor for generic serial devices.
+.SH "Bug with \fBcdef()\fP Fixed"
+.sp
+Using the chained macro function
+\fBcdef()\fP
+with just one argument will create an empty macro with the given name.
+If the macro already exists, it will do nothing.
+Previously, such usage was undefined.
+.SH "\fBfile_info()\fP Bug Fixed"
+.sp
+A bug with the new
+\fBfile_info()\fP
+function, where use with a single argument to test
+for the existence of a file
+could result in a segmentation violation,
+has been fixed.
+.SH "Bit 3 VME Support on Sun Platforms"
+.sp
+The Bit 3 S\-BUS VME controllers for SunOS 4.x and Solaris 2.x
+platforms are now supported.
+.SH "New Feature For NSK Motor Controller"
+.sp
+The function
+\fBmotor_par(mne, "read")\fP
+will now return the strings read for the NSK motor controller.
+.SH "Tweak Macro Enhanced"
+.sp
+You can now change the tweak step size in the
+\fBtw\fP
+macro by typing a numerical value at the
+\fBtw\fP
+prompt.
+.SH "More Flexible ESRF Format Read"
+.sp
+The
+\fBfmt_read()\fP
+function for the ESRF data\-file format now works with headers that are
+not exactly 1024 bytes long.
+.SH "Additions To \fBgmci\fP Geometry"
+.sp
+The
+\fBgmci\fP
+geometry, as used at CEA in Grenoble, now includes
+the latest revisions from the users there.
+.SH "RELEASE 4.02.01"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 4.02.01 as of March 9, 1997.
+.SH "New Default X11 Plot Titles"
+.sp
+\fBspec\fP now sets the default X11 plot title to the name by name of
+the running program followed by the filter number as in
+\fBfourc 1\fP,
+\fBfourc 2\fP,
+\fBsixc 1\fP,
+etc.
+The plot title can still be changed using
+\fBplot_cntl("title=...")\fP.
+.SH "Improved File\-Write Error Handling"
+.sp
+When there is a write error on output to a file, \fBspec\fP will turn off
+further output to the file until there is a
+\fBon()\fP
+or
+\fBopen()\fP
+call.
+That gives the user an opportunity to
+\fBclose()\fP
+the file if no further output is possible, due perhaps to
+a down NFS connection.
+Previously, \fBspec\fP would continue attempts to flush any pending output, even
+after write errors.
+.SH "New \fBxxx_par(... \(dqdevice_id\(dq)\fP Partially Implemented"
+.sp
+The
+\fBmotor_par()\fP,
+\fBcounter_par()\fP,
+\fBmca_par()\fP,
+\fBmca_spar()\fP
+and
+\fBimage_par()\fP
+functions all now take a new
+\fB"device_id"\fP
+parameter.
+In the case of ESRF device server devices, the return value is the
+string name of the imported device.
+For some ESRF devices, the return value will be
+\fB"?"\fP
+if the device was not successfully imported.
+For non\-ESRF devices, the return value may be
+\fB"?"\fP or some other identifier such as GPIB address or CAMAC slot.
+.SH "\fBexit\fP Bug In Macro Functions Fixed"
+.sp
+A bug, whereby an
+\fBexit\fP
+command in a macro function didn\(aqt reset to command level,
+has been fixed.
+.SH "Mnemonic Checking Fix Fixed"
+.sp
+The 4.01.15 fix to prevent the same mnemonic being used for both a
+motor and a counter led to some problems when restarting \fBspec\fP after
+it terminated abnormally.
+Now the mnemonics are kept straight.
+.SH "\fBscans.4\fP Fix For \fB@A\fP Array Data"
+.sp
+A bug in
+\fBscans.4.c\fP,
+where
+\fB\e\fP
+continuation lines of
+\fB@A\fP
+array data were not ignored when the MCA data wasn\(aqt asked for,
+has been fixed.
+.SH "X25 \fBsurf\fP Modifications"
+.sp
+The
+\fBsurf\fP
+geometry for the NSLS X25 diffractometer will now work with either
+a one\- or two\-motor detector\-height stages.
+.SH "Distinct Configuration For NI GPIB\-ENET"
+.sp
+There is now a distinct configuration choice for the
+National Instruments GPIB\-ENET controller on platforms that
+support that device.
+With the GPIB\-ENET configuration selected, \fBspec\fP will block keyboard
+signals during calls to the subroutines in the NI
+\fBcib.o\fP
+module, as
+experience has shown those routines
+are not rebust with respect to signals.
+.SH "More Changes For the MM2500/ITL09 Motor Controllers"
+.sp
+On the advice of the manufacturer, \fBspec\fP now sleeps for 100 msec
+before reading a response to a command sent to the MM2500/ITL09
+motor controllers.
+Perhaps that will help.
+

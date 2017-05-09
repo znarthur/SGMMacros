@@ -1,0 +1,24 @@
+mab                                   macro                                  mab
+
+NAME
+     mmaabb - move to a given incident and reflected angle
+
+SYNOPSIS
+
+     mmaabb aallpphhaa bbeettaa
+
+DESCRIPTION
+
+     The mmaabb macro is used to set a surface diffractometer to a given angle of
+     incidence aallpphhaa and to position the detector at a given angle of reflection
+     bbeettaa (in the plane of incidence) with respect to the surface.  It does not
+     necessarily move the detector into the plane of incidence.
+
+EXAMPLE
+
+     mmaabb 1100mmrr 1100mmrr
+
+SEE ALSO
+
+     _m_r _m_k _w_a_i_t
+

@@ -1,0 +1,204 @@
+.TH "dcx" "hardware" "08/01/12" "dcx.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+PMC DCX\-100 \- PMC Corporation DCX\-100 Motor Controllers
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)dcx.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2000,2001,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "dcx" "hardware" "08/01/12" "dcx.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The PMC Corporation DCX\-100 motor controller
+is an ISA PC card that has eight module positions.
+All eight modules can be used to control individual motors
+or one of the modules can instead be an RS\-232C interface.
+\fBspec\fP can control the DCX\-100 cards either locally
+using the ISA memory\-mapped interface
+or else remotely over the RS\-232C interface.
+In the latter case, the send, receive and ground signals
+of the RS\-232C interface modules from each of
+multiple boards can be wired in parallel, and all can be controlled by
+\fBspec\fP through one serial port of the controlling computer.
+(Other module configurations are possible, but are not currently
+supported by \fBspec\fP.)
+(Note, the DCX\-100 boards are used as OEM components in motor controllers
+sold by the Dynaoptic Motion company.)
+.sp
+The controller is selected on the \fBedconf\fP devices screen along the lines of:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS      DEVICE   ADDR <>MODE  NUM                     <>TYPE
+   YES             0xd000           8  PMC Corp DCX\-100 PC Board
+   YES  /dev/ttyS0     <>   9600   16  PMC Corp DCX\-100 (Serial)
+.ft P
+.fi
+.RE
+.sp
+The \fBconfig\fP file will have:
+.sp
+.RS 4m
+.nf
+\fBPC_DCX = mem_map_address number_of_motors\fP
+\fBRS_DCX = device_name baud_rate number_of_motors\fP
+.fi
+.sp
+.RE
+.sp
+for the above two configurations.
+.sp
+For the PC board configuration,
+the memory\-mapping address is selected by the on\-board rotary switch SW1.
+Position 0 corresponds to address 0xd000,
+position 1 corresponds to address 0xd100, etc.
+For the serial (or RS\-232C) configuration,
+boards are also selected by address.
+That address is used for the individual motor
+channel configuration as follows.
+.sp
+DCX motors on serial ports require unit/channel configuration.
+Unit numbers are assigned to each DCX controller in the order they
+appear on the Device screen, starting with unit 0.
+Channel numbers are of the form
+\fBX\fP1 to \fBX\fP8 where \fBX\fP
+is the board number, matching the SW1 setting,
+and the number is module number on the board.
+.SH "MOTOR PARAMETERS"
+.rs
+.sp
+\fBspec\fP allows a number of additional parameters
+to be set in the configuration file and by the
+\fBmotor_par()\fP function for these controllers.
+Use the configuration editor to establish the long\-term values of
+the parameters in the configuration file.
+Use \fBmotor_par()\fP to make changes
+to the parameters that only are in effect during
+a particular \fBspec\fP session.
+To set the parameters from the configuration editor, use the
+\fBm\fP command from the main motor screen
+to access the optional\-parameter screens.
+.sp
+The following parameters are associated with DC motor operation.
+The two\-letter command sent to the motor controller associated
+with each parameter is given in parenthesis.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "dc_proportional_gain" [, value])\fP
+\- 
+If \fBvalue\fP is given, sets the proportional gain,
+otherwise returns the current value. (\fB"SG"\fP)
+.HP 5m
+."
+\fBmotor_par(motor, "dc_derivative_gain" [, value])\fP
+\- 
+If \fBvalue\fP is given, sets the derivative gain,
+otherwise returns the current value. (\fB"SD"\fP)
+.HP 5m
+."
+\fBmotor_par(motor, "dc_integral_gain" [, value])\fP
+\- 
+If \fBvalue\fP is given, sets the integral gain,
+otherwise returns the current value.  (\fB"SI"\fP)
+.HP 5m
+."
+\fBmotor_par(motor, "dc_integration_limit" [, value])\fP
+\- 
+If \fBvalue\fP is given, sets the integration limit,
+otherwise returns the current value.  (\fB"IL"\fP)
+.HP 5m
+."
+\fBmotor_par(motor, "dc_sampling_interval" [, value])\fP
+\- 
+If \fBvalue\fP is given, sets the derivative sampling interval,
+otherwise returns the current value.  (\fB"FR"\fP)
+.HP 5m
+."
+\fBmotor_par(motor, "dc_following_error" [, value])\fP
+\- 
+If \fBvalue\fP is given, sets the following\-error threshold,
+otherwise returns the current value.  (\fB"SE"\fP)
+.RE
+.sp
+To set the gain for the \fBtth\fP motor, for example, use
+.RS 3m
+.sp
+.nf
+.ft CB
+motor_par(tth, "dc_proportional_gain", 1000)
+.ft P
+.fi
+.RE
+.sp
+The function
+.RS 3m
+.sp
+.nf
+.ft CB
+motor_par(tth, "dc_proportional_gain")
+.ft P
+.fi
+.RE
+.sp
+returns the current value of the \fB"dc_proportional_gain"\fP parameter.
+.SH "SPECIAL COMMANDS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "wdelay" [, value])\fP
+\- 
+If \fBvalue\fP is given, sets the delay before writing a command to
+\fBvalue\fP microseconds, otherwise returns the current value.
+The default value is 20000 (20 msec).
+.HP 5m
+."
+\fBmotor_par(motor, "rdelay" [, value])\fP
+\- 
+If \fBvalue\fP is given, sets the delay before reading a response to
+\fBvalue\fP microseconds, otherwise returns the current value.
+The default value is 50000 (50 msec).
+.HP 5m
+."
+\fBmotor_par(motor, "status_bits")\fP
+\- 
+Returns the value returned by the controller\(aqs \fBTS\fP command.
+.HP 5m
+."
+\fBmotor_par(motor, "send", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the DCX unit associated with \fBmotor\fP.
+.HP 5m
+."
+\fBmotor_par(motor, "read", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the DCX unit associated with
+\fBmotor\fP, as above, and returns a string containing the response.
+.HP 5m
+."
+\fBmotor_par(motor, "usend", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the DCX unit associated with
+\fBmotor\fP, but doesn\(aqt address the command to a specific motor
+or add a line terminator.
+Thus \fBcmd\fP must include the full DCX command syntax.
+.HP 5m
+."
+\fBmotor_par(motor, "uread", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the DCX unit associated with
+\fBmotor\fP, as above, and returns a string containing the response.
+.RE
+

@@ -1,0 +1,53 @@
+.TH "dtscan" "macro" "08/01/12" "dtscan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBdtscan\fP \- relative temperature scan
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)dtscan.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "dtscan" "macro" "08/01/12" "dtscan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBdtscan start end intervals time [sleep_time]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBdtscan\fP macro scans the temperature control set point
+about the current set point.
+The arguments \fBstart\fP and \fBend\fP specify the relative beginning
+and ending values of the set point.
+The number of data points collected will be \fBintervals+1\fP.
+Count time is given by \fBtime\fP, which if positive,
+specifies seconds and if negative, specifies monitor counts.
+.sp
+The optional \fBsleep_time\fP argument specifies
+a time in seconds to delay after each temperature change.
+.sp
+As with all of \fBspec\fP\(aqs temperature\-control macros,
+you need to define a \fBmeasuretemp\fP and a
+\fB_settemp\fP macro that work correctly with your instruments.
+See the \fBTemperature Control Macros\fP section in the
+\fBspec\fP \fBStandard Macro Guide\fP for details.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBdtscan 0 1 10 10\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%te\fP
+\fI\%teramp\fP
+\fI\%tscan\fP
+\fI\%showtemp\fP
+

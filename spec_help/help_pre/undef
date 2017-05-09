@@ -1,0 +1,21 @@
+undef                                command                               undef
+
+NAME
+     uunnddeeff - remove a macro definition
+
+SYNOPSIS
+
+     uunnddeeff  mmaaccrroo__nnaammee ......
+
+DESCRIPTION
+
+     The uunnddeeff command removes a macro definition.
+
+EXAMPLE
+
+     uunnddeeff ttee tteerraammpp ttssccaann ddttssccaann
+
+SEE ALSO
+
+     _d_e_f _l_s_d_e_f
+

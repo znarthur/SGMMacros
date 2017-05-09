@@ -1,0 +1,113 @@
+colors                              graphics                              colors
+
+NAME
+     colors - color codes for high-resolution graphics
+
+USING COLORS
+
+     If your high-resolution display supports colors, you can change the colors
+     used by ssppeecc's plotting with the function call:
+
+         pplloott__ccnnttll((""ccoolloorrss==bbggnndd::wwiinn::tteexxtt::aaxxiiss::ssyymmbb""))
+
+     The values for bbggnndd (the background color of the area outside the axis),
+     wwiinn (the background color of the area inside the axis), tteexxtt (the color of
+     the text), aaxxiiss (the color of the axis) and ssyymmbb (the color of the plotting
+     symbols) are integers.  Values not given will not be changed.
+
+     The standard macros sspplloott and rrpplloott use the color values in the strings
+     sspplloott__ccooll and rrpplloott__ccooll to set colors before plotting.  Default values for
+     VGA and EGA displays are:
+
+         sspplloott__ccooll==""1111::1122::99::33::22""
+         rrpplloott__ccooll==""1122::1111::99::33::22""
+
+     Defaults for X Windows and Sunview are:
+
+         sspplloott__ccooll==""1166::4499::99::33::22""
+         rrpplloott__ccooll==""4499::1166::99::33::22""
+
+     You can choose other color combinations by assigning new values to these
+     strings.  (The first two colors should be light and the last three should
+     be dark to provide good contrast between the background and foreground.)
+
+     A call of
+
+         pplloott__ccnnttll((""--ccoolloorrss""))
+
+     will turn use of colors off.  A call of
+
+         pplloott__ccnnttll((""ccoolloorrss""))
+
+     will turn use of colors on, if the device support colors.
+
+IN-COMMON COLORS
+
+     The first 10 colors are standardized for all color display devices
+     according to the following table:
+
+         0 - background   (normally white or black)
+         1 - foreground   (normally black or white)
+         2 - blue         3 - red
+         4 - green        5 - yellow
+         6 - cyan         7 - magenta
+         8 - white        9 - black
+
+PC CONSOLE GRAPHICS COLOR ASSIGNMENT
+
+     The colors for vga and ega graphics on 386 and 486 PC computers are as
+     follows:
+     0 - black            1 - bright white
+     2 - blue             3 - red
+     4 - green            5 - yellow
+     6 - cyan             7 - magenta
+     8 - bright white     9 - black
+     10 - light blue      11 - light green
+     12 - light cyan      13 - light red
+     14 - light magenta   15 - brown
+     16 - gray            17 - white
+
+X WINDOWS AND SUNVIEW COLORS
+
+     The colors available on X Windows and SunView are as follows:
+     0 - white                  1 - black
+     2 - blue                   4 - red
+     3 - green                  5 - yellow
+     6 - cyan                   7 - magenta
+     8 - white                  9 - black
+     10 - aquamarine            11 - medium aquamarine
+     12 - blue                  13 - cadet blue
+     14 - cornflower blue       15 - dark slate blue
+     16 - light blue            17 - light steel blue
+     18 - medium blue           19 - medium slate blue
+     20 - midnight blue         21 - navy blue
+     22 - sky blue              23 - slate blue
+     24 - steel blue            25 - coral
+     26 - cyan                  27 - firebrick
+     28 - brown                 29 - sandy brown
+     30 - gold                  31 - goldenrod
+     32 - light goldenrod       33 - green
+     34 - dark green            35 - dark olive green
+     36 - forest green          37 - lime green
+     38 - olive drab            39 - medium sea green
+     40 - medium spring green   41 - pale green
+     42 - sea green             43 - spring green
+     44 - yellow green          45 - dark slate gray
+     46 - dim gray              47 - light gray
+     48 - gray                  49 - khaki
+     50 - magenta               51 - maroon
+     52 - orange                53 - orchid
+     54 - dark orchid           55 - medium orchid
+     56 - pink                  57 - plum
+     58 - red                   59 - indian red
+     60 - medium violet red     61 - orange red
+     62 - violet red            63 - salmon
+     64 - sienna                65 - tan
+     66 - thistle               67 - turquoise
+     68 - dark turquoise        69 - medium turquoise
+     70 - violet                71 - blue violet
+     72 - wheat                 73 - yellow
+     74 - green yellow
+
+     Colors from 75 to 175 are 101 shades of gray from black to white.
+

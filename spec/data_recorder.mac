@@ -1,0 +1,536 @@
+global BUFFER_SIZE 
+BUFFER_SIZE = 4096
+global trigger
+
+#Initilize the required shared memory arrays.
+shared string array core_shm[6][255]
+shared string array string_shm[15][255]
+shared double array float_shm[6]
+shared double array roi_shm[4]
+shared double array motor_shm[BUFFER_SIZE][13]
+shared long64 array counter_shm[BUFFER_SIZE][14]
+shared long64 array mca1_shm[BUFFER_SIZE][256]
+shared long64 array mca2_shm[BUFFER_SIZE][256]
+shared long64 array mca3_shm[BUFFER_SIZE][256]
+shared long64 array mca4_shm[BUFFER_SIZE][256]
+shared long array xeol_shm[BUFFER_SIZE][1024]
+
+def resize_share_mem()'{
+	local rows, cols
+
+	BUFFER_SIZE = BUFFER_SIZE + 2048	
+
+	if((rows = array_op("rows", counter_shm)) <= 0)
+		return(-1)
+	if((cols = array_op("cols", counter_shm)) <= 0)
+		return(-1) 
+	{
+		local array old[rows][cols]
+		local info, meta
+
+		old = counter_shm
+		info = array_op("info", counter_shm)
+		meta = array_op("meta", counter_shm)
+		shared long64 array counter_shm[BUFFER_SIZE][14]
+		counter_shm = old
+		array_op("info", counter_shm, info)
+		array_op("meta", counter_shm, meta)
+	}
+
+	if((rows = array_op("rows", motor_shm)) <= 0)
+		return(-1)
+	if((cols = array_op("cols", motor_shm)) <= 0)
+		return(-1) 
+	{
+		local array old[rows][cols]
+		local info, meta
+
+		old = motor_shm
+		info = array_op("info", motor_shm)
+		meta = array_op("meta", motor_shm)
+		shared double array motor_shm[BUFFER_SIZE][13]
+		motor_shm = old
+		array_op("info", motor_shm, info)
+		array_op("meta", motor_shm, meta)
+	}
+	
+	if((rows = array_op("rows", mca1_shm)) <= 0)
+		return(-1)
+	if((cols = array_op("cols", mca1_shm)) <= 0)
+		return(-1) 
+	{
+		local array old[rows][cols]
+		local info, meta
+
+		old = mca1_shm
+		info = array_op("info", mca1_shm)
+		meta = array_op("meta", mca1_shm)
+		shared long64 array mca1_shm[BUFFER_SIZE][256]
+		mca1_shm = old
+		array_op("info", mca1_shm, info)
+		array_op("meta", mca1_shm, meta)
+
+		old = mca2_shm
+		info = array_op("info", mca2_shm)
+		meta = array_op("meta", mca2_shm)
+		shared long64 array mca2_shm[BUFFER_SIZE][256]
+		mca2_shm = old
+		array_op("info", mca2_shm, info)
+		array_op("meta", mca2_shm, meta)
+		
+		old = mca3_shm
+		info = array_op("info", mca3_shm)
+		meta = array_op("meta", mca3_shm)
+		shared long64 array mca3_shm[BUFFER_SIZE][256]
+		mca3_shm = old
+		array_op("info", mca3_shm, info)
+		array_op("meta", mca3_shm, meta)
+		
+		old = mca4_shm
+		info = array_op("info", mca4_shm)
+		meta = array_op("meta", mca4_shm)
+		shared long64 array mca4_shm[BUFFER_SIZE][256]
+		mca4_shm = old
+		array_op("info", mca4_shm, info)
+		array_op("meta", mca4_shm, meta)
+	}
+	
+	if((rows = array_op("rows", xeol_shm)) <= 0)
+		return(-1)
+	if((cols = array_op("cols", xeol_shm)) <= 0)
+		return(-1) 
+	{
+		local array old[rows][cols]
+		local info, meta
+		
+		old = xeol_shm
+		info = array_op("info", xeol_shm)
+		meta = array_op("meta", xeol_shm)
+		shared long array xeol_shm[BUFFER_SIZE][1024]
+		xeol_shm = old
+		array_op("info", xeol_shm, info)
+		array_op("meta", xeol_shm, meta)
+	}
+	return(0)
+}'
+
+def init_dr'{
+	core_shm[0] = sprintf("scan=%d", SCAN_N)
+	core_shm[1] = sprintf("filename=%s", HDF5_FILE)
+	set_signal
+	set_axes
+	DR_STAT = 10
+	core_shm[4] = sprintf("status=10")
+	set_buffer(BUFFER_SIZE)
+	if(XEOL_ENABLE){
+		unix("/home/sgm/lib/spec.d/data_recorder/data_recorder /home/sgm/lib/spec.d/data_recorder/NXsgmXEOL.nxdl.xml &")
+	}
+	else{
+		unix("/home/sgm/lib/spec.d/data_recorder/data_recorder /home/sgm/lib/spec.d/data_recorder/NXsgm.nxdl.xml &")
+	}
+}'
+
+def set_axes'{
+	for (i = 0; i < _nm; i++) {
+		if(i == 0){ 
+			name = sprintf("%s", motor_mne(_m[i]))
+		}
+		else{
+			name = sprintf("%s,%s",name, motor_mne(_m[i]))
+		}
+	}
+	core_shm[3] = sprintf("axes=%s", name)
+}'
+
+def set_signal'{
+	local name
+	name = cnt_mne(DET)
+	core_shm[2] = sprintf("signal=%s", name)
+}'
+
+def set_buffer(buffer)'{
+	core_shm[5] = sprintf("buffer=%d", buffer)
+	sleep(0.002)
+}'
+
+#Control modes for data_recorder: 
+# 0: Create HDF5_FILE
+# 1: Re-open HDF5_FILE
+# 2: Close HDF5_FILE
+# 3: Write Header
+# 4: Write/Add Data
+global DR_STAT
+def dr_stat(upd_stat) '{
+	local cntlp
+	if(upd_stat == 10){
+		 return(DR_STAT)
+	}
+	else{
+		DR_STAT = upd_stat
+		core_shm[4] = sprintf("status=%d", DR_STAT)
+		if(DR_STAT != 100 && DR_STAT != 0 && DR_STAT != 3 ){
+		   while(core_shm[4] != "status=10"){
+			sleep(0.0001)
+			cntlp++
+			if(cntlp == 100000){
+				print "ERROR: The data recorder is taking over 5s to write data. Aborting. "
+				_scanabort
+				 break
+			}
+		   }
+		}
+	}
+}'
+
+
+def newhdf5'{
+	global HDF5_FILE
+	if(HDF5_ON == 1){
+		HDF5_FILE = "$*"
+		user_input = HDF5_FILE
+		is_file = unix("[ -f $* ]")
+		unix("readlink -fn $*", HDF5_FILE)
+		if(is_file != 0) {
+			newfile /dev/null
+			core_shm[0] = sprintf("scan=1")
+			core_shm[1] = sprintf("filename=%s", HDF5_FILE)
+			printf("Creating newhdf5: %s \n", user_input)
+			createhdf5
+			sleep(0.01)
+			is_file = unix("[ -f $* ]")
+			if (is_file != 0){
+				print "ERROR: There was problem creating the file."
+				printf("Please check that the path to %s exists. \n", user_input)
+				#Data recorder is designed to close itself upon failure to create file.
+				#Need to restart it. 
+				init_dr
+			}
+			else{
+				closehdf5
+			}
+		}
+		else{
+			print "WARNING: A file by that name already exists."
+			print "BEWARE: Continuing with this operation will over-write the previous file."
+			prompt = sprintf("Did you want create a new file over-writing the data in file:\n%s", user_input)
+			over_write = yesno(prompt, 0)
+			if(over_write){
+				newfile /dev/null
+				core_shm[0] = sprintf("scan=1")
+				core_shm[1] = sprintf("filename=%s", HDF5_FILE)
+				printf("Old file will be deleted. Creating newhdf5: %s \n", user_input)
+				createhdf5
+				sleep(0.01)
+				is_file = unix("[ -f $* ]")
+				if (is_file != 0){
+					print "ERROR: There was problem creating the file"
+					printf("Does spec have the permissions to overwrite %s ?\n", user_input)
+					#Data recorder is designed to close upon failure to create file. 
+					#Need to restart it.
+					init_dr
+				}
+				else{
+					closehdf5
+				}
+			}
+			else{
+				print "Please choose an alternate file name, or rename the existing file."
+			}
+		}
+	}
+	else{
+		print "The data recorder for NeXus files is not currently enabled,"
+		print "to enable type \"hdf5_on\". "
+	}
+}'
+
+
+def whoami'{
+	global WHOAMI
+	unix("whoami", WHOAMI)
+	return(WHOAMI)
+}'
+
+def hdf5_on '{
+	global HDF5_ON
+
+	init_dr
+
+	cdef("user_postscan_head", "writehdf5_head sprintf(HDF5_FILE, SCAN_N); ", "_hdf5.output_")
+
+	cdef("user_scan_loop", "writehdf5_nexus sprintf(MCA_FMT, HDF5_FILE, SCAN_N); ", "_hdf5.output_")
+	
+	cdef("user_scan_tail", "tailhdf5 sprintf(MCA_FMT, HDF5_FILE, SCAN_N); ", "_hdf5.output_")
+
+	cdef("user_scan_write", "writehdf5_trigger sprintf(MCA_FMT, HDF5_FILE, SCAN_N);", "_hdf5.output_")
+
+	HDF5_ON = 1
+
+}'
+
+def hdf5_off '{
+
+	local pid
+	pid = 0
+	cdef("", "", "_hdf5.output_", "delete")
+
+	dr_stat(100)
+	sleep(0.1)
+
+	HDF5_ON = 0
+	
+	unix("pgrep data_recorder", pid)
+	while(pid > 1){
+		s = sprintf("kill %s", pid)
+		unix(s)
+		sleep(0.1)
+		unix("pgrep data_recorder", pid)	
+	}
+
+}'
+
+def tailhdf5'{
+	local temp
+	temp = HDF5_COUNT 
+	if(temp != 0){
+		printf("Saving remaining %d  data points.", temp)
+		set_buffer(temp)
+		dr_stat(4)
+		set_buffer(BUFFER_SIZE)
+		closehdf5
+		trigger = 0
+		HDF5_COUNT = 0
+	}
+}'
+
+
+def createhdf5 '{
+	dr_stat(0)
+}'
+
+def openhdf5 '{
+	dr_stat(1)
+}'
+
+def closehdf5 '{
+	dr_stat(2)
+}'
+
+def upd_entry '{
+	core_shm[0] = sprintf("scan=%d", SCAN_N)
+}'
+
+def sample '{
+	global SAMPLE_DESC
+
+	SAMPLE_DESC = "$*"
+
+	string_shm[11] = SAMPLE_DESC
+}'
+
+def check_recorder '{
+	local pid
+	unix("pgrep data_recorder", pid)
+	if(pid < 1){
+		if(HDF5_ON){
+			print "ERROR: The data recorder program has stopped. Restarting  and aborting current scan."
+			print "ERROR: The data in this file scan might be corrupted"
+			_scanabort
+		}
+		init_dr
+	}
+	else{
+		if(!HDF5_ON){
+			printf("Data recorder is running, PID:%d", pid)
+		}
+	}
+}'
+
+def current_sample'{
+	print SAMPLE_DESC
+}'
+
+def writehdf5_head '{
+	global HDF5_COUNT
+	global WRITE_HEADER	
+	global NUM_PTS
+
+	local entry, title, UTCdate
+	local current, energy, en_err, grating, coating
+	local exs_pos, stripe_M
+	array temparray[1]
+	
+	#Make sure the recorder is active, if not attempt restart.
+	check_recorder
+
+	#Set signal and axes attributes for NeXuS.
+	set_signal
+	set_axes
+
+	#Setup (default) instrument values for scan header.
+	current = epics_get("PCT1402-01:mA:fbk")
+	en_err = 5000 
+	float_shm[3] = current
+	
+
+	#Determine line density from grating
+	grating = epics_get("AM1611-4-I10:energy:grating:translation:fbk")
+	if (grating == "Low Energy"){
+		period = 600
+		coating = "Ni"
+	}
+	else if (grating == "Medium Energy"){
+		period = 1100
+		coating = "Au"
+	}
+	else {
+		period = 1700
+		coating = "Au"
+	}
+	float_shm[2] = period
+	string_shm[0] = coating
+	string_shm[1] = "10"
+	string_shm[2] = "2000"
+	string_shm[3] = "vacuum"
+	string_shm[4] = "nxsphere"
+	string_shm[5] = "fused silica"
+	string_shm[7] = SPEC_USER
+	string_shm[8] = HEADING
+
+	#Determine exit slit and stripe values
+        stripe_M = epics_get("BL1611-ID-1:stripe:fbk")
+	string_shm[6] = stripe_M
+	exs_pos = epics_get("PSL16114I1004:Y:mm:fbk")
+	float_shm[1] = exs_pos
+	float_shm[0] = 5
+
+
+	#Get an appropriately formatted date.
+	UTCdate = sprintf("%s", date(+"%Y-%m-%dT%H:%M:%S%z"))
+	string_shm[10] = UTCdate
+	#Required by NXxas format.
+	title = sprintf("SGM XAS Scan %s of %s", SCAN_N, HDF5_FILE)
+	upd_entry
+	string_shm[9] = title
+	string_shm[11] = SAMPLE_DESC
+
+	#Determine SR570 gains and write to header
+	gPD_n = epics_get("Amp1611-4-22:sens_num")
+        gTEY_n = epics_get("Amp1611-4-23:sens_num")
+        gIo_n = epics_get("Amp1611-4-24:sens_num")
+        gPD_u = epics_get("Amp1611-4-22:sens_unit")
+        gTEY_u = epics_get("Amp1611-4-23:sens_unit")
+        gIo_u = epics_get("Amp1611-4-24:sens_unit")
+	TEYstring = sprintf("%s %s", gTEY_n, gTEY_u)
+	I0string = sprintf("%s %s", gIo_n, gIo_u)
+	PDstring = sprintf("%s %s", gPD_n, gPD_u)
+	string_shm[12] = TEYstring
+	string_shm[13] = I0string
+	string_shm[14] = PDstring 
+
+
+	#Determine SDD hardware ROI values and write to header
+	roi1_up = mca_spar(0, "scaler1", "upper")
+        roi1_down = mca_spar(0, "scaler1", "lower")
+        roi2_up = mca_spar(0, "scaler2", "upper")
+        roi2_down = mca_spar(0, "scaler2", "lower")
+	roi_shm[0] = roi1_down
+	roi_shm[1] = roi1_up
+	roi_shm[2] = roi2_down
+	roi_shm[3] = roi2_up
+
+	WRITE_HEADER = 1
+	num_pts = 0
+	HDF5_COUNT = 0
+	
+}'
+
+def copy_counters'{
+	for (i=0; i < COUNTERS; i++){
+		temp = S[i]
+		counter_shm[HDF5_COUNT][i] =  i == 0 ? 1000000*temp: temp
+	}
+
+}'
+
+def copy_motor_pos'{
+	for (i=0; i < MOTORS; i++){
+		motor_shm[HDF5_COUNT][i] =  A[i] 
+	}
+}'
+def writehdf5_trigger'{
+	trigger = 1
+}'
+
+def resethdf5'{
+	hdf5_off
+	sleep(0.1)
+	BUFFER_SIZE = 4096
+	shared double array motor_shm[BUFFER_SIZE][13]
+	shared long64 array counter_shm[BUFFER_SIZE][14]
+	shared long64 array mca1_shm[BUFFER_SIZE][256]
+	shared long64 array mca2_shm[BUFFER_SIZE][256]
+	shared long64 array mca3_shm[BUFFER_SIZE][256]
+	shared long64 array mca4_shm[BUFFER_SIZE][256]
+	shared long array xeol_shm[BUFFER_SIZE][1024]
+	trigger = 0
+	hdf5_on
+	
+
+}'
+
+def writehdf5_nexus '{
+	local tempMotor
+	local tempScaler
+	#local trigger
+	local prog
+	global num_pts
+	num_pts++
+
+	copy_counters
+	copy_motor_pos
+	array_copy(mca1_shm[HDF5_COUNT][0:255], MCA1_DATA[0:255])
+	array_copy(mca2_shm[HDF5_COUNT][0:255], MCA2_DATA[0:255]) 
+	array_copy(mca3_shm[HDF5_COUNT][0:255], MCA3_DATA[0:255])
+	array_copy(mca4_shm[HDF5_COUNT][0:255], MCA4_DATA[0:255]) 
+	if(XEOL_ENABLE){
+		array_copy(xeol_shm[HDF5_COUNT][0:1023], XEOLRAW[0:1023]) 
+	}
+	
+	if(npts_est > 0){
+		div = num_pts/(npts_est)
+	}
+	prog = _stype&scanType_MeshScan? 110*div: 25*div 
+	if(prog > 0){
+		tty_cntl("resized?")
+		tty_cntl("ce") 
+		tty_fmt(0, -1, 80, sprintf("Scan Progress: %d/100", prog))
+	} 	
+
+	if(trigger && WRITE_HEADER == 0){
+		printf(" Writing to file.")
+		check_recorder
+		set_buffer(HDF5_COUNT)
+		dr_stat(4)
+		set_buffer(BUFFER_SIZE)
+		HDF5_COUNT = 0
+		trigger = 0
+	}
+	else if(WRITE_HEADER == 1 && HDF5_COUNT == 0){
+		# Actual writing of header occurs after first data point,  
+		# this keeps the program from initializing a row of zeros
+		# at row 0.  	
+		openhdf5
+		set_buffer(1)
+		WRITE_HEADER = 0
+		dr_stat(3)
+		set_buffer(BUFFER_SIZE)
+		HDF5_COUNT = 0
+	}
+	else{	
+		HDF5_COUNT = HDF5_COUNT + 1
+		if(HDF5_COUNT == BUFFER_SIZE){
+			resize_share_mem()
+		}
+	}
+}'

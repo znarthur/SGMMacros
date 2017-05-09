@@ -1,0 +1,53 @@
+.TH "whats" "macro" "08/01/12" "whats.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBwhats\fP \- identify what an object is
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)whats.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "whats" "macro" "08/01/12" "whats.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBwhats object\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBwhats\fP macro identifies whether
+\fBobject\fP is a built\-in keyword, function, macro or variable.
+.SH "EXAMPLES"
+.rs
+.RS 3m
+.sp
+.nf
+.ft CB
+whats A
+    A variable with the following attributes:
+    Built\-in Array
+whats A[0]
+    A variable with the following attributes:
+    Built\-in Number
+whats whats
+    A macro, 754 bytes big.
+whats whatis
+    A built\-in keyword or function.
+.ft P
+.fi
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%syms\fP
+\fI\%lscmd\fP
+\fI\%lsdef\fP
+

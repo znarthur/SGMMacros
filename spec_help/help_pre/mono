@@ -1,0 +1,128 @@
+mono                                reference                               mono
+
+NAME
+     monochromator - monochromator control macros
+
+DESCRIPTION
+
+     ssppeecc supports energy-selecting monochromators in three configurations.  The
+     first configuration uses a single motor to control the monochromator tilt.
+     The second configuration uses three motors to control the tilt of two
+     crystals and the travel distance between them.  The third configuration
+     takes into account a fourth motor to control the offset between the two
+     crystals.  (In the three-motor configuration the offset is a fixed
+     parameter.)
+
+     All of the monochromator support is contained in the macro source file
+     mmaaccrrooss//eenneerrggyy..mmaacc, which is automatically installed with the standard macro
+     library.  When the macros are read, commands from the eenneerrggyy..mmaacc file check
+     whether particular motor mnemonics are present in the ccoonnffiigg file.  Motors
+     with mnemonics mmoonnuu, mmoonndd, mmoonnttrraavv and mmoonnooffff select the four-motor
+     configuration.  The mnemonics stand for the upstream, downstream, travel
+     and offset monochromator motors.  If there are only motors with mnemonics
+     mmoonnuu, mmoonndd and mmoonnttrraavv, the three-motor configuration is selected.  Having
+     just a motor with a mnemonic of either mmoonnuu or mmoonnoo selects the one-motor
+     configuration.
+
+USER-INVOKED MACROS
+
+     sseettmmoonnoo [[dd--ssppaacciinngg]] [[ooffffsseett]] - Used to enter the monochromator d-spacing.
+          If using a three-motor monochromator, you can also enter the offset
+          between the two crystals.  With no arguments, the macro will prompt
+          you to enter values.  If you enter a 00 for the d-spacing in
+          interactive mode, you will then be prompted to enter the type of
+          crystal and its Miller indices.  The macro will then calculate the
+          d-spacing for you.  The macro knows about Silicon and Germanium
+          crystals.  For other materials, you need to enter the crystal lattice
+          parameter.  The distributed sseettmmoonnoo only allows you to change the
+          parameters if you have write permission for the file gg__mmoo__dd..mmaacc in
+          ssppeecc's auxiliary file directory.  The current values of the parameters
+          gg__mmoo__dd and gg__mmoo__ss (if used) are stored in that file.  If you can't
+          write the gg__mmoo__dd..mmaacc file, the file is read as a command file.  If you
+          can write to the file, the file will be updated with the new
+          parameters.
+
+     ggeettEE - Displays the current energy calculated from the monochromator motor
+          position(s).
+
+     mmoovveeEE eenneerrggyy__iinn__KKeeVV - Moves the monochromator motor(s) to correspond to the
+          energy value given as an argument.  The macro writes the new energy to
+          the data file using the ccoommmmeenntt macro.
+
+     sseettEE eenneerrggyy__iinn__KKeeVV - Changes the user offset of the monochromator motor(s)
+          so that the current motor position(s) correspond to the energy value
+          given as an argument.  No motors are moved.  The sseett macro, which
+          comments a change of a motor's user offset to the data file, is used
+          within sseettEE.  (Additional motors that may be involved by way of the
+          ccaallccMM__llooccaall macro will not be set by this macro.)
+
+     EEssccaann ssttaarrtt eenndd iinntteerrvvaallss ttiimmee [[ ffiixxQQ ]] - Does an energy scan, starting at
+          the energy given by ssttaarrtt and ends at the energy given by eenndd. The
+          step size is ((ssttaarrtt--eenndd))//iinntteerrvvaallss.  The number of data points
+          collected will be iinntteerrvvaallss++11.  Count time is given by ttiimmee, which if
+          positive, specifies seconds and if negative, specifies monitor counts.
+          If the optional fifth argument is given as the literal characters
+          ffiixxQQ, the values of HH, KK and LL at the start of the scan are maintained
+          at each point.
+
+INTERNAL MACROS AND GLOBAL VARIABLES
+
+     mmoonnoo__ttyyppee - Global variable set to one, three or four representing the
+          number of motors in the monochromator.
+
+     gg__mmoo__dd - Global variable containing the monochromator d-spacing in
+          Angstroms.
+
+     gg__mmoo__ss - Global variable containing the offset for the three-motor
+          monochromator in millimeters.
+
+     xxttaall__iinndd - Global array containing the Miller indices of the crystal (if
+          d-spacing is specified by Miller indices and crystal type).
+
+     xxttaall__llaatt - Global variable containing the monochromator crystal lattice
+          parameter in Angstroms (if d-spacing is specified by Miller indices
+          and crystal type).
+
+     xxttaall__ttyyppee - Global variable describing the material of the crystal (if
+          d-spacing is specified by Miller indices and crystal type).  It is set
+          to ""SS"" for Si, ""GG"" for Ge and ""oo"" for any other material.
+
+     ccaallccMM eenneerrggyy__iinn__KKeeVV - Calculates standard monochromator motor positions
+          from the argument.  Calls the macro ccaallccMM__llooccaall, if defined, to
+          calculate additional motor positions.
+
+     ccaallccMM__llooccaall eenneerrggyy__iinn__KKeeVV - Optionally defined by local users to calculate
+          motor positions for monochromator motors not taken care of in ccaallccMM.
+
+     ccaallccEE - Calculates LLAAMMBBDDAA from motor positions.
+
+     __cchhkk__mmlliimm - Checks limits on monochromator motors, used by EEssccaann.
+
+     ppaa__mmoonnoo - Displays monochromator parameters as part of the ppaa macro.
+
+     ssaavv__mmoonnoo - Saves monochromator parameters as part of the ssaavvee macro.
+
+     mmiilllleerr - Used by setmono to calculate d-spacing from Miller indices.
+
+     __aassssiiggnn__mmoonnoo - Figures out which kind of monochromator is being used from
+          motor mnemonics specified in the ccoonnffiigg file.  This macro is called
+          after the rreeccoonnffiigg statement in the ccoonnffiigg macro.
+
+NOTES
+
+     To control access to the monochromator parameters, the ssppeecc administrator
+     can set the write permission and ownership of the gg__mmoo__dd..mmaacc file
+     appropriately.
+
+     To have the monochromator parameters automatically read in by each user
+     running ssppeecc, put the line
+
+         qqddooffiillee((sspprriinnttff((""%%ss//gg__mmoo__dd..mmaacc"",,SSPPEECCDD))))
+
+     in the ssiittee..mmaacc file in the auxiliary file directory.  (The ssiittee..mmaacc file
+     is automatically read as a command file each time a user starts ssppeecc.)
+
+     The business of storing the monochromator parameters in a file will need to
+     be changed if there is more than one version of ssppeecc using monochromators
+     running at the same time on the same computer.
+

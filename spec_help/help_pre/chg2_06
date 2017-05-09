@@ -1,0 +1,45 @@
+changes                      spec 2.6 Release Notes                      changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.6
+
+DESCRIPTION
+
+     These notes summarize the modifications made for ssppeecc release 2.6, as
+     finalized on June 6, 1988.
+
+CHANGES
+
+     The UUsseerr MMaannuuaall, RReeffeerreennccee MMaannuuaall and AAddmmiinniissttrraattoorr''ss GGuuiiddee are now
+     relatively complete.  The UUsseerr MMaannuuaall contains an introductory tutorial
+     chapter on basic diffractometer operation.
+
+     The scan macros are substantially rewritten.  Refer to the RReeffeerreennccee MMaannuuaall
+     for a discussion of their present form.
+
+     The temperature control macros are substantially rewritten.  Refer to the
+     RReeffeerreennccee MMaannuuaall.  In addition, thermistor conversions are now handled
+     entirely within the macros.
+
+     The plot-results output is now generated in a macro named pplloott__rreess, that
+     can be invoked separately and can be easily modified by the user.
+
+     The motor name uunnuusseedd is special.  Motors with that name won't appear on
+     any of the standard-macro generated output.
+
+     Bugs in the code for two CAMAC modules, the RTC018 clock and Joerger SMC
+     motor controller, have been fixed.
+
+     Bugs in the code for the four-circle ffrroozzeenn modes have been fixed.
+
+     The geometry-specific standard macro file is now kept in ssppeecc..dd// rather
+     than ssppeecc..dd//ccoonnff//.  The four-circle file is called
+     //uussrr//lliibb//ssppeecc..dd//ffoouurr..mmaacc.
+
+     The modulus operator (%%) now correctly converts its operands to integers
+     before operating.
+
+     New options for ppll__aannaall(()) return the minimum and maximum values of xx.
+
+     The names ggppsseett, ssaavveeuussrr and ssaavveeggeeoo replace __ggppsseett, __ssaavveeuussrr and __ssaavveeggeeoo.
+

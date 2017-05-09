@@ -1,0 +1,26 @@
+cat                                   macro                                  cat
+
+NAME
+     cat - UNIX shell cat command
+
+SYNOPSIS
+
+     ccaatt ffiillee__nnaammee [[ffiillee__nnaammee ...... ]]
+
+DESCRIPTION
+
+     The ccaatt macro runs the standard UNIX utility of the same name.  The ccaatt
+     utility copies the ffiillee__nnaammee arguments to the standard output.
+
+DEFINITION
+
+     ddeeff ccaatt ''uunniixx((""ccaatt $$**""))''
+
+EXAMPLE
+
+     ccaatt ddoo..ssccaannss
+
+SEE ALSO
+
+     UUNNIIXX UUsseerr RReeffeerreennccee MMaannuuaall
+

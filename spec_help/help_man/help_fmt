@@ -1,0 +1,362 @@
+.TH "help_fmt" "reference" "08/27/12" "help_fmt.rst 6.2  08/27/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+help format \- help file format conventions and syntax
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)help_fmt.rst     6.2  08/27/12  CSS
+.
+.\" Copyright (c) 1992,1995,2009,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "help_fmt" "reference" "08/27/12" "help_fmt.rst 6.2  08/27/12 CSS"
+.
+.SH "SPECIAL NOTE FOR \fBspec\fP RELEASE 6"
+.rs
+.sp
+The syntax described below is no longer used by the
+standard \fBspec\fP help utility.
+With \fBspec\fP release 6,
+help files are now authored using
+reStructuredText (reST) format.
+For terminal display, the reST files are converted to an
+\fInroff\fP format, then processed using \fIman\fP\-page type macros
+for display.
+.sp
+Files residing in the
+\fBSPECD\fP\fB/help\fP directory that use the following
+directives will be processed using \fIgroff\fP (or \fInroff\fP)
+with a compatible macro set.
+The \fBspec\fP program itself no longers contains
+built\-in code for formatting help files.
+.SH "INTRODUCTION"
+.rs
+.sp
+This document describes the formatting syntax and conventions used
+with the \fBspec\fP and \fBC\-PLOT\fP help files.
+The formatting syntax uses the conventions of the traditional
+UNIX text formatters (\fBnroff\fP, \fBtroff\fP, \fBditroff\fP, etc.),
+although only a small subset of the formatting directives are
+supported by the \fBspec\fP and \fBC\-PLOT\fP built\-in formatting.
+The supported directives are described below.
+.sp
+The distributions of \fBspec\fP and \fBC\-PLOT\fP include utilities
+for preparing both PostScript and HTML (hyper text markup language)
+versions of the help files using either the standard \fBditroff\fP or the GNU
+\fBgroff\fP packages.
+.SH "FORMATTING COMMANDS"
+.rs
+.sp
+Input text that has a dot on the first line is a formatting command.
+Unrecognized commands are ignored in \fBspec\fP and \fBC\-PLOT\fP.
+.sp
+The following commands are supported:
+.RS 0m
+.HP 5m
+."
+\fB.\e"\fP
+\- 
+Begins a comment.  The rest of the text on the line is ignored.
+.HP 5m
+."
+\fB.bp\fP
+\- 
+Begins a new page.
+.HP 5m
+."
+\fB.BP\fP
+\- 
+Same as above.
+.HP 5m
+."
+\fB.ne N\fP
+\- 
+Indicates \fBN\fP lines are needed on the current page.
+If there isn\(aqt enough room on the current page, a new page is started.
+.HP 5m
+."
+\fB.sp N\fP
+\- 
+spaces \fBN\fP lines.  Without an argument, one line is skipped.
+The argument may contain a decimal point
+and a unit indicator for the benefit of
+\fBnroff\fP/\fBtroff\fP, although for \fBspec\fP
+and \fBC\-PLOT\fP, only the integer part of the argument is used.
+.HP 5m
+."
+\fB.ta N\fP
+\- 
+Start words every \fBN\fP letters, somewhat like using tabs.
+.HP 5m
+."
+\fB.br\fP
+\- 
+Causes a line break.
+The current line is finished and a new line is started.
+.HP 5m
+."
+\fB.nf\fP
+\- 
+Switch to no\-fill mode.
+Each newline in the input causes a newline in the output.
+.HP 5m
+."
+\fB.fi\fP
+\- 
+Switch to fill mode.
+Words are collected from the input until a full line of output is available.
+.HP 5m
+."
+\fB.TH name category date SCCS_info\fP
+\- 
+Should be on the first line of a help file.
+The arguments are used in the page header (and footer, when printed) and
+are, respectively, the name of the help file, the category (such as
+macro, function, reference, etc.), the date the file was last revised
+and source\-code control information.
+.HP 5m
+."
+\fB.SH\fP
+\- 
+Does a subhead.
+There can\(aqt be more than six arguments, although you can use
+double quotes to put more than one word in an argument.
+Subheads are placed all the way to the left of the page.
+.HP 5m
+."
+\fB.HP N\fP
+\- 
+Starts a hanging paragraph.
+The optional argument \fBN\fP specifies the indent level.
+The default is 0.
+.HP 5m
+."
+\fB.hp N\fP
+\- 
+Can be used within a \fB.HP\fP block to increase or decrease the indent.
+The optional argument \fBN\fP specifies the indent level.
+This command will skip a line.
+.HP 5m
+."
+\fB.PP\fP
+\- 
+Starts a paragraph.
+.HP 5m
+."
+\fB.LP\fP
+\- 
+Same as above.
+.HP 5m
+."
+\fB.(L  F N I\fP
+\- 
+Starts a no\-fill block.
+The optional argument \fBF\fP indicates the font to use and may be
+\fBR\fP, \fBI\fP, \fBC\fP, \fBB\fP or \fBO\fP.
+(See below for a description of the font code letters.)
+The optional argument \fBN\fP is the number of lines needed.
+If there is not enough room to print that many lines on the current page,
+a new page will be started.
+The optional argument \fBI\fP is the number of spaces
+of extra indentation to add.
+.HP 5m
+."
+\fB.)L\fP
+\- 
+Ends the no\-fill block started by \fB.(L\fP.
+.HP 5m
+."
+\fB.Q\fP
+\- 
+Put quotation marks around arguments.
+If no arguments, put quotation marks around text on next input line.
+.HP 5m
+."
+\fB.NE\fP
+\- 
+Only relevant for screen displays, this command indicates the screen
+should not be erased before displaying the first page.
+.HP 5m
+."
+\fB#\fP
+\- 
+Starts a comment if its the first character on a line.
+The rest of the text on the line is ignored.
+This comment notation is only for files
+that will not be run off using \fBnroff\fP/\fBtroff\fP.
+.HP 5m
+."
+\fB.BL\fP
+\- 
+Begin a list of items.
+.HP 5m
+."
+\fB.EL\fP
+\- 
+Ends a list of items.
+.HP 5m
+."
+\fB.LI item\fP
+\- 
+Adds \fBitem\fP to a list of items.
+For HTML documents, one list items appears per line of output.
+For non\-HTML documents, list items are separated by tabs, and will
+fill the row according to the current tab stops.
+.HP 5m
+."
+\fB.DL +\fP or \fB.DL \-\fP
+\- 
+For HTML output, indicates the start or end of a definition block.
+.HP 5m
+."
+\fB.DD text\fP
+\- 
+For HTML output, indicates the start of a definition.
+For the other formats, the optional argument is simply copied verbatim.
+.HP 5m
+."
+\fB.HR text[ C [ URL ]]\fP
+\- 
+For HTML output, creates a hypertext link.
+If one or two arguments are present, names the link \fBtext.html\fP.
+If the second argument is \fBC\fP, outputs \fBtext\fP in Courier font.
+If the third argument is present, uses that as the URL link.
+For non\-HTML formats, the text is copied verbatim in the indicated font.
+.RE
+.SH "FONT CONTROL"
+.rs
+.sp
+The help files use the following fonts for the purposes indicated.
+In the printed documentation, the New Century
+Schoolbook typeface is used for the Roman, italic and bold fonts.
+When used with \fBspec\fP and \fBC\-PLOT\fP, the directives to switch to bold,
+italic or one of the Courier typefaces result in highlighted text
+on a video terminal.
+.sp
+Roman (R) \- Used for normal text.
+.sp
+\fBItalic\fP (I) \- Used for file and path names, including system commands,
+along with book titles, etc.
+.sp
+\fBBold\fP (B) \- Used for section heads.  Occasionally used for emphasis.
+Sometimes used to display arguments to system commands.
+.sp
+\fBCourier\fP (C) \- Used to represent literal text that might be output by
+the computer program or might be typed by a user at the keyboard.
+.sp
+\fBCourier Bold\fP (CB) \- Occasionally used to distinguish text
+a user types from text output by the computer.
+.sp
+\fBCourier Oblique\fP (O) \- Used to represent variable computer text, such
+as the argument to a function.
+.sp
+"Quoted Text" (Q) \- Not really a font, but used to place double quotes
+around a bit of text.
+.sp
+All the fonts, except Roman, display as highlighted text on the video terminal.
+.sp
+The formatting commands:
+.sp
+.RS 4m
+\fB.B .C .I .O\fP
+.RE
+.sp
+put their arguments in the associated font.
+If there are no arguments to the above commands,
+the next line of input is put in that font.
+.sp
+The formatting commands:
+.RS 3m
+.sp
+.nf
+.ft CB
+\&.RB  .BR  .IR  .CR  .OR  .CB
+\&.RI  .BI  .IB  .CI  .OC
+\&.RC       .IC  .CO
+\&.RO
+.ft P
+.fi
+.RE
+.sp
+place the first argument in the first font, the second argument in
+the second font and append an optional third argument in the regular text font,
+except for \fB.CB\fP, which uses Courier Bold and Roman for the two fonts.
+The space characters between the arguments are removed.  Use
+double quotes to include space characters within arguments.
+A space character is added after the last argument.
+The formatting commands:
+.RS 3m
+.sp
+.nf
+.ft CB
+\&.rb       .ir
+\&.ri            .ci  .oc
+\&.rc       .ic  .co
+\&.ro
+.ft P
+.fi
+.RE
+.sp
+work as above, except a space characters is not appended
+after the last argument.
+.sp
+The \fB@\fP symbol is used in the help file sources to represent
+literal double quote characters, which
+makes it easier to insert literal double quote characters into
+formatting command arguments.  To enter a literal
+\fB@\fP use both a backslash and the troff \fB.tr\fP directive, as in:
+.RS 3m
+.sp
+.nf
+.ft CB
+\&.tr @@
+a literal \e@ appears
+\&.tr @"
+.ft P
+.fi
+.RE
+.SH "SPECIAL CHARACTER SEQUENCES"
+.rs
+.sp
+The following special character sequences are recognized:
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fB\e"\fP	A double quote
+\fB\e&\fP	A zero\-width space
+\fB\e0\fP	A digit\-width space
+\fB\e|\fP	A sixth\-em space (no space on screen)
+\fB\e(**\fP	An asterisk (*)
+\fB\e(hy\fP	A hyphen (\-)
+\fB\e(mu\fP	The multiplication sign (x)
+\fB\e(space)\fP	An unpaddable space
+\fB\e*(CP\fP	The string \fBC\-PLOT\fP
+\fB\e*(SP\fP	The string \fBspec\fP
+\fB\e*(UN\fP	The string UNIX
+\fB\e\-\fP	A minus sign (\-)
+\fB\e@\fP	An @ sign
+\fB\e\e\fP	A back slash
+\fB\ee\fP	A back slash
+\fB\ef1\fP	Switch to font R
+\fB\efC\fP	Switch to font C
+\fB\efP\fP	Switch to previous font
+\fB\ef\e*(#C\fP	Switch to font C
+\fB\ef\e*(#I\fP	Switch to font I
+\fB\ef\e*(#O\fP	Switch to font O
+.TE
+.RE
+.SH "HINTS"
+.rs
+.sp
+Since the \fB.if\fP command is not recognized by the \fBspec\fP and \fBC\-PLOT\fP
+built\-in formatter,
+use the command \fB.if t ...\fP to insert formatting directives
+to be executed only when the help files are being printed with \fBtroff\fP.
+

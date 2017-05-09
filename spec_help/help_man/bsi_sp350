@@ -1,0 +1,452 @@
+.TH "bsi_sp350" "hardware" "01/16/15" "bsi_sp350.rst 6.1  01/16/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+BSI SP350 Controller Board \- Baltic Scientific Instruments Si(Li) Detector with Peltier Cooling type SER\-25
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)bsi_sp350.rst    6.1  01/16/15 CSS
+.
+.\" Copyright (c) 2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "bsi_sp350" "hardware" "01/16/15" "bsi_sp350.rst 6.1  01/16/15 CSS"
+.
+.sp
+The Baltic Scientific Instruments Si(Li) detector with Peltier cooling type SER\-25
+uses the model SP350 circuit board for control of the device and to receive
+external commands over a serial interface.
+The instrument is
+configured in \fBspec\fP as an MCA\-type device using
+a serial interface.
+.sp
+In addition to the standard MCA functionality, the SP350 has eight
+count\-rate monitors that return the counts per second in defined
+channel ranges.
+.SH "OPERATION"
+.rs
+.sp
+The following \fBmca_par()\fP commands are available.
+If more than one MCA
+is configured, use \fBmca_sel()\fP or \fBmca_spar()\fP.  See the \fI\%mca\fP
+help file for details on using multiple MCA devices.
+Note, all \fBmca_par()\fP arguments below are case insensitive, that is,
+upper case, lower case or mixed case letters will work.
+.RS 0m
+.HP 5m
+."
+\fBmca_par("clear")\fP
+\- 
+Sends commands to the SP350 to clear the data and counters.
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+If \fB"auto_clear"\fP mode is set, sends commands to clear the data and counters.
+Turns live\-time mode on or off, if needed, to match the current preset mode.
+Sets leveling mode, shaping time, and threshold level, if needed, to match current settings
+If a preset value is nonzero, programs the SP350 with the preset time.
+Finally, sends the command to start acquisition.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+Sends the command to halt acquisition.
+.HP 5m
+."
+\fBmca_par("auto_clear" [, 0|1])\fP
+\- 
+With no arguments returns the current value of auto\-clear mode.
+Otherwise turns auto\-clear mode off or on.
+When auto\-clear mode is on, the data and counters are cleared automatically
+each time an acquisition is started.
+.HP 5m
+."
+\fBmca_par("auto_run" [, 0|1])\fP
+\- 
+With no arguments returns the current value of auto\-run mode.
+Otherwise turns auto\-run mode off or on.
+When auto\-run mode is on, the SP350 is started automatically with the standard
+\fBspec\fP count commands.
+.HP 5m
+."
+\fBmca_par("soft_preset" [, 0|1])\fP
+\- 
+With no arguments, returns the current value of soft\-preset mode.
+Otherwise turns soft\-preset mode off or on.
+When soft\-preset mode is on in conjunction with auto\-run mode, the SP350 will
+be programmed for the same preset accumulation time as the master timer when
+counting to time.
+Also, \fBspec\fP will poll the SP350 for the end of
+timed counting in addition to polling the master timer.
+.HP 5m
+."
+\fBmca_par("npts" [, value])\fP
+\- 
+With no arguments, returns the current number of points configured for the SP350
+data.  Otherwise sets the number of points to \fBvalue\fP.
+Allowed values are 1024, 2048, 4096, 8192 and 16384.
+.HP 5m
+."
+\fBmca_par("group_size" [, value])\fP
+\- 
+Has the same meaning as \fB"npts"\fP above.
+.HP 5m
+."
+\fBmca_par("preset" [, value])\fP
+\- 
+With no arguments, returns the current preset acquisition time in seconds.
+Otherwise sets the preset acquisition time to \fBvalue\fP.
+The SP350 is not programmed with the value until acquisition is started.
+.HP 5m
+."
+\fBmca_par("preset_real" [, value])\fP
+\- 
+With no arguments, returns the current preset acquisition time in seconds.
+Otherwise sets the preset acquisition time to \fBvalue\fP and sets
+the acquisition mode to real time.
+The SP350 is not programmed with the mode or value until acquisition is started.
+.HP 5m
+."
+\fBmca_par("preset_live" [, value])\fP
+\- 
+With no arguments, returns the current preset acquisition time in seconds.
+Otherwise sets the preset acquisition time to \fBvalue\fP and sets
+the acquisition mode to live time.
+The SP350 is not programmed with the mode or value until acquisition is started.
+.HP 5m
+."
+\fBmca_par("real")\fP
+\- 
+Sets the acquisition mode to real time.
+The SP350 is not programmed with the mode until acquisition is started.
+.HP 5m
+."
+\fBmca_par("live")\fP
+\- 
+Sets the acquisition mode to live time.
+The SP350 is not programmed with the mode until acquisition is started.
+.HP 5m
+."
+\fBmca_par("elapsed_live")\fP
+\- 
+Returns the elapsed live time in seconds of the current or most recent acquisition.
+.HP 5m
+."
+\fBmca_par("elapsed_real")\fP
+\- 
+Returns the elapsed real time in seconds of the current or most recent acquisition.
+.HP 5m
+."
+\fBmca_par("leveling" [, 0|1])\fP
+\- 
+With no arguments, returns 1 or 0 indicating whether leveling mode is on or off.
+Otherwise turns leveling mode off or on if the argument is zero or nonzero,
+respectively.
+Leveling mode rejects double and triple peaks from the data.
+The manufacturer recommends having leveling mode on.
+.HP 5m
+."
+\fBmca_par("shaping_time" [, 3|6])\fP
+\- 
+With no arguments, returns the current shaping\-time value, which can be
+either 3 or 6 microseconds.
+Otherwise sets the shaping time to the argument, which must be 3 or 6.
+A 3 microsecond shaping time is good for count rates up to 150 kcps.
+A 6 microsecond shaping time offers better energy resolution but is
+only good for count rates less than 20 kcps.
+.HP 5m
+."
+\fBmca_par("threshold" [, value])\fP
+\- 
+With no arguments, returns the current threshold level.
+Otherwise sets the threshold to \fBvalue\fP, which must be
+from 0 to 4096.
+The resolution of the value is to 0.0625 (1/16).
+The threshold sets the level of background noise cut off.
+.HP 5m
+."
+\fBmca_par("ADC_lld" [, value])\fP
+\- 
+With no arguments, returns the current low\-level discriminator value.
+Otherwise sets the low\-level discriminator to \fBvalue\fP, which must be
+from 0 to 4096.
+The resolution of the value is to 0.0625 (1/16).
+The low\-level discriminator sets the low energy border for spectrum
+acquisition.
+.HP 5m
+."
+\fBmca_par("input_cps")\fP
+\- 
+Returns the count rate at the input.
+.HP 5m
+."
+\fBmca_par("ADC_cps")\fP
+\- 
+Returns the count rate after the ADC processing.
+.HP 5m
+."
+\fBmca_par("input_counts")\fP
+\- 
+Returns the total accumulated input counts.
+.HP 5m
+."
+\fBmca_par("ADC_counts")\fP
+\- 
+Returns the total accumulated counts after the ADC processing.
+.HP 5m
+."
+\fBmca_par("CRM")\fP
+\- 
+Displays the current count\-rate meter configuration and count rates
+in the following format:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+#     CPS   Channels
+0   14234       0 to 64000
+1       0   13760 to 14560
+2    1288    3840 to 4384
+3       0   11200 to 13440
+4     656    5280 to 6176
+5     271    6208 to 7040
+6    1757    1280 to 1696
+7   14234       0 to 65280
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("CRM_array")\fP
+\- 
+Returns an eight\-element data array of unsigned long values
+containing the current count rates for each of the count\-rate
+meters.
+.HP 5m
+."
+\fBmca_par("CRM#")\fP
+\- 
+Returns the current count rate from
+meter \fB#\fP, where \fB#\fP is from 0 to 7.
+.HP 5m
+."
+\fBmca_par("CRM#", "lower"|"upper" [, value])\fP
+\- 
+With one argument, returns the \fB"lower"\fP or \fB"upper"\fP cutoff
+for count rate meter \fB#\fP, where \fB#\fP is from 0 to 7.
+If \fBvalue\fP is specified, sets the lower or upper cutoff
+to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("CRM#", low, high)\fP
+\- 
+When two numerical arguments are specified, sets
+the lower and upper cutoff to \fBlow\fP and \fBhigh\fP
+for count rate meter \fB#\fP, where \fB#\fP is from 0 to 7.
+.HP 5m
+."
+\fBmca_par("UHVP")\fP
+\- 
+Returns the vacuum pump voltage in Volts.
+.HP 5m
+."
+\fBmca_par("IHVP")\fP
+\- 
+Returns the vacuum pump current in milliamperes.
+.HP 5m
+."
+\fBmca_par("UHVD")\fP
+\- 
+Returns the detector voltage in Volts.
+.HP 5m
+."
+\fBmca_par("Uc")\fP
+\- 
+Returns the Peltier cooler voltage in Volts.
+.HP 5m
+."
+\fBmca_par("Ic")\fP
+\- 
+Returns the Peltier cooler current in milliamperes.
+.HP 5m
+."
+\fBmca_par("UBAT")\fP
+\- 
+Returns the battery voltage in Volts.
+.HP 5m
+."
+\fBmca_par("TEMP_BP")\fP
+\- 
+Returns the power supply temperature in degrees C.
+.HP 5m
+."
+\fBmca_par("param", 0)\fP
+\- 
+Displays parameter group 0 values in the following format:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+        Error code = 0x0
+ dsPIC status bits = 0x0
+        Mode0 bits = 0xda
+       ADC setting =    10 bits
+      Shaping time =    tau2 (6 us) ("shaping_time")
+     Leveling mode =    ON ("leveling")
+       Acquisition =    OFF
+  Acquisition mode =    Real time
+       Preset mode =    ON
+        Mode1 bits = 0x18
+       Acquisition =    Not ended
+            Memory =    Clear
+ Overflow detected =    NO
+   Count rate mode =    ON
+ CRM recovery mode =    ON
+Spectrometer state =    Switched off
+         Test mode =    OFF
+  Input count rate = 196956 cps ("input_cps")
+        ADC output = 0 cps ("ADC_cps")
+ Elapsed real time = 0 sec ("elapsed_real")
+ Elapsed live time = 0 sec ("elapsed_live")
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("param", 1)\fP
+\- 
+Displays parameter group 1 values in the following format:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+Total input count = 0 ("input_counts")
+  Total ADC Count = 0 ("ADC_counts")
+           CRM[0] = 0
+           CRM[1] = 0
+           CRM[2] = 0
+           CRM[3] = 0
+           CRM[4] = 0
+           CRM[5] = 0
+           CRM[6] = 0
+           CRM[7] = 0
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("param", 2)\fP
+\- 
+Displays parameter group 2 values in the following format:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+     WCStat = 0x0
+Preset time = 50
+       UHVP = 3921 V
+       IHVP = 7.6 mA
+       UHVD = 407 V
+         Uc = 11.64 V
+         Ic = 2212 mA
+       UBAT = 12.66 V
+    TEMP_BP = 35 C
+     Datain = 0x430a
+    Dataout = 0xffff
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("param", 3)\fP
+\- 
+Displays parameter group 3 values in the following format:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+CRM[0] =      0 cps  (chan      0 to  64000)
+CRM[1] =      0 cps  (chan  13760 to  14560)
+CRM[2] =      0 cps  (chan   3840 to   4384)
+CRM[3] =      0 cps  (chan  11200 to  13440)
+CRM[4] =      0 cps  (chan   5280 to   6176)
+CRM[5] =      0 cps  (chan   5500 to   6000)
+CRM[6] =      0 cps  (chan   1280 to   1696)
+CRM[7] =      0 cps  (chan      0 to  65280)
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("param", 4)\fP
+\- 
+Displays parameter group 4 values in the following format:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+   Ver_dsPIC = 0x0
+      Det_Nr = 0x0
+    SpSer_Nr = 0x0
+Thresh_Level = 0.0 ("threshold")
+   HLD_Level = 4000.0
+  LLD1_Level = 0.0 ("ADC_lld")
+  LLD2_Level = 40.0
+    PZ_Level = 0
+  Gain_Level = 0
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("param", \-1)\fP
+\- 
+Displays values from all of the parameter groups.
+.HP 5m
+."
+\fBmca_par("send", cmd)\fP
+\- 
+Allows sending arbitrary commands to the SP350  The format of \fBcmd\fP is a
+24\-bit hexadecimal number containing the three\-byte SP350 command.  For example,
+to send the command to switch on leveling mode, which is <50><06><00>, use:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+mca_par("send", 0x500600)
+.ft P
+.fi
+.RE
+.sp
+This command should not normally be needed, but allows sending SP350 commands that
+may be needed but are not implemented in the SP350 \fBspec\fP support.
+.RE
+.HP 5m
+."
+\fBmca_par("reset")\fP
+\- 
+Restarts the SP350 by rebooting its CPU.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%mca\fP
+

@@ -1,0 +1,29 @@
+ned                                   macro                                  ned
+
+NAME
+     nneedd - full-screen editor with windows
+
+SYNOPSIS
+
+     nneedd [[ffiillee__nnaammee]]
+
+DESCRIPTION
+
+     The nneedd macro runs the editor with the same name in a sub-shell.  It is the
+     editor of choice for the developers of ssppeecc.
+
+     The source code to nneedd is available by request from Certified Scientific
+     Software, but comes with no guarantees.
+
+DEFINITION
+
+     ddeeff nneedd ''uunniixx((""nneedd $$**""))''
+
+EXAMPLE
+
+     nneedd mmyy..mmaacc
+
+SEE ALSO
+
+     _u _v_i
+

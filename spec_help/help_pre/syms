@@ -1,0 +1,160 @@
+syms                                 command                                syms
+
+NAME
+     ssyymmss - list of known symbols
+
+SYNOPSIS
+
+     ssyymmss [[--vv]] [[++||--BBGGLLAADDNNSSIICC]] [[nnaammee ......]]
+
+DESCRIPTION
+
+     The command ssyymmss lists ssppeecc's current variables.  Without arguments, all
+     the variables are listed, along with their memory consumption and type.
+     With the --vv flag, the variables are listed along with their values in a
+     format that can be saved to a file and read back as commands.  If arguments
+     are given as nnaammee  ......, only symbols matching the arguments are printed.
+     Such arguments may contain the ** and ?? metacharacters.
+
+     Note, the --vv flag does not display the values of the new data array types.
+     Rather, a declaration suitable for creating the array is printed.  Such a
+     declaration does, in fact, clear the contents of an already existing array.
+
+     In addition, the type of symbols listed can be controlled using the flags
+     in the following table where a -- flag prevents symbols with the given
+     attribute from being listed and a ++ flag includes symbols with the given
+     attribute in the list.
+
+         B   Built-In
+         G   Global
+         L   Local
+         A   Associative array
+         D   Data array
+         N   Number type
+         S   String type
+         I   Immutable attribute
+         C   Constant attribute
+
+     Symbol attributes are as follows:
+
+     BBuuiilltt--IInn - Symbols that cannot be removed.
+
+     GGlloobbaall - Symbols that retain their value outside of statement blocks.  All
+          built-in symbols are global.
+
+     LLooccaall - Symbols that have scope only within the statement block in which
+          they are used.
+
+     IImmmmuuttaabbllee - Built-in symbols that cannot have their value altered.
+
+     CCoonnssttaanntt - Global symbols that cannot have their value altered by ordinary
+          assignment.  They can only have their value altered using the ccoonnssttaanntt
+          command.
+
+     Symbols can be of string, number or array type.  They may be of both string
+     and number type simultaneously.  There are two arrays types:  associative
+     and data.
+
+     The pprriinntt command always prints the string representation of a symbol.  The
+     pprriinnttff(()) and sspprriinnttff(()) functions print the number or string representation,
+     depending on the given format specifications.  Arithmetic operators use the
+     number value of a symbol.  The relational operators >> <<  <<==  >>== use the
+     number value if both operands are of number type, otherwise the string
+     values are lexicographically compared.
+
+     If the string value of a symbol cannot be interpreted as a number, its
+     number value is zero.
+
+     A nonglobal symbol is automatically brought into existence within a
+     statement or statement block ({{ ...... }}) simply by using its name.
+
+     A symbol assigned a value at the top level (outside of any curly brackets)
+     is automatically made global.
+
+     The llooccaall command forces the scope of a symbol to be within the current
+     statement block and allows reuse of global names within statement blocks.
+     Names already used as macro names may be used as local symbols within a
+     statement block, although that macro then becomes unavailable within that
+     block.
+
+BUILT-IN SYMBOLS
+
+     ssppeecc's built-in symbols include the following:
+
+     FFRREESSHH - is nonzero if ssppeecc was started with the --ff (fresh) flag.
+
+     VVEERRSSIIOONN - a string containing the ssppeecc version as in ""44..0033..1122"".
+
+     PPII - the numeric constant 3.14159...
+
+     UUSSEERR - the user's name, from //eettcc//ppaasssswwdd.
+
+     HHOOMMEE - the user's home directory, from the environment.
+
+     TTEERRMM - the user's terminal type, from the environment.
+
+     GGTTEERRMM - the user's graphics terminal type, from the environment.  May be
+          changed while running.
+
+     DDIISSPPLLAAYY - used by X Window clients to figure out on which host to run.  On
+          startup, the value is taken from the environment.  If not set in the
+          environment, the value saved in the user's state file is used.  The
+          value can be changed while running, and the current value will be
+          exported to new xx1111ffiilltt processes as they are spawned.
+
+     CCOOLLSS - the number of columns on the screen.  Initially taken from the
+          environment, may be changed by assignment, unless the TTIIOOCCGGWWIINNSSZZ
+          iiooccttll(()) is available, in which case the values via that call will be
+          used.
+
+     RROOWWSS - the number of rows on the screen.  Obtained as above.
+
+     CCWWDD - the current working directory.
+
+     SSPPEECC - the name of the program.
+
+     SSPPEECCDD - the auxiliary file directory.
+
+     DDEEBBUUGG - the debugging level.
+
+     MMOOTTOORRSS - the number of motors from the ccoonnffiigg file.
+
+     CCOOUUNNTTEERRSS - the number of counters from the ccoonnffiigg file.
+
+     AA - used to communicate motor positions.
+
+     SS - holds counter values.
+
+     Other built-in symbols are installed by site-dependent code.  In
+     particular, the symbols GG, QQ, ZZ and UUBB are used with most of the standard
+     geometry modules.
+
+EXAMPLE
+
+        SSPPEECC>> ssyymmss TT**
+
+           8800 TTEEMMPP__CCSS    ((GG..NNSS..))    9966 TTIITTLLEE      ((GG....SS..))
+           8800 TTEEMMPP__SSPP    ((GG..NNSS..))    8800 TT__AAVV       ((GG..NNSS..))
+           9966 TTEERRAAMMPP__MMIINN ((GG..NN....))    8800 TT__HHII__SSPP    ((GG..NN....))
+           9966 TTEERRMM       ((BB....SS..))    8800 TT__LL        ((GG..NNSS..))
+           8800 TTIIMMEE       ((GG..NNSS..))    8800 TT__LLOO__SSPP    ((GG..NN....))
+           9966 TTIIMMEE__EENNDD   ((GG..NNSS..))
+
+        SSPPEECC>> ssyymmss --vv TT**
+
+        TTEEMMPP__CCSS == 00
+        TTEEMMPP__SSPP == 00
+        TTEERRAAMMPP__MMIINN == 00..22
+        TTEERRMM == ""xxtteerrmm""
+        TTIIMMEE == 00
+        TTIIMMEE__EENNDD == 00
+        TTIITTLLEE == ""ffoouurrcc""
+        TT__AAVV == 00
+        TT__HHII__SSPP == 110000
+        TT__LL == 00
+        TT__LLOO__SSPP == --110000
+
+SEE ALSO
+
+     _g_l_o_b_a_l _c_o_n_s_t_a_n_t _l_s_d_e_f _l_s_c_m_d _w_h_a_t_s
+

@@ -1,0 +1,276 @@
+.TH "dac" "hardware" "12/10/13" "dac.rst 6.2  12/10/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+DAC \- Digital\-To\-Analog (DAC) Motors
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)dac.rst  6.2  12/10/13  CSS
+.
+.\" Copyright (c) 2003,2004,2009,2011,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "dac" "hardware" "12/10/13" "dac.rst 6.2  12/10/13 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP has built\-in C code to treat a number
+of digital\-to\-analog converter (DAC) devices as motors.
+The standard commands for moving motors and reading motor positions
+will set and
+get corresponding values on the DAC registers.
+The "move" of a DAC motor is instantaneous \- the value corresponding
+to the target position is written at once to the DAC register.
+.sp
+The DAC hardware supported includes ISA boards with
+either byte or word access, PCI boards with word access, VME modules with an
+A16 addressing mode and USB devices.
+(The configuration described here is not used for the
+CAMAC DSP E250, KS 3112/6 and KS 3195 DAC modules,
+which can also be used as DAC motors.)
+.sp
+Digital I/O, which is an independent hardware feature
+often included with the DAC devices, is supported
+using \fBmotor_par()\fP commands as described below.
+.SH "DEVICE CONFIGURATION"
+.rs
+.sp
+Each DAC module should be configured on the Devices screen of the
+configuration editor.
+Currently supported DAC controller types are:
+.sp
+.RS 4m
+.nf
+DAC as motor (ISA \- byte access)
+DAC as motor (ISA \- word access)
+DAC as motor (VME A16 addressing)
+DAC as motor (PCI)
+DAC as motor (USB)
+.fi
+.sp
+.RE
+.sp
+For the byte\-access mode for ISA cards,
+\fBspec\fP first writes the high\-order byte to one plus
+the register address, then writes the low\-order byte to the register address.
+.sp
+The specific PCI DAC cards currently supported
+are the Measurement Computing models PCI\-DDA02/12, PCI\-DDA04/12, PCI\-DDA08/12,
+PCI\-DDA02/16, PCI\-DDA04/16, PCI\-DDA08/16, PCI\-DAC6702 and PCI\-DAC6703.
+.sp
+On the USB bus, the Measurement Computing USB\-3100 series models are
+supported.  These devices all use 16\-bit DACs.
+.sp
+The Acromag model 921x VME modules are specifically detected.
+For those modules,
+\fBspec\fP adds 0x80 to the base address and left
+shifts 12\-bit values as required by these modules.
+Other VME modules that support DAC registers
+using A16 addressing may also work with the existing support.
+.sp
+Recognition for other PCI boards, USB devices and VME modules
+will be added in response to user requests.
+.SH "MOTOR CONFIGURATION"
+.rs
+.sp
+The controller type for all the above DAC motors should be
+selected as \fBDAC\fP on the Motors screen of the configuration editor.
+Unit numbers (for unit/channel configuration)
+are assigned starting with unit 0 for the first DAC motor controller
+selected on the Devices screen.  Channel numbers also start at zero.
+.sp
+The second alternate motor parameter screen is important
+for certain DAC configurations.
+Type little \fBm\fP twice to get to that screen.
+To select particular features for the DAC motor, enter the appropriate
+strings from the list below as "Generic Parameters".
+(To enter a string, type a single quote \fB\(aq\fP.
+To delete an entry, type \fB^D\fP.)
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fBtwelve\fP	\- twelve\-bit DAC
+\fBsixteen\fP	\- sixteen\-bit DAC
+\fBbinary\fP	\- binary output
+\fBtwos\fP	\- two\(aqs complement output
+\fBbipolar_2.5\fP	\- output from \-2.5V to +2.5V
+\fBbipolar_5\fP	\- output from \-5V to +5V
+\fBbipolar_10\fP	\- output from \-10V to +10V
+\fBunipolar_2.5\fP	\- output from 0 to +2.5V
+\fBunipolar_5\fP	\- output from 0 to +5V
+\fBunipolar_10\fP	\- output from 0 to +10V
+.TE
+.RE
+.sp
+For the mutually exclusive options,
+the last one in the list of generic parameters will take precedence.
+The default data configuration is 16\-bit binary.
+The selection of unipolar versus bipolar and range is only used to
+configure PCI and USB device registers,
+when such hardware configuration options are
+available.  Selections not supported by the hardware will be ignored.
+.sp
+The first four parameters should not be used with PCI or USB devices.
+\fBspec\fP can determine which model is being used by the device IDs
+and knows what output format is associated with a particular model.
+.sp
+Values in the following table for the steps\-per\-degree
+and user\-offset parameters
+will put the user units in Volts (the range notation is as above):
+.RS 3m
+.sp
+.nf
+.ft CB
+Range         Steps/Unit  Steps/Unit  Offset
+               (12 bits)   (16 bits)
+bipolar_2.5       819.15    13107.15    \-2.5
+bipolar_5         409.55     6553.55    \-5
+bipolar_10        204.75     3276.75   \-10
+unipolar_2.5     1638.3     26214.3      0
+unipolar_5        819.1     13107.1      0
+unipolar_10       409.5      6553.5      0
+.ft P
+.fi
+.RE
+.sp
+For example, for a 16\-bit DAC with a range of \-10 to +10 Volts,
+to have the user units be Volts,
+set the steps\-per\-unit parameter to 3276.75 and the user offset to \-10.
+.sp
+As of \fBspec\fP release 5.09.02\-2,
+the following DAC motor controller configurations are obsolete.
+One of the above interface types needs to be chosen instead.
+The mode (12\- or 16\-bit and binary or two\(aqs complement output)
+is selected using the generic parameters described above.
+.sp
+.RS 4m
+.nf
+DAC 12\-Bit D/A (ISA \- binary output)
+DAC 16\-Bit D/A (ISA \- binary output)
+DAC 12\-Bit D/A (ISA \- two\(aqs complement)
+DAC 16\-Bit D/A (ISA \- two\(aqs complement)
+.fi
+.sp
+.RE
+.sp
+Likewise, the motor channel controller types
+\fBDAC_B12\fP, \fBDAC_B16\fP, \fBDAC_T12\fP and \fBDAC_T16\fP are obsolete
+and need to be replaced with \fBDAC\fP.
+.SH "FUNCTIONS"
+.rs
+.sp
+\fBspec\fP includes the following functions to access
+the digital I/O capabilities available with some DAC devices.
+These functions are currently available for the Measurement
+Computing PCI and USB devices.
+.sp
+The following options are associated with the operation of a particular
+unit, not with a particular channel.  The
+\fBmne\fP argument is necessary for the syntax of the command and should be
+the mnemonic or motor number of any of the configured channels
+associated with the particular card or device.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "io_config" [, val])\fP
+\- 
+Configures input/output direction on the digital I/O lines.
+The meaning of \fBval\fP varies with model.
+For the Measurement Computing USB\-3100 series and PCI\-DAC670x
+series, bits set in \fBval\fP will be configured
+as outputs on the digital I/O lines.
+On power up, all lines on these devices
+default to inputs.
+Also, note, the configuration cannot be read from the device.
+On start up or after a \fBreconfig\fP be sure to reestablish
+the configuration before accessing the ports.
+When the command is issued without an argument,
+\fBspec\fP will return the current value as set by the user.
+.sp
+For the Measurement Computing PCI\-DDA series cards with
+48 digital I/O lines, the input/output control is split into
+four groups of eight and four groups of four.
+All lines in each group are either input or output.
+Configuration is accomplished by assigning
+\fBval\fP the sum of the values in the first column in the table below.
+Bits set in \fBval\fP will set the associated group of lines as outputs.
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l .
+\fBval\fP	Output Lines
+0x01	16 \- 19
+0x02	8 \- 15
+0x04	20 \- 23
+0x08	0 \- 7
+0x10	40 \- 43
+0x20	32 \- 39
+0x40	44 \- 47
+0x80	24 \- 31
+.TE
+.RE
+.sp
+The configuration is readable, and \fBspec\fP will read the configuration
+for these devices on start up and after a \fBreconfig\fP.
+When the command is issued without an
+argument, \fBspec\fP will return the current value.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "set_bit", val)\fP
+\- 
+Set output line corresponding to bit number \fBval\fP to high,
+where bits and lines are numbered starting from 0.
+.HP 5m
+."
+\fBmotor_par(mne, "clr_bit", val)\fP
+\- 
+Set output line corresponding to bit number \fBval\fP to low,
+where bits and lines are numbered starting from 0.
+.HP 5m
+."
+\fBmotor_par(mne, "put_byte", val)\fP
+\- 
+Sets output lines corresponding to the bits set in \fBval\fP
+to high and bits not set in \fBval\fP to low.
+For the Measurement Computing PCI\-DDA series, affects lines 0 to 7.
+.HP 5m
+."
+\fBmotor_par(mne, "put_byte#", val)\fP
+\- 
+As above, but allows access to bytes 0 to 5 of the Measurement Computing
+PCI\-DDA series, which has 48 lines of digital I/O.
+The argument \fB#\fP is the byte number.
+.HP 5m
+."
+\fBmotor_par(mne, "get_bit", val)\fP
+\- 
+Returns 1 or 0 based on whether the input line corresponding to bit number
+\fBval\fP is high or low, where lines and bits are numbered starting from 0.
+.HP 5m
+."
+\fBmotor_par(mne, "get_byte")\fP
+\- 
+Returns an 8\-bit value that reflects the setting of the input lines.
+A set bit correspond to a high\-level on the input.
+For the Measurement Computing PCI\-DDA series,
+returns the state of lines 0 to 7.
+.HP 5m
+."
+\fBmotor_par(mne, "get_byte#")\fP
+\- 
+As above, but allows access to bytes 0 to 5
+of the Measurement Computing PCI\-DDA series,
+which has 48 lines of digital I/O.
+The argument \fB#\fP is the byte number.
+.RE
+

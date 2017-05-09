@@ -1,0 +1,217 @@
+.TH "mono" "reference" "04/16/13" "mono.rst 6.2  04/16/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+monochromator \- monochromator control macros
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mono.rst 6.2  04/16/13  CSS
+.
+.\" Copyright (c) 1992,1995,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mono" "reference" "04/16/13" "mono.rst 6.2  04/16/13 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP supports energy\-selecting monochromators in three configurations.
+The first configuration uses a single motor to control the monochromator tilt.
+The second configuration uses three motors to control the tilt of two
+crystals and the travel distance between them.
+The third configuration takes into account a fourth motor to control
+the offset between the two crystals.
+(In the three\-motor configuration the offset is a fixed parameter.)
+.sp
+All of the monochromator support is contained in the macro source file
+\fBmacros/energy.mac\fP, which is automatically installed
+with the standard macro library.
+When the macros are read, commands from the \fBenergy.mac\fP file check
+whether particular motor mnemonics are present in the \fBconfig\fP file.
+Motors with mnemonics \fBmonu\fP, \fBmond\fP, \fBmontrav\fP and
+\fBmonoff\fP select the four\-motor configuration.
+The mnemonics stand for the upstream, downstream, travel and offset
+monochromator motors.
+If there are only motors with mnemonics \fBmonu\fP, \fBmond\fP and
+\fBmontrav\fP, the three\-motor configuration is selected.
+Having just a motor with a mnemonic of either \fBmonu\fP or
+\fBmono\fP selects the one\-motor configuration.
+.SH "USER\-INVOKED MACROS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBsetmono [d\-spacing] [offset]\fP
+\- 
+Used to enter the monochromator d\-spacing.
+If using a three\-motor monochromator, you can also enter
+the offset between the two crystals.
+With no arguments, the macro will prompt you to enter values.
+If you enter a \fB0\fP for the d\-spacing in interactive mode,
+you will then be prompted to enter the type of crystal
+and its Miller indices.
+The macro will then calculate the d\-spacing for you.
+The macro knows about Silicon and Germanium crystals.
+For other materials, you need to enter the crystal lattice parameter.
+The distributed \fBsetmono\fP only allows you
+to change the parameters if you have write permission for the file
+\fBg_mo_d.mac\fP in \fBspec\fP\(aqs auxiliary file directory.
+The current values of the parameters \fBg_mo_d\fP and \fBg_mo_s\fP (if used)
+are stored in that file.
+If you can\(aqt write the \fBg_mo_d.mac\fP file,
+the file is read as a command file.
+If you can write to the file,
+the file will be updated with the new parameters.
+.HP 5m
+."
+\fBgetE\fP
+\- 
+Displays the current energy calculated
+from the monochromator motor position(s).
+.HP 5m
+."
+\fBmoveE energy_in_KeV\fP
+\- 
+Moves the monochromator motor(s) to correspond to the energy value
+given as an argument.
+The macro writes the new energy to the data file using the
+\fBcomment\fP macro.
+.HP 5m
+."
+\fBsetE energy_in_KeV\fP
+\- 
+Changes the user offset of the monochromator motor(s) so that the
+current motor position(s) correspond
+to the energy value given as an argument.
+No motors are moved.
+The \fBset\fP macro, which comments a change of a motor\(aqs user offset
+to the data file, is used within \fBsetE\fP.
+(Additional motors that may be involved by way of the
+\fBcalcM_local\fP macro will not be set by this macro.)
+.HP 5m
+."
+\fBEscan start end intervals time [ fixQ ]\fP
+\- 
+Does an energy scan, starting at the energy given by
+\fBstart\fP and ends at the energy given by \fBend\fP. The step size is
+\fB(start\-end)/intervals\fP.
+The number of data points collected will be \fBintervals+1\fP.
+Count time is given by \fBtime\fP, which if positive,
+specifies seconds and if negative, specifies monitor counts.
+If the optional fifth argument is given as the literal characters
+\fBfixQ\fP, the values of \fBH\fP, \fBK\fP and
+\fBL\fP at the start of the scan are maintained at each point.
+.RE
+.SH "INTERNAL MACROS AND GLOBAL VARIABLES"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmono_type\fP
+\- 
+Global variable set to one, three or four representing the number
+of motors in the monochromator.
+.HP 5m
+."
+\fBg_mo_d\fP
+\- 
+Global variable containing the monochromator d\-spacing in Angstroms.
+.HP 5m
+."
+\fBg_mo_s\fP
+\- 
+Global variable containing the offset for the three\-motor monochromator
+in millimeters.
+.HP 5m
+."
+\fBxtal_ind\fP
+\- 
+Global array containing the Miller indices of the crystal (if d\-spacing
+is specified by Miller indices and crystal type).
+.HP 5m
+."
+\fBxtal_lat\fP
+\- 
+Global variable containing the monochromator crystal lattice parameter
+in Angstroms (if d\-spacing is specified by Miller indices and crystal type).
+.HP 5m
+."
+\fBxtal_type\fP
+\- 
+Global variable describing the material of the crystal
+(if d\-spacing is specified by Miller indices and crystal type).
+It is set to \fB"S"\fP for Si, \fB"G"\fP for Ge and \fB"o"\fP
+for any other material.
+.HP 5m
+."
+\fBcalcM energy_in_KeV\fP
+\- 
+Calculates standard monochromator motor positions from the argument.
+Calls the macro \fBcalcM_local\fP, if defined,
+to calculate additional motor positions.
+.HP 5m
+."
+\fBcalcM_local energy_in_KeV\fP
+\- 
+Optionally defined by local users to calculate motor positions
+for monochromator motors not taken care of in \fBcalcM\fP.
+.HP 5m
+."
+\fBcalcE\fP
+\- 
+Calculates \fBLAMBDA\fP from motor positions.
+.HP 5m
+."
+\fB_chk_mlim\fP
+\- 
+Checks limits on monochromator motors, used by \fBEscan\fP.
+.HP 5m
+."
+\fBpa_mono\fP
+\- 
+Displays monochromator parameters as part of the \fBpa\fP macro.
+.HP 5m
+."
+\fBsav_mono\fP
+\- 
+Saves monochromator parameters as part of the \fBsave\fP macro.
+.HP 5m
+."
+\fBmiller\fP
+\- 
+Used by setmono to calculate d\-spacing from Miller indices.
+.HP 5m
+."
+\fB_assign_mono\fP
+\- 
+Figures out which kind of monochromator is being used from motor mnemonics
+specified in the \fBconfig\fP file.
+This macro is called after the \fBreconfig\fP statement in the
+\fBconfig\fP macro.
+.RE
+.SH "NOTES"
+.rs
+.sp
+To control access to the monochromator parameters, the \fBspec\fP
+administrator can set the write permission and ownership of the
+\fBg_mo_d.mac\fP file appropriately.
+.sp
+To have the monochromator parameters automatically read in by each
+user running \fBspec\fP, put the line
+.sp
+.RS 4m
+\fBqdofile(sprintf("%s/g_mo_d.mac",SPECD))\fP
+.RE
+.sp
+in the \fBsite.mac\fP file in the auxiliary file directory.
+(The \fBsite.mac\fP file is automatically read as a command file each
+time a user starts \fBspec\fP.)
+.sp
+The business of storing the monochromator parameters in a file
+will need to be changed if there is more than one version of \fBspec\fP
+using monochromators running at the same time on the same computer.
+

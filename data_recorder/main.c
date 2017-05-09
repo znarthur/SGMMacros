@@ -210,10 +210,10 @@ char *getGroupPath(char *spec_version, xmlNode *group_node){
 	xmlAttr *cur_attr;
 	xmlChar *attr;
 	char groupName[STRMAX];
-	char *pathName, *tmp, *scan_n;
+	char *pathName, *tmp; 
+	char scan_n[STRMAX];
 	pathName = (char*)malloc(10);
 	tmp = (char*)malloc(10);
-	scan_n = (char*)malloc(STRMAX);
 	strncpy(pathName, "\0", 1);
 	strncpy(scan_n, "\0", 1);
 	size_t pathSize;
@@ -493,6 +493,8 @@ int createNexusData(xmlDocPtr xmlDoc, char *spec, NXhandle *fileid){
 			if(NX_axes[i] != NULL) free(NX_axes[i]);
 		}
 		if(NX_axes != NULL) free(NX_axes);
+		if(NX_data_path != NULL) free(NX_data_path);
+		if(scan != NULL) free(scan);
 	}
 
 return 0;
@@ -544,6 +546,7 @@ NXhandle setAxes(NXhandle *fileid, char *NXaxespath, char **ax_strs, int axis_ct
 		if(string[i] != NULL)free(string[i]);
 	}
 	if((NXopen(filename, NXACC_RDWR, &newID)) != NX_OK) return NULL;
+//	if(string != NULL) free(string);
 	if(filename != NULL) free(filename);
 return newID;
 }
@@ -614,7 +617,6 @@ return 0;
  * that are siblings or children of a given xml node.
  */
 int writeNexusHead(xmlDocPtr xmlDoc, char *spec_name, NXhandle *fileid){
-		
 	if(createNexusGroups(xmlDoc, spec_name, *fileid) == 1) return 1;
 	if(createNexusData(xmlDoc, spec_name, fileid) == 1) return 1;
 	if(createNexusAttr(xmlDoc, spec_name, *fileid) == 1) return 1;
@@ -754,7 +756,23 @@ void *getSpec2D(char *spec, sgm_ndAttr *nodeprop, int rows, int cols, int type){
 	size = rows*cols;
 	void *temp;
 	int nxt = nxType(type);
-	temp = malloc(size*SPS_Size(type));
+	if(type == 0) temp = (double*)malloc(size*sizeof(double));
+	if(type == 1) temp = (float*)malloc(size*sizeof(double));
+	if(type == 2) temp = (int*)malloc(size*sizeof(int));
+	if(type == 3) temp = (unsigned int*)malloc(size*sizeof(int));
+	if(type == 4) temp = (short*)malloc(size*sizeof(short));
+	if(type == 5) temp = (unsigned short*)malloc(size*sizeof(short));
+	if(type == 6) temp = (char*)malloc(size*sizeof(char));
+	if(type == 7) temp = (unsigned char*)malloc(size*sizeof(char));
+	if(type == 8){
+		 temp = (char*)malloc(size*sizeof(char));
+		 strcpy(temp, "\0");
+	}
+	if(type == 9) temp = (long*)malloc(size*sizeof(long));
+	if(type == 10) temp = (unsigned long*)malloc(size*sizeof(long));
+	if(type == 11) temp = (long long*)malloc(size*sizeof(long long));
+	if(type == 12) temp = (unsigned long long*)malloc(size*sizeof(long long));
+	//Copy 2D array using 1D allocation and some pointer arithmetic.
 	for(j=0; j<rows; j++){
 		if(SPS_CopyRowFromShared(spec, nodeprop->spec, (temp + j*(SPS_Size(2))*cols), type, j, cols, &copied)){
 			return NULL;
@@ -906,13 +924,9 @@ int specDataWrite(char *spec_version, sgm_ndAttr *var_name, NXhandle *file_id, i
 			if(NXflush(file_id) != NX_OK) return 1;
 		}
 	}
-	if(temp2Darray != NULL){
-	//	for(i=0; i<cols; i++){
-	//		if(temp2Darray[i] != NULL) free(temp2Darray[i]);
-	//	}
-		if(temp2Darray != NULL)free(temp2Darray);
-	}
+	if(temp2Darray != NULL)free(temp2Darray);
 	if(temparray != NULL) free(temparray);
+	if(copied != NULL) free(copied);
 	return 0;
 }
 

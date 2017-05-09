@@ -1,0 +1,51 @@
+cm4000                              hardware                              cm4000
+
+NAME
+     cm4000 - Compumotor 4000 motor controller
+
+DESCRIPTION
+
+     The Compumotor Model 4000 can be used either over its GPIB or one of its
+     two RS-232C interfaces.  From the configuration editor, switch to the
+     DDevice screen to select the appropriate version of the CM4000 controller
+     from one of the following:
+
+        MMOOTTOORRSS        DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE  NNUUMM                           <<>>TTYYPPEE
+           YYEESS                    33            44           CCoommppuummoottoorr 44000000 ((GGPPIIBB))
+           YYEESS    //ddeevv//ttttyySS00     <<>>    99660000    44  CCoommppuummoottoorr 44000000 ((SSeerriiaall ppoorrtt 11))
+           YYEESS    //ddeevv//ttttyySS11     <<>>    99660000    44  CCoommppuummoottoorr 44000000 ((SSeerriiaall ppoorrtt 22))
+
+     Corresponding entries in the ccoonnffiigg file are:
+
+         GGPP__CCMM44000000  ==  ggppiibb__aaddddrreessss  nnuummbbeerr__ooff__mmoottoorrss
+         RRSS11__CCMM44000000  ==  ddeevviiccee__nnaammee  bbaauudd__rraattee  nnuummbbeerr__ooff__mmoottoorrss
+         RRSS22__CCMM44000000  ==  ddeevviiccee__nnaammee  bbaauudd__rraattee  nnuummbbeerr__ooff__mmoottoorrss
+
+     On the MMoottoorr screen, select the CCMM44000000 controller type for each motor to be
+     controlled.  Motors are assigned to the CM4000 channels in the same order
+     they appear on the motor screen.
+
+CONTROLLER SETUP
+
+     You must program the RS-232 baud rate or the GPIB address using the
+     Compumotor front panel controls before trying to access it with ssppeecc.  You
+     should consult the Compumotor manual for details, but in brief, the
+     procedure is as follows.  First enter the AACCCCEESSSS code (the factory default
+     is 44000000).  Then choose the IIMMMMEEDD function, and then the DDEEFFIINNEE GGPPIIBB AADDDDRR
+     statement to select the the GPIB address.  Alternatively, choose the IIMMMMEEDD
+     function, and the the RRSS223322 PPOORRTT11 statement to configure the baud rate for
+     the RS-232 interface.
+
+     There are many other configuration options with this controller.  Other
+     than the GPIB address and the baud rate, you should probably not change any
+     of these others.  You can reestablish the factory defaults using the RREESSEETT
+     function from the main menu.
+
+     Output pins 46 or 47 on the programmable output connector can be used to
+     gate a counter during powder-mode scans.  While the powder-mode motor is
+     moving during these scans, ssppeecc sets pin 46 high and pin 47 low.  Use the
+     one appropriate for your particular counter.  To gate the Ortec 994
+     counter/timer, for example, pin 46 and an even-numbered pin (all are logic
+     ground) are connected to the front panel eennaabbllee BNC connector on the Ortec
+     module.
+

@@ -1,0 +1,75 @@
+meteor                              hardware                              meteor
+
+NAME
+     meteor - Matrox Meteor PC Board Frame Grabber
+
+DESCRIPTION
+
+     The Matrox Meteor frame grabber is a PCI board supported by ssppeecc on LLiinnuuxx
+     platforms through the kernel-level driver available at
+     _f_t_p_:_/_/_f_t_p_._r_w_i_i_._c_o_m_/_p_u_b_/_l_i_n_u_x_/_s_y_s_t_e_m_/_M_e_t_e_o_r_/.  (The currently supported
+     driver version is 1.5.4.)
+
+     ssppeecc treats the frame grabber as a CCD-like device.  It is selected on the
+     AAcquisition-type device screen of the configuration editor as:
+
+        MMCCAA-- aanndd CCCCDD--AAccqquuiissiittiioonn TTyyppee DDeevviiccee CCoonnffiigguurraattiioonn
+
+        CCCCDD--lliikkee        DDEEVVIICCEE  AADDDDRR <<>>MMOODDEE                        <<>>TTYYPPEE
+         00   YYEESS  //ddeevv//mmeetteeoorr00     11             MMeetteeoorr FFrraammee GGrraabbbbeerr PPCCII
+
+     The device name, of course, must match what was created with the driver
+     installation.  The address field (ADDR) is used to select the signal format
+     for the frame grabber as follows:
+
+        AADDDDRR FFoorrmmaatt SSiizzee
+         11   NNTTSSCC   448800xx664400
+         22   PPAALL    557766xx776688
+         33   SSEECCAAMM  557766xx776688
+
+     Currently ssppeecc sets the input source to the RCA-type connector when the
+     device is opened.
+
+FUNCTIONS
+
+     From ssppeecc, the frame grabber is accessed as an image device.  It is read
+     using the iimmaaggee__ggeett(()) function, for example, as
+
+         uubbyyttee aarrrraayy iimmaaggee[[448800]][[664400]]
+         iimmaaggee__ggeett((00,, iimmaaggee))
+
+     The native data type the unsigned byte uubbyyttee, as used above.
+
+     Special options include:
+
+     iimmaaggee__ppaarr((sseell,, ""ssiinnggllee"")) - Selects single-capture mode.  Every iimmaaggee__ggeett(())
+          function will start a single frame capture, and wait until the frame
+          is available.  The frame buffer will then be copied to the user's data
+          area.  Single-capture mode is the default on start-up.
+
+     iimmaaggee__ppaarr((sseell,, ""ccoonnttiinnuuoouuss"")) - Selects continuous-capture mode.  Each time
+          iimmaaggee__ggeett(()) is called, ssppeecc will check the time stamp on the current
+          frame buffer.  When the time stamp changes from ssppeecc's previously
+          saved value, ssppeecc will copy the current frame buffer contents to the
+          user's data area.  This method should insure that a different frame is
+          returned each time.  (A more robust method of collecting a series of
+          frames may be implemented in the future.  Contact CSS for more
+          information.)
+
+     iimmaaggee__ppaarr((sseell,, ""ffppss"" [[,, vvaalluuee]])) - Returns or sets the number of frames per
+          second acquired by the device in continuous-capture mode.  The maximum
+          value is 30 in NTSC mode and 25 in PAL and SECAM modes.
+
+     iimmaaggee__ppaarr((sseell,, ""ttiimmeessttaammpp"")) - Returns the time stamp of the last frame
+          obtained via iimmaaggee__ggeett(()) in terms of the current UNIX epoch.  (The
+          UNIX epoch is the number of seconds from January 1, 1970, 00:00:00
+          GMT.)  The value returned includes a fractional part with the
+          resolution of the system clock.  The value returned is in the same
+          units as ssppeecc's ttiimmee(()) function.
+
+     iimmaaggee__ppaarr((sseell,, ""ffrraammeess"")) - Returns the current frame count.
+
+     iimmaaggee__ppaarr((sseell,, ""sshhoowwaallll"")) - Displays internal driver information.
+
+     iimmaaggee__ppaarr((sseell,, ""rreesseett"")) - Resets the hardware interface.
+

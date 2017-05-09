@@ -1,0 +1,23 @@
+showtemp                              macro                             showtemp
+
+NAME
+     sshhoowwtteemmpp - display the current temperature
+
+SYNOPSIS
+
+     sshhoowwtteemmpp
+
+DESCRIPTION
+
+     The sshhoowwtteemmpp macro displays the current temperature and temperature
+     controller set point.  sshhoowwtteemmpp is used by the ttee and tteerraammpp macros.
+
+     As with all of ssppeecc's temperature-control macros, you need to define a
+     mmeeaassuurreetteemmpp and a __sseetttteemmpp macro that work correctly with your instruments.
+     See the TTeemmppeerraattuurree CCoonnttrrooll MMaaccrrooss section in the ssppeecc SSttaannddaarrdd MMaaccrroo GGuuiiddee
+     for details.
+
+SEE ALSO
+
+     _t_e _t_e_r_a_m_p _t_s_c_a_n _d_t_s_c_a_n
+

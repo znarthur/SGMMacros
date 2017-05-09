@@ -1,0 +1,131 @@
+.TH "changes" "spec 2.5 Release Notes" "08/01/12" "chg2_05.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.5
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_05.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1995 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.5 Release Notes" "08/01/12" "chg2_05.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes summarize the modifications made for \fBspec\fP release 2.5,
+as finalized on May 11, 1988.
+.SH "CHANGES"
+.rs
+.sp
+Each motor now has three levels of security: 1) no protection,
+2) limits cannot be changed and 3) motor cannot be moved.
+.sp
+When using edconf to alter the configuration file, limits no longer
+track changes to the accumulator, however they still follow
+changes to the dial setting.
+.sp
+The name of the standard macro file has been changed from
+\fB/usr/lib/spec.d/spec.mac\fP
+to
+\fB/usr/lib/spec.d/standard.mac\fP.
+.sp
+The DSP CAMAC driver has been fixed to enable slot 16 to work.
+In addition, each time a process opens the driver when no other
+process has it open, a CAMAC
+\fBZ\fP
+(initialization command) is issued.
+.sp
+A new macro
+\fBwm\fP,
+\fB"where motor"\fP,
+prints positions and limits for up to six motors.
+.sp
+A new macro
+\fBvi\fP
+invokes the editor called
+\fBvi\fP.
+.sp
+A new macro
+\fBmail\fP
+invokes the mailer called
+\fBmailx\fP.
+.sp
+A new macro
+\fBbug\fP
+lets the user enter a message that is then mailed to the
+administrator,
+\fBspec_adm\fP.
+.sp
+A new macro
+\fBsplot\fP
+plots the current data on the video screen.
+.sp
+The geometry status macros
+\fBwh\fP,
+\fBca\fP,
+\fBci\fP,
+etc., will now
+only print the positions of the four\-circle motors.
+.sp
+\fBMOTORS\fP
+is now a built\-in symbol, automatically
+set to the number of configured motors when the
+\fBconfig\fP
+file is read.
+.sp
+On first reading of the standard macros, if the four\-circle motors
+are not configured in the standard positions (0\-3), the motor
+indirection array
+(\fB_A[]\fP)
+is automatically initialized.
+.sp
+The four\-circle diffractometer macro set and C code
+has been improved, including better diagnostics when trying to go to
+unreachable positions and bug fixes.
+The
+\fBReference Manual\fP
+now contains a complete description of the
+four\-circle interface.
+Among the new four\-circle macros to set geometry parameters
+(each will prompt if invoked without arguments) are
+\fBsetmode\fP
+to set the mode,
+\fBsetsector\fP
+to set the sector,
+\fBsetlat\fP
+to set the crystal lattice parameters and
+\fBsetaz\fP
+to set the azimuthal reference vector.
+.sp
+The state file is no longer saved if the user exits using
+\fB^Z\fP.
+.sp
+The plotting interface has been revised.
+Consult the
+\fBReference Manual\fP
+for details.
+.sp
+The
+\fBwait()\fP
+function can now be invoked to return a value indicating
+if any asynchronous activity is going on.
+.sp
+New built\-in functions
+\fBexp10(x)\fP
+and
+\fBpow(x, y)\fP
+are available.
+The former returns 10 to the
+\fBx\fP,
+the latter,
+\fBx\fP
+to the
+\fBy\fP.
+

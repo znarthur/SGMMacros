@@ -1,0 +1,29 @@
+dscan                                 macro                                dscan
+
+NAME
+     ddssccaann or lluupp - motor scan relative to the starting position
+
+SYNOPSIS
+
+     ddssccaann mmoottoorr ssttaarrtt eenndd iinntteerrvvaallss ttiimmee
+     lluupp mmoottoorr ssttaarrtt eenndd iinntteerrvvaallss ttiimmee
+
+DESCRIPTION
+
+     ddssccaann (also called lluupp) scans one motor, as specified by mmoottoorr. If the
+     motor is at position XX before the scan begins, the scan will run from
+     XX++ssttaarrtt to XX++eenndd.  The step size is ((ssttaarrtt--eenndd))//iinntteerrvvaallss.  The number of
+     data points collected will be iinntteerrvvaallss++11.  Count time is given by ttiimmee,
+     which if positive, specifies seconds and if negative, specifies monitor
+     counts.
+
+     Upon termination, the motor is returned to its starting position.
+
+EXAMPLE
+
+     ddssccaann pphhii --11 11 2200 1100
+
+SEE ALSO
+
+     _m_o_t_o_r_s _a_s_c_a_n _a_2_s_c_a_n _a_3_s_c_a_n _a_4_s_c_a_n _d_2_s_c_a_n _d_3_s_c_a_n _m_e_s_h
+

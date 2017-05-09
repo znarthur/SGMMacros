@@ -1,0 +1,23 @@
+set_dial                              macro                             set_dial
+
+NAME
+     sseett__ddiiaall - define the dial position of a motor
+
+SYNOPSIS
+
+     sseett__ddiiaall mmoottoorr vvaalluuee
+
+DESCRIPTION
+
+     The sseett__ddiiaall macro is used to set the dial position to vvaalluuee for one mmoottoorr.
+
+     The macro use the built-in functions cchhgg__ddiiaall(()) and cchhgg__ooffffsseett(()).
+
+EXAMPLE
+
+     sseett__ddiiaall tthh 00
+
+SEE ALSO
+
+     _m_o_t_o_r_s _s_e_t
+

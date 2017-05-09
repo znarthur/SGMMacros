@@ -1,0 +1,123 @@
+.TH "setscans" "macro" "08/01/12" "setscans.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBsetscans\fP \- configure scan options
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)setscans.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2004,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "setscans" "macro" "08/01/12" "setscans.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBsetscans\fP macro asks the following questions:
+.sp
+\fBSleep (settle) time before each scan point (0)?\fP
+.sp
+.RS 4m
+Setting the sleep time to a nonzero value causes the scan macros
+to delay for that many seconds before counting at each point.
+.sp
+The value entered here is assigned to the
+\fB_sleep\fP global variable, which can also be assigned to directly.
+.sp
+The default value is zero.
+.RE
+.RS 0m
+.HP 5m
+."
+\fBShow updated moving and counting during scans (NO)?\fP
+\- 
+This option turns on a feature where during moving and
+counting in scans, the motor positions or scaler contents
+are continually read and displayed on the screen.
+This feature works by redefining the standard macros
+\fB_count\fP and \fB_move\fP.
+.sp
+The default value is no.
+.RE
+.sp
+\fBDo hklscan prescan limit\-check loops (YES)?\fP
+.sp
+.RS 4m
+The prescan limit checks calculate motor positions for each point
+of the reciprocal space scans before moving any motors.
+On slower computers and for long scans these calculations can
+be annoyingly slow.
+You can disable these checks if you are reasonably sure your
+scans will not take motors outside their configured limits.
+Disabling prescan limit checks doesn\(aqt disable limit checking
+during the actual moves.  Rather, it simply avoids having a scan
+aborted because of an attempt to move to a reciprocal space
+position that takes motors beyond their limits.
+.sp
+The value entered here is assigned to the \fB_pre_chk\fP global variable,
+which can also be assigned a zero or nonzero value directly.
+.sp
+The default value is 1 (yes).
+.RE
+.sp
+\fBSave motors to data file at each point for HKL scans (NO)?\fP
+.sp
+.RS 4m
+Normally, \fBspec\fP doesn\(aqt write motor positions to the data file
+at each point in a scan when scanning over reciprocal space coordinates.
+The reason is that the motor
+positions can be recovered, if necessary, from the
+\fBHKL\fP coordinates that are saved, saving the motor positions can
+double the size of the data file, and as a rule, users use
+the reciprocal space coordinates rather than the motor positions
+in subsequent analysis of the data.
+However, if this option is selected,
+the positions of the geometry\-related motors will
+be saved at each point for all standard
+\fBHKL\fP linear, arc, radial and mesh scans.
+(This option was introduced to the standard macros
+in \fBspec\fP release 5.05.01\-7.)
+.sp
+The value entered here is assigned to the \fB_sav_geo_mot\fP global variable,
+which can also be assigned a zero or nonzero value directly.
+.sp
+The default value is 0 (no).
+.RE
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBUPDATE\fP
+\- 
+The number of seconds between screen updates
+during updated moving and counting.
+.HP 5m
+."
+\fB_sleep\fP
+\- 
+The settle time, in seconds.
+.HP 5m
+."
+\fB_pre_chk\fP
+\- 
+If set, do the prescan limit checks for reciprocal\-space scans.
+.HP 5m
+."
+\fB_sav_geo_mot\fP
+\- 
+If set, save geometry\-related motor positions in the data file
+for reciprocal\-space scans.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%scans\fP
+\fI\%startup\fP
+

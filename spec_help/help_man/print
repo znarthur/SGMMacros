@@ -1,0 +1,98 @@
+.TH "printing" "reference" "08/01/12" "print.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+printing \- producing formatted output
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)print.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "printing" "reference" "08/01/12" "print.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBprint\fP command and the \fBprintf()\fP and
+\fBfprintf()\fP functions are used to send output to files or to the screen.
+In \fBspec\fP, files and devices are turned \fBon\fP or \fBoff\fP using special commands
+(see the \fBfiles\fP help file),
+and printed output generally goes to all devices that are currently
+\fBon\fP. The \fBfprintf()\fP function differs in that it
+turns off output to everything except the file or device
+specified in its first argument.
+.sp
+The \fBprint\fP command
+prints each of its arguments separated by spaces, and then prints a newline.
+Strings are printed as is, numbers are printed using the \fB"%g"\fP format.
+.sp
+The functions \fBprintf()\fP, \fBfprintf()\fP and
+\fBsprintf()\fP use format specifications just like those in C.
+A few of those format specifications are
+\fB%s\fP to print a string,
+\fB%g\fP to print a floating point number and
+\fB%d\fP to print an integer.
+An embedded \fB\en\fP prints a newline.
+See the description of \fBprintf()\fP in a C manual for more details.
+.SH "BUILT\-IN COMMANDS AND FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBprint a, b ...\fP
+\- 
+Prints each argument, separated by spaces.
+.HP 5m
+."
+\fBprintf(format, a, b ... )\fP
+\- 
+Prints \fBa\fP, \fBb\fP, etc. using \fBformat\fP.
+.HP 5m
+."
+\fBfprintf(file_name, format [, a, ...])\fP
+\- 
+Does formatted printing on \fBfile_name\fP.
+All other devices (except log files)
+are turned off while the string is printed.
+.HP 5m
+."
+\fBsprintf(format, a, b ... )\fP
+\- 
+Returns a string holding the formatted print.
+.RE
+.SH "EXAMPLES"
+.rs
+.RS 3m
+.sp
+.nf
+.ft CB
+1.SPEC> print sqrt(2), PI, PRINTER
+1.41412 3.14159 /dev/lp
+
+2.SPEC> printf("Today is %s.  PI = %.3g\en",\e
+     date(), PI)
+Today is Sat Jan 23 00:54:23 1988.  PI = 3.14
+
+
+
+3.SPEC> FILENAME = sprintf("%s/data/run.%d",\e
+        HOME, run);
+
+4.SPEC> print FILENAME
+/usr/gerry/data/run.12
+.ft P
+.fi
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%files\fP
+.sp
+\fBprintf()\fP in any C\-language programming manual.
+

@@ -1,0 +1,436 @@
+.TH "trinamic" "hardware" "01/05/14" "trinamic.rst 6.4  01/05/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+Trinamic \- Trinamic QUADpack/SIXpack motor controllers
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)trinamic.rst     6.4  01/05/14  CSS
+.
+.\" Copyright (c) 2007,2009,2010,2012,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "trinamic" "hardware" "01/05/14" "trinamic.rst 6.4  01/05/14 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Trinamic QUADpack and SIXpack motor controllers are supported
+by \fBspec\fP over both serial (RS\-232C) and CAN\-bus interfaces.
+\fBspec\fP support for Trinamic controllers was introduced in release
+5.05.03\-2 (May 2004).
+A number of bug fixes and updates have been included in subsequent release.
+A major upgrade in parameter configuration
+was included in release 5.07.04\-1 (October 2007).
+Details are included in the text below.
+.SH "CONFIGURATION"
+.rs
+.sp
+Configure the motor controllers on the
+\fBD\fPevices screen of the configuration editor as follows, choosing
+the CAN bus or serial entry, as appropriate:
+.RS 3m
+.sp
+.nf
+.ft CB
+Motor and Counter Device Configuration (Not CAMAC)
+
+MOTORS     DEVICE   ADDR <>MODE NUM                               <>TYPE
+   YES                 0         16  Trinamic QUADpack/SIXpack (CAN bus)
+   YES /dev/ttyS0     <>  19200  10   Trinamic QUADpack/SIXpack (Serial)
+.ft P
+.fi
+.RE
+.sp
+If using the CAN\-bus interface, configure the CAN\-bus controller in use
+in the field\-bus section
+of the
+\fBI\fPnterfaces screen of the configuration editor.  Multiple
+field\-bus controllers can be configured with each assigned an index number
+starting from zero.
+The ADDR field in the example holds the index number
+of the field\-bus controller to be used.
+.sp
+For the serial interface, the baud rate is entered in the MODE column.
+Use 19200 baud for the Trinamic controllers.
+.sp
+On the \fBM\fPotor screen of the configuration editor,
+choose \fBTRINAMIC\fP as the controller type.  Note, also, that Trinamic
+motor channels require the \fBunit/module/channel\fP configuration for each motor
+channel.  The \fBunit\fP numbers refer to the entries on the \fBD\fPevices screen
+for the controller configuration and start at zero for each type of controller.
+That is, the first Trinamic controller is unit 0, even if other controller types
+appear before it in the listing.
+The \fBmodule\fP number is the board address set using switches on the controller card.
+The \fBchannel\fP numbers run from 0 to 3 for the QUADpack and 0 to 5 for the SIXpack.
+.SH "FUNCTIONS"
+.rs
+.sp
+The Trinamic controllers support many configuration parameters that are not
+normally used by \fBspec\fP.
+\fBspec\fP does provide the capability to set practically all of the parameters.
+Note, though, changing the values of some of the parameters
+may interfere with \fBspec\fP\(aqs operation of the motor controller.
+.sp
+The following \fBmotor_par()\fP options are available while running \fBspec\fP.
+The parameter names are not sensitive to case (upper and lower
+case letters are equivalent).
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "get_io1")\fP
+\- 
+Returns the logic state of the TTLIO1 pin.
+.HP 5m
+."
+\fBmotor_par(mne, "set_io1", arg)\fP
+\- 
+Sets the logic state of the TTLIO1 pin, using it as an output.
+Note, the TTLOUT1 pin is set simultaneously using the value given with
+the \fB"set_out1"\fP option.
+.HP 5m
+."
+\fBmotor_par(mne, "set_out1", arg)\fP
+\- 
+Sets the logic state of the TTLOUT1 pin.
+Note, the TTLIO1 pin is set simultaneously using the value given with the
+\fB"set_io1"\fP option.
+.RE
+.sp
+The following three options can be set on the standard
+optional\-parameters screen in
+\fBspec\fP\(aqs hardware configuration editor.
+(Type \fBp\fP when on the \fBM\fPotor screen.)
+As of \fBspec\fP release 5.07.04\-6, there are additional ways
+to set the same motor parameters.  See below.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "misc_par_1" [, arg])\fP
+\- 
+Sets or gets the peak current in percent.  See \fB"PeakCurrent"\fP below.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "misc_par_2" [, arg])\fP
+\- 
+Sets or gets the power\-down current in percent.
+See \fB"PowerDownCurrent"\fP below.
+.HP 5m
+."
+\fBmotor_par(mne, "misc_par_3" [, 0|1])\fP
+\- 
+Sets or gets the limit configuration.
+A zero configures normally closed limits, while a one configures
+normally open limits.  See \fB"NullPositive"\fP below.
+.RE
+.sp
+The following parameters allow setting of all the power parameters
+associated with the Trinamic controller.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "PeakCurrent" [, arg])\fP
+\- 
+Sets or returns the peak current in percent.
+Note the maximum peak current is configured via a DIP switch
+on the SIXpack2 models.
+Note also, the peak current is set in pairs,
+i.e., channels 0 and 1 share the setting,
+as do channels 2 and 3 and channels 4 and 5.
+Default value is 50.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "PowerDownCurrent" [, arg])\fP
+\- 
+Sets or returns the power\-down current as a percent of the peak current.
+The power\-down current kicks in after the power\-down delay interval.
+Default value is 0.
+.HP 5m
+."
+\fBmotor_par(mne, "StandingCurrent" [, arg])\fP
+\- 
+Sets or returns the stand\-still current as a percent of the peak current.
+The stand\-still current kicks in at the end of a move.
+Default value is 50.
+.HP 5m
+."
+\fBmotor_par(mne, "RunningCurrent" [, arg])\fP
+\- 
+Sets or returns the constant\-velocity current as a percent
+of the peak current.  Default value is 75.
+.HP 5m
+."
+\fBmotor_par(mne, "AccelerationCurrent" [, arg])\fP
+\- 
+Sets or returns the acceleration current as a percent of the peak current.
+Default value is 100.
+.HP 5m
+."
+\fBmotor_par(mne, "PowerDownDelay" [, arg])\fP
+\- 
+Sets or returns the power\-down delay time in milliseconds.
+The power\-down delay is the time between when a motor has reached
+its target position
+and the time the current is set to the power\-down value.
+Default value is 1000 (1 second).
+.RE
+.sp
+The following fifteen parameters can be set individually or
+all at once by using the built\-in optional
+\fB"home_method"\fP parameter, also described below.
+Setting any of the following parameters individually will
+override values set via the home\-method parameter.
+.sp
+Note, although these parameters can all be set, certain settings may
+interfere with \fBspec\fP\(aqs ability to control the motors.
+In general, one shouldn\(aqt modify the values from the defaults without
+a good reason and an understanding of the consequences.
+.sp
+The meaning and significance for these parameters can be sought
+in Trinamic\(aqs documentation.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "RotaryAxis" [, 0|1])\fP
+\- 
+Sets or returns the value of the rotary\-axis parameter (zero or one).
+Default value is zero.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "AutoNullCmd" [, 0|1])\fP
+\- 
+Sets or returns the value of the auto\-null flag (zero or one).
+Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "TestNull" [, 0|1])\fP
+\- 
+Sets or returns the value of the test\-null flag.  Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "NullLeft" [, 0|1])\fP
+\- 
+Sets or returns the value of the null\-left flag.  Default value is one.
+.HP 5m
+."
+\fBmotor_par(mne, "NullCenter" [, 0|1])\fP
+\- 
+Sets or returns the value of the null\-center flag.
+Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "StopNull" [, 0|1])\fP
+\- 
+Sets or returns the value of the stop\-null flag.
+Default value is one.
+.HP 5m
+."
+\fBmotor_par(mne, "FilterSwitch" [, 0|1])\fP
+\- 
+Sets or returns the value of the filter\-switch flag.
+Default value is one.
+.HP 5m
+."
+\fBmotor_par(mne, "WayOptimization" [, 0|1])\fP
+\- 
+Sets or returns the value of the way\-optimization flag.
+Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "FastRef" [, 0|1])\fP
+\- 
+Sets or returns the value of the fast\-reference flag.
+Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "MechRef" [, 0|1])\fP
+\- 
+Sets or returns the value of the mechanical\-reference flag.
+Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "DelayTestNull" [, 0|1])\fP
+\- 
+Sets or returns the value of the delay\-test\-null flag.
+Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "StopSoft" [, 0|1])\fP
+\- 
+Sets of returns the value of the stop\-soft flag.
+Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "StopNoRef" [, 0|1])\fP
+\- 
+Sets or returns the stop\-no\-ref flag.
+Default value is one.
+.HP 5m
+."
+\fBmotor_par(mne, "NullPositive" [, 0|1])\fP
+\- 
+Sets or returns the null\-positive flag.
+Default value is one.
+.HP 5m
+."
+\fBmotor_par(mne, "home_method" [, arg])\fP
+\- 
+Sets or returns the value of the Trinamic\-specific home\-method parameter.
+For the Trinamic controller, the home method is a 16\-bit number
+that encodes the flags included in the above parameters as follows:
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l .
+0x0002	RotaryAxis
+0x0004	AutoNullCmd
+0x0008	TestNull
+0x0010	NullLeft
+0x0020	NullCenter
+0x0040	StopNull
+0x0080	FilterSwitch
+0x0100	WayOptimization
+0x0200	FastRef
+0x0400	MechRef
+0x0800	DelayTestNull
+0x1000	StopSoft
+0x2000	StopNoRef
+0x4000	NullPositive
+0x8000	StopAtFullSteps
+.TE
+.RE
+.sp
+The \fB"home_method"\fP option provides an alternative to setting
+the parameters individually.
+However, setting parameters individually will override the value
+selected with this parameter.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "PosLimit" [, arg])\fP
+\- 
+Set or returns the value of the position\-limit parameter
+used in the home search.
+.HP 5m
+."
+\fBmotor_par(mne, "StopAtFullSteps" [, 0|1])\fP
+\- 
+Sets or returns the stop\-at\-full\-steps flag.  Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "DebouncingTime" [, arg])\fP
+\- 
+Sets or returns the debouncing time.  Default value is 22 msec.
+.HP 5m
+."
+\fBmotor_par(mne, "StopAfterSearch" [, 0|1])\fP
+\- 
+Sets or returns the stop\-after\-search flag.  Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "NullOffset" [, arg)])\fP
+\- 
+Sets or returns the null\-point offset value.  Default value is zero.
+.HP 5m
+."
+\fBmotor_par(mne, "TestNullRange" [, arg])\fP
+\- 
+Sets or returns the test\-null range.  Default value is 240.
+.HP 5m
+."
+\fBmotor_par(mne, "dump")\fP
+\- 
+Displays current values for the above Trinamic\-specific parameters
+along the following lines:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+        PeakCurrent =     50 %
+AccelerationCurrent =    100 %
+     RunningCurrent =     75 %
+    StandingCurrent =     50 %
+   PowerDownCurrent =      0 %
+     PowerDownDelay =   1000 msec
+     DebouncingTime =     22 msec
+    StopAfterSearch =      0
+         NullOffset =      0 steps
+      TestNullRange =    240 steps
+           PosLimit = 400000 steps
+         RotaryAxis =      0 (0x0002)
+        AutoNullCmd =      0 (0x0004)
+           TestNull =      0 (0x0008)
+           NullLeft =      1 (0x0010)
+         NullCenter =      0 (0x0020)
+           StopNull =      1 (0x0040)
+       FilterSwitch =      1 (0x0080)
+    WayOptimization =      0 (0x0100)
+            FastRef =      0 (0x0200)
+            MechRef =      0 (0x0400)
+      DelayTestNull =      0 (0x0800)
+           StopSoft =      0 (0x1000)
+          StopNoRef =      1 (0x2000)
+       NullPositive =      1 (0x4000)
+    StopAtFullSteps =      0 (0x8000)
+      "home_method" = 0x60D0
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "disable_limit_checks" [, 0|1])\fP
+\- 
+Sets or returns the value of the standard optional motor parameter
+to disable limit checks.
+Set this parameter
+if the limit inputs are to be used for a reference search
+but not to stop motion.
+.RE
+.SH "CHECKING FOR RESET"
+.rs
+.sp
+Trinamic parameters need to be reprogrammed after a power cycle.
+It is possible to have \fBspec\fP continuously check whether power
+has been cycled by requesting a particular status response from the controller.
+To enable such an automatic check (as of \fBspec\fP release 5.09.01\-1),
+set the custom controller parameter \fB"check_interval"\fP in the
+hardware \fBconfig\fP file.  If this parameter has a value greater than zero,
+\fBspec\fP will check for reset no more frequently than that number of seconds.
+If a reset is noted, all parameters will be reprogrammed.
+The check will be performed before moving, reading positions, on the
+\fBsync\fP command, and before changing parameters with
+\fBmot_par()\fP, but no more often than the specified interval.
+When the controller is idle, there is no checking done.
+.sp
+To set the parameter, go the controller configuration line on the
+\fBD\fPevices screen of the configuration editor and type
+\fBp\fP to enter the parameter:
+.RS 3m
+.sp
+.nf
+.ft CB
+Custom Parameters for "Trinamic QUADpack/SIXpack (Serial)"
+
+NAME                      VALUE
+check_interval            2
+.ft P
+.fi
+.RE
+.sp
+The above example configures the checking
+at no more often than every two seconds.
+In the current implementation, the parameter
+needs to be separately configured for
+each controller for which checks are to be enabled.
+

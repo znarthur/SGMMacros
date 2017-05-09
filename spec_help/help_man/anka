@@ -1,0 +1,196 @@
+.TH "anka" "hardware" "08/01/12" "anka.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+anka \- RST Gamma interface as used at ANKA
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)anka.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2003,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "anka" "hardware" "08/01/12" "anka.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The ANKA Synchrotron at the Forschungzentrum in Karlsruhe, Germany
+sponsored the adaptation of industrial control software
+to beamline control.  The software product is
+called Gamma and is provided by RST Industrie Automation GmbH.
+The Gamma software runs on an OS/9 operating system
+in a VME crate and works using
+peer\-to\-peer connections.  \fBspec\fP uses TCP/IP sockets
+over ethernet to communicate with the Gamma
+software and supports motors and counter/timers over this interface.
+\fBspec\fP also provides general access to Gamma
+variables through the new built\-in
+user\-level functions \fBanka_get()\fP, \fBanka_put()\fP and \fBanka_par()\fP.
+.SH "CONFIGURATION"
+.rs
+.sp
+Several connection parameters need to be specified that describe the Gamma
+peer\-to\-peer connection.  The most important are the remote\-host name,
+the remote\-host Gamma node number and the local\-host Gamma node number.
+These parameters are available to read or modify with the
+\fBspec_par()\fP facility using the names
+\fBanka_remote_host\fP, \fBanka_remote_node\fP and
+\fBanka_local_node\fP. The parameters can also be read from the
+\fBconfig\fP file using the \fBSPEC_PAR:\fP directive, as in:
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC_PAR: anka_remote_host = the.host.name
+SPEC_PAR: anka_remote_node = 123
+SPEC_PAR: anka_local_node = 456
+.ft P
+.fi
+.RE
+.sp
+Currently, \fBSPEC_PAR:\fP parameters must be manually added to the
+\fBconfig\fP file.
+.sp
+The special functions below will only be available when
+the ANKA hardware is configured or the above parameters are set.
+.sp
+The default TCP/IP port for the Gamma peer\-to\-peer connections is
+port 3500,
+although the local and remote ports can be reconfigured with
+the \fBanka_par()\fP function as described below.
+.sp
+Since only one process at a time can bind to a particular port number,
+\fBspec\fP can only connect to one Gamma system at a time with the same
+port number.
+.sp
+If the connection parameters are changed, either a
+\fBreconfig\fP or the command \fBanka_par("reconnect")\fP is needed to close
+the old connection and open a new one.
+.SH "FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBanka_get(node, index1, index2 [, type])\fP
+\- 
+Reads the data value described
+by the Gamma parameters \fBnode\fP, \fBindex1\fP and
+\fBindex2\fP (LNR in Gamma lingo).
+The default data type is \fB"long"\fP (or \fBSINT\fP in Gamma lingo).
+Other data types can be retrieved as specified by the optional
+fourth argument, which can be one of the strings
+\fB"byte"\fP, \fB"ubyte"\fP, \fB"short"\fP, \fB"ushort"\fP,
+\fB"long"\fP, \fB"ulong"\fP, \fB"float"\fP, \fB"double"\fP or \fB"string"\fP.
+.HP 5m
+."
+\fBanka_put(node, index1, index2, value [, type])\fP
+\- 
+Sets the data value described by the Gamma parameters
+\fBnode\fP, \fBindex1\fP and \fBindex2\fP
+(LNR in Gamma lingo) to \fBvalue\fP. The default data type is
+\fB"long"\fP. Other data types can be sent as specified by the
+optional fourth argument, as listed above.
+.HP 5m
+."
+\fBanka_par(name [, value])\fP
+\- 
+Controls selected operational parameters according to the string
+\fBname\fP as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"local_port"\fP
+\- 
+Sets or retrieves the port number
+on which \fBspec\fP listens for connections from the remote Gamma peer.
+The default is 3500.
+.HP 5m
+."
+\fB"remote_port"\fP
+\- 
+Sets or retrieves the port number on which \fBspec\fP uses to connect
+to the remote Gamma peer.  The default is 3500.
+.HP 5m
+."
+\fB"new_driver"\fP
+\- 
+If set, indicates a newer version of the Gamma software is running.
+The default is for the mode to be set.
+.HP 5m
+."
+\fB"reconnect"\fP
+\- 
+Closes the sockets associated with the current connection to the Gamma
+software, and attempts to reconnect using the current connection
+parameters.
+.PD
+.RE
+.sp
+The parameters are saved in the user\(aqs state file, so are retained
+between invocations of \fBspec\fP,
+but must be reset when starting fresh.
+.RE
+.RE
+.SH "USING ANKA MOTORS"
+.rs
+.sp
+The ANKA RST Gamma motors are configured in the standard way.
+Choose
+.sp
+.RS 4m
+\fBANKA RST Gamma Motor Controller\fP
+.RE
+.sp
+as the motor controller type on the \fBD\fPevices screen of the
+configuration editor, and select controller type
+\fBANKA\fP for the individual motor channels.
+.sp
+With respect to homing,
+the Gamma interface provides six home commands, which involve
+writing the values 0, 1, \-10, \-11, \-20 or \-21 to line
+number 30 of the Gamma data area for a particular motor.
+The first four values correspond to the standard
+\fBspec\fP search commands (as arguments to
+\fBchg_dial()\fP) \fB"lim\-"\fP, \fB"lim+"\fP, \fB"home+"\fP and
+\fB"home\-"\fP, respectively.
+The \-20 value corresponds to a sequence of 0 and \-10, while
+\-21 corresponds to 1 and \-11.
+To accommodate these sequence searches within the existing \fBspec\fP structure,
+one can associate a particular Gamma home command with a particular
+motor for use with the default \fB"home"\fP search argument to
+\fBchg_dial()\fP. The association is done by entering the Gamma home value as
+"Generic parameter 1" on the second optional motor parameter screen
+of the configuration editor.
+(Get there by typing \fBm\fP twice from the standard motor parameter screen.)
+.sp
+In addition, the setting for the home position that is written to line
+number 29 of the Gamma data area can be saved as
+"Generic parameter 2" in the \fBconfig\fP file.
+The units are steps.  The parameter value is copied, as is, to line number 29.
+If the \fBchg_dial()\fP function is invoked with a third argument,
+the value of that argument will override the value
+for the home position in the \fBconfig\fP file.
+The units for \fBchg_dial()\fP, home\-position optional third argument
+are dial units.
+.SH "DEBUGGING"
+.rs
+.sp
+Debug level 128 (0x80) displays the internal \fBanka_get()\fP and
+\fBanka_put()\fP commands generated by the built\-in C code for the motor
+and counter commands sent to the Gamma software.
+Debug level 0x8000 displays information about each packet sent
+and received between \fBspec\fP and the Gamma software.
+Debug level 64 (0x40) displays the raw contents of the messages
+transmitted in the socket connections.
+If the debug level includes bit 0x400000, the contents will be displayed
+in aligned hexadecimal columns, rather than the default printable/escaped
+ASCII.
+

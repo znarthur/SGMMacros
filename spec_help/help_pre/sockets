@@ -1,0 +1,166 @@
+sockets                             function                             sockets
+
+NAME
+     sockets - Connect to sockets
+
+DESCRIPTION
+
+     ssppeecc user-level socket functions allow you to connect and communicate with
+     sockets created by other processes on the local platform or on a remote
+     host.  The user-level access  is through the functions ssoocckk__ggeett(()),
+     ssoocckk__ppuutt(()) and ssoocckk__ppaarr(()). (These functions were introduced in ssppeecc release
+     5.01.01, replacing the now deprecated ssoocckk__iioo(()) function.)
+
+BUILT-IN FUNCTIONS
+
+     Most of the function calls require a string in the form ""hhoosstt::ppoorrtt"" as the
+     first argument to specify the socket.  The hhoosstt can be specified by a
+     symbolic name or by an IP address.  The ppoorrtt number is assigned by the
+     process creating the socket.
+
+     ssoocckk__ggeett((""hhoosstt::ppoorrtt"")) - Reads and returns as many characters as are already
+          available.  If no characters are immediately available, waits for
+          input and returns the first character(s) that show up, or returns a
+          null string if no characters arrive before the time-out expires.  The
+          maximum number of characters that can be read at a time is this mode
+          is 8191 characters.
+
+     ssoocckk__ggeett((""hhoosstt::ppoorrtt"",, nn)) - Reads up to nn characters or until a timeout.  If
+          nn is zero, the routine reads up to a newline or the maximum of 8191
+          characters, whichever comes first.  In any case, if the read is not
+          satisfied before a timeout, the routine returns the null string.
+
+     ssoocckk__ggeett((""hhoosstt::ppoorrtt"",, eeooss)) - Reads characters until a portion of the input
+          matches the string eeooss and returns the string so obtained, including
+          the end-of-string characters.  If no match to the end-of-string
+          characters is found within the timeout period, the null string is
+          returned.
+
+     ssoocckk__ggeett((""hhoosstt::ppoorrtt"",, dd)) - Reads incoming bytes into the data array dd. The
+          size of dd determines how many bytes are to be read.  Sub-array syntax
+          can be used to limit the number of bytes.  The function returns the
+          number of array elements read, or zero if the read times out.  Note,
+          no byte re-ordering is done for short- or long-integer data, and no
+          format conversions are done for float or double data.
+
+     ssoocckk__ggeett((""hhoosstt::ppoorrtt"",, mmooddee)) - If mmooddee is the string ""bbyyttee"", reads and
+          returns one unsigned binary byte.  If mmooddee is the string ""sshhoorrtt"",
+          reads two binary bytes and returns the short integer so formed.  If
+          mmooddee is the string ""lloonngg"", reads four binary bytes and returns the
+          long integer so formed.  The last two modes work the same on both
+          bbiigg--eennddiiaann and lliittttllee--eennddiiaann platforms.  On both, the incoming data is
+          treated as bbiigg eennddiiaann. If the incoming data is lliittttllee eennddiiaann, use
+          ""sshhoorrtt__sswwaapp"" or ""lloonngg__sswwaapp"". (For ssppeecc versions prior to release
+          5.01.01, use iinntt22 for sshhoorrtt and iinntt44 for lloonngg.)
+
+     ssoocckk__ppuutt((""hhoosstt::ppoorrtt"",, ss)) - Writes the string ss to the socket described by
+          ""hhoosstt::ppoorrtt"". Returns the number of bytes written.
+
+     ssoocckk__ppuutt((""hhoosstt::ppoorrtt"",, dd [[,, ccnntt]])) - Writes the contents of the data array dd
+          to the socket described by ""hhoosstt::ppoorrtt"".  By default, the entire array
+          (or subarray, if specified) will be sent.  The optional third argument
+          ccnntt can be used to specify the number of array elements to send.  For
+          short and long integer arrays, the data will be sent using native byte
+          order.  The ""sswwaapp"" option of the aarrrraayy__oopp(()) function can be used to
+          change the byte order, if necessary.  No format conversions are
+          available for float or double data.  Returns the number of bytes
+          written.
+
+     ssoocckk__ppaarr((""??""))  - Lists the available commands.
+
+     ssoocckk__ppaarr((""sshhooww"")) - Lists the existing sockets along with additional
+          information, such as whether the socket is UDP type, whether the
+          socket is internal (as opposed to a user-level socket created by one
+          of the functions described in this document) and whether the socket is
+          set up for listening.  The command does not check whether the
+          connection is still alive.
+
+     ssoocckk__ppaarr((""iinnffoo"")) - Returns a string that contains the information displayed
+          by the ""sshhooww"" command described above.
+
+     ssoocckk__ppaarr((""hhoosstt::ppoorrtt"",, ""ccoonnnneecctt"" [[,, ""ssiilleenntt""]])) - Opens a socket to the
+          specified host and port.  Returns ttrruuee for success and ffaallssee for
+          failure.  With the ""ssiilleenntt"" option, error messages won't be shown (as
+          of ssppeecc release 6.00.02).
+
+     ssoocckk__ppaarr((""hhoosstt::ppoorrtt"",, ""ccoonnnneecctt__uuddpp"" [[,, ""ssiilleenntt""]])) - Opens a socket to the
+          specified host and port using the UDP protocol.  Returns ttrruuee for
+          success and ffaallssee for failure.  With the ""ssiilleenntt"" option, error
+          messages won't be shown (as of ssppeecc release 6.00.02).
+
+     ssoocckk__ppaarr((""hhoosstt::ppoorrtt"",, ""lliisstteenn"")) - Sets up a socket for listening, allowing
+          another instance of ssppeecc or some other program to make a connection.
+
+     ssoocckk__ppaarr((""hhoosstt::ppoorrtt"",, ""cclloossee"")) - Closes the socket associated with the
+          specified host and port.
+
+     ssoocckk__ppaarr((""hhoosstt::ppoorrtt"",, ""fflluusshh"")) - Flushes ssppeecc's input queue for the socket
+          at ""hhoosstt::ppoorrtt"". The input queue may contain characters if a ssoocckk__ggeett(())
+          times out before the read is satisfied, or if more characters arrive
+          than are requested.
+
+     ssoocckk__ppaarr((""hhoosstt::ppoorrtt"",, ""iiggnnoorree__ssiimm"" [[,, 11||00]])) - Turns iiggnnoorree--ssiimmuullaattee mode on
+          or off, or returns the current state.  When iiggnnoorree--ssiimmuullaattee mode is
+          on, the ssoocckk__ggeett(()), ssoocckk__ppuutt(()) and ssoocckk__ppaarr(()) commands will work even
+          when simulate mode is on.  Note, simulate mode must be off to create a
+          new socket connection.
+
+     ssoocckk__ppaarr((""hhoosstt::ppoorrtt"",, ""qquueeuuee"")) - Returns the number of characters in the
+          socket's input queue.  The input queue may contain characters if a
+          ssoocckk__ggeett(()) times out before the read is satisfied, or if more
+          characters arrive than are requested.
+
+     ssoocckk__ppaarr((""hhoosstt::ppoorrtt"",, ""ttiimmeeoouutt"" [[,, tt]])) - Returns or sets the read timeout
+          for the socket described by ""hhoosstt::ppoorrtt"". The units are seconds.  A
+          value of zero indicates no timeout - a ssoocckk__ggeett(()) will wait until the
+          read is satisfied or is interrupted by a ^^CC. The smallest allowed
+          value of 0.001 will cause the ssoocckk__ggeett(()) to return immediately.  A
+          negative value resets the timeout to the default of five seconds.
+
+     ssoocckk__ppaarr((""hhoosstt::ppoorrtt"",, ""nnooddeellaayy"" [[,, 11||00]])) - Returns or sets the state of the
+          TTCCPP__NNOODDEELLAAYY socket option.  Normally, the underlying TCP protocol
+          sends data along as it is made available.  However, if the previous
+          data packet has not yet received acknowledgment from the client, the
+          protocol holds onto and gathers small amounts of data into a single
+          packet which will be sent once the pending acknowledgment is received
+          or the size of the packet exceeds a threshold.  This algorithm
+          increases network efficiency.  For some clients that send a stream of
+          short packets that receive no replies, this algorithm may cause
+          unwanted delays.  Set the ""nnooddeellaayy"" option to 1 to turn off the
+          algorithm, which corresponds to setting the TTCCPP__NNOODDEELLAAYY option at the
+          system level.
+
+     All the ssoocckk__ggeett(()) calls will store leftover bytes in a queue.  Contents
+     from the queue will be returned on a subsequent ssoocckk__ggeett(()) call.  Bytes are
+     leftover if the read finishes with a timeout, if more bytes have arrived
+     than are asked for or if more bytes are available after an end-of-string
+     match.  Use the ""fflluusshh"" option of ssoocckk__ppaarr(()) to clear the input queue, if
+     needed.
+
+     To transfer binary byte streams containing null bytes, use the data-array
+     versions of ssoocckk__ggeett(()) and ssoocckk__ppuutt(()) with byte arrays.  Null bytes mark
+     the end of a normal string.
+
+     Note, the ""ccoonnnneecctt"" command isn't required to open a TCP connection, as the
+     ssoocckk__ggeett(()) and ssoocckk__ppuutt(()) functions will automatically open the connection
+     if it doesn't already exist.  The return value from the ""ccoonnnneecctt"" command,
+     however, may be useful as a test on whether a given socket can be created.
+     To create a UDP connection, however, the ""ccoonnnneecctt__uuddpp"" command must be
+     used.
+
+     Connections remain open until closed with the ""cclloossee"" option to
+     ""ssppeecc__ppaarr(())"". Sockets created at user level are not closed on a hardware
+     rreeccoonnffiigg.
+
+     The following example connects to the eecchhoo service on port 7 of the local
+     host:
+
+        SSPPEECC..11>> ssoocckk__ppuutt((""llooccaallhhoosstt::77"",, ""TThhiiss iiss aa tteesstt..\\nn""))
+
+        SSPPEECC..22>> pprriinntt ssoocckk__ggeett((""llooccaallhhoosstt::77""))
+        TThhiiss iiss aa tteesstt..
+
+SEE ALSO
+
+     _g_p_i_b _s_e_r_i_a_l
+

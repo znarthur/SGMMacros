@@ -1,0 +1,297 @@
+changes                      spec 5.03 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 5.03
+
+July 17, 2003 - RELEASE 5.03.02-1
+
+Bug Fix For IMS MDrive Motor Numbering
+     A bug in motor numbering for the IMS MDrive motors in party-line mode has
+     been fixed.  The correspondence between ssppeecc ccoonnffiigg file motor channel
+     numbers and physical motor address was intended to be channels 1, 2, ...,
+     9, 10, 11, 12, ... correspond to physical motor addresses 1, 2, ..., 9, A,
+     B, C, ...  The bug was that addresses for channels 10 and above were
+     shifted by one, so that channel 10 corresponded to address B, etc.  The bug
+     has been fixed, and the channel numbering is now as intended.  Sites that
+     have configured MDrive motor channels 10 and above should edit the ccoonnffiigg
+     file by hand or via the eeddccoonnff configuration editor and add one to those
+     MDrive motor channels before running this new ssppeecc release.
+
+July 3, 2003 - RELEASE 5.03.02
+
+New File Argument Available for aarrrraayy__dduummpp(()) and ddaattaa__dduummpp(())
+     An optional initial argument to the aarrrraayy__dduummpp(()) and ddaattaa__dduummpp(()) functions
+     can now be used to specify an output file, which makes it unnecessary to
+     use the oonn(()) and ooffff(()) functions or related macros when writing arrays (or
+     data groups) to a file.
+
+aarrrraayy__rreeaadd(()) Now Respects Array WWiissee-ness
+     The aarrrraayy__rreeaadd(()) function will now assign values read from a file by rows
+     or by columns, depending on whether the array argument is a row-wise or
+     column-wise array.  Previously, aarrrraayy__rreeaadd(()) would only assign by rows.
+     See the _a_r_r_a_y_s help file for more information.
+
+""aauuttoo__cclleeaarr"" Implemented For Additional MCAs
+     The ""aauuttoo__cclleeaarr"" option to mmccaa__ppaarr(()), which instructs ssppeecc to clear the MCA
+     prior to starting, is now implemented for additional MCA models.  The MCA
+     devices for which ""aauuttoo__cclleeaarr"" is newly implemented are the Nucleus PCA II,
+     PCA-3, Multiport and Microfast; Fast Comtec MCD; MBraun PSD-50M; Silena
+     7328 and 7329; Roentec XFlash MAX; Labo 2400; the EPICS MCA record and the
+     TACO (ESRF) MCA device server.  Local macros that explicitly clear the MCA
+     before each run should be revised to eliminate the extra overhead of
+     clearing the device twice.  Devices for which the auto-clear mode had
+     already been implemented are the XIA DXP, Ortec Trump MCA (ISA and PCI) and
+     MCS (PCI), Seiko EG&G MCA 7700 and Amptek 8000 and 8000A.  Note, the
+     ""aauuttoo__cclleeaarr"" mode is set at start up and after each hardware
+     reconfiguration.
+
+ww2211vv Geometry Update and Consolidation
+     The ww2211vv geometry has been updated to include variations for the ESRF ID10B
+     and ESRF D32 beamlines.  Also the geometry from ggeeoo__ggmmccii..cc has been folded
+     into ggeeoo__ww2211vv..cc.  The geometry names ww2211vv, iidd1100bb, ggoonniioo and ggmmccii are
+     recognized and select the different motor mnemonics and psuedomotors
+     associated with each implementation of the otherwise similar goniometers.
+     See the ggeeoo__ww2211vv..cc source file and the ww2211vv..ssrrcc macro file in the ssppeecc
+     distribution for details.
+
+Support For PMC DCX-PCI300 Motor Controller
+     ssppeecc now supports the PMC model DCX-PCI300 motor controller, a PCI-bus
+     motor controller card that can control up to eight motors.
+
+Minor Newport MM4000/4005/4006 Update
+     Possible loss of precision in communicating motor positions with the
+     Newport MM4000/4005/4006 motor controllers has been addressed.  ssppeecc now
+     uses nine-digit precision (previously it was six) when sending motor
+     positions, and rounds (rather than truncating) the lowest order digit
+     (after multiplying the user-units position by the configured step size)
+     when reading positions.  It's not expected users will notice a difference.
+
+June 12, 2003 - RELEASE 5.03.01-5
+
+SCIPE Counters-Only Support
+     The SCIPE detector device units can now be configured as either
+     counter/timers or counters only, thus allowing multiple SCIPE servers to be
+     included in the counter configuration.  (SSCCIIPPEE is a protocol for device
+     control developed at the DND CAT at the Advanced Photon Source.)
+
+June 4, 2003 - RELEASE 5.03.01-4
+
+Improved Sleeping For Short Intervals
+     The ssppeecc C code for sleep times less than ten milliseconds has been
+     revised.  On most platforms where ssppeecc is used, the system calls that allow
+     a process to sleep by releasing control of the processor have an effective
+     resolution of ten milliseconds.  Previously, ssppeecc implemented sleeps for
+     intervals smaller than 10 milliseconds only on LLiinnuuxx platforms using a
+     user-level busy-wait loop.  The revised code still uses a busy-wait loop,
+     but is a bit more accurate and is now available on all platforms, not just
+     LLiinnuuxx.  Both user-level sleeps with the sslleeeepp(()) function and built-in
+     sleeps, like those used while waiting for hardware to complete, use the new
+     code.  Note, the default hardware poll interval, set with
+     ssppeecc__ppaarr((""hhddww__ppoollll__iinntteerrvvaall"")), is ten milliseconds.  Because that is above
+     the busy-wait threshold, the sleeps may take longer due to operating system
+     latencies.  To minimize per-point dead time during scans (at the cost of
+     increasing the CPU load imposed by ssppeecc), one can set the hardware poll
+     interval to values less than the default ten milliseconds.
+
+Use Of Calculational Pseudomotors Made More Robust
+     For the calculational pseudomotors introduced in ssppeecc release 5.03.01, if
+     the __ccaallcc(()) macro function called the built-in functions wwaaiitt(()) or
+     rreeaadd__mmoottoorrss(()) either directly or indirectly through other macros, macro
+     recursion would result.  It is inappropriate for the __ccaallcc(()) macro function
+     to call those functions or any functions that cause hardware access.  Calls
+     to wwaaiitt(()) or rreeaadd__mmoottoorrss(()) from the __ccaallcc(()) macro function are now blocked,
+     and an error message will be printed when such calls are attempted.  See
+     the _m_a_c___h_d_w help file for details.
+
+Shared-Array Utility Code Now Included In the Distribution
+     The file ssppss..cc is now included in the standard distribution.  The C code in
+     that file provides functions for connecting to ssppeecc shared data arrays.
+     See the code in that file and the ssppss__ddeebbuugg target in the mmaakkee..ddiisstt file
+     for examples of how to use the interface.
+
+Support for MEN M-41 VME Counter/Timer
+     ssppeecc now supports the MEN Mikro Electronik GmbH M-Bus model M-41
+     Counter/Timer.  The current support is based on the M-41 module being
+     installed in an MEN A201S 6U VMEbus Carrier Board.  Only counting to time
+     presets is supported for this hardware.  Also, if the scale factor for the
+     time-base channel is set to 8e6 in the ccoonnffiigg file, ssppeecc will use the
+     internal time base, which allows count times up to just over 2 seconds.
+     For any other scale factor, ssppeecc will assume an external time base is
+     provided with the scale factor indicating the rate.  Maximum count times
+     are determined by how long it takes to overflow the 24-bit scaler with the
+     given time base.
+
+Update For Updated EPICS Motor Record With Encoders
+     Changes in EPICS motor record release 4.5 required modifications in ssppeecc
+     that affect use of EPICS motors with encoders.  Those modifications are
+     included in this release.
+
+Bug Fix For uunniixx(()) Function
+     A bug, apparently introduced in release 5.01.02-9, where about twenty
+     repeated calls of the uunniixx(()) function with two or more arguments inside a
+     curly bracketed loop would result in the ""OOuutt ooff tteemmppoorraarryy cceellllss"" error
+     message, has been fixed.
+
+aarrrraayy__ffiitt(()) Reenabled
+     An accidental disabling of the aarrrraayy__ffiitt(()) function in late 1996 has been
+     reversed.
+
+Bug Fix For Screw-Type ssiixxcc Geometry
+     A bug, introduced in release 5.02.03-2, which broke use of the gamma
+     pseudomotor for the screw-type six-circle configuration, has been fixed.
+
+April 17, 2003 - RELEASE 5.03.01-3
+
+EPICS and TACO ssppeecc Libraries Now Included With All Distributions
+     The ssppeecc libraries needed for the EPICS and TACO environments (lliibbEEPPIICCSS..aa
+     and lliibbEESSRRFF..aa, respectively) are now included with all ssppeecc distributions.
+
+New ""iimmmmccaatt22"" Binary Output Format
+     Another custom binary output format called ""iimmmmccaatt22"" is available for the
+     ffmmtt__wwrriittee(()) function.  Although the details of the format may be of limited
+     interest to general ssppeecc users, the method of implementing a custom output
+     format as illustrated in the ffmmtt__iimmmmccaatt..cc source file may be of didactic
+     value.
+
+Recent Bug With Near-Zero Acceleration Fixed
+     A bug, introduced in ssppeecc release 5.03.01, where an acceleration parameter
+     set with mmoottoorr__ppaarr(()) to be between zero and one could result in a floating
+     point fault and a core dump, has been fixed.
+
+Follow Up Fix On Motor Position Rounding Bug
+     The fix of an obscure motor rounding bug in ssppeecc release 5.02.03-5 had the
+     unintended consequence of sometimes causing nonzero user angles with
+     nonzero offsets to print with decimal parts on the order of 1e-9 and angles
+     at zero to print with decimal parts on the order of 1e-16.  Those artifacts
+     no longer appear.
+
+April 6, 2003 - RELEASE 5.03.01-2
+
+Fix For ffiillee__iinnffoo(()) Group Access Test
+     Previously, when testing file read, write or execute access permissions,
+     the ffiillee__iinnffoo(()) function compared only the group mode bits with the user's
+     effective group ID, but did not examine the groups to which the user could
+     belong, as configured in //eettcc//ggrroouupp.  The aacccceessss(()) system call is now used
+     to check permissions rather than the mode bits, resulting in a more
+     comprehensive group-access test.
+
+Support For the National Instruments PCI 6601/6602 Counter/Timers
+     The National Instruments PCI 6601/6602 counter/timers are now supported by
+     ssppeecc.  These cards offer four and eight 32-bit counter channels,
+     respectively.  Any channel can be designated as the preset timer.  See the
+     _n_i_6_6_0_x help file for details.
+
+Support For the Caen V260 VME Counters
+     ssppeecc now supports the Caen V260 VME counters.  This module has sixteen
+     24-bit counters.  ssppeecc will pair adjacent channels to form 48-bit counters
+     if the number of counters on the DDevices screen of the configuration editor
+     is eight or less.  Otherwise, up to 16 24-bit counters will be available.
+
+Support For the Caen V462 VME Gate Generator
+     ssppeecc now supports the Caen V462 VME gate generator as a timer.  This module
+     is not recommended due to its limitations.  Its maximum count time is only
+     ten seconds.  Also, in the event a count is interrupted with ^^CC or ssttoopp(()),
+     the module can't be reprogrammed until the current gate time has elapsed.
+     The module has two channels.  ssppeecc use channel 0 or 1 according to value in
+     the NUM column on the DDevices screen of the configuration editor.
+
+More Fixes For MDrive Motor Controller
+     The IMS MDrive 17/23/34 motor controller support has been revised yet again
+     to better handle encoders and stall detection.  To aid in tuning, the
+     following generic optional motor parameters can be set from the
+     configuration editor.  The values will be sent to the MDrive controllers as
+     follows (the corresponding MDrive command is shown in parenthesis):
+
+         Generic parameter 1 - Run current in percent (RC)
+         Generic parameter 2 - Hold current in percent (HC)
+         Generic parameter 3 - Hold current delay time in msec (HT)
+         Generic parameter 4 - Settling time in msec (MT)
+
+     Also, the standard optional motor parameter ""DDCC ffoolllloowwiinngg eerrrroorr"" can now be
+     configured.  If set, its value will be sent as the stall factor (SF
+     command).
+
+March 16, 2003 - RELEASE 5.03.01-1
+
+New Error Message When Constraints Disallow ppssiicc Angles
+     If angle cut points or a sector choice rule out the calculated angles for a
+     particular reciprocal space position for the ppssiicc geometry, ssppeecc now prints
+     out an error message.  Previously, an error value was returned by the
+     ccaallcc(()) function, but there was no error message from the C code.
+
+New Timing Options For Compumotor SX Motor Controller
+     New ""wwddeellaayy"" and ""rrddeellaayy"" options to mmoottoorr__ppaarr(()) allow configuring delays
+     before commands are sent to or replies are read from the Compumotor SX
+     motor controller.  Units for the delays are seconds.  Delays of 10 msec or
+     so appear necessary on faster computers to communicate reliably with the
+     motor controller.
+
+Adjustments For Phytron Motor Controller
+     As ssppeecc support for newer models of the Phytron motor controllers has been
+     added over the years, some commands were included that did not work with
+     older Phytron firmware.  Adjustments as to what commands are sent based on
+     firmware version have been made, and the older Phytron models now work with
+     the current ssppeecc release.
+
+Fixes For MDrive Motor Controller
+     The preliminary support for the IMS MDrive 17/23/34 motor controllers has
+     been revised to cope with incompatible updates made by IMS to the
+     controller firmware.
+
+Driver For PIO device Updated For LLiinnuuxx 2.4 Kernels
+     The ppiioo..cc driver used with the ILL 2D detector has been updated to work
+     with version 2.4 LLiinnuuxx kernels.
+
+March 16, 2003 - RELEASE 5.03.01
+
+New Macro Hardware Facility
+     A major new feature in this release of ssppeecc is macro hardware support.
+     This feature combines features of the built-in C code for motor control and
+     counter control with the flexibility of user-defined macro functions.  In
+     addition, the macro motor support has special capabilities to ease the
+     creation of calculational pseudomotors (that is, pseudomotors with
+     positions that depend on real motors).  See the _m_a_c___h_d_w help file for
+     implementation details.
+
+Better Handling Of Recalcitrant Hardware
+     When motors won't stop, the ssyynncc command will now clear ssppeecc's internal
+     busy flags for the associated controller to avoid the endless waiting for
+     the controller to indicate the motors have stopped.  The ssyynncc command will
+     now also clear the internal busy flags for non-responsive timers.  Finally,
+     ssppeecc is now also more willing to quit when busy hardware is not responding.
+
+Previous "Fix" To eeddccoonnff Step-Size Handling Reversed
+     A change made in ssppeecc release 3.02.01 (Feb 1995) to the eeddccoonnff hardware
+     configuration editor, where modifying the motor step-size parameter would
+     change the dial position parameter, but leave the motor accumulator
+     constant, has been reversed.  The dial position will now remain fixed, and
+     the motor accumulator value will be adjusted when the step-size is changed.
+     The reason for the code change is that a modification to the step size
+     seems more likely to be made in the delicate situation where a motor or
+     motor controller is replaced and the position of the motorized component
+     should remain unchanged.  The case where the motor controller position
+     register should remain constant seems less likely and less critical.  Users
+     with strong feelings otherwise, please contact CSS.
+
+New Facility to Support the ANKA RST Gamma Software
+     ssppeecc now supports yet another control system that provides an interface to
+     beamline control hardware via a unique protocol.  This system is in use at
+     the ANKA synchrotron in Karlsruhe Germany, and is an industrial control
+     software called Gamma from RST Industrie Automation GmbH.  Besides the new
+     motor and counter/timer controller types, the interface has new user-level
+     functions in ssppeecc.  The new functions are called aannkkaa__ppuutt(()), aannkkaa__ggeett(()) and
+     aannkkaa__ppaarr(()), but are only visible if the Gamma hardware or connection
+     parameters are configured.  See the _a_n_k_a help file for details.
+
+New Configuration Option For Hardware-Related ssppeecc__ppaarr(()) Options
+     Certain hardware-related ssppeecc__ppaarr(()) options can now be set in the ccoonnffiigg
+     file.  See the _s_p_e_c___p_a_r help file for syntax details.
+
+Support For Amptek Pocket MCA 8000/8000A
+     ssppeecc now supports the Amptek Pocket MCA 8000/8000A over a serial interface.
+     See the _a_m_p_t_e_k help file for details.
+
+Support For New Focus Model 87XX Picomotor Controller
+     ssppeecc now supports the New Focus Model 8750 and 8753 Picomotor controller
+     modules over a serial interface.
+

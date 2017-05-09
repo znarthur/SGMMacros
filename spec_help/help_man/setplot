@@ -1,0 +1,203 @@
+.TH "setplot" "macro" "04/16/13" "setplot.rst 6.2  04/16/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBsetplot\fP \- set plotting options
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)setplot.rst      6.2  04/16/13  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "setplot" "macro" "04/16/13" "setplot.rst 6.2  04/16/13 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBsetplot [value]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The
+\fBsetplot\fP macro asks the following questions:
+.RS 3m
+.sp
+.nf
+.ft CB
+   1) Do real\-time plots during scans (YES)?
+   2) Do screen plot after scan (YES)?
+   8) Range x axis with scan min and max (NO)?
+  16) Force y\-axis minimum to zero (NO)?
+  32) Use logarithmic y\-axis (NO)?
+  64) Use background subtraction (NO)?
+ 128) Use high resolution plotting device (YES)?
+        What kind of high\-res graphics (x11)?
+ 256) Draw large dots at points (YES)?
+ 512) Connect points with lines (YES)?
+1024) Draw error bars (YES)?
+      Sum of selections is 131.
+.ft P
+.fi
+.RE
+.sp
+The numbers before each question are added
+and printed after all options are selected.
+You can quickly select the same set of options by invoking
+\fBsetplot\fP with that number.
+.sp
+Selecting option 1 causes the otherwise null macro
+\fBscan_plot\fP to be defined as \fBrplot\fP. The
+\fBrplot\fP macro creates updated plots during scans using
+the internal plotting functions.
+.sp
+The various combinations of options 2 and 4
+are used to select a definition for the
+\fBplot\fP macro, which is invoked at the end of each scan.
+The \fBplot\fP macro will be defined to
+possibly include the macros \fBsplot\fP and \fBlp_plot\fP.
+The \fBsplot\fP macro uses the internal plotting and screen formatting functions
+to plot the current data on the screen,
+while the \fBlp_plot\fP macro uses the internal plotting functions
+to plot data on a 132\-column printer.
+In any case, the \fBplot\fP macro includes the
+\fBplot_res\fP macro, which prints out summary information from the scan.
+.sp
+Selecting option 8 forces the scan data to encompass the entire
+\fBx\fP axis.  Otherwise the
+\fBx\fP\-axis ranges are rounded out to rational numbers.
+.sp
+Option 16 forces logarithmic scaling for the \fBy\fP axis.
+.sp
+Option 32 forces the minimum for the
+\fBy\fP axis to be zero, no matter where the data points lie.
+.sp
+Option 64 selects a different method of doing the scan
+analysis.
+When this option is selected, a linear background is calculated for
+each scan using the scan endpoints.
+The number of endpoints that are averaged together is given by the global
+variable \fBbg_pts\fP (default is 1).
+The resulting linear background is subtracted from each point.
+The quantities printed out as the peak position, sum, FWHM and center of the
+FWHM are calculated after the background is subtracted.
+.sp
+Option 128 selects high\-resolution graphics mode.
+If selected, you will be prompted for the high\-resolution device
+you are using.  Recognized device names include
+\fBvga\fP, \fBega\fP, \fBherc\fP, \fBsun\fP and
+\fBx11\fP. By default, the high\-resolution plots are drawn with large dots
+around each point and lines connecting the points.
+Options 256 and 512 allow you to turn the dots and lines off.
+Also by default, error bars are drawn, with the height of each error bar
+proportional to the square root of the
+\fBy\fP values, as appropriate for counting statistics.
+Option 1024 lets you turn off error\-bar mode.
+\fBspec\fP initially uses the value of the environment variable
+\fBGTERM\fP, which can be set in your
+\fB.login\fP file, to select the type of high resolution display you are using.
+(You can, however, change
+\fBGTERM\fP while \fBspec\fP is running.
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBPL_G\fP
+\- 
+global variable holding data group used for plotting, normally zero.
+.HP 5m
+."
+\fBPL_G1\fP
+\- 
+global variable holding
+data group used to hold background\-subtracted data, normally one.
+.HP 5m
+."
+\fBPL_X\fP
+\- 
+global variable holding data element used for \fBx\fP axis, normally zero.
+.HP 5m
+."
+\fBPL_Y\fP
+\- 
+global variable holding data element used for \fBy\fP axis, normally one.
+.HP 5m
+."
+\fBsplot_col\fP
+\- 
+global variable holding string describing
+colors for end\-of\-scan plots on high\-res devices, may default to
+\fB"6:5:9:3:2"\fP, corresponding to cyan outer background,
+yellow inner background, black text, red axis and blue symbols.
+.HP 5m
+."
+\fBrplot_col\fP
+\- 
+global variable holding string describing
+colors for runtime plots on high\-res devices, may default to
+\fB"5:6:9:3:2"\fP, corresponding to yellow outer background,
+cyan inner background, black text, red axis and blue symbols.
+.HP 5m
+."
+\fBBG\fP
+\- 
+global variable holding a flag that if set, indicates
+to use the background\-subtracted data in the analysis results and
+plots produced by the \fBplot\fP macro.  It is important to make sure the
+\fBdo_bg\fP macro is called to calculate the background\-subtracted data before
+using macros such as \fBpl_FWHM\fP that look at the value of
+\fBBG\fP to determine which data group to analyze.
+The various standard definitions for the
+\fBplot\fP macro will call \fBdo_bg\fP when appropriate.
+.HP 5m
+."
+\fBPLOT_MODE\fP
+\- 
+global variable containing the code representing
+the current plotting options.
+.HP 5m
+."
+\fBbg_pts\fP
+\- 
+global variable that holds the number of
+endpoints of a scan to average together to calculate the linear background.
+.RE
+.SH "MACROS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBplot\fP
+\- 
+defined according to the selected options, and invoked
+by the scan macros to do the end\-of\-scan plotting and analysis.
+.HP 5m
+."
+\fBscan_plot\fP
+\- 
+defined either as
+\fBrplot\fP or nothing, and invoked after each point in a scan is taken
+to do the real\-time scan plotting.
+.HP 5m
+."
+\fBYMIN\fP
+\- 
+defined either as \fB"0"\fP or \fB"auto"\fP
+and determines how the \fBy\fP\-axis minimum range is set.
+.RE
+.SH "EXAMPLE"
+.rs
+.sp
+\fBsetplot 3\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%plot\fP
+\fI\%splot\fP
+\fI\%lp_plot\fP
+

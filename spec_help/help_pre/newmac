@@ -1,0 +1,26 @@
+newmac                                macro                               newmac
+
+NAME
+     nneewwmmaacc - re-read the standard macro definitions
+
+SYNOPSIS
+
+     nneewwmmaacc
+
+DESCRIPTION
+
+     This macro is used to re-read the standard macro definitions without
+     starting fresh and thus losing one's current state.  It can be used after
+     installing a new version of the macros, or if you want to recover the
+     original definitions of any standard macros you may have redefined.
+
+GLOBALS
+
+     SSPPEECCDD - the name of ssppeecc's auxiliary file directory.
+
+     SSPPEECC - the name of the current geometry, as in ffoouurrcc, zzaaxxiiss, etc.
+
+SEE ALSO
+
+     _d_o _q_d_o
+

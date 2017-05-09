@@ -1,0 +1,241 @@
+aisolutions                         hardware                         aisolutions
+
+NAME
+     AI Solutions DAQ-ATDC/NDAQ - USB acquisition module (formerly "KISIM")
+
+DESCRIPTION
+
+     The NDAQ module was originally developed by the Korean Astronomy
+     Observatory (KAO) group in collaboration with at the HANARO research
+     reactor group at the Korean Atomic Energy Research Institute (KAERI).
+     Development of the module has been taken over by the new company AI
+     Solutions, which also created the DAQ-ATDC module.  The NDAQ module
+     (formerly called KISIM) requires an external time-to-digital converter
+     (TDC), which is usually the ESRF N110 device.  The DAQ-ATDC includes TDC
+     functionality.  Both modules communicate with the ssppeecc computer over a USB
+     interface.  Both USB 1.1 and 2.0 are supported.
+
+     The modules have several modes of operation.  ssppeecc supports ssttaattiicc mode in
+     both linear and area detector configurations.  Multiple modules can be used
+     at the same time, with both 1D and 2D modes configured.  Modules can also
+     be configured with one master and several slaves, such that the master will
+     gate the slaves to run at the same time.
+
+     The data returned by the DAQ-ATDC/NDAQ modules are four-byte long integers.
+     Although the array size is configurable to 256, 512, 1024 and 2048
+     dimensions, the entire array must be received when reading the device.  No
+     area-of-interest feature is available.  Using USB 2.0, ssppeecc can read a
+     1024x1024 array in about 1.75 seconds.
+
+     In 2D mode when acquisition is active, the device returns a 256x256 preview
+     image no matter what the configured resolution.
+
+CONFIGURATION
+
+     Select the modules on the AAcquisition screen of the configuration editor:
+
+        MMCCAA--lliikkee DDEEVVIICCEE AADDDDRR <<>>MMOODDEE                                 <<>>TTYYPPEE
+         00  YYEESS           22            AAII SSoolluuttiioonnss DDAAQQ--AATTDDCC//NNDDAAQQ 11DD ((UUSSBB))
+         00  YYEESS           33        AAII SSoolluuttiioonnss DDAAQQ--AATTDDCC ((mmaasstteerr)) 11DD ((UUSSBB))
+         00  YYEESS           44         AAII SSoolluuttiioonnss DDAAQQ--AATTDDCC ((ssllaavvee)) 11DD ((UUSSBB))
+
+        CCCCDD--lliikkee DDEEVVIICCEE AADDDDRR <<>>MMOODDEE                                 <<>>TTYYPPEE
+         00  YYEESS           55            AAII SSoolluuttiioonnss DDAAQQ--AATTDDCC//NNDDAAQQ 22DD ((UUSSBB))
+         00  YYEESS           66        AAII SSoolluuttiioonnss DDAAQQ--AATTDDCC ((mmaasstteerr)) 22DD ((UUSSBB))
+         00  YYEESS           77         AAII SSoolluuttiioonnss DDAAQQ--AATTDDCC ((ssllaavvee)) 22DD ((UUSSBB))
+
+     The value in the AADDDDRR field should match the device ID configured for the
+     particular DAQ-ATDC/NDAQ module.  Valid IDs are from 1 to 99.  Although the
+     devices IDs are programmable, they must be set outside of ssppeecc by the
+     manufacturer or by software provided by the manufacturer.
+
+     When used in master-slave (or synchronized-start) mode, the modules are to
+     be connected such that one module (the master) gates others (the slaves).
+     There can be only one master, but there is no limit on the number of
+     slaves.
+
+     Other than the limitation that there can only be one master, the other
+     configuration options can be freely mixed in the same set up.
+
+FUNCTIONS
+
+     When configured as a 1D MCA-type device, the DAQ-ATDC/NDAQ is controlled by
+     ssppeecc's MCA functions, such as mmccaa__ggeett(()) and mmccaa__ppaarr(()).  See the _m_c_a help
+     file for details.  When configured as 2D device, the DAQ-ATDC/NDAQ is
+     controlled by ssppeecc's image functions, iimmaaggee__ggeett(()) and iimmaaggee__ppaarr(()).
+
+     The mmccaa__ggeett(()) (or mmccaa__ssggeett(())) and iimmaaggee__ggeett(()) functions retrieve data from
+     the DAQ-ATDC/NDAQ module.  The mmccaa__ppaarr(()) (or mmccaa__ssppaarr(())) and iimmaaggee__ppaarr(())
+     functions control the module behavior as follows.  The sseell parameter is the
+     MCA- or image-device number from the ccoonnffiigg file.  The functions mmccaa__ggeett(())
+     and mmccaa__ppaarr(()) use the currently selected MCA device chosen by the mmccaa__sseell(())
+     function.
+
+     mmccaa__ggeett((aarrrr)), mmccaa__ssggeett((sseell,, aarrrr)), iimmaaggee__ggeett((sseell,, aarrrr)) - Reads data into the
+          array aarrrr. The native data type is uulloonngg.  In image mode, when
+          acquisition is active, the device returns a 256x256 preview image.
+          However, iimmaaggee__ggeett(()) must still be called with an array dimensioned to
+          the full resolution of the device.  ssppeecc will place the preview image
+          in the first 256 columns and rows of the array.
+
+     mmccaa__ppaarr((""rreesseett"")), mmccaa__ssppaarr((sseell,, ""rreesseett"")), iimmaaggee__ppaarr((sseell,, ""rreesseett"")) - Resets
+          the USB endpoints and the DSP.  Note, the modules are always reset
+          during hardware initialization at start up and on a rreeccoonnffiigg.  This
+          command shouldn't be needed during normal operation.
+
+     mmccaa__ppaarr((""mmiirrrroorr"")), mmccaa__ssppaarr((sseell,, ""mmiirrrroorr"")), iimmaaggee__ppaarr((sseell,, ""mmiirrrroorr"")) -
+          Returns one or zero, depending on whether mmiirrrroorr mode is set.
+
+     mmccaa__ppaarr((""mmiirrrroorr"",, vvaalluuee)), mmccaa__ssppaarr((sseell,, ""mmiirrrroorr"",, vvaalluuee)), iimmaaggee__ppaarr((sseell,,
+          ""mmiirrrroorr"",, vvaalluuee)) - Turns mmiirrrroorr mode on or off depending on whether
+          vvaalluuee is nonzero or zero.  MMiirrrroorr mode is only available in
+          ssyynncchhrroonniizzeedd-start mode when one module is configured as master and
+          others as slaves.  In mirror mode, the slave modules are programmed
+          with the same acquisition parameters as the master, and the slave
+          presets are set to zero, which means the slaves will count as long as
+          gated by the synchronization signal from the master.
+
+     mmccaa__ppaarr((""uuppddaattee"")), mmccaa__ssppaarr((sseell,, ""uuppddaattee"")), iimmaaggee__ppaarr((sseell,, ""uuddppaattee"")) -
+          Updating the parameters on the DAQ-ATDC modules (not the NDAQ) takes a
+          couple of seconds.  For maximum efficiency, ssppeecc only writes the
+          parameters if one or more have changed.  The parameters will be
+          updated to the module, if necessary, before the modules are started.
+          To avoid a delay when starting the modules, the ""uuppddaattee"" option can be
+          sent to ensure the parameters are current.  If operating in
+          synchronized-start mode and the ""mmiirrrroorr"" parameter is set, the slave
+          modules will be updated with the same operating parameters as the
+          master.
+
+     mmccaa__ppaarr((""cclleeaarr"")), mmccaa__ssppaarr((sseell,, ""cclleeaarr"")), iimmaaggee__ppaarr((sseell,, ""cclleeaarr"")) - Clears
+          the current data.  If operating in synchronized-start mode with master
+          and slaves, if called for the master, the slaves will be cleared also.
+
+     mmccaa__ppaarr((""rruunn"")), mmccaa__ssppaarr((sseell,, ""rruunn"")), iimmaaggee__ppaarr((sseell,, ""rruunn"")) - Starts data
+          collection.  If operating in synchronized-start mode with master and
+          slaves, if called for the master, the slaves will be started also.  In
+          addition, if auto-clear (clear-on-start) mode is enabled, data on both
+          master and slaves will be cleared.
+
+     mmccaa__ppaarr((""hhaalltt"")), mmccaa__ssppaarr((sseell,, ""hhaalltt"")), iimmaaggee__ppaarr((sseell,, ""hhaalltt"")) - Halts data
+          collection.
+
+     mmccaa__ppaarr((""nnppttss"")), mmccaa__ssppaarr((sseell,, ""nnppttss"")) - Returns the current number of
+          points in 1D configuration.
+
+     mmccaa__ppaarr((""nnppttss"",, vvaalluuee)), mmccaa__ssppaarr((sseell,, ""nnppttss"",, vvaalluuee)) - Sets number of
+          points in 1D configuration.  Legal values for the parameter are 256,
+          512, 1024 and 2048.
+
+     iimmaaggee__ppaarr((sseell,, ""rreessoolluuttiioonn"")) - Returns the the current resolution value in
+          2D configuration.
+
+     iimmaaggee__ppaarr((sseell,, ""rreessoolluuttiioonn"",, vvaalluuee)) - Sets resolution in 2D configuration.
+          Legal values for the parameter are 256, 512, 1024 and 2048.
+
+     iimmaaggee__ppaarr((sseell,, ""bbiittss"")) - Returns the current value of the iimmaaggee bbiittss
+          parameter.
+
+     iimmaaggee__ppaarr((sseell,, ""bbiittss"",, vvaalluuee)) - Sets the iimmaaggee bbiittss parameter.  This
+          parameter is used to reduce the number of bits in the raw data
+          arriving from the TDC input.  A value of 12 results in a 4096x4096
+          array, a value of 11 results in a 2048x2048 array, and so on.
+
+     mmccaa__ppaarr((""pprreesseett__mmooddee"")), mmccaa__ssppaarr((sseell,, ""pprreesseett__mmooddee"")), iimmaaggee__ppaarr((sseell,,
+          ""pprreesseett__mmooddee"")) - Returns ""ccoouunnttss"" or ""ttiimmee"" according to the current
+          preset mode.
+
+     mmccaa__ppaarr((""pprreesseett__mmooddee"",, vvaalluuee)), mmccaa__ssppaarr((sseell,, ""pprreesseett__mmooddee"",, vvaalluuee)),
+          iimmaaggee__ppaarr((sseell,, ""pprreesseett__mmooddee"",, vvaalluuee)) - Sets the preset mode to time if
+          vvaalluuee is the string ""ttiimmee"" or has the number value of zero.  Sets the
+          preset mode to counts if vvaalluuee is the string ""ccoouunnttss"" or has a nonzero
+          number value.
+
+     mmccaa__ppaarr((""pprreesseett"")), mmccaa__ssppaarr((sseell,, ""pprreesseett"")), iimmaaggee__ppaarr((sseell,, ""pprreesseett"")) -
+          Returns the current preset value.  The value is in seconds if the
+          current preset mode is ""ttiimmee"" or counts if the current preset mode is
+          ""ccoouunnttss"".
+
+     mmccaa__ppaarr((""pprreesseett"",, vvaalluuee)), mmccaa__ssppaarr((sseell,, ""pprreesseett"",, vvaalluuee)), iimmaaggee__ppaarr((sseell,,
+          ""pprreesseett"",, vvaalluuee)) - Set the preset value to the specified number of
+          seconds if the current preset mode is ""ttiimmee"" or to the specified
+          number of counts if the current preset mode is ""ccoouunnttss"".
+
+     mmccaa__ppaarr((""eellaappsseedd__ttiimmee"")), mmccaa__ssppaarr((sseell,, ""eellaappsseedd__ttiimmee"")), iimmaaggee__ppaarr((sseell,,
+          ""eellaappsseedd__ttiimmee"")) - Returns the elapsed time in seconds of the most
+          recent data acquisition.  The command can be used while acquisition is
+          in progress.
+
+     mmccaa__ppaarr((""eellaappsseedd__ccoouunnttss"")), mmccaa__ssppaarr((sseell,, ""eellaappsseedd__ccoouunnttss"")), iimmaaggee__ppaarr((sseell,,
+          ""eellaappsseedd__ccoouunnttss"")) - Returns the elapsed counts of the most recent data
+          acquisition.  The command can be used while acquisition is in
+          progress.
+
+     mmccaa__ppaarr((""ooffffsseett__xx"")), mmccaa__ppaarr((sseell,, ""ooffffsseett__xx"")), iimmaaggee__ppaarr((sseell,, ""ooffffsseett__xx""))""
+          - Returns the xx--ooffffsseett parameter for the ATDC module.
+
+     mmccaa__ppaarr((""ooffffsseett__xx"",, vvaalluuee)), mmccaa__ssppaarr((sseell,, ""ooffffsseett__xx"",, vvaalluuee)),
+          iimmaaggee__ppaarr((sseell,, ""ooffffsseett__xx"",, vvaalluuee)) - Sets the xx--ooffffsseett parameter for
+          the ATDC module to vvaalluuee.
+
+     iimmaaggee__ppaarr((sseell,, ""ooffffsseett__yy"")) - Returns the yy--ooffffsseett parameter for the ATDC
+          module, which is only useful in 2D mode.
+
+     iimmaaggee__ppaarr((sseell,, ""ooffffsseett__yy"",, vvaalluuee)) - Sets the yy--ooffffsseett parameter for the
+          ATDC module to vvaalluuee, which is only useful in 2D mode.
+
+     mmccaa__ppaarr((""bbiinn__ttiimmee"")), mmccaa__ppaarr((sseell,, ""bbiinn__ttiimmee"")), iimmaaggee__ppaarr((sseell,, ""bbiinn__ttiimmee"")) -
+          Returns the ATDC bin time in picoseconds.
+
+     mmccaa__ppaarr((""bbiinn__ttiimmee"",, vvaalluuee)), mmccaa__ssppaarr((sseell,, ""bbiinn__ttiimmee"",, vvaalluuee)),
+          iimmaaggee__ppaarr((sseell,, ""bbiinn__ttiimmee"",, vvaalluuee)) - Sets the ATDC bin time to vvaalluuee.
+          Allowed values are 110, 120, 130, 140 and 150.  ssppeecc will choose the
+          value closest to the value passed as an argument.
+
+     mmccaa__ppaarr((""ggaattee"")), mmccaa__ppaarr((sseell,, ""ggaattee"")), iimmaaggee__ppaarr((sseell,, ""ggaattee"")) - Returns the
+          gate value for the ATDC module in nanoseconds.
+
+     mmccaa__ppaarr((""ggaattee"",, vvaalluuee)), mmccaa__ssppaarr((sseell,, ""ggaattee"",, vvaalluuee)), iimmaaggee__ppaarr((sseell,,
+          ""ggaattee"",, vvaalluuee)) - Sets the ATDC gate to vvaalluuee, with units of
+          nanoseconds.  The valid range is from 100 to 500.
+
+     mmccaa__ppaarr((""eemmuullaattiioonn"")), mmccaa__ssppaarr((sseell,, ""eemmuullaattiioonn"")), iimmaaggee__ppaarr((sseell,,
+          ""eemmuullaattiioonn"")) - Returns zero or one to indicate whether emulation mode
+          is on.  In emulation mode, the DAQ-ATDC/NDAQ module generates an
+          artificial data set.
+
+     mmccaa__ppaarr((""eemmuullaattiioonn"",, vvaalluuee)), mmccaa__ssppaarr((sseell,, ""eemmuullaattiioonn"",, vvaalluuee)),
+          iimmaaggee__ppaarr((sseell,, ""eemmuullaattiioonn"",, vvaalluuee)) - Sets emulation mode on or off
+          according to whether the argument is nonzero or zero.
+
+     mmccaa__ppaarr((""dduummpp"")), mmccaa__ssppaarr((sseell,, ""dduummpp"")), iimmaaggee__ppaarr((sseell,, ""dduummpp"")) - Displays
+          most of the DAQ-ATDC/NDAQ parameters.  This command can be used while
+          acquisition is in progress.
+
+USAGE
+
+     The following example shows how to take data in 2D mode and display the
+     data using the 2D display program oonnzzee from the ESRF (and downloadable at
+     _c_e_r_t_i_f_._c_o_m_/_d_o_w_n_l_o_a_d_s_/_e_x_t_r_a_s_/_o_n_z_e .
+
+        {{
+            sshhaarreedd uulloonngg aarrrraayy ddaattaa[[11002244]][[11002244]]
+
+            iimmaaggee__ppaarr((00,, ""rreessoolluuttiioonn"",, 11002244))
+            iimmaaggee__ppaarr((00,, ""pprreesseett__mmooddee"",, ""ttiimmee""))
+            iimmaaggee__ppaarr((00,, ""pprreesseett"",, 1100))
+            iimmaaggee__ppaarr((00,, ""rruunn""))
+            wwaaiitt(())
+            iimmaaggee__ggeett((00,, ddaattaa))
+        }}
+
+     To display the data, from a shell run oonnzzee &&.  After ssppeecc starts and the
+     shared data array has been created, go to the oonnzzee file menu and choose
+     "open spec", then click on the name of the shared array.
+
+SEE ALSO
+
+     _m_c_a
+     _w_w_w_._a_i_s_o_l_u_t_i_o_n_s_._c_o_._k_r
+     _h_t_t_p_:_/_/_w_w_w_._e_s_r_f_._e_u_/_I_n_f_r_a_s_t_r_u_c_t_u_r_e_/_C_o_m_p_u_t_i_n_g_/_E_l_e_c_t_r_o_n_i_c_s
+     _c_e_r_t_i_f_._c_o_m_/_d_o_w_n_l_o_a_d_s_/_e_x_t_r_a_s_/_o_n_z_e
+

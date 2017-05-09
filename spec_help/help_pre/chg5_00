@@ -1,0 +1,446 @@
+changes                      spec 5.00 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 5.00
+
+September 4, 2001 - RELEASE 5.00.04-8
+
+DAC-Motor Bug Fix
+     A bug introduced with ssppeecc release 5 that caused a segmentation fault when
+     DAC motors were configured has been fixed.
+
+August 15, 2001 - RELEASE 5.00.04-7
+
+Support for Mclennan PM600 Motor Controller
+     This ssppeecc release includes preliminary support for the Mclennan PM600 motor
+     controller.
+
+August 14, 2001 - RELEASE 5.00.04-6
+
+Fix For SBS (Bit 3) VME On LLiinnuuxx
+     A problem, where an unexpected new ""ffeeaattuurree"" in the revision 1.0 SBS Model
+     1003 driver for LLiinnuuxx prevented ssppeecc from working properly with A32 devices
+     has been fixed.
+
+August 7, 2001 - RELEASE 5.00.04-5
+
+Revised ffiivveecc and ssiixxcc Geometry Code
+     The ssiixxcc geometry code has been revised to use the current ssppeecc conventions
+     of returning an error rather than resetting to command level when a
+     calculation fails.  Also, cut points are now available for all geometry
+     motors.  The ffiivveecc geometry code has been revised quite a bit to use
+     algebra equivalent to that used in the ssiixxcc calculations.  The revisions do
+     appear to affect the angles calculated for the motors, which brings in to
+     question whether the previous calculations were completely correct.  Also,
+     the ffiivveecc implementation now allows two mirror-image configurations, just
+     as in the ssiixxcc implementation.  The sseettccoonnffiigg macro selects the
+     configuration.
+
+Now possible To Use NI ENET-GPIB With GPIB PC Cards
+     It is now possible to use the National Instruments ENET-GPIB simultaneously
+     with the NI AT-GPIB and/or PCI-GPIB cards.  The method involves a bit of a
+     hack to get around the name-space conflict that otherwise occurs.  See the
+     new mmaakkeeCCIIBB file in the ssppeecc distribution for hacking details.
+
+July 31, 2001 - RELEASE 5.00.04-4
+
+Fixes For EPICS MCA Record Support
+     CSS's first opportunity for testing the three-year-old ssppeecc support for the
+     EPICS MCA record with real hardware revealed several coding bugs, which are
+     now fixed.  CSS looks forward to comments from any users of this code.
+
+July 29, 2001 - RELEASE 5.00.04-3
+
+Support For Mclennan PM381 Multiplexor
+     This ssppeecc release includes preliminary support for the Mclennan PM381
+     multiplexor.  When the user requests moves by multiple motors connected to
+     the multiplexor, ssppeecc automatically sends commands to move each motor in
+     turn.
+
+July 26, 2001 - RELEASE 5.00.04-2
+
+SBS (Bit 3) VME On LLiinnuuxx Requires New SBS Driver
+     This release of ssppeecc requires the new revision 1.0 of the SBS Model 1003
+     (non-beta) driver when using the SBS Models 616, 617, 618 and 620
+     PCI-to-VME adapters.  The earlier beta releases of the driver are
+     incompatible with the new driver.
+
+SBS (Bit 3) VME Support Updated
+     ssppeecc's support for the SBS (Bit 3) VME drivers and adapters for Sun, HP and
+     Linux platforms has been updated.
+
+eeddccoonnff Update
+     The eeddccoonnff configuration editor now asks for confirmation when inserting a
+     motor using the ii command.
+
+Fix For Kappa-Mode wwhh Display
+     A bug in the ffoouurrcc and ffiivveecc kappa-mode geometries, where the motors
+     displayed with wwhh and similar macros showed non-geometry motors under
+     certain conditions, has been fixed.
+
+July 19, 2001 - RELEASE 5.00.04-1
+
+Internal Updates
+     This release includes internal code reorganization that should have no
+     impact on function or behavior.
+
+June 24, 2001 - RELEASE 5.00.04
+
+String Array Enhancements
+     The functions aarrrraayy__pplloott(()), aarrrraayy__ppiippee(()) and aarrrraayy__dduummpp(()) can now take
+     string-type data arrays as arguments.  For these functions, each byte of
+     the string array will be treated as a signed eight-bit integer.  Also, the
+     pprriinntt command now translates unprintable bytes in a string-type data array
+     to backslash-escaped strings.  Previously, the raw bytes were output, which
+     could corrupt the text display.
+
+Kappa Support Added To ffiivveecc Geometry
+     The five-circle geometry (ffiivveecc) now includes support for the kkaappppaa
+     configuration of the diffractometer.  The implementation is similar to the
+     kkaappppaa variations for the ffoouurrcc and ppssiicc geometries.
+
+New Option For eeppiiccss__ggeett(())
+     The eeppiiccss__ggeett(()) function can now take an optional third argument to specify
+     the number of elements to read into the array named by the second argument.
+     Previously, if the second argument was an array, and the EPICS process
+     variable was an array type, ssppeecc would transfer the entire array.
+
+Consistency Fix For ppssiicc Macros
+     The order of the geometry motor arguments for the ccuuttss macro had the nnuu and
+     mmuu motors in reverse order from the convention used elsewhere in the ppssiicc
+     macros.  The order is now consistently nnuu, then mmuu.
+
+Small Fix For Energy Macros
+     The code in the eenneerrggyy..mmaacc macros has been changed to be more precise with
+     respect to decoding the monochromator type from the motor mnemonics.
+     Previously, having both a mmoonnoo and mmoonnuu mnemonic with a single-motor
+     monochromator would cause errors.
+
+Support For Mclennan PM301 Motor Controllers
+     This ssppeecc release includes preliminary support for the Mclennan PM301 motor
+     controller.
+
+Fix For XIA DXP Real-Time Value
+     This version corrects an error in the recently added support for the XIA
+     DXP 4C2X module.  The factor-of-two error in the values returned for the
+     ""rreeaall"" and ""ddeeaadd"" arguments to the mmccaa__ppaarr(()) function has been fixed.
+
+Bug Fix For Multiple OMS PCI Cards
+     A bug in the new code to support the OMS PCI motor controller card, where
+     only one card could be detected, has been fixed.
+
+June 1, 2001 - RELEASE 5.00.03-4
+
+Retry Added For NI GPIB "Not CIC" Error
+     ssppeecc will now automatically perform one retry of operations which were
+     unsuccessful due to a ""nnoott CCIICC"" (not controller-in-charge) error for
+     National Instruments GPIB controllers.  These errors occur mainly when a
+     second process initializes a connection to the GPIB-ENET (ethernet)
+     controller.  Previous behavior on this error was for functions such as
+     ggppiibb__ggeett(()) or ggppiibb__ppuutt(()) to return -1 on the first try after getting a ""nnoott
+     CCIICC"" error.
+
+Several Memory Errors Fixed
+     Several minor memory access errors uncovered using third-party memory
+     consistency testing software have been fixed.  These errors are not known
+     to be associated with any observed ssppeecc failures.  The memory access
+     problems occurred during initialization of the data group storage, display
+     of help files, removal of ccddeeff-type macros and initialization of the VDL
+     ESRF counter parameters saved in the state file.
+
+Fix For Help Pager Options
+     An error, where the command line the standard macros assigned to the PPAAGGEERR
+     variable previously included the --ww flag for versions of the lleessss utility
+     greater than 337, has been corrected.  That option caused the first line of
+     text after a scroll or new page to be highlighted.
+
+ESRF CCD Updates
+     This release includes updates to the ESRF CCD support
+
+May 17, 2001 - RELEASE 5.00.03-3
+
+Bug Fix For Associative Array Scope Declarations
+     A bug, where in a scope statement such as
+
+        gglloobbaall  tt11[[]],, tt22[[]],, tt33[[]]
+
+     that has a list of names that explicitly designates associative array type
+     and only the last name in the series would be made global, has been fixed.
+     The bug also affected such a list following the llooccaall keyword.
+
+May 16, 2001 - RELEASE 5.00.03-2
+
+Bug Fix For eevvaall(()) Execution
+     A bug with the evaluation of the commands in an eevvaall(()) string has been
+     fixed.  The problem occurred in the case where the eevvaall(()) argument
+     contained a curly-bracket delimited statement block that included a macro
+     function that did not use an explicit rreettuurrnn.  If that macro function was
+     followed by additional statements in the statement block, those subsequent
+     statements didn't get executed.
+
+Bug Fix For eevvaall(()) Return Values
+     A bug with the return value of the eevvaall(()) function has been fixed.  In the
+     case where the eevvaall(()) argument was a macro function, eevvaall(()) did not return
+     the macro function return value.
+
+Bug Fix For Long Strings
+     A bug in the ssppeecc release 5 rewritten lexical analyzer, where input strings
+     longer than 8K (such as a very long macro definition) might cause a
+     segmentation fault, has been fixed.
+
+Bug Fix For pprrddeeff Of Long Macros
+     A bug from release 5.00.03, where pprrddeeff with a macro larger than 8K would
+     cause a segmentation fault, has been fixed.
+
+Bug Fix For OMS PC58
+     A bug, where the ccoonnffiigg file information for the Oregon Micro Systems model
+     PC58 motor controller could not be read, has been fixed.
+
+Bug Fix For ACS SPI-8 Fix
+     The fix in ssppeecc release 4.05.10-9 to send the command to enable limit
+     switches had the wrong start character in the command string.  The correct
+     start character is now sent.
+
+May 8, 2001 - RELEASE 5.00.03-1
+
+Initial Support For Delta-Tau PMAC Motor Controller
+     This release of ssppeecc contains preliminary support for the Delta-Tau PMAC
+     motor controller.
+
+More Fixes For ACS SPI-8
+     The code for the Advanced Control Systems SPI-8 motor controller does
+     better checking on whether replies from the controller are formatted
+     properly.  ssppeecc also now has a provision for adding small delays during
+     communication with the controller using the mmoottoorr__ppaarr(()) function.  The
+     commands ""mmddeellaayy"", ""wwddeellaayy"" and ""rrddeellaayy"" are used to set delays after
+     sending the move command, before writing a message and before reading a
+     reply, respectively.  The default value for ""mmddeellaayy"" is 0.1 sec, while the
+     default values for ""wwddeellaayy"" and ""rrddeellaayy"" are zero.  The values for the
+     delays apply to all motor channels associated with all SPI-8 controllers.
+
+April 10, 2001 - RELEASE 5.00.03
+
+New ggeettssvvaall(()) Function
+     A new ggeettssvvaall(()) function is available.  This function has the same syntax
+     as the existing ggeettvvaall(()), but unlike ggeettvvaall(()), which converts octal or
+     hexadecimal input (number strings that begin with 0, 0x or 0X) to the
+     corresponding decimal value, the ggeettssvvaall(()) function returns the literal
+     string as entered.
+
+Standard Macros Now Use ggeettssvvaall(()) Where Appropriate
+     The standard macros have been modified to use the new ggeettssvvaall(()) function
+     where appropriate, such as for entering file names.  Also, all instances of
+     the obsolete ggeettvvaarr macro have been replaced with ggeettvvaall(()) or ggeettssvvaall(()).
+
+New cclloonnee(()) Function
+     A new function named cclloonnee(()) is available to duplicate an existing object.
+     It currently only works for macros.  Also, currently a clone of a ccddeeff
+     chained macro becomes an ordinary macro.  Usage is cclloonnee((ddeesstt,, ssrrcc))..
+
+Fix For Signal Handling
+     Signal handling in ssppeecc has undergone many changes over the history of the
+     program, as the type of hardware has changed from mostly interrupt-driven
+     to mainly polled, and also as the kernel system calls for handling signals
+     have evolved.  Somewhere during these changes, the signal blocking ssppeecc did
+     during certain critical code got broke.  In particular, typing a ^^CC to
+     abort motors with some GPIB motor controllers would cause the controller to
+     hang.  This version restores proper signal blocking and the problems with
+     ^^CC should be improved.
+
+Fix For Single Array Element In Binary Array Operations
+     When two data arrays of different dimension are subject to a binary
+     operator, ssppeecc performs the operation on the elements the arrays have in
+     common.  That has been true even when one of the arrays was only a single
+     element.  With this release, an array or subarray of only one element is
+     treated as a scaler when used with a binary operator and another array.
+
+Release 4 State Files Readable
+     This version of ssppeecc Release 5 can now handle state files from Release 4.
+     Previous versions would force a fresh start.  A fresh start is normally
+     recommended, though, in order to read in the new standard macro files.
+
+Better Memory Accounting
+     The memory accounting displayed with the mmeemmssttaatt command has been adjusted
+     to better take into account the overhead used by the C library mmaalllloocc(())
+     routines.  Note, though, ssppeecc still cannot account for every byte used as
+     overhead by the C library functions, but this release does appear to do a
+     better job at estimating.
+
+Support for OMS PCIx Motor Controller
+     ssppeecc now supports the Oregon Micro Systems PCIx motor controller.  Up to
+     eight of these four-motor cards can be used with a PCI bus computer
+     (currently on lliinnuuxx only).
+
+Support For Oriel 18133
+     ssppeecc now has a configuration option for the Oriel 18133 Encoder Mike
+     Controllers over a PC board (ISA) interface.
+
+Fix For ACS SPI-8
+     The Advanced Control System SPI-8 motor controller has the limit switches
+     disabled by default, and previously ssppeecc did not send a command to enable
+     the limits.  ssppeecc now does send the LLEE command during hardware
+     initialization to enable limits.  The mmoottoorr__ppaarr(()) option ""nnoolliimmiittss"" with
+     argument of 0 or 1 will enable or disable limits, respectively, for a
+     particular motor.
+
+March 1, 2001 - RELEASE 5.00.02-4-BETA
+
+New Version Of XIA DXP Vendor Code Required
+     ssppeecc must now be linked with the new version of the XIA vendor libraries to
+     use their DXP digital MCA CAMAC models.  However, both the older 4C and the
+     newer 4C2X models are supported.  See the _d_x_p help file for details.
+
+Preliminary Support For CAMAC Technoland C-KP 402 Counter
+     Initial support for the Techonoland Model C-KP-402 fast 8-channel 48-bit
+     CAMAC counter module is included in this ssppeecc release.
+
+February 21, 2001 - RELEASE 5.00.02-3-BETA
+
+Old Bug with ESRF TACO MAXE Fixed
+     An old bug in the code for the ESRF TACO MAXE device server, where a
+     DEVFAULT state in the server would cause ssppeecc to core dump or exhibit other
+     anomalous behavior, has been fixed.
+
+MURR Motor Controller Support Expanded
+     The code to support the motor controllers built and used at the University
+     of Missouri Research Reactor (MURR) has been updated to work with very old
+     versions of the motor controller (prior to firmware release 2.30).
+
+February 16, 2001 - RELEASE 5.00.02-2-BETA
+
+Renamed Global Symbol In pplloottaarrrraayy..mmaacc
+     The ""llaasstt--ddaattaa--ppooiinntt"" symbol in the macro file pplloottaarrrraayy..mmaacc is back to
+     being named LLDDTT from its short-lived name LLDDPP.  This change is to avoid
+     headaches at ESRF, where the symbol has been named LLDDTT for the last several
+     years.  This value of this symbol is the index of the current data point of
+     the current scan in the scan data array SSCCAANN__DD.  See the pplloottaarrrraayy..mmaacc file
+     for details.
+
+February 13, 2001 - RELEASE 5.00.02-1-BETA
+
+Sub-Array Fix For VME and Image Functions
+     ssppeecc now handles all sub-arrays properly for the vvmmee__mmoovvee(()), iimmaaggee__ggeett(())
+     and iimmaaggee__ppuutt(()) built-in functions.  Previously, certain subarrys, such as
+     a complete row that wasn't the first row, would be interpreted as the first
+     row.
+
+Crash On Usage Errors Fixed
+     A bug in the initial Release 5 distribution, where using the wrong number
+     of arguments in a built-in ssppeecc function resulted in a segmentation fault
+     rather than a usage message, has been fixed.
+
+Fix For Updating Accelerations Parameters
+     An old bug, where ssppeecc did not send a new acceleration parameter to a motor
+     controller when the motor speed was changed using mmoottoorr__ppaarr(()) for motor
+     controllers where the acceleration parameter is a function of the motor
+     speed, has been fixed.
+
+Fix For ACS SPI-8 Motor Controller
+     A bug, where the acceleration parameter sent to the Advanced Control System
+     Model SPI-8 motor controller was not calculated correctly, has been fixed.
+
+Delays Available For MM-3000 Motor Controller
+     The mmoottoorr__ppaarr(()) options ""wwddeellaayy"" and ""rrddeellaayy"" are now available for the
+     Newport MM-3000 motor controllers.  The values for each specify delay times
+     to insert before sending and reading messages, respectively.  Presently,
+     they are only used with the GPIB interface.  On fast PCs, the communication
+     is too fast for the motor controller to keep up.
+
+RELEASE 5
+
+     Welcome to the first installment of ssppeecc Release 5.  Most of the
+     modifications for this first release are internal and won't be visible to
+     the user.  These changes are to accommodate new features - most are still
+     under development, though.  Some of the changes, however, are currently
+     usable.
+
+     One powerful new feature now available is the eevvaall(()) function.  This
+     function parses and executes its string argument, and can be used within an
+     executing statement block.  Calls of eevvaall(()) can even be nested.  This
+     function opens up many possibilities for new and interesting macros.
+
+     One feature for which the ground work has been laid, but is not quite ready
+     for general use, is the built-in PPyytthhoonn interpreter.  PPyytthhoonn is an
+     interpretive language with a relatively clean syntax and many capabilities,
+     including some that should eventually allow ssppeecc to work with a tightly
+     coupled graphic user interface (for those users who want such a thing).
+     See _w_w_w_._p_y_t_h_o_n_._o_r_g for Python information.
+
+     Another feature still in the works is ssppeecc server mode.  This mode of
+     operation will allow ssppeecc to function as a pure hardware controller, with
+     other instances of ssppeecc or other software programs running as clients.
+
+February 1, 2001 - RELEASE 5.00.02-Beta
+
+INTRODUCTION
+New eevvaall(()) Function
+     The new eevvaall(()) function takes as argument a string which contains input for
+     the ssppeecc parser.  The string is parsed and executed.  If the string is an
+     expression, its value is returned.  If the string is a statement or
+     statement list, ttrruuee (nonzero) is returned if there were no errors
+     executing the statement(s) and ffaallssee (zero) is returned if there was an
+     error.  Note, errors encountered during execution of the eevvaall(()) string do
+     not reset ssppeecc to the command level.  Instead, the errors simply cause
+     eevvaall(()) to return an error, allowing execution of the calling statement
+     block to continue.
+
+Switch To C-Library mmaalllloocc(())
+     ssppeecc continually allocates and frees memory - usually in small amounts -
+     while collecting and parsing input and while executing commands.
+     Historically, ssppeecc used its own memory allocation routine, as early C
+     library implementations would lead to excessive memory fragmentation.  The
+     C library allocation routines are much better these days (particularly, the
+     GNU mmaalllloocc(()) routines), and release 5 of ssppeecc now uses those.
+
+     As a result of the switch in memory allocation, the format of the
+     information printed by the mmeemmssttaatt built-in command has changed.  ssppeecc
+     still keeps track of how it is allocating memory in categories such as
+     parse tree, symbols, macros, etc., but the total allocation statistics are
+     now obtained from the C library.  In particular, a ""nnoott ttrraacckkeedd"" value
+     counts memory allocated by non-ssppeecc code linked with ssppeecc, such as C
+     library functions or other vendor libraries.
+
+     On lliinnuuxx platforms, the C library memory allocation has the great advantage
+     that requests for big chunks of memory are allocated using the mmmmaapp(())
+     system call, which allows the memory to be returned the operating system
+     when freed.  Normally, programs only grow in size and can't return memory.
+
+No More lleexx
+     The lexical analyzer portion of ssppeecc has been coded directly in C to remove
+     ssppeecc's dependence on the original UNIX lleexx utility, and to provide greater
+     flexibility for future code development.  Users shouldn't notice any
+     difference in behavior.
+
+Using Modified yyaacccc Parser
+     ssppeecc is now using a customized version of the yyaacccc parser generator to
+     generate a reentrant parser to accommodate a threaded version of ssppeecc.
+     Users shouldn't notice any difference in standard behavior.
+
+ffoouurrcc and kkaappppaa Geometries Combined and Revised
+     Several changes have been made to the organization and behavior of the
+     four-circle and kappa geometry code.  First, the kappa-geometry C code and
+     macros have been merged with the four-circle code and macros.  Second,
+     errors in the calculations now cause the calling ccaallcc(()) functions to return
+     an error value of -1 rather than resetting to command level.  Third, cut
+     points have been introduced for all the motors associated with the
+     diffractometer.  Finally, a variation of the four circle manufactured by
+     Picker (model 3645, perhaps others) where the motions of the cchhii and pphhii
+     motors are mechanically linked, is available.  See the ggeeoo__ffoouurrcc..cc file for
+     details.
+
+Memory Fix For Nested and Recursive Macro Functions
+     A problem with unbounded memory growth with nested and recursive macro
+     functions has been fixed.
+
+Array Plot Macros Now the Default
+     Although the file mmaaccrrooss//pplloottaarrrraayy..mmaacc, which contains new versions of the
+     plotting macros, has been included with the ssppeecc distribution for more than
+     a year, not until this release have those macros been installed as the
+     default plotting macros.  These new macros define all the standard plotting
+     macros to use data arrays rather than data groups for storing and plotting
+     data.  There should be no problems using these macros with the standard
+     scan macros, but users who have developed local macros with direct
+     manipulation of data groups may need to make some changes.  If that proves
+     difficult, the old plotting macros that use data groups are included in
+     mmaaccrrooss//pplloott..mmaacc, and can be used instead.
+

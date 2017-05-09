@@ -1,0 +1,56 @@
+.TH "cd" "macro" "08/01/12" "cd.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+cd \- change working directory
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)cd.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "cd" "macro" "08/01/12" "cd.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBcd [directory]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBcd\fP is used to change \fBspec\fP\(aqs current working directory.
+Without arguments, \fBcd\fP changes \fBspec\fP\(aqs current working directory
+to your home directory.
+.SH "DEFINITION"
+.rs
+.sp
+\fBdef cd \(aqchdir("$*")\(aq\fP
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBCWD\fP
+\- 
+built\-in string variable holding the full path name
+of the current working directory.
+.RE
+.SH "EXAMPLE"
+.rs
+.sp
+\fBcd data/Si\fP
+.SH "WARNING"
+.rs
+.sp
+Note that the UNIX escape \fBu cd\fP or \fBunix("cd")\fP
+has no effect as only the working directory of a temporary sub\-shell is changed.
+.SH "SEE ALSO"
+.rs
+.sp
+\fBUNIX User Reference Manual\fP
+

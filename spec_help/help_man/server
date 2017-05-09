@@ -1,0 +1,1665 @@
+.TH "server" "reference" "04/29/14" "server.rst 6.5  04/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBspec\fP server/client \- issue commands and control hardware remotely
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)server.rst       6.5  04/29/14  CSS
+.
+.\" Copyright (c) 2002,2003,2004,2007,2008,2009,2012,2013,2014
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "server" "reference" "04/29/14" "server.rst 6.5  04/29/14 CSS"
+.
+.SH "INTRODUCTION"
+.rs
+.sp
+Server mode \fBspec\fP allows communication between instances of \fBspec\fP on
+different platforms or between \fBspec\fP and other client software.
+The server protocol includes special commands for motor and counter
+control, and general commands for transfer of information.
+When acting as a client, \fBspec\fP can connect to a \fBspec\fP server and be
+configured for motors and counters that are on the server, but that behave
+as if they were local.
+.sp
+The \fBspec\fP server can send asynchronous
+messages to the client when certain events occur.
+Clients can arrange to receive messages when
+hardware\-related events occur (such as a motor position change),
+when a variable is assigned a new value or
+when certain server state changes occur.
+Clients can have commands executed on the server and retrieve the result.
+The \fBspec\fP client implements both synchronous and asynchronous
+retrieval of results.
+.sp
+The new \fBspec\fP user\-level commands for server/client communications
+are described below, as is the protocol used by the \fBspec\fP server.
+Although, \fBspec\fP will very often be the client,
+the communication protocol is open so arbitrary
+clients can be created.
+.sp
+See the \fBUpdates\fP section at the end of this file for
+a summary of changes to the protocol associated with particular
+\fBspec\fP releases.
+.SH "Starting the Server"
+.rs
+.sp
+The \fBspec\fP server mode is started by invoking \fBspec\fP with the
+\fB\-S\fP flag (or \fB\-S1\fP or \fB\-S2\fP, see below) one of three ways.
+In the first instance, a specific TCP/IP
+port number can be specified, as in:
+.sp
+.RS 4m
+\fBshell> fourc \-S 6789\fP
+.RE
+.sp
+The server will attempt to listen for incoming connections at the
+specified port number.
+Only one server can listen at a particular port number at a time.
+.sp
+The second invocation specifies a range of port numbers, as in:
+.sp
+.RS 4m
+\fBshell> fourc \-S 5320\-5330\fP
+.RE
+.sp
+The server will use the first port number in the range that is
+available.
+.sp
+Finally, server mode can be invoked with no port number arguments, as in:
+.sp
+.RS 4m
+\fBshell> fourc \-S\fP
+.RE
+.sp
+In this case, \fBspec\fP will use its default port number range, which is
+6510 to 6530.
+.sp
+Port numbers are arbitrary, but must be known by the client and must not
+conflict with any other services currently configured.
+(See \fI\%www.iana.org\fP  for an official list of port number assignments.)
+Port numbers below 1024 should be avoided, as they require root privilege
+for binding.
+.sp
+There are currently two server modes possible
+(as of \fBspec\fP release 5.07.04\-4).
+The difference in the two modes relates to the handling of motor\-limit events.
+The first mode, activated with \fB\-S\fP or \fB\-S1\fP, is the original mode.
+In this mode, unlike a standard non\-server mode \fBspec\fP session,
+if a motor hits a limit, although that motor is stopped, \fBspec\fP does
+not stop other motors that may be moving
+nor does \fBspec\fP reset to command level.
+With a mode\-2 server, activated with
+\fB\-S2\fP, behavior on hitting a limit is the same as when operating in
+non\-server mode.
+Note, in both modes events are sent to registered clients when a limit is hit.
+Also, a \fBspec\fP client will send a command to a \fBspec\fP server
+to abort all motors and reset to command level in any case.
+Note also, some motor controllers implement an emergency stop and/or
+a motor fault
+condition, which results in nearly the same actions as hitting a limit.
+(The only differences are in the text of the messages displayed and
+the name of the event sent to clients.)
+.sp
+When started in server mode,
+\fBspec\fP creates three threads:  one to listen for client connections
+and read command requests from clients, one to write replies to clients and
+one to execute commands received from the client or typed in to the
+interactive \fBspec\fP prompt.
+.sp
+Although the server provides an interactive prompt (at least in the current
+implementation), the server has only one command thread.
+Thus, if the command thread
+is busy running a command entered at the server prompt,
+commands sent by remote clients will remain in the command queue until
+the interactive command has finished executing.
+Certain client requests, such as requests to get current motor
+positions don\(aqt put commands on the queue, as the requests are instead
+satisfied using existing data.
+.sp
+CSS recommends that interactive use of the server be limited.
+If an interactive \fBspec\fP session is required on the same host on which
+the server
+runs, it may be better to configure a second \fBspec\fP instance on the host
+that will be a client to the server \fBspec\fP session.
+.sp
+Most motor controller types and all counter/timers associated with
+a \fBspec\fP server
+can be controlled
+by a client.
+Certain motor controllers
+(namely the 18011, CM3000, CM4000, E500, ES_OMS, ES_VPAP,
+IP28, MC4, MCB, SIX19, SMC and XRGCI_M)
+are not currently supported by the \fBspec\fP server for remote control.
+Contact CSS to discuss the feasibility of adding server
+support for any of the above controllers.
+.SH "Configuring the \fBspec\fP Client"
+.rs
+.sp
+\fBspec\fP server motor and timer/counter controllers are selected on
+\fBD\fPevices screen of the
+\fBedconf\fP configuration editor on the client along the following lines:
+.RS 3m
+.sp
+.nf
+.ft CB
+Motor and Counter Device Configuration (Not CAMAC)
+
+ MOTORS        DEVICE  ADDR <>MODE  NUM                       <>TYPE
+    YES  host_A:fourc                16          SPEC Motor (TCP/IP)
+    YES  host_A:specX                16          SPEC Motor (TCP/IP)
+    YES   host_B:6789                16          SPEC Motor (TCP/IP)
+
+SCALERS        DEVICE  ADDR <>MODE  NUM                       <>TYPE
+    YES  host_A:specX                 4  SPEC Timer/Counter (TCP/IP)
+    YES   host_B:6789                 4  SPEC Counters Only (TCP/IP)
+.ft P
+.fi
+.RE
+.sp
+The DEVICE entry contains the host name or IP address of the server
+followed by a colon and either the name of a \fBspec\fP process that is
+being run in server mode or a port number on which the server is listening.
+If there is nothing before the colon or if there is no colon,
+\fB"localhost"\fP will be assumed (as
+of \fBspec\fP release 6.01).
+.sp
+If a \fBspec\fP process name is given, the \fBspec\fP client will try each
+of the port numbers in the default range (6510 to 6530) and look for
+a matching server.
+.sp
+(Note, in \fBspec\fP releases prior to 6.01, a client must reference a particular
+server consistently by port number or by \fBspec\fP process name.)
+.sp
+The scaler device can be configured as a timer/counter, making that
+device the master timer, or as counters only.
+When configured as counters only, the associated \fBspec\fP client scaler channels
+passively mirror the values on the server.
+.sp
+On the \fBM\fPotor and \fBS\fPcaler
+screens, the controller types should be selected as
+\fBSPEC_M2\fP and \fBSPEC_SC\fP respectively.
+The specific motor or counter channel on the server is selected by
+the mnemonic.
+That is, the client and server have to use the same mnemonic for
+the same motor or counter channel.
+.SH "Server/Client \fBspec\fP Built\-in Functions"
+.rs
+.sp
+In the following functions, \fBhost\fP is a string of the form
+\fB"remotehost:6789"\fP or \fB"remotehost:spec"\fP where
+\fBremotehost\fP is the host name or IP address of the server,
+\fB6789\fP is a specific port number on which the server
+is listening (given by the \fB\-S port\fP start\-up option on the server) or
+\fBspec\fP is the name of the \fBspec\fP process using a port number
+in the default range (6510 to 6530).
+If \fBremotehost\fP is missing, \fBlocalhost\fP is assumed (as of \fBspec\fP
+release 6.01).
+(As mentioned above, prior to release 6.01 a client needed to
+reference a particular server consistently by port number or by \fBspec\fP
+process name.)
+.sp
+The argument \fBproperty\fP is a string of the form
+\fB"motor/tth/base_rate"\fP or \fB"var/DEGC"\fP, for example.
+The built\-in properties are documented below.
+.SH "Server Functions"
+.rs
+.sp
+There is only one built\-in function available to the server to communicate
+with its clients.
+.RS 0m
+.HP 5m
+."
+\fBprop_send(property, value)\fP
+\- 
+Sends an event to all clients registered for
+\fBproperty\fP. There is nothing to prevent a user\-level call of
+\fBprop_send()\fP from generating events for built\-in properties,
+although that may lead to an unexpected client response.
+.RE
+.SH "Client Functions"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBprop_get(host, property)\fP
+\- 
+Reads and returns the current value of \fBproperty\fP from the remote
+\fBhost\fP. Single\-valued, associative\-array
+and data\-array types can be returned.
+.HP 5m
+."
+\fBprop_put(host, property, value)\fP
+\- 
+Sets \fBproperty\fP to \fBvalue\fP on the remote
+\fBhost\fP. Single\-valued, associative\-array
+and data\-array types can be sent.
+.HP 5m
+."
+\fBprop_watch(host, property)\fP
+\- 
+Registers \fBproperty\fP on the remote
+\fBhost\fP. When the \fBproperty\fP value changes,
+the remote \fBhost\fP will send an event to the client.
+Consider:
+.sp
+.RS 5m
+.RS 4m
+\fBprop_watch("remotehost:6789", "var/TEMP")\fP
+.RE
+.sp
+If a variable named \fBTEMP\fP exists on the local client,
+then the value of the local client\(aqs
+instance will track changes to the value of the same variable
+on the remote host.
+.sp
+The variable must exist on the server
+before the client requests it be watched.
+If the variable goes out of existence on the server,
+but is subsequently recreated as the same type of global variable,
+the watched status will be reinstated (as of \fBspec\fP release 5.05.05\-1).
+If the variable doesn\(aqt exist on the client or goes out of existence,
+the client will continue to receive events, and if the variable
+is recreated on the client, its value will track the values sent with
+the events (as of \fBspec\fP release 5.05.05\-1).
+.sp
+Regular global variables, associative arrays
+and associative array elements can be watched.
+Data arrays cannot be watched.  The built\-in motor and scaler arrays
+\fBA[]\fP and \fBS[]\fP can be watched,
+but events will only be generated when the elements are
+explicitly assigned values on the server, not when the values change
+by way of built\-in code, such as from \fBcalcA\fP,
+\fBgetangles\fP or \fBgetcounts\fP.
+.RE
+.HP 5m
+."
+\fBremote_stat(host)\fP
+\- 
+Returns nonzero if the connection to \fBhost\fP is up,
+otherwise returns zero.
+.HP 5m
+."
+\fBremote_stat(host, "?")\fP
+\- 
+Returns the string \fB"up"\fP if the connection to \fBhost\fP is up.
+Returns the string \fB"lost"\fP if the connection had been up,
+but has been lost.
+Returns the string \fB"trying"\fP if in the process of creating a connection.
+Returns the string \fB"no connection"\fP if unable to contact the host.
+Returns the string \fB"not connected"\fP if the client has not attempted
+to create a connection to the host.
+(These options available with \fBspec\fP release 5.06.03\-7.)
+.HP 5m
+."
+\fBremote_par(host, "connect")\fP
+\- 
+Initiates a connection to \fBhost\fP.
+Connections are initiated automatically when \fBspec\fP
+server hardware is configured or when a server is accessed
+with the commands below.
+One might want to explicitly create the connection, though,
+in order to set a timeout for
+\fBremote_eval()\fP prior to accessing the host
+or to check the availablity of a connection with \fBremote_stat()\fP, above.
+.HP 5m
+."
+\fBremote_par(host, "close")\fP
+\- 
+Closes the connection to the \fBspec\fP server
+\fBhost\fP, but only if no server hardware is configured on the client.
+.HP 5m
+."
+\fBremote_par(host, "abort")\fP
+\- 
+Sends an \fBSV_ABORT\fP message to the server
+\fBhost\fP, which has the effect on the server
+as if a \fB^C\fP had been typed at its keyboard.
+.HP 5m
+."
+\fBremote_par(host, "timeout" [, value])\fP
+\- 
+Returns or sets the timeout interval for a \fBremote_eval()\fP call
+to complete.
+The units are seconds, and the default value is four seconds.
+.HP 5m
+."
+\fBremote_cmd(host, cmd)\fP
+\- 
+Puts the \fBspec\fP command \fBcmd\fP on the execution queue of the remote
+\fBhost\fP. This function does not wait for the command to execute on the
+server.  The return is immediate.
+Use \fBremote_eval()\fP or \fBremote_async()\fP with
+\fBremote_poll()\fP for synchronous execution of commands
+on the remote server.
+.HP 5m
+."
+\fBremote_eval(host, cmd)\fP
+\- 
+Puts the \fBspec\fP command \fBcmd\fP on the execution queue of the remote
+\fBhost\fP and returns the result.
+The function will not return until the command has been executed
+on the server.
+Single\-valued (number or string),
+associative\-array and data\-array return values are allowed.
+If a \fB^C\fP keyboard interrupt is received before the
+host returns a result and before the connection timeout interval, an
+\fBSV_ABORT\fP message will be sent to the server,
+which will have the same effect on the server as a
+\fB^C\fP from the server\(aqs keyboard (as of \fBspec\fP release 5.08.04\-3).
+In addition, any pending commands in the server queue
+from the client will be removed.
+.HP 5m
+."
+\fBid = remote_async(host, cmd)\fP
+\- 
+Puts the \fBspec\fP command \fBcmd\fP on the execution queue of the remote
+\fBhost\fP and returns a unique
+\fBid\fP. The return value of the command can be retrieved using the
+\fBremote_poll()\fP function, below.
+A \fB^C\fP keyboard interrupt will clear the local queue
+of all pending events, but will not stop the commands
+from being executed on the remote host.
+The \fBwait()\fP command can be used to wait
+for all asynchronous remote events.
+Bit 0x8 in the (optional) argument to \fBwait()\fP
+corresponds to remote events.
+.HP 5m
+."
+\fBremote_poll(id, "status")\fP
+\- 
+Returns 1 (or 0) to indicate whether result number \fBid\fP from
+\fBremote_async()\fP is available (or not).  Returns \-1 if
+\fBid\fP is no longer in queue or if the connection
+to the server has disappeared.
+.HP 5m
+."
+\fBremote_poll(id)\fP
+\- 
+Returns the result of the command associated with the
+\fBid\fP value of a particular call to
+\fBremote_async()\fP. Single\-valued result types (number or string),
+along with
+associative\-array and data\-array results are allowed.
+Note, if called before the result is available, the
+\fBid\fP will be removed from the queue, and the return value will be zero.
+Always check first if the result is available using either the
+\fB"status"\fP option above or the \fBwait()\fP function for remote events
+before fetching the result.  Returns \-1 if
+\fBid\fP is not in the queue or if the connection
+to the server has disappeared.
+.RE
+.SH "Protocol"
+.rs
+.sp
+The protocol used by the \fBspec\fP server is described below.
+Clients other than a \fBspec\fP client that follow the protocol
+can also communicate with \fBspec\fP servers.
+.sp
+Messages are sent between the server and the clients via a TCP/IP socket
+using a structured packet with a fixed\-size header
+and an optional variable\-sized data section.
+.sp
+All definitions described below will be in the header file
+\fBSPECD\fP\fB/include/spec_server.h\fP
+where \fBSPECD\fP is the \fBspec\fP auxiliary file directory, usually
+\fB/usr/local/lib/spec.d\fP.
+.sp
+The default port range definitions appear in the header file as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+#define SV_PORT_FIRST   6510
+#define SV_PORT_LAST    6530
+.ft P
+.fi
+.RE
+.sp
+Clients that wish to connect using \fBspec\fP process names rather than
+explicit port numbers should scan through the ports in the above
+(inclusive) range to look for the correct server, using the
+"hello" protocol described below.
+.sp
+The packet header structure
+is currently 132 bytes long and defined as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+#define SV_NAME_LEN     80
+
+struct  svr_head {
+    int     magic;  /* SV_SPEC_MAGIC */
+    int     vers;   /* Protocol version number */
+    unsigned size;  /* Size of this structure */
+    unsigned sn;    /* Serial number (client\(aqs choice) */
+    unsigned sec;   /* Time when sent (seconds) */
+    unsigned usec;  /* Time when sent (microseconds) */
+    int     cmd;    /* Command code */
+    int     type;   /* Type of data */
+    unsigned rows;  /* Number of rows if array data */
+    unsigned cols;  /* Number of cols if array data */
+    unsigned len;   /* Bytes of data that follow */
+#if SV_VERSION >= 3
+    int     err;    /* Error code */
+#endif
+#if SV_VERSION >= 4
+    int     flags;  /* Flags */
+#endif
+    char    name[SV_NAME_LEN];      /* name of property */
+};
+.ft P
+.fi
+.RE
+.sp
+The element \fBmagic\fP should be set to the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+#define SV_SPEC_MAGIC   4277009102
+.ft P
+.fi
+.RE
+.sp
+The server will reject any packets lacking the magic number.
+.sp
+The \fBspec\fP server will check the endianess of the
+\fBmagic\fP element of the first packet sent by the client and swap
+header and data bytes in that packet and subsequent incoming and outgoing
+data, if necessary, to accommodate the client.
+The client can send and read packet headers (and
+binary array data) using the native endian format of the client\(aqs platform.
+.sp
+The \fBvers\fP element should be set to the current version number:
+.RS 3m
+.sp
+.nf
+.ft CB
+#define SV_VERSION      4
+.ft P
+.fi
+.RE
+.sp
+The \fBsize\fP element should be set to the size of the header structure
+(currently 132 bytes).
+Clients should check both the version number and size of the structure
+and be prepared to accommodate future \fBspec\fP releases where the
+version number and structure size may change.
+.sp
+(Note, in \fBspec\fP release 5.05.04, the header version number
+changed from 2 to 3 due to the addition of the
+\fBerr\fP error\-code element to the header structure.
+In \fBspec\fP release 5.05.05, the header version number
+changed from 3 to 4 due to the addition of the
+\fBflags\fP element to the header structure.
+However, \fBspec\fP releases from 5.05.04\-5 on
+should work with both clients and servers using earlier or later
+header versions.)
+.sp
+The serial\-number element
+\fBsn\fP is under the control of the client and can be used to
+keep track of server replies.
+For \fBSV_REPLY\fP packets sent in response to client commands,
+the server will set the serial number to that of the request.
+The serial number for all
+\fBSV_EVENT\fP packets sent by the server is zero.
+.sp
+The \fBsec\fP and \fBusec\fP packet elements may be useful for debugging.
+The server sets them based on the host\(aqs real\-time clock.
+The client can do the same.
+When the \fBspec\fP debug level is set to 4096 (0x1000), the elapsed time
+in milliseconds between
+packets will be displayed.
+When the elapsed time between a packet and the previous
+becomes greater than one second, the time difference is shown as zero.
+.sp
+The \fBcmd\fP element contains one of the following command codes:
+.RS 3m
+.sp
+.nf
+.ft CB
+#define SV_CLOSE            1     /* From Client */
+#define SV_ABORT            2     /* From Client */
+#define SV_CMD              3     /* From Client */
+#define SV_CMD_WITH_RETURN  4     /* From Client */
+#define SV_RETURN           5     /* Not yet used */
+#define SV_REGISTER         6     /* From Client */
+#define SV_UNREGISTER       7     /* From Client */
+#define SV_EVENT            8     /* From Server */
+#define SV_FUNC             9     /* From Client */
+#define SV_FUNC_WITH_RETURN 10    /* From Client */
+#define SV_CHAN_READ        11    /* From Client */
+#define SV_CHAN_SEND        12    /* From Client */
+#define SV_REPLY            13    /* From Server */
+#define SV_HELLO            14    /* From Client */
+#define SV_HELLO_REPLY      15    /* From Server */
+.ft P
+.fi
+.RE
+.RS 0m
+.HP 5m
+."
+\fBSV_CLOSE\fP
+\- 
+Can be sent by the client to terminate a connection, allowing
+the server to release resources.
+Resources will be released in any case, if the server loses the
+connection to the client.
+.HP 5m
+."
+\fBSV_ABORT\fP
+\- 
+Sent by the client to abort commands the server is currently running.
+Receiving an \fBSV_ABORT\fP packet is equivalent to typing
+\fB^C\fP at the server keyboard.
+.HP 5m
+."
+\fBSV_CMD\fP
+\- 
+Sent by the client to place the commands from the data
+string following the header onto the server command queue.
+.HP 5m
+."
+\fBSV_CMD_WITH_RETURN\fP
+\- 
+As above, but the output generated by the command will be
+returned to the client in an \fBSV_REPLY\fP packet.
+.HP 5m
+."
+\fBSV_RETURN\fP
+\- 
+Not currently used.
+.HP 5m
+."
+\fBSV_REGISTER\fP
+\- 
+Sent by the client to register a property on which to receive events.
+.HP 5m
+."
+\fBSV_UNREGISTER\fP
+\- 
+Sent by the client to unregister a property,
+so that events will no longer be sent.
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Asynchronous packet sent by the server to clients registered
+for a property when the property value changes.
+The packet is also sent when the property
+is registered with \fBSV_REGISTER\fP.
+.HP 5m
+."
+\fBSV_FUNC\fP
+\- 
+Sent by the client to put a single function (or command)
+on the server command queue.
+The data following the header contains the function (or command) name
+and any arguments, separated by null bytes.
+The server will add parentheses, commas or space characters, as needed,
+depending on whether the first item is a function or a command.
+.HP 5m
+."
+\fBSV_FUNC_WITH_RETURN\fP
+\- 
+As above, but the result of the function will be returned to the client
+in an \fBSV_REPLY\fP packet.
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Sent by the client to get the value of a property.
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Sent by the client to set the value of a property.
+.HP 5m
+."
+\fBSV_REPLY\fP
+\- 
+Sent by the server with the result of a command.
+.HP 5m
+."
+\fBSV_HELLO\fP
+\- 
+Sent by the client to check if the desired server is listening on
+a particular port.  The client should then look for the expected
+\fBSV_HELLO_REPLY\fP response.
+The \fBspec\fP client puts a short message in the property name
+field for debugging purposes, which the server otherwise ignores.
+.HP 5m
+."
+\fBSV_HELLO_REPLY\fP
+\- 
+Sent by the server in response to an \fBSV_HELLO\fP packet.
+The data section of the reply contains the name of the \fBspec\fP process
+by which the server was invoked.
+That name is used by clients to find servers specified by \fBspec\fP process
+name.
+.RE
+.sp
+The \fBtype\fP element of the header structure describes the type
+of data (if any) that follow.  The recognized types are:
+.RS 3m
+.sp
+.nf
+.ft CB
+#define SV_DOUBLE       1
+#define SV_STRING       2
+#define SV_ERROR        3
+#define SV_ASSOC        4
+#define SV_ARR_DOUBLE   5
+#define SV_ARR_FLOAT    6
+#define SV_ARR_LONG     7
+#define SV_ARR_ULONG    8
+#define SV_ARR_SHORT    9
+#define SV_ARR_USHORT   10
+#define SV_ARR_CHAR     11
+#define SV_ARR_UCHAR    12
+#define SV_ARR_STRING   13
+#define SV_ARR_LONG64   14
+#define SV_ARR_ULONG64  15
+.ft P
+.fi
+.RE
+.sp
+The \fBspec\fP client does not currently use the
+\fBSV_DOUBLE\fP data type, and the \fBspec\fP server
+does not currently send any data
+using that type.
+However, the \fBspec\fP server will recognize incoming packets used to
+set a \fBvar/\fP property with \fBSV_DOUBLE\fP data.
+.sp
+The \fBspec\fP server sends both string\-valued and number\-valued items
+as strings.  Numbers are converted to strings using a
+\fBprintf("%.15g")\fP format.
+.sp
+For the \fBSV_ERROR\fP type, which is only sent by the server,
+the data following the header is a string containing an
+error message.
+.sp
+The \fBSV_ASSOC\fP type is used for sending \fBspec\fP\(aqs associative arrays.
+(An associative array element has an arbitrary string or number index
+and a string or number value.)
+Number\-valued indices and values are converted to strings.
+The associative array data is sent as a series of
+null\-terminated strings in
+the order index, value, index, value, etc.
+There is an additional null byte appended to the sequence.
+.sp
+When sending data to the server,
+any number of elements of the associative array may be included.
+Note, for the built\-in associative arrays
+(\fBA[]\fP, \fBS[]\fP and possibly \fBG[]\fP, \fBQ[]\fP, \fBZ[]\fP, \fBU[]\fP and
+\fBUB[]\fP, depending on geometry),
+only existing elements may be sent to the server.
+For non\-built\-in associative arrays, the array must already exist, but
+new elements will be automatically created if included in the data.
+.sp
+The \fBSV_ARR_*\fP data types are for transferring \fBspec\fP data arrays.
+The data is transferred in binary format row by row using the
+client\(aqs native byte order.
+.sp
+For \fBspec\fP data arrays, the \fBrows\fP and
+\fBcols\fP header elements are set to the array dimensions.
+\fBspec\fP supports only one\- and two\-dimensional arrays.
+For a one\-dimensional array, the value of one of
+\fBrows\fP or \fBcols\fP will be one.
+.sp
+For all packets containing data, the
+\fBlen\fP header element is the number of additional bytes transmitted.
+If there is no data, \fBlen\fP must be set to zero.
+.sp
+Starting with version 3 headers, a new
+\fBerr\fP element is included in the header structure.
+This element is set to a nonzero value if the
+\fBSV_CMD_WITH_RETURN\fP or \fBSV_FUNC_WITH_RETURN\fP commands fail with an
+unrecoverable error (the type of error that causes an interactive
+\fBspec\fP session to reset to the main command prompt, such as
+a syntax error or a divide\-by\-zero error).
+This element is needed to distinguish between
+an unrecoverable error and
+a command or function that returns zero.
+.sp
+The \fBflags\fP structure element was introduced with version 4 headers.
+Currently, it is used only by the server to transmit the flag
+.RS 3m
+.sp
+.nf
+.ft CB
+#define SV_DELETED      0x1000
+.ft P
+.fi
+.RE
+.sp
+in packets sent to clients when watched variables or associative
+array elements are deleted.
+The \fBspec\fP client currently does not take any action on receipt of
+such events.
+.sp
+The \fBname\fP element of the header contains the null\-terminated
+property name in ASCII, when applicable.
+Properties contain one, two or three parts, separated by slashes.
+Currently recognized property names begin with one of the following:
+.sp
+.RS 4m
+.nf
+\fBerror\fP
+\fBstatus/\fP
+\fBvar/\fP
+\fBoutput/\fP
+\fBscaler/\fP
+\fBmotor/\fP
+.fi
+.sp
+.RE
+.SH "The \fBerror\fP Property"
+.rs
+.sp
+The \fBerror\fP property is used by the server to inform a client when the
+client tries to register an unavailable property.
+.sp
+\fBerror\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when an
+\fBSV_REGISTER\fP packet contains an unrecognizable
+or unacceptable property string.
+The data will contain an error message.
+.RE
+.RE
+.sp
+Note, a client must register for the
+\fBerror\fP property in order to receive these events.
+.SH "The \fBstatus\fP Properties"
+.rs
+.sp
+The \fBstatus\fP properties
+reflect changes in the server state that may affect the
+server\(aqs ability to execute client commands or control hardware.
+.sp
+\fBstatus/ready\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the server is waiting for input at the interactive prompt
+(data is 1) and after a return has been typed at the interactive prompt
+(data is 0).
+The server is available to execute commands from clients
+when it is ready.
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Data is 1 if the server command thread is busy and unable to immediately
+process a new command, otherwise data is 0.
+.RE
+.RE
+.sp
+\fBstatus/shell\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the server enters a subshell (data is 1) or returns from
+a subshell (data is 0).
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Data is 1 if server command thread is in a subshell,
+otherwise data is 0.
+.RE
+.RE
+.sp
+Note, when in a subshell, the server will not process commands
+on the input queue.
+.sp
+\fBstatus/simulate\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the server enters (data is 1)
+or leaves (data is 0) simulate mode.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Data is 1 if server is in simulate mode, otherwise data is 0.
+.RE
+.RE
+.sp
+Note, when in simulate mode, the server will not send commands to
+hardware devices.
+.sp
+\fBstatus/quit\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the server exits.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Always read back as zero.
+.RE
+.RE
+.SH "The \fBvar\fP Properties"
+.rs
+.sp
+The \fBvar\fP properties allow values of any variables to be transferred between
+the server and the client.
+.sp
+\fBvar/var_name\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent to clients who have registered when the variable
+\fBvar_name\fP changes value.
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the value of the \fBvar_name\fP in the data, if
+\fBvar_name\fP is an existing variable on the server.
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Sets the value of \fBvar_name\fP on the server to the contents of data.
+.RE
+.RE
+.sp
+All data types (numbers, strings, associative arrays and data arrays)
+are supported.
+Numbers and strings are always sent by the server as null\-terminated strings,
+although the server will accept
+\fBSV_DOUBLE\fP\-type data for number\-valued single variables.
+.sp
+For built\-in associative arrays
+(\fBA[]\fP, \fBS[]\fP and possibly \fBG[]\fP, \fBQ[]\fP, \fBZ[]\fP, \fBU[]\fP and
+\fBUB[]\fP, depending on geometry), only existing elements can be set.
+For associative arrays created at user\-level, any number of elements can
+be sent and created in one call.
+.sp
+An associative array element can be sent to the server in two ways,
+either with the array name and element specified in the property name (as in
+\fB"var/arr[13]")\fP and the value
+contained in the data, or with the array name only specified in the property
+name (as in \fB"var/arr"\fP) and the index and value specified in the data.
+In the first case, the associative array element must already exist
+on the server.  In the second case, any number of elements
+can be sent as a series of null\-terminated strings in the order index,
+value, index, value, etc.
+.sp
+Data arrays are transferred in binary format row by row using the
+client\(aqs native byte order.
+The packet header contains the number of rows and columns and the
+data type.
+.SH "The \fBoutput\fP Property"
+.rs
+.sp
+The \fBoutput\fP property puts copies of the strings
+written to files or to the screen
+in events sent to clients.
+.sp
+\fBoutput/filename\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the server sends output to the file or device given by
+\fBfilename\fP, where \fBfilename\fP can be the built\-in name
+\fB"tty"\fP or a file or device name.
+The data will be a string representing the output.
+.RE
+.RE
+.sp
+Once a client has registered for output events from a particular
+file, the server will keep track of the client\(aqs request as the file
+is opened and closed.
+File names are given relative to the server\(aqs current directory
+and can be relative or absolute path names, just as with the
+built\-in commands that refer to files.
+.sp
+(The output property was introduced in \fBspec\fP release 5.07.04\-1.)
+.SH "The \fBscaler\fP Properties"
+.rs
+.sp
+The \fBscaler\fP properties are used to control the hardware timer
+and monitor counters on the server.
+.sp
+\fBscaler/.all./count\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when counting starts (data is 1)
+and when counting stops (data is 0).
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Data indicates counting (1) or not counting (0).
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+If data is nonzero, the server pushes a
+.sp
+.RS 5m
+.RS 4m
+\fBcount_em data\en\fP
+.RE
+.sp
+onto the command queue.
+If data is 0, counting is aborted as if a \fB^C\fP
+had been typed at the server.
+.RE
+.RE
+.RE
+.sp
+\fBscaler/mne/value\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent periodically while counting on the server
+with current contents of scaler channel
+\fBmne\fP. Also sent after counting has finished.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the current scaler value for channel \fBmne\fP.
+.RE
+.RE
+.sp
+When configured as a timer/counter on a \fBspec\fP client, both \fBcount\fP and
+\fBvalue\fP events will be received from the server.
+When configured as "counters only" on a \fBspec\fP client,
+only \fBvalue\fP events will be received.  In fact, for
+"counters only" counters on a \fBspec\fP client,
+the client count functions do not trigger any activity on the server.
+.SH "The \fBmotor\fP Properties"
+.rs
+.sp
+The \fBmotor\fP properties are used to control the motors.
+The parameters for the commands that are sent from the client
+and the values in the replies and events that sent from the server
+are always transmitted as ASCII strings in the data that follows
+the packet header.
+.sp
+\fBmotor/mne/position\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the dial position or user offset changes.
+The data contains the motor position in user units.
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the current motor position in user units.
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Sets the user offset on the server by pushing a
+.sp
+.RS 5m
+.RS 4m
+\fBset mne data\en\fP
+.RE
+.sp
+onto the command queue.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/mne/dial_position\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the dial position changes.
+The data contains the motor position in dial units.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the current motor position in dial units.
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Sets the dial position on the server by pushing a
+.sp
+.RS 5m
+.RS 4m
+\fBset_dial mne data\en\fP
+.RE
+.sp
+onto the command queue,
+unless the dial position is already set to that value.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/mne/offset\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the offset changes.
+The data contains the user offset in motor units (degrees, mm, etc.)
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the current user offset in dial units.
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Sets the user offset by pushing the
+.sp
+.RS 5m
+.RS 4m
+\fBset mne value\en\fP
+.RE
+.sp
+command onto the command queue, unless the offset
+is already at the value.
+The data should contain the offset value in motor units
+(degrees, mm, etc.).
+The server will calculate \fBvalue\fP for the argument in
+\fBset\fP appropriately.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/mne/step_size\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the steps\-per\-unit parameter changes.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the current steps\-per\-unit parameter.
+.RE
+.sp
+The server doesn\(aqt allow clients to change this parameter.
+.RE
+.sp
+\fBmotor/mne/sign\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the sign\-of\-user*dial parameter changes.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the current sign\-of\-user*dial parameter.
+.RE
+.sp
+The server doesn\(aqt allow clients to change this parameter.
+.RE
+.sp
+\fBmotor/../prestart_all\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Should be sent in preparation of a move of more than one motor.
+Puts the string
+.sp
+.RS 4m
+\fB{getangles;\fP
+.RE
+.sp
+into a buffer that will be pushed onto the server command queue
+when the move is started.
+Must be followed by a \fBstart_all\fP packet, with possible intervening
+\fBstart_one\fP packets.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/mne/start_one\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+If preceded by a \fBprestart_all\fP, adds a
+.sp
+.RS 4m
+\fBA[mne]=data;\fP
+.RE
+.sp
+to the buffer that will be pushed onto the server command queue.
+Otherwise, pushes
+.sp
+.RS 4m
+\fB{get_angles;A[mne]=data;move_em;}\en\fP
+.RE
+.sp
+onto the command queue in order to start the single motor moving.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/../start_all\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+When preceded by \fBprestart_all\fP and one or more
+\fBstart_one\fP packets, adds a
+.sp
+.RS 4m
+\fBmove_em;}\en\fP
+.RE
+.sp
+to the buffer created by those commands
+and pushes the entire buffer onto the command queue.
+Otherwise, does nothing.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/../abort_all\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Causes a \fB^C\fP\-type interrupt in the server command thread.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/mne/move_done\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when moving starts (data is 1) and when moving stops (data is 0).
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns one if the motor is busy, otherwise zero.
+.RE
+.RE
+.sp
+\fBmotor/mne/high_lim_hit\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the high\-limit switch has been hit.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns nonzero if the high\-limit switch has been hit.
+.RE
+.RE
+.sp
+\fBmotor/mne/low_lim_hit\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the low\-limit switch has been hit.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns nonzero if the low\-limit switch has been hit.
+.RE
+.RE
+.sp
+\fBmotor/mne/emergency_stop\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when a motor controller indicates a hardware emergency stop.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns nonzero if an emergency\-stop switch
+or condition has been activated.
+.RE
+.RE
+.sp
+\fBmotor/mne/motor_fault\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when a motor controller indicates a hardware motor fault.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns nonzero if a motor\-fault condition has been activated.
+.sp
+.RS 5m
+.RS 4m
+\fBmotor/mne/high_limit\fP
+.RE
+.RE
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the value of the high limit position changes.
+The data contains the high limit in dial units.
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the high limit in dial units.
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Sets the high limit by pushing
+.sp
+.RS 5m
+.RS 4m
+\fBset_lm  mne data user(mne,get_lim(mne,\-1))\en\fP
+.RE
+.sp
+onto the server command queue.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/mne/low_limit\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the value of the low limit position changes.
+The data contains the low limit in dial units.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the low limit in dial units.
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Sets the low limit by pushing
+.sp
+.RS 5m
+.RS 4m
+\fBset_lm mne data user(mne,get_lim(mne,+1))\en\fP
+.RE
+.sp
+onto the server command queue.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/mne/limits\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Sets both motor limits by pushing
+.sp
+.RS 4m
+\fBset_lm mne data\en\fP
+.RE
+.sp
+onto the server command queue, where
+\fBdata\fP should contain the low and high motor
+limit values in a string.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/mne/search\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+The server starts a home or limit search by pushing a
+.sp
+.RS 4m
+.nf
+\fBchg_dial(mne, how)\en\fP
+or a
+\fBchg_dial(mne, how, home_pos)\en\fP
+.fi
+.sp
+.RE
+.sp
+onto the command queue, depending on whether the data
+contains one or two arguments.
+The \fBhow\fP argument is one of the strings
+recognized by \fBchg_dial()\fP, namely
+\fB"home"\fP, \fB"home+"\fP, \fB"home\-"\fP, \fB"lim+"\fP or \fB"lim\-"\fP.
+The optional \fBhome_pos\fP is the home position in dial units.
+.RE
+.RE
+.RE
+.sp
+\fBmotor/mne/sync_check\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when a position discrepancy occurs between \fBspec\fP and the motor
+controller that requires human intervention to resolve.
+The data contains two values: the position that \fBspec\fP
+has in memory and the
+position read from the controller, both in dial units.
+A response is required, either from the server keyboard or by a client
+sending the property described below.  Note, a motor\(aqs
+\fBread_mode\fP can be configured to always accept
+the controller position so that
+discrepancy events will never be generated.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+A client should send a yes or no (1 or 0) response
+when the server needs
+to resolve a motor discrepancy.
+The server requires this response or a keyboard response on the
+server\(aqs controlling terminal.
+.RE
+.RE
+.sp
+Note, until a response is received by the server, either from a client or
+the server\(aqs interactive prompt, the server will not be able to process
+commands in the command queue.
+.sp
+\fBmotor/mne/unusable\fP
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when a \fB"disable"\fP option to
+\fBmotor_par()\fP has changed the enabled/disabled state
+of a motor on the server.
+(This event implemented in \fBspec\fP release 5.07.01\-5.)
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns nonzero if the motor is unusable.
+The motor may be unusable because it didn\(aqt respond to
+the presence test, it has been explicitly disabled with the
+\fB"disable"\fP option to \fBmotor_par()\fP, or it has received an
+\fBunusable\fP event from another server.
+.RE
+.RE
+.sp
+The following properties correspond to standard and optional motor parameters.
+All behave the same with respect to server/client communication.
+.sp
+\fBStandard Parameters:\fP
+.sp
+.RS 4m
+.nf
+\fBmotor/mne/base_rate\fP
+\fBmotor/mne/slew_rate\fP
+\fBmotor/mne/acceleration\fP
+\fBmotor/mne/backlash\fP
+.fi
+.sp
+.RE
+.sp
+\fBOptional Parameters:\fP
+.sp
+.RS 4m
+.nf
+\fBmotor/mne/home_base_rate\fP
+\fBmotor/mne/home_slew_rate\fP
+\fBmotor/mne/home_acceleration\fP
+\fBmotor/mne/encoder_step_size\fP
+\fBmotor/mne/dc_dead_band\fP
+\fBmotor/mne/dc_settle_time\fP
+\fBmotor/mne/dc_proportional_gain\fP
+\fBmotor/mne/dc_derivative_gain\fP
+\fBmotor/mne/dc_integral_gain\fP
+\fBmotor/mne/dc_integration_limit\fP
+\fBmotor/mne/dc_following_error\fP
+\fBmotor/mne/dc_sampling_interval\fP
+\fBmotor/mne/dc_veloc_feedforward\fP
+\fBmotor/mne/dc_accel_feedforward\fP
+\fBmotor/mne/step_mode\fP
+\fBmotor/mne/disable_limit_checks\fP
+\fBmotor/mne/slop\fP
+\fBmotor/mne/read_mode\fP
+\fBmotor/mne/deceleration\fP
+\fBmotor/mne/torque\fP
+\fBmotor/mne/misc_par_1\fP
+\fBmotor/mne/misc_par_2\fP
+\fBmotor/mne/misc_par_3\fP
+\fBmotor/mne/misc_par_4\fP
+\fBmotor/mne/misc_par_5\fP
+\fBmotor/mne/misc_par_6\fP
+\fBmotor/mne/powder_base\fP
+\fBmotor/mne/powder_slew\fP
+\fBmotor/mne/powder_acceleration\fP
+.fi
+.sp
+.RS 0m
+.HP 5m
+."
+\fBSV_EVENT\fP
+\- 
+Sent when the parameter changes.
+The data contains the value of the parameter.
+.RE
+.HP 5m
+."
+\fBSV_CHAN_READ\fP
+\- 
+Returns the value of the parameter.
+.HP 5m
+."
+\fBSV_CHAN_SEND\fP
+\- 
+Sets the parameter by pushing
+.sp
+.RS 5m
+.RS 4m
+\fBmotor_par(mne, cmd, data)\en\fP
+.RE
+.sp
+onto the server command queue with the appropriate arguments, using
+the value passed in the data portion of the packet.
+.RE
+.RE
+.RE
+.sp
+The following property names correspond to features in \fBspec\fP\(aqs internal
+motor control code, but aren\(aqt currently used with the server.
+.sp
+.RS 4m
+.nf
+\fBmotor/mne/magnitude\fP
+\fBmotor/mne/backlash_rate\fP
+\fBmotor/../preread_all\fP
+\fBmotor/mne/preread_one\fP
+\fBmotor/mne/abort_one\fP
+\fBmotor/../flush_all\fP
+\fBmotor/mne/flush_one\fP
+\fBmotor/mne/set_position\fP
+\fBmotor/mne/diff_position\fP
+\fBmotor/mne/prestart_one\fP
+.fi
+.sp
+.RE
+.SH "Updates"
+.rs
+.sp
+The following summarizes updates to the \fBspec\fP server/client
+protocol that mainly affect compatibility with older or newer
+servers or clients.  Search for "server" in the
+\fI\%changes\fP help file for a complete list of updates.
+.RS 0m
+.HP 5m
+."
+Release 5.04.03 \- July 20, 2003
+\- 
+Initial server/client support released with \fBSV_VERSION\fP at 2.
+.HP 5m
+."
+Release 5.05.04 \- July 18, 2004
+\- 
+Added \fBerr\fP element to \fBsvr_head\fP structure.
+\fBSV_VERSION\fP at 3, but maintained server compatibility
+with version 2 clients.
+.HP 5m
+."
+Release 5.05.04\-4 \- August 17, 2004
+\- 
+Fixed server so that it can work with
+future clients with higher \fBSV_VERSION\fP numbers.
+.HP 5m
+."
+Release 5.05.05 \- Sept 30, 2004
+\- 
+Added \fBflags\fP element to \fBsvr_head\fP structure.  \fBSV_VERSION\fP at 4.
+\fBspec\fP clients and servers should be both forward
+and backward compatible with respect to protocol version.
+.HP 5m
+."
+Release 6.01.01 \- Nov 4, 2013
+\- 
+Added \fBSV_ARR_LONG64\fP and \fBSV_ARR_ULONG64\fP data types.
+.RE
+

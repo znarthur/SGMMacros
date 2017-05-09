@@ -1,0 +1,40 @@
+.TH "vi" "macro" "08/01/12" "vi.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBvi\fP \- invokes the standard UNIX visual editor
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)vi.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "vi" "macro" "08/01/12" "vi.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBvi [file_name ...]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBvi\fP macro runs the standard UNIX visual editor in a sub\-shell.
+.SH "DEFINITION"
+.rs
+.sp
+\fBdef vi \(aqunix("vi $*")\(aq\fP
+.SH "EXAMPLE"
+.rs
+.sp
+\fBvi do.scans\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%ned\fP
+\fI\%u\fP
+

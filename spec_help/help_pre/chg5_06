@@ -1,0 +1,1107 @@
+changes                      spec 5.06 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 5.06
+
+September 5, 2006 - RELEASE 5.06.06-10
+
+Updated Support for Delta-Tau Controllers
+     The existing support for the Delta-Tau PMAC motor controller on an ISA bus
+     has been updated for PMAC2 controllers over socket (Ethernet) interfaces.
+
+Open-Loop Mode Fix for New Focus 8750/53
+     A problem with position discrepancy messages appearing after aborting a
+     move when using the New Focus 8750/53 controllers with open-loop motors has
+     been fixed.  The problem did not appear with closed-loop motors.
+
+August 28, 2006 - RELEASE 5.06.06-9
+
+Home Search For New Focus 8750/53 Updated
+     The home search feature for the New Focus model 8750/53 has been updated to
+     implement the FFIINN, RRIINN, FFLLII and RRLLII commands included with the controller
+     version 1.5.4 firmware.  The first two search for the index mark on
+     actuators so equipped in the forward and reverse directions.  The second
+     two search for the limit switches.
+
+Fix For PI E710 Motor Controller
+     An old bug in the code for the Physik Instrumente E710 where the
+     configuration choice of serial vs. GPIB was not always correctly detected
+     has been fixed.
+
+August 17, 2006 - RELEASE 5.06.06-8
+
+Additional Updates For AI Solutions DAQ Modules
+     Bugs in the new code for the AI Solutions DAQ modules (formerly KISIM),
+     which could lead to segmentation faults when switching the configuration
+     between 1D and 2D mode in the configuration file or switching out of
+     emulation mode via mmccaa__ppaarr(()), have been fixed.
+
+August 4, 2006 - RELEASE 5.06.06-7
+
+Support For Tsuji Model SPM8C-01 Motor Controller
+     This ssppeecc release includes support for the Tsuji Model SPM8C-01 motor
+     controller over a socket interface.
+
+Support For Huber 9300 Motor Controller
+     This ssppeecc release has preliminary support for the Huber 9300 motor
+     controller over serial and socket interfaces.
+
+Fixes For Amptek Pocket MCA
+     A bug in the code for the Amptek PPoocckkeett MCA 8000/8000A that prevented
+     reading back the correct data from other than group zero has been fixed.
+     Also, a bug where the value returned by the mmccaa__ppaarr(()) ""bbaatttteerryy__ttyyppee""
+     argument was incorrect has been fixed.
+
+Fix For ESRF/TACO Serial Device Timeouts
+     A bug, where the RPC timeouts for connections to the ESRF/TACO serial
+     device server were set to 1000 times the requested value (usually 2000
+     seconds instead of 2 seconds), has been fixed.
+
+July 25, 2006 - RELEASE 5.06.06-6
+
+More Updates For AI Solutions DAQ Modules
+     A bug in the new code for the AI Solutions DAQ modules (formerly KISIM),
+     which prevented setting the ""ooffffsseett__xx"" parameter in MCA mode with the
+     mmccaa__ppaarr(()) function, has been fixed.  In addition, the internal clock
+     parameter is now reprogrammed, if necessary, for time presets larger than
+     approximately 4.7 hours.  Also, when counting to fixed count presets or
+     with no presets, ssppeecc will keep track of overflows in the elapsed-time
+     register by using the computer's system clock, thus making the returned
+     elapsed-time value correct for indefinitely long count times.
+
+Fix For Mac Science (now Bruker) MXC Instrument
+     A bug (introduced three years ago in ssppeecc release 5.02.04-1), which broke
+     control of the rrsslliitt motor for the then Mac Science, now Bruker, MXC
+     controller, has been fixed.
+
+July 13, 2006 - RELEASE 5.06.06-5
+
+Fix For sslleeeepp(())
+     A bug that has been present for at least several years, where a call to the
+     built-in sslleeeepp(()) function with an argument between -1 and zero would cause
+     ssppeecc to become stuck, has been fixed.
+
+Fix For __pplloottccoonnffiigg(()) Macro
+     An old bug in the internal __pplloottccoonnffiigg(()) macro, which resulted in an ""AArrrraayy
+     aacccceessss SSCCAANN__DD[[......]][[]] iiss oouutt ooff bboouunnddss"" error message on start up or with
+     the pplloottsseelleecctt macro, has been fixed.  The error would occur if the scaler
+     channels were rearranged in the ccoonnffiigg file such that an existing scaler's
+     number (as returned by the ccnntt__nnuumm(()) function) became greater than or equal
+     to the value of the global variable PPLLOOTT__CCNNTTRRSS__MMAAXX (default value of 10).
+     The previous work around for this bug of increasing the value of
+     PPLLOOTT__CCNNTTRRSS__MMAAXX is no longer necessary.
+
+Updated Code For AI Solutions DAQ Modules (Formerly KISIM)
+     The support for the HANARO KISIM USB modules has been rewritten for
+     redesigned modules, now produced by the Korean company, AI Solutions.  See
+     the updated _k_i_s_i_m or _a_i_s_o_l_u_t_i_o_n_s help file for information on the new
+     support.
+
+July 12, 2006 - RELEASE 5.06.06-4
+
+Fix For ccoonnffiigg Issues When Changing Limits
+     A rare problem, where motor limits would revert to their prior values when
+     reentering ssppeecc after using the ccoonnffiigg macro and configuration editor to
+     change them, has been fixed.  The problem only occurred when motor position
+     discrepancies were resolved (either silently or with user intervention) in
+     favor of the hardware causing the sseettttiinnggss file to be updated during the
+     built-in motor synchronization call that occurs just before possibly
+     modified ccoonnffiigg and sseettttiinnggss files are reread.
+
+Fix For OMS MAXv Controller When Moving Off Limits
+     A timing problem with the new Oregon Micro Systems MAXv VME motor
+     controller firmware that sometimes made it impossible for ssppeecc to move a
+     motor off a limit switch has been worked around.
+
+Fix For Ortec MCS PCI Initialization
+     A problem with ssppeecc's presence test and initialization of the Ortec MCS PCI
+     multi-channel analyzer hardware that could occur if the board was actively
+     acquiring during ssppeecc's hardware configuration procedure has been fixed by
+     making sure acquisition is off before testing the board's memory.
+
+July 10, 2006 - RELEASE 5.06.06-3
+
+Fixed the Updated Support For EPICS Serial Record
+     The updated support for the EPICS serial record that was included in
+     release 5.06.06-1 had many problems which should now be fixed.
+
+July 5, 2006 - RELEASE 5.06.06-2
+
+Newport NSC200 Support Updated
+     The preliminary support for the Newport NSC200 motor controller has been
+     updated to fix a few problems.
+
+June 30, 2006 - RELEASE 5.06.06-1
+
+Updated Support For EPICS Serial Record
+     This ssppeecc release includes updated support for the EPICS serial record.  In
+     particular, the new aassyynn record is supported.  Support for the older
+     HHiiddeeooss-based generic serial record is still included, and many bugs with
+     the older support have been fixed.  ssppeecc automatically sorts out which
+     serial record is being used.
+
+Fix For Server Motor and Counter Properties
+     An old coding bug that may have caused generally insignificant problems
+     with the ssppeecc server when motor or counter properties were received from a
+     client, with the most noticeable being incorrect command serial numbers,
+     has been fixed.
+
+June 2, 2006 - RELEASE 5.06.05-11
+
+Support For Inel PEM Motor Controller
+     This ssppeecc release supports the Inel PEM motor controller over a serial
+     interface.
+
+Insure User-Units Mode Is Off For OMS Controllers
+     ssppeecc will now send the ""UUFF"" (user off) command to each axis of an OMS motor
+     controller during hardware configuration to make sure user units are off to
+     accommodate at least one site that switches control between ssppeecc and
+     software that turns user-units mode on.
+
+May 12, 2006 - RELEASE 5.06.05-10
+
+Initial Support For Newport XPS Motor Controller
+     This ssppeecc release contains initial support for Newport's XPS motor
+     controller.  This motor controller communicates exclusively via sockets and
+     contains its own computer and operating system.  Motor parameters must be
+     configured by downloading and uploading the XPS configuration files by ftp.
+     ssppeecc mnemonics must match the XPS motor names in the XPS ssyysstteemm..iinnii file.
+     ssppeecc will send slew rate and acceleration parameters, as set in ssppeecc's
+     ccoonnffiigg file, but those parameters will only be accepted by the XPS if the
+     values are not greater than the maximum values set in the XPS ssttaaggeess..iinnii
+     file.  Although the value of ssppeecc's steps-per-degree parameter is ignored
+     for calculating positions for these motors, the value is used in ssppeecc's
+     code for rounding motor positions to their intrinsic resolution.  Thus, set
+     the parameter to a value the same order of magnitude as the value in the
+     ssttaaggeess..iinnii file.  (Unfortunately, there is no command in the XPS protocol
+     to retrieve the value, other than retrieving and parsing the configuration
+     files, which is beyond ssppeecc's scope.)
+
+May 3, 2006 - RELEASE 5.06.05-9
+
+Fixes For Compumotor 6K Motor Controller
+     A couple of problems with the support code for the Compumotor 6K motor
+     controller have been fixed.  Unnecessary AAXXSSDDEEFF calls, which could lead to
+     lost positions, are now avoided for all models, including those with eight
+     motors.  A problem, where the final position of a motor was sometimes not
+     read at the end of a move when multiple motors were active, has been fixed.
+
+April 30, 2006 - RELEASE 5.06.05-8
+
+Preliminary Support For Newport NSC200 Motor Controllers
+     Preliminary support for the Newport NSC200 motor controller is included
+     with this ssppeecc release.
+
+April 26, 2006 - RELEASE 5.06.05-7
+
+New Option To Set Stop Bits For Generic Serial Devices
+     A new sseerr__ppaarr(()) option ""ssttoopp__bbiittss"" can be used to set the number of stop
+     bits for generic serial devices.  The default value of one works for almost
+     all serial devices.  A value of two can be set when needed.  See the _s_e_r_i_a_l
+     help file for details.
+
+New Option To Test For Motor Limits
+     New mmoottoorr__ppaarr(()) options ""hhiigghh__lliimm__hhiitt"" and ""llooww__lliimm__hhiitt"" return nonzero if
+     the associated motor limit is active (for most supported motor
+     controllers).
+
+Further Update for OMS VME MAXv Support
+     Problems with the support code for the OMS MAXv motor controller that
+     weren't fixed in release 5.06.05-4 have now been fixed with the help of OMS
+     support engineers.
+
+April 21, 2006 - RELEASE 5.06.05-6
+
+New ssiixxcc Mode
+     A new cchhii-fixed, pphhii-fixed, mmuu-fixed mode is available with the standard
+     ssiixxcc geometry.
+
+April 12, 2006 - RELEASE 5.06.05-5
+
+Fixes For Compumotor 6K With Encoders and With Servos
+     The ssppeecc support for the Compumotor 6K motor controller now uses relative
+     moves (rather than absolute moves) if the axis is configured for an
+     encoder.  Also, when starting up, the initial configuration commands now
+     work correctly if servo motors are configured, avoiding unnecessary AAXXSSDDEEFF
+     calls, which could lead to lost positions.
+
+Update For ESRF TACO LeCroy 1151 Counter Support
+     The ssppeecc support for the LeCroy 1151 counters via the ESRF TACO facility
+     now allows more than one such counter module to be configured.
+
+April 2, 2006 - RELEASE 5.06.05-4
+
+Update For OMS VME MAXv Support
+     The code for the Oregon Micro Systems VME model MAXv controller has been
+     modified to be a bit more robust in the face of communication errors.
+
+March 22, 2006 - RELEASE 5.06.05-3
+
+Longer Count Times Implemented For NI 660x Cards
+     The code for the National Instruments 6601/6602 PCI counter/timer card will
+     now automatically select the slower time base when necessary to allow for
+     longer counter times, now up to nearly 12 hours.
+
+March 22, 2006 - RELEASE 5.06.05-2
+
+Fix For Amptek PX4 Attenuation
+     The recently added support for the Amptek PX4 MCA should have set a bit in
+     the configuration buffer but didn't, which resulted in the input signal
+     being attenuated by fifty percent.  The bit is now set.
+
+March 8, 2006 - RELEASE 5.06.05-1
+
+Fix For Comment Parsing On Macro Invocation Line
+     Since the earliest versions of ssppeecc (ca. 1986), the $$## and $$** symbols in
+     ordinary macro definitions (replaced by the number of arguments and all the
+     arguments, respectively) have always inappropriately included any ##
+     prefixed comments on the invocation line.  Consider the macro definition
+
+        11..SSPPEECC>> ddeeff tteesstt ''{{pprriinntt $$##,, "" $$** "",, $$**}}''
+
+     Prior behavior was:
+
+        22..SSPPEECC>> tteesstt 11 22 33 ## 44 55 66
+        77  11 22 33 ## 44 55 66  112233
+
+     (Since the second $$** isn't in quotes, the comment is effective after the
+     argument substitution.)  New behavior is:
+
+        22..SSPPEECC>> tteesstt 11 22 33 ## 44 55 66
+        33  11 22 33  112233
+
+     Not sure why this problem went unnoticed and unfixed all this time.
+
+Fix For ESRF VCT6 Timer Polling
+     The polling of the counting/busy status for the ESRF VCT6 timer now also
+     checks for the status bit that indicates the unit is preparing to start
+     counting.  Previously, not checking this bit wasn't a problem, but with
+     faster computers, ssppeecc's polling for busy status can occur before counting
+     has actually started.
+
+Fix For Amptek PX4 Parameter Display
+     A bug in the new code for the Amptek PX4 where an incorrect high-voltage
+     setting was displayed with the mmccaa__ppaarr((""ppaarrss"")) command has been fixed.
+
+Fix For Kinetic Systems 3388
+     A bug introduced with implementation of support for multiple CAMAC crates
+     in release 5.06.02-1 that broke support for the Kinetic Systems 3388
+     CAMAC-to-GPIB controller has been fixed.  In addition, the KS 3388 can now
+     be used in other than crate zero, and more than one KS 3388 can be used at
+     a time.
+
+February 22, 2006 - RELEASE 5.06.04-12
+
+Support For Amptek PX4 MCA
+     ssppeecc now supports the Amptek PX4 Digital Processor MCA over both USB (on
+     Linux and Mac OS X) and serial interfaces.  See the new _p_x_4 help file for
+     details.
+
+February 21, 2006 - RELEASE 5.06.04-11
+
+Recent lliibbeeddiitt Problem With ^^CC Handling Fixed
+     Some obscure problems with signal handling when linking ssppeecc with the
+     optional lliibbeeddiitt library version included with ssppeecc releases since 5.06.03
+     have been fixed.
+
+February 16, 2006 - RELEASE 5.06.04-10
+
+USB Support Under Mac OS X
+     The USB support in ssppeecc is now available on Mac OS X platforms in addition
+     to Linux.  To enable the USB support on the Mac OS X platform, ssppeecc must be
+     linked with the lliibbuussbb library, available at _l_i_b_u_s_b_._s_o_u_r_c_e_f_o_r_g_e_._n_e_t .
+
+February 9, 2006 - RELEASE 5.06.04-9
+
+Support For Physik Instrumente C-630 Motor Controller
+     ssppeecc now supports the Physik Instrumente model C-630 (Apollo) motor
+     controller.  This controller uses a serial interface.
+
+Fix For ssppeecc Client's Server Lookup
+     A bug in the ssppeecc client server-lookup algorithm has been fixed.
+     Previously, if a ssppeecc client connected to multiple ssppeecc servers on the same
+     host using port numbers for some (such as ""llooccaallhhoosstt::77000000"") and ssppeecc
+     process names for others (such as ""llooccaallhhoosstt::ffoouurrcc""), the code would
+     sometimes direct commands to the wrong server.  The bug was probably
+     associated with the updates to the lookup algorithm in ssppeecc release
+     5.06.03-1.
+
+Fix For Unconfigured Optional Motor Parameters
+     The new mmoottoorr__ppaarr(()) features introduced in release 5.06.04-1 broke old
+     behavior that allowed setting values for optional motor parameters that
+     were not explicitly assigned values in the ccoonnffiigg file.  With the new
+     features, motor parameters not in the ccoonnffiigg file can be created (to exist
+     only in the current ssppeecc session) using the new mmoottoorr__ppaarr(()) ""aadddd"" option.
+     This ssppeecc release will restore compatibility with past releases by doing an
+     automatic ""aadddd"" of any of the standard optional motor parameters not
+     otherwise assigned values in the ccoonnffiigg file when values are set with
+     mmoottoorr__ppaarr(()).
+
+Fix For Synchronizing Motor Positions
+     A bug in the implementation of the new mmoottoorr__ppaarr(()) features in release
+     5.06.04-1 that could cause problems with synchronizing motor positions in
+     some situations has been fixed.
+
+February 2, 2006 - RELEASE 5.06.04-8
+
+New pprreeffiixx__AADDDDRR Variable For Macro Hardware Functions
+     The string value of the controller AADDDDRR parameter for macro hardware
+     controllers, as set on the DDevices screen of the eeddccoonnff hardware
+     configuration editor, is now available in the associated macro functions as
+     a llooccaall variable with the name pprreeffiixx__AADDDDRR.  See the _m_a_c___h_d_w help file for
+     details.
+
+Fix For Compumotor 6K With Negative Step Size
+     The ssppeecc code that supports the Compumotor 6K motor controllers will no
+     longer supply a negative argument to the DDRREESS command, as was the previous
+     behavior when ssppeecc's steps-per-degree motor parameter was negative.  (The
+     6K doesn't accept negative values for that parameter.)
+
+Fix For Broken ssppeecc Server Motor Initialization
+     A bug in the implementation of the new mmoottoorr__ppaarr(()) features introduced in
+     release 5.06.04-1, which prevented ssppeecc clients from connecting to ssppeecc
+     server motors that didn't have a configured encoder step-size parameter,
+     has been fixed.
+
+Fix For Server/Client Associative Array-Element Transfers
+     A coding bug in release 5.06.04-5, where ssppeecc server/client transfers for
+     single elements of associative arrays using pprroopp__ggeett(()) and pprroopp__ppuutt(()) were
+     broken, has been fixed.
+
+January 24, 2006 - RELEASE 5.06.04-7
+
+New uusseerr__ssccaann__pplloott Hook In Standard Macros
+     The standard ssccaann__pplloott macro, called for each point of a scan, now includes
+     a call of uusseerr__ssccaann__pplloott, which local users can define to perform special
+     actions before the standard __pplloott (normally defined as rrpplloott) macro is
+     called.  By default, uusseerr__ssccaann__pplloott is defined as an empty macro using
+     ccddeeff(()).
+
+Fix For TACO Serial Interface
+     A bug, where the TACO device-server timeout was not set correctly for baud
+     rates of 38400 and above, has been fixed.
+
+Bug Fix For Out-Of-Bounds Array Access
+     A bug, where assignment of a value to a data-array element indexed beyond
+     its dimensioned size could cause a segmentation fault on Solaris platforms,
+     has been fixed.
+
+January 23, 2006 - RELEASE 5.06.04-6
+
+Fix For TACO and EPICS Serial Interface
+     A bug, which would cause problems only with the Galil Optima, IMS MDrive
+     and New Focus 8753 motor controllers and only when used with the TACO or
+     EPICS serial-line interface, has been fixed.
+
+January 19, 2006 - RELEASE 5.06.04-5
+
+ssyymmss --vv Now Escapes Embedded Double Quotes
+     The built-in command ssyymmss has a --vv option to list symbols and values in a
+     format that can be used as input to ssppeecc.  Previously, symbol values with
+     embedded double-quote characters ("") were not escaped with a backslash,
+     thus making the ssyymmss output not suitable as further input.  That problem is
+     fixed.  Previous behavior was as follows:
+
+        11..FFOOUURRCC>> xx[[00]]==""aa \\""ssttrriinngg\\""""
+
+        22..FFOOUURRCC>> ssyymmss --vv xx
+
+        xx[[""00""]] == ""aa ""ssttrriinngg""""
+
+     New behavior is:
+
+        22..FFOOUURRCC>> ssyymmss --vv xx
+
+        xx[[""00""]] == ""aa \\""ssttrriinngg\\""""
+
+Bug Fix To Allow Macro Functions To Return Arrays
+     A bug, which prevented certain associative array representations from being
+     used as return values from macro functions, has been fixed.  An example of
+     what didn't work before is
+
+        ddeeff ffoooo22(()) ''{{
+                llooccaall xx[[]]
+                xx[[00]]==""tteesstt""
+                rreettuurrnn((xx))
+        }}''
+
+Associative Array Elements Keep String Value In Server/Client Calls
+     String-valued associative array elements that represent numbers (of the
+     form ""11ee66"" or ""00xx112233"", for example) will now maintain the string
+     representation when passed to and from ssppeecc server and clients using the
+     server/client protocol.  (See the _s_e_r_v_e_r help file for details on passing
+     associative arrays.)
+
+Associative Array Initialization Keeps String Value
+     Associative array initialization of the form
+
+        xx == [[ 00 :: ""11ee66"" ,, 11 :: ""00xx112233"" ]]
+
+     will now maintain the string representation of the array elements.
+     Previously, values were converted to numbers.
+
+December 16, 2005 - RELEASE 5.06.04-4
+
+New mmoottoorr__ppaarr(()) Option for Macro Motors
+     The new read-only parameter ""cchhaann00"" returns the motor number of the motor
+     associated with channel zero of the unit and module of the specified motor.
+     This feature allows for simplified implementation of general-purpose
+     calculational pseudomotors.
+
+New Configuration Parameter Available for Macro Hardware
+     The configuration editor now allows entry of an arbitrary string in the
+     AADDDDRR field for macro motors and counters.  The contents of this field can
+     be retrieved with the mmoottoorr__ppaarr(()) and ccoouunntteerr__ppaarr(()) option ""aaddddrreessss"".  All
+     macro-hardware motor and counter channels associated with the controller
+     will return the parameter.
+
+Fix For Recently Broken ccoouunntteerr__ppaarr(())
+     A coding bug in release 5.06.04-1 that broke ccoouunntteerr__ppaarr(()) for
+     device-dependent parameters has been fixed.
+
+Update For ttiimmeessccaann, llooooppssccaann Macros
+     The __ttiimmeessccaann macro used by both ttiimmeessccaann and llooooppssccaann has been modified to
+     take into account the duration of the optional sleep times when calculating
+     the range of the xx-axis for plotting.
+
+December 14, 2005 - RELEASE 5.06.04-3
+
+String-Valued Mnemonics Now Work With mmoottoorr__ppaarr(()) and ccoouunntteerr__ppaarr(())
+     Previously, the mmoottoorr__ppaarr(()) and ccoouunntteerr__ppaarr(()) functions only accepted
+     number-valued symbols as the first argument.  Now, string-valued symbols
+     containing the string representing the motor mnemonic are recognized.  That
+     is, the following syntax will now work as expected:
+
+        {{
+           llooccaall ss
+           ss == ""cchhii""
+           pp mmoottoorr__ppaarr((ss,, ""sstteepp__ssiizzee""))
+        }}
+
+Another Bug Fix For Recent mmoottoorr__ppaarr(()) Changes
+     Another bug associated with recent changes for the mmoottoorr__ppaarr(()) function,
+     which would result in a segmentation fault only in server mode and only
+     with string-valued optional motor parameters in the ccoonnffiigg file, has been
+     fixed.
+
+Update for ESRF DC Motor Device Server Support
+     The previous limit of four motors per controller for the ESRF (TACO) DC
+     Motor device server has been removed.
+
+Fixes For Negative Step Size For Several Motor Controllers
+     Possible problems when using a negative step size with the Newport ESP300,
+     the Newport 4000 series and the Compumotor SX motor controllers have been
+     addressed.
+
+December 7, 2005 - RELEASE 5.06.04-2
+
+Bug Fix For Recent mmoottoorr__ppaarr(()) Changes
+     A programming bug associated with changes in the previous ssppeecc release that
+     could cause a segmentation fault and could prevent the setting of a number
+     of optional motor parameters has been fixed.
+
+Fix For PSD-50M Number Of Channels
+     An oversight in the original code for the MBraun PSD-50M MCA, where the
+     number of channels could not be changed from the default 1024, has been
+     fixed.  The ""nnppttss"" option to mmccaa__ppaarr(()) can now be used to set or retrieve
+     the number of channels.  Note, the number of channels is only relevant to
+     data read out and the clear command.
+
+November 28, 2005 - RELEASE 5.06.04-1
+
+New Motor Parameter and Counter Parameter Features
+     Site-defined motor and counter parameters may now be included in the ccoonnffiigg
+     file.  These parameters will be accessible in ssppeecc via the standard
+     mmoottoorr__ppaarr(()) and ccoouunntteerr__ppaarr(()) functions.  Currently, the configuration
+     editor eeddccoonnff will read and save the parameters, but the parameters are not
+     viewable or editable with eeddccoonnff.  Thus the parameters must be added
+     manually.
+
+     In addition, arbitrary, temporary run-time motor and counter parameters may
+     be created using
+
+         mmoottoorr__ppaarr((mmnnee,,  ss,,  vv,, ""aadddd""))
+
+     where ss is the parameter name and vv is the initial parameter value.  The
+     same syntax works for ccoouunntteerr__ppaarr(()).  These temporary parameters disappear
+     when ssppeecc exits and after a rreeccoonnffiigg command.  This feature might be useful
+     with calculational macro pseudomotors (see the _m_a_c___h_d_w help file).
+
+New ""ttiimmeeoouutt"" Parameter For ddaattaa__ppiippee(())
+     By default, calls to the user code embedded in the ddaattaa__ppiippee(()) functions
+     are expected to return within one second.  This release includes a
+     configurable time-out parameter to accommodate special user needs.  The
+     command
+
+         ddaattaa__ppiippee((""ttiimmeeoouutt"",, sseecc))
+
+     changes the timeout to sseecc seconds for all subsequent newly created
+     ddaattaa__ppiippee(()) processes.  The command
+
+         ddaattaa__ppiippee((pprrooggrraamm,, ""ttiimmeeoouutt"",,  sseecc))
+
+     changes the timeout to sseecc seconds just for the named data-pipe process.
+     For both calls, if the sseecc argument is missing, the current timeout is
+     returned.
+
+Enhanced Sectors Scheme For ppssiicc Geometry
+     The sector transformations for the ppssiicc geometry have been rewritten to
+     perform an exhaustive search of possible angle transformations.  The new
+     search algorithm makes additional angle settings available, usually in
+     situations where one or more of the diffractometer angles are at special
+     positions, such as multiples of ppii over 2.  In addition, transformations
+     that violate motor limits are eliminated in the preference ranking schemes.
+     See the _p_s_i_c help file for details.
+
+New Theta-Fixed Mode For zzaaxxiiss
+     A new theta-fixed mode for use near 0000LL scattering vectors is implemented
+     for the zzaaxxiiss geometry.  See the ggeeoo__zzaaxxiiss..cc file included in the ssppeecc
+     distribution for implementation details.
+
+Fix For Theta-Fixed Mode In ffoouurrcc
+     A bug in the recently introduced theta-fixed mode for the ffoouurrcc geometry
+     has been fixed.
+
+New ""iinniittiiaalliizzee"" Option For XIA DXP Devices
+     A new ""iinniittiiaalliizzee"" mmccaa__ppaarr(()) option is available for the XIA DXP devices.
+     This option will reload the firmware and execute all the initialization
+     functions associated with startup and the rreeccoonnffiigg command.
+
+Fix For XIA DXP Devices
+     Users have reported from time to time that the XIA DXP libraries return the
+     error ""mmuusstt ssttoopp rruunn bbeeffoorree bbeeggiinnnniinngg aa nneeww rruunn"".  To avoid this message
+     and resulting error, ssppeecc now always calls the ddxxpp__ssttoopp__rruunn(()) DXP library
+     function before calling the ddxxpp__ssttaarrtt__rruunn(()) function.
+
+More Updates For Struck SIS 3820 Scalers
+     Another new ccoouunntteerr__ppaarr(()) option, ""tteesstt__ppuullssee__mmaasskk"", is implemented for the
+     Struck SIS 3820 scalers.  The value of the argument is used to program
+     register 0x218 (part of Struck's firmware release 1.0A).  This register
+     allows the 25 MHz internal test pulse train to be routed to any channel.
+     If a nonzero value is written to this register, ssppeecc will enable counter
+     test mode and the 25 MHz test pulses in the operation register (register
+     0x000) during counting.  It is then necessary to mask the channels that are
+     to count external signals using the mask written with this command.  Note,
+     ssppeecc will always mask channel 0 on the master unit, as ssppeecc uses that
+     channel to measure elapsed time based on the 50 MHz internal signal.
+
+Initial Support For ESRF MUSST As MCA
+     The Multipurpose Unit for Synchronization, Sequencing and Triggering
+     (MUSST) from the the ESRF Control Electronics group is now supported as an
+     MCA device in ssppeecc.  The interface is GPIB.
+
+Update For ESRF/TACO Serial Device Server
+     Previously, ^^CC aborts would turn off reading from the ESRF/TACO serial
+     device server, thus preventing macro-hardware implementation of calls such
+     as ""aabboorrtt__oonnee"" from working.  That problem has been fixed.  (Similar
+     behavior for the standard serial support and the EPICS serial support was
+     corrected in ssppeecc release 5.02.03.)
+
+Macro-Function Argument Precision Increased
+     All number values passed to macro-hardware macro functions are now sent
+     with nine-digit precision.  Previously, six-digit precision was used for
+     most calls.
+
+Macro-Function ccoouunntteerr__ppaarr(()) Support Enhanced
+     The macro-hardware counter macro functions now fully support the
+     ccoouunntteerr__ppaarr(()) facility.
+
+November 2, 2005 - RELEASE 5.06.03-11
+
+Nonfatal Bug In MVP-2001 Support
+     A bug in the support for the MicroMo MVP-2001 (present since the code was
+     created for ssppeecc release 5.05.01-3), where spurious error messages of the
+     sort ""sseerriiaall ddeevviiccee XX iissnn''tt ccoonnffiigguurreedd"" could be displayed during device
+     configuration, has been fixed.
+
+October 27, 2005 - RELEASE 5.06.03-10
+
+New rreeccoonnnneecctt Option For eessrrff__iioo(())
+     A new ""rreeccoonnnneecctt"" option is available with the eessrrff__iioo(()) function.  The
+     option is also available directly for the ESRF/TACO camera devices via
+     iimmaaggee__ppaarr(()).  Such an option allows remaking the connection without the
+     disruption caused by the complete hardware reinitialization associated with
+     rreeccoonnffiigg.  The command closes the connection to the device via the
+     ddeevv__ffrreeee(()) TACO function and reopens the connection to the same device
+     using the same timeout and UDP/TCP protocol via ddeevv__iimmppoorrtt(()).
+
+New Theta-Fixed Mode For ffoouurrcc
+     A new theta-fixed mode is available with the four-circle geometry code.
+     Currently, though, the sectors transformations are not implemented for this
+     mode.  Only sector 0 is available.
+
+Server/Client ssppeecc Motor Version Incompatibility Fixed
+     A problem where ssppeecc clients from releases 5.06.02-2 through 5.06.03-9 are
+     not compatible with ssppeecc motor servers from prior releases has been
+     addressed with this release.  Clients in the above range did work with ssppeecc
+     motor servers in the same range and will now work with servers from this
+     and later releases.  Clients from this release onward will work with all
+     previous ssppeecc motor server releases.
+
+ddeebbuugg Macro Fix
+     A syntax error introduced in the ddeebbuugg macro in release 5.06.03-8 has been
+     fixed.
+
+Mclennan Motor Fix
+     A programming error introduced in the code that supports the Mclennan
+     PM301/381, PM600 and PM608 motor controllers in release 5.06.03-2 that
+     would produce a segmentation fault when an attempt was made to move a motor
+     associated with one of the above controllers has been fixed
+
+October 17, 2005 - RELEASE 5.06.03-9
+
+Updates For Struck SIS3820 Scalers
+     New ccoouunntteerr__ppaarr(()) options ""iinnvveerrtt__iinnppuuttss"", ""iinnvveerrtt__oouuttppuuttss"", ""iinnppuutt__mmooddee""
+     and ""vveettoo__iinnhhiibbiittss"" are available to allow additional flexibility in
+     configuring the Struck SIS3820 VME Scaler module.  If passed with nonzero
+     arguments, the ""iinnvveerrtt__iinnppuuttss"" and ""iinnvveerrtt__oouuttppuuttss"" will have corresponding
+     bits set in the module's operation-mode register when the device is
+     programmed for counting.  The ""iinnppuutt__mmooddee"" option can be set to values from
+     0 through 6 to override the default input mode 2.  A value can be passed
+     using the ""vveettoo__iinnhhiibbiittss"" option that will be written to register 0x214 of
+     the module (only available with firmware 1.9 and greater).  Currently,
+     options are reset to default values after every start up and rreeccoonnffiigg.
+
+October 17, 2005 - RELEASE 5.06.03-8
+
+The ""ddiissaabbllee"" mmoottoorr__ppaarr(()) Option Now Passed To Macro Motors
+     The __ppaarr(()) function for macro motors will now be called when the ""ddiissaabbllee""
+     option to mmoottoorr__ppaarr(()) is called to change the disabled status of a motor.
+     See the _m_a_c___h_d_w help file for details.
+
+String-Valued Generic Motor Parameters Passed to Macro Motors
+     Previously, if the value of a generic motor parameter (one named mmiisscc__ppaarr__NN
+     were NN is from 1 to 6), was set to a string, the string value was not
+     passed to the __ppaarr(()) function of an associated macro motor.  That problem
+     has been fixed.
+
+Support For Tsuji PM4C-05A Motor Controller
+     ssppeecc now supports the Tsuji model PM4C-05A motor controllers.  The
+     controller can be used with ssppeecc over GPIB or serial interfaces.  The
+     controller is selected as TTSSUUJJII44CC on the MMotor screen of the configuration
+     editor.  The optional ""mmiisscc__ppaarr__11"" motor parameter, if set, will enable the
+     controller's hold-off mode for the associated axis.
+
+Support For New Focus 8751 Closed-Loop Picomotors
+     The support for the New Focus 87XX Picomotor Controller has been extended
+     to include support for the 8751 closed-loop controllers.  Such support
+     requires New Focus firmware version 1.5.4 or higher in the model 8752
+     ethernet controller.  ssppeecc will automatically detect the presence of the
+     closed-loop controllers.
+
+New Debugging Level For Server-Client Socket I/O
+     The new debugging bit 0x800000 will print only the socket I/O transactions
+     associated with ssppeecc server and client communications.  That output will no
+     longer be displayed with debugging bit 0x40 (64).
+
+October 3, 2005 - RELEASE 5.06.03-7
+
+New Option To rreemmoottee__ssttaatt(())
+     If a second argument of ""??""  is used with the rreemmoottee__ssttaatt(()) function on a
+     ssppeecc client, the return value is a string indicating the status of the
+     connection specified by the first argument.  Possible return strings are
+     ""uupp"", ""ttrryyiinngg"", ""lloosstt"" and ""nnoo ccoonnnneeccttiioonn"".  See the _s_e_r_v_e_r help file for
+     details.
+
+New Tracking Option For X19C ssuurrff Geometry
+     The X19C variation of the ssuurrff geometry now includes an option to turn off
+     sample height and detector height tracking with the incident angle motions.
+     This is the same option that has been available with the X22B and CMC ssuurrff
+     variations.  Tracking is generally turned off to speed alignment of the
+     motors associated with the incident angle.  The sseettttrraacckk macro can be used
+     to turn tracking on or off.  By default, tracking is on.
+
+Bug In Handling of SSVV__AABBOORRTT Fixed
+     Deficiencies in the original implementation of the handling of SSVV__AABBOORRTT
+     protocol command (which is intended to mimic a ^^CC action from the keyboard)
+     by a ssppeecc server have been addressed.  Previously, reception of an SSVV__AABBOORRTT
+     packet could cause the server to become stuck in a loop on reads of the
+     input socket stream and/or to fail to carry out the abort actions on
+     subsequent SSVV__AABBOORRTT packets.
+
+Recently Introduced ssppeecc Client Bugs Fixed
+     The release 5.06.03-1 update that was intended to allow servers to be
+     interchangeably specified by port number or ssppeecc version name had problems
+     that could cause a ssppeecc client to crash or not properly recognize an
+     existing connection.  Those problems have been fixed.
+
+September 19, 2005 - RELEASE 5.06.03-6
+
+Bug Fix For Compumotor 6K
+     A programming bug that could cause bad positions to be reported for the
+     Compumotor 6K motor controller has been fixed.
+
+September 17, 2005 - RELEASE 5.06.03-5
+
+Fix For XIA X10P Support
+     The changes in release 5.06.02-1 to add support for multiple CAMAC crates
+     inadvertently broke the support for XIA X10P parallel port MCA device.
+     That problem has been fixed.  (Note, the X10P support in ssppeecc does work
+     with the Radiant Vortex X-ray detector.)
+
+September 13, 2005 - RELEASE 5.06.03-4
+
+Fix For Compumotor 6K Encoder Support
+     ssppeecc now sends the EENNCCCCNNTT command to the Compumotor 6K motor controllers,
+     which is needed to enable encoder position read back.  ssppeecc now also
+     properly uses the configured encoder step-size parameter to determine the
+     user angle associated with the encoder position.
+
+August 20, 2005 - RELEASE 5.06.03-3
+
+Fix For FAST ComTec MCDLAP ISA Board MCA Support
+     A bug in the recently introduced support for the FAST ComTec MCDLAP that
+     prevent the ""ssoofftt__pprreesseett"" mode from working has been fixed.
+
+August 3, 2005 - RELEASE 5.06.03-2
+
+Fix For Compumotor 6K Support
+     A problem that prevented ssppeecc from recognizing certain eight-motor
+     Compumotor 6K controller configurations has been fixed.
+
+August 3, 2005 - RELEASE 5.06.03-1
+
+Updated For GCC Release 4
+     The ssppeecc code has been updated to compile cleanly with gcc 4.x, as used
+     with Fedora Core 4 Linux, Mac OS 10.4, etc.
+
+Pseudocounters Now Ignore Scale Factor
+     For pseudocounters (those counters with controller type NNOONNEE in the ccoonnffiigg
+     file), ssppeecc shouldn't change the value assigned to the corresponding
+     element of the SS[[]] scaler array.  However, in prior releases, ssppeecc would
+     divide the value in SS[[]] by the ccoonnffiigg-file scale factor on every call of
+     ggeettccoouunnttss.  Since the scale factor is normally set to one, this was seldom
+     an issue.  In any case, with this release, ssppeecc will ignore the scale
+     factor for pseudocounters.  The configured scale factor can be retrieved,
+     though, via the ""ssccaallee"" option to ccoouunntteerr__ppaarr(()).
+
+Two Issues With the ssppeecc Client Addressed
+     Previously, if a ssppeecc client configured to use ssppeecc server hardware was
+     started before the server was started, and if a user-level call, such as
+     rreemmoottee__ccmmdd(()), was also issued before the server started, when the server
+     finally did come up, the client would not connect to the server for the
+     configured hardware.  That problem has been fixed.
+
+     Also previously, if a server was specified by both a symbolic name, such as
+     hhoosstt::ffoouurrcc, and a port number, such as hhoosstt::66551100, ssppeecc would attempt to
+     create two connections, even if the first was using the same port number as
+     the second.  The two connections were problematic in some situations.  Now
+     the ssppeecc client will check if the two specifications refer to the same
+     server and use the same connection when appropriate.
+
+Support For FAST ComTec MCDLAP ISA Board MCA
+     Initial support for the FAST ComTec MCDLAP ISA Board MCA is now included
+     with ssppeecc.
+
+Fix For Mclennan Motor Controllers
+     Previously, errors were sometimes generated when changing base and slew
+     rates on a multiplexed Mclennan motor channel on a Model 381 or 608
+     controller if the new base rate was higher than the old slew rate.  ssppeecc
+     now makes sure the slew rate is reprogrammed first, when necessary.
+
+Fix For IMS Motor Controllers
+     A problem, where a failed serial communication link to an IMS motor
+     controller could lead to endless looping in ssppeecc, has been addressed.
+
+July 15, 2005 - RELEASE 5.06.02-9
+
+Support For Scientific Solutions GPIB Controllers Updated
+     The Scientific Solutions IEEE-488-CL/PCI GPIB controller is now supported
+     by ssppeecc on Linux.  The support is entirely built into the ssppeecc code and no
+     kernel driver is required.  The support shares code with the
+     register-compatible ISA GPIB controllers from Scientific Solutions
+     (formerly Tecmar).  Also, the code has also been updated to allow multiple
+     boards of this type (both ISA and PCI) to be used with ssppeecc simultaneously.
+     In addition, the timing in the polling loops of the code has been improved.
+
+Support For Scientific Solutions Labmaster PCI Timer/Counter
+     The Scientific Solutions Labmaster DPCI with Am9513-based timer/counter
+     functionality is now supported by ssppeecc.
+
+Update For Am9513-Type Counter/Timers
+     A number of updates have been made to the Am9513 code.  Multiple PC cards
+     with Am9513 chips may now be used.  An improved gating system is
+     implemented, although it requires adding an additional jumper between two
+     connector pins.  However, boards without the jumper will still work.  See
+     the _a_m_9_5_1_3 help file for details.
+
+Fix For Hecus ASA-32 MCA Card
+     Missing code in the Hecus ASA-32 MCA card support needed to set the time
+     preset when the MCA ""ssoofftt__pprreesseett"" mode is active has been put in place.
+
+Fix For nneewwffiillee Macro
+     An old bug in the nneewwffiillee macro where a typo in a variable name resulted in
+     a harmless but unintended reset of the EEPPOOCCHH variable when an existing file
+     was reused, has been fixed.
+
+June 12, 2005 - RELEASE 5.06.02-8
+
+Fixes For Unit Number Assignment
+     Previously, for a number of motor controller and counter types, when using
+     more than one controller of the same type, if the device associated with
+     one of the controllers couldn't be opened during hardware configuration,
+     the unit numbers assigned to additional controllers of the same type would
+     be shifted.  Although, this behavior was not normally encountered, it was
+     annoying to users when it did occur, which usually happened when ssppeecc
+     couldn't connect to controllers interfaced via Ethernet.  In this ssppeecc
+     release, the code for most of the motor controller types has been changed
+     to avoid the unit number reassignment.
+
+Bug Fix For End-Of-String For Several Socket-Interfaced Controllers
+     A bug in the end-of-string detection that affected only the Galil, New
+     Focus model 8752/53 and Compumotor 6K motor controllers, and only over
+     socket interfaces, has been fixed.  The bug could result in communication
+     problems with the controllers, although only problems with the 6K have so
+     far been reported.
+
+Accommodate TACO Plus TANGO Install For ESRF
+     The ssppeecc installation script now accommodates linking with both TACO and
+     TANGO libraries simultaneously, as is now needed in the ESRF instrument
+     control environment.
+
+May 22, 2005 - RELEASE 5.06.02-7
+
+New zeta Geometry
+     A new four-motor geometry for a diffractometer located at NSLS beamline X21
+     is included.  The geometry is called zzeettaa.  The geometry motors are called
+     nnuu, zzeettaa, ddeellttaa and tthheettaa.
+
+Support For OMS MAXv Motor Controller
+     This ssppeecc release supports the new Oregon Micro Systems MAXv VME motor
+     controller module.
+
+Fixes For Compumotor 6K
+     A problem with setting the axis definition on the Compumotor 6K to stepper
+     or server to reflect the ssppeecc hardware configuration file has been fixed.
+     Also, an issue where the unit number assignments would change if configured
+     controllers were unavailable has been addressed.
+
+May 4, 2005 - RELEASE 5.06.02-6
+
+Fix For Optional Motor Parameters With Linked Configurations
+     An old bug, where for linked configurations, the MMOOTTPPAARR optional parameters
+     encountered in the ccoonnffiigg file for motors not part of the active geometry
+     were assigned to the last motor that was part of the active geometry, has
+     been fixed.
+
+May 2, 2005 - RELEASE 5.06.02-5
+
+Fix For DAC Motor Timing
+     Short (< 10 millisecond) sleeps have been added after PCI- and ISA-board
+     DAC motors are set to allow the DACs time to settle, apparently required in
+     some configurations when more than one DAC channel on the same card is to
+     be ""mmoovveedd"" at the same time.
+
+Fix For Macro-Hardware Motor Start Command
+     A bug, where the first parameter sent with the ""ssttaarrtt__oonnee"" key in the call
+     to the macro motor ""__ccmmdd"" macro function had been inadvertently sent as the
+     final position after a backlash correction was applied, rather than final
+     position for the first part of a two-part move with backlash, has been
+     fixed.
+
+April 27, 2005 - RELEASE 5.06.02-4
+
+Option Added To OMS Multiplexing
+     The multiplexing support for the OMS motor controller, where a single
+     channel can be used to drive up to sixteen motors, has a new mmoottoorr__ppaarr(())
+     option available.  When set, the order in which the multiplexed channels
+     are moved will be reversed.  By default, when more than one motor is
+     commanded to move at the same time, the motors are moved in the channel
+     number order.  The command
+
+         mmoottoorr__ppaarr((mmnnee,, ""mmpplleexx__rreevveerrssee"",, 11))
+
+     will cause the motors to be moved in reverse channel number order, while
+
+         mmoottoorr__ppaarr((mmnnee,, ""mmpplleexx__rreevveerrssee"",, 00))
+
+     will restore the default order.
+
+April 25, 2005 - RELEASE 5.06.02-3
+
+Fix For Server-Mode ""ssttaattuuss//qquuiitt"" Property
+     A problem, where the server property ""ssttaattuuss//qquuiitt"" was often not sent to
+     registered clients when the server exited, has been fixed.
+
+April 24, 2005 - RELEASE 5.06.02-2
+
+Support For Parker/Compumotor 6K Motor Controller
+     This ssppeecc release includes support for the Parker/Compumotor 6K motor
+     controller over serial and Ethernet interfaces.  The code includes support
+     for encoders, servo motors and home searches, although some details of the
+     implementation of these features may require refinement.  The support for
+     these motor controllers includes a new ssppeecc feature for detecting an
+     emergency stop.  If any of the 6K limit or trigger inputs have been
+     preprogrammed using the LLIIMMFFNNCC or IINNFFNNCC firmware commands for behavior DD
+     (emergency stop), ssppeecc will check whether the corresponding bit is set
+     before starting a move and when a move has finished.  In the former case,
+     ssppeecc will warn the user that the emergency stop is active.  In the latter
+     case, ssppeecc will print a message that an emergency stop has occurred.
+
+New Motor Property
+     A new eemmeerrggeennccyy ssttoopp motor property has been incorporated into the ssppeecc
+     infrastructure.  Currently, the only motor controller which can trigger the
+     property is the Compumotor 6K.  ssppeecc's behavior on receiving an emergency
+     stop is much the same as hitting a limit.  However, unlike with an active
+     limit, ssppeecc will allow a new move to be started while the emergency stop is
+     active.
+
+New kkaappppaa Geometry Variation For Crystalogic Diffractometer
+     A new kkaappppaa geometry variation is included to support Crystalogic kappa
+     diffractometers where the detector angle is controlled by an elevator.  The
+     configuration is automatically selected if, in addition to the standard
+     ffoouurrcc and kkaappppaa motors, a motor with mnemonic xxllhhggtt is included in the
+     ccoonnffiigg file.  For such a configuration, the tttthh motor should be configured
+     with controller type NNOONNEE, as it will be a pseudomotor.  In addition, two
+     geometry parameters, gg__xxttaallooggiicc__dd11 (the vertical distance between the
+     instrument center and the driven point below the detector table) and
+     gg__xxttaallooggiicc__dd22 (the horizontal distance between the instrument center and
+     the detector table vertical axis) are included with the standard geometry
+     macro files.
+
+Further Improvements For Struck SIS 1100/3100 V2 Driver
+     Additional modifications to the recently updated support for Struck's
+     version 2.0 Linux driver for their SIS 1100/3100 PCI-to-VME controller
+     turned out to be needed.
+
+April 22, 2005 - RELEASE 5.06.02-1
+
+Initial Support For Multiple CAMAC Controllers
+     This release of ssppeecc allows up to four CAMAC crate controllers to be used
+     at the same time, however, with a number of limitations.  (Previously, only
+     one crate controller could be used.)  Currently, except for the Jorway 73A,
+     the KS3929 and the DSP 6001 controller models, only one instance of a
+     particular type or model of a controller can be used at a time.  Also, so
+     far the only CAMAC modules that can be installed in other than the first
+     crate (crate 0) are the XIA DXP-4C/4C2X MCA, KS-3655, KS-3610, QS-450,
+     RTC-018, KS-3112, KS-3116, KS-3195 and E250 modules.  In addition, the
+     user-level functions ccaa__ggeett(()), ccaa__ppuutt(()), ccaa__ffnnaa(()) and ccaa__ccnnttll(()) currently
+     only work with the first crate.  The multiple crate support will be
+     extended for multiple identical controllers, additional modules and to the
+     user-level functions in the future as needed.
+
+     To configure additional controllers from the eeddccoonnff configuration editor
+     (invoked by the ccoonnffiigg macro), use ^^FF or ^^BB on the CAMAC entry of the
+     IInterfaces screen.  To configure modules in the additional crates, type CC
+     from the CAMAC crate screen to cycle through the crates associated with
+     each controller.  For scaler modules installed in other than the first
+     CAMAC crate, the crate number must be entered in the same field as the unit
+     number on the SScaler screen of the configuration editor using the
+     crate/unit notation, as in 1/0 for crate 1, unit 0.  For motor modules
+     installed in other than the first CAMAC crate, the crate number is entered
+     as [crate/]unit/channel in the unit/[module/]channel field of the motor
+     screen.
+
+     If only one crate is configured, the ccoonnffiigg file syntax is the same as
+     before.  When multiple crates are configured, additional information
+     specifying crate number for each module and controller is added to the
+     ccoonnffiigg file.
+
+Updated Code For CAMAC DAC Modules
+     The support for the CAMAC KS-3112, KS-3116, KS-3195 and E250 (used as DAC
+     motors) has been rewritten to use the ""nneeww"" (as of 1995) motor formalism.
+     This change should be invisible for the most part, but does allow these
+     motors to be accessed via the ssppeecc server.  Also, the optional unit/channel
+     configuration feature is now available for these motor channels.
+
+Fix For XIA DXP CAMAC Module
+     A bug that prevented the XIA DXP parameters from being modified using the
+     mmccaa__ppaarr(()) function where ssppeecc incorrectly indicated the parameter was ""rreeaadd
+     oonnllyy"", has been fixed.
+
+Improved Memory Mapping For Struck SIS 1100/3100
+     The Struck SIS 1100/3100 PCI-to-VME controller on Linux has room for
+     sixty-four 4 megabyte memory maps.  Previously, if all were used, an
+     attempt to map a new region would fail.  In this update, ssppeecc will now
+     reuse mapping registers in a circular fashion, thus making it possible to
+     access the entire 4 gigabyte A32 VME address space.
+
+Fix For Extra Echo In Piper Mode
+     A recent bug (introduced with the piper mode fix in ssppeecc release
+     5.05.05-7), that caused commands to be echoed twice when the file
+     descriptor option to the --pp command line option was zero, has been fixed.
+
+Fix For Start-up With No ccoonnffiigg File
+     Although there is little reason to start ssppeecc with no ccoonnffiigg file, a bug
+     which would cause ssppeecc to crash in that situation has been fixed.
+
+April 13, 2005 - RELEASE 5.06.01-8
+
+Fix For Hecus ASA-32 MCA Card
+     A bug in the support for the Hecus ASA-32 MCA ISA card that affected the
+     clear operation has been fixed.
+
+April 4, 2005 - RELEASE 5.06.01-7
+
+Update For Struck SIS 1100/3100 V2 Driver
+     Support for the Struck SIS 1100/3100 PCI-to-VME controller on Linux has
+     been updated to work with Struck's new Version 2 driver.  The new driver
+     supports Linux 2.6 kernels.  When configuring ssppeecc to work with the new
+     driver, note the default device name for the first controller has changed
+     from //ddeevv//ssiiss11110000 to //ddeevv//ssiiss11110000__0000rreemmoottee.
+
+March 21, 2005 - RELEASE 5.06.01-6
+
+Fix For PI E710 Motor Controller
+     An adjustment to the code for the Physik Instrumente Model E710 Picomotor
+     Controller has been made to allow it to work with socket-to-serial devices.
+
+March 10, 2005 - RELEASE 5.06.01-5
+
+More Improvements For Micos Motor Controllers
+     The Micos VENUS-2 compatible motor controllers on occasion send the same
+     response twice, such that subsequent commands and responses become
+     unsynchronized.  ssppeecc now examines responses to most commands to make sure
+     the response contains the correct number of arguments.  If the number of
+     arguments is incorrect, ssppeecc will flush the input buffer for the Micos
+     controller and send the command again in order to reestablish synchronized
+     communication.  (This code is considered a work around for a defect in the
+     Micos firmware.)
+
+March 9, 2005 - RELEASE 5.06.01-4
+
+Enhanced Powder-Mode Macros
+     The powder-mode macros will now return the rocked motor to its position at
+     the start of the scan, taking into account the backlash correction, if
+     needed.  (See the _s_e_t_p_o_w_d_e_r help file for more information.)
+
+Additions To ppssiicc Macros
+     The standard ppssiicc geometry macros now include suitable definitions for the
+     traditional ffoouurrcc macros aann and uuaann, which move ddeell and eettaa; ppll and uuppll,
+     which move cchhii and pphhii; and tthh22tthh, which scans ddeell and eettaa.
+
+Fix For MicroMo MVP-2001 Motor Controller
+     A bug in the support for the MicroMo MVP-2001 motor controller that
+     prevented motor channels numbered ten and above from working has been
+     fixed.
+
+March 3, 2005 - RELEASE 5.06.01-3
+
+Improvements For Micos Motor Controllers
+     This release includes some new code to address communication
+     synchronization issues with the Micos VENUS-2 compatible motor controllers
+     that have been observed after ^^CC aborts.
+
+Another Fix For EPICS Motors Powder-Mode Behavior
+     The renewed attention (see below) to powder-mode behavior for EPICS motors
+     revealed that the backlash parameter for the EPICS powder-mode motor, set
+     to zero during a powder-mode scan, did not get restored at the end of the
+     scan.  Such behavior has always been the case, but is now fixed.
+
+February 24, 2005 - RELEASE 5.06.01-2
+
+Fix For EPICS Motors Powder-Mode Behavior
+     The recent addition of the new powder-mode mmoottoorr__ppaarr(()) parameters in ssppeecc
+     release 5.05.05-1 adversely affected use of powder mode with EPICS motors.
+     This release should correct the problem.
+
+February 16, 2005 - RELEASE 5.06.01-1
+
+Fix For ssppeecc Exiting On Start Up On Macro Hardware Macro Errors
+     Previously, during the initial hardware configuration for the case of macro
+     hardware (see the mmaacc__hhddww help file), errors in the macro functions
+     associated with the hardware that would normally cause ssppeecc to reset to
+     command level would cause ssppeecc to exit.  Now, ssppeecc will continue running,
+     although the particular macro function call that contained the error will
+     exit.
+

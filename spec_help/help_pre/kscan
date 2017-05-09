@@ -1,0 +1,24 @@
+kscan                                 macro                                kscan
+
+NAME
+     kkssccaann - scan along the KK-axis in reciprocal space
+
+SYNOPSIS
+
+     kkssccaann ssttaarrtt eenndd iinntteerrvvaallss ttiimmee
+
+DESCRIPTION
+
+     kkssccaann is a linear scan in reciprocal space along the KK-axis from ssttaarrtt to
+     eenndd. The step size is ((ssttaarrtt--eenndd))//iinntteerrvvaallss.  The number of data points
+     collected will be iinntteerrvvaallss++11.  Count time is given by ttiimmee, which if
+     positive, specifies seconds and if negative, specifies monitor counts.
+
+EXAMPLE
+
+     kkssccaann ..99 11..11 1100 1100
+
+SEE ALSO
+
+     _h_s_c_a_n _l_s_c_a_n _h_k_l_s_c_a_n _h_k_c_i_r_c_l_e _h_l_c_i_r_c_l_e _k_l_c_i_r_c_l_e _h_k_r_a_d_i_a_l _h_l_r_a_d_i_a_l _k_l_r_a_d_i_a_l
+

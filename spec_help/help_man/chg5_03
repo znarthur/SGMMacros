@@ -1,0 +1,520 @@
+.TH "changes" "spec 5.03 Release Notes" "08/01/12" "chg5_03.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 5.03
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg5_03.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2003 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 5.03 Release Notes" "08/01/12" "chg5_03.rst 6.1  08/01/12 CSS"
+.
+.SH "July 17, 2003 \- RELEASE 5.03.02\-1"
+.rs
+.SH "Bug Fix For IMS MDrive Motor Numbering"
+.sp
+A bug in motor numbering for the IMS MDrive motors in party\-line mode
+has been fixed.
+The correspondence between
+\fBspec\fP
+\fBconfig\fP
+file motor
+channel numbers
+and physical motor address was intended to be channels
+1, 2, ..., 9, 10, 11, 12, ... correspond to physical
+motor addresses 1, 2, ..., 9, A, B, C, ...
+The bug was that addresses for channels 10 and above were shifted by
+one, so that channel 10 corresponded to address B, etc.
+The bug has been fixed, and the channel numbering is now as intended.
+Sites that have configured MDrive motor channels 10 and above should
+edit the
+\fBconfig\fP
+file by hand or via the
+\fBedconf\fP
+configuration editor and add one to those MDrive motor channels
+before running this new \fBspec\fP release.
+.SH "July 3, 2003 \- RELEASE 5.03.02"
+.rs
+.SH "New File Argument Available for \fBarray_dump()\fP and \fBdata_dump()\fP"
+.sp
+An optional initial argument to the
+\fBarray_dump()\fP
+and
+\fBdata_dump()\fP
+functions can now be used to specify an output file, which
+makes it unnecessary to use the
+\fBon()\fP
+and
+\fBoff()\fP
+functions or related macros when writing arrays (or data groups) to a file.
+.SH "\fBarray_read()\fP Now Respects Array \fBWise\fP\-ness"
+.sp
+The
+\fBarray_read()\fP
+function will now assign values read from a file
+by rows or by columns, depending on whether the array argument
+is a row\-wise or column\-wise array.
+Previously,
+\fBarray_read()\fP
+would only assign by rows.
+See the
+\fI\%arrays\fP help file for more information.
+.SH "\fB\(dqauto_clear\(dq\fP Implemented For Additional MCAs"
+.sp
+The
+\fB"auto_clear"\fP
+option to
+\fBmca_par()\fP,
+which instructs \fBspec\fP to clear the MCA prior to starting,
+is now implemented for additional MCA models.
+The MCA devices for which
+\fB"auto_clear"\fP
+is newly implemented
+are the Nucleus PCA II, PCA\-3, Multiport and
+Microfast;
+Fast Comtec MCD; MBraun PSD\-50M;
+Silena 7328 and 7329; Roentec XFlash MAX;
+Labo 2400; the EPICS MCA record and the TACO (ESRF) MCA device server.
+Local macros that explicitly clear the MCA before each run should be
+revised to eliminate the extra overhead of clearing the device twice.
+Devices for which the auto\-clear mode had already been implemented are
+the XIA DXP, Ortec Trump MCA (ISA and PCI) and MCS (PCI),
+Seiko EG&G MCA 7700 and
+Amptek 8000 and 8000A.
+Note, the
+\fB"auto_clear"\fP
+mode is set at start up and after each hardware
+reconfiguration.
+.SH "\fBw21v\fP Geometry Update and Consolidation"
+.sp
+The
+\fBw21v\fP
+geometry has been updated to include variations for the ESRF ID10B
+and ESRF D32 beamlines.
+Also the geometry from
+\fBgeo_gmci.c\fP
+has been folded into
+\fBgeo_w21v.c\fP.
+The geometry names
+\fBw21v\fP,
+\fBid10b\fP,
+\fBgonio\fP
+and
+\fBgmci\fP
+are recognized and select the different motor mnemonics and psuedomotors
+associated with each implementation of the otherwise similar goniometers.
+See the
+\fBgeo_w21v.c\fP
+source file and the
+\fBw21v.src\fP
+macro file in the \fBspec\fP distribution for details.
+.SH "Support For PMC DCX\-PCI300 Motor Controller"
+.sp
+\fBspec\fP now supports the PMC model DCX\-PCI300 motor controller,
+a PCI\-bus motor controller card that can control up to eight motors.
+.SH "Minor Newport MM4000/4005/4006 Update"
+.sp
+Possible loss of precision in communicating motor positions with
+the Newport MM4000/4005/4006 motor controllers has been addressed.
+\fBspec\fP now uses nine\-digit precision (previously it was six)
+when sending motor positions, and rounds (rather than truncating) the lowest
+order digit (after multiplying the user\-units position by the configured
+step size) when reading positions.
+It\(aqs not expected users will notice a difference.
+.SH "June 12, 2003 \- RELEASE 5.03.01\-5"
+.rs
+.SH "SCIPE Counters\-Only Support"
+.sp
+The SCIPE detector device units can now be configured as either
+counter/timers or counters only, thus allowing multiple SCIPE
+servers to be included in the counter configuration.
+(\fBSCIPE\fP
+is a protocol for device control
+developed at the DND CAT at the Advanced Photon Source.)
+.SH "June 4, 2003 \- RELEASE 5.03.01\-4"
+.rs
+.SH "Improved Sleeping For Short Intervals"
+.sp
+The \fBspec\fP C code for sleep times less than
+ten milliseconds has been revised.
+On most platforms where \fBspec\fP is used, the system calls that
+allow a process to sleep by releasing control of the processor
+have an effective resolution of
+ten milliseconds.
+Previously, \fBspec\fP implemented
+sleeps for intervals smaller
+than 10 milliseconds only on
+\fBLinux\fP
+platforms using a user\-level busy\-wait loop.
+The revised code still uses a busy\-wait loop, but is
+a bit more accurate
+and is now available on
+all platforms, not just
+\fBLinux\fP.
+Both
+user\-level sleeps with the
+\fBsleep()\fP
+function and built\-in sleeps, like those used while waiting
+for hardware to complete,
+use the new code.
+Note, the default hardware poll interval, set with
+\fBspec_par("hdw_poll_interval")\fP,
+is ten milliseconds.
+Because
+that is above the busy\-wait threshold, the sleeps
+may take longer due to operating system latencies.
+To minimize per\-point dead time during scans (at the cost of
+increasing the CPU load
+imposed by \fBspec\fP), one can set the hardware poll interval to values less
+than the default ten milliseconds.
+.SH "Use Of Calculational Pseudomotors Made More Robust"
+.sp
+For the calculational pseudomotors introduced in \fBspec\fP release 5.03.01,
+if the
+\fB_calc()\fP
+macro function called
+the built\-in functions
+\fBwait()\fP
+or
+\fBread_motors()\fP
+either directly or indirectly through
+other macros,
+macro recursion would result.
+It is inappropriate for the
+\fB_calc()\fP
+macro function to call those functions or any functions
+that cause hardware access.
+Calls to
+\fBwait()\fP
+or
+\fBread_motors()\fP
+from the
+\fB_calc()\fP
+macro function are now blocked, and
+an error message will be printed when
+such calls are attempted.
+See the
+\fI\%mac_hdw\fP help file for details.
+.SH "Shared\-Array Utility Code Now Included In the Distribution"
+.sp
+The file
+\fBsps.c\fP
+is now included in the standard distribution.
+The C code in that file provides functions for connecting to
+\fBspec\fP shared data arrays.
+See the code in that file and the
+\fBsps_debug\fP
+target in the
+\fBmake.dist\fP
+file for examples of how to use the interface.
+.SH "Support for MEN M\-41 VME Counter/Timer"
+.sp
+\fBspec\fP now supports the MEN Mikro Electronik GmbH M\-Bus model
+M\-41 Counter/Timer.
+The current support is based on the M\-41 module being installed
+in an MEN A201S 6U VMEbus Carrier Board.
+Only counting to time presets is supported for this hardware.
+Also, if the
+scale factor for the time\-base channel is set to
+8e6 in the
+\fBconfig\fP
+file,
+\fBspec\fP will use the internal
+time base, which allows count times up to just
+over 2 seconds.
+For any other scale factor, \fBspec\fP will assume an external time base is
+provided with the scale factor indicating the rate.
+Maximum count times are determined by how long it takes to overflow the
+24\-bit scaler with the given time base.
+.SH "Update For Updated EPICS Motor Record With Encoders"
+.sp
+Changes in EPICS motor record release 4.5 required modifications
+in \fBspec\fP
+that affect use of EPICS motors with encoders.
+Those modifications are included in this release.
+.SH "Bug Fix For \fBunix()\fP Function"
+.sp
+A bug, apparently introduced in release 5.01.02\-9,
+where about twenty repeated calls of the
+\fBunix()\fP
+function with two or more arguments inside a curly bracketed loop would
+result in the
+\fB"Out of temporary cells"\fP
+error message, has been fixed.
+.SH "\fBarray_fit()\fP Reenabled"
+.sp
+An accidental disabling of the
+\fBarray_fit()\fP
+function in late 1996 has been reversed.
+.SH "Bug Fix For Screw\-Type \fBsixc\fP Geometry"
+.sp
+A bug, introduced in release 5.02.03\-2, which broke use of
+the gamma pseudomotor for the screw\-type six\-circle configuration,
+has been fixed.
+.SH "April 17, 2003 \- RELEASE 5.03.01\-3"
+.rs
+.SH "EPICS and TACO \fBspec\fP Libraries Now Included With All Distributions"
+.sp
+The \fBspec\fP libraries
+needed for the EPICS
+and TACO environments
+(\fBlibEPICS.a\fP
+and
+\fBlibESRF.a\fP,
+respectively)
+are now
+included with all \fBspec\fP
+distributions.
+.SH "New \fB\(dqimmcat2\(dq\fP Binary Output Format"
+.sp
+Another custom binary
+output format
+called
+\fB"immcat2"\fP
+is available
+for the
+\fBfmt_write()\fP
+function.
+Although the details of the format may be of limited interest to general
+\fBspec\fP users, the method of implementing a custom output format
+as illustrated in the
+\fBfmt_immcat.c\fP
+source file may be of didactic value.
+.SH "Recent Bug With Near\-Zero Acceleration Fixed"
+.sp
+A bug, introduced in \fBspec\fP release 5.03.01, where
+an acceleration parameter
+set with
+\fBmotor_par()\fP
+to be between zero and one
+could result in
+a floating point fault and a core dump, has been fixed.
+.SH "Follow Up Fix On Motor Position Rounding Bug"
+.sp
+The fix of an obscure motor rounding bug in \fBspec\fP release 5.02.03\-5
+had the
+unintended consequence of sometimes
+causing nonzero user angles with nonzero offsets
+to print with decimal parts on the
+order of 1e\-9 and angles at zero to print with decimal parts on the
+order of 1e\-16.
+Those artifacts no longer appear.
+.SH "April 6, 2003 \- RELEASE 5.03.01\-2"
+.rs
+.SH "Fix For \fBfile_info()\fP Group Access Test"
+.sp
+Previously, when testing file read, write or execute access
+permissions, the
+\fBfile_info()\fP
+function compared only the group mode bits with the user\(aqs
+effective group ID, but did not examine the groups to which the user could
+belong, as configured in
+\fB/etc/group\fP.
+The
+\fBaccess()\fP
+system call is now used to check permissions rather than the mode
+bits, resulting in a more comprehensive group\-access test.
+.SH "Support For the National Instruments PCI 6601/6602 Counter/Timers"
+.sp
+The National Instruments PCI 6601/6602 counter/timers are now supported
+by \fBspec\fP.
+These cards offer four and eight 32\-bit counter channels, respectively.
+Any channel can be designated as the preset timer.
+See the
+\fI\%ni660x\fP help file for details.
+.SH "Support For the Caen V260 VME Counters"
+.sp
+\fBspec\fP now supports the Caen V260 VME counters.
+This module has sixteen 24\-bit counters.
+\fBspec\fP will pair adjacent channels to form 48\-bit counters
+if the number of counters
+on the
+\fBD\fPevices
+screen of the configuration editor is eight or less.
+Otherwise, up to 16 24\-bit counters will be available.
+.SH "Support For the Caen V462 VME Gate Generator"
+.sp
+\fBspec\fP now supports the Caen V462 VME gate generator as
+a timer.
+This module is not recommended due to its limitations.
+Its maximum count time is only ten seconds.
+Also, in the event a count is interrupted with
+\fB^C\fP
+or
+\fBstop()\fP,
+the module can\(aqt be reprogrammed until the current gate time
+has elapsed.
+The module has two channels.
+\fBspec\fP use channel 0 or 1
+according to value in the NUM column on the
+\fBD\fPevices
+screen of the
+configuration editor.
+.SH "More Fixes For MDrive Motor Controller"
+.sp
+The IMS MDrive 17/23/34 motor controller support
+has been revised yet again to better handle encoders and stall detection.
+To aid in tuning, the following generic
+optional motor parameters can
+be set from the configuration editor.
+The values will be sent to the MDrive
+controllers as follows (the corresponding MDrive command is shown
+in parenthesis):
+.sp
+.RS 4m
+.nf
+Generic parameter 1 \- Run current in percent (RC)
+Generic parameter 2 \- Hold current in percent (HC)
+Generic parameter 3 \- Hold current delay time in msec (HT)
+Generic parameter 4 \- Settling time in msec (MT)
+.fi
+.sp
+.RE
+.sp
+Also, the standard optional motor parameter
+\fB"DC following error"\fP
+can
+now be configured.
+If set, its value will be sent as the stall factor (SF command).
+.SH "March 16, 2003 \- RELEASE 5.03.01\-1"
+.rs
+.SH "New Error Message When Constraints Disallow \fBpsic\fP Angles"
+.sp
+If angle cut points or a sector choice rule out the calculated angles for
+a particular reciprocal space position for the
+\fBpsic\fP
+geometry, \fBspec\fP now prints out an error message.
+Previously, an error value was returned by the
+\fBcalc()\fP
+function, but there was no error message from the C code.
+.SH "New Timing Options For Compumotor SX Motor Controller"
+.sp
+New
+\fB"wdelay"\fP
+and
+\fB"rdelay"\fP
+options to
+\fBmotor_par()\fP
+allow configuring delays before commands are sent to or replies are read
+from the Compumotor SX motor controller.
+Units for the delays are seconds.
+Delays of 10 msec or so appear necessary on faster computers
+to communicate reliably with the motor controller.
+.SH "Adjustments For Phytron Motor Controller"
+.sp
+As \fBspec\fP support for newer models of the Phytron motor controllers
+has been added over the years,
+some commands were included that did not work
+with older Phytron firmware.
+Adjustments
+as to what commands are sent based on firmware version
+have been made,
+and the older Phytron models now work
+with the current \fBspec\fP release.
+.SH "Fixes For MDrive Motor Controller"
+.sp
+The preliminary support for the IMS
+MDrive 17/23/34 motor controllers has been revised to cope with
+incompatible updates made by IMS to the controller firmware.
+.SH "Driver For PIO device Updated For \fBLinux\fP 2.4 Kernels"
+.sp
+The
+\fBpio.c\fP
+driver used with the ILL 2D detector has been updated to work with
+version 2.4
+\fBLinux\fP
+kernels.
+.SH "March 16, 2003 \- RELEASE 5.03.01"
+.rs
+.SH "New Macro Hardware Facility"
+.sp
+A major new feature in this release of \fBspec\fP is macro hardware support.
+This feature combines features of the built\-in C code for motor control
+and counter control with the flexibility of user\-defined
+macro functions.
+In addition, the macro motor support has special capabilities to ease
+the creation of calculational pseudomotors (that is, pseudomotors
+with positions that depend on real motors).
+See the
+\fI\%mac_hdw\fP help file for implementation details.
+.SH "Better Handling Of Recalcitrant Hardware"
+.sp
+When motors won\(aqt stop,
+the
+\fBsync\fP
+command will
+now clear \fBspec\fP\(aqs internal busy flags for the associated controller
+to avoid the endless waiting for the controller to indicate the motors
+have stopped.
+The
+\fBsync\fP
+command will now also clear the internal busy flags for non\-responsive
+timers.
+Finally,
+\fBspec\fP is now also more willing to quit when busy hardware is
+not responding.
+.SH "Previous \(dqFix\(dq To \fBedconf\fP Step\-Size Handling Reversed"
+.sp
+A change made in \fBspec\fP release 3.02.01 (Feb 1995)
+to the
+\fBedconf\fP
+hardware configuration editor,
+where modifying
+the motor step\-size parameter would change the dial position
+parameter, but leave
+the motor accumulator constant, has been reversed.
+The dial position will now remain fixed, and the motor accumulator
+value will be adjusted when the step\-size is changed.
+The reason for the code change is that
+a modification to the step size seems more likely to be made
+in the delicate situation where
+a motor or motor controller is replaced and the
+position of the motorized component should remain unchanged.
+The case where the motor controller position register should remain
+constant seems less likely and less critical.
+Users with strong feelings otherwise, please contact CSS.
+.SH "New Facility to Support the ANKA RST Gamma Software"
+.sp
+\fBspec\fP now supports yet another control system that provides an
+interface to beamline control hardware via a unique protocol.
+This system is in use at the ANKA synchrotron in Karlsruhe Germany, and
+is an industrial control software called Gamma from
+RST Industrie Automation GmbH.
+Besides the new motor and counter/timer controller types,
+the interface has new user\-level functions in \fBspec\fP.
+The new functions are called
+\fBanka_put()\fP,
+\fBanka_get()\fP
+and
+\fBanka_par()\fP,
+but are only visible if the Gamma hardware or connection
+parameters are configured.
+See the
+\fI\%anka\fP help file for details.
+.SH "New Configuration Option For Hardware\-Related \fBspec_par()\fP Options"
+.sp
+Certain hardware\-related
+\fBspec_par()\fP
+options
+can now be set in the
+\fBconfig\fP
+file.
+See the
+\fI\%spec_par\fP help file for syntax details.
+.SH "Support For Amptek Pocket MCA 8000/8000A"
+.sp
+\fBspec\fP now supports the Amptek Pocket MCA 8000/8000A over a serial interface.
+See the
+\fI\%amptek\fP help file for details.
+.SH "Support For New Focus Model 87XX Picomotor Controller"
+.sp
+\fBspec\fP now supports the New Focus Model 8750 and 8753 Picomotor
+controller modules over a serial interface.
+

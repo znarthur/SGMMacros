@@ -1,0 +1,223 @@
+.TH "nicomp" "hardware" "08/01/12" "nicomp.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+nicomp \- Nicomp Model TC\-100 Autocorrelator
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)nicomp.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1991,1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "nicomp" "hardware" "08/01/12" "nicomp.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Nicomp TC\-100 Autocorrelator is selected in the config file as
+.sp
+.RS 4m
+\fBRS_TC100 = /dev/ttyXX  baud_rate\fP
+.RE
+.sp
+When running \fBedconf\fP (or the \fBconfig\fP macro),
+use the \fBMCAs\fP section of the \fBDevices\fP screen
+to select the Nicomp autocorrelator.
+.SH "FUNCTIONS"
+.rs
+.sp
+The \fBmca_par()\fP function controls the correlator behavior as follows:
+.RS 0m
+.HP 5m
+."
+\fBmca_par("clock")\fP
+\- 
+returns the value of the current clock time parameter in microseconds.
+.HP 5m
+."
+\fBmca_par("clock", value)\fP
+\- 
+sets the clock time parameter.  The units for
+\fBvalue\fP are microseconds.  Valid clock times are of the form
+\fBX.XeY\fP where \fBX.X\fP ranges from 0.1 to 1.6 and \fBY\fP ranges from 0 to 5.
+Values outside these bounds will be rounded to the closest allowed value.
+The new value takes effect on the next \fBrun\fP command.
+.HP 5m
+."
+\fBmca_par("prescale")\fP
+\- 
+returns the value of the prescale factor.
+.HP 5m
+."
+\fBmca_par("prescale", value)\fP
+\- 
+sets the value of the prescale factor.
+Valid prescale values are from 1 to 99.
+The new value takes effect on the next \fBrun\fP command.
+.HP 5m
+."
+\fBmca_par("dbase_mode")\fP
+\- 
+returns the state of the baseline mode.
+A return value of 1 means delayed baseline mode is in effect.
+A return value of 0 means delayed baseline mode is off.
+.HP 5m
+."
+\fBmca_par("dbase_mode", 1|0)\fP
+\- 
+sets the state of the baseline mode.
+A value of 1 turns on delayed\-baseline mode.
+A value of 0 turns it off.
+The new mode takes effect on the next \fBrun\fP command.
+.HP 5m
+."
+\fBmca_par("dbase")\fP
+\- 
+returns the value of the delayed baseline from the last data
+obtained using \fBmca_get()\fP.
+.HP 5m
+."
+\fBmca_par("cbase")\fP
+\- 
+returns the value of the calculated baseline
+from the last data obtained using \fBmca_get()\fP.
+.HP 5m
+."
+\fBmca_par("tcnts")\fP
+\- 
+returns the value of the total\-counts monitor channel
+from the last data obtained using \fBmca_get()\fP.
+.HP 5m
+."
+\fBmca_par("pcnts")\fP
+\- 
+returns the value of the total\-prescaled\-counts monitor channel
+from the last data obtained using \fBmca_get()\fP.
+.HP 5m
+."
+\fBmca_par("rtime")\fP
+\- 
+returns the value of the run\-time monitor channel
+from the last data obtained using \fBmca_get()\fP in seconds.
+.HP 5m
+."
+\fBmca_par("clear")\fP
+\- 
+clears the correlator.
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+sends the current clock\-time, prescale and delayed\-baseline
+parameters to the correlator and starts the correlator.
+The \fBtcount()\fP and \fBmcount()\fP functions also start the correlator.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+stops the correlator.
+The correlator is also halted
+when count intervals specified by
+\fBtcount()\fP or
+\fBmcount()\fP have elapsed, or when counting is aborted using a \fB^C\fP.
+.HP 5m
+."
+\fBmca_par("plot")\fP
+\- 
+reads off the real\-time data plot from the running correlator.
+The data obtained is a very low resolution version
+of the correlation function.
+.HP 5m
+."
+\fBmca_get(g, e)\fP
+\- 
+reads the current data from the correlator, and stuffs
+the data into the data group \fBg\fP element \fBe\fP.
+.RE
+.SH "MACROS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBclr\fP
+\- 
+clears the correlator.
+.HP 5m
+."
+\fBrun\fP
+\- 
+starts the correlator.
+.HP 5m
+."
+\fBhalt\fP
+\- 
+stops the correlator.
+.HP 5m
+."
+\fBget\fP
+\- 
+reads the correlator data and plots it.
+.HP 5m
+."
+\fBclk [clock_time]\fP
+\- 
+sets the clock time.
+The macro prompts for a value if it is not given as an argument.
+.HP 5m
+."
+\fBpre [prescale_factor]\fP
+\- 
+sets the prescale factor.
+The macro prompts for a value if it is not given as an argument.
+.HP 5m
+."
+\fBdbase [0|1]\fP
+\- 
+sets delayed\-baseline mode.
+The macro prompts for a value if it is not given as an argument.
+.HP 5m
+."
+\fBcbase\fP
+\- 
+prints the value of the calculated baseline from the last data read.
+.HP 5m
+."
+\fBct [count_time]\fP
+\- 
+accumulates correlation function for \fBcount_time\fP seconds.
+Plots the data at the end of count_time.
+.HP 5m
+."
+\fBuct [count_time]\fP
+\- 
+accumulates correlation function for \fBcount_time\fP seconds.
+Updates a low resolution display of the correlation function while counting.
+.HP 5m
+."
+\fBqelsplot\fP
+\- 
+does a screen plot of the current data using labels appropriate
+for a correlation function.
+.HP 5m
+."
+\fBqelsfile\fP
+\- 
+saves the current data to the datafile.
+After the data points are saved, two lines of information are saved as
+.nf
+\fB#U2 clock_time prescale cbase dbase\fP
+\fB#U3 dbase_mode tcnts pcnts rtime\fP
+.fi
+.sp
+.RE
+.sp
+where the parameters are, in order: the clock time, the prescale factor,
+the values of the calculated and delayed baselines, a zero or one to indicate
+if the delayed baseline was used, the total counts, the total prescaled
+counts and the elapsed time from the correlator.
+

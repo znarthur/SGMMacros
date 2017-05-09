@@ -1,0 +1,944 @@
+.TH "readline" "GNU command line editing" "08/01/12" "readline.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+readline \- command line recall and editing
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)readline.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1993,1995,1997,1998,2003,2004,2008,2009,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "readline" "GNU command line editing" "08/01/12" "readline.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The GNU \fBreadline\fP library or the BSD
+\fBlibedit\fP library may be optionally linked with \fBspec\fP during the \fBspec\fP
+installation.
+When \fBspec\fP is linked with either of these libraries, the following
+command completion, history substitution
+and command line editing features become availble.
+.SH "COMMAND COMPLETION"
+.rs
+.sp
+The \fB<tab>\fP key can be used to complete the current word being typed.
+The completion is context sensitive.
+If completion is asked for on the first word of a command, possible completions
+are all of \fBspec\fP\(aqs built\-in keywords and currently defined macros.
+.sp
+Possible completion on words following the commands \fBlsdef\fP, \fBprdef\fP and
+\fBundef\fP are the currently defined macros.
+Possible completion on words following the commands \fBsyms\fP and
+\fBunglobal\fP include all the current symbol names.
+Completion on words following \fBlscmd\fP are the built\-in keywords.
+Possible completions to \fBspec_par(\fP are the available
+\fBspec_par()\fP options.
+In all other cases, possible completions on words following the first word of
+a command are all the file and directory names in the current
+directory.
+.sp
+If only one completion is possible, typing the
+\fB<tab>\fP key will generate the completion.
+If a small number of completions are available, typing the
+\fB<tab>\fP key twice will list them,
+followed by a redisplay of the current input line.
+If a large number of completions are possible, typing the
+\fB<tab>\fP will generate a prompt asking if all should be displayed.
+.SH "TILDE EXPANSION"
+.rs
+.sp
+The sequences \fB~/\fP and \fB~any_user/\fP
+will be replaced by the full path names for the current user\(aqs and
+any user\(aqs home directory when those characters are used
+in the arguments to the
+\fBopen()\fP, \fBclose()\fP, \fBon()\fP, \fBoff()\fP,
+\fBdofile()\fP, \fBqdofile()\fP, \fBfile_info()\fP,
+\fBchdir()\fP and \fBunix()\fP functions.
+The same applies when the tilde\-containing arguments
+are passed to the functions through macros, such as through the standard
+\fBnewfile\fP, \fBdo\fP, \fBcd\fP, \fBu\fP, etc. macros.
+.sp
+Note, as of \fBspec\fP release 5.04.04, tilde expansion is available
+whether or not \fBspec\fP is linked with the command\-line editing libraries.
+.SH "HISTORY SUBSTITUTION \- EVENT SPECIFIERS"
+.rs
+.sp
+All or part of a previous command can be recalled for the current command
+using a string starting with the \fB!\fP event specifier character.
+The following event specifiers may appear anywhere in the input line.
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fB!!\fP
+\- 
+The previous command.
+.HP 5m
+."
+\fB!N\fP
+\- 
+Command number \fBN\fP.
+.HP 5m
+."
+\fB!\-N\fP
+\- 
+The \fBN\fPth previous command.
+.HP 5m
+."
+\fB!string\fP
+\- 
+The most recent command starting with \fBstring\fP.
+.HP 5m
+."
+\fB!?string[?]\fP
+\- 
+The most recent command containing \fBstring\fP. The trailing
+\fB?\fP is optional at the end of a line.
+.RE
+.RE
+.SH "HISTORY SUBSTITUTION \- WORD DESIGNATORS"
+.rs
+.sp
+Individual words from previous commands can be recalled by
+adding a word designator to the event specifier.
+A colon (\fB:\fP) separates the two components and
+can be omitted if the word designator begins with the characters
+\fB^\fP, \fB$\fP, \fB*\fP or \fB%\fP.
+Words are numbered from the beginning of the line, starting with
+a 0 (zero).
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fB0\fP
+\- 
+The 0th word.
+.HP 5m
+."
+\fBN\fP
+\- 
+The \fBN\fPth word.
+.HP 5m
+."
+\fB^\fP
+\- 
+Word 1.  \fB!^\fP refers to word 1 of the previous command.
+.HP 5m
+."
+\fB$\fP
+\- 
+The last word.  \fB!$\fP refers to the last word of the previous command.
+.HP 5m
+."
+\fB%\fP
+\- 
+The word most recently matched by a \fB?string?\fP.
+.HP 5m
+."
+\fBN\-M\fP
+\- 
+A range of words; \fB\-N\fP Abbreviates \fB0\-N\fP.
+.HP 5m
+."
+\fB*\fP
+\- 
+All of the words, except the 0th.  This is the same as
+\fB1\-$\fP. If there is just one word (the 0th)
+in the event, an empty string is substituted.
+.HP 5m
+."
+\fBN*\fP
+\- 
+Same as \fBN\-$\fP.
+.HP 5m
+."
+\fBN\-\fP
+\- 
+Same as \fBN\-$\fP, but doesn\(aqt include the last word.
+.RE
+.RE
+.SH "HISTORY SUBSTITUTION \- MODIFIERS"
+.rs
+.sp
+One or more modifiers may follow the optional word designator,
+each preceded by a \fB:\fP, as follows:
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fB#\fP
+\- 
+The entire command line typed so far.
+.HP 5m
+."
+\fBh\fP
+\- 
+Remove a trailing path name component of the form \fB/pathname\fP.
+.HP 5m
+."
+\fBr\fP
+\- 
+Remove a trailing suffix of the form \fB.suffix\fP.
+.HP 5m
+."
+\fBe\fP
+\- 
+Remove all but the suffix.
+.HP 5m
+."
+\fBt\fP
+\- 
+Remove all leading path name components.
+.HP 5m
+."
+\fBs/left/right[/]\fP
+\- 
+Substitute the first occurrence of the string \fBleft\fP with the string
+\fBright\fP. The pattern delimiter can be any character.
+An \fB&\fP character in \fBright\fP is replaced by \fBleft\fP, unless the
+\fB&\fP is preceeded by a single backslash.
+The trailing delimiter is optional
+if \fBright\fP is at the end of the line.
+.HP 5m
+."
+\fBg\fP
+\- 
+When used with \fBs\fP,
+apply the substitution to each occurrence of the string \fBleft\fP.
+.HP 5m
+."
+\fBp\fP
+\- 
+Print the new command but do not execute it.
+.RE
+.RE
+.sp
+The usage
+\fB^left^right^\fP is shorthand for \fB!!:s/left/right/\fP.
+.SH "COMMAND LINE EDITING"
+.rs
+.sp
+The following special keys can be used to recall previous command lines
+and to modify the current command line.
+In addition to the control keys described below,
+the up and down arrow keys move through the history, while the left and
+right arrow keys move the cursor within the currently displayed line.
+.sp
+The command names listed for readline and libedit are the
+names you would use in an optional key\-bindings file.
+See the documentation for readline or libedit for information
+on setting up their respective key bindings files.
+\fBspec\fP will arrange for a key\-bindings file named
+\fB.spec_keys\fP in the \fBspec\fP user\(aqs home directory to be loaded, if it exists.
+.RS 0m
+.HP 5m
+."
+\fB^A\fP
+\- 
+Move to the beginning of the current line.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBbeginning\-of\-line\fP
+libedit: \fBed\-move\-to\-beg\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^E\fP
+\- 
+Move to the end of the current line.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBend\-of\-line\fP
+libedit: \fBed\-move\-to\-end\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC f\fP
+\- 
+Move forward to the end of the next word.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBforward\-word\fP
+libedit: \fBem\-next\-word\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC b\fP
+\- 
+Move to the start of the current or previous word.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBbackward\-word\fP
+libedit: \fBed\-prev\-word\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^L\fP
+\- 
+Clear the screen and reprint the current line at the top.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBclear\-screen\fP
+libedit: \fBed\-clear\-screen\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^K\fP
+\- 
+Kill from the cursor to the end of the line.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBkill\-line\fP
+libedit: \fBed\-kill\-line\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC d\fP
+\- 
+Kill from the cursor to the end of the current word.  If between
+words, kill to the end of the next word.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBkill\-word\fP
+libedit: \fBem\-delete\-next\-word\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC DEL\fP
+\- 
+Kill from the cursor the start of the previous word.  If between
+words, kill to the start of the previous word.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBbackward\-kill\-word\fP
+libedit: \fBed\-delete\-prev\-word\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^W\fP
+\- 
+Kill from the cursor to the previous white space.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBunix\-word\-rubout\fP
+libedit: \fBem_kill_region\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^Y\fP
+\- 
+Insert the most recently killed text at the cursor.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fByank\fP
+libedit: \fBem\-yank\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC y\fP
+\- 
+Rotate the kill\-ring, and yank the new top.
+You can only do this if the previous command was
+\fB^Y\fP or \fBESC y\fP.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fByank\-pop\fP
+libedit: not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^F\fP
+\- 
+Move forward a character.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBforward\-char\fP
+libedit: \fBed\-next\-char\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^B\fP
+\- 
+Move back a character.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBbackward\-char\fP
+libedit: \fBed\-prev\-char\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB<return>\fP
+\- 
+Accept the line regardless of where the cursor is.
+If non\-empty, add the line to the history list.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBaccept\-line\fP
+libedit: \fBed\-newline\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^P\fP
+\- 
+Move up through the history list.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBprevious\-history\fP
+libedit: \fBed\-prev\-history\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^N\fP
+\- 
+Move down through the history list.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBnext\-history\fP
+libedit: \fBed\-next\-history\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC <\fP
+\- 
+Move to the first line of the history.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBbeginning\-of\-history\fP
+libedit: not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC >\fP
+\- 
+Move to last line of the history.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBend\-of\-history\fP
+libedit: not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^R\fP
+\- 
+Search backward, incrementally,
+starting at the current line and moving up
+through the history as necessary.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBreverse\-search\-history\fP
+libedit: \fBem\-inc\-search\-prev\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^S\fP
+\- 
+Search forward starting at the current line and moving down
+through the the history as necessary.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBforward\-search\-history\fP
+libedit: \fBem\-inc\-search\-next\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^D\fP
+\- 
+Delete the character under the cursor.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBdelete\-char\fP
+libedit: \fBem\-delete\-or\-list\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^H\fP, \fBDEL\fP
+\- 
+Delete the character behind the cursor.  A numeric argument means
+kill the characters instead of deleting them.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBbackward\-delete\-char\fP
+libedit: \fBed\-delete\-prev\-char\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^Q\fP, \fB^V\fP
+\- 
+Add the literal next character to the line.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBquoted\-insert\fP
+libedit: \fBed\-quoted\-insert\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBa\fP, \fBb\fP, etc.
+\- 
+Characters to be inserted as themselves.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBself\-insert\fP
+libedit: \fBed\-insert\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^T\fP
+\- 
+Transpose the previous and current characters and move forward
+one character.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBtranspose\-chars\fP
+libedit: \fBed\-transpose\-chars\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC t\fP
+\- 
+Transpose the previous and current words and move forward one word.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBtranspose\-words\fP
+libedit: not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC ^_\fP
+\- 
+Insert a copy of the previous word
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline:  not available
+libedit: \fBem_copy_prev\-word\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC u\fP
+\- 
+Capitalize the current word.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBupcase\-word\fP
+libedit: \fBem\-upper\-case\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC l\fP
+\- 
+Make the current word lower case.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBdowncase\-word\fP
+libedit: \fBem\-lower\-case\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC c\fP
+\- 
+Capitalize the current word.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBcapitalize\-word\fP
+libedit: \fBem\-capitol\-case\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBunbound\fP
+\- 
+Kill backward to the beginning of the line.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBbackward\-kill\-line\fP
+libedit: not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^U\fP
+\- 
+Kill the current line.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBunix\-line\-discard\fP
+libedit: \fBem\-kill\-line\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC 0\fP, \fBESC 1\fP, ...
+\- 
+Enter number arguments for commands that can operate on more than one
+object.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBdigit\-argument\fP
+libedit: \fBed\-argument\-digit\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^G\fP, \fBESC ^G\fP, \fB^X\fP \fB^G\fP
+\- 
+Stop.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBabort\fP
+libedit: no binding, but \fB^G\fP aborts incremental seaches
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC\fP
+\- 
+Use this character as a \fBmeta\fP prefix for keyboards that lack
+a meta key.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBprefix\-meta\fP
+libedit: \fBem\-meta\-next\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^_\fP, \fB^X\fP \fB^U\fP
+\- 
+Undo last change.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBundo\fP, is incremental and remembered for each line
+libedit: \fBvi\-undo\fP, only one level of undo
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC r\fP, \fBESC ^R\fP
+\- 
+Undo all changes made to this line.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBrevert\-line\fP
+libedit: \fBvi\-undo\-line\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^X (\fP
+\- 
+Save the key strokes that follow.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBstart\-kbd\-macro\fP
+libedit: not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^X )\fP
+\- 
+Cease saving key strokes.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBend\-kbd\-macro\fP
+libedit: not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^X e\fP
+\- 
+Recall the previously saved key strokes.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBcall\-last\-kbd\-macro\fP
+libedit: not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBunbound\fP
+\- 
+Redraw the current line.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBredraw\-current\-line\fP
+libedit: \fBed\-redisplay\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBESC ^Y\fP
+\- 
+Insert nth previously killed text at the cursor.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fByank\-nth\-arg\fP
+libedit: not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBunbound\fP
+\- 
+List the current key bindings.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBdump\-functions\fP
+libedit:  not available
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fB^X ^R\fP
+\- 
+Reread the \fB$HOME/.spec_keys\fP key\-bindings file, if it exists.
+.sp
+.RS 5m
+.RS 4m
+.nf
+readline: \fBre\-read\-init\-file\fP
+libedit:  not available
+.fi
+.sp
+.RE
+.RE
+.RE
+.SH "NOTES"
+.rs
+.sp
+With the optional history libraries, the \fB!\fP character must be preceded by a
+\fB\e\fP when it is typed from the keyboard
+and is not intended to be part of a history substitution.
+.SH "DISTRIBUTION"
+.rs
+.sp
+The readline library is included with most modern \fBLinux\fP distributions.
+In addition, sources can be retrieved from \fI\%ftp://ftp.gnu.org/gnu/readline\fP
+and installed on any platform supported by \fBspec\fP.
+\fBspec\fP should link with all current and previous releases of readline.
+\fBspec\fP is known to link with
+readline versions 2.0, 2.1, 2.2, 2.2.1, 4.0, 4.1, 4.2, 4.2a and 4.3.
+.sp
+A prebuilt version of the NetBSD libedit library is included with the
+\fBspec\fP distribution in the \fBlibedit\fP subdirectory.
+The official source respository for the NetBSD version is at
+\fI\%http://cvsweb.netbsd.org/bsdweb.cgi/src/lib/libedit\fP.
+Portable versions configurable for other platforms are available from
+\fI\%http://www.thrysoee.dk/editline\fP,
+although that site doesn\(aqt always have the most recent version.
+The source for the prebuilt version included with the \fBspec\fP distribution
+is available at \fI\%certif.com/downloads/extras\fP.
+

@@ -1,0 +1,107 @@
+changes                      spec 2.12 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.12
+
+DESCRIPTION
+
+     These notes summarize the modifications made for ssppeecc release 2.12, as
+     finalized on May 23, 1989.
+
+CHANGES
+
+     A new scan-plotting option has been added at the macro level.  You can
+     choose to have a continuously updated plot made on the video screen as the
+     points of the scan are collected.  Use the sseettpplloott macro to select this
+     mode.
+
+     The history-substitution mechanism has been expanded a bit.  You may now
+     append text to recalled items.
+
+     History is now retained when you exit the program and restored when you
+     restart.  The ssaavvssttaattee command will include command history in the state
+     file, and the ggeettssttaattee command will restore the command history from the
+     last issued ssaavvssttaattee.
+
+     A new powder-averaging mode for scans is available.  When powder mode is
+     on, the selected powder-average motor is run at its base rate a selected
+     width about each point in each scan.  The scalers are automatically enabled
+     for counting during the time the motor is in motion.  Powder mode works
+     with all the angle scans and HKL scans.  Use the macro sseettppoowwddeerr to turn
+     powder mode on and off.  See the ppoowwddeerr help file for details.
+
+     The command mmoovvee__ccnntt has been added to make powder mode work.  This command
+     works similarly to mmoovvee__aallll except the motors are moved at the base rate,
+     no backlash is performed and the scalers are automatically gated while the
+     motors move.
+
+     All the scan macros required slight modifications to make powder mode work.
+     New global variables, __ssttyyppee00 and __ssttyyppee11 are assigned values to indicate
+     the type of scan in progress.  In addition, some of the statements in each
+     scan loop have been gathered into a new macro named ssccaann__mmoovvee.  The
+     ssccaann__mmoovvee macro is assigned a different definition in powder mode.  Also,
+     the ccoouunntt macro called by all the scans has been made redefinable to
+     accommodate powder mode.  Study the macro files ssccaannss..mmaacc, ccoouunntt..mmaacc and
+     ppoowwddeerr..mmaacc to see just how these things are done.
+
+     A new four-circle geometry mode has been added called pphhii ffiixxeedd.  This mode
+     is similar to the existing three-circle (phi-zero) mode, except the value
+     of pphhii no longer needs to be fixed at zero.
+
+     A new geometry configuration, named rr22dd22 after the high-vacuum surface
+     chamber that it describes, is included in the distribution.  The geometry
+     code is in the file ggeeoo__rr22dd22..cc.
+
+     ssppeecc has two distinct phases during the process of interpreting user
+     commands: the parse phase and the execution phase.  Previously, a macro
+     definition assigned with ddeeff would be carried out in the execution phase,
+     making the definition unavailable until the entire enclosing statement
+     block had been read in and parsed.  This method of handling macro
+     definitions made it impossible to enclose any of the recently (release
+     2.10) redesigned standard scan macros within a statement block, since the
+     same macro was both defined and invoked with the scan macro.  To solve this
+     problem, macro-definition assignments are now made as they are encountered
+     during the parse phase.  However, since several ssppeecc macros still require
+     macro definitions to be made during the execution (or run) phase, a new
+     command called rrddeeff has been introduced.  This new command behaves now like
+     ddeeff used to.  See the macros sseettpplloott, sseettppoowwddeerr, lluupp or __hheeaadd for examples
+     of the use of rrddeeff.
+
+     The maximum macro length has been increased a bit from 1536 to 1920 bytes.
+
+     Clock-tick sleeps are now available with ssppeecc on non-VENIX systems.
+     Clock-tick sleeps are sleeps with sixtieth of a second resolution.  New
+     versions of either of the drivers ddsspp..cc or oommss..cc must be installed, though,
+     and the clock-tick sleeps will only work when the corresponding device has
+     been opened.  Clock-tick sleeps work well with the sleep-time variable
+     UUPPDDAATTEE used in updated-move macros such as uummvv, uummkk and uuwwmm.
+
+     ssppeecc is now supported on the AT&T 6386 platform running UNIX version 3.2.
+
+     The National Instruments GPIB boards are now supported for VENIX 286 and
+     for the various 386 systems.  Drivers for the 386 systems must be obtained
+     directly from National Instruments.
+
+     The Scientific Solutions (Tecmar) GPIB support code has been rewritten
+     following the sample programs provided by the manufacturer.  In addition,
+     this board can now be used on the 386 systems.  On the 386 systems a
+     supplied program called iioo__eennaabbllee is automatically run the first time the
+     board is used in order to enable the IO ports used by the board to be
+     accessible from user-level programs.
+
+     The code to support the Kinetic Systems CAMAC GPIB board (KS3388) has been
+     fixed.  A timing problem in the code that rarely, if ever, manifested
+     itself on the PDP and 80286 systems had made the module unusable on the 386
+     systems.
+
+     The driver files, formerly distributed in the subdirectories ccaammaacc and oommss
+     are now distributed in the subdirectory ddrriivveerrss.  Three master installation
+     scripts, iinnssttaallll__vvnnxx, iinnssttaallll__338866, and iinnssttaallll__aatttt, are supplied that are
+     invoked by driver-specific scripts, such as iinnssttaallll__ddsspp for the DSP CAMAC
+     driver, iinnssttaallll__oommss for the Oregon Micro Systems PCX driver and
+     iinnssttaallll__ggppiibb for the National Instruments PCII GPIB driver.
+
+     A problem on the 386 systems, where using a number larger than the largest
+     long integer in a print statement or expression would cause a floating
+     exception and possibly a core dump, has been fixed.
+

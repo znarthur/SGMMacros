@@ -1,0 +1,21 @@
+.TH "mxc" "hardware" "08/01/12" "mxc.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+MXC \- MAC Science MXC Goniometer Control
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mxc.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2000,2001,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mxc" "hardware" "08/01/12" "mxc.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+

@@ -1,0 +1,795 @@
+.TH "oms" "hardware" "05/26/13" "oms.rst 6.3  05/26/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+OMS \- Oregon Micro Systems motor controllers
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)oms.rst  6.3  05/26/13  CSS
+.
+.\" Copyright (c) 1993-2005,2009,2010,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "oms" "hardware" "05/26/13" "oms.rst 6.3  05/26/13 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP supports most models of the Oregon Micro Systems
+motor controllers, including ISA, PCI, VME, Ethernet and serial  models.
+\fBspec\fP includes support for both the encoder and
+the servo\-motor options available with most of the cards.
+.sp
+The recognized ISA models are the
+PCX, PC34, PC38, PC39, PC46, PC48 and PC58.
+Both the PCI models PCIx and MAXp are recognized and supported.
+Modern \fBspec\fP configurations control all these cards
+completely from user level
+(no IRQ and no kernel driver is needed).
+.sp
+For VME crates, the VME8, VME44, VME58 and MAXv models are supported.
+The OMS VME cards are
+operated in polled mode in all currently recommended configurations, so
+no VME IRQs will be used.
+.sp
+\fBspec\fP also supports the MAXnet model over both RS\-232C and Ethernet
+interfaces.
+.SH "DEVICE CONFIGURATION"
+.rs
+.sp
+The OMS motor controllers are selected
+in the \fBspec\fP
+\fBconfig\fP file by lines similar to:
+.RS 3m
+.sp
+.nf
+.ft CB
+PC_OMS = /dev/oms00 4 INTR
+PC_OMSP = 0x330 4
+PC_OMSP58 = 0x300 0xe000 4
+PC_OMSV = 0xfc00 8 POLL
+PC_OMSV58 = 0xe000 8 POLL
+PC_OMSMAXV = 0xd000 8 POLL
+PC_OMSPCI = 1 4
+PC_OMSPCIM = 1 8
+HW_OMSMAXN = 192.168.0.4:23 10
+HW_OMSMAXN_RS = /dev/ttyS0 115200 10
+HW_OMSUMX = /dev/ttyUSB0 19200 4
+.ft P
+.fi
+.RE
+.sp
+The \fBD\fPevice screen of the \fBedconf\fP program
+(normally run from the \fBconfig\fP macro)
+is used to select the controller type and to assign the parameters.
+The above selection would be displayed as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+Motor and Counter Device Configuration (Not CAMAC)
+
+MOTORS       DEVICE   ADDR <>MODE NUM                               <>TYPE
+   YES   /dev/oms00          INTR   4         OMS PCX/34/38/39/48 (driver)
+   YES               0x330          4      OMS PCX/34/38/39/48 (no driver)
+   YES       0xe000  0x300          4            Oregon Micro Systems PC58
+   YES              0xfc00   POLL   8         Oregon Micro Systems VME8/44
+   YES              0xe000   POLL   8           Oregon Micro Systems VME58
+   YES              0xd000   POLL   8        Oregon Micro Systems VME MAXv
+   YES                   1          4            Oregon Micro Systems PCIx
+   YES                   1          8        Oregon Micro Systems PCI MAXp
+   YES   /dev/ttyS0     <> 115200  10 Oregon Micro Systems MAXnet (Serial)
+   YES    maxnet:23                10 Oregon Micro Systems MAXnet (Socket)
+   YES /dev/ttyUSB0         19200   4    Oregon Micro Systems UMX (Serial)
+.ft P
+.fi
+.RE
+.sp
+The first example is only of historical interest.
+It selects the PC board with the driver node
+\fB/dev/oms00\fP. The special kernel\-level driver could be used in either
+interrupt or polled mode.  Interrupts would be generated when motors
+completed their motions or hit a limit.
+.sp
+The second example selects one of the ISA card models with I/O port polling,
+with the board\(aqs base address at \fB0x330\fP and with four motors on the board.
+.sp
+The third example selects the PC58 board at I/O port
+\fB0x300\fP. The PC58 also requires 4,096 bytes of low memory.
+In the example, the address entered as
+\fB0xE000\fP in the DEVICE
+column of the configuration editor selects a real memory address of
+\fB0xE0000\fP. (The value in the configuration is multiplied by 16.)
+.sp
+The fourth example selects the VME8 and VME44 modules,
+with the board\(aqs A16 base address jumpered at \fB0xFC00\fP
+and with the VME interrupt disabled, i.e., the board is used
+in polled mode.  \fBspec\fP\(aqs early VME implementation included support for
+VME controllers with UNIX drivers that included IRQ support.
+The currently active VME support in \fBspec\fP doesn\(aqt use IRQs, so all VME
+modules should be configured for polled mode.
+.sp
+The next two examples select the VME58 and MAXv models, respectively.
+Note, both models requires 4,096 bytes of A16 address space, so valid
+addresses have one hexadecimal digit followed by three zeroes.
+Note also, \fBspec\fP currently only supports A16 addressing for the MAXv, so
+make sure the card is jumpered appropriately.
+.sp
+The next two examples select the PCIx and the MAXp models.
+Each OMS PCI board should be set to a unique board address from 1 to 8,
+and that is the value to be entered in the
+\fBADDR\fP field.
+.sp
+The next example is for the MAXnet controller
+over the serial interface.
+The default baud rate of the device is 115200, and that is what is shown.
+Following is the MAXnet controller using its ethernet interface.
+The DEVICE column contains either an IP address or a resolvable host name.
+The port number can optionally follow using a colon as delimiter.
+If missing, the default port, 23, will be used.
+.sp
+Finally, the configuration for the UMX model is shown.
+The UMX has a USB interface that is supported on \fBLinux\fP and Mac OSX using
+USB to serial kernel drivers.
+On \fBLinux\fP, the standard \fBftdi_sio\fP kernel module is required along with
+the special \fBudev\fP rules installed by \fBspec\fP in \fB/etc/udev/rules.d/10\-spec_usb.rules\fP.
+On OSX, the VCP driver available at the \fI\%ftdichip.com\fP must be installed.
+The UMX USB vendor and product IDs must be added to
+the kernel extension \fBInfo.plist\fP file as explained in the \fI\%FTDI Technical Note 105\fP
+available at the FTDI website.
+Contact CSS for assistance, if needed.
+.SH "MOTOR CONFIGURATION"
+.rs
+.sp
+On the \fBM\fPotor
+screen of the configuration editor, all of the OMS models use one of the
+symbols \fBOMS\fP, \fBOMS_E\fP, \fBOMS_P\fP, \fBOMS_S\fP or
+\fBOMS_M\fP in the controller field of the screen.
+The \fBOMS_E\fP choice indicates the motor is being used with an encoder.
+The \fBOMS_P\fP option is for a stepping motor with an encoder and which
+will use the position\-maintenance feature (as of \fBspec\fP release 5.08.02\-1).
+The \fBOMS_S\fP configures a DC servo motor and also enables the encoder features.
+The \fBOMS_M\fP choice indicates the motor channel is being used with special
+multiplexing hardware.
+See the section on Multiplexing below.
+.sp
+OMS motor controllers can have from two to eight motors.
+\fBspec\fP numbers the motors that OMS designates as
+\fBX\fP, \fBY\fP, \fBZ\fP, \fBT\fP, \fBU\fP, \fBV\fP, \fBR\fP and \fBS\fP
+from 0 through 7, in that order.
+.sp
+By default, motors are automatically
+assigned to the controller channels in the same order as they appear on the
+\fBM\fPotor screen.
+If there is more than one controller, the channels are assigned
+to the controllers in the order in which the controllers
+appear on the \fBD\fPevice screen.
+.sp
+Alternatively, the controller unit and motor channel numbers
+can be assigned explicitly on the second line of the
+\fBM\fPotor screen in any order.  Channel numbers start at zero.
+Unit numbers are automatically assigned to each OMS controller configured
+on the \fBD\fPevice screen in the order in which they appear, starting with
+unit zero.
+All OMS controller types are included in a single unit numbering
+sequence, and the unit numbering for OMS controllers is independent
+of the unit numbering for any other configured controller types.
+.SH "EMERGENCY STOP"
+.rs
+.sp
+For the MAX model controllers with firmware 1.21 or greater,
+\fBspec\fP will treat the case where both
+limits are set simultaneously as a special event.
+(Other OMS models do not have a command to read the status
+of both limit switches.)
+\fBspec\fP will generate an emergency stop when that happens.
+As is the normal case with hitting a limit, \fBspec\fP will stop
+all other active motors and reset to command level.
+For an emergency stop, a different message is printed on the screen and,
+if in server mode, an "emergency_stop" event is sent to clients.
+.SH "INITIALIZATION SEQUENCE"
+.rs
+.sp
+If the nonstandard optional motor parameter \fB"init_sequence"\fP is set in the
+\fBconfig\fP file for any particular motor, \fBspec\fP will send that string during
+hardware initialization (as of \fBspec\fP release 5.08.03\-8).
+(Non\-standard optional parameters are set from the configuration editor
+by typing a \fBp\fP from the motor screen.)
+The string can be made up of a sequence of the following commands:
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fBABH\fP	Auxiliary bit on (fw >= 1.30)
+\fBABL\fP	Auxiliary bit off (fw >= 1.30)
+\fBAF\fP	Auxiliary bit off (legacy)
+\fBAN\fP	Auxiliary bit on (legacy)
+\fBBDx\fP	Set direction of general purpose I/O bits
+\fBBHd\fP	Bit high
+\fBBLd\fP	Bit low
+\fBBSx\fP	Bit set
+\fBDBI\fP	Invert step direction bit
+\fBDBN\fP	Normal step direction bit
+\fBHH\fP	Home high (legacy)
+\fBHL\fP	Home low (legacy)
+\fBHTH\fP	Home active high (fw >= 1.30)
+\fBHTL\fP	Home active low (fw >= 1.30)
+\fBIOd,t\fP	I/O bit direction, \fBt\fP = 0 or 1
+\fBLF\fP	Limits off (legacy)
+\fBLH\fP	Limits high (legacy)
+\fBLL\fP	Limits low (legacy)
+\fBLMF\fP	Limits off (fw >= 1.30)
+\fBLMH\fP	Limits on (fw >= 1.30)
+\fBLN\fP	Limits on (legacy)
+\fBLTH\fP	Limits high (fw >= 1.30)
+\fBLTL\fP	Limits low (fw >= 1.30)
+\fBPAt\fP	Power automatic, \fBt\fP = 0 or 1
+\fBPH\fP	Auxiliary bit high (legacy)
+\fBPL\fP	Auxiliary bit low (legacy)
+\fBSEv\fP	Settling time in PA mode, 0 <= v <= 1000
+.TE
+.RE
+.sp
+where \fBx\fP is a hexadecimal value and \fBd\fP is a decimal value, each
+with a maximum value associated with the number of general purpose I/O bits.
+If there are 8, the maximum value for \fBx\fP is
+\fBFF\fP, and the maximum value for \fBd\fP is \fB7\fP.
+If there are 16 I/O bits, the maximum values are \fBFFFF\fP and \fB15\fP, respectively.
+Note, though, \fBspec\fP doesn\(aqt check if the values are in range.
+.sp
+The commands labeled "legacy" are deprecated by OMS for
+"MAX" controllers with firmware versions at 1.30 or greater.
+The commands labeled "fw >= 1.30" can be used with such controllers.
+.sp
+The commands should be placed in a string, delimited by semicolons.
+For example, the \fBconfig\fP file might contain entries like these:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTPAR:init_sequence = LH;AF
+MOTPAR:init_sequence = LH;PA1;SE250;BDFF00;BH1;BL2
+MOTPAR:init_sequence = IO2,1;IO3,1;BH2;BH3
+.ft P
+.fi
+.RE
+.sp
+Consult the OMS manual for details on the commands.
+.sp
+Not all commands are available on all models.
+Bad commands or bad values may produce unexpected errors from the controller.
+The string value may be examined with \fBmotor_par()\fP. Assigning a value with
+\fBmotor_par()\fP will have no effect, as the parameter
+is only sent to the controller when the
+\fBconfig\fP file is read during hardware initialization.
+.SH "HOME SEARCH"
+.rs
+.sp
+Home and limit searches are started through \fBspec\fP\(aqs built\-in
+\fBchg_dial()\fP function and \fBhome\fP macro.
+The motor speed of the home search is determined
+from the home\-speed parameters, if set,
+otherwise from the normal base and slew rates and acceleration.
+(The home\-speed parameters can be set on the optional motor\-parameter
+screen of the configuration editor.)
+.sp
+The \fBchg_dial()\fP arguments \fB"home+"\fP, \fB"home\-"\fP,
+\fB"lim+"\fP and \fB"lim\-"\fP will use the commands
+\fBHM\fP, \fBHR\fP, \fBJG+N\fP and \fBJG\-N\fP, respectively,
+to perform the search.
+Here, \fBN\fP is the home slew rate if set, otherwise the normal slew rate.
+If the optional home\-position third argument to
+\fBchg_dial()\fP is present, the controller will mark the point
+where the home switch
+is triggered or where the motor stops when hitting the limit
+as the home position.
+.sp
+The \fBchg_dial()\fP argument \fB"home"\fP is treated differently, though.
+By default, the behavior associated with \fB"home+"\fP or
+\fB"home\-"\fP will take place, depending on whether the current dial position is
+less than or greater than the home position, if set, or zero if not.
+.sp
+However, the home and limit search support
+for the OMS controllers was greatly expanded in \fBspec\fP release 5.05.02\-7.
+If the optional motor parameter,
+\fB"home_method"\fP is set and is a string, \fBspec\fP
+will use that string as the actual home command sequence.
+The string must be a list of valid OMS commands, although a parameter
+substitution syntax is available for the step speeds and the home position.
+.sp
+OMS commands that should be used in a home\-method string include:
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fBHS\fP	Enable home\-switch mode
+\fBHE\fP	Enable encoder home mode
+\fBHL\fP	Set home switch active low
+\fBHH\fP	Set home switch active high
+\fBJG\fP	Jog, specify direction and speed
+\fBHM\fP	find home in forward direction
+\fBHR\fP	find home in reverse direction
+.TE
+.RE
+.sp
+Use of other commands may cause problems with \fBspec\fP\(aqs communication
+with the controller.
+\fBspec\fP will include the proper axis addresses and terminators.
+Multiple commands should be separated by a semicolon.
+.sp
+The possible parameter substitution strings are:
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fB$S\fP	Base rate (slow)
+\fB$F\fP	Slew rate (fast)
+\fB$A\fP	Acceleration time
+\fB$H\fP	Home position
+.TE
+.RE
+.sp
+Example home sequences follow:
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fBHS;JG+1000;VL200;HL;HR0\fP
+\- 
+Enable home switch mode, run clockwise at 1000 steps/second
+until hitting the limit switch,
+set the home switch active low, set the speed to 200 steps/second,
+search for the home switch in the counter\-clockwise direction and
+set the position to zero when the home switch is reached.
+.HP 5m
+."
+\fBHE;JG+1000;VL200;HL;HR0\fP
+\- 
+As above, but enable the encoder\-index home mode.
+.HP 5m
+."
+\fBHS;JG+1000;HL;HR0;VL200;HH;HM0\fP
+\- 
+Enable home switch mode, run clockwise at 1000 steps/second
+until hitting the limit switch,
+set the home switch active low and search for it
+in the counter\-clockwise
+direction, set the speed to 200 steps/second,
+make the home switch active
+high, move counter clockwise until the switch is released, and set that
+position as zero.
+.HP 5m
+."
+\fBHS;JG+$F;HL;HR0;VL2$S;HH;HM$H\fP
+\- 
+As above, but the speeds and final home position are parameterized.
+.RE
+.RE
+.sp
+The sense of the home switch on the OMS controllers is set by software.
+The default sense is for the switch to be active low.
+The command pass through feature, described below, can
+change the sense.
+For example,
+.sp
+.RS 4m
+\fBmotor_par(tth, "send", "HH")\fP
+.RE
+.sp
+will send the \fB"HH"\fP command to the controller to make
+the home switch for the \fBtth\fP motor active high.
+If the sense needs to be changed, a startup command file could define
+the \fBconfig_mac\fP macro to include code such as
+.RS 3m
+.sp
+.nf
+.ft CB
+{
+   local i
+   for (i = 0; i < MOTORS; i++) {
+      if (substr(motor_par(i, "controller"), 1, 3) == "OMS")
+         if (motor_par(i, "responsive"))
+            motor_par(i, "send", "HH")
+   }
+}
+.ft P
+.fi
+.RE
+.sp
+The above will send the \fB"HH"\fP command to each OMS motor that passed
+the presence test.  The \fBconfig_mac\fP macro is run automatically
+after hardware is (re)initialized.
+Alternatively, the \fB"init_sequence"\fP feature, described above,
+can be used as of \fBspec\fP release 5.08.03\-8.
+.SH "SERVO MOTORS"
+.rs
+.sp
+If the servo motor configuration is selected with the controller type set
+to \fBOMS_S\fP,
+additional parameters associated with the PID loop are recognized and programmed.
+If a parameter is not set, \fBspec\fP will not send a command to change the value.
+The following standard optional parameters may be set on the first
+optional motor parameter screen of the configuration editor, reached
+by typing an \fBm\fP
+from the main motor screen.
+.RS 0m
+.HP 5m
+."
+\fBdc_proportional_gain\fP
+\- 
+(OMS command \fBKP\fP) sets the proportional gain.
+.HP 5m
+."
+\fBdc_derivative_gain\fP
+\- 
+(OMS command \fBKD\fP) sets the derivative gain.
+.HP 5m
+."
+\fBdc_integral_gain\fP
+\- 
+(OMS command \fBKI\fP) sets the integral gain.
+.HP 5m
+."
+\fBdc_integration_limit\fP
+\- 
+(OMS command \fBKU\fP) sets the integration limit.
+.HP 5m
+."
+\fBdc_veloc_feedforward\fP
+\- 
+(OMS command \fBKV\fP) sets the velocity feedforward parameter.
+.HP 5m
+."
+\fBdc_accel_feedforward\fP
+\- 
+(OMS command \fBKA\fP) sets the acceleration feedforward parameter.
+.RE
+.sp
+The following non\-standard optional parameter can be configured on the optional
+parameter screen reached by typing a \fBp\fP
+from the main motor screen.
+.RS 0m
+.HP 5m
+."
+\fBpid_offset\fP
+\- 
+(OMS command \fBKO\fP) sets the PID offset parameter.
+.RE
+.RE
+.sp
+All of the parameters can also be set or accessed using the
+\fBmotor_par()\fP function.
+.SH "POSITION MAINTENANCE"
+.rs
+.sp
+In order to enable position\-maintenance mode on encoder\-equipped
+stepping motors, in addition to setting the controller type to
+\fBOMS_P\fP, several additional optional parameters need to be set.
+The standard optional parameter \fB"encoder_step_size"\fP must be set.
+Its value is the number of encoder steps per degree (or per unit),
+in line with the value of the standard
+\fB"step_size"\fP parameter, which is the number of steps per degree
+(or per unit) as used by the positioning commands.
+In addition, the following non\-standard optional parameters should
+be set:
+.RS 0m
+.HP 5m
+."
+\fBhold_velocity\fP
+\- 
+(OMS command \fBHV\fP) The maximum velocity to be used
+when correcting position error.
+Note, the controller\(aqs factory default value is zero.
+A non\-zero value is required for position maintenance to be enabled.
+.HP 5m
+."
+\fBhold_gain\fP
+\- 
+(OMS command \fBHG\fP) The hold gain parameter,
+which is multiplied by the position
+error to determine the velocity used during correction.
+.HP 5m
+."
+\fBhold_deadband\fP
+\- 
+(OMS command \fBHD\fP) The number of encoder counts from the target position
+in which no position correction is made.
+.RE
+.sp
+See the OMS user manuals for additional details on these commands.
+.sp
+The non\-standard optional parameters are set from the configuration
+editor by typing a \fBp\fP from the motor screen.
+For non\-standard optional parameters, both the name of the parameter
+and the value are entered.
+.sp
+When position maintenance is enabled, \fBspec\fP will program the encoder
+ratio (OMS command \fBER\fP) using the values of the
+\fB"step_size"\fP and \fB"encoder_step_size"\fP parameters.
+\fBspec\fP will also program the hold velocity, gain and deadband if the
+parameters have been set.
+Finally, spec will enable position maintenance by sending the OMS
+command \fBHN\fP before the first move following hardware initialization and on
+the first moves following a limit\-switch event or a move abort.
+.sp
+By default, \fBspec\fP will turn off position maintenance when exiting.
+To override that default behavior, set the nonstandard optional
+parameter \fB"keep_pos_maint"\fP to a nonzero value.
+The parameter can be a controller parameter which will set values
+for all motors on the controller, or a motor parameter which will
+only set values for the individual motor.
+The motor parameter will override the controller parameter setting.
+.sp
+Note, do not select position maintenance for a motor
+on which there is no encoder.
+The software cannot detect the error in configuration, and sensible
+motor behavior is not guaranteed.
+.SH "SLIP DETECTION"
+.rs
+.sp
+If the non\-standard optional parameter \fB"slip_steps"\fP is set in the
+\fBconfig\fP file, \fBspec\fP will enable slip detection for stepper motors
+with encoders.
+If the controller detects motor slip, \fBspec\fP will treat that notification
+as a motor fault, which will cause \fBspec\fP to halt all moving motors
+and print an error message.
+.SH "SPECIAL COMMANDS"
+.rs
+.sp
+The following special commands are available
+through the \fBmotor_par()\fP function.
+The two letter commands are direct implementations of commands
+described in the OMS manual.
+Refer to that manual for more information.
+Not all commands are available on all versions of the OMS controllers
+or on all firmware versions for a particular controller.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "PA", mode)\fP
+\- 
+If \fBmode\fP is 1, the controller turns motor power on
+before each move and off after the
+move (assuming motor power is controlled by the auxiliary output pins).
+If \fBmode\fP is 0, motor power stays on.
+.HP 5m
+."
+\fBmotor_par(motor, "SE", msec)\fP
+\- 
+Sets the settling time in milliseconds to be used before the power is
+reduced in \fBPA\fP mode.
+.HP 5m
+."
+\fBmotor_par(motor, "AF")\fP
+\- 
+Turns auxiliary power off.
+.HP 5m
+."
+\fBmotor_par(motor, "AN")\fP
+\- 
+Turns auxiliary power on.
+.HP 5m
+."
+\fBmotor_par(motor, "BH", bit_numb)\fP
+\- 
+Sets general purpose output pin numbered \fBbit_numb\fP high.
+.HP 5m
+."
+\fBmotor_par(motor, "BL", bit_numb)\fP
+\- 
+Sets general purpose output pin numbered \fBbit_numb\fP low.
+.HP 5m
+."
+\fBmotor_par(motor, "BX")\fP
+\- 
+Returns the state of the general purpose input pins.
+A one in any binary position in the value returned indicates that the
+corresponding pin is low.
+.HP 5m
+."
+\fBmotor_par(motor, "RB")\fP
+\- 
+Returns the direction of the general purpose I/O lines
+as bits in an integer.
+Output bits are a one, while input bits are a zero.
+.RE
+.SH "MULTIPLEXING"
+.rs
+.sp
+The OMS support in \fBspec\fP contains special code to allow the last
+motor channel on each controller to be multiplexed to control up
+to sixteen stepping\-motor channels.
+The intent is that a single motor driver that supplies the phased
+power to a stepping motor can be shared among multiple motors.
+\fBspec\fP will automatically sequence the moves transparently to the user.
+All motor commands and macros work the same, including those that move
+multiple motors at once.
+Each motor can have its own speed and acceleration parameters.
+In addition, \fBspec\fP will step the controller register, if necessary,
+to make sure the next step signal when the output is enabled will be
+in the correct phase for the particular motor.
+.sp
+Multiplexed channels are associated with the \fBOMS_M\fP controller type.
+These channels need the unit/channel configuration filled in.
+The unit number identifies the controller.
+The channel numbers are from zero to 15 and are numbered independently
+from the non\-multiplexed channels on the same controller unit.
+The last channel on the multiplexed controller should not be
+configured as an ordinary channel.
+.sp
+The code uses five digital output lines on the controller for
+channel select and output enable.
+Only controllers that support digital output commands can be used
+with the multiplexing.
+Output lines 0, 1, 2 and 3 are used to select one of sixteen
+channels.
+A high output is logic one.
+Output line 4 is used as the enable/disable control signal.
+When the output is high, the driver signals to the motors should be disabled.
+.sp
+Note, the OMS digital I/O lines 0 through 4 must be configured
+for output.
+On some models, configuration is by way of switches on the controller
+board.
+On other models, the command \fBBD\fP is needed.
+The command with appropriate arguments can be included in the
+\fB"init_sequence"\fP nonstandard optional parameter.
+Normally, the multiplexed motors are started in sequence from
+lowest numbered channel to highest numbered channel.
+If the motor parameter
+\fB"mplex_reverse"\fP is given a nonzero value, the starting order is reversed.
+If used in the \fBconfig\fP file,
+\fB"init_sequence"\fP and \fB"mplex_reverse"\fP
+must be associated with the first \fBOMS_M\fP motor for each controller.
+.sp
+CSS does
+not have schematic diagrams for a hardware multiplexor.
+.SH "COMMAND PASS THROUGH"
+.rs
+.sp
+Command pass through is available using the following functions.
+Command pass through should be used with caution to avoid interfering with
+the built\-in programming commands \fBspec\fP sends to the OMS controllers.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "send", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the OMS channel associated with
+\fBmotor\fP.
+For example, set \fBcmd\fP to
+\fB"LF"\fP to disable hardware limits on the associated motor.
+.HP 5m
+."
+\fBmotor_par(motor, "read", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the OMS channel associated with \fBmotor\fP,
+as above, and returns a string containing the response.
+For example,
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+print motor_par(tth, "read", "RP")
+240000
+.ft P
+.fi
+.RE
+.sp
+results in the string \fB"AX RP\en"\fP being sent to the controller.
+.RE
+.HP 5m
+."
+\fBmotor_par(motor, "usend", cmd)\fP
+\- 
+Sends the \fBcmd\fP to the OMS controller associated with \fBmotor\fP.
+Unlike the \fB"send"\fP option above, no channel address
+or terminator characters are added to the string.
+.HP 5m
+."
+\fBmotor_par(motor, "uread", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the OMS controller associated
+with \fBmotor\fP, as above,
+and returns a string containing the response.  Again, unlike the
+\fB"read"\fP option above, no channel address
+or terminator characters are added to the string.
+.RE
+.SH "ASYNCHRONOUS SURFACE SCANNING"
+.rs
+.sp
+The following commands implement a special asynchronous,
+two\-dimensional scanning mode.
+The purpose of the scan is to allow averaging
+of a signal scattered from different regions of a surface.
+The scan is in the form of a repeating square wave, as illustrated below.
+.RS 3m
+.sp
+.nf
+.ft CB
+ \-\-\-\-\-   \-\-\-\-\-   \-\-\-\-\-
+ |   |   |   |   |   |
+d|   |   |   |   |   |
+y|   |   |   |   |   |
+ |   |   |   |   |   |
+ o   \-\-\-\-\-   \-\-\-\-\-   \-\-\-> dx
+.ft P
+.fi
+.RE
+.sp
+The scan starts at the point \fBo\fP, as specified with the commands below, and
+continues in the \fBx\fP and
+\fBy\fP directions in the range as specified with the commands below.
+At the end of the range, the motors are returned to the starting position
+and the scan is repeated.
+.sp
+Two motors must be configured with the mnemonics \fBdx\fP and
+\fBdy\fP in order for the asynchronous scanning mode to be available.
+When not in scanning mode, these motors may be moved normally.
+.sp
+Once started, the scanning will continue until explicitly stopped either
+with the \fBstop_scan\fP command (shown below), with a
+\fB^C\fP typed at the keyboard or with a
+\fBsync\fP command (which aborts the motors,
+but doesn\(aqt update \fBspec\fP\(aqs positions).
+While scanning, the \fBwait()\fP function will not indicate
+these motors are moving.
+The \fBgetangles\fP command will, however,
+return the current positions of these motors.
+.sp
+When the \fBdx\fP and \fBdy\fP motors are
+scanning, the remaining motors may be moved independently.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "x_start", value)\fP
+\- 
+Sets the starting position for the \fBdx\fP motor.
+.HP 5m
+."
+\fBmotor_par(motor, "x_range", value)\fP
+\- 
+Sets the extent of the motion in the \fBx\fP direction.
+.HP 5m
+."
+\fBmotor_par(motor, "x_stepsize", value)\fP
+\- 
+Sets the size of each step in \fBx\fP.
+The number of steps is determined by dividing this number
+into the range for \fBx\fP.
+.HP 5m
+."
+\fBmotor_par(motor, "y_start", value)\fP
+\- 
+Sets the starting position for the
+\fBdy\fP motor.
+.HP 5m
+."
+\fBmotor_par(motor, "y_range", value)\fP
+\- 
+Sets the extent of the motion in the \fBy\fP direction.
+.HP 5m
+."
+\fBmotor_par(motor, "start_scan")\fP
+\- 
+Starts the asynchronous scan.
+.HP 5m
+."
+\fBmotor_par(motor, "stop_scan")\fP
+\- 
+Stops the asynchronous scan.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%www.omsmotion.com\fP
+

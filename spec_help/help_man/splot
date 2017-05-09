@@ -1,0 +1,184 @@
+.TH "splot" "macro" "12/18/13" "splot.rst 6.2  12/18/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBsplot\fP \- macro for screen plot
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)splot.rst        6.2  12/18/13  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "splot" "macro" "12/18/13" "splot.rst 6.2  12/18/13 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBsplot\fP
+.sp
+\fBsplot y\-col\fP
+.sp
+\fBsplot x\-col y\-col [ num\-pts ]\fP
+.sp
+\fBsplot array [ x\-col [ y\-col [ num\-pts ]]]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+(This document describes \fBsplot\fP the macro, not \fBsplot\fP the Python
+utility.)
+.sp
+The \fBsplot\fP macro produces a screen plot of the current data.
+The macro has a number of configurable parameters, most set
+using the \fBsetplot\fP macro.
+.sp
+With no arguments, \fBsplot\fP plots the \fBSCAN_D\fP array using
+the counters specified in the \fBPLOT_SEL[]\fP array (which is
+configured with either the \fBplotselect\fP macro or the \fBcounters\fP
+macro) versus the scan independent variable in column 0 of
+the \fBSCAN_D\fP array.
+The first through last data point of the most recent
+scan (as contained in the \fBLDT\fP global variable) are plotted.
+.sp
+A single argument \fBy\-col\fP (that is not an array name)
+can specify which counters in \fBSCAN_D\fP to plot
+for the \fBy\fP\-axis.
+The arguments can be counter numbers or counter mnemonics.
+The macros will automatically map the counters to the correct
+column in the \fBSCAN_D\fP array.
+If more than one counter is to be plotted,
+the counter names or numbers must be in one string.
+Individual counters can be separated by commas as in \fBdet,c3,c4\fP or a
+range of counters can given as \fB3:6\fP, which would plot counters 3 through 6.
+.sp
+A column for the \fBx\fP\-axis can be also specified as an additional argument \fBx\-col\fP prior
+to the \fBy\-col\fP argument.  The value can be given as column number in \fBSCAN_D\fP,
+motor mnemonic of any motor
+included in the scan or \fBH\fP, \fBK\fP or \fBL\fP for reciprocal space scans or motor scans
+that involve geometry motors.
+.sp
+An optional \fBnum\-pts\fP third argument specifies the points in the array to be plotted, using
+conventional \fBspec\fP data\-array syntax.  For example, \fB30\fP or \fB:30\fP
+would indicate the first point through the 30th point.  The parameter \fB20:80\fP would plot
+points 20 through 80.  An argument \fB\-50:\-1\fP or \fB\-50:\fP would plot the last 50 points of the array.
+.sp
+If the first argument \fBarray\fP is the name of an array and with no additional arguments, \fBsplot\fP
+will plot the last column versus the first column using all the rows.
+Additional arguments specify the column for \fBx\fP with \fBx\-col\fP, the column for \fBy\fP
+with \fBy\-col\fP, then
+the number of points (or rows) with \fBnum\-pts\fP.
+As with plotting \fBSCAN_D\fP, the arguments for \fBy\-col\fP
+and \fBnum\-pts\fP use \fBspec\fP\(aqs data array syntax.
+However, unlike the case for
+plotting \fBSCAN_D\fP, the \fBx\-col\fP value must be specified if there is a \fBy\-col\fP argument.
+.SH "EXAMPLES"
+.rs
+.sp
+In the following examples, \fBSCAN_D\fP contains data from a \fBth2th\fP scan
+on a four\-circle instrument.
+.sp
+\fBsplot\fP
+.sp
+.RS 4m
+Plots the scan data in \fBSCAN_D\fP.  The
+counters selected via \fBplotselect\fP are plotted
+versus the primary scan independent variable in column 0,
+usually a motor position.
+.RE
+.sp
+\fBsplot  det\fP
+.sp
+.RS 4m
+As above, but plots only the counter channel \fBdet\fP.
+.RE
+.sp
+\fBsplot  det,c2\fP
+.sp
+.RS 4m
+As above, but plots \fBdet\fP and \fBc2\fP.
+.RE
+.sp
+\fBsplot  th   det\fP
+.sp
+.RS 4m
+Plots \fBdet\fP versus the motor \fBth\fP.
+.RE
+.sp
+\fBsplot  H  det  10:20\fP
+.sp
+.RS 4m
+Plots \fBdet\fP versus reciprocal coordinate \fBH\fP, but only
+points 10 through 20.
+.RE
+.sp
+\fBsplot data\fP
+.sp
+.RS 4m
+Plots the last column of the array \fBdata\fP versus the first column.
+.RE
+.sp
+\fBsplot data 0 1:4\fP
+.sp
+.RS 4m
+Plots columns 1 through 4 of \fBdata\fP versus the first column.
+.RE
+.SH "GLOBAL VARIABLES"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBSCAN_D[][]\fP
+\- 
+Shared data array declared as:
+.sp
+.RS 5m
+.RS 4m
+SHARED_SCAN_D array SCAN_D[\fBrows\fP][\fBcols\fP]
+.RE
+.sp
+where the number of \fBrows\fP corresponds to the number of points.
+Initially, \fBrows\fP is set to 4096, but the macros automatically
+increase the size as needed.  The number of \fBcols\fP is set for
+each scan to accommodate all the configured counters and all the
+motors in the scan.  If the scan involves motors associated with
+the diffractometer reciprocal space calculations, \fBH\fP, \fBK\fP and
+\fBL\fP are also saved for each scan point.
+.sp
+\fBSHARED_SCAN_D\fP is a macro defined as \fBshared\fP, by default.
+The \fBSCAN_D\fP
+array needs to be a shared\-data array for the external \fBsplot\fP
+utility to have access to the data if \fBspec\fP is not running in
+server mode.
+.RE
+.HP 5m
+."
+\fBSCAN_COLS[]\fP
+\- 
+An associative array containging string labels for each column in \fBSCAN_D\fP.
+.HP 5m
+."
+\fBPLOT_MOTS\fP
+\- 
+The number of independent variables (motors) in \fBSCAN_D\fP columns.
+.HP 5m
+."
+\fBPLOT_NUM\fP
+\- 
+The number of dependent variables (counters) in \fBSCAN_D\fP columns.
+.HP 5m
+."
+\fBPLOT_SEL[]\fP
+\- 
+An associative array containing the counter mnemonics for
+the columns user to be plotted.
+.HP 5m
+."
+\fBLDT\fP
+\- 
+The row number in \fBSCAN_D\fP of the most recently added data point.
+.RE
+

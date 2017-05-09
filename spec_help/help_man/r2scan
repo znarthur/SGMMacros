@@ -1,0 +1,41 @@
+.TH "r2scan" "macro" "08/01/12" "r2scan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBr2scan\fP \- reflectivity background scans
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)r2scan.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "r2scan" "macro" "08/01/12" "r2scan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBr2scan alpha_start alpha_end alpha_intervals \-beta_off beta_off beta_intervals time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBr2scan\fP macro runs a series of detector in\-plane scans (beta)
+for different angles of incidence (alpha) from \fBalpha_start\fP to
+\fBalpha_end\fP with \fBalpha_intervals\fP. Each scan runs beta from
+alpha\-\fBbeta_off\fP to alpha+\fBbeta_off\fP
+counting for \fBtime\fP for each of the \fBbeta_intervals\fP.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBr2scan 10mr 20mr 10 \-4mr 2mr 3 1000\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%abscan\fP
+\fI\%rscan\fP
+\fI\%mesh\fP
+

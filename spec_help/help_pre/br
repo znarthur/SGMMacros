@@ -1,0 +1,30 @@
+br                                    macro                                   br
+
+NAME
+     bbrr and uubbrr - move to the reciprocal space coordinates (HHKKLL)
+
+SYNOPSIS
+
+     bbrr HH KK LL
+     uubbrr HH KK LL
+
+DESCRIPTION
+
+     The bbrr macro is used to move the diffractometer to the reciprocal space
+     coordinates given by HH, KK and LL.
+
+     The uubbrr macro also moves the diffractometer, but provides an updated
+     display of the motor positions and corresponding reciprocal space
+     coordinates while the motors are moving.  The update interval, in seconds,
+     is set by the global variable UUPPDDAATTEE.
+
+     bbrr is synonymous with mmkk.
+
+EXAMPLE
+
+     bbrr 00 00 11
+
+SEE ALSO
+
+     _c_a _c_a_l _m_k _f_o_u_r_c
+

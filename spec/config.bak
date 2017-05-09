@@ -1,0 +1,55 @@
+# ID @(#)getinfo.c	6.5  03/14/15 CSS
+# Device nodes
+PC_SIS1100	 = /dev/sis1100_00remote	@vme_0
+PSE_MAC_MOT	 = hex_p 4
+PSE_MAC_MOT	 = mac_mot 15
+PC_SIS3820T	 = 0x38000000 64
+HW2_DP5	 = 14850	@mca_0
+HW2_DP5	 = 14851	@mca_1
+HW2_DP5	 = 14849	@mca_2
+HW2_DP5	 = 14848	@mca_3
+PSE_MAC_MCA	 = xeol 5	@mca_4
+# CAMAC Slot Assignments
+#  CA_name_unit = slot [crate_number]
+# Motor    cntrl steps sign slew base backl accel nada  flags   mne  name
+MOT000 = MAC_MOT:1/1  10000  1 30000  200    0  125    0 0x003    hex_x  Hex_X
+MOTPAR:read_mode = 7
+MOT001 = MAC_MOT:1/2  10000  1 30000  200    0  125    0 0x003    hex_y  Hex_Y
+MOTPAR:read_mode = 7
+MOT002 = MAC_MOT:1/3  10000  1 30000  200    0  125    0 0x003    hex_z  Hex_Z
+MOTPAR:read_mode = 7
+MOT003 = MAC_MOT:0/1  10000  1 30000  200    0  125    0 0x003   hex_xp  Hex_XP
+MOTPAR:read_mode = 7
+MOT004 = MAC_MOT:0/2  10000  1 30000  200    0  125    0 0x003   hex_yp  Hex_YP
+MOTPAR:read_mode = 7
+MOT005 = MAC_MOT:0/3  10000  1 30000  200    0  125    0 0x003   hex_zp  Hex_ZP
+MOTPAR:read_mode = 7
+MOT006 = MAC_MOT:1/4  50000  1 50000  200    0  125    0 0x003       en  Energy
+MOTPAR:read_mode = 7
+MOT007 = MAC_MOT:1/5   2000  1  2000  200    0  125    0 0x003    xps_y  XPS_Y
+MOTPAR:read_mode = 7
+MOT008 = MAC_MOT:1/6   2000  1  2000  200    0  125    0 0x003    xps_x  XPS_X
+MOTPAR:read_mode = 7
+MOT009 = MAC_MOT:1/7   2000  1  2000  200    0  125    0 0x003    xps_z  XPS_Z
+MOTPAR:read_mode = 7
+MOT010 = MAC_MOT:1/8   2000  1  2000  200    0  125    0 0x003    xps_r  XPS_R
+MOTPAR:read_mode = 7
+MOT011 = MAC_MOT:1/9   2000  1  2000  200    0  125    0 0x003    kbv_p  KBV_PITCH
+MOTPAR:read_mode = 7
+MOT012 = MAC_MOT:1/10   2000  1  2000  200    0  125    0 0x003    kbh_p  KBH_PITCH
+MOTPAR:read_mode = 7
+# Counter   ctrl unit chan scale flags    mne  name
+CNT000 =  SIS3820  0  0      1 0x001    tr1_r  Clock
+CNT001 =  SIS3820  0  1      1 0x000    pd1_r  Diode
+CNT002 =  SIS3820  0  2      1 0x000    tey_r  TEY
+CNT003 =  SIS3820  0  3      1 0x000     io_r  I0
+CNT004 =  SIS3820  0 24      1 0x000   sdd1_1  SDD1_ROI1
+CNT005 =  SIS3820  0 25      1 0x000   sdd1_2  SDD1_ROI2
+CNT006 =  SIS3820  0 26      1 0x000   sdd2_1  SDD2_ROI1
+CNT007 =  SIS3820  0 27      1 0x000   sdd2_2  SDD2_ROI2
+CNT008 =  SIS3820  0 28      1 0x000   sdd3_1  SDD3_ROI1
+CNT009 =  SIS3820  0 29      1 0x000   sdd3_2  SDD3_ROI2
+CNT010 =  SIS3820  0 30      1 0x000   sdd4_1  SDD4_ROI1
+CNT011 =  SIS3820  0 31      1 0x000   sdd4_2  SDD4_ROI2
+CNT012 =  SIS3820  0 15      1 0x000     grup  GratingUp
+CNT013 =  SIS3820  0 16      1 0x000   grdown  GratingDown

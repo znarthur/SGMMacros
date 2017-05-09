@@ -1,0 +1,39 @@
+.TH "mvd" "macro" "08/01/12" "mvd.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBmvd\fP \- move a motor in dial units
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mvd.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mvd" "macro" "08/01/12" "mvd.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBmvd motor dial_value\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBmvd\fP macro moves
+\fBmotor\fP to the dial angle given by \fBdial_value\fP.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBmvd th 0\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%mv\fP
+\fI\%mvr\fP
+\fI\%wait\fP
+

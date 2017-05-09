@@ -1,0 +1,420 @@
+.TH "data_pipe" "using data_pipe()" "08/01/12" "data_pipe.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBdata_pipe()\fP or \fBarray_pipe()\fP \- integrate external programs into \fBspec\fP
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)data_pipe.rst    6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1995,1997,2006,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "data_pipe" "using data_pipe()" "08/01/12" "data_pipe.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP\(aqs \fBdata_pipe()\fP and \fBarray_pipe()\fP functions
+allow integration of external code
+with \fBspec\fP.
+With the data\-pipe facility, \fBspec\fP sends information
+to the external program,
+allows the external program to execute for a time,
+and then receives information back from the external program.
+The information can be in the form of a string or a number,
+and can also include
+the contents of a \fBspec\fP data group or data array.
+The handshaking and data transfer between \fBspec\fP
+and the data\-pipe program is done in an
+overhead module included in the \fBspec\fP distribution
+that is linked with the external code.
+.sp
+Although \fBdata_pipe()\fP was originally designed to work
+with the data group facility (see the
+\fI\%data\fP help file), both \fBdata_pipe()\fP and
+\fBarray_pipe()\fP can be used with data group
+or data array arguments (see the
+\fI\%arrays\fP  help file) interchangeably.
+There is no difference in implementation.
+In the following discussion, the \fBdata_pipe()\fP name will be used.
+.SH "THE \fBspec\fP SIDE"
+.rs
+.sp
+From \fBspec\fP, access to the data\-pipe facility is through
+the \fBdata_pipe()\fP function called from the user level.
+.sp
+The timeout feature was implemented in release 5.07.01\-1.
+If a timeout is set and the data\-pipe process doesn\(aqt respond within the
+given timeout value, the process is terminated
+and the \fBdata_pipe()\fP call returns \-1.
+If the data\-pipe process terminates on its own,
+\fBspec\fP display a message to that effect and the
+\fBdata_pipe()\fP call returns \-1.
+.RS 0m
+.HP 5m
+."
+\fBdata_pipe("?")\fP
+\- 
+Lists the currently running data\-pipe processes with name and process id.
+.HP 5m
+."
+\fBdata_pipe("timeout")\fP
+\- 
+Returns the global timeout value.
+When the timeout is zero, the data\-pipe process can take as
+long as it needs.
+.HP 5m
+."
+\fBdata_pipe(program, "timeout")\fP
+\- 
+Returns the timeout value for the named data\-pipe \fBprogram\fP.
+.HP 5m
+."
+\fBdata_pipe("timeout", sec)\fP
+\- 
+Set the global timeout to \fBsec\fP seconds.
+A value of zero means no timeout is in effect.
+The global timeout is used for each new \fBdata_pipe()\fP program.
+.HP 5m
+."
+\fBdata_pipe(program, "timeout", sec)\fP
+\- 
+Set the timeout for the data\-pipe process \fBprogram\fP
+to \fBsec\fP seconds, overriding the global default value.
+.HP 5m
+."
+\fBdata_pipe(program, "kill")\fP
+\- 
+Kills the process associated with \fBprogram\fP.
+.HP 5m
+."
+\fBdata_pipe(program [, args [, grp_out|arr_out [, grp_in|arr_in]]])\fP
+\- 
+Initiates or resumes synchronous execution of the special
+process named \fBprogram\fP. If
+\fBprogram\fP contains a \fB/\fP character,
+then it contains the complete absolute or relative path name
+of the program to run.  Otherwise the program must be in the
+\fBSPECD\fP/\fBdata_pipe\fP directory,
+where \fBSPECD\fP is the built\-in \fBspec\fP variable containing the
+path name of \fBspec\fP\(aqs auxiliary file directory.
+You can use the string \fB"."\fP for
+\fBprogram\fP as an abbreviation
+for the same program name as used in the last call to \fBdata_pipe()\fP.
+.sp
+The string value of \fBargs\fP is made available
+to the user code in the program as described in
+the next section.
+.sp
+The optional arguments \fBgrp_out\fP and \fBgrp_in\fP
+are data group numbers.  If
+\fBgrp_out\fP is present,
+the contents of that group are sent to the data\-pipe program.
+If \fBgrp_in\fP is present, it is the number of the data group
+that will receive values from the
+data\-pipe program.
+The data\-pipe program configures the size of \fBgrp_in\fP
+for an implicit call to
+\fBdata_grp()\fP within \fBdata_pipe()\fP.
+If the \fBgrp_in\fP argument is absent,
+\fBspec\fP will not receive data\-group data
+from the data\-pipe program.
+If \fBgrp_out\fP is also absent,
+group data won\(aqt be sent to the data\-pipe program.
+Even without group arguments,
+the data\-pipe program can still return values to \fBspec\fP in
+the form of assigning a number or string return value to \fBdata_pipe()\fP.
+.sp
+Either or both of the data group arguments can be replaced
+with the array arguments
+\fBarr_out\fP and \fBarr_in\fP.
+The arrays referred to by these arguments must be
+the data arrays declared explicitly with the \fBarray\fP keyword.
+When sending array data to the data\-pipe program, the array data
+is first converted to double precision floating point format.
+The received data is always double,
+but is converted to fit the declared data type of
+\fBarr_in\fP.
+Only as much data as will fit into the array will be assigned.
+The number of columns in
+\fBarr_in\fP should match the width of the data
+sent over by the data\-pipe program.
+If not, the data will still be assigned to the array,
+but will be misaligned.
+.RE
+.sp
+Prior to \fBspec\fP release 4.03.13,
+only one \fBdata_pipe()\fP function could be active at a time.
+.SH "THE PROGRAM SIDE"
+.rs
+.sp
+The user C code can be complied and linked using the command:
+.RS 3m
+.sp
+.nf
+.ft CB
+dpmake program [ UOBJ=... ] [ LIBS=... ] [ opt_make_args ]
+.ft P
+.fi
+.RE
+.sp
+The command \fBdpmake\fP is a short shell script
+which invokes the \fBmake\fP utility using the makefile
+\fBdata_pipe.mak\fP in the \fBSPECD\fP/\fBdata_pipe\fP directory.
+The file \fBprogram\fP.c
+will be compiled and linked with the data\-pipe overhead module,
+and the result placed in an executable file named \fBprogram\fP.
+If additional object modules or libraries need
+to be linked, they can be specified
+with the \fBUOBJ=\fP or \fBLIBS=\fP parameters.
+If the tools provided are not sufficient,
+you can create custom makefiles based on the distributed
+\fBdata_pipe.mak\fP.
+.sp
+After linking \fBprogram\fP,
+move it to the \fBSPECD\fP/\fBdata_pipe\fP directory for easy access by all users.
+.sp
+The subroutines available from the user C code portion
+of the data\-pipe program are described below.
+.SH "The User C Code"
+.rs
+.sp
+The skeleton user C\-code part of the data\-pipe program
+should contain the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+#include <user_pipe.h>
+
+user_code(argc, argv)
+char    **argv;
+{
+      ...
+}
+.ft P
+.fi
+.RE
+.sp
+The include file \fBuser_pipe.h\fP contains declarations
+of the subroutines available in the C code.
+The file resides in the \fBSPECD\fP/\fBdata_pipe\fP directory.
+.sp
+The subroutine \fBuser_code()\fP is called by the overhead part
+of the data\-pipe program each time
+\fBdata_pipe()\fP is invoked in \fBspec\fP.  The parameter
+\fBargc\fP is set to the number of space\-delimited words present
+in the string value of the
+\fBargs\fP parameter to \fBdata_pipe()\fP.
+The parameter \fBargv\fP is an array of character pointers
+that point to each of
+the \fBargc\fP space\-delimited words in the \fBargs\fP string.
+Alternatively, the \fBget_input_string()\fP function (see below)
+returns the \fBargs\fP string in its entirety.
+.sp
+The \fBuser_code()\fP routine will be called
+every time the \fBdata_pipe()\fP function is called from \fBspec\fP.
+The data\-pipe program does not exit between calls
+of \fBuser_code()\fP, so you should be careful about
+allocating memory or opening files each time \fBuser_code()\fP is called without
+freeing the memory or closing the files each time \fBuser_code()\fP returns.
+Alternatively, you can make sure such things are only done
+the first time \fBuser_code()\fP is called.
+.SH "Accessing Command Line Arguments"
+.rs
+.sp
+Besides the \fBargc\fP, \fBargv\fP technique
+for accessing the \fBargs\fP typed in the \fBdata_pipe()\fP call,
+the following function is available (as of \fBspec\fP release 4.03.13):
+.RS 0m
+.HP 5m
+."
+\fBchar *get_input_string()\fP
+\- 
+Returns a pointer to memory holding a copy
+of the second argument \fBargs\fP entered with the call to \fBdata_pipe()\fP.
+.RE
+.SH "Reading the Group/Array Data In the C Code"
+.rs
+.sp
+If \fBdata_pipe()\fP is sending a data group or array to the user code,
+the following subroutines provide access to the data parameters and values.
+.RS 0m
+.HP 5m
+."
+\fBint get_group_number()\fP
+\- 
+Returns the group number specified
+as the \fBdata_pipe()\fP \fBgrp_out\fP argument.
+A \-2 is returned if an array was specified.
+A \-1 is returned if neither data group or array was specified.
+.HP 5m
+."
+\fBint get_group_npts()\fP
+\- 
+Returns the number of points
+in the \fBdata_pipe()\fP \fBgrp_out\fP or the number of rows in \fBarr_out\fP.
+.HP 5m
+."
+\fBint get_group_width()\fP
+\- 
+Returns the number of elements per point
+in the \fBdata_pipe()\fP \fBgrp_out\fP or the number of columns in
+\fBarr_out\fP.
+.HP 5m
+."
+\fBint get_input_data(double *x, int pts, int wid)\fP
+\- 
+Transfers data from the \fBgrp_out\fP or \fBarr_out\fP specified in the call to
+\fBdata_pipe()\fP to the memory area indicated by the pointer \fBx\fP.
+The pointer \fBx\fP is treated
+as an array dimensioned as \fBx[pts][wid]\fP.
+If the data group/array has more points/rows
+than \fBpts\fP or more elements/columns than
+\fBwid\fP, only as many points/rows or elements/columns
+as are available in the data group/array are copied.
+Data from only a single element/column may be retrieved using
+one or more calls of \fBget_input_elem()\fP below.
+If the data in the data group from \fBspec\fP is float rather than
+double (which depends on \fBspec\fP\(aqs installation configuration),
+float\-to\-double conversion is done within the call to
+\fBget_input_data()\fP. The return value is the number of points/rows copied.
+.HP 5m
+."
+\fBint get_input_elem(double *x, int pts, int el)\fP
+\- 
+Transfers one element of the data
+from the \fBgrp_out\fP or \fBarr_out\fP specified in the call to
+\fBdata_pipe()\fP to the memory area indicated
+by the pointer \fBx\fP. No more than
+\fBpts\fP points are copied
+from element/column \fBel\fP of the the data group/array.
+If the data in the data group from \fBspec\fP is float rather than
+double (which depends on \fBspec\fP\(aqs installation configuration),
+float\-to\-double conversion is done within the call to
+\fBget_input_data()\fP.
+The return value is the number of points/rows copied.
+.RE
+.SH "Sending Group/Array Data Back To \fBspec\fP"
+.rs
+.sp
+The following subroutines allow you to send group/array
+data back to \fBspec\fP when
+\fBdata_pipe()\fP is invoked with a \fBgrp_in\fP
+or \fBarr_in\fP argument.
+For a data group, the call to
+\fBdata_pipe()\fP will implicitly call \fBdata_grp()\fP
+to configure the size of the
+return group according to the parameters set in the following subroutines.
+For an array, the array must already be declared and dimensioned.
+.sp
+There are two ways to send group/array data back to \fBspec\fP.
+The subroutine \fBset_return_data()\fP allows you to send
+the entire data group in one call that passes both
+a pointer to the data and the data group size
+to the data\-pipe program overhead code.
+Alternatively, you can use the \fBset_return_group()\fP subroutine
+to configure the data group/array size,
+followed by one or more calls to \fBset_return_elem()\fP
+to set one element/column of the data group/array at a time.
+.RS 0m
+.HP 5m
+."
+\fBint get_return_group_number()\fP
+\- 
+Returns the group number specified
+as the \fBdata_pipe()\fP \fBgrp_in\fP argument.
+A \-2 is returned if an array was specified.
+A \-1 is returned if neither data group or array was specified.
+.HP 5m
+."
+\fBvoid set_return_data(double *x, int pts, int wid, int last)\fP
+\- 
+Configures the return data group and copies the data at the same time.
+The pointer \fBx\fP is considered
+as an array of dimension \fBx[pts][wid]\fP
+for the purpose of transferring data to the data group.  The argument
+\fBlast\fP sets the index number
+of the last element added to the group, which is used by
+the various data analysis and plotting functions available in \fBspec\fP.
+.HP 5m
+."
+\fBvoid set_return_group(int pts, int wid)\fP
+\- 
+Configures the size of the return data group without copying data.
+This subroutine must be called once
+before calling \fBset_return_elem()\fP below.
+.HP 5m
+."
+\fBint set_return_elem(double *x, int pts, int el, int last)\fP
+\- 
+Copies one element to the return data group,
+which must have been previously configured by a call of
+\fBset_return_group()\fP, above.
+If the parameters \fBpts\fP or \fBel\fP exceed the values configured,
+or if the return group hasn\(aqt been configured,
+the subroutine returns \-1.  Otherwise zero is returned.
+.RE
+.SH "Setting \fBdata_pipe()\fP Return Values From C Code"
+.rs
+.sp
+You can set the value that the \fBdata_pipe()\fP function returns in \fBspec\fP
+from the user C code in your \fBdata\-pipe\fP process.  You can have
+\fBdata_pipe()\fP return a number or a string or,
+if necessary, reset to command level.
+If no explicit return value is assigned in the user C code,
+\fBdata_pipe()\fP returns zero.
+.RS 0m
+.HP 5m
+."
+\fBint set_return_string(char *s)\fP
+\- 
+Sets the return value of \fBdata_pipe()\fP to the string \fBs\fP.
+This subroutine returns \-1 if memory could not be obtained for the string
+\fBs\fP, otherwise it returns zero.
+.HP 5m
+."
+\fBvoid set_return_value(double v)\fP
+\- 
+Sets the return value of \fBdata_pipe()\fP to the value \fBv\fP.
+.HP 5m
+."
+\fBvoid do_error_return()\fP
+\- 
+Calling this subroutine from the user C code causes control to pass
+back to \fBspec\fP without returning data group or array values,
+if they have been set.
+The return value of \fBdata_pipe()\fP will be the value set by
+\fBset_return_value()\fP above,
+if such a value has been set, otherwise the return value of
+\fBdata_pipe()\fP will be \-1.  This subroutine does not return.
+.HP 5m
+."
+\fBvoid do_abort_return()\fP
+\- 
+Calling this subroutine from the user C code causes control to pass
+back to \fBspec\fP without returning data group or array values,
+if they has been set.
+In \fBspec\fP, there is no return from \fBdata_pipe()\fP,
+rather \fBspec\fP resets to command level.
+This subroutine does not return.
+.HP 5m
+."
+\fBvoid do_quit_return()\fP
+\- 
+Calling this subroutine from the user C code
+causes control to pass back to \fBspec\fP normally as if
+\fBuser_code()\fP returned normally,
+but the data\-pipe program will then exit.
+This subroutine does not return.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%data\fP
+

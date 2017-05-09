@@ -1,0 +1,161 @@
+fourc                               reference                              fourc
+
+NAME
+     fourc - 4-circle geometry modes
+
+DESCRIPTION
+
+     ffoouurrcc version of ssppeecc operates a standard four-circle diffractometer.
+     These notes give a brief description of the features of ffoouurrcc.  Further
+     details are given in the FFoouurr--CCiirrccllee RReeffeerreennccee section of the ssppeecc manual.
+
+FOUR-CIRCLE MODES
+
+     The four-circle modes represent the various constraints that can be made on
+     the transformation equations from reciprocal space to diffractometer
+     angles.  Use the sseettmmooddee macro to select a four-circle mode.  The different
+     modes are numbered as follows:
+
+         0   Omega Equals Zero
+         1   Omega Fixed
+         2   Zone (Chi and Phi Fixed)
+         3   Phi Fixed
+         4   Azimuthal
+         5   Alpha Fixed
+         6   Beta Fixed
+
+FROZEN ANGLES
+
+     Each of the four-circle modes has associated an angle (or angles) that are
+     fixed in that mode.  As a convenience, there is a ffrreeeezzee macro that turns
+     on a ffrroozzeenn mode.  When in frozen mode, all moves that specify reciprocal
+     space coordinates will use the frozen value(s) of the current mode's fixed
+     angle(s).  Thus you can move motors around for lining up, etc, but have the
+     the fixed parameter automatically restored to the frozen value when doing
+     reciprocal space scans, bbrr moves, etc.  The uunnffrreeeezzee macro turns frozen
+     mode off.
+
+     The frozen values are stored in variables (actually macros) named FF__OOMMEEGGAA
+     (omega-fixed mode), FF__CCHHII__ZZ and FF__PPHHII__ZZ (zone mode), FF__PPHHII (phi-fixed
+     mode), FF__AAZZIIMMUUTTHH (azimuthal mode), FF__AALLPPHHAA (alpha-fixed mode), and FF__BBEETTAA
+     (beta-fixed mode).  You can, of course, assign values to these variables by
+     hand.
+
+FOUR-CIRCLE SECTORS
+
+     The sector transformations are symmetry operations on the diffractometer
+     angles that yield eight different positions of the diffractometer circles
+     that correspond to the same HH, KK and LL position. A ninth sector minimizes
+     aabbss((cchhii -- 9900)) and aabbss((pphhii)).  The sseeccttoorrss HH KK LL macro prints the
+     diffractometer angles that would be used for each of the possible sectors
+     for a particular reciprocal space position.  Use the sseettsseeccttoorr macro to
+     select a sector.
+
+CUT POINTS
+
+     Cut points affect the direction the diffractometer circles turn to get from
+     one position to the next.  For example, if a cut point is at zero, the
+     corresponding circle will only move through angles of 0 to 360 degrees.
+     Thus, to get from 355 (=-5) to 5 degrees, the circle will turn 350 degrees.
+     If a cut point is at -180, the circle will move through angles from -180 to
+     180.  Thus the same motion from -5 to 5 will require only 10 degrees of
+     movement.  Use the ccuuttss macro to select cut points for tthheettaa, cchhii and pphhii
+     (and the aazziimmuutthh).  The ttwwoo--tthheettaa motor always uses -180 as a cut point.
+     (Only the sign of the aazziimmuutthh cut point is used, and it determines the sign
+     of the aazziimmuutthh angle.)
+
+LATTICE PARAMETERS
+
+     The sseettllaatt and sseettrrllaatt macros let you set the lattice parameters in direct
+     space or reciprocal space, respectively.
+
+ORIENTATION MATRIX
+
+     With known lattice parameters, you need to find two (nonparallel)
+     reflections in order to determine the orientation matrix.  The macros oorr00 HH
+     KK LL and oorr11 HH KK LL are used to associate the current diffractometer angles
+     with the primary and secondary reflections.  Macros called sseettoorr00 and
+     sseettoorr11 also let you set the orientation reflections, but don't require you
+     to move the diffractometer to the correct position.  Instead, you are
+     prompted for each of the angles and values for HH, KK and LL. The oorr__sswwaapp
+     macro is available to exchange the primary and secondary reflections.
+
+     You can also fit an orientation matrix if you have three or more known
+     reflections (not all in the same plane), but unknown lattice parameters.
+     Use rreefflleexx__bbeegg to initialize a reflections data file.  Use rreefflleexx HH KK LL to
+     add the current reflection to the file.  Use rreefflleexx__eenndd to complete the
+     file.  You then run the reflections file as a ssppeecc command file in order to
+     fit the reflections to obtain a new orientation matrix.  To calculate
+     lattice parameters from the new orientation matrix, type ccaallccLL. You can
+     then display the lattice parameters with the ppaa macro.  Naturally, you can
+     edit the reflections data file to delete or modify any of the reflection
+     data there.
+
+GLOBALS AND MACROS
+
+     QQ[[]] - a built-in array which holds the following four-circle parameters:
+
+          ddeeff HH ''QQ[[00]]'' - Reciprocal space coordinate.
+          ddeeff KK ''QQ[[11]]'' - Reciprocal space coordinate.
+          ddeeff LL ''QQ[[22]]'' - Reciprocal space coordinate.
+          ddeeff LLAAMMBBDDAA ''QQ[[33]]'' - Wavelength of X rays.
+          ddeeff AALLPPHHAA ''QQ[[44]]'' - Incident angle, useful for surface diffraction.
+          ddeeff BBEETTAA ''QQ[[55]]'' - Exit angle, useful for surface diffraction.
+          ddeeff OOMMEEGGAA ''QQ[[66]]'' - The tthheettaa - ttwwoo--tthheettaa / 2 parameter.
+          ddeeff AAZZIIMMUUTTHH ''QQ[[77]]'' - Rotation angle of a reference vector about the
+               scattering vector, useful for surface diffraction.
+          ddeeff FF__AALLPPHHAA ''QQ[[88]]'' - Frozen value of AALLPPHHAA for alpha-fixed mode.
+          ddeeff FF__BBEETTAA ''QQ[[99]]'' - Frozen value of BBEETTAA for beta-fixed mode.
+          ddeeff FF__OOMMEEGGAA ''QQ[[1100]]'' - Frozen value of OOMMEEGGAA for omega-fixed mode.
+          ddeeff FF__AAZZIIMMUUTTHH ''QQ[[1111]]'' - Frozen value of AAZZIIMMUUTTHH for azimuth-fixed
+               mode.
+          ddeeff FF__PPHHII ''QQ[[1122]]'' - Frozen value of PPHHII for phi-fixed mode.
+          ddeeff FF__CCHHII__ZZ ''QQ[[1133]]'' - Frozen value of CCHHII for zone mode.
+          ddeeff FF__PPHHII__ZZ ''QQ[[1144]]'' - Frozen value of PPHHII for zone mode.
+          ddeeff CCUUTT__TTHH ''QQ[[1155]]'' - The tthheettaa cut point.
+          ddeeff CCUUTT__CCHHII ''QQ[[1166]]'' - The cchhii cut point.
+          ddeeff CCUUTT__PPHHII ''QQ[[1177]]'' - The pphhii cut point.
+          ddeeff CCUUTT__AAZZII ''QQ[[1188]]'' - The aazziimmuutthh cut point flag.
+
+     GG[[]] - a built-in array which holds the following four-circle parameters:
+
+          ddeeff gg__mmooddee ''GG[[00]]'' - Holds current four-circle mode.
+          ddeeff gg__sseecctt ''GG[[11]]'' - Holds current four-circle sector.
+          ddeeff gg__ffrrzz ''GG[[22]]'' - Nonzero when frozen mode is on.
+          ddeeff gg__hhaazz ''GG[[33]]'' - HH of azimuthal reference vector.
+          ddeeff gg__kkaazz ''GG[[44]]'' - KK of azimuthal reference vector.
+          ddeeff gg__llaazz ''GG[[55]]'' - LL of azimuthal reference vector.
+          ddeeff gg__zzhh00 ''GG[[66]]'' - HH of first zone-mode vector.
+          ddeeff gg__zzkk00 ''GG[[77]]'' - KK of first zone-mode vector.
+          ddeeff gg__zzll00 ''GG[[88]]'' - LL of first zone-mode vector.
+          ddeeff gg__zzhh11 ''GG[[99]]'' - HH of second zone-mode vector.
+          ddeeff gg__zzkk11 ''GG[[1100]]'' - KK of second zone-mode vector.
+          ddeeff gg__zzll11 ''GG[[1111]]'' - LL of second zone-mode vector.
+
+     ccaallccHHKKLL - calculates HH, KK, LL, AALLPPHHAA, BBEETTAA, and AAZZIIMMUUTTHH from the four-circle
+          angles in the motor array AA[[]].
+
+     ccaallccAA - calculates AA[[]], OOMMEEGGAA, AALLPPHHAA, BBEETTAA and AAZZIIMMUUTTHH from HH, KK and LL.
+
+     ccaallccZZ - calculates the pphhii and cchhii to put the two vectors specified by the
+          six elements of the built-in ZZ[[]] array in the scattering plane.
+
+     cczz - "calculate zone", prints the cchhii and pphhii necessary to put the two
+          vectors specified as arguments in the scattering plane.
+
+     mmzz - "move zone", moves to the cchhii and pphhii values that put the two vectors
+          specified as arguments into the scattering plane.  Also sets zone mode
+          and turns on frozen mode using the calculated cchhii and pphhii values.
+
+     sszz - "set zone", calculates the cchhii and pphhii values that put the two vectors
+          specified as arguments into the scattering plane.  Also sets zone mode
+          and turns on frozen mode using the calculated cchhii and pphhii values.
+
+SEE ALSO
+
+       ggeeoo__ffoouurrcc..cc, C source file for the four-circle geometry calculations.
+       ffoouurrcc..ssrrcc, macro source file for the four-circle macros.
+       hhkkll..mmaacc, macro source file for reciprocal space macros.
+       uubb..mmaacc, macro source file for orientation matrix macros.
+       The FFoouurr--CCiirrccllee RReeffeerreennccee in the ssppeecc manual.
+

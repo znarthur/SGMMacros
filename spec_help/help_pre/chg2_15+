@@ -1,0 +1,568 @@
+changes                     spec 2.15+ Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.15+
+
+DESCRIPTION
+
+     These notes summarize the incremental patches made to ssppeecc release 2.15
+     (released February 21, 1992), as of April 19, 1993.
+
+INCOMPATIBILITIES
+
+String Value Of Uninitialized Variables
+
+     A long standing inconsistency (bug) dealing with the string value of an
+     uninitialized variable has been corrected.  The string value of an
+     uninitialized variable is now the null string, """".  Previously, the string
+     value would have been ""00"".  This change makes the values of uninitialized
+     variables consistent with aawwkk.  The standard macros have been modified in
+     several places to take account of this new behavior.  If you are currently
+     using expressions such as
+
+        iiff ((ssoommee__nnaammee ==== ""00"")) ......
+
+     to test whether a variable is uninitialized, you should change such
+     expressions to
+
+        iiff ((ssoommee__nnaammee ==== """")) ......
+
+     to work with this new version of ssppeecc.
+
+NEW FEATURES
+
+Two High-Res Plot Windows
+
+     The pplloott__ccnnttll(()) function can now be used to create and select between two
+     high resolution plot windows.  See the ffuunnccss help file for more
+     information.
+
+Multiple Curves On A Single Plot
+
+     The ddaattaa__pplloott(()) function can now be used to plot multiple curves with one
+     call.  See the ddaattaa help file for more information.
+
+Including Local Help Files
+
+     Local help files can be included in this list of topics in the basic help
+     file by including the local help file names in a file named
+     SSPPEECCDD//hheellpp//..llooccaall.  The basic help file is only updated during a full
+     installation of ssppeecc.
+
+Macro To Configure Counters
+
+     A new macro named ccoouunntteerrss displays the current counter configuration and
+     then prompts for counter channel numbers for the global variables MMOONN and
+     DDEETT.  Those variables hold the channels to be treated as monitor and
+     detector in the counting and scan macros.  The monitor and detector channel
+     numbers can also be given as arguments to ccoouunntteerrss.
+
+Reusing Macro Names As Local Variables
+
+     ssppeecc's syntax has been changed to allow macro names to be reused as local
+     symbols.  Previously, input such as the following would not be allowed:
+
+        ddeeff dd ''pprriinntt ddaattee(())''
+        {{ llooccaall dd ;; dd == 22 ;; pprriinntt dd }}
+
+     In the current version, reuse of the symbol dd is accepted.
+
+Can Use ..lloogg Extension For Log Files
+
+     Previously, lloogg files (files that recorded all of ssppeecc's output) were any
+     files with names that began with the three characters lloogg.  Now files
+     ending with the four characters ..lloogg, are also used as log files.
+
+Debugging Log Files
+
+     A new type of lloogg file is available.  If an output file name begins with
+     the characters ddlloogg or ends with the characters ..ddlloogg, all of ssppeecc's output
+     will be sent to that file, as with normal lloogg files.  In addition, if any
+     debugging output is being generated (by assigning a value to the built-in
+     DDEEBBUUGG variable), the debugging output will only be sent to the ddlloogg file
+     and won't be printed on the screen or sent to any other files.
+
+New Function To Prompt For User Input
+
+     A new function named ggeettvvaall(()) is available for reading values from the
+     keyboard.  See the ffuunnccss help file for usage information.  Macros that use
+     the slightly awkward ggeettvvaarr macro can be rewritten with this new function.
+
+New Random Number Function
+
+     A new function named rraanndd(()) returns random numbers.  See the ffuunnccss help
+     file for usage information.
+
+New \\aa Attention Character
+
+     A new special character sequence, \\aa (for attention or audible alert), has
+     been added.  This sequence sounds the terminal bell (and appears to be part
+     of the ANSI C grammar).
+
+MCA No Longer Automatically Cleared
+
+     ssppeecc will no longer clear the LeCroy 2301, 3512 and 3521 MCA modules when
+     counting using ttccoouunntt(()) or mmccoouunntt(()).  You will have to use the
+     mmccaa__ppaarr((""cclleeaarr"")) function before counting to clear the MCA channels.  This
+     change is made to accommodate the needs of some users.
+
+Multiple Processes Can Share GPIB Controller
+
+     On System V UNIX operating systems with IPC (inter-process communication),
+     it is now possible to share one National Instruments GPIB controller among
+     multiple versions of ssppeecc running on the same computer.  In addition, it is
+     also possible to share a single KS 3988 GPIB-to-CAMAC controller among
+     multiple processes.  The IPC version of the GPIB controller is selected by
+     the name PPCC__GGPPIIBBPPCC__LL in the ccoonnffiigg file.
+
+Multiple Versions Of 386/486 NI GPIB Supported
+
+     Both the National Instruments PCII and AT-GPIB cards and drivers are now
+     supported within the same binary for 386 systems.  The former is chosen
+     using the PPCC__GGPPIIBBPPCC (or PPCC__GGPPIIBBPPCC__LL) and the latter using PPCC__GGPPIIBBPPCC22 (or
+     PPCC__GGPPIIBBPPCC22__LL) in the ccoonnffiigg file.  WWaarrnniinngg:  Selecting the wrong controller
+     type may crash your computer or damage your file system.
+
+Multiple Versions of Sun NI GPIB Supported
+
+     Three versions of the National Instruments GPIB drivers are now available
+     for Sun platforms.  In the ccoonnffiigg file, the keywords PPCC__GGPPIIBBPPCC (or
+     PPCC__GGPPIIBBPPCC__LL) select the SB-GPIB Version 1.3 driver, the keywords PPCC__GGPPIIBBPPCC22
+     (or PPCC__GGPPIIBBPPCC22__LL) select the GPIB 1014-1S driver and the keywords
+     PPCC__GGPPIIBBPPCC33 (or PPCC__GGPPIIBBPPCC33__LL) select the SB-GPIB Version 2.1 driver.
+     WWaarrnniinngg: Selecting the wrong controller type may crash your system.
+
+Support For ACS MCB-4 Motor Controller
+
+     Preliminary hardware support is available for the Advanced Control System
+     MCB-4 stepping motor controllers over RS-232 and GPIB interfaces.
+
+Support For NSLS MMC32 Motor Controller
+
+     Preliminary hardware support is available for the MMC32 stepping motor
+     controller (produced locally at NSLS) over a GPIB interface.
+
+Support For Oriel Encoder Mike 18011 Motor Controller
+
+     Preliminary hardware support is available for the Oriel Encoder Mike 18011
+     controller over an RS-232 interface.
+
+Support For Klinger Motion Master 2000
+
+     Preliminary hardware support is available for the Klinger Motion Master
+     2000 DC and stepper motor controller over a GPIB interface.  See the kkll22000000
+     help file for more details.
+
+Support For the kkaappppaa Geometry
+
+     Preliminary support for the kkaappppaa diffractometer geometry is included.
+
+Support For ESRF
+
+     Support for the distributed computing, VME-based hardware environment of
+     the European Synchrotron Radiation Facility (ESRF) is now included.  A
+     general hardware control function eessrrff__iioo(()) has been added to ssppeecc (see the
+     eessrrff help file) and support for the ESRF motor controllers is available.
+
+Allowing For Slop In E500 Motor Positions
+
+     An experimental new feature is available to deal with small discrepancies
+     between the E500 controller and ssppeecc.  The function mmoottoorr__ppaarr((mmoottoorr,,
+     ""sslloopp"",, sstteeppss)) sets a threshold value for the selected motor for which ssppeecc
+     will automatically use the E500 value as the correct position.  A message
+     is printed if such a correction occurs.  The values set are saved in the
+     state file.
+
+CHANGED FEATURES
+
+New Definition For the ssccaann__pplloott Macro
+
+     The ssccaann__pplloott macro is now defined in the standard macros as __pplloott, which
+     is a newly introduced name.  The sseettpplloott macro will change the definition
+     of __pplloott, rather than ssccaann__pplloott.  Local sites that wish to redefine
+     ssccaann__pplloott no longer need to redefine the sseettpplloott macro.
+
+New ggeett__aanngglleess Macro
+
+     Occurrences of the built-in command ggeettaanngglleess in the standard macros have
+     been replaced with the macro ggeett__aanngglleess.  This new macro contains the
+     ggeettaanngglleess command, along with invocation of a new macro named
+     uusseerr__ggeettaanngglleess.  The latter is initially defined as a null macro.
+
+New ggeett__ccoouunnttss Macro
+
+     The built-in command ggeettccoouunnttss in the standard macros has been replaced
+     with the macro ggeett__ccoouunnttss, which calls ggeettccoouunnttss and a new macro named
+     uusseerr__ggeettccoouunnttss, which is initially defined as a null macro.  The purpose of
+     this change is to allow the user to insert code, if necessary, after the
+     call to ggeettccoouunnttss either to postprocess the the counter values, or to
+     implement user-level counters.  For one particular configuration, the
+     distance of the detector from the sample varies with the cosine of an
+     angle, so uusseerr__ggeettccoouunnttss is defined to multiply SS[[DDEETT]] by the appropriate
+     factor.
+
+New ccoouunntt__eemm Macro
+
+     A new ccoouunntt__eemm macro replaces all the code and immediate logic surrounding
+     calls to mmccoouunntt(()) and ttccoouunntt(()).  Included in ccoouunntt__eemm are calls to new
+     macros named uusseerr__pprreeccoouunntt and uusseerr__ppoossttccoouunntt.  By default, these macros
+     are defined as null macros.  They can be given definitions by users for
+     various purposes, including implementation of user-level counters.  See the
+     ccoouunntt..mmaacc source file for details.
+
+Orientation Matrix Code Accommodates Six Angles
+
+     The maximum number of angles used by the orientation-matrix code to
+     describe each reflection has been increased from five to six, to
+     accommodate the new six-circle geometry.
+
+Increase In the Number Of Data Groups
+
+     The number of data groups has been increased from eight to 256.  A limit
+     has been placed on the total number of points allowed for all groups.  That
+     limit is currently 65,536 points, but can be increased by CSS if requested.
+
+Data Groups Can Be Deleted
+
+     Calling ddaattaa__ggrrpp(()) with the number-of-elements argument set to zero will
+     now delete the group.
+
+Renaming Of Background-Flag Variable
+
+     The flag for background subtraction in the macros, defined in the source
+     file pplloott..mmaacc, has been renamed BBGG.  Previously the name of the flag was
+     PPGG.
+
+New Measure Macros
+
+     The mmeeaassuurreetteemmpp macro, called after counting in the __lloooopp macro, has been
+     replaced with two new macros called mmeeaassuurree11 and mmeeaassuurree22.  Initially,
+     mmeeaassuurree11 is defined as mmeeaassuurreetteemmpp to maintain compatibility with prior
+     usage.  Also introduced in the __lloooopp macro is a new mmeeaassuurree00 macro that is
+     called before counting.  Both mmeeaassuurree00 and mmeeaassuurree22 are initially defined
+     as null macros.
+
+Macros Work Without A Monitor Counter
+
+     The standard scan and counting macros have been modified so that they can
+     still be used if there is no monitor counter configured.  Set the global
+     variable MMOONN to -1 if you don't have a monitor counter.
+
+IMPROVED FEATURES
+
+No More Need For So Many Underscores
+
+     The initial underscores in the names of many of the local symbols in the
+     standard macros have been removed in order to improve the readability of
+     the macros.  The underscores no longer serve a purpose due to the
+     improvements in the functionality of the llooccaall keyword.
+
+Improvements To Output File Handling
+
+     A number of changes have been made to improve the handling of output files.
+
+     1. ssppeecc now keeps track of the current working directory when each file is
+        opened.  If you exit ssppeecc and then restart it from a different
+        directory, the existing output files will be reopened in their correct
+        directories.
+
+     2. If you restart ssppeecc using an existing state file and there is an output
+        file present in the state file that has disappeared from the file
+        system, ssppeecc now prints a warning message.  If possible, ssppeecc will
+        create a new file using the previous name and directory, though.
+
+     3. The oonn(()) and ooppeenn(()) functions, when used without arguments, now also
+        print the full path name of the files, along with the name by which each
+        was opened.
+
+     4. When the cclloossee(()) function is used with an unopened file, ssppeecc no longer
+        prints an error message.
+
+     5. Previously, if you removed a ssppeecc output file while ssppeecc still had it
+        open, all subsequent output to the file would be lost until the file was
+        closed, either through the cclloossee(()) function, by exiting and restarting
+        ssppeecc or through the ffiixxssttaattee command.  ssppeecc will now detect when you
+        attempt to write to an open file that has been removed from the file
+        system.  ssppeecc will print a warning message, close the old file
+        descriptor, create a new version of the file and open that file for
+        writing.  As a general rule, it is a bad idea to use any other UNIX
+        utility to change a file currently opened for writing by any program,
+        including ssppeecc.
+
+     6. The previous versions of the nneewwffiillee macro opened the data file in a
+        directory named ..//ddaattaa if it existed.  A new global variable named
+        DDAATTAA__DDIIRR is now used to hold the name of the optional data directory.
+        DDAATTAA__DDIIRR is initially set to ..//ddaattaa, so the default behavior is as
+        before.
+
+     7. If the file you enter in the nneewwffiillee macro has the same name as the
+        current data file, but if you have changed directory, the previous file
+        will be closed and a new one opened in the current directory.
+
+     8. If the nneewwffiillee macro can't open the file asked for, the DDAATTAAFFIILLEE
+        variable is set to ""//ddeevv//nnuullll"".
+
+     9. The nneewwffiillee macro now prints warning messages if the file already
+        exists, if the file exists and doesn't have the ##FF characters at the
+        start of the file or if the file name given is the same as the current
+        DDAATTAAFFIILLEE but doesn't exist.  This feature uses a program called
+        cchhkk__ffiillee, which is installed in the SSPPEECCDD directory.
+
+Monochromator Support Revamped
+
+     The monochromator support has been revamped.  All of the functionality is
+     now in macro code.  The ggeeoo__mmoonnoo..cc module has been eliminated.  All of the
+     monochromator macros are in the macro source file mmaaccrrooss//eenneerrggyy..mmaacc.  One-,
+     three- and four-motor monochromators are supported.  The macros
+     automatically detect which type of monochromator is being used based on the
+     motor mnemonics present in the ccoonnffiigg file.  The ggeett__EE, sseett__EE and mmoovvee__EE
+     macros have been renamed ggeettEE, sseettEE and mmoovveeEE, respectively.  See the new
+     mmoonnoo help file for details.
+
+CAMAC Info In iinnssttaallll__ddaattaa File
+
+     The --CC flag to the IInnssttaallll program has been replaced with a line in the
+     iinnssttaallll__ddaattaa file that keeps track of whether or not to include CAMAC
+     support.
+
+Non-Super User Installation
+
+     The --SS option to the IInnssttaallll program that lets you install ssppeecc without
+     being super user as long as you have write permission on all the relevant
+     files has been fixed to work on most, if not all, systems.  Previously, the
+     call of the cchhoowwnn UNIX command caused problems on some systems where it was
+     only available to the super user.  Now, the --SS option disables all calls to
+     cchhoowwnn.
+
+Driver Files Can Be Installed Without Kernel Rebuild
+
+     The driver install scripts for the 386 systems now accepts a --nn option to
+     indicate not to rebuild the kernel after installing the driver files.
+
+Improvements to ssuurrff Geometry Code
+
+     The code in ggeeoo__ssuurrff..cc that determines which version of the available
+     surface diffractometer configurations to use based on the configured motor
+     mnemonics has been improved to check that all the necessary mnemonics are
+     present, rather than just looking for one or two of them.  Also, the code
+     now does better error checking for mathematical singularities.  In
+     addition, the calculations between motor positions and reciprocal space now
+     work correctly in all the available modes.
+
+Improvements To ffoouurrcc and ffiivveecc Code
+
+     The ffoouurrcc and ffiivveecc geometry code has a few more checks for unobtainable
+     reflections in the aazziimmuutthhaall modes.
+
+Changes To ttwwoocc Internals
+
+     The numbering of the QQ[[]] parameters for the ttwwoocc geometry has been changed
+     to be consistent with the other geometries.  The indices of the LLAAMMBBDDAA,
+     AALLPPHHAA and BBEETTAA parameters have all been increased by one.  QQ[[22]], formerly
+     LLAAMMBBDDAA, is now unused.
+
+Improvements to bbuugg Macro
+
+     The bbuugg macro now uses the value of the new global variable MMAAIILL for the
+     name of the mail program to run.  The default value is the string mmaaiill.
+
+Faster, More Robust High-Res Graphics
+
+     The interface code to the high-resolution graphics filters has been
+     rewritten for improved speed and robustness.
+
+X11 Graphics Automatically Brought To Front
+
+     The xx1111ffiilltt program will now automatically raise the window to the front
+     each time its contents are changed.  This feature can be disabled in your
+     ..XXddeeffaauullttss file by setting the ssppeecc..AAuuttooRRaaiissee parameter to off.
+
+X11 Graphics Checks For Backing Store
+
+     The xx1111ffiilltt code has been fixed to automatically detect whether ""bbaacckkiinngg
+     ssttoorree"" is available.  If backing store is requested when it is not
+     available, the code switches automatically to retained pixmap mode.
+
+Am9513 Counting Improved
+
+     The code for the Am9513 based counting boards for the PC has been improved.
+     The maximum count has been increased from from 10.9 minutes to 71.5
+     minutes.  When counting to time, the time base resolution (in seconds) is
+     now set according to the following table:
+
+         0.00001  for tt < 0.6 sec
+         0.0001   for tt < 6 sec
+         0.001    for tt < 60 sec
+         0.01     for tt < 655.35 sec (10.9 min)
+         0.0655   for tt < 71.5 min
+
+     When counting to monitor counts, the 0.01 second time base is used, and the
+     value returned for the time channel will be corrected to account for the
+     rollovers that occur every 655.36 seconds.  Also, the powder-mode counting
+     mode used by the sseettppoowwddeerr macro is now implemented.
+
+MCU Code Improvements
+
+     The MCU code now only sends values for the base rate, steady-state rate and
+     acceleration parameters when ssppeecc starts, when the rreeccoonnffiigg command is
+     executed or when you change the steady-state rate with the mmoottoorr__ppaarr(())
+     function.  Previously, these values were sent before each move.
+
+Compumotor 4000 Code Updated
+
+     The code for the Compumotor 4000 has been updated to work with the revised
+     PROMS that Compumotor is now shipping.
+
+BUG FIXES
+
+X11 Color Names Updated
+
+     The color definitions have been updated to agree with the X11R4 values.  Of
+     the two (out of 175) color names used within the ssppeecc X11 filter that are
+     no longer defined in X11R4, one, unfortunately, was the default background
+     color for the sspplloott and rrpplloott screens, resulting in a black text on a black
+     background.
+
+Bugs in Assigning Values to Built-in Variables Fixed
+
+     It is no longer legal to assign string values to built-in number variables
+     such as CCOOLLSS or RROOWWSS or number values to built-in string variables such as
+     TTEERRMM or GGTTEERRMM.  Attempts to do so will generate a warning message, but will
+     not cause ssppeecc to reset to command level.
+
+Bugs Fixed in eeddccoonnff
+
+     A bug in the eeddccoonnff program, where deleting the highest numbered motor
+     resulted in an incorrect display, has been fixed.
+
+Bug Fixed in ccaa__ffnnaa(())
+
+     A bug in the ccaa__ffnnaa(()) function, where it required an unnecessary fourth
+     argument for command-type F codes (those with bit 3 set), has been fixed.
+
+Bug in Producing Lp-Style Plots Fixed
+
+     A bug in release 2.15, where the lp-style plots would not be produced if
+     high-resolution graphics were enabled, has been fixed.
+
+Bug in bbeeggiinn__mmaacc Fixed
+
+     A bug in the implementation of the bbeeggiinn__mmaacc feature has been fixed.
+     Previously, bbeeggiinn__mmaacc wouldn't execute unless a startup command file, such
+     as ssiittee..mmaacc or ssppeecc..mmaacc, was read.  Also, the message ((rruunnnniinngg bbeeggiinn__mmaacc
+     ......))  is now printed on the screen when ssppeecc starts up if the bbeeggiinn__mmaacc
+     macro is defined.
+
+Bug in ddaattaa__pplloott(()) Fixed
+
+     A bug in the ddaattaa__pplloott(()) function, where if the number-of-points parameter
+     was not zero, the plots weren't made, has been fixed.
+
+Bugs in mmoovvee__ppoollll(()) Implementation Fixed
+
+     The way in which the mmoovvee__ppoollll macro was added to the motor moving macros
+     in release 2.15 broke the updated display of motor positions in the
+     updated-moving macros.  The macros that use mmoovvee__ppoollll have been rewritten
+     so that the updated display will now work.  The change involves
+     reorganizing all the motor moving macros along the lines of
+
+        ddeeff mmvv  ''__mmvv $$**;; mmoovvee__ppoollll''
+        ddeeff uummvv ''__mmvv $$**;; __uuppddaattee11 $$11''
+
+     where the new __mmvv macro contains what used to be in mmvv.
+
+Bugs in CAMAC MCA Code Fixed
+
+     Bugs in the code for LeCroy 2301 and 3588 MCAs that handled large numbers
+     incorrectly have been fixed.
+
+Bugs in ssccaannss..44 Fixed
+
+     A bug, introduced in the last version of ssccaannss..44..cc, where the error bars
+     would be calculated incorrectly for a point with zero detector counts, has
+     been fixed.
+
+     Another bug in ssccaannss..44 (introduced in the January 1992 revision), where
+     when ##CC comment lines contained numbers in columns that matched the data,
+     the function included those numbers in the data that was returned, has been
+     fixed.
+
+Bug in E500 Acceleration Parameter Interpretation Fixed
+
+     An inconsistency concerning the interpretation of the units of the CAMAC
+     E500 stepping motor controller acceleration parameter has been clarified.
+     The E500 has an eight-bit register for each motor that contains the
+     acceleration time in tens of milliseconds.  Valid values for that register
+     are from zero to 255, which translate to valid acceleration times from 10
+     milliseconds to 2.55 seconds.  Since the very first versions of ssppeecc, the
+     values given in the ccoonnffiigg file have been copied directly to the E500
+     registers.  However, ssppeecc's documentation has always stated that the value
+     in the ccoonnffiigg file was in milliseconds.  Thus, the default value of 125
+     translated to 1.25 seconds when the number was copied directly to the E500
+     register.  With this version, ssppeecc now properly treats the values in the
+     ccoonnffiigg file as milliseconds.  ssppeecc also prints a warning message if the
+     values in the ccoonnffiigg are outside the legal range.  A negative value causes
+     a zero to be written to the acceleration register, which is a valid
+     acceleration time on the E500.  ssppeecc does not allow zero to be entered
+     directly, though.  You may want to check all the acceleration parameters
+     for your motors after you install this version of ssppeecc.  In particular, if
+     you have values between 1 and 255 that seemed suitable for your motors, you
+     should change those values by multiplying by ten.
+
+Bug in MCU Acceleration Parameter Interpretation Fixed
+
+     An error concerning the acceleration (ramp) parameter for the ACS MCU motor
+     controller has been fixed.  The values sent to the MCU were previously ten
+     times greater than the values requested in the ccoonnffiigg file.  Since the MCU
+     often has communication problems during the ramp times at the start and end
+     of a move, the long ramp times increased the chances of communication
+     errors.
+
+Bug in DSP and OMS Driver Installation Fixed
+
+     The iinnssttaallll scripts for DSP CAMAC driver and OMS motor driver have been
+     fixed to correctly set the IO-port end address in the kernel configuration
+     files on AT&T System V/386 installations.  Previously, if you changed the
+     base address from the default using a command line option, the end address
+     was not updated correctly.
+
+Bug in Macro Installation Fixed
+
+     A bug in the installation procedure that put the orientation matrix macros
+     in ssttaannddaarrdd..mmaacc rather than the appropriate configuration macro files
+     (ffoouurr..mmaacc, etc.)  has been fixed.  If the last macro package installed
+     didn't use the orientation matrix macros, the orientation matrix macros
+     would not be put in ssttaannddaarrdd..mmaacc and thus would not be available to a
+     previously installed geometry configuration that required them.
+
+Bugs in Ortec Counting Fixed
+
+     Many changes have been made for the Ortec 974/994/995/997 modules,
+     (Apparently the previous code wasn't working as well as CSS was led to
+     believe.)
+
+Microvax GPIB Bug Fixed
+
+     A possible bug with the code for the National Instruments GPIB controller
+     for the DEC Microvax Q-bus dealing with non-terminated reads has been
+     fixed.
+
+Simulate-Mode Bug Fixed
+
+     A bug in simulate mode that occurred when the change to simulate mode took
+     place before any motors had been moved has been fixed.  The manifestation
+     of the bug was the appearance of strange values for motor positions.  The
+     bug only occurred on some computer platforms and only affected the behavior
+     in simulate mode.
+
+ddooffiillee(()) Bug Fixed
+
+     A bug of longstanding, where ssppeecc would hang if the file used with ddooffiillee(())
+     or qqddooffiillee(()) was empty, has been fixed.
+
+Bugs in eeddccoonnff Wizard Mode Fixed
+
+     The main hole in the motor security features available with the wwiizzaarrdd
+     option of the eeddccoonnff program (dealing with reading in backup files that
+     describe a less secure configuration) has been plugged up.
+

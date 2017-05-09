@@ -1,0 +1,171 @@
+hecus                               hardware                               hecus
+
+NAME
+     hecus - Hecus ASA-32 MCA
+
+INTRODUCTION
+
+     The ASA-32 is the ISA acquisition card for the Hecus SAX/SWAX X-ray system.
+     The system has two detectors for obtaining both small- and wide-angle data
+     with the position-sensitive detectors.  The system can be operated in a
+     pure small-angle (SAX) mode or a multiplexed small/wide angle (SWAX) mode,
+     where the time slots assigned to each detector are independently adjustable
+     from 0.01 to 2 seconds.  The ASA-32 card can return both position and
+     energy data for each of the two detectors.
+
+FUNCTIONS
+
+     Since the MCA has two detectors and both energy and position data arrays
+     are available for each, the usual numbering scheme in ssppeecc for selecting
+     MCA devices has been extended.  To access other than the default detector
+     (detector 1, the SAX detector) or the default data (energy), the mmccaa__ssggeett(())
+     and mmccaa__ssppaarr(()) functions must be used rather than mmccaa__ggeett(()) and mmccaa__ppaarr(()).
+
+     Normally, the first argument of mmccaa__ssggeett(()) and mmccaa__ssppaarr(()) selects which MCA
+     device, when more than one are configured.  The ASA-32 is treated as one
+     MCA device, but the first argument usage is extended.  Instead of a simple
+     number, the first argument can be passed as a string that contains first
+     the number of the selected MCA, then a colon, then a number that selects
+     the detector and/or the type of data.  The lowest order hex digit of that
+     second number is zero for detector one or one for detector two.  The next
+     hex digit is zero or one to code for energy or position, respectively.
+     Decimal values are valid, too.  For example,
+
+           mmccaa__ssggeett((""00::00xx1100"",, ddaattaa))
+         or
+           mmccaa__ssggeett((""00::1166"",, ddaattaa))
+
+     reads the position array for detector one, while
+
+           mmccaa__ssggeett((""00::00xx1111"",, ddaattaa))
+         or
+           mmccaa__ssggeett((""00::1177"",, ddaattaa))
+
+     reads the position data for detector two.  The command
+
+         mmccaa__ssggeett((""00::00xx0000"",, ddaattaa))
+
+     reads the energy data for detector one, as does
+
+         mmccaa__ggeett((ddaattaa))
+
+     With respect to parameters that can apply to either detector, a command
+     such as
+
+           mmccaa__ssppaarr((""00::00xx11"",, ""eenneerrggyy__lloowweerr""))
+         or
+           mmccaa__ssppaarr((""00::11"",, ""eenneerrggyy__lloowweerr""))
+
+     would return the parameter value for detector two.
+
+     The parameters where a detector designation makes a difference are:
+
+         ""pprreesseett"", but only in energy- or position-stop mode,
+         ""mmpplleexx__ttiimmee"",
+         ""eenneerrggyy__lloowweerr"" and ""eenneerrggyy__uuppppeerr"",
+         ""AADDCC__ccoouunnttss"", ""eenneerrggyy__ccoouunnttss"", ""ppoossiittiioonn__ccoouunnttss""  and
+           ""ttrriiggggeerr__ccoouunnttss"".
+
+     The standard MCA commands supported by ssppeecc are described in the _m_c_a help
+     file.  Of the standard functions, the ASA-32 MCA supports mmccaa__ggeett(()) but not
+     mmccaa__ppuutt(()). The standard mmccaa__ppaarr(()) options ""iinnffoo"", ""cchhaannss"", ""mmaaxx__cchhaannss"",
+     ""mmaaxx__cchhaannnneellss"", ""ddiissaabbllee"", ""aauuttoo__rruunn"", ""ssoofftt__pprreesseett"", ""aauuttoo__cclleeaarr"",
+     ""nnaattiivvee__ttyyppee"", ""pprreesseett"", ""rruunn"", ""hhaalltt"", and ""cclleeaarr"", are supported by the
+     ASA-32 MCA.
+
+     For options that apply to the "selected detector", detector 1 (the SAX
+     detector) is selected by default, and the mmccaa__ssppaarr(()) first argument can be
+     used to select detector 2, as explained above.
+
+     mmccaa__ppaarr((""pprreesseett"")) - Returns the preset value for the current stop mode and
+          the selected detector.  The preset time parameter is returned in
+          real-time and live-time stop modes.  The preset count parameter is
+          returned in energy and position stop modes.
+
+     mmccaa__ppaarr((""pprreesseett"",, vvaalluuee)) - Sets the preset value for the current stop mode.
+          For real-time and live-time stop modes, sets the number of seconds for
+          acquisition.  For energy and position stop modes, sets the total
+          counts for the selected detector at which to stop acquisition.
+
+     mmccaa__ppaarr((""mmooddee"")) - Returns either of the strings ""ssaaxx"" or ""sswwaaxx"" to indicate
+          whether the device is in pure SAX mode, or multiplexed SWAX mode.
+
+     mmccaa__ppaarr((""mmooddee"",, vvaalluuee)) - Sets the acquisition mode to SAX or SWAX
+          respectively for the arguments ""ssaaxx"" and ""sswwaaxx"".
+
+     mmccaa__ppaarr((""mmpplleexx__ttiimmee"")) - Returns the time in seconds devoted to the selected
+          detector in the multiplexed SWAX mode.
+
+     mmccaa__ppaarr((""mmpplleexx__ttiimmee"",, vvaalluuee)) - Sets the selected detector multiplex time to
+          the specified value, which can be from 0 to 2 seconds, in increments
+          of 0.01 second.
+
+     mmccaa__ppaarr((""ssttoopp__mmooddee"")) - Returns one of the strings ""rreeaallttiimmee"", ""lliivveettiimmee"",
+          ""eenneerrggyy"" or ""ppoossiittiioonn"" to indicate the current stop mode.  Acquisition
+          halts when the specified acquisition value reaches the preset value.
+
+     mmccaa__ppaarr((""ssttoopp__mmooddee"",, vvaalluuee)) - Sets the stop mode according to the argument,
+          which can be ""rreeaallttiimmee"", ""lliivveettiimmee"", ""eenneerrggyy"" or ""ppoossiittiioonn"".
+
+     mmccaa__ppaarr((""eenneerrggyy__lloowweerr"")) - Returns the lower energy limit for the selected
+          detector.
+
+     mmccaa__ppaarr((""eenneerrggyy__lloowweerr"",, vvaalluuee)) - Sets the lower energy limit for the
+          selected detector to vvaalluuee.  The valid range is from 0 to 4095.  The
+          default value is 2048.
+
+     mmccaa__ppaarr((""eenneerrggyy__uuppppeerr"")) - Returns the upper energy limit for the selected
+          detector.
+
+     mmccaa__ppaarr((""eenneerrggyy__uuppppeerr"",, vvaalluuee)) - Sets the upper energy limit for the
+          selected detector to vvaalluuee.  The valid range is from 0 to 4095.  The
+          default value is 3072.
+
+     mmccaa__ppaarr((""hhiigghh__vvoollttaaggee"")) - Reports the status of the high-voltage supply.  A
+          positive return value indicates the supply is on.
+
+     mmccaa__ppaarr((""hhiigghh__vvoollttaaggee"",, vvaalluuee)) - Turns the high-voltage supply on if vvaalluuee
+          is nonzero.  Turns the high-voltage supply off if vvaalluuee is zero.
+
+     mmccaa__ppaarr((""rraatteemmeetteerr"")) - Returns either of the strings ""ttrriiggggeerr"" or
+          ""ppoossiittiioonn"" to indicate the mode of the rate-meter output.
+
+     mmccaa__ppaarr((""rraatteemmeetteerr"",, vvaalluuee)) - Sets the mode of the rate-meter output
+          according to the argument which can be ""ttrriiggggeerr"" or ""ppoossiittiioonn"".
+
+     mmccaa__ppaarr((""AADDCC__ccoouunnttss"")) - Returns the total counts converted by the
+          analog-to-digital converter.
+
+     mmccaa__ppaarr((""eenneerrggyy__ccoouunnttss"")) - Returns the total counts collected into the
+          energy array.
+
+     mmccaa__ppaarr((""ppoossiittiioonn__ccoouunnttss"")) - Returns the total counts collected into the
+          position array.
+
+     mmccaa__ppaarr((""ttrriiggggeerr__ccoouunnttss"")) - Returns the number of counts seen by the input
+          trigger.
+
+     mmccaa__ppaarr((""eellaappsseedd__ttiimmee"")) - Returns the elapsed time of acquisition.
+
+     mmccaa__ppaarr((""dduummpp"")) - Displays current device settings for high-voltage status,
+          ratemeter, position resolution and energy resolution.
+
+     mmccaa__ppaarr((""rreesseett"")) - Resets the board, forcing a reload of the firmware.
+          Currently nonfunctional.
+
+     mmccaa__ppaarr((""mmiinn__ddeellaayy"")) - Returns the value for the parameter that is the
+          minimum time between two pulses from the detector to be counted as
+          separate pulses.
+
+     mmccaa__ppaarr((""mmiinn__ddeellaayy"",, vvaalluuee)) - Sets the above parameter to vvaalluuee.  Note,
+          this parameter is a constant for the detector and should not need to
+          be changed.  The default value, appropriate for the PSD-50M, is zero.
+
+     mmccaa__ppaarr((""ttiimmee__ccoorrrreeccttiioonn"")) - Returns the value for the detector dead-time
+          parameter.
+
+     mmccaa__ppaarr((""ttiimmee__ccoorrrreeccttiioonn"",, vvaalluuee)) - Set the above parameter to vvaalluuee.
+          Note, this parameter is a constant for the detector and should not
+          need to be changed.  The default value, appropriate for the PSD-50M,
+          is 0x573.
+

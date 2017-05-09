@@ -1,0 +1,363 @@
+.TH "serial" "hardware" "08/01/12" "serial.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+serial \- RS\-232C interface functions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)serial.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990-2007,2009,2010,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "serial" "hardware" "08/01/12" "serial.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+Generic user\-level access to the serial ports is through
+the \fBser_get()\fP, \fBser_put()\fP and
+\fBser_par()\fP functions described in the following sections.
+The generic serial devices are configured on the
+\fBI\fPnterfaces screen
+of the configuration editor, as in the example below:
+.RS 3m
+.sp
+.nf
+.ft CB
+SERIAL       DEVICE <>TYPE  <>BAUD                       <>MODE
+0  YES   /dev/ttyS0     <>   19200                          raw
+1  YES   /dev/ttyS1     <>    9600                 cooked igncr
+.ft P
+.fi
+.RE
+.sp
+Each serial device is numbered, starting from zero,
+and that number is the first parameter \fBaddr\fP in the functions below.
+Up to 21 serial devices can be configured, numbered from 0 to 20.
+Only three devices are displayed at a time.
+Use the \fB^F\fP and \fB^B\fP commands to display additional rows.
+.sp
+Do not configure a generic serial device
+when the associated device node is for a
+motor controller, counter/timer or other acquisition device
+that uses \fBspec\fP\(aqs built\-in support.
+The serial device associated with such controllers is specified
+as part of the controller configuration
+on either the \fBD\fPevices screen or the \fBA\fPcquisition
+screen of the configuration editor.
+.sp
+The default serial interface is through the built\-in
+standard UNIX serial driver.
+The \fBTYPE\fP menu allows optional selection of additional serial
+interfaces, namely \fBEPICS\fP, \fBTACO\fP or
+\fBSOCKET\fP. (\fBTACO\fP was previously labeled \fBESRF\fP.) For
+\fBEPICS\fP, the \fBDEVICE\fP field should contain the base name of the
+serial record process variables.
+For \fBTACO\fP, the \fBDEVICE\fP field should contain the name of the
+associated device server.
+The \fBSOCKET\fP serial interface connects to Ethernet\-to\-serial
+devices using the IP address (or resolvable host name)
+and port number entered in the \fBDEVICE\fP field,
+such as \fB192.168.1.100:7890\fP.
+.sp
+Supported \fBBAUD\fP settings are 300, 600, 1200, 1800, 2400, 4800, 7200,
+9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400, 460800,
+921600, 1000000, 1152000, 1500000, 2000000, 2500000, 3000000,
+3500000 and 4000000 baud.
+However, not all baud rates are supported by all platforms and
+by all serial interface hardware.
+.sp
+The baud rate setting is ignored for the \fBSOCKET\fP type of interface.
+See the documentation associated with a particular
+Ethernet\-to\-serial device
+for procedures to set the serial port parameters.
+.sp
+The behavior of the serial interface
+depends on a number of configurable parameters, set
+by the \fBMODE\fP menu, described next.
+The seldom\-used data\-bits and stop\-bits parameters
+can only be adjusted at run time using the
+\fBser_par()\fP function, described further below.
+.SH "TTY MODES"
+.rs
+.sp
+The serial device tty modes refer to the kind of character processing
+the UNIX kernel inserts
+between the serial device and the \fBspec\fP program.
+(Depending on the platform, tty modes descriptions might be found in the
+\fBtermios(3)\fP, \fBtermio(7)\fP or \fBtty(4)\fP sections of the UNIX man pages.)
+\fBspec\fP sets the tty modes for a particular serial device
+according to the selection in \fBspec\fP\(aqs hardware \fBconfig\fP file.
+.sp
+There are many more tty\-mode parameters recognized by
+the serial device drivers than \fBspec\fP offers as configuration options.
+Only the parameters that have been found to be needed by \fBspec\fP users can be
+configured.
+.sp
+The standard serial ports can be configured in either
+\fBraw\fP mode or several flavors of \fBcooked\fP mode.
+In \fBraw\fP mode, the kernel does minimal processing of the bytes transmitted
+and received, generally passing all of the 256 possible values through.
+Also, the received bytes are available to \fBspec\fP
+as soon as they are received by
+the kernel.  For transferring binary data, \fBraw\fP mode is essential.
+On some platforms, a seven\-bit raw mode is available, where the
+eighth bit is used for parity.
+.sp
+In \fBcooked\fP mode, the kernel buffers the incoming data.
+The input data only becomes available to be read by \fBspec\fP when a newline or
+carriage return is received.
+Also, the kernel may do some processing of the data,
+such as converting tabs to
+spaces on output or processing delete or line\-erase characters on input.
+The character processing makes
+\fBcooked\fP mode inappropriate for receiving binary data.
+The various flavors of \fBcooked\fP mode implemented in \fBspec\fP
+set whether to use even or odd parity or no parity, whether to disable
+software flow control and whether to ignore carriage returns on input.
+.sp
+\fBspec\fP does turn off input echoing in both \fBraw\fP and \fBcooked\fP modes.
+.sp
+Note, the \fBTACO\fP, \fBEPICS\fP and \fBSOCKET\fP interface types
+only support \fBraw\fP mode.
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBser_get(addr)\fP
+\- 
+If the serial device \fBaddr\fP is in \fBcooked\fP mode,
+reads and returns a string of bytes,
+up to and including a newline character, or returns the
+null string if the read times out.  If the device is in
+\fBraw\fP mode, the function reads and returns as many characters as are already
+available in the queue.
+If no characters are available, waits for a character and returns it,
+or returns a null string if no characters become
+available within the time\-out period.
+The maximum string length in this mode is 8191 characters.
+.HP 5m
+."
+\fBser_get(addr, n)\fP
+\- 
+If the serial device \fBaddr\fP is in \fBcooked\fP mode,
+reads up to a newline, but no more than
+\fBn\fP bytes from the serial device with address
+\fBaddr\fP and returns the string so obtained.
+In \fBcooked\fP mode, no characters can be read until a newline is received.
+In \fBraw\fP mode, reads up to \fBn\fP characters or until a timeout.
+If \fBn\fP is zero, the routine reads up to a newline or
+the maximum of 8191 characters, whichever comes first.
+In both cases, if the read is not satisfied before a timeout,
+the routine returns the null string.
+.HP 5m
+."
+\fBser_get(addr, eos)\fP
+\- 
+Reads characters until a portion of the input matches the string
+\fBeos\fP and returns the string so obtained, including the end\-of\-string
+characters.
+If no match to the end\-of\-string characters is found within the
+timeout period, the null string is returned.
+.HP 5m
+."
+\fBser_get(addr, d)\fP
+\- 
+Reads incoming bytes into the data array \fBd\fP. The size of
+\fBd\fP determines how many bytes are to be read.
+Sub\-array syntax can be used to limit the number of bytes.
+The function returns the number of array elements read, or zero
+if the read times out.
+Note, no byte re\-ordering is done for short\- or\-long integer data, and
+no format conversions are done for float or double data.
+.HP 5m
+."
+\fBser_get(addr, mode)\fP
+\- 
+If \fBmode\fP is the string
+\fB"byte"\fP, reads and returns one unsigned binary byte.
+If \fBmode\fP is the string \fB"short"\fP, reads two binary
+bytes and returns the short integer so formed.
+If \fBmode\fP is the string \fB"long"\fP, reads four binary
+bytes and returns the long integer so formed.
+The last two modes work the same on both
+\fBbig\-endian\fP and \fBlittle\-endian\fP platforms.  On both,
+the incoming data is treated as \fBbig endian\fP. If the incoming data is
+\fBlittle endian\fP, use \fB"short_swap"\fP or
+\fB"long_swap"\fP. (For \fBspec\fP versions prior to release 5.01.01, use
+\fBint2\fP for \fBshort\fP and \fBint4\fP for \fBlong\fP.)
+.HP 5m
+."
+\fBser_put(addr, s)\fP
+\- 
+Writes the string \fBs\fP to the serial device with address
+\fBaddr\fP. Returns the number of bytes written.
+.HP 5m
+."
+\fBser_put(addr, d [, cnt\fP])
+\- 
+Writes the contents of the data array \fBd\fP
+to the serial device with address
+\fBaddr\fP. By default, the entire array
+(or subarray, if specified) will be sent.
+The optional third argument \fBcnt\fP can be used
+to specify the number of array elements to send.
+For short and long integer arrays,
+the data will be sent using native byte order.
+The \fB"swap"\fP option of the
+\fBarray_op()\fP function can be used to change the byte order, if necessary.
+No format conversions are available for float or double data.
+Returns the number of bytes written.
+.HP 5m
+."
+\fBser_par(addr, "device_id")\fP
+\- 
+Returns the name of the associated serial device or \-1
+if there is no serial device configured as
+\fBaddr\fP (as of of \fBspec\fP release 5.05.05\-7).
+.HP 5m
+."
+\fBser_par(addr, "responsive")\fP
+\- 
+Returns 1 if the associated serial device is open,
+0 if the device could not be opened and \-1
+if there is no serial device configured as
+\fBaddr\fP (as of of \fBspec\fP release 5.05.05\-7).
+.HP 5m
+."
+\fBser_par(addr, "drain")\fP
+\- 
+Waits for pending output on the associated serial device
+to be transmitted (as of \fBspec\fP release 5.09.01\-1), but
+can be interrupted with \fB^C\fP. Use the
+\fB"flush"\fP option, described next, to empty the output queue.
+Does nothing and returns immediately for \fBSOCKET\fP, \fBEPICS\fP and
+\fBTACO\fP serial interfaces.
+.HP 5m
+."
+\fBser_par(addr, "flush" [, how])\fP
+\- 
+Flushes the input and/or output queues for the serial device with address
+\fBaddr\fP. If \fBhow\fP is zero or absent, the input queue is flushed.
+If \fBhow\fP is one, the output queue is flushed.
+Otherwise, both queues are flushed.
+The input queue may contain characters if a \fBser_get()\fP times out
+before the read is satisfied,
+or if more characters arrive than are requested.
+.HP 5m
+."
+\fBser_par(addr, "queue")\fP
+\- 
+Returns the number of characters in the serial device\(aqs input queue.
+The input queue may contain characters
+if a \fBser_get()\fP times out before the read
+is satisfied, or if more characters arrive than are requested.
+.HP 5m
+."
+\fBser_par(addr, "timeout" [, t])\fP
+\- 
+Returns or sets the read timeout for the serial device with address
+\fBaddr\fP. The units are seconds.  A value of zero indicates no timeout \- a
+\fBser_get()\fP will wait until the read is satisfied or is interrupted by a
+\fB^C\fP. The smallest allowed value of 0.001 will cause the
+\fBser_get()\fP to return immediately.
+A negative value resets the timeout to the default of two seconds.
+.HP 5m
+."
+\fBser_par(addr, "baud" [, value])\fP
+\- 
+Returns or sets the baud rate for the serial device with address \fBaddr\fP
+(as of \fBspec\fP release 5.08.6\-4).
+Valid baud rates are from 300 to 4000000.
+The function returns the device\(aqs baud rate.
+If \fBvalue\fP isn\(aqt valid or if there was an error,
+the function returns \-1.  Reading the hardware \fBconfig\fP file resets
+the baud rate to the value in the file.
+\fBspec\fP cannot set the baud rate on \fBSOCKET\fP interfaces.
+.HP 5m
+."
+\fBser_par(addr, "stop_bits" [, bits])\fP
+\- 
+Returns or sets the stop\-bits value for the serial device with address
+\fBaddr\fP (as of \fBspec\fP release 5.06.05\-7).
+Normal values are one or two.
+The default value of one is appropriate for
+nearly every serial device, and this command should very rarely be needed.
+Note, to set the non\-default value,
+this command will need to be issued each time after reading the
+hardware \fBconfig\fP file.
+This mode is not supported on \fBSOCKET\fP interfaces.
+.HP 5m
+."
+\fBser_par(addr, "data_bits" [, bits\fP])
+\- 
+Returns or sets the data\-bits value for the serial device with address
+\fBaddr\fP (as of of \fBspec\fP release 5.07.02\-2).
+Accepted values are 5, 6, 7 and 8.
+The default values of seven if parity is enabled and eight if parity
+is disabled should work for
+nearly every serial device, and this command should very rarely be needed.
+Note, to override the default value,
+this command needs to be issued after reading the hardware
+\fBconfig\fP file (on start up and on \fBreconfig\fP).
+This mode is not supported on \fBSOCKET\fP interfaces.
+.HP 5m
+."
+\fBser_par(addr, "dtr" [, 1|0])\fP
+\- 
+Returns the current setting or sets or clears the Data Terminal Ready (DTR)
+control line (as of \fBspec\fP release 5.08.03\-4).
+Only available on standard serial interfaces.
+Reset on hardware reconfiguration.
+.HP 5m
+."
+\fBser_par(addr, "rts" [, 1|0])\fP
+\- 
+Returns the current setting or sets or clears the Request To Send (RTS)
+control line (as of \fBspec\fP release 5.08.03\-4).
+Only available on standard serial interfaces.
+Reset on hardware reconfiguration.
+.HP 5m
+."
+\fBser_par(addr, "dsr")\fP
+\- 
+Returns the current setting of the Data Set Ready (DSR)
+control line (as of \fBspec\fP release 5.08.03\-4).
+Only available on standard serial interfaces.
+.RE
+.sp
+Values for any combination of the parameters
+\fB"timeout"\fP, \fB"baud"\fP, \fB"stop_bits"\fP, \fB"data_bits"\fP, \fB"dtr"\fP, and
+\fB"rts"\fP can be set in one call of
+\fBser_par()\fP by combining assignments in a comma\-separated list
+(as of \fBspec\fP release 5.08.03\-4), as in:
+.sp
+.RS 4m
+\fBser_par(addr, "timeout=1.5,baud=28800,stop_bits=2,data_bits=8")\fP
+.RE
+.sp
+All the \fBser_get()\fP calls will store leftover bytes in a queue.
+Contents from the queue will be returned on a subsequent
+\fBser_get()\fP call.
+Bytes are leftover if the read finishes with a timeout, if more
+bytes have arrived than are asked for
+or if more bytes are available after an
+end\-of\-string match.  Use the \fB"flush"\fP option of
+\fBser_par()\fP to clear the input queue, if needed.
+.sp
+To transfer binary byte streams containing null bytes, use
+the data\-array versions of \fBser_get()\fP and \fBser_put()\fP with byte arrays.
+Null bytes mark the end of a normal string.
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%gpib\fP
+\fI\%sockets\fP
+\fI\%config_adm\fP
+

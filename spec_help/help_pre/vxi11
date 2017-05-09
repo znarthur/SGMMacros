@@ -1,0 +1,86 @@
+vxi11                               hardware                               vxi11
+
+NAME
+     vxi11 - Connect to VXI-11 RPC servers
+
+DESCRIPTION
+
+     ssppeecc user-level VXI-11 functions connect and communicate with instruments
+     (such as many digital oscilloscopes) that use the VXI-11 protocol.  The
+     client/server protocol use the remote procedure call (RPC) model and is
+     described in the document VXI 11 Revision (7/17/1995) TCP/IP Instrument
+     Protocol Specification, available at _v_x_i_b_u_s_._o_r_g.  The support in ssppeecc
+     currently consists of the ddeevviiccee__rreeaadd and ddeevviiccee__wwrriittee messages over the
+     ccoorree channel.  The aabboorrtt and iinntteerrrruupptt channels described by the protocol
+     are not used.
+
+     The user-level access is through the functions vvxxii1111__ggeett(()), vvxxii1111__ppuutt(()) and
+     vvxxii1111__ppaarr(()).
+
+BUILT-IN FUNCTIONS
+
+     Most of the function calls require a string in the form ""hhoosstt"" or
+     ""hhoosstt::iinnssttrruummeenntt"" as the first argument.  The hhoosstt can be specified by a
+     symbolic name or by an IP address.  For most devices, there is only one
+     instrument per IP address (or host), and it is not necessary to specify the
+     instrument name.  ssppeecc supplies the placeholder name iinnsstt00.  When an
+     instrument name is required, the syntax is as above, where a colon
+     separates the host name from the instrument name.  In the syntax
+     description below, the symbol nnaammee will be used to represent both options.
+
+     The default timeout for the RPC ccllnntt__ccaallll(()) operations is set to two
+     seconds.  It doesn't appear possible to abort a nonresponsive RPC call
+     prior to the expiration of the timeout with a ^^CC.  Thus, do not make the
+     timeout too large.
+
+     The following functions are available.  The syntax and behavior for the
+     vvxxii1111__ggeett(()) and vvxxii1111__ppuutt(()) functions is very similar to ssppeecc's
+     corresponding user level I/O functions for _s_e_r_i_a_l, _s_o_c_k_e_t and _g_p_i_b
+     interfaces.
+
+     vvxxii1111__ggeett((""nnaammee"")) - Reads up 8192 bytes from the device.  A device will
+          usually indicate a read is finished by setting the end bit, resulting
+          in the transfer of less than the maximum number.
+
+     vvxxii1111__ggeett((""nnaammee"",, nn)) - Reads up to nn bytes.
+
+     vvxxii1111__ggeett((""nnaammee"",, dd)) - Reads incoming bytes into the data array dd. The size
+          of dd determines how many bytes are to be read.  Sub-array syntax can
+          be used to limit the number of bytes.  The function returns the number
+          of array elements read, or zero if the read times out.  Note, no byte
+          re-ordering is done for short- or long-integer data, and no format
+          conversions are done for float or double data.
+
+     vvxxii1111__ggeett((""nnaammee"",, mmooddee)) - If mmooddee is the string ""bbyyttee"", reads and returns
+          one unsigned binary byte.  If mmooddee is the string ""sshhoorrtt"", reads two
+          binary bytes and returns the short integer so formed.  If mmooddee is the
+          string ""lloonngg"", reads four binary bytes and returns the long integer so
+          formed.  The last two modes work the same on both bbiigg--eennddiiaann and
+          lliittttllee--eennddiiaann platforms.  On both, the incoming data is treated as bbiigg
+          eennddiiaann. If the incoming data is lliittttllee eennddiiaann, use ""sshhoorrtt__sswwaapp"" or
+          ""lloonngg__sswwaapp"".
+
+     vvxxii1111__ppaarr((""sshhooww"")) - Lists the current open clients.
+
+     vvxxii1111__ppaarr((""iinnffoo"")) - Returns a string that lists the current open clients.
+
+     vvxxii1111__ppaarr((""ttiimmeeoouutt"" [[,, tt]])) - Returns or sets the default timeout for the
+          RPC calls.  The units are seconds.
+
+     vvxxii1111__ppaarr((""nnaammee"",, ""ttiimmeeoouutt"" [[,, tt]])) - Returns or sets the timeout for the
+          named device.  This value overrides the global default.  The units are
+          seconds.
+
+     vvxxii1111__ppaarr((""nnaammee"",, ""ccoonnnneecctt"")) - Opens the RPC connection to the named
+          device.  Returns true if successful and false for failure.
+          Connections are created automatically with the vvxxii1111__ggeett(()) and
+          vvxxii1111__ppuutt(()) functions.  It is not necessary to use the ""ccoonnnneecctt""
+          option.  However, it may be useful to check if a connection is
+          possible.  There is no difference in behavior for a connection opened
+          using this ""ccoonnnneecctt"" option or one opened automatically with
+          vvxxii1111__ggeett(()) or vvxxii__ppuutt(()).
+
+     vvxxii1111__ppaarr((""nnaammee"",, ""cclloossee"")) - Closes the RPC connection to the named device
+          and frees associated resources.  Returns true whether or not the named
+          device is open.  All connections are closed during a rreeccoonnffiigg.
+

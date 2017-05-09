@@ -1,0 +1,747 @@
+.TH "changes" "spec 5.00 Release Notes" "08/01/12" "chg5_00.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 5.00
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg5_00.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2000,2001 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 5.00 Release Notes" "08/01/12" "chg5_00.rst 6.1  08/01/12 CSS"
+.
+.SH "September 4, 2001 \- RELEASE 5.00.04\-8"
+.rs
+.SH "DAC\-Motor Bug Fix"
+.sp
+A bug introduced with \fBspec\fP release 5
+that caused a segmentation fault when
+DAC motors were configured has been fixed.
+.SH "August 15, 2001 \- RELEASE 5.00.04\-7"
+.rs
+.SH "Support for Mclennan PM600 Motor Controller"
+.sp
+This \fBspec\fP release includes preliminary support for the Mclennan PM600
+motor controller.
+.SH "August 14, 2001 \- RELEASE 5.00.04\-6"
+.rs
+.SH "Fix For SBS (Bit 3) VME On \fBLinux\fP"
+.sp
+A problem, where an unexpected new
+\fB"feature"\fP
+in the revision 1.0 SBS Model 1003 driver for
+\fBLinux\fP
+prevented \fBspec\fP from working properly with A32 devices
+has been fixed.
+.SH "August 7, 2001 \- RELEASE 5.00.04\-5"
+.rs
+.SH "Revised \fBfivec\fP and \fBsixc\fP Geometry Code"
+.sp
+The
+\fBsixc\fP
+geometry code has been revised to use the current \fBspec\fP conventions
+of returning an error rather than resetting to command level when
+a calculation fails.
+Also, cut points are now available for all geometry motors.
+The
+\fBfivec\fP
+geometry code has been revised quite a bit to use algebra equivalent
+to that used in the
+\fBsixc\fP
+calculations.
+The revisions do appear to affect the angles calculated for the motors,
+which
+brings in to question whether the previous calculations were completely
+correct.
+Also, the
+\fBfivec\fP
+implementation now allows two mirror\-image configurations, just as in the
+\fBsixc\fP
+implementation.
+The
+\fBsetconfig\fP
+macro selects the configuration.
+.SH "Now possible To Use NI ENET\-GPIB With GPIB PC Cards"
+.sp
+It is now possible to use the National Instruments ENET\-GPIB
+simultaneously
+with the NI AT\-GPIB and/or PCI\-GPIB cards.
+The method involves a bit of a hack to get around the name\-space
+conflict that otherwise occurs.
+See the new
+\fBmakeCIB\fP
+file in the \fBspec\fP distribution for hacking details.
+.SH "July 31, 2001 \- RELEASE 5.00.04\-4"
+.rs
+.SH "Fixes For EPICS MCA Record Support"
+.sp
+CSS\(aqs first opportunity for testing the three\-year\-old \fBspec\fP support
+for the EPICS MCA record with real hardware revealed several coding bugs,
+which are now fixed.
+CSS looks forward to comments from any users of this code.
+.SH "July 29, 2001 \- RELEASE 5.00.04\-3"
+.rs
+.SH "Support For Mclennan PM381 Multiplexor"
+.sp
+This \fBspec\fP release includes preliminary support for the Mclennan PM381
+multiplexor.
+When the user requests moves by multiple motors connected to the multiplexor,
+\fBspec\fP automatically sends commands to move each motor in turn.
+.SH "July 26, 2001 \- RELEASE 5.00.04\-2"
+.rs
+.SH "SBS (Bit 3) VME On \fBLinux\fP Requires New SBS Driver"
+.sp
+This release of \fBspec\fP requires the new revision 1.0 of the SBS Model 1003
+(non\-beta) driver when using the SBS Models 616, 617, 618 and 620 PCI\-to\-VME
+adapters.
+The earlier beta releases of the driver are incompatible with the new driver.
+.SH "SBS (Bit 3) VME Support Updated"
+.sp
+\fBspec\fP\(aqs support for the SBS (Bit 3) VME drivers and
+adapters for Sun, HP and Linux
+platforms has been updated.
+.SH "\fBedconf\fP Update"
+.sp
+The
+\fBedconf\fP
+configuration editor now asks for confirmation when inserting a motor using
+the
+\fBi\fP
+command.
+.SH "Fix For Kappa\-Mode \fBwh\fP Display"
+.sp
+A bug in
+the
+\fBfourc\fP
+and
+\fBfivec\fP
+kappa\-mode geometries, where
+the motors displayed with
+\fBwh\fP
+and similar macros showed non\-geometry motors under certain
+conditions, has been fixed.
+.SH "July 19, 2001 \- RELEASE 5.00.04\-1"
+.rs
+.SH "Internal Updates"
+.sp
+This release includes internal code reorganization that should have
+no impact
+on function or behavior.
+.SH "June 24, 2001 \- RELEASE 5.00.04"
+.rs
+.SH "String Array Enhancements"
+.sp
+The functions
+\fBarray_plot()\fP,
+\fBarray_pipe()\fP
+and
+\fBarray_dump()\fP
+can now take string\-type data arrays as arguments.
+For these functions,
+each byte of the string array will be treated as a signed eight\-bit
+integer.
+Also, the
+\fBprint\fP
+command now translates unprintable bytes in a string\-type data array
+to backslash\-escaped strings.
+Previously, the raw bytes were output, which could corrupt the text display.
+.SH "Kappa Support Added To \fBfivec\fP Geometry"
+.sp
+The five\-circle geometry
+(\fBfivec\fP)
+now includes support for the
+\fBkappa\fP
+configuration of the diffractometer.
+The implementation is similar to the
+\fBkappa\fP
+variations for the
+\fBfourc\fP
+and
+\fBpsic\fP
+geometries.
+.SH "New Option For \fBepics_get()\fP"
+.sp
+The
+\fBepics_get()\fP
+function can now take an optional third argument to specify the
+number of elements to read into the array named by the second argument.
+Previously, if the second argument was an array, and the EPICS process
+variable was an array type, \fBspec\fP would transfer the entire array.
+.SH "Consistency Fix For \fBpsic\fP Macros"
+.sp
+The order of the geometry motor arguments for the
+\fBcuts\fP
+macro had the
+\fBnu\fP
+and
+\fBmu\fP
+motors in reverse order from the convention used elsewhere in the
+\fBpsic\fP
+macros.
+The order is now consistently
+\fBnu\fP,
+then
+\fBmu\fP.
+.SH "Small Fix For Energy Macros"
+.sp
+The code in the
+\fBenergy.mac\fP
+macros has been changed to be more precise with respect to
+decoding the monochromator type from the motor mnemonics.
+Previously, having both a
+\fBmono\fP
+and
+\fBmonu\fP
+mnemonic with a single\-motor monochromator would cause errors.
+.SH "Support For Mclennan PM301 Motor Controllers"
+.sp
+This \fBspec\fP release includes preliminary support for the Mclennan PM301
+motor controller.
+.SH "Fix For XIA DXP Real\-Time Value"
+.sp
+This version corrects an error in the recently added
+support for the XIA DXP 4C2X module.
+The factor\-of\-two error in the values returned for the
+\fB"real"\fP
+and
+\fB"dead"\fP
+arguments to the
+\fBmca_par()\fP
+function has been fixed.
+.SH "Bug Fix For Multiple OMS PCI Cards"
+.sp
+A bug in the new code to support the OMS PCI motor controller card,
+where only one card could be detected,
+has been fixed.
+.SH "June 1, 2001 \- RELEASE 5.00.03\-4"
+.rs
+.SH "Retry Added For NI GPIB \(dqNot CIC\(dq Error"
+.sp
+\fBspec\fP will now automatically perform one retry of operations which
+were unsuccessful due to a
+\fB"not CIC"\fP
+(not controller\-in\-charge) error for National Instruments GPIB controllers.
+These errors occur mainly when a second process initializes a
+connection to the
+GPIB\-ENET (ethernet) controller.
+Previous behavior on this error was for functions such as
+\fBgpib_get()\fP
+or
+\fBgpib_put()\fP
+to return \-1 on the first try after getting a
+\fB"not CIC"\fP
+error.
+.SH "Several Memory Errors Fixed"
+.sp
+Several minor memory access errors uncovered using third\-party memory
+consistency testing software have been fixed.
+These errors are not known to be associated with any observed
+\fBspec\fP failures.
+The memory access problems occurred during initialization of the data
+group storage, display of help files, removal of
+\fBcdef\fP\-type
+macros and initialization of the VDL ESRF counter parameters saved
+in the state file.
+.SH "Fix For Help Pager Options"
+.sp
+An error, where
+the command line the standard macros assigned to the
+\fBPAGER\fP
+variable previously included the
+\fB\-w\fP
+flag for versions of the
+\fBless\fP
+utility greater than 337, has been corrected.
+That option caused the first line of text after a scroll or new page to
+be highlighted.
+.SH "ESRF CCD Updates"
+.sp
+This release includes updates to the ESRF CCD support
+.SH "May 17, 2001 \- RELEASE 5.00.03\-3"
+.rs
+.SH "Bug Fix For Associative Array Scope Declarations"
+.sp
+A bug, where in a scope statement such as
+.RS 3m
+.sp
+.nf
+.ft CB
+global  t1[], t2[], t3[]
+.ft P
+.fi
+.RE
+.sp
+that has a list of names
+that explicitly designates
+associative array type
+and
+only the last name in the series would be made global,
+has been fixed.
+The bug also affected such a list
+following the
+\fBlocal\fP
+keyword.
+.SH "May 16, 2001 \- RELEASE 5.00.03\-2"
+.rs
+.SH "Bug Fix For \fBeval()\fP Execution"
+.sp
+A bug with the evaluation of the
+commands in an
+\fBeval()\fP
+string has been fixed.
+The problem occurred
+in the case where the
+\fBeval()\fP
+argument
+contained a curly\-bracket delimited
+statement block that included a macro function that
+did not use an
+explicit
+\fBreturn\fP.
+If that macro function was followed by additional statements
+in the statement block, those
+subsequent statements didn\(aqt get executed.
+.SH "Bug Fix For \fBeval()\fP Return Values"
+.sp
+A bug with the return value of the
+\fBeval()\fP
+function has been fixed.
+In the case where the
+\fBeval()\fP
+argument was a macro function,
+\fBeval()\fP
+did not return the macro function return value.
+.SH "Bug Fix For Long Strings"
+.sp
+A bug in the \fBspec\fP release 5 rewritten lexical analyzer, where
+input strings longer than 8K (such
+as a very long macro definition) might cause a segmentation fault,
+has been fixed.
+.SH "Bug Fix For \fBprdef\fP Of Long Macros"
+.sp
+A bug from release 5.00.03, where
+\fBprdef\fP
+with a macro larger than 8K
+would cause a segmentation fault, has been fixed.
+.SH "Bug Fix For OMS PC58"
+.sp
+A bug, where the
+\fBconfig\fP
+file information for the Oregon Micro Systems model PC58 motor controller
+could not be read,
+has been fixed.
+.SH "Bug Fix For ACS SPI\-8 Fix"
+.sp
+The fix in \fBspec\fP release 4.05.10\-9
+to send the command
+to enable limit switches had
+the wrong start character in the command string.
+The correct start character is now sent.
+.SH "May 8, 2001 \- RELEASE 5.00.03\-1"
+.rs
+.SH "Initial Support For Delta\-Tau PMAC Motor Controller"
+.sp
+This release of \fBspec\fP contains preliminary support for the
+Delta\-Tau PMAC motor controller.
+.SH "More Fixes For ACS SPI\-8"
+.sp
+The code for the Advanced Control Systems SPI\-8 motor controller
+does better checking on whether replies from the controller are formatted
+properly.
+\fBspec\fP also now has a provision for adding small delays during communication
+with the controller using the
+\fBmotor_par()\fP
+function.
+The commands
+\fB"mdelay"\fP,
+\fB"wdelay"\fP
+and
+\fB"rdelay"\fP
+are used to set delays after sending the move command, before writing a
+message and before reading a reply, respectively.
+The default value for
+\fB"mdelay"\fP
+is 0.1 sec, while the default values for
+\fB"wdelay"\fP
+and
+\fB"rdelay"\fP
+are zero.
+The values for the delays apply to all motor channels associated with all
+SPI\-8 controllers.
+.SH "April 10, 2001 \- RELEASE 5.00.03"
+.rs
+.SH "New \fBgetsval()\fP Function"
+.sp
+A new
+\fBgetsval()\fP
+function is available.
+This function has the same syntax as the existing
+\fBgetval()\fP,
+but unlike
+\fBgetval()\fP,
+which converts octal or hexadecimal input (number strings that begin with
+0, 0x or 0X)
+to the corresponding decimal value,
+the
+\fBgetsval()\fP
+function returns the literal string as entered.
+.SH "Standard Macros Now Use \fBgetsval()\fP Where Appropriate"
+.sp
+The standard macros have been modified to use the new
+\fBgetsval()\fP
+function where appropriate, such as for entering file names.
+Also, all instances of the obsolete
+\fBgetvar\fP
+macro have been replaced with
+\fBgetval()\fP
+or
+\fBgetsval()\fP.
+.SH "New \fBclone()\fP Function"
+.sp
+A new function named
+\fBclone()\fP
+is available to duplicate an existing object.
+It currently only works for macros.
+Also, currently a clone of a
+\fBcdef\fP
+chained macro becomes an ordinary macro.
+Usage is
+\fBclone(dest, src).\fP
+.SH "Fix For Signal Handling"
+.sp
+Signal handling in \fBspec\fP has undergone many changes over the history of
+the program, as the type of hardware has changed from mostly interrupt\-driven
+to mainly polled,
+and also as the kernel system calls for handling signals have
+evolved.
+Somewhere during these changes, the signal blocking \fBspec\fP did during
+certain critical code got broke.
+In particular, typing a
+\fB^C\fP
+to abort motors with some GPIB motor controllers would cause the controller
+to hang.
+This version restores proper signal blocking and the problems
+with
+\fB^C\fP
+should be improved.
+.SH "Fix For Single Array Element In Binary Array Operations"
+.sp
+When two data arrays of different dimension are subject to
+a binary operator, \fBspec\fP performs the operation on the
+elements the arrays have in common.
+That has been true even when one of the arrays was only a single element.
+With this release, an array or subarray of only one element is treated
+as a scaler when used with a binary operator and another array.
+.SH "Release 4 State Files Readable"
+.sp
+This version of \fBspec\fP Release 5 can now handle state files
+from Release 4.
+Previous versions would force a fresh start.
+A fresh start is normally recommended, though, in order to read in the new
+standard macro files.
+.SH "Better Memory Accounting"
+.sp
+The memory accounting displayed with the
+\fBmemstat\fP
+command has been adjusted to better take into account the overhead
+used by the
+C library
+\fBmalloc()\fP
+routines.
+Note, though, \fBspec\fP still cannot account for every byte used as overhead
+by the C library functions, but
+this release does appear to do a better job at estimating.
+.SH "Support for OMS PCIx Motor Controller"
+.sp
+\fBspec\fP now supports the Oregon Micro Systems PCIx motor controller.
+Up to eight of these four\-motor cards can be used with a PCI bus
+computer (currently on
+\fBlinux\fP
+only).
+.SH "Support For Oriel 18133"
+.sp
+\fBspec\fP now has a configuration option for the Oriel 18133 Encoder Mike
+Controllers over a PC board (ISA) interface.
+.SH "Fix For ACS SPI\-8"
+.sp
+The Advanced Control System SPI\-8 motor controller has the limit switches
+disabled by default, and previously
+\fBspec\fP did not send a command to enable the limits.
+\fBspec\fP now does send the
+\fBLE\fP
+command during hardware initialization to enable limits.
+The
+\fBmotor_par()\fP
+option
+\fB"nolimits"\fP
+with argument of 0 or 1 will enable or disable limits, respectively, for
+a particular motor.
+.SH "March 1, 2001 \- RELEASE 5.00.02\-4\-BETA"
+.rs
+.SH "New Version Of XIA DXP Vendor Code Required"
+.sp
+\fBspec\fP must now be linked with the new version of the XIA vendor libraries
+to use their DXP digital MCA CAMAC models.
+However, both the older 4C and the newer 4C2X models are supported.
+See the
+\fI\%dxp\fP help file for details.
+.SH "Preliminary Support For CAMAC Technoland C\-KP 402 Counter"
+.sp
+Initial support for
+the Techonoland Model C\-KP\-402 fast 8\-channel 48\-bit CAMAC counter
+module is included in this \fBspec\fP release.
+.SH "February 21, 2001 \- RELEASE 5.00.02\-3\-BETA"
+.rs
+.SH "Old Bug with ESRF TACO MAXE Fixed"
+.sp
+An old bug in the code for the ESRF TACO MAXE device server,
+where a DEVFAULT state in the server
+would cause
+\fBspec\fP to core
+dump or exhibit other anomalous behavior, has been fixed.
+.SH "MURR Motor Controller Support Expanded"
+.sp
+The code to support the motor controllers built and used at the
+University of Missouri Research Reactor (MURR) has been updated to
+work with very old versions of the motor controller (prior to firmware
+release 2.30).
+.SH "February 16, 2001 \- RELEASE 5.00.02\-2\-BETA"
+.rs
+.SH "Renamed Global Symbol In \fBplotarray.mac\fP"
+.sp
+The
+\fB"last\-data\-point"\fP
+symbol in the macro file
+\fBplotarray.mac\fP
+is back to being named
+\fBLDT\fP
+from its short\-lived name
+\fBLDP\fP.
+This change is to avoid headaches at ESRF, where the symbol has been named
+\fBLDT\fP
+for the last several years.
+This value of this symbol is the index of the current data point
+of the current scan in the scan data array
+\fBSCAN_D\fP.
+See the
+\fBplotarray.mac\fP
+file for details.
+.SH "February 13, 2001 \- RELEASE 5.00.02\-1\-BETA"
+.rs
+.SH "Sub\-Array Fix For VME and Image Functions"
+.sp
+\fBspec\fP now handles all sub\-arrays properly for the
+\fBvme_move()\fP,
+\fBimage_get()\fP
+and
+\fBimage_put()\fP
+built\-in functions.
+Previously, certain subarrys, such as a complete row that wasn\(aqt
+the first row, would be interpreted as the first row.
+.SH "Crash On Usage Errors Fixed"
+.sp
+A bug in the initial Release 5 distribution, where using the wrong
+number of arguments in a built\-in \fBspec\fP function resulted in a
+segmentation fault rather than a usage message, has been fixed.
+.SH "Fix For Updating Accelerations Parameters"
+.sp
+An old bug, where
+\fBspec\fP did not send a new acceleration parameter to a motor controller
+when the motor speed was changed
+using
+\fBmotor_par()\fP
+for motor controllers where the acceleration parameter
+is a function of the motor speed,
+has been fixed.
+.SH "Fix For ACS SPI\-8 Motor Controller"
+.sp
+A bug, where the acceleration parameter sent to the Advanced Control
+System Model SPI\-8 motor controller was not calculated correctly,
+has been fixed.
+.SH "Delays Available For MM\-3000 Motor Controller"
+.sp
+The
+\fBmotor_par()\fP
+options
+\fB"wdelay"\fP
+and
+\fB"rdelay"\fP
+are now available for the Newport MM\-3000 motor controllers.
+The values for each specify delay times to insert
+before sending and reading messages, respectively.
+Presently, they are only used with
+the GPIB interface.
+On fast PCs, the communication is too fast for the motor
+controller to keep up.
+.SH "RELEASE 5"
+.rs
+.sp
+Welcome to the first installment of \fBspec\fP Release 5.
+Most of the modifications for this first release are internal
+and won\(aqt be visible to the user.
+These changes are to accommodate new features \- most are
+still under development, though.
+Some of the changes, however,
+are currently usable.
+.sp
+One powerful new feature now available is the
+\fBeval()\fP
+function.
+This function
+parses and executes its string argument, and
+can be used within
+an executing statement block.
+Calls of
+\fBeval()\fP
+can even be nested.
+This
+function opens up many possibilities for new and interesting macros.
+.sp
+One feature
+for which the ground work has been laid, but
+is not quite ready for general use, is
+the built\-in
+\fBPython\fP
+interpreter.
+\fBPython\fP
+is an interpretive language with a relatively clean syntax and
+many capabilities, including some
+that should eventually allow \fBspec\fP to work
+with a tightly coupled graphic user interface (for those users
+who want such a thing).
+See
+\fI\%www.python.org\fP for Python information.
+.sp
+Another feature still in the works is \fBspec\fP
+server mode.
+This mode of operation will allow \fBspec\fP to function as
+a pure hardware controller, with other instances of \fBspec\fP
+or other software programs running as clients.
+.SH "February 1, 2001 \- RELEASE 5.00.02\-Beta"
+.rs
+.SH "INTRODUCTION"
+.SH "New \fBeval()\fP Function"
+.sp
+The new
+\fBeval()\fP
+function takes as argument a string which contains input
+for the \fBspec\fP parser.
+The string is parsed and executed.
+If the string is an expression, its
+value is returned.
+If the string is a statement or statement list,
+\fBtrue\fP
+(nonzero) is returned
+if there were no errors executing the statement(s) and
+\fBfalse\fP
+(zero) is returned if there was an error.
+Note, errors encountered during execution of the
+\fBeval()\fP
+string do not reset \fBspec\fP to the command level.
+Instead, the errors simply cause
+\fBeval()\fP
+to return an error, allowing execution of the calling statement block
+to continue.
+.SH "Switch To C\-Library \fBmalloc()\fP"
+.sp
+\fBspec\fP continually allocates and frees memory \- usually in small amounts \-
+while collecting and parsing input and while executing commands.
+Historically,
+\fBspec\fP used its own memory allocation routine,
+as early C library implementations would lead to excessive memory
+fragmentation.
+The C library allocation routines are much better these days
+(particularly, the
+GNU
+\fBmalloc()\fP
+routines), and release 5 of \fBspec\fP now uses those.
+.sp
+As a result of the switch in memory allocation, the format of the
+information printed by the
+\fBmemstat\fP
+built\-in command has changed.
+\fBspec\fP still keeps track of how it is allocating memory in categories such
+as parse tree, symbols, macros, etc., but the total allocation statistics
+are now obtained from the C library.
+In particular, a
+\fB"not tracked"\fP
+value counts memory allocated by non\-\fBspec\fP code
+linked with \fBspec\fP, such as C library
+functions or other vendor libraries.
+.sp
+On
+\fBlinux\fP
+platforms, the C library memory allocation has the great advantage that
+requests for big chunks of memory are allocated using the
+\fBmmap()\fP
+system call, which allows the memory to be returned the
+operating system when freed.
+Normally, programs only grow in size and can\(aqt return memory.
+.SH "No More \fBlex\fP"
+.sp
+The lexical analyzer portion of \fBspec\fP has been coded directly in C
+to remove \fBspec\fP\(aqs dependence on the original UNIX
+\fBlex\fP
+utility, and to provide greater flexibility for future code development.
+Users shouldn\(aqt notice any difference in behavior.
+.SH "Using Modified \fByacc\fP Parser"
+.sp
+\fBspec\fP is now using a customized version of the
+\fByacc\fP
+parser generator to generate a reentrant parser to accommodate
+a threaded version of \fBspec\fP.
+Users shouldn\(aqt notice any difference in standard behavior.
+.SH "\fBfourc\fP and \fBkappa\fP Geometries Combined and Revised"
+.sp
+Several changes have been made to the organization and behavior of the
+four\-circle and kappa geometry code.
+First, the kappa\-geometry C code and macros have been merged with the
+four\-circle code and macros.
+Second, errors in the calculations now cause the calling
+\fBcalc()\fP
+functions to return an error value of \-1 rather than resetting to
+command level.
+Third, cut points have been introduced for all the motors associated
+with the diffractometer.
+Finally, a variation of the four circle manufactured by Picker
+(model 3645, perhaps others)
+where the motions of
+the
+\fBchi\fP
+and
+\fBphi\fP
+motors are mechanically linked, is available.
+See the
+\fBgeo_fourc.c\fP
+file for details.
+.SH "Memory Fix For Nested and Recursive Macro Functions"
+.sp
+A problem with unbounded memory growth with nested and recursive
+macro functions has been fixed.
+.SH "Array Plot Macros Now the Default"
+.sp
+Although the file
+\fBmacros/plotarray.mac\fP,
+which contains new versions of the plotting macros,
+has been included with the \fBspec\fP distribution for more than a year,
+not until this release have those macros
+been installed as the default plotting macros.
+These new macros
+define all the standard plotting macros
+to use data arrays rather than data groups for storing and
+plotting data.
+There should be no problems using these macros with the standard scan macros,
+but users who have developed local macros with direct manipulation
+of data groups
+may need to make some changes.
+If that proves difficult,
+the old plotting macros that use data groups are included in
+\fBmacros/plot.mac\fP,
+and can be used instead.
+

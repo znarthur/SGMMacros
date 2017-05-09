@@ -1,0 +1,25 @@
+wm                                    macro                                   wm
+
+NAME
+     wwmm - print information about one or more motors
+
+SYNOPSIS
+
+     wwmm mmoottoorr [[mmoottoorr ......]]
+
+DESCRIPTION
+
+     The wwmm (where motors) macro lists names, mnemonics, limits and current
+     positions for each of the motors given as arguments.  The arguments may be
+     motor numbers or mnemonics.
+
+EXAMPLE
+
+     wwmm 00 11 22 33 44 55
+
+     wwmm tttthh tthh cchhii pphhii
+
+SEE ALSO
+
+     _m_o_t_o_r_s _w_h _w_a
+

@@ -1,0 +1,1444 @@
+.TH "mac_hdw" "reference" "03/16/15" "mac_hdw.rst 6.4  03/16/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+mac_hdw \- macro\-hardware facility
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mac_hdw.rst      6.4  03/16/15  CSS
+.
+.\" Copyright (c) 2003,2004,2006,2008,2009,2011,2012,2014,2015
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mac_hdw" "reference" "03/16/15" "mac_hdw.rst 6.4  03/16/15 CSS"
+.
+.SH "Description"
+.rs
+.sp
+The macro\-hardware facility links user\-defined
+macro functions with \fBspec\fP\(aqs built\-in C code for device control.
+The facility supports user\-defined
+motors, counters, MCA\-type (1D)
+and image\-type (2D) devices,
+providing a simple method to control hardware devices
+that don\(aqt have \fBspec\fP\(aqs built\-in support.
+(MCA support added in release 5.10.10\-1, image devices in release 6.03.02.)
+.sp
+The facility also provides a simple method
+to implement calculational pseudomotors.
+Calculational pseudomotors are motions created by
+the combined movement of multiple real motors.
+For example, the gap and offset of a two\-blade slit
+are derived from the real motions of two blades.
+Likewise, the height, pitch and roll of a table
+are derived from the real motions of three or four table legs.
+.sp
+There are up to three
+macro functions that can be defined for
+macro\-hardware devices.
+During start up and on the \fBreconfig\fP command,
+\fBspec\fP will call a \fBconfiguration\fP  macro
+for each macro\-hardware
+controller unit and for each macro\-hardware motor and counter
+channel.
+This macro function is required for calculational pseudomotors and for MCA\- and image\-type
+devices to return necessary configuration settings, but optional for regular motor and counter
+controllers.
+.sp
+For each low\-level command corresponding to built\-in spec functions
+to implement motor,
+counter, MCA or image control capabilities, \fBspec\fP will call a
+\fBcommand\fP  macro function.
+The command function is called with various parameters when \fBspec\fP
+sends commands to count, move motors, etc.
+The function only needs to implement a subset of the available parameters, as described
+in detail below.
+.sp
+For calculational pseudomotors, \fBspec\fP will instead call a
+\fBcalculation\fP macro function to calculate the
+position of each pseudomotor based on the real motor positions and to calculate
+the real motor positions based on a target
+pseudomotor position.
+.sp
+Finally, \fBspec\fP will call an optional \fBparameter\fP  macro function to
+set or get values associated with the built\-in \fBmotor_par()\fP, \fBcounter_par()\fP, \fBmca_par()\fP
+and \fBimage_par()\fP functions.
+.SH "Configuration"
+.rs
+.sp
+To enable a macro motor or counter, configure a macro controller on the
+\fBD\fPevices
+screen of configuration editor, as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+ MOTORS  DEVICE  ADDR  <>MODE  NUM                <>TYPE
+    YES   motxx     \-            5           Macro Motor
+
+SCALERS  DEVICE  ADDR  <>MODE  NUM                <>TYPE
+    YES   cntxx     \-            5         Macro Counter
+    YES   cntzz     \-            5   Macro Counter/Timer
+.ft P
+.fi
+.RE
+.sp
+Here, the \fBmotxx\fP, \fBcntxx\fP or \fBcntzz\fP entries for DEVICE
+are arbitrary user\-created names
+that match the prefix for the macros associated with the
+particular macro\-hardware controller.
+.sp
+The counter type is for plain counters that are started and
+stopped by the master timer and return count values for scaler channels.
+The counter/timer type is for a master timer.
+\fBspec\fP supports multiple macro hardware master timers.
+The \fBwait()\fP function will wait until all return a not\-busy
+status.
+.sp
+To enable a macro\-hardware MCA or image device, configure the controller on the
+MCA\- and CCD\-type configuration screen as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+MCA\-like   DEVICE  ADDR  <>MODE                  <>TYPE
+ 0  YES     mcaxx     \-                       Macro MCA
+
+CCD\-like   DEVICE  ADDR  <>MODE                  <>TYPE
+ 0  YES     ccdxx     \-                       Macro CCD
+.ft P
+.fi
+.RE
+.sp
+Again, the \fBmcaxx\fP and \fBccdxx\fP entries are arbitrary names, but serve
+as the prefix to the macros.
+.sp
+The \fBADDR\fP field is optional in all cases, but may contain a string value.
+For motors and counters, the value can be retrieved within \fBspec\fP using
+.sp
+.RS 4m
+.nf
+.in +2
+\fBmotor_par(mne, "address")\fP
+.in -2
+or
+.in +2
+\fBcounter_par(mne, "address")\fP
+.in -2
+.fi
+.sp
+.RE
+.sp
+where \fBmne\fP is the mnemonic of any motor
+or counter channel associated with
+the controller (as of \fBspec\fP release 5.06.04\-4).
+For MCA and image devices, use
+.sp
+.RS 4m
+.nf
+.in +2
+\fBmca_par("address")\fP
+\fBmca_spar(num, "address")\fP
+.in -2
+or
+.in +2
+\fBimage_par(num, "address")\fP
+.in -2
+.fi
+.sp
+.RE
+.sp
+where \fBnum\fP is the MCA or image device number.
+In addition, within the macro functions described below, the value will
+assigned to a local variable named \fBprefix_ADDR\fP
+(as of \fBspec\fP release 5.06.04\-8).
+.sp
+Nonstandard optional controller parameters, entered and modified
+using the \fBp\fP command on the \fBD\fPevices screen and stored in the
+\fBconfig\fP file prefixed by the string
+\fBCONPAR:\fP, are accessible within the macro hardware functions as elements
+of the associative array \fBprefix_CONPAR[]\fP,
+where the array elements are indexed by the parameter name.
+In addition, the parameters for motors and counters are also available using
+.sp
+.RS 4m
+.nf
+.in +2
+\fBmotor_par(mne, par)\fP
+.in -2
+or
+.in +2
+\fBcounter_par(mne, par)\fP
+.in -2
+.fi
+.sp
+.RE
+.sp
+where \fBmne\fP is the mnemonic of any motor or counter channel associated with
+the controller and \fBpar\fP is the parameter name
+(as of \fBspec\fP release 5.08.05\-1).
+For MCA and image devices, use
+.sp
+.RS 4m
+.nf
+.in +2
+\fBmca_par(par)\fP
+\fBmca_spar(num, par)\fP
+.in -2
+or
+.in +2
+\fBimage_par(num, par)\fP
+.in -2
+.fi
+.sp
+.RE
+.sp
+where \fBnum\fP is the MCA or image device number.
+.sp
+Individual motor and counters are assigned to macro\-hardware
+controllers on the \fBM\fPotor and \fBS\fPcaler
+screens, respectively.  On the \fBM\fPotor
+screen, select \fBMAC_MOT\fP as the controller type.
+For ordinary counters, choose \fBMAC_CNT\fP as the controller type on the
+\fBS\fPcaler screen.
+For polled counters (introduced in \fBspec\fP release 5.08.03\-3), choose the
+\fBMAC_CNTP\fP controller type.
+.sp
+Unit numbers for macro motors and counters are assigned consecutively, starting at zero for
+each macro motor controller and for each macro counter controller.
+.SH "The Macro Functions"
+.rs
+.sp
+For standard macro motors, macro counters, macro MCA devices and macro image devices,
+the three possible
+user\-defined macro functions have names formed by prepending the
+prefix defined in the \fBconfig\fP file to \fB_config()\fP, \fB_cmd()\fP and
+\fB_par()\fP.
+For calculational pseudomotors, a
+\fB_calc()\fP function is needed rather than the \fB_cmd()\fP function.
+.sp
+For the standard motor and counter macro functions, the first argument is the
+motor or counter number if the call applies to a single channel or the
+string \fB".."\fP if the call applies to all channels associated
+with the motor or counter controller.
+For MCA and image devices, the first argument is the MCA or image device number.
+.sp
+For all the \fB_cmd()\fP functions, the
+second argument is a string that contains a key specific to the command.
+Remaining arguments, if any, contain parameters.
+.sp
+If an optional \fBADDR\fP string is included in the
+\fBconfig\fP file for the associated controller,
+the string will be assigned to a variable
+named \fBprefix_ADDR\fP.
+Likewise, nonstandard optional parameters configured for the associated
+controller are assigned to an associative array variable named
+\fBprefix_CONPAR\fP.
+However, the variables are only visible within the macro functions.
+.sp
+To send an error back to \fBspec\fP from the macro functions,
+return the special string \fB".error."\fP.
+.sp
+It may be helpful to set the \fBspec\fP DEBUG level to 128 to display the macro
+function calls.
+The debugging messages should make
+clear when, how and in what order the various macro functions are called.
+.SH "The \fB_config()\fP Function"
+.rs
+.sp
+The \fBprefix_config()\fP function is called after reading the \fBconfig\fP file.
+On startup, the function is called after
+the initial command files have been read, so that macros
+defined in the initial command files can be used to set up the macro hardware.
+For regular macro motors and counters,
+this function is optional and need not exist.
+The function is required for calculation pseudomotors to configure the
+dependencies between real and pseudomotors.
+The function is also required for MCA and image devices to configure the
+maximum number of channels or pixels and the native data type.
+.sp
+The \fBprefix_config\fP macro function is called as follows:
+.RS 0m
+.HP 5m
+."
+\fBprefix_config("..", "ctrl", p1, p2)\fP
+\- 
+Called for each macro\-hardware motor and counter controller unit.  The parameter
+\fBp1\fP is the unit number of the controller, while
+\fBp2\fP is the number of channels set as NUM on the
+\fBD\fPevices screen of the configuration editor.
+If the function returns the string \fB".error."\fP,
+\fBspec\fP will consider the controller unresponsive and won\(aqt call the macro
+functions for the associated channels.
+.HP 5m
+."
+\fBprefix_config(mne, "mot", unit, module, chan)\fP
+\- 
+Called for each macro motor channel, where \fBmne\fP is the motor mnemonic,
+\fBunit\fP is the unit number of the associated controller,
+\fBmodule\fP is the optional module number and
+\fBchan\fP is the channel number.
+For calculational pseudomotors, this call must return
+a string containing a list of mnemonics for the real motors
+on which the pseudomotor depends.
+If the function returns the string
+\fB".error."\fP, \fBspec\fP will consider the channel unusable.
+.HP 5m
+."
+\fBprefix_config(mne, "cnt", unit, 0, chan)\fP
+\- 
+Called for each macro counter channel, where \fBmne\fP
+is the counter mnemonic,
+\fBunit\fP is the unit number of the associated controller, and
+\fBchan\fP is the channel number.
+The fourth argument is currently always zero.
+If the function returns the string \fB".error."\fP,
+\fBspec\fP will consider the channel unusable.
+.HP 5m
+."
+\fBprefix_config(num, "mca")\fP
+\- 
+Called for each macro MCA, where \fBnum\fP is the MCA number.
+This function must return a string with two arguments in any order: the
+maximum number of channels for the MCA and the native data type.
+The data type is one of the words \fBbyte\fP, \fBubyte\fP,
+\fBshort\fP, \fBushort\fP, \fBlong\fP, \fBulong\fP, \fBfloat\fP or \fBdouble\fP.
+An example return string is \fB"4096 ulong"\fP.
+If the function returns the string
+\fB".error."\fP, \fBspec\fP will consider the MCA unit unusable.
+.HP 5m
+."
+\fBprefix_config(num, "image")\fP
+\- 
+Called for each macro image device, where \fBnum\fP is the image device number.
+This function must return a string with three arguments: the
+number of rows, number of columns and native data type.
+The data type is one of the words \fBbyte\fP, \fBubyte\fP,
+\fBshort\fP, \fBushort\fP, \fBlong\fP, \fBulong\fP, \fBfloat\fP or \fBdouble\fP.
+An example return string is \fB"195 487 long"\fP for 195 rows and 487 columns.
+If the function returns the string
+\fB".error."\fP, \fBspec\fP will consider the image device unusable.
+.RE
+.sp
+For motors and counters, the unit and channel numbers
+are assigned in the configuration editor
+just as with other motors and counters.
+Unit numbers are assigned consecutively to each controller type.
+That is, the first macro motor controller listed is unit zero, as is
+the first macro counter controller, both independent of other controller types.
+Counter unit and channel numbers are assigned explicitly on the \fBS\fPcaler
+screen of the configuration editor.
+Motor unit, module and channel numbers can be explicitly assigned in the
+unit/channel field of the configuration editor.
+If left blank, the channels numbers
+are assigned automatically in consecutive order.
+.sp
+For macro hardware designed for general purpose applications,
+these calls to the
+\fBprefix_config()\fP macro function can be used
+to set up the rest of the macro interface.
+For simple motor and counter applications,
+the \fBprefix_config()\fP function may not be needed at all.
+.SH "Motors"
+.rs
+.SH "The \fB_cmd()\fP Function For Motors"
+.sp
+The \fBprefix_cmd()\fP function is called to control regular macro motors.
+The second argument of the function is a command key.
+There are many more command keys than
+any particular macro motor implementation needs.
+Only the command keys that are relevant to the particular application should be
+included in the user\-defined macro function.
+.sp
+The syntax of the function call is:
+.RS 0m
+.HP 5m
+."
+\fBprefix_cmd(mne, key [, p1 [, p2]] [, unit])\fP
+\- 
+Called by the C code for all operations related to motor control.
+\fBmne\fP is the string \fB".."\fP for keys that apply to all motors, such
+as with the keys \fB"prestart_all"\fP and \fB"start_all"\fP.
+\fBmne\fP is the motor number for keys that apply to individual motors.
+Each key is only called one way or the other.
+\fBkey\fP is a string containing the particular command.
+\fBp1\fP and \fBp2\fP, if present, are parameters related to the command.
+If the \fBmne\fP argument is the string \fB".."\fP the
+\fBunit\fP parameter will be included and specifies the unit number
+for which the command applies (as of \fBspec\fP release 5.07.03\-3).
+.RE
+.sp
+In the following, the phrase "sent when changed" means the
+\fBprefix_cmd()\fP macro function is only called with the given key before
+the first applicable move command or home command after \fBspec\fP reads the
+\fBconfig\fP file, either on startup or after a \fBreconfig\fP command
+(included in the \fBconfig\fP macro),
+or after the associated parameter has been changed using
+the \fBmotor_par()\fP function.
+.sp
+Note, the \fBprefix_cmd()\fP macro function must not assign a value to any elements of the motor
+position \fBA[]\fP array.
+.RS 0m
+.HP 5m
+."
+\fB"base_rate"\fP
+\- 
+Sent when changed. The \fBp1\fP parameter contains
+the base rate in units of Hz.
+.RE
+.HP 5m
+."
+\fB"slew_rate"\fP
+\- 
+Sent when changed. The \fBp1\fP parameter contains
+the slew rate in units of Hz.
+.HP 5m
+."
+\fB"acceleration"\fP
+\- 
+Sent when changed. Also called if the base rate
+or slew rate have changed, since
+some motor controllers need to be told to recalculate acceleration ramps
+if the velocity parameters change.
+The \fBp1\fP parameter contains the acceleration time
+in units of milliseconds.
+The \fBp2\fP parameter contains the acceleration
+in units of steps per second per second.
+.HP 5m
+."
+\fB"home_base_rate"\fP
+\- 
+Sent when changed. The \fBp1\fP parameter contains
+the home base rate in units of Hz.
+.HP 5m
+."
+\fB"home_slew_rate"\fP
+\- 
+Sent when changed. The \fBp1\fP parameter contains
+the home slew rate in units of Hz.
+.HP 5m
+."
+\fB"home_acceleration"\fP
+\- 
+Sent when changed. The \fBp1\fP parameter contains
+the home acceleration time in units of milliseconds.
+The \fBp2\fP parameter contains the home acceleration
+in units of steps per second per second.
+.HP 5m
+."
+\fB"preread_all"\fP
+\- 
+Sent prior to a possible read of all the motors.
+Note, depending on the configured hardware read modes
+for the motors, there may be no subsequent commands
+to read a motor associated with this controller.
+Either \fB"preread_all"\fP or \fB"preread_one"\fP (below),
+but not both, will be called prior to the \fB"position"\fP call below.
+.HP 5m
+."
+\fB"preread_one"\fP
+\- 
+Sent prior to reading an individual motor.  Either
+\fB"preread_all"\fP (above) or \fB"preread_one"\fP, but
+not both, will be called prior to the \fB"position"\fP call below.
+.HP 5m
+."
+\fB"position"\fP
+\- 
+For this key, the macro function must return
+the current motor position in dial units.
+This call will be preceded by a call with a key
+of either \fB"preread_one"\fP or \fB"preread_all"\fP.
+.sp
+The macro\-hardware motors use natural units for positions.
+For such motor controllers,
+\fBspec\fP only uses the steps\-per\-degree parameter in the
+\fBconfig\fP file to determine the precision of the position values.
+The precision is determined
+by the magnitude of the parameter.
+For example,
+a value of 1000 will cause \fBspec\fP to round to the nearest 0.001, while
+a value of 5000 will cause \fBspec\fP to round to the nearest 0.0002.
+The rounding is performed on the value returned by the \fB"position"\fP key.
+.HP 5m
+."
+\fB"set_position"\fP
+\- 
+Sent to set the current dial position of the macro motor.  The parameter
+\fBp1\fP contains the position in dial units.
+.HP 5m
+."
+\fB"prestart_all"\fP
+\- 
+For regular moves, sent if any motors associated
+with the macro motor controller need to be moved.
+.HP 5m
+."
+\fB"prestart_one"\fP
+\- 
+For regular moves and homing moves, sent for each motor
+that needs to be moved.
+For regular moves, a call of \fB"prestart_all"\fP comes first.
+.HP 5m
+."
+\fB"magnitude"\fP
+\- 
+For regular moves, sent with the magnitude of the move in dial units.
+The parameter \fBp1\fP contains the position in dial units
+and includes the sign of the move.
+The magnitude is also included with the \fB"start_one"\fP key (below).
+.HP 5m
+."
+\fB"start_one"\fP
+\- 
+Sent to start a regular move for one motor.
+The parameter \fBp1\fP contains the target position
+in dial units to accommodate a
+controller that requires absolute positions.  The parameter
+\fBp2\fP contains the magnitude of the move in dial units to accommodate a
+controller that requires relative positions.
+.HP 5m
+."
+\fB"start_all"\fP
+\- 
+Sent after all \fB"start_one"\fP commands
+to accommodate controllers that use a simultaneous start.
+.HP 5m
+."
+\fB"get_status"\fP
+\- 
+Sent to get the move and limit status of individual motors.
+If the motor is moving, the macro function must return
+a value with bit 0x02 set.
+If the low limit is active, the return value must have bit 0x04 set.
+If the high limit is active, the return value must have bit 0x08 set.
+Setting bit 0x10 indicates an "emergency stop"
+and setting bit 0x20 indicates a motor fault
+(as of \fBspec\fP release 5.07.04\-4), both which currently
+result in similar behavior to when a limit
+is hit.  Otherwise, the macro function must return a value of zero.
+.HP 5m
+."
+\fB"flush_all"\fP
+\- 
+Sent before the "hard" position synchronization that occurs
+on startup and before and after
+reading the \fBconfig\fP and \fBsettings\fP files on a \fBreconfig\fP command.
+.HP 5m
+."
+\fB"flush_one"\fP
+\- 
+Sent for each motor after the \fB"flush_all"\fP key above and before a
+\fB"get_status"\fP during the position synchronization.
+.HP 5m
+."
+\fB"abort_one"\fP
+\- 
+Sent for each active motor when motors are halted, normally either by a
+\fB^C\fP from the keyboard or by a \fBstop()\fP command.
+.HP 5m
+."
+\fB"abort_all"\fP
+\- 
+Sent to each macro motor controller that has busy motors
+when motor are halted.
+The key is sent after the \fB"abort_one"\fP keys are sent.
+This command accommodates controllers that allow a single command to
+halt all its associated motors.
+.HP 5m
+."
+\fB"search"\fP
+\- 
+Sent to initiate a home or limit search.
+A \fB"prestart_one"\fP call will precede this call.
+The parameter \fBp1\fP indicates the type of search as follows.
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"home"\fP
+\- 
+Find the home position as appropriate.
+.HP 5m
+."
+\fB"home+"\fP
+\- 
+Find the home position by moving in the positive direction.
+.HP 5m
+."
+\fB"home\-"\fP
+\- 
+Find the home position by moving in the negative direction.
+.HP 5m
+."
+\fB"lim+"\fP
+\- 
+Find the positive limit.
+.HP 5m
+."
+\fB"lim\-"\fP
+\- 
+Find the negative limit.
+.PD
+.RE
+.sp
+If the underlying \fBchg_dial()\fP
+call includes the optional third argument or
+if the optional parameter \fB"home_position"\fP is
+set, the parameter \fBp2\fP contains the position
+in dial units that corresponds to the
+home or limit switch.
+.RE
+.HP 5m
+."
+\fB"diff_position"\fP
+\- 
+Sent if the motor is configured for a settle time.
+To configure a motor for settle time, both the DC
+dead\-band and the DC settle\-time parameters have to be set
+(usually from the first optional motor parameter screen of
+the configuration editor \- get there by typing an
+\fBm\fP from the primary motor screen).
+The settle\-time parameter is in seconds.
+\fBspec\fP will wait for at least as long
+as the settle time before treating a
+move as complete.  In addition, \fBspec\fP will wait
+until the value returned by this call
+is less than the dead band, but for no longer than five seconds.
+The preferred units for dead band are steps, but it is only necessary
+that the units in the \fBconfig\fP file agree with the units
+returned by this call.
+.RE
+.sp
+Backlash is handled as two separate move commands.
+If the macro function will take care of backlash,
+set the backlash parameter to zero in the \fBconfig\fP file.
+.sp
+The default behavior with respect to reading the motor position
+is to only ask for the motor position
+from the controller during position synchronization
+or at the end of a move.  The motor parameter "hardware read mode"
+(on the second optional motor parameter screen of the configuration editor)
+can be set to require \fBspec\fP to ask for the position before each move
+and/or for every \fBread_motors()\fP call from user level.
+The hardware read mode can also be set so that position discrepancies
+are always silently resolved in favor of the value returned by the
+controller (or macro function).
+.sp
+A minimal implementation would likely recognize the keys
+\fB"start_one"\fP, \fB"get_status"\fP, \fB"position"\fP and
+\fB"set_position"\fP. An example that does nothing useful follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+def motxx_cmd(mne, key, p1, p2) \(aq{
+    global demo_pos[]
+
+    if (key == "set_position") {
+            demo_pos[mne] = p1
+            return
+    }
+    if (key == "position") {
+            return(demo_pos[mne])
+    }
+    if (key == "start_one") {
+            demo_pos[mne] = p1
+            return
+    }
+    if (key == "get_status") {
+            return(0)
+    }
+}\(aq
+.ft P
+.fi
+.RE
+.SH "The \fB_par()\fP Function For Motors"
+.sp
+The \fBprefix_par()\fP macro function is called when various
+motor parameters are set, and when the
+\fBmotor_par()\fP function is used to retrieve a user\-defined parameter.
+The \fBmne\fP argument will always be a motor number and never the
+string \fB".."\fP that is used
+with the other user\-defined macro\-hardware functions.
+.sp
+The function will be called as:
+.RS 0m
+.HP 5m
+."
+\fBprefix_par(mne, key, "get")\fP
+\- 
+The function should return a value for the parameter named as
+\fBkey\fP for motor number
+\fBmne\fP. The macro function will never be called
+to get a parameter value when
+\fBkey\fP is a parameter name that is built into the \fBspec\fP C code.
+.HP 5m
+."
+\fBprefix_par(mne, key, "set", p1 [, p2])\fP
+\- 
+Called when various parameters change their value, as described below.
+.RE
+.sp
+The built\-in parameter names are as follows.
+The \fBprefix_par()\fP function will never be called with
+\fB"get"\fP for these parameters, as their values are maintained internally.
+.sp
+The first set below are called only when \fBmotor_par()\fP
+is executed from user\-level.
+.RS 0m
+.HP 5m
+."
+\fB"acceleration"\fP
+\- 
+\fBp1\fP contains the acceleration time in milliseconds.
+\fBp2\fP contains the acceleration value in steps per second per second.
+.RE
+.HP 5m
+."
+\fB"backlash"\fP
+\- 
+\fBp1\fP contains the new backlash value in steps.
+.HP 5m
+."
+\fB"backlash_rate"\fP
+\- 
+\fBp1\fP contains the new backlash rate in Hz.
+.HP 5m
+."
+\fB"base_rate"\fP
+\- 
+\fBp1\fP contains the new base rate in Hz.
+.HP 5m
+."
+\fB"disable"\fP
+\- 
+\fBp1\fP contains 1 or 0, depending on whether the motor
+was disabled or un\-disabled (available as of \fBspec\fP release 5.06.03\-8).
+.HP 5m
+."
+\fB"slew_rate"\fP or \fB"velocity"\fP
+\- 
+\fBp1\fP contains the new slew  rate in Hz.
+.HP 5m
+."
+\fB"step_size"\fP
+\- 
+\fBp1\fP contains the new step\-size parameter.
+.RE
+.sp
+The following two keys are called
+when an associated function is executed from user level.
+.RS 0m
+.HP 5m
+."
+\fB"limits"\fP
+\- 
+\fBp1\fP contains the low limit in dial units.
+\fBp2\fP contains the high limit in dial units.
+Called when the user\-level \fBset_lim()\fP function is executed.
+.RE
+.HP 5m
+."
+\fB"offset"\fP
+\- 
+Called when the user\-level \fBchg_offset()\fP function is executed.
+\fBp1\fP contains the offset in user units.
+.RE
+.sp
+The following optional motor parameters generate a call to the
+user\-defined macro\-hardware function when the values are read
+from the \fBconfig\fP file and when the values are set with the
+\fBmotor_par()\fP function.
+See the \fI\%motors\fP help file for additional information on the parameters.
+.sp
+.RS 4m
+.nf
+\fB"home_slew_rate"\fP
+\fB"home_base_rate"\fP
+\fB"home_acceleration"\fP
+\fB"dc_dead_band"\fP
+\fB"dc_settle_time"\fP
+\fB"dc_proportional_gain"\fP
+\fB"dc_derivative_gain"\fP
+\fB"dc_integral_gain"\fP
+\fB"dc_integration_limit"\fP
+\fB"dc_following_error"\fP
+\fB"dc_sampling_interval"\fP
+\fB"encoder_step_size"\fP
+\fB"step_mode"\fP
+\fB"slop"\fP
+\fB"read_mode"\fP
+\fB"deceleration"\fP
+\fB"torque"\fP
+\fB"misc_1"\fP
+\fB"misc_2"\fP
+\fB"misc_3"\fP
+\fB"misc_4"\fP
+\fB"misc_5"\fP
+\fB"misc_6"\fP
+.fi
+.sp
+.RE
+.sp
+There are a number of valid arguments to \fBmotor_par()\fP
+which will not generate a call to the
+\fBprefix_par()\fP macro function at all.  These include
+\fB"unit"\fP, \fB"channel"\fP, \fB"responsive"\fP,
+\fB"controller"\fP, \fB"device_id"\fP, \fB"active"\fP,
+\fB"status"\fP, \fB"config_step_size"\fP, \fB"config_acceleration"\fP,
+\fB"config_velocity"\fP, \fB"config_base_rate"\fP,
+\fB"config_backlash"\fP, \fB"low_limit"\fP and \fB"high_limit"\fP.
+.sp
+Arguments to \fBmotor_par()\fP
+that are not recognized by the built\-in C code will be passed on, as is,
+to the \fBprefix_par()\fP user\-defined macro function.
+.SH "Calculational Pseudo Motors"
+.sp
+For calculational pseudomotors, two macro functions must
+be be provided with names formed by prepending the prefix
+from the \fBconfig\fP file to \fBprefix_config()\fP and \fBprefix_calc()\fP.
+.sp
+The \fBprefix_config()\fP function, when called with the key equal to
+\fB"mot"\fP, must return a string that contains a
+space\-delimited list of mnemonics for the real motors on which motor
+\fBmne\fP depends.
+.sp
+The \fBprefix_calc()\fP macro function will be called as follows:
+.RS 0m
+.HP 5m
+."
+\fBprefix_calc(mne, mode)\fP
+\- 
+When called with \fBmode\fP equal to zero,
+the function should assign a value to
+\fBA[mne]\fP corresponding to the current position of the pseudomotor
+\fBmne\fP. When called with \fBmode\fP equal to one,
+the function should assign a value to
+\fBA[mne]\fP corresponding to the target position
+of the real motor \fBmne\fP.
+.RE
+.sp
+When called to calculate the real motor positions
+for a move (with \fBmode\fP equal 1),
+the function will first be called with \fBmne\fP set to the string
+\fB".."\fP, then called with each of the real motor mnemonics as arguments,
+in turn.
+One can use the initial call to calculate quantities that depend
+on the current positions of the real motors before new values are
+assigned in subsequent calls.
+.sp
+The \fBprefix_calc()\fP function should only include commands
+to calculate pseudomotor positions
+from real motor positions or vice versa.
+The function should not contain calls to do hardware access.
+In fact, calls to the built\-in functions \fBwait()\fP or
+\fBread_motors()\fP will return immediately if called from the
+\fBprefix_calc()\fP macro function, to avoid possible recursion
+as those built\-in functions
+can subsequently call the invoking
+\fBprefix_calc()\fP macro function.
+.sp
+Note, if the pseudomotor is disabled via \fBmotor_par(mne, "disable", 1)\fP the
+calls to \fBprefix_calc()\fP with \fBmode\fP equal to 1 will be skipped.
+That will prevent new positions from being calculated for the
+associated real motors.
+.sp
+With \fBspec\fP release 5.06.04\-4, a special
+\fBmotor_par()\fP option called \fB"chan0"\fP is available for macro motors.
+The command
+.sp
+.RS 4m
+\fBmotor_par(mne, "chan0")\fP
+.RE
+.sp
+will return the motor number of the macro motor
+in the first channel of the same
+controller unit and module number of the macro motor with mnemonic
+\fBmne\fP. This feature allows for simplified implementation
+of general\-purpose calculational pseudomotors.
+For example, if there are parameters associated with a group
+of motors, one copy of the parameters can be assigned to the
+\fB"chan0"\fP motor and then accessed by the related motors.
+.sp
+The following examples implements calculational pseudomotors for a slit.
+The slit has two blades whose real motors have mnemonics \fBsl2t\fP and
+\fBsl2b\fP (slit 2 top and bottom).  The pseudomotors are
+the slit gap and the slit offset position with mnemonics
+\fBsl2g\fP and \fBsl2o\fP, respectively.
+.sp
+The \fBD\fPevices
+screen of the configuration editor should
+look as follows for the controller:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS   DEVICE   ADDR  <>MODE  NUM               <>TYPE
+  YES     slit2                   2          Macro Motor
+.ft P
+.fi
+.RE
+.sp
+The macros would be as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+def slit2_config(mne, type, unit, module, chan) \(aq{
+      if (type == "mot")
+              return "sl2t sl2b"
+}\(aq
+def slit2_calc(mne, mode) \(aq{
+      if (mode == 0) {
+              if (mne == sl2g)
+                      A[sl2g] = A[sl2t] + A[sl2b]
+              if (mne == sl2o)
+                      A[sl2o] = (A[sl2t] \- A[sl2b])/2
+      } else {
+              if (mne == sl2b)
+                      A[sl2b] = \-A[sl2o] + A[sl2g]/2
+              if (mne == sl2t)
+                      A[sl2t] = A[sl2o] + A[sl2g]/2
+      }
+}\(aq
+.ft P
+.fi
+.RE
+.sp
+The following \fBmake_slit_macs\fP macro can be used to
+generate macros such as the above.
+.RS 3m
+.sp
+.nf
+.ft CB
+def make_slit_macs \(aq{
+    local   name, file
+    local   l, r, g, o
+
+    file = getval("File for macros", "tty")
+    name = getval("Name of slit", "Slit1")
+    r = getval("Mnemonic for right/top slit", "s1r")
+    l = getval("Mnemonic for left/bottom slit", "s1l")
+    g = getval("Mnemonic for gap", "s1vg")
+    o = getval("Mnemonic for offset", "s1vo")
+
+    fprintf(file, "\en\e
+def %s_config(mne, type, unit, module, chan) \e\(aq{\en\e
+    if (type == \e"mot\e")\en\e
+            return \e"%s %s\e"\en\e
+}\e\(aq\en\e
+def %s_calc(mne, mode) \e\(aq{\en\e
+    if (mode == 0) {\en\e
+            if (mne == %s)\en\e
+                    A[mne] = A[%s] + A[%s]\en\e
+            if (mne == %s)\en\e
+                    A[mne] = (A[%s] \- A[%s])/2\en\e
+    } else {\en\e
+            if (mne == %s)\en\e
+                    A[mne] = \-A[%s] + A[%s]/2\en\e
+            if (mne == %s)\en\e
+                    A[mne] = A[%s] + A[%s]/2\en\e
+    }
+}\e\(aq\en", name,l,r, name, g,r,l, o,r,l, l,o,g, r,o,g)
+}\(aq
+.ft P
+.fi
+.RE
+.sp
+The following example implements a table\-height pseudomotor
+with mnemonic \fBt1z\fP that is the average height of the three real motors
+\fBt1f\fP, \fBt1b1\fP and \fBt1b2\fP that correspond to the table legs.
+When the height is moved, each leg is moved by an amount equal
+to the difference of the current height and the target height.
+The current average height needs to be calculated from
+the current real\-motor positions before the new positions are assigned.
+The feature where the \fBprefix_calc()\fP function is called with \fBmne\fP
+set to the string
+\fB".."\fP before being called with the real motor mnemonics is used to
+save the average position in a global variable to be used in the
+subsequent calls.
+.RS 3m
+.sp
+.nf
+.ft CB
+def tab1_config(mne, type, unit, module, chan) \(aq{
+      global  tab1_ave
+      if (type == "mot")
+              return "t1f t1b1 t1b2"
+}\(aq
+def TE1_vert_jack_calc(mne, mode) \(aq{
+      if (mode == 0) {
+              if (mne == t1z)
+                      A[mne] = (A[t1f]+A[t1b1]+A[t1b2])/3
+      } else {
+              if (mne == "..")
+                      tab1_ave = (A[t1f]+A[t1b1]+A[t1b2])/3
+              else if (mne == t1f)
+                      A[t1f] += A[t1z] \- tab1_ave
+              else if (mne == t1b1)
+                      A[t1b1] += A[t1z] \- tab1_ave
+              else if (mne == t1b2)
+                      A[t1b2] += A[t1z] \- tab1_ave
+      }
+}\(aq
+.ft P
+.fi
+.RE
+.sp
+This last example shows how an
+\fBenergy\fP pseudomotor can be readily created that ties in with the standard
+\fBspec\fP energy macros from the \fBenergy.mac\fP distribution file.
+Such a pseudomotor can then be scanned using the standard motor scans.
+Note, the existing energy macros, such as \fBEscan\fP, \fBmoveE\fP, etc.,
+will still work.
+.sp
+The \fBprefix_config()\fP function below makes use of the monochromator
+mnemonic conventions set in \fBenergy.mac\fP.
+.RS 3m
+.sp
+.nf
+.ft CB
+def Energy_config(mne, type, unit, module, chan) \(aq{
+         if (type == "mot") {
+                 if (mono_type == 1)
+                         return(motor_mne(Mono))
+                 if (mono_type == 2)
+                         return("mono mon_y mon_z")
+                 if (mono_type == 3)
+                         return("monu mond montrav")
+                 if (mono_type == 4)
+                         return("monu mond montrav monoff")
+         }
+}\(aq
+def Energy_calc(mne, mode) \(aq{
+         if (mode == 0) {
+                 calcE
+                 A[energy] = hc_over_e / LAMBDA
+         } else {
+                 calcM A[energy]
+                 calcE
+         }
+}\(aq
+.ft P
+.fi
+.RE
+.sp
+The prefix \fBEnergy\fP and motor mnemonic
+\fBenergy\fP are, as always, arbitrary, but must match the configured
+device name on the \fBD\fPevices screen
+and motor mnemonic on the \fBM\fPotor screen.
+.SH "Counter/timers"
+.rs
+.SH "The \fB_cmd()\fP Function For Counters"
+.sp
+The \fBprefix_cmd()\fP macro function for counters is called in response
+to \fBspec\fP\(aqs counter\-related built\-in functions and commands:
+\fBtcount()\fP, \fBmcount()\fP, \fBwait()\fP,
+\fBstop()\fP, \fBmove_cnt\fP, \fBgetcounts\fP and \fBsync\fP.
+.sp
+There are three possible counter channel configurations:
+a master timer, a regular counter channel or a polled counter channel.
+The function calls differ depending on the configuration.
+.sp
+A master timer belongs to controller type
+"Macro Counter/Timer" . The counter type is
+\fBMAC_CNT\fP and the individual channel is identified as either
+\fBtimer\fP or \fBmonitor\fP. For such a channel, the
+\fB"start_one"\fP call will include a nonzero parameter
+indicating the count mode as described below.
+Also, \fB"get_status"\fP calls will be made to determine
+when the count time has completed.
+.sp
+A regular counter channel belongs to controller type
+"Macro Counter" with counter type
+\fBMAC_CNT\fP and function type \fBcounter\fP.
+.sp
+The polled counter type also has controller type
+"Macro Counter" and function type
+\fBcounter\fP, but the counter type is \fBMAC_CNTP\fP.
+Polled counters will receive
+\fB"get_status"\fP calls to see when the counter is no longer busy.
+.sp
+The syntax of the function call is:
+.RS 0m
+.HP 5m
+."
+\fBprefix_cmd(mne, key [, p1 [, p2]] [, unit])\fP
+\- 
+Called by the C code for all operations related to counter/timer control.
+\fBmne\fP is the string \fB".."\fP for keys that apply to all counters.
+\fBmne\fP is the counter number for keys that apply to individual counters.
+Each key is only called one way or the other.
+\fBkey\fP is a string containing the particular command.
+\fBp1\fP and \fBp2\fP, if present, are parameters related to the command.
+If the \fBmne\fP argument is the string \fB".."\fP the
+\fBunit\fP parameter will be included and specifies the unit number
+for which the command applies (as of \fBspec\fP release 5.07.03\-3).
+.RE
+.sp
+When the \fB"start_all"\fP and \fB"start_one"\fP keys are sent
+as described below, the count\-mode parameter will be set as follows:
+.sp
+.RS 4m
+.TS
+;
+l l .
+0	this channel is not the master timer
+1	count to a monitor preset \- \fBmcount()\fP
+2	count to a time preset \- \fBtcount()\fP
+3	just count until the counters are halted \- \fBmove_cnt\fP
+.TE
+.RE
+.sp
+Possible keys are as follows:
+.RS 0m
+.HP 5m
+."
+\fB"prestart_all"\fP
+\- 
+Sent to the controller (\fBmne\fP set to \fB".."\fP)
+before any counters are started.
+\fBp1\fP will contain the count preset,
+either in seconds or monitor counts.
+\fBp2\fP contains the count mode (1, 2 or 3), as in the above list.
+The fifth argument will contain the unit number of the controller.
+.RE
+.HP 5m
+."
+\fB"start_one"\fP
+\- 
+Sent to start each counter at the start of the counting period.
+The function will be called for the regular counting channels before
+being called for the master timer channel.
+\fBp1\fP is the count time in seconds if counting to time or in counts
+if counting to monitor.  If \fBmne\fP is the master timer,
+\fBp2\fP will contain 1, 2 or 3 to indicate the counting mode.
+If \fBmne\fP is not the master, \fBp2\fP will be zero.
+.HP 5m
+."
+\fB"get_status"\fP
+\- 
+Sent after the counters have been started, but only
+to the master timer/counter, if there is one, or to any
+counters configured as polled (with type
+\fBMAC_CNTP\fP).
+Must return nonzero if the channel is busy
+or zero if the counting is finished.
+.HP 5m
+."
+\fB"counts"\fP
+\- 
+Called when \fBspec\fP\(aqs built\-in \fBgetcounts\fP function is executed.
+The macro function must return the current counts for scaler channel number
+\fBmne\fP. Note, all the scalers channels associated with real counters
+will have been read before the macro function call, so the values in the
+\fBS[]\fP counter array will be current for the non\-macro counters.
+.HP 5m
+."
+\fB"halt_all"\fP
+\- 
+Sent to each macro counter controller
+(\fBmne\fP set to \fB".."\fP) when counting is halted.
+The key is sent before the \fB"halt_one"\fP keys are sent.
+The third argument will contain the unit number of the controller.
+.HP 5m
+."
+\fB"halt_one"\fP
+\- 
+Sent to each active counter when counting is halted.
+The \fBp1\fP argument will be zero if called
+at the end of normal counting and
+one if called when \fB^C\fP is typed at the keyboard or when a \fBstop()\fP or
+\fBsync\fP command is entered or after motors have stopped
+with a \fBmove_cnt\fP.
+.sp
+Commands to halt counters are sent when a preset count time elapses, if a
+\fB^C\fP is typed from the keyboard, when a \fBstop()\fP or
+\fBsync\fP command is encountered from user\-level
+or after motors have stopped when the
+\fBmove_cnt\fP command is used.
+.RE
+.SH "The \fB_par()\fP Function For Counters"
+.sp
+There are currently no built\-in keywords that produce calls to the
+\fBprefix_par()\fP macro function for counters.  The macro function will only be
+called when \fBspec\fP\(aqs user\-level \fBcounter_par()\fP function is called to set
+or retrieve an otherwise unrecognized parameter.
+.sp
+The function will be called as:
+.RS 0m
+.HP 5m
+."
+\fBprefix_par(mne, key, "get")\fP
+\- 
+The function should return a value for the user\-defined parameter named as
+\fBkey\fP for counter number \fBmne\fP.
+.HP 5m
+."
+\fBprefix_par(mne, key, "set", p1)\fP
+\- 
+Called to set the user\-defined parameter \fBkey\fP to
+\fBp1\fP for counter number \fBmne\fP.
+.RE
+.sp
+The \fBmne\fP argument will always be a counter number and never the
+string \fB".."\fP.
+.sp
+A call of \fBcounter_par()\fP to set \fB"disable"\fP mode on or off will
+be passed through to \fBprefix_par()\fP.
+.sp
+Built\-in arguments to \fBcounter_par()\fP
+that are not passed to the \fBprefix_par()\fP macro function include
+\fB"unit"\fP, \fB"channel"\fP,
+\fB"responsive"\fP, \fB"controller"\fP, \fB"device_id"\fP,
+\fB"scale"\fP, \fB"monitor"\fP and \fB"timer"\fP.
+.SH "MCAs and Image Devices"
+.rs
+.SH "The \fB_cmd()\fP Function For MCA and Image Devices"
+.sp
+The MCA device \fBprefix_cmd()\fP function is called when \fBspec\fP\(aqs
+\fBmca_get()\fP, \fBmca_sget()\fP, \fBmca_put()\fP and \fBmca_sput()\fP
+built\-in functions are used.
+Image devices are associated with
+\fBimage_get()\fP and \fBimage_put()\fP.
+The \fBprefix_cmd()\fP macro function for both types of device gets called from
+\fBtcount()\fP,
+\fBmcount()\fP, \fBmove_cnt\fP, \fBwait()\fP, \fBstop()\fP and \fBsync\fP.
+The \fBprefix_cmd()\fP macro function is also called in response to the standard
+\fBmca_par()\fP, \fBmca_spar()\fP and \fBimage_par()\fP commands \fB"clear"\fP, \fB"run"\fP and \fB"halt"\fP.
+.sp
+For MCA devices, the syntax of the function call is:
+.RS 0m
+.HP 5m
+."
+\fBprefix_cmd(num, key [, p1 [, p2 [, data]]])\fP
+\- 
+Called by the C code for operations related to MCA control.
+\fBnum\fP is the MCA number.
+\fBkey\fP is a string containing the particular command.  \fBp1\fP and
+\fBp2\fP, if present, are parameters related to the command.
+For the \fBmca_get()\fP and \fBmca_put()\fP functions,
+\fBdata\fP will be a data array for sending or receiving the MCA data.
+.RE
+.sp
+For image devices, the syntax of the function call is:
+.RS 0m
+.HP 5m
+."
+\fBprefix_cmd(num, key [, p1 [, p2 [, p3, p4, p5]]])\fP
+\- 
+Called by the C code for operations related to image\-device control.
+\fBnum\fP is the image\-device number.
+\fBkey\fP is a string containing the particular command.  \fBp1\fP through
+\fBp5\fP are parameters related to the command.
+.RE
+.RE
+.sp
+None of the keys are mandatory in the implementation.  Possible keys are as follows:
+.RS 0m
+.HP 5m
+."
+\fB"clear"\fP
+\- 
+Sent in response to \fBmca_par("clear")\fP or \fBimage_par("clear")\fP
+and before \fB"run"\fP when
+\fB"auto_clear"\fP mode is enabled.  There are no additional parameters.
+.RE
+.HP 5m
+."
+\fB"run"\fP
+\- 
+Sent in response to \fBmca_par("run")\fP or \fBimage_par("run")\fP
+and at the start of counting associated with the standard
+\fBtcount()\fP, \fBmcount()\fP and \fBmove_cnt\fP commands
+when \fB"auto_run"\fP mode is enabled.
+If \fB"soft_preset"\fP mode is enabled,
+\fBp1\fP will be the counting preset (seconds or monitor counts),
+otherwise \fBp1\fP will be the value set
+with the \fBmca_par()\fP \fB"preset"\fP option.
+\fBp2\fP will be the count mode, as follows:
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l l .
+1		called by \fBmcount()\fP
+2		called by \fBtcount()\fP
+3		called via \fBmove_cnt\fP
+4		called by \fBmca_par("run")\fP
+.TE
+.RE
+.RE
+.HP 5m
+."
+\fB"halt"\fP
+\- 
+Sent in response to \fBmca_par("halt")\fP or \fBimage_par("halt")\fP.
+Also sent at the end of counting associated with the standard
+\fBtcount()\fP, \fBmcount()\fP and \fBmove_cnt\fP commands
+if \fB"auto_run"\fP mode is enabled, but only when
+\fB"soft_preset"\fP is not enabled and the \fB"preset"\fP value set via
+\fBmca_par()\fP or \fBimage_par()\fP is zero.  The
+\fBp1\fP argument will be zero if called at the end of normal counting and
+one if called when \fB^C\fP is typed at the keyboard, when a
+\fBstop()\fP or \fBsync\fP command is entered
+or after motors have stopped with a \fBmove_cnt\fP.
+.HP 5m
+."
+\fB"get_status"\fP
+\- 
+Called during counting.
+A return value of one will indicate the MCA or image device is still busy.
+.HP 5m
+."
+\fB"read"\fP (for MCA)
+\- 
+Sent to read data. \fBp1\fP and
+\fBp2\fP are the first and last channels to be read, respectively,
+reflecting the optional first and last channel arguments to
+\fBmca_read()\fP.
+\fBdata\fP is a data array of the native type
+(configured with the \fBprefix_config()\fP call) where the data should be written.
+The optional return value is the number of points actually read.
+The value will be used by \fBmca_get()\fP
+to determine how many points to copy to the returned array.
+If no value is returned, \fBmca_get()\fP
+will use the requested number of points.
+.HP 5m
+."
+\fB"write"\fP (for MCA)
+\- 
+Sent to write data.  \fBp1\fP and
+\fBp2\fP are the first and last channels to be written, respectively,
+reflecting the optional first and last channel arguments to
+\fBmca_write()\fP.
+\fBdata\fP is a data array of the native type
+(configured with the \fBprefix_config()\fP call) where the data can be read.
+The optional return value is the number of points actually written.
+.RE
+.sp
+The \fB"read"\fP and \fB"write"\fP keys for images are called with
+region of interest (ROI) parameters.  The parameters are set with
+\fBimage_par()\fP as described below.  The ROI parameters define which part
+of the image should be returned (with \fB"read"\fP) or written (with \fB"write"\fP).
+If no ROI has been defined, the values will encompass the entire image.
+The ROI arguments can be
+ignored if not meaningful with the particular implementation.
+.RS 0m
+.HP 5m
+."
+\fB"read"\fP (for images)
+\- 
+Sent to read data. \fBp1\fP is a data array of the native type.  \fBp2\fP through
+\fBp5\fP define the region of interest (ROI) in the order first row,
+last row, first column, last column.
+The optional return value is the number of points actually read.
+.RE
+.HP 5m
+."
+\fB"write"\fP (for images)
+\- 
+Sent to write data.  \fBp1\fP is a data array of the native type.  \fBp2\fP through
+\fBp5\fP define the region of interest (ROI) in the order first row,
+last row, first column, last column.
+The optional return value is the number of points actually written.
+.RE
+.SH "The \fB_par()\fP Function For MCA and Image Devices"
+.sp
+The \fBprefix_par()\fP macro function is called when various
+MCA or image device parameters are set, and when the \fBmca_par()\fP,
+\fBmca_spar()\fP or \fBimage_par()\fP functions are used to retrieve a user\-defined parameter.
+The \fBnum\fP argument is the MCA or image device number.
+.sp
+The standard \fBmca_par()\fP and \fBimage_par()\fP commands
+\fB"info"\fP,
+\fB"auto_run"\fP, \fB"soft_preset"\fP,
+\fB"auto_clear"\fP, \fB"native_type"\fP and \fB"preset"\fP
+are handled by \fBspec\fP\(aqs built\-in code
+and will not generate calls to the \fBprefix_par()\fP macro function, although
+the value set for \fB"preset"\fP will be included in the arguments
+passed to \fBprefix_cmd()\fP with \fB"run"\fP.
+.sp
+The read\-only MCA commands
+\fB"chans"\fP and \fB"max_chans"\fP are also handled by \fBspec\fP\(aqs built\-in code.
+Similarly,
+the read\-only commands
+\fB"rows"\fP and \fB"cols"\fP that apply to image devices are handled by the built\-in code.
+.sp
+In addition, the region\-of\-interest (ROI) commands for images, \fB"row_beg"\fP, \fB"row_end"\fP,
+\fB"col_beg"\fP, \fB"col_end"\fP and \fB"roi"\fP, are implemented in the built\-in code.
+The first four set or get a single parameter.
+The \fB"roi"\fP option takes four additional arguments in the
+order row_beg, row_end, col_beg and col_end.
+The \fB"roi"\fP option without parameters returns the number of points in the
+current ROI.
+The ROI parameters are passed
+to the \fBprefix_cmd()\fP function as arguments for the \fB"read"\fP and \fB"write"\fP keys.
+.sp
+The standard \fB"disable"\fP call
+will be passed to the \fBprefix_par()\fP function
+when setting or clearing the disabled state.
+.sp
+Tha \fBmca_par()\fP command \fB"chan#"\fP will generate a call to
+the \fBprefix_cmd()\fP function with a \fB"read"\fP or \fB"write"\fP key, as
+appropriate with the ROI values set to the indicated channel number.
+.sp
+The \fBprefix_par()\fP function will be called as:
+.RS 0m
+.HP 5m
+."
+\fBprefix_par(num, key, "get")\fP
+\- 
+The function should return a value for the user\-defined parameter named as
+\fBkey\fP for MCA or image device number \fBnum\fP.
+.HP 5m
+."
+\fBprefix_par(num, key, "set", p1)\fP
+\- 
+Called to set the user\-defined parameter \fBkey\fP
+to \fBp1\fP for MCA or image device number \fBnum\fP.
+.RE
+.SH "MCA and Image Device Counting Mode Summary"
+.sp
+The \fB"auto_run"\fP mode must be enabled
+for the standard \fBspec\fP counting commands to control the MCA or image device.
+If the \fB"soft_preset"\fP mode is enabled, when the
+\fBprefix_cmd()\fP function is called with the \fB"run"\fP argument,
+\fBp1\fP will be the count time \-\- in seconds with \fBtcount()\fP (counting
+to time) and in counts with \fBmcount()\fP (counting to monitor).
+In \fB"auto_run"\fP mode,
+the macro hardware device will be polled using \fB"get_status"\fP.
+If the device takes longer to count than
+the master timer, \fBspec\fP will wait until the device has finished.
+The \fB"halt"\fP command is not called at the normal end of counting, but is called if
+counting is stopped with \fBstop()\fP or aborted with \fB^C\fP or \fBsync\fP.
+.sp
+If \fB"soft_preset"\fP is disabled,
+when the \fBprefix_cmd()\fP function is called with the
+\fB"run"\fP argument, \fBp1\fP will be the value set using the \fB"preset"\fP command to
+\fBmca_par()\fP or \fBimage_par()\fP, or zero if the value has not been set.
+If the value is nonzero,
+\fBspec\fP will poll the MCA until it returns a non\-busy status.
+Thus one can have the macro hardware MCA count
+to a different preset than the master timer.
+If the preset value is zero,
+the MCA will be sent a halt command when the master timer reaches the
+end of the count interval.
+.sp
+The \fBp1\fP argument will be zero for powder\-mode counting with the
+\fBmove_cnt\fP command, and the device will be sent a \fB"halt"\fP command
+when
+the designated motor has completed its trajectory.
+.sp
+In all cases, a count abort will generate a \fB"halt"\fP command.
+

@@ -1,0 +1,36 @@
+cd                                    macro                                   cd
+
+NAME
+     cd - change working directory
+
+SYNOPSIS
+
+     ccdd [[ddiirreeccttoorryy]]
+
+DESCRIPTION
+
+     ccdd is used to change ssppeecc's current working directory.  Without arguments,
+     ccdd changes ssppeecc's current working directory to your home directory.
+
+DEFINITION
+
+     ddeeff ccdd ''cchhddiirr((""$$**""))''
+
+GLOBALS
+
+     CCWWDD - built-in string variable holding the full path name of the current
+          working directory.
+
+EXAMPLE
+
+     ccdd ddaattaa//SSii
+
+WARNING
+
+     Note that the UNIX escape uu ccdd or uunniixx((""ccdd"")) has no effect as only the
+     working directory of a temporary sub-shell is changed.
+
+SEE ALSO
+
+     UUNNIIXX UUsseerr RReeffeerreennccee MMaannuuaall
+

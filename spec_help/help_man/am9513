@@ -1,0 +1,284 @@
+.TH "am9513" "hardware" "12/09/12" "am9513.rst 6.3  12/09/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+am9513 \- PC board and USB counter/timers based on the AMD Am9513 chip
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)am9513.rst       6.3  12/09/12  CSS
+.
+.\" Copyright (c) 1995,1996,1997,1998,2003,2005,2011,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "am9513" "hardware" "12/09/12" "am9513.rst 6.3  12/09/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP supports counter/timer PC cards and USB devices based
+on the Advanced Micro Devices Am9513 chip.
+Although production of the original AMD chip ended
+in 1995 (after twenty years), compatible chips
+from other manufactures continued to be available for many years.
+Unfortunately, as of late 2012 it appears production of the compatible
+chips has ceased, and vendors have discontinued the counter/timer
+products based on the chips.
+The extremely cost\-effective
+counter/timers based on the Am9513 chip will continue to be supported
+by \fBspec\fP.
+These devices work quite well, and if one can find a module
+on a vendor\(aqs back shelf or in the second\-hand market, it would be
+worth grabbing.
+.sp
+Counter/timer models supported by \fBspec\fP include:
+Measurement Computing (formerly ComputerBoards)
+model CIO\-CTR05/10/20 ISA cards, PCI\-CTR05/10/20HD PCI cards,
+and the USB\-4300 series; Keithley\-Metrabyte Model CTM\-05/10 ISA cards,
+Scientific Solutions Labmaster series ISA and PCI cards,
+Kontron\(aqs PCIDCC5/20\-P PCI card.
+.sp
+The Am9513 chip contains five 16\-bit counters that can be programmed
+in a wide range of configurations.
+Although boards may contain more than one of the chips,
+the first chip on the timer/counter board is used as the master timer.
+\fBspec\fP\(aqs programming uses two of the counters
+of the master timer for a 32\-bit detector counter, two for
+a 32\-bit monitor counter and one for a 16\-bit elapsed time counter.
+On boards with two or four chips, the
+additional chips are each programmed for two more 32\-bit detector counters.
+\fBspec\fP supports the Am9513 chip
+as both a time preset counter using the \fBtcount()\fP function
+or a monitor\-count preset using
+\fBmcount()\fP.
+.sp
+Note, \fBspec\fP release 5.06.03 includes several updates to the Am9513 support.
+With the update, more than one Am9513\-type card can be configured at a time,
+where the additional cards must be configured as counters only.
+Also, the code was changed to improve the timer gating, although
+an additional jumper is required to make the change effective.
+Previously, the timer was started in one instruction,
+followed by another instruction that released the gate signal
+that inhibited the counters.
+In the new code, the timer will also be gated by the gate signal,
+but only if the additional jumper from \fBoutput 1\fP to \fBgate 1\fP is installed.
+(See the \fI\%HARDWARE CONFIGURATION\fP section below).
+\fBspec\fP will test for the presence of the additional jumper.
+If it is missing, \fBspec\fP will program the timer for no gate, as before,
+and print a message suggesting the jumper be added.
+.sp
+Note also, \fBspec\fP release 5.09.02
+includes several significant updates to Am9513 support.
+The Am9513\-compatible counter/timer chips used by Measurement Computing
+in PCI cards and USB devices
+behave slightly differently than the original chips.
+This difference prevented the chips working
+in counting\-to\-monitor mode using \fBspec\fP\(aqs original code.
+This release includes a work around in the \fBspec\fP support,
+and counting\-to\-monitor mode now works.
+.sp
+In addition, \fBspec\fP release 5.09.02
+includes \fBcounter_par()\fP commands to access the
+digital I/O ports on all versions of the device.
+See the \fBFUNCTIONS\fP section below.
+.SH "SOFTWARE CONFIGURATION"
+.rs
+.sp
+Use \fBspec\fP\(aqs configuration editor (\fBedconf\fP, normally invoked by the
+\fBconfig\fP macro) to select the timer and to configure the scaler channels.
+For ISA cards, enter the base address on the \fBDevice\fP screen.
+For all cards, enter the number of counters to be used on the board:
+.RS 3m
+.sp
+.nf
+.ft CB
+SCALERS  DEV  ADDR  <>MODE  NUM                        <>TYPE
+    YES      0x340            3    Am9513 Counter/Timer (ISA)
+    YES        0:0            3    Am9513 Counter/Timer (PCI)
+    YES          0            3    Am9513 Counter/Timer (USB)
+    YES      0x340            2     Am9513 Counter\-Only (ISA)
+    YES        0:0            2     Am9513 Counter\-Only (PCI)
+    YES          0            2     Am9513 Counter\-Only (USB)
+.ft P
+.fi
+.RE
+.sp
+The corresponding entries in the \fBconfig\fP file would be:
+.sp
+.RS 4m
+.nf
+\fBPC_AM9513  =  isa_address  number_of_channels\fP
+\fBPCI_AM9513  =  number_of_channels  pci=bus:slot\fP
+\fBUSB_AM9513  =  serial_number  number_of_channels\fP
+\fBPC_AM9513C  =  isa_address  number_of_channels\fP
+\fBPCI_AM9513C  =  number_of_channels  pci=bus:slot\fP
+\fBUSB_AM9513C  =  serial_number  number_of_channels\fP
+.fi
+.sp
+.RE
+.sp
+Note that for the Labmaster board, the base address of the counter chip is
+eight plus the base address of the board itself.
+For PCI cards, the address is determined automatically.
+The address field can be used to enter the serial number
+of USB devices if more than one is to be configured.
+If the address is zero, the USB devices will be assigned in the order found.
+.sp
+For each additional chip on a board, add 2 to the value in the \fBNUM\fP field.
+.sp
+If more than one PCI Am9513 board is installed, the unit numbers are
+assigned to the boards, starting with unit 0, in the same
+order as the PCI bus/slot/function IDs are assigned by the computer.
+(The \fBLinux\fP command \fB/sbin/lspci\fP lists the PCI identifiers.)
+.sp
+As of \fBspec\fP release 5.06.03, the command
+.sp
+.RS 4m
+\fBcounter_par(mne, "device_id")\fP
+.RE
+.sp
+where \fBmne\fP is the mnemonic of a counter associated with a PCI Am9513 card,
+will return a string containing the I/O base address
+of the PCI counter/timer cards, which
+may useful in writing macros that access other features of the card,
+such as digital I/O, A/D converters, etc.
+(With \fBspec\fP release 5.09.02,
+the digital I/O is accessible via \fBcounter_par()\fP. See below.)
+.sp
+On the \fBScaler\fP screen, the channel assignments
+must have the timebase as channel
+0 and the monitor as channel 1, as shown below:
+.RS 3m
+.sp
+.nf
+.ft CB
+NUMBER      NAME  MNEMONIC  <>DEVICE  UNIT  CHAN   <>USE AS  SCALE
+     0   Seconds       sec    AM9513     0     0   timebase      1
+     1   Monitor       mon    AM9513     0     1    monitor      1
+     2  Detector       det    AM9513     0     2    counter      1
+     3 Counter 2      cnt2    AM9513     0     3    counter      1
+     4 Counter 3      cnt3    AM9513     0     4    counter      1
+     5 Counter 4      cnt4    AM9513     1     0    counter      1
+     6 Counter 5      cnt5    AM9513     1     1    counter      1
+.ft P
+.fi
+.RE
+.sp
+The timebase scale factor is ignored.  Counters on unit 0, channels 3 and 4
+would only be available if there are at least two Am9513 chips on the card.
+Counters on unit 1 correspond to a second Am9513 card.
+.SH "HARDWARE CONFIGURATION"
+.rs
+.sp
+Connect the detector to the input connector pin labeled
+\fBsource 3\fP. Counts received from the monitor go to the pin labeled
+\fBsource 5\fP. In addition, wire the connector pin labeled \fBoutput 1\fP to the pins
+\fBgate 1\fP, \fBgate 2\fP, \fBgate 4\fP and \fBgate 5\fP.
+(In the more recent Keithley\-Metrabyte CTM\-05A manual, the
+\fBsource\fP pins are now labeled \fBACLKIN\fP, the
+\fBoutput\fP pins are now labeled \fBATIMEROUT\fP, and the
+\fBgate\fP pins are now labeled \fBAGATE\fP.)
+.sp
+For a two\- or four\-chip board, or for additional counter\-only boards,
+additional detectors can be connected
+to the \fBsource 3\fP and \fBsource 5\fP pins of the chips.  In addition, the
+\fBoutput 1\fP from the first chip of the timer/counter board
+must be connected to \fBgate 2\fP and \fBgate 4\fP of the additional chips.
+.sp
+The counter boards are accessed from user level
+and are polled to determine when count intervals have elapsed.
+Thus, interrupts should be disabled on the boards.
+.sp
+When counting to time, the resolution of the clock depends
+on the length of the count interval.
+The maximum count time is 71.5 minutes.  The time base resolution (in seconds)
+is set according to the following table:
+.sp
+.RS 4m
+.TS
+;
+l l l .
+0.00001	for	\fBt\fP < 0.6 sec
+0.0001	for	\fBt\fP < 6 sec
+0.001	for	\fBt\fP < 60 sec
+0.01	for	\fBt\fP < 655.35 sec (10.9 min)
+0.0655	for	\fBt\fP < 71.5 min
+.TE
+.RE
+.sp
+When counting to monitor counts, the 0.01 second time base is used,
+and the value returned for
+the time channel will be corrected to account for the rollovers
+that occur every 655.36 seconds.
+.SH "FUNCTIONS"
+.rs
+.sp
+The following \fBcounter_par()\fP options are available.
+Note, some models have 8 bits each of input and output and some
+models have 16 bits each.
+Also, some models allow the output bit settings to be read,
+while some models do not.
+For models that do not allow reading of the output registers, \fBspec\fP
+keeps track of the values that have been written, so that it is possible
+to set and clear individual bits without disturbing settings on other bits.
+Note, though, that after reinitializing the hardware during startup or
+\fBreconfig\fP, the previous state of read\-only output registers will be lost.
+.sp
+The digital I/O is associated with a counter card or device,
+not with a counter channel.
+However, the \fBspec\fP \fBcounter_par()\fP function
+requires a counter\-channel argument.
+In the calls below, \fBmne\fP is any counter channel associated
+with the particular card or device
+having the digital I/O ports being addressed.
+.RS 0m
+.HP 5m
+."
+\fBcounter_par(mne, "set_bit", val)\fP
+\- 
+Set output line corresponding to bit number \fBval\fP to high,
+where bits and lines are numbered from 0 to 7 or 0 to 15.
+.HP 5m
+."
+\fBcounter_par(mne, "clr_bit", val)\fP
+\- 
+Set output line corresponding to bit number \fBval\fP to low,
+where bits and lines are numbered from 0 to 7 or 0 to 15.
+.HP 5m
+."
+\fBcounter_par(mne, "put_byte", val)\fP
+\- 
+Sets output lines corresponding to the bits set in \fBval\fP
+to high and bits not set in \fBval\fP to low.
+.HP 5m
+."
+\fBcounter_par(mne, "put_word", val)\fP
+\- 
+On devices with 16 bits of output, sets output lines corresponding
+to the bits set in
+\fBval\fP to high and bits not set in \fBval\fP to low.
+.HP 5m
+."
+\fBcounter_par(mne, "get_bit", val)\fP
+\- 
+Returns 0 or 1 based on whether the input line corresponding to bit number
+\fBval\fP is high or low, where lines and bits
+are numbered from 0 to 7 or 0 to 15.
+.HP 5m
+."
+\fBcounter_par(mne, "get_byte")\fP
+\- 
+Returns an 8\-bit value that reflects the setting of the input lines 0 to 7.
+.HP 5m
+."
+\fBcounter_par(mne, "get_word")\fP
+\- 
+On devices with 16 bits of input, returns a 16\-bit value
+that reflects the setting of the input lines 0 to 15.
+.RE
+

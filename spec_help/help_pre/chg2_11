@@ -1,0 +1,122 @@
+changes                      ssppeecc 2.11 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.11
+
+DESCRIPTION
+
+     These notes summarize the modifications made for ssppeecc release 2.11, as
+     finalized on February 6, 1989.
+
+CHANGES
+
+     If the command file //uussrr//lliibb//ssppeecc..dd//ssiittee..mmaacc exists, it will be read each
+     time any user runs ssppeecc.  Site administrators are encouraged to put
+     site-specific commands in this file, for example, commands to assign
+     synchrotron-beamline monochromator parameters.
+
+     The aassccaann and aa22ssccaann macros now include the values of HH, KK and LL at each
+     data point in the data file.
+
+     In the prescan limit checking for the various hhkkll scans, a check for
+     motor-limit problems at the last point of the scan has been added before
+     the limit checking at the rest of the points in the scan.  Thus, a limit
+     problem that occurs at the extreme points in HH, KK and LL will be caught
+     earlier.
+
+     New scan macros aa33ssccaann and dd33ssccaann are included for scanning three motors at
+     a time.
+
+     A new scan macro hhkkllmmeesshh is provided that does a mesh scan of any two of HH,
+     KK and LL.
+
+     The ssccaann__oonn macro that restarts aborted scans now also works with mesh
+     scans.
+
+     A sseettpplloott macro is now included that lets you configure the output
+     generated at the conclusion of a scan.  You can choose from several
+     combinations of printer and screen output.
+
+     The ddoo and qqddoo macros have been modified to look for command files in a
+     directory given by the global variable DDOO__DDIIRR if they can't be found in the
+     current directory.
+
+     A new macro ssccaann__ttaaiill, defined by default as __ttaaiill, is called at the end of
+     each scan.  This construction is similar to the ssccaann__hheeaadd and ssccaann__lloooopp
+     macros already in place and is related to the sseettpplloott macro described
+     above.
+
+     New macros for the folks at X-20 NSLS related to setting the X-ray beam
+     energy are included in the standard distribution.  These macros are sseett__EE,
+     ggeett__EE, mmoovvee__EE and EEssccaann.
+
+     The ccoonnffiigg macro now does a wwaaiittaallll and a ssyynncc before invoking the eeddccoonnff
+     program.
+
+     The CAMAC driver for the VENIX system on the AT computers has been changed
+     to solve a problem with losing LAM interrupts that come in during servicing
+     of a prior LAM interrupt.  The bug would manifest itself with ssppeecc being
+     hung and DSP 6001 LAM lights being lit.  (Affected sites should be sure to
+     install the new driver.)  (The problem does not occur on PDP systems.)
+
+     For folks running ssppeecc using VENIX on AT clones, ssppeecc is now compiled using
+     the large-model compiler.  This gives a larger memory arena than otherwise
+     available.  The added memory comes at a slight loss of execution speed,
+     though.  (The regular-model version is still available.)
+
+     ssppeecc now allows you to use more than one kind of motor controller at a
+     time.  (This feature entailed revising much motor-related code - please
+     inform CSS if you notice any new bug manifestations.)
+
+     The eeddccoonnff program (invoked by the ccoonnffiigg macro) has undergone some
+     changes.  A third screen is used to configure the device names.  The order
+     of the screens is changed so that the motor screen appears first.  A new
+     parameter for each motor indicates the type of controller to be used for
+     that motor.
+
+     A presence check is now performed on all types of motor controllers, not
+     just on the E500.  The check is performed with the rreeccoonnffiigg command now,
+     rather than with the ssyynncc command.  When a controller fails the presence
+     test, the associated motors are marked as uunnuussaabbllee.
+
+     The ""cclleeaarriinngg rreemmaaiinniinngg sstteeppss"" message that occurred on ^^CC aborts of E500
+     motors has been eliminated from normal operation.  The message will appear
+     when hardware debugging is turned on, though.
+
+     A bug with using the mmccoouunntt(()) function (counting to monitor) with the
+     RTC-018 controller has been fixed.  Previously the monitor counts would be
+     off by a factor of 64.
+
+     The first draft of general serial device routines, sseerr__ggeett(()) and sseerr__ppuutt(())
+     is now available.  See the sseerriiaall help file for more information.
+
+     A bug where ssppeecc tended to dump core after you typed three ^^CC's to stop
+     motors and got the message
+
+         GGiivviinngg uupp oonn wwaaiittiinngg..
+
+         IIff mmoottoorr ccoonnttrrooll iiss hhuunngg,, ttyyppee ``ssyynncc''..
+
+     is fixed.
+
+     A bug where ssppeecc would screw up if you had more than nine arguments in a
+     macro has been fixed.
+
+     A bug where macro definitions very close to the maximum length caused ssppeecc
+     to screw up badly has been fixed.
+
+     To aid in debugging and testing new versions of ssppeecc, a new command line
+     argument, --DD _s_p_e_c_d_i_r is available.  It selects the name of the auxiliary
+     file directory to be used instead of the compiled in directory, normally
+     //uussrr//lliibb//ssppeecc..dd.  It is also possible to change the compiled in directory
+     name when remaking ssppeecc on site.  See the comments at the top of the file
+     uu__hhooookk..cc for an explanation of how.
+
+     There is an aawwkk script, aauuxx//sshhooww..aawwkk in the distribution directory that can
+     be used with CC--PPLLOOTT to produce summary plots of scans, twelve per page.
+     The file contains comments explaining its usage.
+
+     The scripts to install kernel drivers, iinnssttaallll__ddsspp and iinnssttaallll__338866, now
+     take several command-line options.  See the RREEAADDMMEE file in the ccaammaacc
+     subdirectory of the distribution for details.
+

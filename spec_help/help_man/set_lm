@@ -1,0 +1,40 @@
+.TH "set_lm" "macro" "08/01/12" "set_lm.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBset_lm\fP \- set lower and upper software limits
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)set_lm.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "set_lm" "macro" "08/01/12" "set_lm.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBset_lm motor low_limit high_limit\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBset_lm\fP macro is used to establish the
+\fBlow_limit\fP and \fBhigh_limit\fP for one
+\fBmotor\fP in units of the user positions.
+(The built\-in function \fBset_lim()\fP, used by the
+\fBset_lm\fP macro, establishes the limits in terms of
+dial positions.)
+.SH "EXAMPLE"
+.rs
+.sp
+\fBset_lm phi \-90 90\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%lm\fP
+

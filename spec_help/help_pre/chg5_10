@@ -1,0 +1,641 @@
+changes                      spec 5.10 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 5.10
+
+August 7, 2012 - RELEASE 5.10.02-17
+
+Blank Lines Allowed Again In ccoonnffiigg File
+     Recent updates inadvertently led to blank lines in the ccoonnffiigg file
+     generating error messages in ssppeecc.  That issue has been fixed.
+
+Fix For Off-by-one Motor Number Display In Certain Messages
+     An issue with the support for the EPICS motor record and the Newport Agilis
+     controller, where several motor-related messages (including hard-limit
+     reports) gave a channel number off by one, has been fixed.
+
+Fix For Recently Introduced Crash When Using ISA Am9513 Card
+     Changes in the Am9513 support in the previous ssppeecc release introduced a bug
+     that could cause ssppeecc to crash when using other than PCI models.  That bug
+     is fixed.
+
+June 27, 2012 - RELEASE 5.10.02-16
+
+Large File Support On 32-Bit Platforms
+     The 32-bit architecture versions of ssppeecc are now compiled with large file
+     support.  It should now be possible to use the ssppeecc built-in output
+     functions to add data to files larger than 2.15 gigabytes.
+
+Fix For Attocube ANC350 Support
+     A bug that was part of the original ssppeecc ANC350 support, where actuators
+     with particular values for the the step-width parameter would be marked
+     unusable, has been fixed.
+
+Additional Fixes For Am9513 Use With Multiple PCI Cards
+     The support for multiple PCI Am9513 cards has been fixed.  It is unclear
+     whether a configuration with multiple PCI Am9513 had ever been working.
+     Such a configuration does work in the current release.  In addition, the
+     ADDR field of the configuration editor can be used to set the PCI bus and
+     slot IDs to distinguish among multiple cards.
+
+June 18, 2012 - RELEASE 5.10.02-15
+
+Fix For Am9513 With Multiple PCI Cards
+     A recently introduced bug, where ssppeecc would hang if using more than one
+     Am9513 PCI card, has been fixed.
+
+Fix For Inserting Motors In Configuration Editor
+     A bug associated with inserting a new motor channel on the MMotor screen of
+     the configuration editor has been fixed.  Previously, any existing
+     non-standard optional parameters would be copied from the neighboring motor
+     channel to the inserted motor and changing the value of one of those
+     parameters for either of the motors would change the value for both motors.
+
+Fix For ssppeecc Standard Output With lliibbeeddiitt
+     A "feature" added to the upstream lliibbeeddiitt source in early 2011 disabled
+     command-line editing if the linking program's standard output was not a ttttyy
+     device.  For users who piped ssppeecc's output through a program such as the
+     tteeee utility to make a copy of ssppeecc's standard output to a file, the ssppeecc
+     prompt would not be seen and command line editing would be disabled.  The
+     libedit version now distributed with ssppeecc disables that feature of the
+     standard lliibbeeddiitt distribution, restoring the previous behavior.  As usual,
+     the version of libedit used with ssppeecc can be downloaded at
+     _c_e_r_t_i_f_._c_o_m_/_d_o_w_n_l_o_a_d_s_/_e_x_t_r_a_s.  Note, to make a log of ssppeecc's tty output, CSS
+     recommends using a ttlloogg file rather than the tteeee utility.
+
+May 29, 2012 - RELEASE 5.10.02-14
+
+Fix For wwaaiitt(()) With Some MCA Models
+     An issue when using the wwaaiitt(()) function to determine when counting had
+     finished with certain MCA devices active with ""aauuttoo__rruunn"" mode on and
+     ""ssoofftt__pprreesseett"" mode off has been fixed.  The problem was due to ssppeecc
+     considering the MCA done after sending the halt command, but prior to the
+     device acknowledging it had stopped.  The EPICS MCA was particularly
+     affected.  The code for the SEIKO EG&G MCA 7700, the Bruker Vantec-1 and
+     the Ortec PCI MCS had the same defect, but the consequences were unlikely
+     to be noticed.
+
+Fix For Number of Channel Configuration For Some Controllers
+     A recently introduced issue with channel configuration for certain
+     controllers where channels are numbered starting from one in the
+     configuration file has been fixed.  The last channel configured would
+     generate a "not enough channels on unit" message unless the number of
+     channels on the DDevices screen of the configuration editor was increased by
+     one.  Affected controllers were the Attocube ANC300, EPICS motor record,
+     JVL SMI20B, Munich BR-tronik IPS, Newport Agilis, PI E-712 and Sigmatech
+     FC-501A.
+
+May 19, 2012 - RELEASE 5.10.02-13
+
+Fix For GPIB-ENET Reads
+     A bug, introduced in the ssppeecc release 5.10.02-3 update to support the
+     GPIB-ENET/1000 modules, where GPIB-ENET reads would fail if the read count
+     had bit 7 or 15 set, has been fixed.
+
+May 17, 2012 - RELEASE 5.10.02-12
+
+Fix For Signal Handling When Using TANGO GPIB
+     A bug, where ssppeecc could crash when the new TANGO GPIB device server was
+     configured and software signals associated ^^CC or the software timer were
+     raised, has been fixed.
+
+Fix For Channel Count For TACO VCT6
+     A recently introduced issue, where it became necessary to configure the
+     number-of-channels parameter on the DDevices screen of the configuration
+     editor with one more channel than needed when using the TACO VCT6 device
+     server, has been addressed.
+
+May 12, 2012 - RELEASE 5.10.02-11
+
+New ""ttiimmeessttaammpp"" Option For eeppiiccss__ppaarr(())
+     A new ""ttiimmeessttaammpp"" option is available with the eeppiiccss__ppaarr(()) function to
+     return the EPICS timestamp associated with a process variable.  See the
+     _e_p_i_c_s help file for details.
+
+Fix For Using Named Pipes As Output Devices
+     A problem with ssppeecc hanging when opening a named pipe when no process had
+     the named pipe open for reading has been fixed.
+
+New "bbll1188bb" ssuurrff Geometry
+     A new liquid surface diffractometer geometry for beamline BL18B at the
+     Photon Factory is included in this ssppeecc release.
+
+May 8, 2012 - RELEASE 5.10.02-10
+
+Fix For EPICS Crash
+     On certain platforms, use of eeppiiccss__ppuutt(()) with the optional third argument
+     to have the code wait for a callback to indicate the value has been sent
+     resulted in a segmentation fault.  The crash might also appear when reading
+     using the built-in EPICS serial device support.  The problem has been
+     fixed.
+
+Update To Recognize New Model Tsuji Counter
+     This ssppeecc release will recognize the new Tsuji model CT08-01D
+     counter/timer.
+
+May 5, 2012 - RELEASE 5.10.02-9
+
+Fix For Recently Introduced Bug With PCI Am9513
+     The configuration updates included in ssppeecc release 5.10.02-1 introduced a
+     bug that could cause a segmentation fault when a PCI Am9513 was configured.
+     This release fixes that problem.
+
+TACO Serial Driver Support Reversions
+     The changes to the support for TACO serial driver introduced in ssppeecc
+     release 5.10.02-3 to display additional error messages have been removed.
+     However, an issue where HHDDWW__EERRRR could be incorrectly set when reading a
+     serial device has been fixed.
+
+April 6, 2012 - RELEASE 5.10.02-8
+
+Fix For Slow Reads Using Built-In NI PCI-GPIB Support
+     A timing issue with ssppeecc's built-in support for the National Instruments
+     PCI-GPIB controller, where GPIB reads of large blocks of data (on the order
+     of 10,000 bytes or more, depending on the transfer rate) could take much
+     longer than necessary, has been fixed.
+
+April 2, 2012 - RELEASE 5.10.02-7
+
+More Controllers Allowed In Configuration
+     The maximum number of motor controller and timer/counter entries on the
+     DDevices screen of the configuration editor has been increased from 40 to
+     64.  In addition, a bug where the configuration editor could crash if there
+     were more than the allowed number of controllers in the ccoonnffiigg file has
+     been fixed.
+
+Fixed ddeeccooddee(()) Function
+     A bug, where the newly added ddeeccooddee(()) function did not allow assignment of
+     its return value when the return value was an associative array, has been
+     fixed.
+
+Updates For Micos MMC-100
+     A problem where ssppeecc would consider a move complete too early with the
+     newly added Micos MMC-100 support has been fixed.  In addition, a new
+     ""iinniittiiaalliizzee"" mmoottoorr__ppaarr(()) option is available to locate the limit and home
+     position of a stage.  See the _m_m_c_1_0_0 help file.
+
+Update For New Struck SIS1100ecmc Model
+     The hardware signature of Struck's new SIS1100ecmc 2G link PCIe-to-VME
+     adapter is now recognized by ssppeecc's driverless built-in support.
+
+Fixed ANC300 Support
+     A bug in the newly added support for the Attocube ANC300, where ssppeecc could
+     crash if a controller was configured but not connected, has been fixed.
+
+OMS Motor Controller Updates
+     ssppeecc will now allow up to ten channels per controller for the OMS MAXnet
+     controller in order to work with the new models.  Also, a bug, where the
+     ""iinniitt__sseeqquueennccee"" parsing did not recognize the BBDD command to configure
+     digital I/O direction, has been fixed.
+
+OMS Motor Multiplexing Fixed and Updated
+     The configuration updates in ssppeecc release 5.10.02-1 broke the old motor
+     multiplexing support in the OMS code.  The code been brought up to date and
+     is working again.  In addition, the support now allows a multiplexed
+     channel for each controller module.  Previously, only one multiplexed
+     channel was allowed among all the controllers.  With multiplexing, one OMS
+     channel can drive up to sixteen motors.  ssppeecc uses five digital output
+     lines on the OMS controller to control external hardware that switches the
+     motor driver power lines among the multiplexed motors.  See the new section
+     on multiplexing in the _o_m_s help file for details.
+
+March 14, 2012 - RELEASE 5.10.02-6
+
+Fix For Serial Support On LLiinnuuxx
+     Some kernel-level serial device drivers on LLiinnuuxx did not work with the
+     updated code in ssppeecc to set baud rates introduced in ssppeecc release
+     5.08.06-4.  In particular, problems have been seen with drivers for
+     Prolific PL2303 USB-to-serial adapters and for the Rayon Multiport PCI
+     cards.  This ssppeecc release should fix the issue.
+
+March 11, 2012 - RELEASE 5.10.02-5
+
+Support For Micos MMC-100 Motor Controller
+     This ssppeecc release includes preliminary support for the Micos MMC-100
+     Modular Motion Controller System.  See the _m_m_c_1_0_0 help file for
+     implementation details.
+
+Updates For OMS Support
+     Values for the standard optional motor parameters ""ddcc__iinntteeggrraattiioonn__lliimmiitt"",
+     ""ddcc__vveelloocc__ffeeeeddffoorrwwaarrdd"" and ""ddcc__aacccceell__ffeeeeddffoorrwwaarrdd"" will now set the KKUU, KKVV
+     and KKAA OMS parameters, respectively.  The non-standard optional motor
+     parameter ""ppiidd__ooffffsseett"" will program the KKOO OMS parameter.  A new
+     ""cclloosseedd__lloooopp"" mmoottoorr__ppaarr(()) non-standard optional parameter can
+     disable/enable closed-loop mode during a session or from the ccoonnffiigg file.
+     When using servo motors, the code will now query the encoder status during
+     moves to detect moves interrupted by a slip if slip detection is enabled.
+     For firmware versions greater than 1.30, ssppeecc now will send the new
+     commands for a number of deprecated commands.
+
+Fix For USB-4300 ""ggeett__bbiitt"" Command
+     An issue where the ""ggeett__bbiitt"" option to the ccoouunntteerr__ppaarr(()) function for the
+     Measurement Computing USB-4300 series timer/counters didn't return the
+     correct value has been fixed.
+
+Fix For Allowed GPIB Addresses
+     Previously, ssppeecc allowed GPIB device address 31 to be passed to the GPIB
+     controller support code.  The maximum valid address is 30, and ssppeecc now
+     respects that.
+
+Support For TANGO GPIB Server
+     ssppeecc supports release 1.0 of the TANGO GPIB device server.  All of the
+     existing GPIB support, including the user-level commands such as ggppiibb__ggeett(())
+     and ggppiibb__ppuutt(()), along with the built-in support for motor controllers,
+     counter/timers and other devices that use GPIB should work if the ""TTAANNGGOO
+     GGPPIIBB sseerrvveerr"" interface is selected in the hardware configuration editor.
+
+New TANGO Options To Obtain Attribute Information
+     Additional options are available to the ttaannggoo__ggeett(()) function to display or
+     return all available descriptive attribute properties.  See the _t_a_n_g_o help
+     file for details.
+
+Fix For NI 6601/2 Unavailable Channel Access
+     A bug, where ssppeecc could crash if an unavailable National Instruments 6601
+     or 6602 counter channel was accessed with ccoouunntteerr__ppaarr(()), has been fixed.
+
+January 5, 2012 - RELEASE 5.10.02-4
+
+Fix For Linked Configurations
+     A issue when using linked ccoonnffiigg files that was introduced in ssppeecc release
+     5.10.01-9 where in some configurations ssppeecc would quit immediately after
+     reading the hardware configuration with a message of the sort "user():  Not
+     configured for motor ..."  has been fixed.
+
+December 28, 2011 - RELEASE 5.10.02-3
+
+Support For NI GPIB-ENET/1000
+     ssppeecc will now work with the National Instruments GPIB-ENET/1000 using
+     ssppeecc's built-in support.  The programming for the GPIB-ENET/1000 is a bit
+     different than that for the GPIB-ENET/100 and the GPIB-ENET models, which
+     continue to be supported.
+
+Restored Compatibility With NI LLiinnuuxx Drivers
+     ssppeecc can now be linked with release 2.9.0 of the National Instruments GPIB
+     drivers on LLiinnuuxx, although use has not been well tested and isn't
+     recommended.  Use of ssppeecc's built-in GPIB support is preferred.  See the
+     _n_i_g_p_i_b help file for details.
+
+Update For Newport SMC100 Controller
+     A too short serial timeout for the Newport SMC100 controller has been
+     fixed.
+
+Update For Newport NSC200 Controller
+     Checks on maximum values for the velocity and acceleration when using the
+     Newport NSC200 motor controller have been removed, as the maximum values
+     built into the software were too low for some actuator models.  ssppeecc will
+     now program the values requested.  Users should make sure the configured
+     values do not exceed the specifications for the particular actuator model.
+
+Preliminary Support For the Attocube ANC300
+     This ssppeecc release contains preliminary support for the Attocube ANC300
+     controller.  The current release is only for controllers with one active
+     channel.  Updated support will be provided when the ANC300 firmware is
+     updated to accommodate easier programming of multi-channel configurations.
+
+Update For Attocube ANC350 Support
+     ssppeecc now recognizes the ""ttaarrggeettggrroouunndd"" parameter for the Attocube ANC350
+     positioner.
+
+Trinamic Check-For-Reset Feature Updated
+     The check-for-reset feature for Trinamic motor controllers, implemented in
+     ssppeecc release 5.09.01-1, will now also restore motor position when restoring
+     parameters.
+
+TACO Serial Driver Update
+     Some error messages associated with the TACO serial device that had been
+     suppressed are now shown.
+
+Update For Miscellaneous State File Data
+     Some internal improvements have been made for the handling of certain
+     miscellaneous data that is saved in the user state file.  Such data
+     includes ssppeecc__ppaarr(()) parameters and some persistent hardware parameters.  In
+     most cases, the data will now be properly restored if saved by one computer
+     and read by another of different endianess, such as an Intel PC (little
+     endian) and a Sun SPARC station (big endian).
+
+New Option For sshhooww__ssttaattee Command
+     The sshhooww__ssttaattee command now includes a new ++//--xx option to show or not show
+     miscellaneous values, which include the ssppeecc__ppaarr(()) parameters and some
+     persistent hardware parameters.  Only the values are displayed, not the
+     parameter descriptions.
+
+November 8, 2011 - RELEASE 5.10.02-2
+
+Support For SmarAct Controller
+     ssppeecc now supports the SmarAct GmbH Modular Control System for micro- and
+     nanopositioning.  The support is for the serial interface.  See the new
+     _s_m_a_r_a_c_t help file for details.
+
+October 25, 2011 - RELEASE 5.10.02-1
+
+New Option to Disable Controllers In Configuration Editor
+     A new option is available to disable the configuration of motor and counter
+     controllers, interface controllers, serial devices, MCA-type devices and
+     image-type devices from the eeddccoonnff configuration editor without removing
+     the configuration from the ccoonnffiigg file.  The YES/NO column of the
+     configuration for each of these items now has an additional OFF option,
+     which can be selected by typing an OO or an oo.  When ""ooffff"", the
+     configuration information will remain in the ccoonnffiigg file, but ssppeecc will
+     treat the controller or device as disabled and not access it.
+
+Macro Hardware MCA Update For Returned Count
+     The macro-hardware MCA implementation for the commands ""rreeaadd"" and ""wwrriittee""
+     now accepts a return value for the number of points actually read or
+     written.  The value will determine how many data elements will be
+     transferred to the spec data array when mmccaa__ggeett(()) is called with an array
+     argument and will be the return value for the mmccaa__ggeett(()) and mmccaa__ppuutt(())
+     functions when called with group/element arguments.  See the _m_a_c___h_d_w help
+     file for additional details.
+
+October 21, 2011 - RELEASE 5.10.01-14
+
+Fix For Number Of Generic Serial Devices
+     The eeddccoonnff hardware configuration editor allows 21 generic serial devices
+     to be configured, but prior to this release, ssppeecc only allowed 20 to be
+     opened.
+
+October 18, 2011 - RELEASE 5.10.01-13
+
+Fix For Tsuji Counter Update
+     A problem with the previous update for the Tsuji counter/timers that
+     prevented proper operation of the devices on some platforms has been fixed.
+
+October 9, 2011 - RELEASE 5.10.01-12
+
+Fix For cchhgg__ddiiaallss(()) Crash Bug
+     An old bug, where ssppeecc could crash if cchhgg__ddiiaallss(()) was called to perform a
+     limit search using an out-of-range motor number, has been fixed.
+
+Updated Support For Tsuji Counters
+     The built-in support for the various models of the Tsuji counter/timers has
+     been updated.  A reset command is no longer sent on hardware
+     initialization.  Settings for certain internal parameters, such as maximum
+     allowed preset and preset resolution, are now correctly assigned based on
+     the capabilities of the specific model detected during the presence test.
+
+Attocube ANC350 Support Now Includes Limit Searches
+     Limit searches using the ""lliimm++"" and ""lliimm--"" options to cchhgg__ddiiaall(()) are now
+     available for the Attocube ANC350 controller.  See the _a_t_t_o_c_u_b_e help file.
+
+Support For Radicon SCSD-3C
+     This ssppeecc release includes support for the Radicon SCSD-3C X-ray
+     scintillation detector with integrated timer/counter.  See the _r_a_d_i_c_o_n help
+     file for details.
+
+October 1, 2011 - RELEASE 5.10.01-11
+
+Fix For USB Support On openSUSE 10.0 and 10.1
+     The USB devices supported by ssppeecc should now work with the old openSUSE
+     10.0 and 10.1 LLiinnuuxx releases.
+
+Preliminary Support For Physik Instrumente E-516 Motor Controller
+     This ssppeecc release includes initial support for the Physik Instrumente E-512
+     controller over serial and GPIB interfaces.  Contact CSS for implementation
+     details.
+
+September 26, 2011 - RELEASE 5.10.01-10
+
+Fix Of Bug In Previous Release That Leads To an Early Exit
+     This minor update fixes a bug that was put into the previous release and
+     that would cause ssppeecc to terminate during initial hardware configuration if
+     there was a position discrepancy that was resolved in favor of the motor
+     controller.
+
+September 23, 2011 - RELEASE 5.10.01-9
+
+Fix For eevvaall(()) Return Of Associative Array
+     The stricter validation for assignment of associative arrays implemented in
+     ssppeecc release 5.09.2-2 disabled the ability to return associative arrays
+     from the eevvaall(()) function, which also broke the behavior when using the
+     rreemmoottee__eevvaall(()) function with a ssppeecc server.  That problem has been fixed.
+
+Improvements For "Commanded" Position, Reversion Of mmvvrr Macros
+     Several instances where the value for the last-commanded position of a
+     motor was incorrect have been fixed.  (The last-commanded position is
+     available with the new mmoovvee__iinnffoo(()) function and a new option to
+     rreeaadd__mmoottoorrss(()), both introduced in ssppeecc release 5.10.01-1.  The
+     last-commanded position saves the requested target position to the fully
+     specified resolution, while the usual motor position is rounded to the
+     motor step size.  Using the last-commanded position to calculate target
+     positions in relative moves allows one to perform successive relative moves
+     in increments less than the motor resolution.)  The last-commanded position
+     will now be set to the current motor position on a fresh start (with the --ff
+     flag), when leaving simulate mode, and after correcting a position
+     discrepancy where the software position or user offset was adjusted to
+     match the hardware.  Although the updated mmvvrr and uummvvrr included in release
+     5.10.01-1 should work fine for most users most of the time, the previous
+     definitions have been restored for the time being while CSS works to make
+     sure the last-commanded position feature is as robust as possible.  The
+     definitions that use the last-commanded position are still available as
+     mmvvrr22 and uummvvrr22.
+
+September 15, 2011 - RELEASE 5.10.01-8
+
+String Values Now Available For eeppiiccss__ggeett(()) Character Arrays
+     When reading arrays of DDBBFF__CCHHAARR with eeppiiccss__ggeett(()), if the optional argument
+     that specifies the desired type of the return value is specified as
+     ""ssttrriinngg"", ssppeecc will now return an ordinary string.  Previously, the
+     function would return a single-row string data array.  See the _e_p_i_c_s help
+     file.
+
+September 10, 2011 - RELEASE 5.10.01-7
+
+Fix For Canberra Lynx MCA Issues After ^^CC
+     A problem with the Canberra Lynx MCA, where socket communications could
+     become disrupted if a transaction was interrupted by a a keyboard ^^CC, has
+     been fixed.
+
+Fix For State File Locking On Mac OS X
+     Normally, ssppeecc prevents the same user from starting multiple instances of
+     the same ssppeecc version.  A problem on Mac OS X, where the locking mechanism
+     didn't always work correctly with more than ten terminal windows open, has
+     been fixed.
+
+Fix For GPIB Sharing With Built-in NI GPIB Support
+     A problem where the sharing feature for GPIB controllers wasn't working
+     with the built-in support for some of the National Instruments GPIB models
+     has been fixed.
+
+September 4, 2011 - RELEASE 5.10.01-6
+
+Prompt Now Indicates Simulate Mode
+     The ssppeecc prompt will now contain text to indicate when simulate mode is
+     active, as in 112233..FFOOUURRCC__ssiimm>> .
+
+MMuu Pseudomotor Available For Six-Circle Geometry
+     The six-circle geometry, ssiixxcc, now recognizes a configuration where the mmuu
+     rotation involves two real motors, mmuuTT and mmuuRR.  See the _s_i_x_c help file.
+
+Fix For Recently Created Pseudomotor Issue
+     An oversight in ssppeecc release 5.10.01-3 that removed the ability to use
+     mmoottoorr__ppaarr(()) to retrieve arbitrarily configured unit and channel numbers for
+     motors with the NNOONNEE controller type has been remedied.
+
+Fix For EPICS Debugging Messages
+     A bug, where the values printed at debug level 128 for the eeppiiccss__ppuutt(())
+     command were incorrect for non DDBBFF__DDOOUUBBLLEE number-valued process variables,
+     has been fixed.  The bug only affected the debugging output, not the values
+     sent through the EPICS channel access calls.
+
+Update For Attocube Controller
+     The Attocube ANC350 controller support has been updated to work better with
+     the firmware problem where the controller can take hundreds of milliseconds
+     to report a motor is busy after ssppeecc sends a move command.
+
+Fix For Number Of Channels For Huber SMC 9300 Controller
+     A bug, introduced in ssppeecc release 5.09.01-3 and associated with the update
+     to the Huber SMC 9300 support for simultaneous motor starts, where the
+     highest numbered motor channel wouldn't move unless the number of motor
+     channels configured was one more than needed, has been fixed.
+
+August 12, 2011 - RELEASE 5.10.01-5
+
+Fix For Motor Sync Issue With ssppeecc Client
+     A bug, where a ^^CC on a ssppeecc client could be ignored during a move of a
+     motor on a ssppeecc server, has been fixed.  The issue only occurred if the
+     server had sent the client a ""ssyynncc__cchheecckk"" message that initiated a motor
+     discrepancy dialog on the client.  (The bug was related to improper
+     settings of the keyboard-input modes after the discrepancy dialog.)
+
+Fix For Setting Certain MCA Parameters On Unresponsive Unit
+     The mmccaa__ppaarr(()) commands ""aauuttoo__cclleeaarr"", ""aauuttoo__rruunn"" and ""ssoofftt__pprreesseett"" can now
+     be used to set those modes on MCA devices that are configured, but not
+     responsive.  In particular, for the EPICS MCA (which isn't flagged as
+     responsive until all the registered connection events arrive), the
+     mmccaa__ppaarr(()) commands can now be used immediately after reading the ccoonnffiigg
+     file.  For example, the commands can be included in the definition of
+     ccoonnffiigg__mmaacc, which will generally execute before the EPICS MCA is fully
+     connected.
+
+Fix For EPICS MCA Polling During wwaaiitt(())
+     A bug, where EPICS events were not processed during a call of wwaaiitt(()) or
+     wwaaiitt((00)) if the only EPICS device that was busy was the EPICS MCA, has been
+     fixed.
+
+Fix For TANGO Commands
+     Implementation of data-array type conversions for ttaannggoo__ppuutt(()) input
+     arguments has been completed.  Previously, if the type of the data array
+     passed to ttaannggoo__ppuutt(()) didn't match TANGO's expected data type, incorrect
+     data could be sent.  Also, a bug with the ttaannggoo__iioo(()) and ttaannggoo__ppuutt(())
+     functions with 64-bit ssppeecc builds, where incorrect values were sent when
+     converting elements of an input associative array to TANGO long (32-bit)
+     data types, has been fixed.
+
+sseerr__ppaarr(()) ""qquueeuuee"" Implemented For TACO Serial Devices
+     The sseerr__ppaarr(()) ""qquueeuuee"" option is now implemented for the TACO serial device
+     server.
+
+July 1, 2011 - RELEASE 5.10.01-4
+
+Fix For OMS Position Maintenance With Negative Encoder Ratio
+     A problem, where the Oregon Micro Systems position-maintenance mode would
+     not work if the encoder-step-size parameter had the opposite sign of the
+     standard step-size parameter, has been fixed.
+
+June 22, 2011 - RELEASE 5.10.01-3
+
+Fix For Calculational Pseudomotors In Server Mode
+     A problem, where ssppeecc would get stuck waiting for a move to finish in the
+     seldom encountered configuration of running in server mode with a
+     calculational pseudomotor (using the macro hardware feature) having an
+     associated real motor configured as controller type NNOONNEE, has been fixed.
+
+June 20, 2011 - RELEASE 5.10.01-2
+
+Fix For GPIB-ENET Issues On ^^CC
+     An issue with some built-in hardware controlled over GPIB using the
+     National Instruments GPIB-ENET interface, where a ^^CC interrupt would lead
+     to a breakdown in communications with the GPIB-ENET, has been fixed.
+
+June 6, 2011 - RELEASE 5.10.01-1
+
+New mmoovvee__iinnffoo(()) Function
+     A new mmoovvee__iinnffoo(()) function returns information about what would happen on a
+     subsequent mmoovvee__aallll command given the current motor positions and current
+     values in the AA[[]] array.  The information returned can include a list of
+     motors that would be moved.  See the new _m_o_v_e___i_n_f_o help page for details.
+
+New "Commanded" Motor Position Value Available With rreeaadd__mmoottoorrss(())
+     ssppeecc now retains the value of the commanded motor position passed to the
+     move code via the motor position AA[[]] array.  The value is retained to the
+     full precision specified, which can be higher precision than the normal
+     motor positions, which are rounded to the step size of the motor.  A new
+     option to the built-in rreeaadd__mmoottoorrss(()) function will return this commanded
+     position.  If called as rreeaadd__mmoottoorrss((00xx1100)), the commanded positions for all
+     motors will be placed in the AA[[]] array.  If called as rreeaadd__mmoottoorrss((00xx1100,,
+     mmnnee)), the function will return the commanded position for motor mmnnee,
+     leaving the AA[[]] array unchanged.  The commanded position is set to the
+     current (rounded) position on start up, after hardware reconfiguration, at
+     the end of a homing operation, after hitting a limit, with a cchhgg__ooffffsseett(())
+     command (called by the sseett macro) and when a move is aborted by ^^CC or an
+     emergency stop.
+
+Revised __mmvvrr Macro Uses Commanded Position
+     The standard __mmvvrr macro (used by mmvvrr and uummvvrr) has been updated to use the
+     new commanded-position return value of rreeaadd__mmoottoorrss(()) to calculate the
+     target position of the relative move.
+
+New eennccooddee(()) and ddeeccooddee(()) Functions
+     New built-in functions eennccooddee(()) and ddeeccooddee(()) are available to convert
+     between ssppeecc data types and data-serialization formats to aid in exchanging
+     data with other processes.  See the new _e_n_c_o_d_e help file for details.
+
+New Macro Hardware MCA Functionality
+     The macro hardware feature now includes support for MCA devices, in
+     addition to the existing support for motors and counter/timers.  See the
+     _m_a_c___h_d_w help file for details.
+
+Restored Auto-Raise Functionality to X Window Plots
+     The focus-stealing-prevention functionality that has appeared in window
+     managers over the last years broke the auto-raise feature of ssppeecc's X
+     Window plots.  With the auto-raise feature enabled, hidden or partially
+     hidden plot windows rise to the top when ssppeecc updates the plot.  This
+     release restores the auto-raise functionality.  See ssppeecc's _x_1_1 help file
+     for details on setting plot window options.
+
+Fix For Early Read Of Counters In Server Mode
+     In server mode, while waiting for command input, ssppeecc will periodically
+     issue calls to read the active scalers and cache the values in order to be
+     able to respond to client requests for scaler values without needing to
+     access the hardware.  Previously, as part of this procedure, the counters
+     would be read immediately after starting the time count interval.  Now,
+     that first read won't occur immediately.  The change will be noticed
+     particularly in the sequence of calls to macro counter __ccmmdd(()) functions.
+
+Enhanced Support For 2D Associative Arrays With vvaarr iinn Syntax
+     The syntax related to querying 2D associative arrays with a known second
+     element, as in
+
+         ffoorr ((vvaarr iinn aarrrr[[]][[kkeeyy]])) pprriinntt aarrrr[[vvaarr]][[kkeeyy]]
+
+     and
+
+         iiff ((vvaarr iinn aarrrr[[]][[kkeeyy]])) ......
+
+     is now supported.  Previously, such usage produced a syntax error.
+
+Support For DDEEVV__EENNCCOODDEEDD ttaannggoo__iioo(()) Type
+     This ssppeecc release supports the current implementation of the new
+     DDEEVV__EENNCCOODDEEDD data type for the ttaannggoo__iioo(()) function as used at ESRF and
+     elsewhere.
+
+Fix For Crash When Using Empty Macro Functions
+     A segmentation fault that sometimes occurred when using macro functions
+     defined as an empty string (no curly brackets) in particular contexts has
+     been fixed.
+
+Fix For TACO MCA Access Of Disabled Units
+     A bug, where ssppeecc would access the device state on a call of disabled (via
+     the ""ddiissaabblleedd"" key for the mmccaa__ppaarr(()) function) TACO MCA device-server
+     units, has been fixed.
+
+Fix For Mistaken "Duplicate Channel" Error
+     An issue with a handful of hardware controllers (EPICS motor record, ESRF
+     VCT6, JVL SM120B, Munich BR-tronik IPS, Newport Agilis and Sigmatech
+     FC-501A), where a ""dduupplliiccaattee cchhaannnneell"" error message would sometimes be
+     erroneously displayed during hardware configuration when a channel number
+     was the same as the configured number of channels, has been fixed.  The
+     issue with the VCT6 was introduced with the code update in ssppeecc release
+     5.09.02-1.  The issue with the other controllers dates generally from the
+     introduction of the particular controller support to ssppeecc.
+

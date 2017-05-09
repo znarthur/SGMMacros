@@ -1,0 +1,18 @@
+wa                                    macro                                   wa
+
+NAME
+     wwaa - list all motor positions
+
+SYNOPSIS
+
+     wwaa
+
+DESCRIPTION
+
+     The wwaa macro lists the positions of all configured motors in both uusseerr and
+     ddiiaall units.
+
+SEE ALSO
+
+     _m_o_t_o_r_s _w_h _w_m
+

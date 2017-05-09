@@ -1,0 +1,672 @@
+#
+# mca.mac
+# 
+# This is the base macro file for the SGM MCA macros.
+# All macros here are based on SPEC's mca support using
+# the mca_* instructions.  Each function checks for a 
+# _mca_type_*name* function that can be used to override
+# the standard call for derives that don't support the
+# standard commands.  
+#
+# MCA device specific macros are placed in command 
+# files called from mcasetup.  These files are called
+# "mca_*name*.cmd" where *name* is defined in the 
+# mcasetup macro.
+#
+# Each device SHOULD provide a _mca_type_setup macro
+# that setups the hardware.  In particular, the MCA 
+# channels needs to be set to the proper value.
+#
+#
+# $Id: mca.mac,v 1.1 2002/07/10 20:39:41 sorensen Exp $
+#
+# Edited 11/05 by AW to add format (MCA_FMT), header line...
+#
+# Edited 03/2016 by TZR to support four amptek detectors.
+
+# DEPENDENCY INFO
+#   PROVIDES: _FILE_MCA_MAC_
+#   NEEDS:
+#
+#   Can use setup.mac if available
+#
+
+global _FILE_MCA_MAC_
+_FILE_MCA_MAC_ = 1
+
+
+
+#
+# MACRO DEFINITIONS
+#
+
+#
+# SETUP/UNSETUP macros
+#   (call device specific hooks)
+#
+
+#
+# mcasetup [%type%] [%chan%] [%options% ...]
+#   Setup MCA for use. The %type% selects which MCA
+#   you are using.  The number of channels used is
+#   selected by %chan%.  If not given on the command 
+#   line, the user is prompted for type.  The macro 
+#   loads command file "mca_*type*.cmd" and setups a
+#   call to _mca_type_setup macro on prompt passing 
+#   all the parameters.
+#
+#   NOTE: The arrays MCA_DATA and MCA_RAW are defined 
+#   as ulong.  If MCA uses a different format you will
+#   need to change the type in _mca_type_setup
+#
+def mcasetup '{
+	if(MCA_SETUP == 1) {
+		mcaunsetup
+	}
+
+	global MCA_SETUP MCA_TYPE MCA_NAME MCA_STRG MCA1_CHAN MCA2_CHAN MCA3_CHAN MCA4_CHAN  MCA_SCAN
+	global MCA1_RAW MCA1_DATA MCA2_RAW MCA2_DATA MCA3_RAW MCA3_DATA MCA4_RAW MCA4_DATA 
+	# AW adds 18 Nov 2005 MCA_FMT
+	global MCA_FMT MCA_FILENAME MCA_CONT
+	global old_time new_time delta_time
+
+
+	MCA_SETUP = 0
+	MCA_TYPE = $1
+	MCA_NAME = "unknown"
+	MCA_STRG = "Unknown"
+	MCA_CHAN = $2
+	MCA_SCAN = 0
+	MCA_FMT = "%s_%d.mca"
+
+	MCA_CHAN = 256
+
+	
+	MCA1_NAME = "SDD1"
+	MCA1_STRG = "Amptek 1"
+	MCA1_NAME = "SDD2"
+	MCA1_STRG = "Amptek 2"
+	MCA1_NAME = "SDD3"
+	MCA1_STRG = "Amptek 3"
+	MCA1_NAME = "SDD4"
+	MCA1_STRG = "Amptek 4"
+
+	MCA1_CHAN = MCA_CHAN
+	MCA2_CHAN = MCA_CHAN
+	MCA3_CHAN = MCA_CHAN
+	MCA4_CHAN = MCA_CHAN
+	
+	ulong array MCA1_RAW[MCA1_CHAN]
+	ulong array MCA1_DATA[MCA1_CHAN]
+	ulong array MCA1_OLD[MCA1_CHAN]
+	ulong array MCA2_RAW[MCA2_CHAN]
+	ulong array MCA2_DATA[MCA2_CHAN]
+	ulong array MCA2_OLD[MCA2_CHAN]
+	ulong array MCA3_RAW[MCA3_CHAN]
+	ulong array MCA3_DATA[MCA3_CHAN]
+	ulong array MCA3_OLD[MCA3_CHAN]
+	ulong array MCA4_RAW[MCA4_CHAN]
+	ulong array MCA4_DATA[MCA4_CHAN]
+	ulong array MCA4_OLD[MCA4_CHAN]
+
+	array_op("fill", MCA1_DATA, 0)
+	array_op("fill", MCA2_DATA, 0)
+	array_op("fill", MCA3_DATA, 0)
+	array_op("fill", MCA4_DATA, 0)
+
+#	Uncomment this line to run a setup macro for each detector	
+#	eval(sprintf("udo mca_%s.cmd", MCA_NAME))
+
+	cdef("prompt_mac", "mcasetup_end $*;", "_mca.mac_", 0x10)
+}'
+
+#
+# mcasetup_end [%mcasetup's args%]
+#   Bottom half of macsetup macro.  This is needed
+#   because reading device specific command file 
+#   is not done until the mcasetup macro exits.
+#
+def mcasetup_end '{
+#	if(whatis("_mca_type_setup") & 0x02)
+#		_mca_type_setup("$*")
+
+	MCA_SETUP = 1
+
+#	if(_FILE_SETUP_MAC_ == 1)
+#		setup_tail("mca")
+
+	printf("\n%s MCA unit successfully setup\n", MCA_STRG)
+
+	cdef("prompt_mac", "", "_mca.mac_", "delete")
+}'
+
+#
+# mcaunsetup
+#   Turns off any enable MCA modes and undefines all
+#   associated global variables.  Calls _mca_type_unsetup 
+#   for type specific unsetup  
+#
+def mcaunsetup '{
+	# turn things off
+
+	if(whatis("_mca_type_unsetup") & 0x2)
+		_mca_type_unsetup
+
+	unglobal MCA_SETUP MCA_TYPE MCA_NAME MCA_STRG MCA_CHAN MCA_SCAN
+	unglobal MCA_RAW MCA_DATA
+}'
+
+
+#
+# ACQUIRE/READ macros
+#   (can be overridden)
+#
+
+#
+# mcacq
+#   Start accumulating a spectrum. 
+#
+# Override: _mca_type_acq
+#
+def mcacq '{
+
+	mca_spar(0,"run")
+	mca_spar(1,"run")
+	mca_spar(2,"run")
+	mca_spar(3,"run")
+	new_time = time()
+}'
+
+#
+# mcaoff
+#   Stop accumulating a spectrum.
+#
+# Override: _mca_type_off
+#
+def mcaoff '{
+		
+	mca_spar(0, "halt")
+	mca_spar(1, "halt")
+	mca_spar(2, "halt")
+	mca_spar(3, "halt")
+	
+}'
+
+def mca_single '{
+
+	MCA_CONT = 0
+
+	mca_spar(0, "halt")
+        mca_spar(1, "halt")
+        mca_spar(2, "halt")
+        mca_spar(3, "halt")
+	sleep(0.1)
+
+	mca_spar(0, "auto_run", 1)
+	mca_spar(1, "auto_run", 1)
+	mca_spar(2, "auto_run", 1)
+	mca_spar(3, "auto_run", 1)
+	sleep(0.1)
+
+	mca_spar(0, "auto_clear", 1)
+	mca_spar(1, "auto_clear", 1)
+	mca_spar(2, "auto_clear", 1)
+	mca_spar(3, "auto_clear", 1)
+
+	mca_spar(0, "soft_preset", 1)
+	mca_spar(1, "soft_preset", 1)
+	mca_spar(2, "soft_preset", 1)
+	mca_spar(3, "soft_preset", 1)
+	sleep(0.1)
+
+	mca_spar(0, "clear")
+        mca_spar(1, "clear")
+        mca_spar(2, "clear")
+        mca_spar(3, "clear")
+	sleep(0.1)
+
+	mca_spar(0, "preset", COUNT_TIME)
+	mca_spar(1, "preset", COUNT_TIME)
+	mca_spar(2, "preset", COUNT_TIME)
+	mca_spar(3, "preset", COUNT_TIME)
+
+	mcacq
+	mcaread
+}'
+
+def mca_cont '{
+
+	MCA_CONT = 1
+	
+	mca_spar(0, "halt")
+        mca_spar(1, "halt")
+        mca_spar(2, "halt")
+        mca_spar(3, "halt")
+	sleep(0.1)
+
+        mca_spar(0, "auto_run", 0)
+        mca_spar(1, "auto_run", 0)
+        mca_spar(2, "auto_run", 0)
+        mca_spar(3, "auto_run", 0)
+	sleep(0.1)
+
+        mca_spar(0, "soft_preset", 0)
+        mca_spar(1, "soft_preset", 0)
+        mca_spar(2, "soft_preset", 0)
+        mca_spar(3, "soft_preset", 0)
+	sleep(0.1)
+
+	mca_spar(0, "preset", 999999)
+	mca_spar(1, "preset", 999999)
+	mca_spar(2, "preset", 999999)
+	mca_spar(3, "preset", 999999)
+	sleep(0.1)
+
+	mcaclr
+	mcacq
+}'
+
+#
+# mcaclr
+#   Clear the accumulated spectrum.
+#
+# Override: _mca_type_clr
+#
+def mcaclr '{
+
+	mca_spar(0, "clear")
+	mca_spar(1, "clear")
+	mca_spar(2, "clear")
+	mca_spar(3, "clear")
+
+	array_op("fill", MCA1_DATA, 0)
+	array_op("fill", MCA2_DATA, 0)
+	array_op("fill", MCA3_DATA, 0)
+	array_op("fill", MCA4_DATA, 0)
+}'
+
+#
+# mcaread
+#   Read the accumulated spectrum from mca.  It is 
+#   stored in array MCA_DATA.  The raw spectrum is
+#   stored in array MCA_RAW.  Any _mca_type_read
+#   function needs to fill MCA_RAW.
+#
+# Override: _mca_type_read
+#
+def mcaread '{
+	local i 
+	global delta_time
+
+	if(MCA_CONT) {
+	
+		array_copy(MCA1_OLD, MCA1_RAW)
+		array_copy(MCA2_OLD, MCA2_RAW)
+		array_copy(MCA3_OLD, MCA3_RAW)
+		array_copy(MCA4_OLD, MCA4_RAW)
+		old_time = new_time
+#	for(i = 0; i < MCA1_CHAN; i++) {
+#                MCA1_OLD[i] = MCA1_RAW[i]
+#                MCA2_OLD[i] = MCA2_RAW[i]
+#                MCA3_OLD[i] = MCA3_RAW[i]
+#                MCA4_OLD[i] = MCA4_RAW[i]
+#		old_time = new_time
+#        }
+
+	mca_sget(0, MCA1_RAW, 0, (MCA1_CHAN-1))
+	mca_sget(1, MCA2_RAW, 0, (MCA2_CHAN-1))
+	mca_sget(2, MCA3_RAW, 0, (MCA3_CHAN-1))
+	mca_sget(3, MCA4_RAW, 0, (MCA4_CHAN-1))
+	new_time = time()
+
+	delta_time = new_time - old_time
+#	print delta_time
+	for(i = 0; i < MCA1_CHAN; i++) {
+		MCA1_DATA[i] = (MCA1_RAW[i] - MCA1_OLD[i])/delta_time
+		MCA2_DATA[i] = (MCA2_RAW[i] - MCA2_OLD[i])/delta_time
+		MCA3_DATA[i] = (MCA3_RAW[i] - MCA3_OLD[i])/delta_time
+		MCA4_DATA[i] = (MCA4_RAW[i] - MCA4_OLD[i])/delta_time
+	}
+	}
+	else
+	{
+	mca_sget(0, MCA1_DATA, 0, (MCA1_CHAN-1))
+        mca_sget(1, MCA2_DATA, 0, (MCA2_CHAN-1))
+        mca_sget(2, MCA3_DATA, 0, (MCA3_CHAN-1))
+        mca_sget(3, MCA4_DATA, 0, (MCA4_CHAN-1))
+	}
+
+	#mca1disp
+}'
+
+def socketData_on '{
+
+	cdef("user_scan_loop", "sendData", "_socketdata.output_")
+	
+}'
+
+def socketData_off '{
+
+	cdef("", "", "_socketdata.output_", "delete")
+
+}'
+
+global HOSTPORT
+HOSTPORT = "OPI1611-408:8889"
+
+def sendData '{
+
+	sock_par(HOSTPORT, "connect_udp")
+	sock_put(HOSTPORT, MCA1_DATA)
+	sock_par(HOSTPORT, "close")
+	sock_par(HOSTPORT, "connect_udp")
+	sock_put(HOSTPORT, MCA2_DATA)
+	sock_par(HOSTPORT, "close")
+	sock_par(HOSTPORT, "connect_udp")
+	sock_put(HOSTPORT, MCA3_DATA)
+	sock_par(HOSTPORT, "close")
+	sock_par(HOSTPORT, "connect_udp")
+	sock_put(HOSTPORT, MCA4_DATA)
+	sock_par(HOSTPORT, "close")
+	sock_par(HOSTPORT, "connect_udp")
+	sock_put(HOSTPORT,  motor_shm[HDF5_COUNT-1][])
+	sock_par(HOSTPORT, "close")
+	sock_par(HOSTPORT, "connect_udp")
+	sock_put(HOSTPORT,  counter_shm[HDF5_COUNT-1][])
+	sock_par(HOSTPORT, "close")
+}'
+
+
+#
+# DISPLAY AND DUMP macros
+#
+
+#
+# mcadisp [%min-chan% %max-chan% %y-max%] 
+#   Displays the MCA spectrum in MCA_DATA.  The data is
+#   plotted for %min-chan% through %max-chan% from 0 to
+#   %y-max%.  If no parameters are given then the plot
+#   auto-scales.
+def mca1disp '{
+	local xmin xmax ymax
+
+	plot_cntl("filter5")
+	plot_cntl("-ebars -dots lines")
+	plot_cntl("open")
+	plot_cntl("erase")
+	plot_cntl("colors")
+#	plot_cntl("geometry=1024x768-0+10")
+
+	xmin = ($1 !=0) ? $1 : "1"
+	xmax = ($2 !=0) ? $2 : (MCA1_CHAN - 1)
+
+	plot_range(xmin, xmax, 0, ($3 !=0) ? $3 : "auto")
+
+	plot_cntl("mca")
+	plot_cntl("colors=8:8:9:1:2")
+	array_plot(MCA1_DATA[xmin:xmax])
+	plot_cntl("addline")
+	plot_cntl("colors=8:8:9:1:3")
+	array_plot(MCA2_DATA[xmin:xmax])
+	plot_cntl("addline")
+	plot_cntl("colors=8:8:9:1:4")
+	array_plot(MCA3_DATA[xmin:xmax])
+	plot_cntl("addline")
+	plot_cntl("colors=8:8:9:1:6")
+	array_plot(MCA4_DATA[xmin:xmax])
+	
+
+	plot_cntl("colors=8:8:9:9:9")
+	plot_move(0, 2, "Counts")
+	plot_move(0, -1, "Channel")
+	plot_cntl("colors=8:8:2:9:9")
+	plot_move(-50, 2, "SDD1")
+	plot_cntl("colors=8:8:3:9:9")
+	plot_move(-45, 2, "SDD2")
+	plot_cntl("colors=8:8:4:9:9")
+	plot_move(-40, 2, "SDD3")
+	plot_cntl("colors=8:8:6:9:9")
+	plot_move(-35, 2, "SDD4")
+
+
+#	plot_move(-51, 0, sprintf("Peak at %.5g is %.5g. COM at %.5g", \
+#	  array_op("x_at_max",MCA1_RAW[xmin:xmax][0],MCA1_RAW[xmin:xmax][1]),\
+#	  array_op("max", MCA1_RAW[xmin:xmax][1]), \
+#	  array_op("com", MCA1_RAW[xmin:xmax][0], MCA1_RAW[xmin:xmax][1])))
+#	plot_move(-51, 1, sprintf("FWHM is %.5g at %.5g.", \
+#	  array_op("fwhm", MCA1_RAW[xmin:xmax][0], MCA1_RAW[xmin:xmax][1]),\
+#	  array_op("cfwhm", MCA1_RAW[xmin:xmax][0], MCA1_RAW[xmin:xmax][1])))
+
+	plot_cntl("filter1")
+}'
+
+
+#
+# mcad [%filename%]
+#   Dumps the MCA spectrum to a file in the form of a
+#   SPEC scan.
+#
+def mcad '{
+	local i j str
+
+	dumpfile = "$1"
+
+	if($# != 1)
+		dumpfile = getval( "Dump file", dumpfile)
+
+	if(file_info(dumpfile, "-r")) {
+		if(!yesno( "\nFile already exists!  Overwrite it", 0))
+			exit
+		else
+			unix( sprintf( "rm -f %s", dumpfile))
+	}
+
+	fprintf(dumpfile, "#F %s\n", dumpfile)
+	fprintf(dumpfile, "#E %d\n", EPOCH)
+	fprintf(dumpfile, "#D %s\n", date())
+	fprintf(dumpfile, "#C %s  User = %s\n", TITLE, USER)
+	on(dumpfile); offt
+	for(i = 0; i < MOTORS; i += 8) {
+		printf("#O%d ", i/8)
+		s = ""
+		for(j = i; (j < i+8) && (j < MOTORS); j++) {
+			if(motor_name(mA[j]) != "unused")
+				s = s sprintf("%.8s  ", motor_name(mA[j]))
+		}
+		print s
+	}
+
+	HEADING = "Dump of MCA data"
+	printf("\n#S1 %s\n#D %s\n",HEADING,DATE)
+	_head_par G 0
+	_head_par U 1
+	_head_par M 2
+	printf("#Q %s\n", _hkl_val)
+	waitall; get_angles
+	for(i = 0; i < MOTORS; i += 8) {
+		printf("#P%d ", i/8)
+		s = ""
+		for(j = i; (j < i+8) && (j < MOTORS); j++) {
+			if(motor_name(mA[j]) != "unused")
+				s = s sprintf("%.8g  ", A[mA[j]])
+		}
+		print s
+	}
+	Fheader
+	printf("#N 2\n")
+	printf("#L Channel  Counts\n")  ### Calibrate ??? ###
+	array_dump(MCA_DATA)
+	ont; close(dumpfile)
+}'
+
+#
+# mca_s %file%
+#   Dumps the MCA spectrum to %file%. The format is
+#   a simple space seperated two column text output.
+#   Calls to the same file append the new data to 
+#   the existing file  
+#
+def mcad_s '{
+	if(!HDF5_ON){
+	dumpfile = DATAFILE
+	on(dumpfile); offt;
+	printf("@A1 ")
+	array_dump(MCA1_DATA, "%256")
+	printf("@A2 ")
+	array_dump(MCA2_DATA, "%256")
+	printf("@A3 ")
+	array_dump(MCA3_DATA, "%256")
+	printf("@A4 ")
+	array_dump(MCA4_DATA, "%256")
+	ont; off(dumpfile);
+	close(dumpfile)
+	}
+}'
+
+#
+# ADD:
+#   mcal
+#   mroi
+#
+
+
+#
+# SCAN macros
+#
+
+#
+# mcasmode [%state%]
+#   Turn on and off the mode of taking a spectrum at
+#   each point of a scan or during any other count.
+#   The %state% toggles the mode on and off.  Without
+#   it the macros prompts for state.  The data is 
+#   dumped to files named datafile_scan.mca 
+#   with the mcad_s macros.
+#
+#  AW 18 NOV 2005: Added ref to MCA_FMT which may not work...
+def mcasmode '{
+	MCA_SCAN = $1
+
+	if($# != 1)
+		MCA_SCAN = yesno("Enable MCA scan mode", MCA_SCAN)
+
+	if(MCA_SCAN) {
+		cdef("user_getcounts", "mcaread; ", "_mca.mac_scan_")
+		MCA_FILENAME = sprintf(MCA_FMT,DATAFILE,SCAN_N)
+		cdef("user_scan_loop", \
+		     "mcad_s sprintf(MCA_FMT,DATAFILE,SCAN_N); ", \
+		     "_mca.mac_scan_")
+#		cdef("user_postscan_head", \
+#		     "fprintf(DATAFILE, \"#@MCA1\n#@CALIB1 0 10 0\n\#@MCA2\n#@CALIB2 0 10 0\n\#@MCA3\n#@CALIB3 0 10 0\n\#@MCA4\n#@CALIB4 0 10 0\n\"); ", \
+#		     "_mca.mac_scan_")
+	} else {
+		cdef("", "", "_mca.mac_scan_", "delete")
+		MCA_SCAN = 0
+	}
+	printf("MCA scan mode %s.\n", MCA_SCAN ? "enable" : "disable")
+	user_mcasmode
+}'
+
+def user_mcasmode '{}'
+
+
+#
+# MISC macros
+#
+
+#
+# mcahelp
+#   Prints list of MCA macros with brief discription.
+#   Calls _mac_type_help for any device specific 
+#   macros.  
+#
+def mcahelp '{
+	printf("The following MCA commands are available:\n\n");
+	printf("Setup Macros\n")
+	printf("\tmcasetup   -- setup the MCA and macros\n")
+	printf("\tmcaunsetup -- disable the MCA and macros\n")
+	printf("Device control\n")
+	printf("\tmcacq      -- start MCA data acquisition\n")
+	printf("\tmcaoff     -- stop MCA data acquisition\n")
+	printf("\tmcaclr     -- clear MCA data\n")
+	printf("\tmcaread    -- read data from MCA and plot it\n")
+	printf("Spectrum display, calibrate, and write\n")
+	printf("\tmcadisp    -- display spectrum\n")
+	printf("\tmcad       -- dump spectrum to a file\n")
+	printf("\tmcal       -- calibrate MCA\n")
+	printf("\tmroi       -- view a region of interest\n")
+	printf("Scan control\n")
+	printf("\tmcasmode   -- switch MCA scan mode\n")
+	printf("Misc. macros\n")
+	printf("\tmcahelp    -- prints this list.\n")
+	printf("Device specific macros\n")
+	if(whatis("_mca_type_help") & 0x02)
+		_mca_type_help
+	else
+		printf("\tNONE\n")
+}'
+
+
+#
+# COMMANDS RUN AT LOAD
+#
+
+#
+# XEOL mca setup
+#
+global XEOL_ENABLE
+
+def enableXEOL '{
+	XEOL_ENABLE = 1
+	global XEOLRAW
+	long array XEOLRAW[1024]
+	array_op("fill", XEOLRAW, 0)
+
+	mca_spar(4, "auto_run", 1)
+	
+        cdef("user_getcounts", "xeolread; ", "_xeol.mac_scan_")
+#        XEOL_FILENAME = sprintf(MCA_FMT,DATAFILE,SCAN_N)
+        cdef("user_scan_loop", \
+        "xeolwrite sprintf(MCA_FMT,DATAFILE,SCAN_N); ", \
+               "_xeol.mac_scan_")
+        printf("XEOL scan mode %s.\n", MCA_SCAN ? "enable" : "disable")
+        user_mcasmode
+}'
+
+def disableXEOL '{
+	XEOL_ENABLE = 0
+	mca_spar(4, "auto_run", 0)
+	cdef("", "", "_xeol.mac_scan_", "delete")
+}'
+
+def xeolread '{
+
+        mca_sget(4, XEOLRAW, 0, 1023)
+}'
+
+def xeolwrite '{
+        if(!HDF5_ON){
+		dumpfile = DATAFILE
+        	on(dumpfile); offt
+        	printf("@A_XEOL ")
+        	array_dump(XEOLRAW, "%1024")
+        	ont
+        	ont; off(dumpfile)
+        	close(dumpfile)
+	}
+}'
+
+def xeolrun '{
+	epics_put("SA0000-03:Acquire", 1)
+}'
+
+def xeoldark '{
+	lights_off
+	beam_off
+	epics_put("SA0000-03:AcquisitionMode", 2)
+	sleep(0.5)
+	xeolrun
+        epics_put("SA0000-03:AcquisitionMode", 0)
+}'
+
+	

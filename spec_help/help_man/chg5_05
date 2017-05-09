@@ -1,0 +1,1492 @@
+.TH "changes" "spec 5.05 Release Notes" "08/01/12" "chg5_05.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 5.05
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg5_05.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2003,2004,2005,2006,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 5.05 Release Notes" "08/01/12" "chg5_05.rst 6.1  08/01/12 CSS"
+.
+.SH "February 14, 2005 \- RELEASE 5.05.05\-9"
+.rs
+.SH "Support For ULS3020 Counter/Timer"
+.sp
+\fBspec\fP now includes support for the ULS3020 NIM\-module
+counter/timer from the Korean company ULS, Inc.
+See
+\fI\%www.uls.co.kr\fP for hardware details.
+.SH "OMS MAXp Problem Introduced In Last Release Fixed"
+.sp
+Some ill\-considered changes in the code
+for the OMS PCI MAXp motor
+controller added in \fBspec\fP release 5.05.05\-8 that prevented the controller
+from working as it should
+have been undone.
+.SH "February 4, 2005 \- RELEASE 5.05.05\-8"
+.rs
+.SH "New Formatting Options For \fBdate()\fP"
+.sp
+\fBspec\fP now allows an optional argument to the
+\fBdate()\fP
+function to specify the format of the date string.
+The syntax of the argument follows that of
+the standard C library
+\fBstrftime()\fP
+function, with the additional \fBspec\fP\-added option of specifying a format for
+fractional seconds.
+See the
+\fI\%funcs\fP help file for details.
+.SH "New Options For Error\-Logging Features"
+.sp
+There are a couple of new features associated with
+the error\-logging facility.
+If the
+\fBspec_par()\fP
+option
+\fB"elog_timestamp"\fP
+is set to less than a second (units are minutes, so the value must be less
+than 1/60), every message written to the
+\fBelog\fP
+file will be preceded by a time stamp, and the time stamp will
+print the epoch time to microsecond resolution (as obtained from
+the system
+\fBgettimeofday()\fP
+function).
+This feature is to accomodate users requiring relatively precise
+time stamps associated with each command.
+In addition, a new
+\fBspec_par()\fP
+option
+\fB"elog_level"\fP
+is available.
+The default value of 1 prints commands typed at the keyboard to the
+\fBelog\fP
+files as before.
+At level 2, commands read from command files will also be logged.
+.SH "Updates For HANARO KISIM USB Acquisition Module"
+.sp
+\fBspec\fP now supports multiple HANARO KISIM USB modules.
+Also, the module\(aqs one dimensional mode is now supported.
+See the updated
+\fI\%kisim\fP help file for details.
+.SH "Fix For Potential PCI Memory\-Mapping Problem"
+.sp
+A bug with the masking of memory base addresses obtained from PCI
+configuration space that could cause problems with some of the PCI
+cards supported by \fBspec\fP has been fixed.
+A problem had only been observed in one
+\fBspec\fP installation with an OMS MAXp card.
+.SH "January 11, 2005 \- RELEASE 5.05.05\-7"
+.rs
+.SH "New Options To \fBser_par()\fP"
+.sp
+A new
+\fB"device_id"\fP
+option to the
+\fBser_par()\fP
+function returns the
+name of the associated serial device.
+A new
+\fB"responsive"\fP
+option returns a value that indicates whether the
+associated device was opened successfully.
+These options parallel options with the same names available with
+\fBmotor_par()\fP,
+\fBcounter_par()\fP,
+\fBmca_par()\fP
+and
+\fBimage_par()\fP.
+See the
+\fI\%serial\fP help file for details.
+.SH "Fix For \fBpiper\fP Mode"
+.sp
+A minor fix to the code that interfaces \fBspec\fP to the optional
+command\-line editing libraries has been made to allow the
+\fBpiper\fP
+method of controlling \fBspec\fP through another program
+to work when \fBspec\fP is linked with the
+\fBlibedit\fP
+library.
+Another fix now allows (for the first time) the
+\fBpiper\fP
+method to work when \fBspec\fP isn\(aqt linked with an external command\-line editing
+library.
+Note, however,
+the
+\fBpiper\fP
+method is no longer recommended for interfacing other programs to \fBspec\fP.
+The \fBspec\fP server mode is preferred.
+See the
+\fI\%server\fP and
+\fI\%piper\fP help files for more information.
+.SH "December 18, 2004 \- RELEASE 5.05.05\-6"
+.rs
+.SH "Support for HANARO KISIM USB Module"
+.sp
+This \fBspec\fP release includes preliminary support for the HANARO
+KISIM USB Module.
+The device was developed at KAERI to interface with the ESRF N110
+TDC device used with 2D detectors.
+See the
+\fI\%kisim\fP help file for details.
+(Note, this is the first piece of USB hardware to be supported by \fBspec\fP.)
+.SH "Support for Hecus ASA\-32 MCA Card"
+.sp
+This \fBspec\fP release includes preliminary support for the
+ASA\-32 ISA acquisition card, which is part of the Hecus SAX/SWAX
+X\-ray system.
+See the
+\fI\%hecus\fP help file for details.
+.SH "\fBwait\fP Macros Updated"
+.sp
+New global variables
+\fBWAITING_MOVE\fP,
+\fBWAITING_COUNT\fP
+and
+\fBWAITING_ACQ\fP
+are now part of the standard macros.
+These variables are incorporated into the
+\fBwaitall\fP,
+\fBwaitmove\fP,
+\fBwaitcount\fP,
+\fBwaitacq\fP,
+\fBchk_move\fP,
+\fBchk_count\fP
+and
+\fBchk_acq\fP
+macros to hold the most recent result of a
+\fBwait(0x21)\fP,
+\fBwait(0x22)\fP
+and
+\fBwait(0x24)\fP,
+respectively.
+The latter calls are made in the
+\fBchk_*\fP
+macros.
+Such results are useful in macros such as
+\fBuser_getangles\fP
+or
+\fBuser_getcounts\fP
+to determine whether moving or counting is still active without incurring
+the overhead of an additional hardware poll, particularly
+during updated moving or counting.
+.SH "December 8, 2004 \- RELEASE 5.05.05\-5"
+.rs
+.SH "Fix For New Focus 8750/53 Small Moves"
+.sp
+A problem where \fBspec\fP didn\(aqt properly detect the end of
+small, fast moves for the New Focus
+8750/53 motor controllers has been fixed.
+.SH "Fixed Bug With Server\-Mode \fBstatus/ready\fP Property"
+.sp
+A bug in the implementation of the
+\fBstatus/ready\fP
+property (sent by the \fBspec\fP server to indicate when the server
+is available to execute commands either received from a client or
+typed in at the keyboard),
+where
+the values sent before and after keyboard input were opposite of
+what was intended,
+has been fixed.
+The behavior of this property is now as documented in the
+\fI\%server\fP help file.
+.SH "Improved Socket Debugging Display"
+.sp
+When debug mode 0x400000 (hexadecimal dump) is
+added to debug mode 0x40 (basic hardware), repeated lines of
+identical values
+are now condensed to minimize generated output.
+The hexadecimal dump mode is currently only used with socket debugging,
+including socket communications between \fBspec\fP server and clients.
+.SH "November 6, 2004 \- RELEASE 5.05.05\-4"
+.rs
+.SH "More Workarounds For New Focus 8750/53 Firmware"
+.sp
+The New Focus 8750/53 firmware bug that has been the subject of previous
+\fBspec\fP workarounds is reported to have been fixed in firmware
+version 1.5.6, so the
+\fBspec\fP workaround is now only activated for firmware versions 1.3.1
+through 1.5.5.
+Also, \fBspec\fP now sends the
+\fB"JOF"\fP
+(joystick off)
+command on initialization, as controllers with
+recent firmware versions don\(aqt seem to
+work properly otherwise.
+(The command should do no harm with
+earlier firmware versions.)
+.SH "Workaround For Source\-Forge \fBLinux\fP GPIB 3.2 Anomalies"
+.sp
+The Source Forge
+\fBLinux\fP
+GPIB project (successor to the deprecated
+linux\-lab GPIB project) appears to be usable with \fBspec\fP using the
+\fBcib.o\fP
+configuration option.
+However, the 3.2 release of the package (for 2.6
+\fBLinux\fP
+kernels)
+appears to have broken the compatibility of
+the National Instruments standard
+\fBibonl()\fP
+interface function.
+This \fBspec\fP release contains a workaround for that broken behavior.
+See the
+\fI\%nigpib\fP help file for information on configuring \fBspec\fP to use this
+library.
+(See
+\fI\%http://linux\-gpib.sourceforge.net\fP for downloads and documentation of version 3 of the
+\fBLinux\fP
+GPIB project.)
+.SH "October 14, 2004 \- RELEASE 5.05.05\-3"
+.rs
+.SH "Help Utility Links File Updated"
+.sp
+The index
+file
+used by \fBspec\fP\(aqs built\-in help utility
+(normally installed as
+\fB/usr/local/lib/spec.d/help/.links\fP),
+which has had out\-of\-date line\-number information for
+some time, is now automatically generated and so will always be up to date
+with each \fBspec\fP distribution.
+.SH "\fBcdef()\fP Query Syntax Updated"
+.sp
+In previous releases, the syntax
+to print out the pieces of a
+\fBcdef()\fP
+chained macro was
+\fBcdef(name, "", "", "?")\fP,
+although the documentation indicated
+\fBcdef(name, "", "?")\fP.
+As of this release, a
+\fB"?"\fP
+as second, third or fourth argument will print out the
+macro parts.
+.SH "\fBedconf\fP Allows VME Addresses Of Zero"
+.sp
+Prior releases of the
+\fBedconf\fP
+hardware configuration editor were inconsistent
+with respect to allowing a value of zero
+for the base address of a VME module.
+The current release will allow a zero value, and such behavior
+should continue in future releases.
+.SH "Fix For Recent Obscure Server\-Mode Bug"
+.sp
+A bug that could lead to a segmentation fault and
+associated mainly with features added for server mode in \fBspec\fP
+release 5.05.05\-1 has been fixed.
+The fault could occur when the server tried to send a delete event for
+a watched array element that had been created in a macro function
+where the array name had been passed to the macro
+function as an argument.
+.SH "October 12, 2004 \- RELEASE 5.05.05\-2"
+.rs
+.SH "Fix For OMS ISA Support"
+.sp
+Updates to the OMS support
+in release 5.05.03\-1 included some modifications to the
+low\-level interface code.
+The changes apparently fatally affected some sensitive timing for at least
+one ISA card, namely the PC39.
+This \fBspec\fP release readjusts the low\-level OMS interface code
+so that the PC39 again works properly.
+.SH "September 20, 2004 \- RELEASE 5.05.05\-1"
+.rs
+.SH "New Motor Parameters To Set Powder\-Mode Speed"
+.sp
+Powder\-mode uses \fBspec\fP\(aqs
+\fBmove_cnt\fP
+command to gate counters open while a designated motor is
+rocked at each point of a scan.
+(See the
+\fI\%setpowder\fP help file for more information.)
+Previously, the powder\-mode motor rocking speed was
+set to the motor\(aqs base rate.
+To accommodate users needing a faster rocking speed that requires
+accelerating from a base rate,
+the following
+\fBmotor_par()\fP
+motor parameters
+are now available:
+\fB"powder_base"\fP,
+\fB"powder_slew"\fP
+and
+\fB"powder_acceleration"\fP.
+The values for the first two parameters are set to the motor base
+rate and the last to the motor acceleration
+when \fBspec\fP starts up and on every
+\fBreconfig\fP
+command (or
+\fBconfig\fP
+macro invocation).
+If the
+\fB"powder_slew"\fP
+value is less than the
+\fB"powder_base"\fP
+value
+both the base and slew rates are set to the
+\fB"powder_slew"\fP
+value.
+(Certain motor controllers,
+namely the
+18011, CM3000, CM4000,
+E500, ES_OMS, ES_VPAP,
+HUB9000, IP28,
+MC4, MCB, SIX19, SMC and XRGCI_M,
+do not currently recognize these new parameters.
+Contact CSS to discuss the feasibility of adding support for the
+new parameters for any of these controllers.)
+.SH "New Server Feature To Send Delete Events"
+.sp
+The \fBspec\fP server will now send events to clients when registered
+global variables or associative array elements are deleted.
+See the
+\fI\%server\fP help file for more details.
+Note, the \fBspec\fP client currently takes no action on such events.
+.SH "New Server Feature To Reinstate Watched Status"
+.sp
+The \fBspec\fP server will now automatically reinstate the
+\fB"watched"\fP
+status of global variables and associative array elements
+that are registered
+by clients and subsequently
+made unglobal in the server
+and then made global again.
+.SH "Client \fBprop_watch()\fP Command Improved"
+.sp
+The
+\fBprop_watch()\fP
+command used by the \fBspec\fP client to register properties on which to
+receive events from the server will now re\-register properties
+when invoked for a previously registered property.
+Previously, there was no way to re\-register a variable that had,
+for example, been made unglobal on the server and then global again
+other than by exiting and restarting the client.
+.SH "New Support For HANARO Motor Controller"
+.sp
+Support is included for a new motor controller built and used at the
+HANARO research reactor at the
+Korea Atomic Energy Research Institute (KAERI).
+.SH "Workaround For New Focus 8750/53 Firmware Bug Extended"
+.sp
+Since the New Focus 8750/53 firmware bug first addressed in
+\fBspec\fP release 5.04.04\-10 hasn\(aqt been fixed in firmware version 1.5.4,
+the \fBspec\fP workaround is now also applied to that firmware release.
+.SH "Instability Associated With EPICS Motors Fixed"
+.sp
+A double\-free bug that could result in segmentation faults
+on some platforms,
+introduced in \fBspec\fP release 5.05.03\-7 and only associated with the
+\fBreconfig\fP
+call for EPICS motors,
+has been fixed.
+.SH "One More Revision Of the Algorithm For Determining EPICS Release"
+.sp
+The
+method for determining the EPICS release (3.13 versus 3.14)
+in \fBspec\fP\(aqs
+\fBInstall\fP
+script, most recently revised in release 5.05.04\-8,
+has been rewritten once more and is now better than ever.
+.SH "September 10, 2004 \- RELEASE 5.05.04\-9"
+.rs
+.SH "Update To New Code For Micos Motor Controllers"
+.sp
+The support for the Micos VENUS\-2 compatible motor controllers
+added in release 5.05.04\-6
+has been updated to fix a problem with spurious error messages.
+.SH "September 8, 2004 \- RELEASE 5.05.04\-8"
+.rs
+.SH "Recent Client Segmentation Fault Fixed"
+.sp
+A bug associated with the client/server updates of release 5.05.04\-1,
+where a
+\fBremote_eval()\fP
+call that failed (due to an unreachable host, for example) could
+produce a segmentation fault, has been fixed.
+.SH "Installation Root\-User Test Modified"
+.sp
+The
+\fBInstall\fP
+installation script
+root\-access test has been revised to not require write
+permission in the current directory if the standard shell command
+\fBid\fP
+exists.
+This change helps in a situation where root access is available, but not
+for writing to an NFS\-mounted disk where the \fBspec\fP distribution might be
+located.
+Note, root access is required for installing \fBspec\fP on
+\fBLinux\fP
+boxes where I/O port or memory\-map access is used for control of PC
+cards.
+Otherwise, installation only requires write access to the directories
+where \fBspec\fP is installed along with permission to overwrite any
+existing \fBspec\fP files.
+.SH "Installation EPICS Release Specification Enhanced"
+.sp
+Since release 5.05.01, \fBspec\fP can be linked with either EPICS release 3.13
+or EPICS release 3.14.
+\fBspec\fP needs to know which, as
+different \fBspec\fP libraries are used for the different EPICS releases.
+Previously, the EPICS release was determined automatically by
+the
+\fBInstall\fP
+script by examining the
+\fBepicsVersion.h\fP
+file in the EPICS base directory specified in the \fBspec\fP installation
+configuration.
+However, although
+some sites have the EPICS libraries available, the header files are not.
+Now, if the header files aren\(aqt available, the installation will default
+to EPICS release 3.13.
+However, by setting the shell variable
+\fBEPICS_VER\fP
+to
+\fB314\fP
+the \fBspec\fP administrator can force linking for the 3.14 release.
+Usage from the shell command line might be
+.RS 3m
+.sp
+.nf
+.ft CB
+EPICS_VER=314 ./Install \-d
+.ft P
+.fi
+.RE
+.SH "September 2, 2004 \- RELEASE 5.05.04\-7"
+.rs
+.SH "MDrive Support Improved"
+.sp
+The code to support the IMS MDrive motor controllers is now a bit
+more robust.
+Previously, replies to position and status requests were indistinguishable.
+Occasionally, an MDrive controller would miss a response and \fBspec\fP would
+get unsynchronized with respect to the requests and replies, leading to
+unexpected behavior.
+The MDrive controllers are now programmed to format replies to position
+and status requests such that \fBspec\fP can tell one from the other
+and resynchronize when necessary.
+.SH "Fix For Recent Bug in ESRF CCD Support"
+.sp
+An undocumented update to the ESRF CCD support in \fBspec\fP release
+5.05.04\-3 that removed the constraint on the number of units that
+could be configured, also introduced a bug that prevented the code
+from working properly at all.
+That bug has been fixed.
+.SH "Fix For Opening Socket\-to\-Serial Interfaces"
+.sp
+Code
+introduced
+in \fBspec\fP release
+5.05.03\-8
+to do a sleep after opening a socket\-to\-serial device
+has been eliminated, as the sleep appears to have been unnecessary, but
+did noticeably add to the configuration time overhead.
+.SH "August 31, 2004 \- RELEASE 5.05.04\-6"
+.rs
+.SH "Support For Micos VENUS\-2 Compatible Motor Controllers"
+.sp
+Initial support for the Micos VENUS\-2 compatible motor controllers
+is included in this \fBspec\fP release.
+.SH "August 24, 2004 \- RELEASE 5.05.04\-5"
+.rs
+.SH "Update To Server For Forward Compatibility"
+.sp
+A fix had been made to the \fBspec\fP server, so that it will work
+with future clients that may use a newer version of the
+\fBspec\fP client/server protocol,
+as was originally intended.
+Unfortunately, \fBspec\fP releases prior to this update require
+clients of the same or earlier client/server protocol version.
+.SH "August 17, 2004 \- RELEASE 5.05.04\-4"
+.rs
+.SH "Implementation of Counters\-Only Mode For \fBspec\fP Client"
+.sp
+The
+\fB"counters\-only"\fP
+mode is now usable as a device configuration on \fBspec\fP clients.
+The \fBspec\fP server will send events to the client when
+the associated scalers are updated during counting on the server.
+The client will copy the latest values received via events from the
+server to the
+\fBS[]\fP
+scaler array when the client
+\fBgetcounts\fP
+command is executed.
+See the
+\fI\%server\fP help file for more information.
+.SH "Minor \fBedconf\fP Fix"
+.sp
+A bug in the
+\fBedconf\fP
+hardware configuration editor,
+where inappropriate serial\-device prefixes
+(ESRF:, EPICS: or SOCKET:)
+could be included in the
+\fBconfig\fP
+file output for non\-serial devices,
+has been fixed.
+.SH "Fix For Setting Trinamic Current Parameters"
+.sp
+A bug that limited the maximum peak current for the Trinamic QUADpack motor
+controllers to 800 mA when set from the
+\fBconfig\fP
+file has been fixed.
+.SH "July 31, 2004 \- RELEASE 5.05.04\-3"
+.rs
+.SH "Bug In Configuring OMS PCIx Controllers Fixed"
+.sp
+A bug in the
+\fBedconf\fP
+hardware configuration editor (associated with the support added for the
+OMS MAXp in release 5.05.03\-1),
+where the parameters for the
+OMS PCIx controller
+information were read incorrectly,
+has been fixed.
+.SH "Fixes For New OMS Homing Feature"
+.sp
+A couple of issues
+with the new
+\fB"home_method"\fP
+feature for OMS controllers have been addressed.
+A problem where the standard
+slew speed on moves following
+certain home sequences was not restored has been fixed.
+Another problem, where under certain circumstances, the
+first move command was ignored after a home
+search when the search
+ended at a limit switch, has been fixed.
+.SH "July 22, 2004 \- RELEASE 5.05.04\-2"
+.rs
+.SH "Fix For Trinamic QUADpack/SIXpack Speed Settings"
+.sp
+A bug, where the speed parameters were sometimes not set correctly
+for cards beyond the first when
+multiple Trinamic QUADpack/SIXpack cards were assigned the same
+\fBspec\fP unit number, has been fixed.
+.SH "Updated Counter Output Formats For Standard Scans"
+.sp
+The counter
+\fBprintf()\fP
+formats in the standard
+\fB_loop\fP
+and
+\fB_upd_count\fP
+macros
+have been modified to display
+non\-integer
+values on the screen (and printer) when appropriate,
+and to include additional significant digits in the values written
+to the data file.
+.SH "July 18, 2004 \- RELEASE 5.05.04\-1"
+.rs
+.SH "New Associative Array Feature"
+.sp
+A new syntax feature allows initialization of associative arrays
+by assignment and the passing of associative\-array data
+to
+macro functions
+by value.
+The syntax uses a pair of square brackets to enclose a comma\-separated
+list of colon\-separated value pairs.
+The first item of each pair is the associative array index and the second
+item is the value of the array element.
+The examples below illustrate the usage:
+.RS 3m
+.sp
+.nf
+.ft CB
+1.SPEC> x = [ "val":123, 456:"data" ]
+
+2.SPEC> p x
+x["val"] = 123
+x["456"] = "data"
+
+3.SPEC> def test(x) \(aq{ for (i in x) p i, x[i] }\(aq
+
+4.SPEC> test([ "val":123, 456:"data" ])
+val 123
+456 data
+.ft P
+.fi
+.RE
+.SH "Improved \fBpsic\fP Sector Calculation"
+.sp
+A change in the
+\fBpsic\fP
+geometry code
+(see \fBgeo_psic.c\fP)
+makes another sector available for the
+\fBnaz\fP\-
+and
+\fBqaz\fP\-fixed
+modes that have the
+constraint
+\fBeta\fP=\fBdel\fP/2
+or
+\fBmu\fP=\fBnu\fP/2.
+For sector 9 (which only involves transformation of
+the detector circles)
+the sample circle positions are now recalculated to
+maintain
+the constraints.
+This change provides more flexibility in positioning
+a
+\fBpsi\fP\-circle
+diffractometer.
+.SH "Improved Connection Handling From \fBspec\fP Client To \fBspec\fP Server"
+.sp
+Code has been added to better handle the loss of connection from
+the \fBspec\fP client to the \fBspec\fP server, including additional timeout
+checks.
+.SH "Server\-Client Communication Faster"
+.sp
+The socket communication between the \fBspec\fP server and clients has been
+sped up by a significantly.
+.SH "Fix For \fBremote_eval()\fP Return of Associative Arrays"
+.sp
+A bug, where the \fBspec\fP client\(aqs
+\fBremote_eval()\fP
+(and
+\fBremote_async()/remote_poll()\fP)
+couldn\(aqt return associative arrays, has been fixed.
+.SH "Server Errors Noted On \fBremote_eval()\fP"
+.sp
+The \fBspec\fP server protocol has been revised to allow the server
+to flag clients when commands sent by
+\fBremote_eval()\fP
+(and
+\fBremote_async()/remote_poll()\fP)
+fail due to unrecoverable errors, such as syntax or divide\-by\-zero errors.
+\fBspec\fP clients will display the error messages provided by the server.
+.SH "Client Can Create Associative Array Elements With \fBprop_put()\fP"
+.sp
+The previous limitation on creating new associative array elements with
+\fBprop_put()\fP
+from a \fBspec\fP client has been removed.
+The command
+\fBprop_put("host:spec", "var/x[3]", "value")\fP
+can create the associative array element on a \fBspec\fP server, even if
+the element doesn\(aqt already exist.
+The associative array
+\fBx[]\fP
+must already exist on the server, though.
+.SH "New Server Protocol Options For Executing Functions"
+.sp
+The \fBspec\fP client/server protocol includes new
+commands to pass function names
+and arguments from client to server.
+See the
+\fI\%server\fP help file (or contact CSS) for additional information on the new
+\fBSV_FUNC\fP
+and
+\fBSV_FUNC_WITH_RETURN\fP
+commands.
+.SH "July 11, 2004 \- RELEASE 5.05.03\-8"
+.rs
+.SH "More Features For CANbus Interface"
+.sp
+The built\-in code to support CANbus devices
+has been improved with the addition of support for
+segmented SDO transfers and
+better reporting on SDO error returns.
+.SH "Improvements For Socket\-to\-Serial Devices"
+.sp
+Some models of Ethernet\-to\-serial interfaces generate a short stream of
+garbage characters when the initial socket connection is made, which
+caused presence tests for a number of serial devices in \fBspec\fP to fail.
+\fBspec\fP now attempts to flush out the garbage before the first command is
+sent.
+.SH "July 5, 2004 \- RELEASE 5.05.03\-7"
+.rs
+.SH "Fixes For EPICS Motor Record Support"
+.sp
+A couple of old, minor problems with the \fBspec\fP support of the EPICS motor
+record
+associated with how \fBspec\fP maintains certain parameters in step units, while
+the EPICS data base maintains the parameters in engineering units,
+have been corrected.
+Previously, a negative step\-size (or motor resolution) parameter would
+change the sign of motor base rate, slew rate and backlash in \fBspec\fP.
+The negative speeds would cause problems for the EPICS motor record code.
+Also, previously, if the initial connect events for motor base rate
+(VBAS), slew (VELO) or backlash (BDST) arrived before the connect
+event for the motor resolution (MRES),
+\fBspec\fP would, under certain conditions, maintain incorrect values
+for those parameters.
+.SH "Several ERSF TACO Updates"
+.sp
+The ESRF TACO support for CCD cameras will now assign
+\fBdev_putget()\fP
+error numbers to the global
+\fBESRF_ERR\fP
+symbol, if it exists.
+Segmentation faults that could occur with \fBspec\fP hardware debugging turned
+on when TACO
+\fBdev_putget()\fP
+calls that returned strings returned null pointers without setting an
+error code are now prevented.
+Also, the TACO serial support can now set baud rates higher than 19,200.
+.SH "July 1, 2004 \- RELEASE 5.05.03\-6"
+.rs
+.SH "MDrive Channel Numbering Fixed Again"
+.sp
+The intended fix included in \fBspec\fP release 5.03.02\-1
+for the IMS MDrive motor controller channel numbering
+for channels above number 9
+turns out not to have been effective.
+This \fBspec\fP release has the true fix.
+.SH "June 25, 2004 \- RELEASE 5.05.03\-5"
+.rs
+.SH "Fix For Joerger VSC8/16 \fBmove_cnt\fP Support"
+.sp
+The code for the Joerger VSC8/16 VME scalers has been fixed so that
+the hardware responds as expected when used with the
+\fBmove_cnt\fP
+command that gates scalers open for counting while a motor is moving.
+.SH "Touch Up For Trinamic QUADpack/SIXpack Presence Test"
+.sp
+The presence test for the Trianmic QUADpack/SIXpack motor controllers
+no longer tries other motors on a particular controller card if the first
+motor\(aqs presence test determines the card is unresponsive.
+.SH "June 23, 2004 \- RELEASE 5.05.03\-4"
+.rs
+.SH "New \fBsock_par()\fP Option For UDP Sockets"
+.sp
+A new
+\fB"connect_udp"\fP
+option
+to the
+\fBsock_par()\fP
+function
+will create a socket using the UDP protocol, rather than the
+default TCP.
+See the
+\fI\%sockets\fP help file for more information.
+.SH "New DAC Motor Device"
+.sp
+The Measurement Computing PCI DAC 6702/6703 cards are now supported
+as DAC motors.
+.SH "Update For Trinamic QUADpack/SIXpack Motor Controllers"
+.sp
+Fixes and new features are included for the very recently added
+Trinamic QUADpack/SIXpack motor controller support.
+Problems with the base\-rate and slew\-rate units have been fixed,
+the
+\fB^C\fP
+abort now works correctly, and the limit switches now function as
+they should.
+Also, new miscellaneous motor parameters for setting the peak
+and hold current are implemented.
+Type
+\fBmotor_par(mne, "?")\fP for a list of supported motor parameters.
+.SH "Preliminary Support For Encoders For Phytron Controllers"
+.sp
+Preliminary support for encoders is included for the Phytron IXE, OMC
+and TMC motor controllers.
+Select
+\fBIXE_E\fP
+as the motor type and enter the encoder steps per degree on the optional
+motor\-parameter screen to enable the feature.
+.SH "Galil Support Now Available on Non\-\fBLinux\fP Platforms"
+.sp
+A bug that prevented the support
+for
+Galil motor controllers
+over Ethernet and serial interfaces
+added in \fBspec\fP release
+5.02.02\-1
+from being available on platforms
+other than
+\fBLinux\fP
+has been fixed.
+.SH "May 29, 2004 \- RELEASE 5.05.03\-3"
+.rs
+.SH "Memory Mapping Fixes"
+.sp
+Potential problems with the configuration of certain PCI cards supported
+by \fBspec\fP user\-level code on
+\fBLinux\fP
+have been fixed.
+Previously,
+the \fBspec\fP code did not always make adjustments to the memory\-map
+system calls if the
+PCI base\-address values were not on a memory\-page boundary (although
+the need for re\-alignment is apparently rare).
+In addition, the code now does a better job of freeing mapped regions
+when hardware is detached during the
+\fBreconfig\fP
+operation.
+.SH "May 27, 2004 \- RELEASE 5.05.03\-2"
+.rs
+.SH "Preliminary Support For Trinamic QUADpack/SIXpack"
+.sp
+This \fBspec\fP release includes preliminary support for the Trinamic
+QUADpack and SIXpack motor controllers.
+.SH "Home\-Search Update For Kohzu SC\-2/4/800 Controllers"
+.sp
+The code for the Kohzu SC\-2/4/800 motor controllers
+now recognizes
+the optional home slew\-rate, base\-rate and acceleration
+motor parameters.
+.SH "May 7, 2004 \- RELEASE 5.05.03\-1"
+.rs
+.SH "OMS MAXp PCI Motor Controller Supported"
+.sp
+\fBspec\fP now supports the new Oregon Micro Systems 8\-channel PCI
+controller model MAXp.
+Each channel of this card can be used for stepper motors with or without
+encoders or for servo motors.
+See the
+\fI\%oms\fP help file for configuration details.
+.SH "New Homing Procedure for OMS Controllers"
+.sp
+A new highly configurable home search facility is available for the OMS
+motor controllers.
+See the
+\fI\%oms\fP help file for usage details.
+.SH "May 7, 2004 \- RELEASE 5.05.02\-7"
+.rs
+.SH "Fix For Using Single\-Element Data Arrays"
+.sp
+A bug introduced in \fBspec\fP release 5.02.01, where references
+to the single element of a one\-element data array in certain contexts
+would result in an
+\fB"Illegal reference to array"\fP
+error, has been fixed.
+.SH "New Commands To Access Digital I/O On NI 6601/6002"
+.sp
+New
+\fBcounter_par()\fP
+options are available to configure, write and read the eight digital I/O
+lines on the National Instruments 6601/6602 PCI counter/timers.
+See the
+\fI\%ni660x\fP help file for details.
+.SH "Help With XIA HSC Serial Numbers"
+.sp
+Some users have reported the XIA HSC (Huber Slit Controller)
+serial numbers in firmware don\(aqt always
+match the numbers stamped on the cases.
+The serial number must be entered in the \fBspec\fP
+\fBconfig\fP
+file, as \fBspec\fP
+must include the serial number in the command strings sent to the controllers.
+\fBspec\fP now displays the serial numbers read from the connected
+slit controllers that don\(aqt match serial numbers in the \fBspec\fP
+\fBconfig\fP
+file.
+That should help in diagnosing serial number problems.
+See the
+\fI\%xiahsc\fP help file for complete information.
+.SH "April 29, 2004 \- RELEASE 5.05.02\-6"
+.rs
+.SH "CAN Configuration Now Includes Baud Rate"
+.sp
+The configuration for field bus controllers now includes a parameter
+for the baud rate.
+.SH "New Support For CANnes PCI CAN Controller"
+.sp
+\fBspec\fP now supports the Trinamic CANnes PCI CAN bus controller as
+a field bus controller type.
+.SH "Update For Kohzu SC\-2/4/800 Controllers"
+.sp
+The support for the Kohzu SC\-2/4/800 motor controllers
+has been revised to use
+the existing value of the controller\(aqs system setting 29,
+\fB"Feedback Type"\fP
+which controls whether position\-maintenance mode is used when encoders
+are present.
+The previous \fBspec\fP version forced the parameter to zero.
+You must restart \fBspec\fP or type
+\fBreconfig\fP
+for \fBspec\fP to note a change in value made using the controller\(aqs front panel.
+Also, by default, \fBspec\fP performs backlash as a separate move.
+However, if optional
+\fB"Generic Parameter 1"\fP
+is set and is nonzero,
+\fBspec\fP will configure the controller to use its built\-in
+backlash\-correction feature.
+The built\-in backlash correction appears slower than using a separate move,
+so \fBspec\fP does not automatically select the built\-in feature.
+.SH "April 26, 2004 \- RELEASE 5.05.02\-5"
+.rs
+.SH "Fix For National Instruments PCII/A GPIB Controllers"
+.sp
+Problems with the support
+for the old National Instruments
+PCII and PCII/A nec7210\-based GPIB controllers
+added in \fBspec\fP release 5.05.01\-4
+have been addressed.
+.SH "April 20, 2004 \- RELEASE 5.05.02\-4"
+.rs
+.SH "Motor Mnemonic Length Enforced In Configuration Editor"
+.sp
+The
+\fBedconf\fP
+configuration editor will now prevent the entry of motor mnemonics longer
+than the maximum seven characters accepted by \fBspec\fP.
+.SH "Fix For Using Multiple National Instruments 6601/6602 Cards"
+.sp
+A bug, which prevented using more than one National Instruments
+6601/6602 counter/timer PCI card, has been fixed.
+.SH "Fix For Updated Limit Behavior Of Huber SMC 9000"
+.sp
+\fBspec\fP now recognizes the Huber SMC 9000 motor controller
+firmware update from November 2001 that
+changed the controller limit behavior.
+The old firmware would disable remote control when a limit
+switch was hit.
+The updated firmware allows the computer to move a motor after it
+hits a limit, but a new command is required to clear the limit status.
+This \fBspec\fP update will send that command when appropriate.
+.SH "March 31, 2004 \- RELEASE 5.05.02\-3"
+.rs
+.SH "Maximum Number Of Controllers In \fBedconf\fP Increased"
+.sp
+The number of motor and counter devices that can be configured on the
+\fBD\fPevices
+screen of the
+\fBedconf\fP
+configuration editor has been increased from 24 to 40 for each.
+.SH "Server/Client Enhancements For \(dqWatched\(dq Variables"
+.sp
+Several improvements associated with
+\fB"watched"\fP
+variables set by the
+\fBspec\fP client
+\fBprop_watch()\fP
+function
+are included.
+Previously, the \fBspec\fP client wouldn\(aqt poll for asynchronous events,
+including events associated with changes to
+watched
+variables,
+unless the client was configured to use \fBspec\fP server
+motors or counters.
+That problem has been fixed.
+Also, redundant calls by the client to register watched
+variables on the server have been eliminated.
+Finally,
+the server will now stop sending events
+associated with a watched variable
+when all clients have
+unregistered the variable.
+.SH "Fix For ANKA RST Generic Access"
+.sp
+A bug, where \fBspec\fP would crash if an
+\fBanka_put()\fP
+or an
+\fBanka_get()\fP
+command were used when no ANKA RST motors or counters
+were configured, has been fixed.
+.SH "Fix For Amptek MCA 8000/8000A"
+.sp
+An adjustment to a timing loop for the Amptek MCA 8000/8000A has been
+made to accommodate an even faster PC.
+.SH "Fix For Setting DAC Motor Limits"
+.sp
+A rounding problem, where \fBspec\fP would generate an error message indicating
+the high limit was being reset
+every time
+a DAC motor was moved when the limit was set beyond the maximum,
+has been fixed.
+.SH "Prompt Aesthetics Tuned"
+.sp
+The placement of newlines in the vicinity of the \fBspec\fP prompt
+has been reengineered to present a more consistent
+appearance when using
+the
+\fBlibedit\fP
+command\-line editing library,
+particularly
+around
+\fB^C\fP
+interrupts and when running in server mode.
+.SH "March 22, 2004 \- RELEASE 5.05.02\-2"
+.rs
+.SH "Update For Macro Hardware \fB_config\fP Routines"
+.sp
+If the macro hardware
+\fB_config()\fP
+function explicitly sets an error return (by returning the string
+\fB".error."\fP),
+\fBspec\fP will now mark the associated macro hardware controller (for the
+\fB"ctrl"\fP
+key) or motor or scaler channel (for the
+\fB"mot"\fP
+or
+\fB"cnt"\fP
+keys) as unresponsive.
+If the controller is unresponsive, all associated channels are
+considered unusable.
+\fBspec\fP won\(aqt attempt to access such channels, although that can be
+changed when the
+\fB_config()\fP
+function is called on the next
+\fBreconfig\fP.
+.SH "Fix For Obscure \fBunglobal\fP and \fBshared\fP Bug"
+.sp
+Improvements in the behavior of the
+\fBunglobal\fP
+command in \fBspec\fP release 5.02.02
+had the unintended consequence of undoing the global scope of an
+array with the same name subsequently declared as
+\fBshared\fP
+in the same statement block.
+Now, a shared array will always have global scope.
+.SH "New \fBglobal array\fP Syntax"
+.sp
+It is now possible to preface a data array declaration with the
+\fBglobal\fP
+keyword.
+Array declarations in statement blocks default to global
+in any case, although, an
+\fBunglobal\fP
+statement for the symbol within the same statement block would
+force a subsequent
+\fBarray\fP
+declaration to result in a local\-scope array.
+The explicit
+\fBglobal\fP
+declaration gets around that problem.
+.SH "March 13, 2004 \- RELEASE 5.05.02\-1"
+.rs
+.SH "New Facility For Field Bus Interfaces"
+.sp
+This \fBspec\fP release contains the first support for field\-bus interfaces.
+Currently, only one field\-bus (CAN) and one controller (MEN M51) are
+supported, although additional protocols and controllers are likely
+to be implemented in the future.
+Support for generic user\-level access and for built\-in
+field\-bus hardware is included.
+.sp
+The user\-level access to the field\-bus is through the new
+\fBfbus_get()\fP
+and
+\fBfbus_put()\fP
+functions.
+The first argument to these function is the unit number of the
+intended field\-bus controller, where unit numbers are assigned in
+the
+\fBconfig\fP
+file and currently run from zero to three.
+Currently only CAN bus is implemented, with the user\-level
+functions currently behaving as follows.
+(Additional functionality is
+likely to be added in later releases.)
+.sp
+The
+\fBfbus_get()\fP
+function can take an optional second argument, namely the string
+\fB"poll"\fP,
+which means to return immediately if no message is available.
+The function normally returns an unsigned long
+data array containing eight elements, which are filled with as many
+CAN packet elements as were provided by the CAN device.
+The data is returned from a first\-in, first\-out (FIFO) buffer of (currently)
+100 elements.
+If the buffer is overrun, older elements are lost.
+If a global variable named
+\fBHDW_ERR\fP
+exists, it will be assigned a value zero if there is no error and data is
+available, a value three (TIMEOUT) if there is a timeout
+and a value of four (NONFATAL) if
+there is no data available with the
+\fB"poll"\fP
+argument.
+.sp
+The
+\fBfbus_put()\fP
+function can take up to nine arguments after the unit number,
+which are used to
+create the CAN packet that is sent out on the interface.
+The second argument is the CAN identifier.
+The remaining
+arguments are the packet data.
+.sp
+The built\-in CAN support for motor controllers and other devices
+will use the same
+input buffer as the user\-level functions.
+CSS recommends that CAN devices accessed through the above
+user\-level functions be on a separate CAN interface from the devices
+supported by the built\-in C code.
+.SH "Support For MEN M51 Quadruple CAN Interface"
+.sp
+\fBspec\fP now supports the MEN Mikro Electronik GmbH M\-Bus model
+M51 Quadruple CAN interface.
+The device is selected in the new FIELD section of the
+\fBI\fPnterfaces
+screen of the configuration editor.
+Each of the four CAN interfaces must be configured separately.
+(The address of each channel is offset by an additional 0x40 from
+the base address of the MEN module.)
+.SH "Support For Mclennan PM595 CAN Motor Controller"
+.sp
+\fBspec\fP now supports the Mclennan PM595 CAN\-interfaced motor controller.
+Although the controller is based on the CANopen protocol, \fBspec\fP
+communicates with the device as a register\-based CAN device, keeping
+the controller in the CANopen
+\fB"pre\-operational"\fP
+state and using service data object (SDO) transfers exclusively.
+The homing method can be set with the optional
+\fB"home_method"\fP
+motor parameter.
+.SH "New Rotary/Linear Optional Motor Parameter"
+.sp
+A new
+\fB"rotary"\fP
+optional
+motor parameter is available on the second optional parameter screen of
+the configuration editor and as an argument to the
+\fBmotor_par()\fP
+function.
+The parameter is so far used in the support for just one motor
+controller (MicroMo MVP\-2001, see below).
+A nonzero value indicates a rotary stage.
+.SH "Home Search Implemented For MVP\-2001"
+.sp
+The home search facility is now implemented for the MicroMo MVP\-2001
+motor controller.
+So far, these controllers have only appeared in \fBspec\fP applications
+in stages supplied by National Aperture, so the programming is
+geared for that hardware.
+The home search only functions for the rotary stages, and the
+optional motor parameter
+\fB"rotary"\fP
+should be set to indicate a rotary stage is being used.
+For the rotary stages, limits are disabled, but home searches are allowed.
+For the linear stages, limits are enabled, but home searches are not
+possible.
+.SH "More Fixes For \fBlibedit\fP With \fBspec\fP Server"
+.sp
+A problem with the
+\fBlibedit\fP
+\fBreadline\fP\-compatibility
+code dealing with setting the tty modes after the \fBspec\fP server
+receives an asynchronous signal from a client (generated by the client
+when aborting moving or counting, for example), has been fixed.
+The fix has not yet been submitted to the official
+\fBlibedit\fP
+maintainers, as it is currently somewhat of a hack.
+However, the fix meets all the needs of \fBspec\fP.
+.SH "March 8, 2004 \- RELEASE 5.05.01\-8"
+.rs
+.SH "Fix To Accommodate TANGO Threads"
+.sp
+Additional code has been added to
+accommodate linking \fBspec\fP with
+TANGO, a threaded object\-oriented
+alternative to TACO, both of which are
+distributed computing environments developed at the ESRF.
+.SH "March 2, 2004 \- RELEASE 5.05.01\-7"
+.rs
+.SH "Plot Macros Now Automatically Grow Data Array"
+.sp
+The standard plot macros will now automatically resize the
+\fBSCAN_D\fP
+data array by increasing the number of rows by 1,024 if the
+number of points in a scan becomes greater than the number
+of rows currently available.
+The initial default size for
+\fBSCAN_D\fP
+is 4,096 rows.
+.SH "New \fBsetscans\fP Option For Configuring Data File Contents"
+.sp
+A new option is available in the
+\fBsetscans\fP
+macro to have all the geometry\-related motor positions saved at
+each point in the data file for
+regular, mesh, arc
+and radial
+HKL scans.
+Assigning a non\-zero value to the new standard global variable
+\fB_sav_geo_mot\fP
+accomplishes the same thing.
+See the
+\fI\%setscans\fP help file for more information.
+.SH "Bug Fix For Misconfigured EPICS PV Scalers"
+.sp
+A bug, where \fBspec\fP would crash if EPICS process variable (PV) scalers
+were assigned channel numbers beyond the maximum configured,
+has been fixed.
+.SH "February 26, 2004 \- RELEASE 5.05.01\-6"
+.rs
+.SH "Update For ILL\-2D Detector Support"
+.sp
+A new
+\fBLinux\fP
+kernel driver to support a
+24\-bit digital I/O PCI card interface to the
+2D detector electronics (ESRF model N110 TDC)
+used with some neutron detectors at ILL is included
+in this \fBspec\fP release.
+See the
+\fI\%ILL_2d\fP help file for more information.
+.SH "February 23, 2004 \- RELEASE 5.05.01\-5"
+.rs
+.SH "New \fBwait()\fP Options For Asynchronous Connections"
+.sp
+It is now possible to wait until remote motors
+become fully connected and usable.
+(Currently, the only such motors are accessed via EPICS and the \fBspec\fP
+server interfaces.)
+Bit 3 in the argument to
+\fBwait()\fP
+that
+checks if
+\fBremote_async()\fP
+replies have all arrived will now also include checks on
+connections to \fBspec\fP servers and \fBspec\fP server and EPICS motors.
+See the updated
+\fI\%wait\fP help file for more information.
+.SH "Fixes For \fBlibedit\fP With \fBspec\fP Server"
+.sp
+A flaw in the
+\fBlibedit\fP
+\fBreadline\fP\-compatibility
+functions that produced extra prompt strings and
+left the terminal interface in the wrong mode after receiving
+remote commands from clients has been fixed.
+.SH "Code For Tsuji CT16\-01B Updated"
+.sp
+\fBspec\fP code for the Tsuji CT16\-01B counter/timer has been updated for the
+device\(aqs version 1.31 firmware.
+.SH "New Focus 8752 Picomotor Controllers Supported"
+.sp
+\fBspec\fP now supports the New Focus Model 8752 Intelligent
+Picomotor Ethernet controller in addition to the Model 8750 Intelligent
+Picomotor Network controller (using a serial interface), both to control
+the Model 8753 Picomotor Drivers.
+.SH "February 18, 2004 \- RELEASE 5.05.01\-4"
+.rs
+.SH "GPIB Sharing Recently Broken, Now Fixed"
+.sp
+Modifications made for \fBspec\fP release 5.05.01 inadvertently
+disabled the feature to share control of GPIB controllers among
+multiple instances of \fBspec\fP.
+The ability to share GPIB controllers is now restored.
+.SH "Direct Support Added For National Instruments PCII/A GPIB Controllers"
+.sp
+\fBspec\fP now includes initial support for the old National Instruments
+PCII and PCII/A nec7210\-based GPIB controllers using direct register
+access.
+No kernel\-level driver is used.
+.SH "February 17, 2004 \- RELEASE 5.05.01\-3"
+.rs
+.SH "New \fB\(dqhome_method\(dq\fP Optional Motor Parameter"
+.sp
+A new
+\fB"home_method"\fP
+motor parameter is available on the first optional parameter screen of
+the configuration editor and as an argument to the
+\fBmotor_par()\fP
+function.
+It is intended that this parameter will be used in a device\-dependent
+manner to specify how to perform a home search.
+For some motor controllers that have a long list of numbered methods
+(the Kohzu SC\-2/4/800, for example),
+this parameter will select one of those methods.
+For other motor controllers, this parameter may contain a command string
+to send to the controller to perform a home search (such as the Phytron
+IXE).
+For many motor controllers, this parameter will not be used.
+.SH "Phytron Support Updated For OMC/TMC Models and Home Method"
+.sp
+\fBspec\fP now includes support for the
+OMC/TMC Phytron motor controller models.
+Although there is a new entry to specify the Phytron OMC/TMC on the
+\fBD\fPevices
+screen of the configuration editor, the controller type on the
+\fBM\fPotor
+screen should be selected as
+\fBIXE\fP.
+In addition, the new
+\fB"home_method"\fP
+parameter can be used to specify the home\-search string, rather than
+the first generic parameter (although that parameter will still be
+examined if
+\fB"home_method"\fP
+is not set).
+.SH "Support For Kohzu SC\-2/4/800 Motor Controllers"
+.sp
+Initial support for the Kohzu SC\-200, SC\-400 and SC\-800
+motor controllers over
+RS\-232C and GPIB interfaces is included in this \fBspec\fP release.
+.SH "Support For MicroMo MVP\-2001 Motor Controller"
+.sp
+Initial support for the MicroMo MVP\-2001 motor controllers (also
+branded as MicroMini by National Aperture) is included in this
+\fBspec\fP release.
+.SH "Support For Physik Instrumente Model E710 Picomotor Controller"
+.sp
+Initial support for the Physik Instrumente Model E710 picomotor
+controllers over RS\-232C and GPIB interfaces is included in this \fBspec\fP release.
+.SH "Byte Swapping Fix For ESRF Sensicam Support"
+.sp
+\fBspec\fP now returns image data in the correct byte order
+on little\-endian platforms
+(such as PCs) when reading data from the Sensicam CCD camera using the ESRF
+TACO device server.
+.SH "February 3, 2004 \- RELEASE 5.05.01\-2"
+.rs
+.SH "Fix For New Focus 8750/53 Support"
+.sp
+The recent modifications for the New Focus 8750/8753 picomotor controller
+in \fBspec\fP release 5.04.04\-10 inadvertently caused the motor channel
+numbering to be off by one.
+That problem has been fixed.
+Also the new unit/module/channel motor configuration is now implemented
+for this controller.
+.SH "February 2, 2004 \- RELEASE 5.05.01\-1"
+.rs
+.SH "Fix For Saving Pseudomotor Positions"
+.sp
+A minor problem associated with pseudomotor positions has been fixed.
+Previously, the positions associated with calculational pseudomotors
+could be written
+to the
+\fBsettings\fP
+file incorrectly as zero immediately after executing a
+\fBreconfig\fP
+command.
+If \fBspec\fP was quit before motor positions were recalculated,
+the zeroes would remain in the
+\fBsettings\fP
+file, although the positions would be recalculated and saved in the
+\fBsettings\fP
+file correctly the
+next time \fBspec\fP needed them.
+.SH "Fix For Serial Devices In Simulate Mode"
+.sp
+A minor problem, where if \fBspec\fP was started in simulate mode the
+\fBser_get()\fP
+and
+\fBser_put()\fP
+functions would generate errors, has been fixed.
+The errors did not occur if simulate mode was turned on after \fBspec\fP
+was started normally.
+.SH "January 18, 2004 \- RELEASE 5.05.01"
+.rs
+.SH "Somewhat Revised Installation Procedure"
+.sp
+The \fBspec\fP
+\fBInstall\fP
+script no longer prompts for a system type \- the system will be determined
+automatically.
+The platform types currently recognized (as seen in the return value
+of the standard
+\fBuname\fP
+utility) are
+\fBLinux\fP
+(x86),
+\fBSunOS\fP
+(Solaris 2),
+\fBHP\-UX\fP
+(hp700) and
+\fBDarwin\fP
+(Mac OS X).
+(Support for OS X
+is still experimental.)
+Previously, the system type also included a prefix to indicate
+whether EPICS
+(\fBepics_\fP)
+or TACO
+(\fBesrf_\fP)
+support was to be linked.
+The choice of linking with TACO,
+TANGO or EPICS will now be made based on whether the new
+\fBtaco_home\fP,
+\fBtango_home\fP
+or
+\fBepics_home\fP
+parameters are set in
+the
+\fBinstall_data\fP
+file.
+.SH "New Option To \fBInstall\fP"
+.sp
+A new
+\fB\-f file\fP
+option to the \fBspec\fP
+\fBInstall\fP
+script allows specification of a file for the default parameters other
+than the default file
+\fBinstall_data\fP
+in the current directory.
+.SH "Enhancements For Command\-Line Editing"
+.sp
+The optional capability to link \fBspec\fP
+with command\-line editing libraries has been
+updated and enhanced.
+Previously, the \fBspec\fP installation could be configured to
+link with a version 2.0 release
+of the GNU readline library.
+Now \fBspec\fP may be linked (at the user\(aqs option)
+with all current and previous releases of readline,
+namely versions 2.0, 2.1, 2.2, 2.2.1, 4.0, 4.1, 4.2, 4.2a and 4.3.
+.sp
+CSS no longer aggregates a readline distribution
+with the \fBspec\fP distribution,
+since the readline library is now included with most modern
+\fBLinux\fP
+distributions and, in any case, can be easily retrieved
+(from \fI\%ftp://ftp.gnu.org/gnu/readline/\fP)
+and readily installed
+on any platform supported by \fBspec\fP.
+.sp
+Also, an alternative command\-line editing package is included with
+the \fBspec\fP distribution, namely the NetBSD libedit library.
+While the readline library code is from the
+\fBbash\fP
+shell, the libedit
+library is rooted in the
+\fBtcsh\fP
+shell.
+Although most command\-line editing and history\-recall features are
+identical in readline and libedit, there are some small differences which
+may lead users to prefer one over the other.
+Either or neither can be used with \fBspec\fP.
+The choice is made at installation time based on an option selected
+when running \fBspec\fP\(aqs
+\fBInstall\fP
+script.
+The default choice is
+\fBlibedit\fP,
+since that library is included with the \fBspec\fP distribution.
+.SH "Support For EPICS 3.14"
+.sp
+\fBspec\fP now supports EPICS release 3.14.
+The current \fBspec\fP distribution
+includes support for both EPICS 3.13 and
+3.14, although only one or the other can be linked with at a time.
+The path given as the
+\fB"EPICS library directory"\fP
+to the
+\fBInstall\fP
+program (saved as the
+\fBepics_home\fP
+option in the
+\fBinstall_data\fP
+file) is examined to see whether it contains
+contains an EPICS 3.13 or 3.14 distribution, and \fBspec\fP links with
+the appropriate \fBspec\fP and EPICS libraries.
+The EPICS library directory parameter
+should be set to path name at the top of the standard
+EPICS distribution hierarchy, that is, the path should
+be a directory that
+contains a subdirectory named
+\fBbase\fP.
+

@@ -1,0 +1,282 @@
+data                                reference                               data
+
+NAME
+     data - built-in functions for handling internal data
+
+DESCRIPTION
+
+     (Note, data groups are no longer used in the standard ssppeecc macros, and
+     their use is deprecated.  Data arrays should be used instead.  See the
+     _a_r_r_a_y_s help file.)
+
+     ssppeecc stores data in up to 256 independent data arrays called groups.  Each
+     group is configured (see below) to have a particular number of data
+     elements per point.  For example, each point in a group could have elements
+     for HH, KK, LL and detector counts.  Alternatively, each point could have just
+     one element and be used to hold data obtained from an MCA.
+
+     Groups are configured using the ddaattaa__ggrrpp(()) function.  A group can have up
+     to 2048 elements per point.  The maximum number of points in a group is
+     determined by the product of the number of elements per point and the
+     number of points.  That product can be no more than 65,536, and may be
+     slightly less depending on how the number of elements divides into 2048.
+     The maximum number of points for all groups is 262,144.  (These limits are
+     arbitrary and are set to control the size of static data arrays and
+     auxiliary files.  If requested, CSS can make the limits larger.)
+
+     When starting ssppeecc for the first time or with the --ff (fresh) flag, one data
+     group (group 0) is configured for 4096 points, with each point consisting
+     of two elements.  The old-style functions for accessing the internal data
+     (ppll__ggeett(()), ppll__ppuutt(()), etc.)  are described at the end of this section.
+     Their use is discouraged, though, as they will not be available in future
+     releases.
+
+     When leaving ssppeecc, the current data group configuration and data points are
+     saved.
+
+     ssppeecc has several functions to manipulate the internal data.  These
+     functions allow unary and binary arithmetic operations, math functions and
+     analysis operations to be performed on all the elements of a group or among
+     elements in different groups.
+
+     In the functions described below, if an element number is negative, the
+     element number is obtained by adding the number of elements per point in
+     the group to the negative element number.  For example, element -1 is the
+     last element, element -2 is the second to last, etc.
+
+     All functions reset to command level if an invalid group, point or element
+     is given as an argument.  Functions that don't need to return anything in
+     particular return zero.
+
+BUILT-IN FUNCTIONS
+
+     ddaattaa__ggrrpp((gg,, nn,, ww)) - Configures data group gg. The group will have nn points,
+          each having ww elements.  If nn and ww match the previous values for the
+          group, the data in the group is unchanged.  Otherwise, the data values
+          of the reconfigured group are set to zero.  If ww is zero, the group is
+          eliminated.  If nn is zero, as many points as possible are configured.
+          If nn is negative, as many points as possible, but not more than --nn are
+          configured.  If gg is -1, the current group configuration is displayed.
+
+     ddaattaa__iinnffoo((gg,, ss)) - Returns data group configuration information for group gg,
+          according to the string ss.  Values for ss are:
+
+          ""nnppttss"" - the number of configured points.
+          ""eelleemm"" - the number of configured elements.
+          ""llaasstt"" - the number of the last point added to the group.
+          ""pprreecciissiioonn"" - the number of bytes per element, either 4 or 8.
+
+          If the group number is invalid, or if the string ss is none of the
+          above, returns -1.
+
+     ddaattaa__ggeett((gg,, nn,, ee)) - Returns the value of element ee of point nn in group gg.
+
+     ddaattaa__ppuutt((gg,, nn,, ee,, vv)) - Assigns the value vv to element ee of point nn in group
+          gg.
+
+     ddaattaa__nnppuutt((gg,, nn,, vv00 [[,, vv11 ......]]))  - Assigns values to point nn of group gg.
+          Element 0 is assigned vv00, element 1 is assigned vv11, etc.  Not all
+          elements need be given, although elements are assigned successively,
+          starting at element 0.
+
+     ddaattaa__uuoopp((ggss,, eess,, ggdd,, eedd,, uuoopp [[,, aarrgg]])) - Performs the unary operation
+          specified by the string uuoopp on element eess for all points in group ggss.
+          The results are put in element eedd of the corresponding points in group
+          ggdd. The source and destination groups and/or elements may be the same.
+          If the number of points in the groups differ, the operation is carried
+          out on up to the smallest number of points among the groups.
+
+          Values for uuoopp are:
+
+          ""ccllrr"" - clear to zero.
+          ""ffiillll"" - each element is set to point number, starting at 0.
+          ""nneegg"" - negative of source.
+          ""aabbss"" - absolute value of source.
+          ""iinnvv"" - inverse of source.
+          ""ssiinn"" - sine of source.
+          ""ccooss"" - cosine of source.
+          ""ttaann"" - tangent of source.
+          ""aassiinn"" - arcsine of source.
+          ""aaccooss"" - arccosine of source.
+          ""aattaann"" - arctangent of source.
+          ""lloogg"" - natural logarithm of source.
+          ""eexxpp"" - exponential of source.
+          ""lloogg1100"" - log base 10 of source.
+          ""ppooww"" - the aarrgg power of source.
+          ""ccooppyy"" - value of source.
+          ""rreevv"" - reversed copy of source.
+          ""ssqqrrtt"" - square root of source.
+          ""sseett"" - all elements set to the value of aarrgg.
+          ""ccoonnttrraacctt"" - every aarrgg points are averaged to make a new point.
+          ""aadddd"" - source plus aarrgg.
+          ""ssuubb"" - source minus aarrgg.
+          ""mmuull"" - source times aarrgg.
+          ""ddiivv"" - source divided by aarrgg.
+
+          If any of the operations would result in an exception (divide by zero,
+          log or square root of a negative number, etc), the operation is not
+          performed and a count of the operations skipped is printed as an error
+          message.
+
+     ddaattaa__bboopp((ggss00,, eess00,, ggss11,, eess11,, ggdd,, eedd,, bboopp)) - Performs the binary operation
+          specified by the string bboopp on elements eess00 and eess11 for all points in
+          the groups ggss00 and ggss11. The results are put in element eedd for the
+          corresponding points of group ggdd.  The source and destination groups
+          and/or elements may be the same.  If the number of points in the
+          groups differ, the operation is carried out on up to the smallest
+          number of points among the groups.
+
+          Values for bboopp are:
+
+          ""aadddd"" - The sum of the source elements.
+          ""ssuubb"" - Source 0 minus source 1.
+          ""mmuull"" - The product of the source elements.
+          ""ddiivv"" - Source 0 divided by source 1.
+
+          If the divide would result in an exception, the operation is not
+          performed and a count of the operations skipped is printed as an error
+          message.
+
+     ddaattaa__aannaall((gg,, ss,, nn,, ee00,, ee11,, oopp [[,, aarrgg]])) - Performs the operations indicated
+          by oopp on nn points in group gg, starting at point ss.  The operations use
+          the values in element ee00 (if applicable) and ee11.  If nn is zero, the
+          operations are performed on points from ss to the last point added
+          using ddaattaa__nnppuutt(()) or ddaattaa__ppuutt(()).
+
+          ""mmiinn"" - Returns the minimum value of ee11. (ee00 is unused.)
+          ""mmaaxx"" - Returns the maximum value of ee11. (ee00 is unused.)
+          ""ii__aatt__mmiinn"" - Returns the point number of the data point with the
+               minimum value of ee11. (ee00 is unused.)
+          ""ii__aatt__mmaaxx"" - Returns the point number of the data point with the
+               maximum value of ee11. (ee00 is unused.)
+          ""ii__<<==__vvaalluuee"" - Returns the point number of the nearest data point in
+               ee11 at or below aarrgg, starting from the first point.  (ee00 is
+               unused.)
+          ""ii__>>==__vvaalluuee"" - Returns the point number of the nearest data point in
+               ee11 at or above aarrgg, starting at the last point.  (ee00 is unused.)
+          ""uuhhmmxx"" - Returns the value in ee00 corresponding to half the maximum
+               value in ee11, and at a higher index.
+          ""llhhmmxx"" - Returns the value in ee00 corresponding to half the maximum
+               value in ee11, and at a lower index.
+          ""ssuumm"" - Returns the sum of the values in ee11. (ee00 is unused.)
+          ""ffwwhhmm"" - Returns the full-width in ee00 at half the maximum value of ee11.
+          ""ccffwwhhmm"" - Returns the center of the full-width in ee00 at half the
+               maximum value of ee11.
+          ""ccoomm"" - Returns the center of mass in ee00 with respect to ee11. The value
+               is the sum of the products of each ee00 and ee11 divided by the
+               number of points.
+          ""xx__aatt__mmiinn"" - Returns the value of ee00 at the minimum in ee11.
+          ""xx__aatt__mmaaxx"" - Returns the value of ee00 at the maximum in ee11.
+          ""ssuummssqq"" - Returns the sum of the squares in ee11. (ee00 is unused.)
+
+          The following operations treat a data group as a two dimensional data
+          array with rows indexed by the point number and the columns indexed by
+          the element number.  The operations work on the portion of the group
+          determined by the starting row ss, the number of rows nn, the starting
+          column ee00 and the end row ee11.  As usual, if nn is zero, all points
+          (rows) from ss to the last are considered.  A negative element (column)
+          number is added to the group width to obtain the element (column) to
+          use.
+
+               ""ggmmiinn"" - Returns the minimum value.
+               ""ggmmaaxx"" - Returns the maximum value.
+               ""ggssuumm"" - Returns the sum of all values.
+               ""ii__aatt__ggmmiinn"" - Returns the index number of the minimum value.  The
+                    index number is the row number times the group width plus
+                    the element number.
+               ""ii__aatt__ggmmaaxx"" - Returns the index number, as defined above, of the
+                    maximum value.
+
+     ddaattaa__dduummpp((gg,, ss,, nn,, ee00 [[,, ee11 ......]] [[,, ffmmtt11]] [[,, ffmmtt22]])) - Efficiently writes
+          elements from group gg to turned on output devices.  The starting point
+          is ss and the number of points is nn. The elements specified by ee00, ee11,
+          etc., are printed.  If ee00 is the string ""aallll"", all the elements for
+          each point are printed.  If nn is zero, only the points from ss to the
+          last point added using ddaattaa__nnppuutt(()) or ddaattaa__ppuutt(()) are printed.  The
+          element arguments can be combined in a single space- or
+          comma-delimited string.  The optional argument ffmmtt11 is a string,
+          having the format ""%%##"", that specifies how many data points (specified
+          by the number ##) are to be printed on each line.  If the number ## is
+          followed by the letter CC, a backslash is added to each continued line,
+          appropriate for saving MCA data in managable length lines.  New
+          versions (since May 1, 1995) of the CC--PPLLOOTT ssccaannss..44 user function
+          interpret the continued lines correctly for MCA data.  The optional
+          argument ffmmtt22 is a string that specifies an alternate pprriinnttff(())-style
+          format for the values.  Only ee, gg and ff formats are recognized.  For
+          example, ""%%1155..88ff"" uses fixed-point format with eight digits after the
+          decimal point and a fifteen-character-wide field.  The default output
+          format is ""%%gg"".  See pprriinnttff(()) in a C manual for more information.
+          Note that in the default installation, the internal data arrays use
+          single-precision floating values, which contain only about 8 decimal
+          digits of significance.
+
+     ddaattaa__rreeaadd((ffiillee__nnaammee,, gg,, ss,, nn)) - Reads data from the ASCII file ffiillee__nnaammee,
+          and stuffs the data into group gg starting at point ss, reading up to nn
+          points.  If nn is zero, all the points in the file are read.  The
+          values on each line of the file are assigned into successive elements
+          for each point in the group.  If there are more elements on a line in
+          the file than fit in the group, or if there are more points in the
+          file than in the group, the extra values are ignored.  Lines beginning
+          with the ## character are ignored.  Returns -1 if the file can't be
+          opened, otherwise returns the number of points read.  At present, the
+          maximum input line length is 2,048 characters.
+
+     ddaattaa__rreeaadd((aarrrr,, gg,, ss,, nn)) - Similar to the above usage, but transfers the
+          data from the data array aarrrr to the data group.  Rows in the data
+          array correspond to points in the data group.  Columns in the data
+          array correspond to elements in the data group.  See the _a_r_r_a_y_s help
+          file for information on data arrays.
+
+     ddaattaa__pplloott((gg,, ss,, nn,, ee00,, ee11 [[,, ee22 ......]]))  - Plots the current data in group gg
+          starting at point ss and plotting nn points.  Element ee00 is used for xx.
+          Elements given by the subsequent arguments (up to a maximum of 64) are
+          plotted along the yy axis.  The element arguments can be combined in a
+          single space- or comma-delimited string.  If nn is zero, only the
+          points from ss to the last point added using ddaattaa__nnppuutt(()) or ddaattaa__ppuutt(())
+          are plotted.  If preceded by a call of pplloott__ccnnttll((""aaddddppooiinntt"")) and the
+          ranges have not changed, only point ss++nn--11 is drawn.  If preceded by a
+          call of pplloott__ccnnttll((""aaddddlliinnee"")) the current plot will not be erased, and
+          the plot ranges will not be changed.  The plotting area is not
+          automatically erased by a call of ddaattaa__pplloott(())-use pplloott__ccnnttll((""eerraassee""))
+          for that.  The axis ranges are set using the pplloott__rraannggee(()) function.
+          See _p_l_o_t___c_n_t_l_(_) for other options that affect drawing the plot.
+
+     ddaattaa__pplloott((gg,, ss,, nn,, ""aallll"")) - As above, but uses element zero for xx and the
+          remaining elements (up to a maximum of 64) for yy values.  The number
+          of elements is set with the ddaattaa__ggrrpp(()) function.
+
+     ddaattaa__ffiitt((ppaarrss,, gg,, ss,, nn,, eeddaattaa,, eeppaarrss [[,, ......]]))  - Performs a linear fit of
+          the data in element eeddaattaa to the terms in the elements specified by
+          eeppaarrss.  The fitted parameters are returned in the array ppaarrss supplied
+          by the user.  The function returns the cchhii--ssqquuaarreedd value of the fit,
+          if the fit was successful.  A -1 is returned if there are insufficient
+          arguments or the covariance matrix is singular.  The fit algorithm is
+          along the same lines as the llffiitt(()) routine in NNuummeerriiccaall RReecciippeess (W.H.
+          Press, et al., Cambridge University Press, 1986, page 512).
+
+OLD-STYLE COMPATIBILITY FUNCTIONS
+
+     The following functions are currently supported, but will be eliminated in
+     future releases.  New macros should be written using the functions
+     described above.
+
+     ppll__ppuutt((ii,, xx,, yy)) - Adds xx and yy as elements 0 and 1 of group 0, point ii.
+
+     ppll__xxggeett((ii)) - Returns the value of element 0 in group 0, point ii.
+
+     ppll__yyggeett((ii)) - Returns the value of element 1 in group 0, point ii.
+
+     ppll__dduummpp((ss,, nn,, hhooww)) - Efficiently writes pairs of elements from group 0 to
+          turned on output devices.  The starting point is ss and the number of
+          points is nn. If hhooww=0 element 0 values are printed, if hhooww=1 element 1
+          values are printed and if hhooww=2 both values are printed.
+
+     pplloott__ppttss((xx,, ss,, nn)) - Plots element 1 versus element 0 of the data values in
+          group 0 starting at point ss and plotting nn points.  If preceded by a
+          call of pplloott__ccnnttll((""aaddddppooiinntt"")) and the ranges have not changed, only
+          point ss++nn--11 is drawn.
+
+SEE ALSO
+
+     _d_a_t_a___p_i_p_e _p_l_o_t _s_p_l_o_t
+

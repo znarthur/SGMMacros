@@ -1,0 +1,335 @@
+.TH "star1" "hardware" "08/01/12" "star1.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+star1 \- Photometrics STAR 1 CCD Camera and Controller
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)star1.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1993,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "star1" "hardware" "08/01/12" "star1.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Photometrics STAR 1 System is supported as a GPIB device.
+The controller is selected in the \fBconfig\fP file with the line
+.sp
+.RS 4m
+\fBGP_STAR1 = gpib_address\fP
+.RE
+.sp
+When running the configuration editor, switch to  the
+device configuration screen to select the STAR 1 as an MCA device.
+.SH "PARAMETERS AND CONTROLS"
+.rs
+.sp
+The \fBmca_par()\fP function controls the STAR 1 behavior as follows:
+.RS 0m
+.HP 5m
+."
+\fBmca_par("auto", value)\fP
+\- 
+Selects whether the lookup table will be automatically adjusted by the
+STAR 1 after each exposure.
+Valid arguments are 0 to turn auto mode off and 1 to turn it on.
+.HP 5m
+."
+\fBmca_par("auto")\fP
+\- 
+Returns the current auto mode (0 or 1).
+.HP 5m
+."
+\fBmca_par("bias")\fP
+\- 
+Initiates a bias integration.
+All charge is cleared from
+the CCD, and then it is immediately read out.
+Provides measure of the DC offset and inherent structure of the CCD array.
+Resets the ROI to the entire image area.
+.HP 5m
+."
+\fBmca_par("bins", value)\fP
+\- 
+Sets the binning value.  Pixel values in the specified number of
+adjacent columns will be combined with the resulting image compressed
+horizontally.
+.HP 5m
+."
+\fBmca_par("bins")\fP
+\- 
+Returns the binning value.
+.HP 5m
+."
+\fBmca_par("clear")\fP
+\- 
+Clears the video image.  Resets the ROI to the entire image area.
+.HP 5m
+."
+\fBmca_par("dark")\fP
+\- 
+Initiates a dark integration for the programmed exposure time.
+Resets the ROI to the entire image area.
+.HP 5m
+."
+\fBmca_par("dx", value)\fP
+\- 
+Sets the width of the box cursor.
+.HP 5m
+."
+\fBmca_par("dx")\fP
+\- 
+Returns the width of the box cursor.
+.HP 5m
+."
+\fBmca_par("dy", value)\fP
+\- 
+Sets the height of the box cursor.
+.HP 5m
+."
+\fBmca_par("dy")\fP
+\- 
+Returns the height of the box cursor.
+.HP 5m
+."
+\fBmca_par("expose")\fP
+\- 
+Opens the shutter for the programmed exposure time.
+Resets the ROI (region of interest) to the entire image area.
+.HP 5m
+."
+\fBmca_par("expose_time", value)\fP
+\- 
+Sets the exposure time in units of tenths of seconds.
+Valid arguments are between 1 and 999 (0.1 and 99.9 seconds).
+.HP 5m
+."
+\fBmca_par("expose_time")\fP
+\- 
+Returns the current exposure time.
+.HP 5m
+."
+\fBmca_par("focus")\fP
+\- 
+Takes one 100x100 pixel exposure from the center of the image area.
+(Uses the \fBcalibrate\fP STAR 1 command, rather than the \fBfocus\fP command,
+as the latter starts a continuous acquisition mode that can\(aqt be
+halted from the remote computer.)
+.HP 5m
+."
+\fBmca_par("gain", value)\fP
+\- 
+Sets the gain.
+Valid arguments are 0 and 1, which set x1 and x4 gain, respectively.
+.HP 5m
+."
+\fBmca_par("gain")\fP
+\- 
+Returns the gain value (0 or 1).
+.HP 5m
+."
+\fBmca_par("getbox")\fP
+\- 
+Updates the retrievable box cursor coordinates within the display.
+.HP 5m
+."
+\fBmca_par("linear_lut")\fP
+\- 
+Creates a linear lookup table
+using the \fB"lut_min"\fP and \fB"lut_max"\fP values.
+.HP 5m
+."
+\fBmca_par("load")\fP
+\- 
+Reads in the image from the current data file and sends it to the
+STAR 1 controller to be displayed on the video monitor.
+Only full\-screen images saved in the \fB"raw"\fP format
+can be read and loaded.
+.HP 5m
+."
+\fBmca_par("lut#", value)\fP
+\- 
+Sets element number \fB#\fP of the user\-defined lookup table to
+\fBvalue\fP. The user\-defined lookup table is sent to the STAR 1 using the
+\fB"send_lut"\fP command.
+Valid element numbers are from 0 to 4095.
+Valid lookup table values are from 0 to 255.
+.HP 5m
+."
+\fBmca_par("lut#")\fP
+\- 
+Returns the value of element \fB#\fP of the user\-defined lookup table.
+.HP 5m
+."
+\fBmca_par("lut_max", value)\fP
+\- 
+Sets the maximum pixel value for the \fB"linear_lut"\fP command.
+Valid arguments are from 0 to 4095.
+.HP 5m
+."
+\fBmca_par("lut_max")\fP
+\- 
+Returns the maximum pixel value.
+.HP 5m
+."
+\fBmca_par("lut_min", value)\fP
+\- 
+Sets the minimum pixel value for the \fB"linear_lut"\fP command.
+Valid arguments are from 0 to 4095.
+.HP 5m
+."
+\fBmca_par("lut_min")\fP
+\- 
+Returns the minimum pixel value.
+.HP 5m
+."
+\fBmca_par("mouse_x")\fP
+\- 
+Sets the delta \fBx\fP value for the next cursor movement.
+The cursor is moved with the \fB"mouse_y"\fP command.
+.HP 5m
+."
+\fBmca_par("mouse_y")\fP
+\- 
+Sets the delta
+\fBy\fP value for cursor movement, and moves the cursor using this value
+and the value set with the \fB"mouse_x"\fP command.
+.HP 5m
+."
+\fBmca_par("roi", value)\fP
+\- 
+Sets the number of ROIs for the \fB"roi_acquire"\fP command.
+.HP 5m
+."
+\fBmca_par("roi")\fP
+\- 
+Returns the number of ROIs.
+.HP 5m
+."
+\fBmca_par("roi_acquire")\fP
+\- 
+Initiates acquisition of the region defined by the box cursor.
+Will acquire multiple regions if the
+\fB"roi"\fP value is greater than one and the size of the box cursor
+allows more than one region to be displayed on the video monitor.
+.HP 5m
+."
+\fBmca_par("roi_delay", value)\fP
+\- 
+Sets the delay (in tenths of a second) between ROI acquisitions when the
+\fB"roi"\fP value is greater than one,
+and the \fB"roi_acquire"\fP command is sent.
+.HP 5m
+."
+\fBmca_par("roi_delay")\fP
+\- 
+Returns the ROI delay.
+.HP 5m
+."
+\fBmca_par("save")\fP
+\- 
+Reads the image from the STAR 1 (either the entire image area, or the
+ROI array(s), depending on the last used acquisition command), and
+writes to the current image file, using the current image format and
+the current save image parameters.
+Only one save image is allowed per file file.
+The existing contents of the file will be erased.
+.HP 5m
+."
+\fBmca_par("save_using_lut")\fP
+\- 
+As above, but saves the image using the user\-defined
+lookup table to transform pixel values.
+.HP 5m
+."
+\fBmca_par("send_lut")\fP
+\- 
+Sends the user\-defined lookup table to the STAR 1.
+Element 0 is first set to zero and element 4095 to 255
+in order to preserve the contrast in the annotation text of the display.
+.HP 5m
+."
+\fBmca_par("setbox")\fP
+\- 
+Displays the box cursor.
+.HP 5m
+."
+\fBmca_par("shade")\fP
+\- 
+Displays a test image on the video monitor.
+.HP 5m
+."
+\fBmca_par("trigger")\fP
+\- 
+Opens the shutter and continually clears the CCD array of charge
+until an external trigger signal is received.
+There is no way to reset the shutter from the remote computer if an
+external trigger signal is not received by the STAR 1.
+.HP 5m
+."
+\fBmca_par("x0", value)\fP
+\- 
+Sets the lower left \fBx\fP coordinate of the box cursor.
+.HP 5m
+."
+\fBmca_par("x0")\fP
+\- 
+Returns the value of the lower left \fBx\fP coordinate of the box cursor.
+.HP 5m
+."
+\fBmca_par("y0", value)\fP
+\- 
+Sets the lower left \fBy\fP coordinate of the box cursor.
+.HP 5m
+."
+\fBmca_par("y0")\fP
+\- 
+Returns the value of the lower left \fBy\fP coordinate of the box cursor.
+.HP 5m
+."
+\fBmca_par("zoom", value)\fP
+\- 
+Sets the zoom factor.
+Valid values are 0, 1 and 2 for x1, x2 and x4 zoom factors, respectively.
+.HP 5m
+."
+\fBmca_par("zoom")\fP
+\- 
+Returns the current zoom value (0, 1 or 2).
+.HP 5m
+."
+\fBimage_par("bits", value)\fP
+\- 
+Sets the number of bits per pixel to use when the image is saved to a
+(tiff) file.  Valid arguments are 4, 8 or 12.
+.HP 5m
+."
+\fBimage_par("bits")\fP
+\- 
+Returns the bits\-per\-pixel value.
+.HP 5m
+."
+\fBimage_par("format", type)\fP
+\- 
+Sets the save file format to be used for the image data file.
+Valid formats are currently \fB"tiff"\fP and \fB"raw"\fP.
+.HP 5m
+."
+\fBimage_par("format")\fP
+\- 
+Returns the current save file format.
+.HP 5m
+."
+\fBimage_par("file", file_name)\fP
+\- 
+Sets the data file name to be used for the next
+\fB"save"\fP, \fB"save_with_lut"\fP or \fB"load"\fP command.
+.RE
+

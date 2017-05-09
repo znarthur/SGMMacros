@@ -1,0 +1,30 @@
+less                                  macro                                 less
+
+NAME
+     less - file perusal program
+
+SYNOPSIS
+
+     lleessss  ffiillee__nnaammee [[ffiillee__nnaammee ......]]
+
+DESCRIPTION
+
+     The lleessss macro runs the handy file-perusal utility program of the same name
+     in a sub-shell.
+
+     The program lleessss is public domain software available through uusseenneett or by
+     request from Certified Scientific Software.  Help for lleessss is available
+     while it is running by typing hh, HH or zz, depending on the version.
+
+DEFINITION
+
+     ddeeff lleessss ''uunniixx((""lleessss $$**""))''
+
+EXAMPLE
+
+     lleessss ddaattaaffiillee
+
+SEE ALSO
+
+     _u _c_a_t _v_i _n_e_d
+

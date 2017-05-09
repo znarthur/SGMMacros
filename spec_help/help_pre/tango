@@ -1,0 +1,277 @@
+tango                               hardware                               tango
+
+NAME
+     tango - TANGO specific functions
+
+DESCRIPTION
+
+     TANGO is an object-oriented distributed control system using CORBA,
+     developed as a collaborative effort among the Alba, Desy, Elettra, ESRF and
+     Soleil institutes.  See _h_t_t_p_:_/_/_w_w_w_._t_a_n_g_o_-_c_o_n_t_r_o_l_s_._o_r_g_/ for complete
+     details.  The support built into ssppeecc requires the C-binding library for
+     TANGO.
+
+     In addition to generic access to TANGO properties via the ttaannggoo__iioo(())
+     function and TANGO attributes with the ttaannggoo__ppuutt(()) and ttaannggoo__ggeett(())
+     functions, ssppeecc also supports the TANGO GPIB server as a standard GPIB
+     interface.
+
+PROPERTIES
+
+     ttaannggoo__iioo((ddeevv,, ""??""))  - Lists the command properties for ddeevv in a concise
+          format, showing the input and output data types for each available
+          command.
+
+     ttaannggoo__iioo((ddeevv,, ""????""))  - Lists the command properties for ddeevv in a more
+          verbose format, showing not only the input and output data types, but
+          also the command description, as supplied by the TANGO server.
+
+     ttaannggoo__iioo((ddeevv,, ccmmdd [[,, aarrggiinn [[,, aarrggoouutt]])) - Allows general access to TANGO
+          devices.  If ccmmdd returns a scalar, the aarrggoouutt argument is optional.
+          If present, the return value for ccmmdd will be placed there and
+          ttaannggoo__iioo(()) will return zero on success.  If absent, ttaannggoo__iioo(()) will
+          return the value for ccmmdd.  If ccmmdd returns an array, the aarrggoouutt array
+          argument is required.  On success, ttaannggoo__iioo(()) returns the number of
+          elements in the array.
+
+     ttaannggoo__iioo((ddeevv,, ""ttiimmeeoouutt"")) - Returns the current connection timeout for ddeevv
+          in seconds.
+
+     ttaannggoo__iioo((ddeevv,, ""ttiimmeeoouutt"",, sseecc)) - Sets the connection timeout for ddeevv in
+          seconds.
+
+     ttaannggoo__iioo((ddeevv,, ""ssoouurrccee"")) - Returns the data source for ddeevv.  A value of 0
+          indicates data is read directly from the device.  A value of 1 means
+          data is read from the polling cache.  A value of 2 indicates data is
+          read from the cache or the device.
+
+     ttaannggoo__iioo((ddeevv,, ""ssoouurrccee"",, vvaalluuee)) - Sets the data source for ddeevv.  Allowed
+          values are 0, 1 and 2, with meanings as described above.
+
+ATTRIBUTES
+
+     ttaannggoo__ggeett((ddeevv,, ""??"")) or ttaannggoo__ppuutt((ddeevv,, ""??""))  - Lists the attributes, the
+          read-write permissions and data type for ddeevv in a concise format.
+
+     ttaannggoo__ggeett((ddeevv,, ""????"")) or ttaannggoo__ppuutt((ddeevv,, ""????""))  - Lists the attributes, the
+          read-write permissions, data type and command description for ddeevv.
+
+     ttaannggoo__ggeett((ddeevv,, ""??"",, aattttrr)) - Displays elements of the attribute information
+          structure for the selected attribute.
+
+     ttaannggoo__ggeett((ddeevv,, ""??"",, aattttrr,, iinnffoo)) - Fills the associative array iinnffoo with the
+          elements of the attribute information structure for the selected
+          attribute.  Elements are indexed as shown:
+
+              iinnffoo[[""ddaattaa__ffoorrmmaatt""]]          Scalar, spectrum or image
+              iinnffoo[[""ddaattaa__nnaammee""]]            Data type as a string
+              iinnffoo[[""ddaattaa__ttyyppee""]]            Data type code number
+              iinnffoo[[""ddeessccrriippttiioonn""]]          Description text
+              iinnffoo[[""ddiisspp__lleevveell""]]           Operator or expert
+              iinnffoo[[""ddiissppllaayy__uunniitt""]]         Conversion factor to GUI display unit
+              iinnffoo[[""ffoorrmmaatt""]]               Format specification string for GUI display
+              iinnffoo[[""llaabbeell""]]                GUI label
+              iinnffoo[[""mmaaxx__aallaarrmm""]]            Max value, checked when reading
+              iinnffoo[[""mmaaxx__ddiimm__xx""]]            Max data size in X
+              iinnffoo[[""mmaaxx__ddiimm__yy""]]            Max data size in Y
+              iinnffoo[[""mmaaxx__vvaalluuee""]]            Max value, checked when writing
+              iinnffoo[[""mmiinn__aallaarrmm""]]            Min value, checked when reading
+              iinnffoo[[""mmiinn__vvaalluuee""]]            Min value, checked when writing
+              iinnffoo[[""nnaammee""]]                 Attribute name
+              iinnffoo[[""ssttaannddaarrdd__uunniitt""]]        Conversion factor to MKS units
+              iinnffoo[[""uunniitt""]]                 Unit string
+              iinnffoo[[""wwrriittaabbllee""]]             Read, write, read_write or read_with_write
+              iinnffoo[[""wwrriittaabbllee__aattttrr__nnaammee""]]   Needed for read_with_write
+
+          In addition, the function returns an associative array containing the
+          information.
+
+     ttaannggoo__ggeett((ddeevv,, ""ttiimmeeoouutt"")) or ttaannggoo__ppuutt((ddeevv,, ""ttiimmeeoouutt"")) - Returns the
+          current connection timeout for ddeevv in seconds.
+
+     ttaannggoo__ggeett((ddeevv,, ""ttiimmeeoouutt"",, sseecc)) or ttaannggoo__ppuutt((ddeevv,, ""ttiimmeeoouutt"",, sseecc)) - Sets the
+          connection timeout for ddeevv in seconds.  Returns -1 on error, otherwise
+          returns the new timeout value.
+
+     ttaannggoo__ggeett((ddeevv,, aattttrr [[,, aarrggoouutt ]] [[,, eexxttrraass]])) - Reads one device attribute.
+          If the attribute is a SSPPEECCTTRRUUMM or IIMMAAGGEE type, then the aarrggoouutt argument
+          is needed and is the name of an associative or data array that will
+          receive the attribute data.
+
+          For SSCCAALLAARR data types, the aarrggoouutt argument is optional.  If present,
+          aarrggoouutt will be assigned the value.  If absent, the ttaannggoo__ggeett(()) call
+          will return the value.  With the optional aarrggoouutt argument, barring
+          other errors, the return value of ttaannggoo__ggeett(()) will be zero unless the
+          data quality is IINNVVAALLIIDD, in which case the return value is 1.  Without
+          the optional aarrggoouutt argument, if the data quality is IINNVVAALLIIDD the
+          return value will be the string ""iinnvvaalliidd"".
+
+          For SSPPEECCTTRRUUMM and IIMMAAGGEE data types, the return value will be the number
+          of array elements returned and the string ""iinnvvaalliidd"" if the data
+          quality is IINNVVAALLIIDD.
+
+          If there is a TANGO error, the function returns -1, with the TTAANNGGOO__EERRRR
+          global variable set to the error message.
+
+          If the optional argument eexxttrraass is included, it must be an associative
+          array.  The elements of the eexxttrraass array will be assigned attribute
+          data elements indexed as follows:
+
+              eexxttrraass[[""ddaattaa__nnaammee""]]    String name of data type
+              eexxttrraass[[""ddaattaa__ttyyppee""]]    Data scalar-type code
+              eexxttrraass[[""ddiimm__xx""]]        Data dimension for X
+              eexxttrraass[[""ddiimm__yy""]]        Data dimension for Y
+              eexxttrraass[[""nnaammee""]]         Attribute name
+              eexxttrraass[[""qquuaalliittyy""]]      Data quality factor
+              eexxttrraass[[""ttiimmee__ssttaammpp""]]   Time stamp
+
+          For scalar data ""ddiimm__yy"" is zero.  The quality factor values are as
+          follows:
+
+              0   VALID
+              1   INVALID
+              2   ALARM
+              3   CHANGING
+              4   WARNING
+
+          The ""ttiimmee__ssttaammpp"" element contains the time in seconds and milliseconds
+          from the UNIX epoch.
+
+     ttaannggoo__ggeett((ddeevv,, aatt11,, aarrggoouutt11,, aatt22,, aarrggoouutt22 [[,, ...... ]]]] [[,, eexxttrraass]])) - Reads
+          multiple device attributes.  An aarrggoouutt argument must be provided for
+          each attribute, whether scalar or array.
+
+          When reading multiple attributes, if there are no errors, the return
+          value of ttaannggoo__ggeett(()) will be the number of attributes that have
+          IINNVVAALLIIDD quality.  If no attributes have IINNVVAALLIIDD quality, the return
+          value is zero.  The eexxttrraass array will be needed to sort out which
+          attributes have IINNVVAALLIIDD data.
+
+          If there is a TANGO error, the function returns -1, with the TTAANNGGOO__EERRRR
+          global variable set to the error message.
+
+          If present, the eexxttrraass array will be two dimensional, with the first
+          index being the attribute name and the second index as above.
+
+     ttaannggoo__ppuutt((ddeevv,, aattttrr11,, aarrggiinn11 [[,, aattttrr22,, aarrggiinn22 [[,, ......]]]]))  - Writes one or
+          more device attributes.  Each attribute is followed by its value.
+          Attributes can be scalar or arrays.
+
+          On success, the return value is 0.
+
+          If there is a TANGO error, the function returns -1, with the TTAANNGGOO__EERRRR
+          global variable set to the error message.
+
+ERROR CONSIDERATIONS
+
+     For all the TANGO functions, ssppeecc will assign values to the built-in
+     variables TTAANNGGOO__EERRRR and TTAANNGGOO__EERRRR__SSTTAACCKK on TANGO errors.  The former is a
+     string-type variable containing the lowest-level reason given by the TANGO
+     library for an error or the null string if no error occurred.  The variable
+     TTAANNGGOO__EERRRR__SSTTAACCKK is an associative array containing the complete error stack
+     for commands generating an error.  The elements of the stack are indexed
+     as:
+
+         TANGO_ERR_STACK[0]["reason"]
+         TANGO_ERR_STACK[0]["origin"]
+         TANGO_ERR_STACK[0]["desc"]
+         TANGO_ERR_STACK[0]["severity"]
+         TANGO_ERR_STACK[1]["reason"]
+         TANGO_ERR_STACK[1]["origin"]
+         TANGO_ERR_STACK[1]["desc"]
+         TANGO_ERR_STACK[1]["severity"]
+
+     If there is no TANGO error the array will be empty.
+
+     If the built-in variable TTAANNGGOO__EERRRR is set to -1 prior to the call of
+     ttaannggoo__iioo(()), ttaannggoo__ppuutt(()) or ttaannggoo__ggeett(()), and if there is a TANGO ERR the
+     function will not print the error message but will return -1.  The error
+     message will be available in TTAANNGGOO__EERRRR.  If there is no error, TTAANNGGOO__EERRRR
+     will be reset to zero.
+
+     In general, TANGO errors are those conditions caught by the TANGO
+     libraries, in contrast to the errors caught by ssppeecc and described below.
+     One error that is caught by ssppeecc but is treated as a TANGO error is
+     requesting an attribute or property that doesn't exist on the device.  For
+     such errors, ssppeecc sets TTAANNGGOO__EERRRR with a message containing the device name
+     and the requested attribute and returns -1.
+
+     A number of errors in the ttaannggoo__iioo(()), ttaannggoo__ggeett(()) and ttaannggoo__ppuutt(()) calls
+     will cause ssppeecc to print an error message and reset to command level.
+     These are generally the type of errors where there is little point in
+     continuing, since there is a problem with the syntax of the call.
+
+     Errors with ttaannggoo__iioo(()) that cause a reset to command level include:
+
+         +o need additional arguments
+
+         +o bad value for "source"
+
+         +o needs unsupported input type
+
+         +o missing input argument
+
+         +o need numeric assoc array indicies - when sending an array
+
+         +o need a 1D assoc array
+
+         +o needs an array input arg
+
+         +o needs unsupported output type
+
+         +o missing output argument
+
+         +o need array for output argument
+
+         +o unsupported encoded format
+
+         +o unrecognized encoded magic number
+
+         +o inconsistent dimensions
+
+         +o impossible data type
+
+         +o data length inconsistency
+
+     Errors with ttaannggoo__ggeett(()) that cause a reset to command level include:
+
+         +o needs unsupported data type
+
+         +o missing value argument
+
+         +o attribute is write only
+
+         +o missing argument for return
+
+         +o Various errors associated with using an unassignable variable (such
+           as a constant) or an array when a scalar is needed.
+
+         +o need array for return
+
+     Errors with ttaannggoo__ppuutt(()) that cause a reset to command level include:
+
+         +o needs unsupported data type
+
+         +o attribute is read only
+
+         +o missing value argument
+
+         +o needs scalar input value - when the rreett parameter is an array.
+
+         +o need numeric assoc array indicies - when sending an array for
+           SSPPEECCTTRRUUMM or IIMMAAGGEE attribute types.
+
+         +o need a consistent 1D or 2D assoc array - when sending an array and
+           some associative array elements are one dimensional and some are two
+           dimensional.
+
+         +o too many rows in input assoc array
+
+         +o too many columns in input assoc array
+
+         +o too many rows in input string array
+
+         +o too many columns in input array
+
+         +o too many rows in input array
+

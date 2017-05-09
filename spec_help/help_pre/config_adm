@@ -1,0 +1,460 @@
+config_adm                          reference                         config_adm
+
+NAME
+     configuration - administer hardware configuration file
+
+DESCRIPTION
+
+     Each spectrometer has an associated file named ccoonnffiigg that describes the
+     hardware interfaces and devices being used.  There is also a binary-format
+     file named sseettttiinnggss that holds motor positions, user-unit offsets and
+     software limits.  The program eeddccoonnff (invoked by the ssppeecc macro ccoonnffiigg) is
+     used to maintain these files.
+
+     This note describes the ASCII format of the ccoonnffiigg file.  Although the
+     ccoonnffiigg file can be edited by hand, you will be safer using the eeddccoonnff
+     program to make modifications as eeddccoonnff insures the ccoonnffiigg file obeys the
+     structuring rules required by ssppeecc.
+
+     Without arguments, eeddccoonnff will use the ccoonnffiigg and sseettttiinnggss files in the
+     current directory. If given a directory name as an argument, it will use
+     the files in that directory.  If invoked with the --ss flag, eeddccoonnff will run
+     in "simulate" mode, allowing the user to view but not modify the files.  If
+     the user doesn't have write permission for the ccoonnffiigg file, eeddccoonnff will
+     automatically run in "simulate" mode.
+
+     Comment lines begin with a ## in the ccoonnffiigg file.  Other lines contain key
+     words, such as CCDDEEVV or MMOOTT0000, followed by an equals sign and one or more
+     parameters.
+
+DEVICE KEY WORDS
+
+     The following table summarizes the key words that select particular
+     hardware devices.
+
+        KKeeyywwoorrdd      PPaarraammeetteerrss
+        ======================  ============================================================================
+        CCDDEEVV         ddeevviiccee__nnaammee
+        SSDDEEVV__##       ddeevviiccee__nnaammee  bbaauudd__rraattee  oopptt__mmooddeess
+        PPCC__PPOORRTT__##    bbaassee__aaddddrreessss ##__ooff__ppoorrttss rrww__mmooddee
+        SSWW__SSFFTTWWAARREE   11
+        PPCC__AAMM99551133    bbaassee__aaddddrreessss
+        PPCC__DDAACC__BB1122   bbaassee__aaddddrreessss ##__ooff__mmoottoorrss
+        PPCC__DDAACC__BB1166   bbaassee__aaddddrreessss ##__ooff__mmoottoorrss
+        PPCC__DDAACC__TT1122   bbaassee__aaddddrreessss ##__ooff__mmoottoorrss
+        PPCC__DDAACC__TT1166   bbaassee__aaddddrreessss ##__ooff__mmoottoorrss
+        PPCC__DDSSPP66000011   bbaassee__aaddddrreessss
+        PPCC__GGPPIIBB1111    ddeevviiccee__nnaammee
+        PPCC__GGPPIIBBPPCC    ddeevviiccee__nnaammee
+        PPCC__GGPPIIBBPPCC__LL  ddeevviiccee__nnaammee
+        PPCC__GGPPIIBBPPCC22   ddeevviiccee__nnaammee
+        PPCC__GGPPIIBBPPCC22__LL ddeevviiccee__nnaammee
+        PPCC__GGPPIIBBPPCC33   ddeevviiccee__nnaammee
+        PPCC__GGPPIIBBPPCC33__LL ddeevviiccee__nnaammee
+        PPCC__GGPPIIBBPPCC44   ddeevviiccee__nnaammee
+        PPCC__GGPPIIBBPPCC44__LL ddeevviiccee__nnaammee
+        PPCC__IIOOTTEECCHH    ddeevviiccee__nnaammee
+        PPCC__MMIIZZAARR     vvmmee__aaddddrreessss  ##__ooff__ccoouunntteerrss IIRRQQ##__oorr__PPOOLLLL
+        PPCC__KKSS22992266    bbaassee__aaddddrreessss
+        PPCC__MMMM22000000    bbaassee__aaddddrreessss ##__ooff__mmoottoorrss
+        PPCC__NNIIVVMMEE     //ddeevv//nnuullll
+        PPCC__OOMMSS       ddeevviiccee__nnaammee  ##__ooff__mmoottoorrss IINNTTRR__oorr__PPOOLLLL
+        PPCC__OOMMSSPP      bbaassee__aaddddrreessss ##__ooff__mmoottoorrss
+        PPCC__OOMMSSVV      vvmmee__aaddddrreessss  ##__ooff__mmoottoorrss IIRRQQ##__oorr__PPOOLLLL
+        PPCC__PPCCAA33      bbaassee__aaddddrreessss
+        PPCC__PPCCAAIIII     ddeevviiccee__nnaammee  bbaassee__aaddddrreessss IINNTTRR__oorr__PPOOLLLL
+        PPCC__SSIICCLL__HH    ddeevviiccee__nnaammee
+        PPCC__SSIICCLL__HHPP   ddeevviiccee__nnaammee
+        PPCC__TTEECC448888    bbaassee__aaddddrreessss
+        PPCC__TTEECC448888__LL  bbaassee__aaddddrreessss
+        RRSS__1188001111     ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__1188009922     ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__CCAATTOO      ddeevviiccee__nnaammee  bbaauudd__rraattee
+        RRSS__CCMM33000000    ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__CCMM44000000    ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__CCMMSSXX      ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__IINNEELL      ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__ccoouunntteerrss
+        RRSS__IIPP2288      ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__IITTLL0099     ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__MMCC44       ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__MMCCBB       ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__MMCCUU       ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__MMCCUU__EE     ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__MMMM22000000    ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__NNSSKK       ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__OORR99XXBB     ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__ccoouunntteerrss
+        RRSS__OORR99XXCC     ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__ccoouunntteerrss
+        RRSS__OORR99XXTT     ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__ccoouunntteerrss
+        RRSS__SSIIXX1199     ddeevviiccee__nnaammee  bbaassee__rraattee ##__ooff__mmoottoorrss
+        RRSS__TTCC110000     ddeevviiccee__nnaammee  bbaassee__rraattee ##__ooff__cchhaannnneellss
+        RRSS__XXRRGGCCII__MM   ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__mmoottoorrss
+        RRSS__XXRRGGCCII__TT   ddeevviiccee__nnaammee  bbaauudd__rraattee ##__ooff__ccoouunntteerrss
+        GGPP__CCCC448888     ggppiibb__aaddddrreessss IINNTTRR__oorr__PPOOLLLL
+        GGPP__CCMM33000000    ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__CCMM44000000    ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__HHUUBB99000000   ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__IIFFEE22DD     ggppiibb__aaddddrreessss
+        GGPP__IIPP2288      ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__IITTLL0099     ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__KK22000011     ggppiibb__aaddddrreessss
+        GGPP__KKSS33998888    ggppiibb__aaddddrreessss IINNTTRR__oorr__PPOOLLLL
+        GGPP__MMCC44       ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__MMCCBB       ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__MMMM22000000    ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__MMMMCC3322     ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__OORR991188AA    ggppiibb__aaddddrreessss
+        GGPP__OORR99XXBB     ggppiibb__aaddddrreessss ##__ooff__ccoouunntteerrss
+        GGPP__OORR99XXTT     ggppiibb__aaddddrreessss ##__ooff__ccoouunntteerrss
+        GGPP__OORR99XXCC     ggppiibb__aaddddrreessss ##__ooff__ccoouunntteerrss
+        GGPP__PPCCAA__MM     ggppiibb__aaddddrreessss
+        GGPP__PPII        ggppiibb__aaddddrreessss ##__ooff__mmoottoorrss
+        GGPP__SSTT111166     ggppiibb__aaddddrreessss
+        GGPP__SSTTAARR11     ggppiibb__aaddddrreessss
+
+     CCDDEEVV specifies the CAMAC device accessed through a ssppeecc CAMAC driver. For
+     example, CCDDEEVV == //ddeevv//ccaa0000.
+
+     SSDDEEVV__00 specifies the name and baud rate of the serial device with ssppeecc
+     device-address 0 to be used with the sseerr__ggeett(()) and sseerr__ppuutt(()) functions.
+     The oopptt__mmooddeess are optional arguments that set the line modes.  For example,
+     SSDDEEVV__00 == //ddeevv//ccoomm22 99660000 rraaww.  Choices for oopptt__mmooddeess are rraaww, ccooookkeedd, eevveennpp,
+     ooddddpp, nnooffllooww and iiggnnccrr.  Several of these can be combined.  See the _s_e_r_i_a_l
+     help file for more information.  The default mode is ccooookkeedd. SSDDEEVV__11,
+     SSDDEEVV__22, ... specify additional serial devices.
+
+     PPCC__PPOORRTT__00 identifies a range of PC IO port addresses for use with the
+     ppoorrtt__ggeett(()) and ppoorrtt__ppuutt(()) functions.  The board's hexadecimal base address
+     is the first argument.  The number of contiguous ports (maximum of 16) that
+     can be accessed is next.  If rrww__mmooddee is 0, the ports are read only, if 1,
+     the ports are both readable and writable.  For example, PPCC__PPOORRTT__00 == 00xx330000 33
+     11.
+
+     SSWW__SSFFTTWWAARREE selects the software timer. The parameter is unused.
+
+PC BOARD DEVICES
+
+     Key words with the PPCC__ prefix select devices that generally are on adapter
+     boards that fit into a PC computer E/ISA slot.
+
+     PPCC__AAMM99551133 selects either of two boards that use the Am9513 counter chip.
+     Both the Metrabyte Model CTM-05 interface board and the Scientific
+     Solutions (formerly Tecmar) Labmaster board are supported.  The hexadecimal
+     base address of the counter-chip registers on the board must be given as a
+     parameter, as in PPCC__AAMM99551133 == 00xx334488.
+
+     PPCC__GGPPIIBB1111 selects the National Instruments GPIB11V board for GPIB control
+     on a MicroVax computer.  Only a ddeevviiccee__nnaammee parameter is needed.
+
+     PPCC__GGPPIIBBPPCC selects the National Instruments PCII board for GPIB control.
+     Only a ddeevviiccee__nnaammee parameter is needed.
+
+     PPCC__PPCCAAIIII selects the Tennelec/Nucleus PCA II MCA board.  The board's base
+     address is given as an argument.
+
+     PPCC__OOMMSS gives information about an Oregon Micro Systems PCX/PC38 board for
+     motor control.  The number of motors and a key word, either IINNTTRR or PPOOLLLL
+     must also be given, as in PPCC__OOMMSS == //ddeevv//oommss 44 IINNTTRR.
+
+     PPCC__TTEECC448888 selects the TECMAR (or Scientific Solutions) IEEE-488 board for
+     GPIB control.  The board's hexadecimal base address must be given as a
+     parameter.
+
+RS-232C DEVICES
+
+     Key words that begin with the RRSS__ prefix describe devices that reside on a
+     serial (RS-232C) interface.  All serial devices require device name and
+     baud rate parameters.
+
+     RRSS__CCAATTOO selects the Silena MCA.
+
+     RRSS__CCMM33000000 selects the Compumotor 3000 motor controller.  A number-of-motors
+     parameter is required.
+
+     RRSS__CCMM44000000 selects the Compumotor 4000 motor controller.  A number-of-motors
+     parameter is required.
+
+     RRSS__IINNEELL selects the Inel 715 dual counter.  A number-of-counters parameter
+     is expected.
+
+     RRSS__IIPP2288 chooses the Microcontrole IP28 stepper motor controller.  This
+     device also requires a number-of-motors parameter, as in
+
+        RRSS__IIPP2288 == //ddeevv//ccoomm22 99660000 44
+
+     RRSS__MMCCBB chooses the Advanced Control Systems MCB stepper motor controller.
+     This device also requires a number-of-motors parameter.
+
+     RRSS__MMCCUU chooses the Advanced Control Systems MCU stepper motor controller.
+     This device also requires a number-of-motors parameter.
+
+     RRSS__MMCCUU__EE is the same as above, except that the motor controllers use
+     encoders.  The only difference from the standard behavior is that during
+     the synchronization of software motors positions with the hardware
+     registers, if the discrepancy is less than some fixed number of steps, the
+     hardware register are automatically assumed to contain the correct
+     position.  The number of steps is taken from field eight of the motor
+     parameter configuration (see below).
+
+     RRSS__MMCC44 chooses the Klinger MC-4 stepper motor controller.  This device also
+     requires a number-of-motors parameter.
+
+     RRSS__OORR99XXTT or RRSS__OORR99XXCC select Ortec 900 series counters or counter/timers. A
+     number-of-counters parameter is required.
+
+     RRSS__SSIIXX1199 selects the Microcontrole SIX19 motor controller.
+
+     TTCC110000 selects the Nicomp TC-100 autocorrelator.  The number of channels is
+     given as a parameter.
+
+     RRSS__XXRRGGCCII__MM selects the Inel XRGCI motor controller/timer instrument and
+     specifies the number of motors that are used with it.
+
+     RRSS__XXRRGGCCII__TT selects the Inel XRGCI motor controller/timer instrument and
+     specifies the number of counters that are used with it.
+
+GPIB DEVICES
+
+     Key words that begin with the GGPP__ prefix describe devices that use the GPIB
+     interface.  All such devices require a GPIB address parameter.
+
+     GGPP__CCMM33000000 selects the Compumotor 3000 motor controller.
+
+     GGPP__CCMM44000000 selects the Compumotor 4000 motor controller.
+
+     GGPP__IIPP2288 chooses the Microcontrole IP28 stepper motor controller on a GPIB
+     interface.  This device requires a GPIB address and a number-of-motors
+     parameter, as in GGPP__IIPP2288 == 1122 44.
+
+     GGPP__KKSS33998888 selects the Kinetic Systems Model 3988-G2A GPIB CAMAC crate
+     controller. The National Instruments GPIB controller (PPCC__GGPPIIBBPPCC) must also
+     be selected.  The GPIB address is specified as an argument, along with
+     either of the key words, IINNTTRR or PPOOLLLL.  (Interrupt-driven mode is
+     recommended, but switch to polled mode if there are problems and contact
+     CSS.)
+
+     GGPP__MMCCBB chooses the Advanced Control Systems MCB stepper motor controller.
+     This device also requires a number-of-motors parameter.
+
+     GGPP__MMCC44 chooses the Klinger MC-4 stepper motor controller.  This device also
+     requires a number-of-motors parameter.
+
+     GGPP__MMMMCC3322 chooses the NSLS-made stepper motor controller.  This device also
+     requires a number-of-motors parameter.
+
+     GGPP__OORR99XXTT or GGPP__OORR99XXCC select Ortec 900 series counters or counter/timers. A
+     number-of-counters is required.
+
+     GGPP__OORR997744TT or GGPP__OORR997744CC select the Ortec 974 device to be used as a
+     counter/timer or just a counter.  A number-of-counters is required.
+
+CAMAC MODULES
+
+     CAMAC slot assignments consist of a module code on the left and a slot
+     number on the right. For example,
+
+         CCAA__KKSS33661100 == 22
+
+     tells the program a Kinetic Systems 3610 hex scaler is in slot 2.
+
+     The following modules names are recognized by ssppeecc (KS is Kinetic Systems,
+     DSP is DSP Technology):
+     CCAA__DDSSPP22119900     DSP 2190 MCS Averager
+     CCAA__EE225500**       DSP E250A 12-bit D/A (as motor controller)
+     CCAA__EE550000**       DSP E500A Stepper Motor Controller
+     CCAA__IIOO**         Any module using F codes of 0 or 16
+     CCAA__IIOOMM11        BiRa 2601 I/O For E500 Multiplexing
+     CCAA__IIOOMM22        F16,A0 I/O For E500 Multiplexing
+     CCAA__IIOOMM33        F16,A1 I/O For E500 Multiplexing
+     CCAA__KKSS33111122**     KS 3112 D/A (as motor controller)
+     CCAA__KKSS33111166**     KS 3116 D/A (as motor controller)
+     CCAA__KKSS33119955**     KS 3195 D/A (as motor controller)
+     CCAA__KKSS33338888      KS 3388 GPIB interface
+     CCAA__KKSS33551122**     KS 3512 ADC (as counters)
+     CCAA__KKSS33661100**     KS 3610 6-Channel, 50 MHz Counter
+     CCAA__KKSS33664400CC**    KS 3640 Up/Down Counter as Counter
+     CCAA__KKSS33664400MM**    KS 3640 Up/Down Counter (for SMC's)
+     CCAA__KKSS33664400TT     KS 3640 Up/Down Counter as Timer
+     CCAA__KKSS33665555      KS 3655 8-Channel Timing Generator
+     CCAA__KKSS33992299      KS 3929 SCSI Crate Controller on Sun
+     CCAA__KKSS33992299__HHPP   KS 3929 SCSI Crate Controller on HP
+     CCAA__KKSSCC         KS Crate Controller with KS Software
+     CCAA__LLCC22330011      LeCroy 2301 interface for QVT MCA
+     CCAA__LLCC33551122      LeCroy 3512 Spectroscopy ADC
+     CCAA__LLCC33552211      LeCroy 3521A Multichannel Scaling
+     CCAA__LLCC33558888      LeCroy 3588 Multi Channel Scaler
+     CCAA__LLCC88220066      LeCroy MM8206A Histogramming Memory
+     CCAA__QQSS445500       DSP QS-450 4-Channel Counter
+     CCAA__RRTTCC001188      DSP RTC-018 Real Time Clock
+     CCAA__SSMMCC**        Joerger Motor Controller SMC-L or SMC-24
+     CCAA__TTSS220011       DSP TS-201 Dual Timer/Scaler
+
+     * More than one of these modules are allowed.  Append __## to number modules
+     consecutively, where ## is 0, 1, 2, etc.
+
+MOTOR PARAMETERS
+
+     Motor parameter assignment consists of key words of the form MMOOTT0000, MMOOTT0011,
+     ... followed by 11 values.  The MMOOTT key words must be numbered
+     consecutively starting at zero.  The values are
+
+         1    Controller type (EE550000, SSMMCC, OOMMSS, ...)
+         2    Steps per unit (sign changes direction of motion)
+         3    Sign between user and dial units (+1 or -1)
+         4    Steady state rate (Hz) (must be positive)
+         5    Base rate (Hz) (must be positive) (also is backlash rate)
+         6    Steps for backlash (sign changes direction of motion)
+         7    Acceleration time (msec)
+         8    Not used
+         9    Motor flags (protection, units, etc.)
+         10   Motor mnemonic (tthh, pphhii, ssll11, ...)
+         11   Motor name (TThheettaa, PPhhii, SSlliitt 11, ...)
+
+     An example is:
+
+        ##FFiieellddss   11     22 33    44   55  66   77 88 99 1100 1111
+        MMOOTT0000 == OOMMSS --22000000 11 22000000 220000 5500 112255 00 33 tthh TThheettaa
+
+     Valid controller types are currently:
+     1188001111     1188009922     CCMM33000000    CCMM44000000    CCMMSSXX
+     CCMMSSXX__EE    DDAACC__BB1122   DDAACC__BB1166   DDAACC__TT1122   DDAACC__TT1166
+     EE225500      EE550000      EE550000__MM    EEPP__OOMMSS    EESS__OOMMSS
+     EESS__PPIIEE    EESS__VVPPAAPP   HHUUBB99000000   IIPP2288      IITTLL0099
+     IITTLL0099__EE   KKSS33111122    KKSS33111166    KKSS33119955    MMAAXXEE
+     MMAAXXEE__EE    MMAAXXEE__SS    MMCC44       MMCCBB       MMCCUU
+     MMCCUU__EE     MMMM22000000    MMMMCC3322     NNOONNEE      NNSSKK
+     OOMMSS       OOMMSS__EE     PPII        SSIIXX1199     SSMMCC
+     XXRRGGCCII__MM
+
+     Field 2, the steps per unit, may be non-integral, and the units can be in
+     degrees, millimeters or whatever.  The rest of the numeric fields must be
+     integral.  The motor names should be kept to nine characters or less, as
+     the standard macros truncate them to fit a nine-character field when
+     printing them out.
+
+     Field 8 is reserved.
+
+     Field 9, the flags field, contains several kinds of information.  The
+     lowest order two bits are used to enable particular operations on the
+     selected motor.  If bit 0 is set, the user can move the motor.  If bit 1 is
+     set, the user can change the software limits of the motor.  Bits 2 and 3
+     are used by the eeddccoonnff program to prevent users from changing certain
+     configuration information.  Bits 8 through 12 are used with the shared
+     ccoonnffiigg file feature described below.
+
+COUNTER PARAMETERS
+
+     Counter parameter assignment consists of key words of the form CCNNTT0000,
+     CCNNTT0011, ...  followed by 6 values.  The CCNNTT key words must be numbered
+     consecutively starting at zero.  The values are
+
+         1   Controller type (KKSS33661100, KKSS33664400MM, TTSS220011, ...)
+         2   Controller unit number (0, 1, ...)
+         3   Channel number in unit (0, 1, ...)
+         4   Counter function (TT, MM or CC - Timer, Monitor or Counter)
+         5   Counter mnemonic (sseecc, mmoonn, ddeett, ...)
+         6   Counter name (SSeeccoonnddss, MMoonniittoorr, DDeetteeccttoorr, ...)
+
+     Examples are:
+
+        ##FFiieellddss        11  22  33  44        55  66
+        CCNNTT0000 ==   KKSS33661100  00  00  TT      sseecc  SSeeccoonnddss
+        CCNNTT0011 ==   KKSS33661100  00  11  MM      mmoonn  MMoonniittoorr
+        CCNNTT0022 ==   KKSS33661100  00  22  CC      ddeett  DDeetteeccttoorr
+
+     Valid controller types are currently:
+     AAMM99551133    CCAAEENN      IINNEELL     KKSS33551122   KKSS33661100
+     KKSS33664400CC   KKSS33664400TT   LLCC11115511   MMIIZZAARR    NNOONNEE
+     OORR99XXBB     OORR99XXCC     OORR99XXTT    OORR99XXCC    OORR99XXTT
+     QQSS445500     SSFFTTWWAARREE   TTSS220011    VVCCTT66     XXRRGGCCII__TT
+
+     In field 4 (counter function), only one TT and one MM is allowed.
+
+LINKED CONFIGURATIONS
+
+     An installation such as a synchrotron beamline uses many motors with most
+     associated with beamline control.  Spectrometers used for particular
+     experiments have motors that aren't used in other experiments.  To avoid
+     having to merge the motor configurations and settings from one set of files
+     to another when the spectrometer is changed, you can set things up so that
+     a single version of the ccoonnffiigg and sseettttiinnggss files will describe a number of
+     different spectrometers. Here is how to set up the files:
+
+     1) If you already have several geometry configurations installed, you
+     should make backup copies of the ccoonnffiigg and sseettttiinnggss files from the current
+     geometries.
+
+     2) If you already have several geometry configurations installed, remove
+     the ccoonnffiigg and sseettttiinnggss files from all but one of the geometry directories.
+     Save the ccoonnffiigg from the other geometries to the remaining ccoonnffiigg file.
+
+     3) Set up hard links in all the geometry directories so that the ccoonnffiigg and
+     sseettttiinnggss in all the geometry directories refer to the same file.  For
+     example, if the files already exist in the ffoouurrcc directory, use the
+     commands
+
+         llnn ffoouurrcc//ccoonnffiigg ssuurrff//ccoonnffiigg
+         llnn ffoouurrcc//sseettttiinnggss ssuurrff//sseettttiinnggss
+
+     to create hard links in the surf directory. Don't use symbolic links.
+
+     4) Edit the ccoonnffiigg file by hand to add new control lines that assign
+     numbers to the different geometries.  These control lines must be before
+     the lines that assign motor information.  The format of the geometry
+     control lines is as follows:
+
+        GGEEOO00 == ccoommmmoonn
+        GGEEOO11 == ffoouurrcc
+        GGEEOO22 == ssuurrff
+        GGEEOO33 == ffiivveecc
+        eettcc..
+
+     The parameter GGEEOO00 always refers to the motors that are common to all the
+     geometries.  Subsequent lines assign consecutive numbers to the other
+     geometries.
+
+     5) Now run eeddccoonnff.  The motor screen will have a new field that lets you
+     assign a spectrometer geometry to each motor or to make the motor in common
+     with all the spectrometers.
+
+     The hard links must be maintained for the shared ccoonnffiigg and sseettttiinnggss file
+     scheme to work.  You can safely use vvii and ccpp to manipulate the files.
+     However, using mmvv will destroy the links.  Also, the editor nneedd will
+     destroy the links.
+
+     When running eeddccoonnff with a geometry directory as an argument or when
+     invoking the ccoonnffiigg macro from ssppeecc, use the new GG command to toggle
+     between displaying all the motors in the ccoonnffiigg file and just those motors
+     used by the given geometry.
+
+EXTRA PROTECTION
+
+     At some ssppeecc installations, the administrators need to prevent users from
+     accessing or modifying the configuration of certain motors.  The eeddccoonnff
+     program supports a wizard mode that allows such protection.  If you type ^^WW
+     while running eeddccoonnff you will be prompted for the wizard's password.  If
+     you enter it properly, you will be able to select additional levels of
+     configuration protection.
+
+     While running ssppeecc, it is possible to enter a command that prompts for the
+     wizard password, giving the current user access to the protected motors
+     until the wizard mode is disabled.  (See the _s_p_e_c___p_a_r help file for details
+     on the ""ssppeeccwwiizz"" option.)
+
+     Use the wwiizz__ppaasssswwdd utility provided with the ssppeecc package to set or change
+     the wizard password, stored in a file named ppaasssswwdd in the ssppeecc auxiliary
+     file directory (normally //uussrr//llooccaall//lliibb//ssppeecc..dd)).
+
+     To prevent users from disabling the wizard protections by editing the
+     ccoonnffiigg file by hand, you can use file protection features built into UNIX.
+     One possibility is to make the eeddccoonnff program set-user id ssppeeccwwiizz or
+     ssppeeccaaddmm, change the ownership of the ccoonnffiigg files to ssppeeccwwiizz or ssppeeccaaddmm,
+     and change the modes of the ccoonnffiigg files to rrww--rr----rr----.  Do that using
+     commands (as super user) like:
+
+        cchhoowwnn ssppeeccaaddmm eeddccoonnff ffoouurrcc//ccoonnffiigg ssuurrff//ccoonnffiigg ......
+        cchhmmoodd uu++ss eeddccoonnff
+        cchhmmoodd 664444 ffoouurrcc//ccoonnffiigg ssuurrff//ccoonnffiigg ......
+
+     At present, reinstalling ssppeecc will undo the above mode changes, so that
+     they will have to be repeated when ssppeecc is updated.
+

@@ -1,0 +1,504 @@
+changes                      ssppeecc 2.14 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.14
+
+DESCRIPTION
+
+     These notes summarize many of the modifications made for ssppeecc release 2.14,
+     as of January 8, 1991.
+
+INCOMPATIBILITIES
+
+     Release 2.14 includes a number of changes that make certain prior usages
+     obsolete.  You must modify any home-grown macros to take into account the
+     following changes:
+
+     1. The customized scan output hooks involving the macros PPllaabbeell, PPoouutt,
+        FFllaabbeell and FFoouutt have had the position of the space character changed
+        from before each string in the label to after each string.  You must
+        edit your macros if you assign values to any of the above or if you have
+        written new scans based on the standard scan macros.
+
+     2. The argument of the wwaaiitt(()) function, as programmed, did not match the
+        documentation.  The documentation stated that bit 1 represented motor
+        status and bit 2 represented counter status.  As programmed, these bit
+        assignments were reversed.  The program has been changed to match the
+        documentation.  You must edit your macros if you call the function
+        wwaaiitt(()) directly.
+
+     3. The ccoonnffiigg file now contains information describing each scaler's label,
+        mnemonic, function and hardware type.  The scaler-name array SS__NNAA[[]] no
+        longer exists.  New string functions, ccnntt__nnaammee((ii)) and ccnntt__mmnnee((ii)), return
+        the name and mnemonic of scaler ii.  You must edit your macros if you
+        make any reference to the symbol SS__NNAA[[]].
+
+     4. The value returned by the ggeettccoouunnttss command in SS[[sseecc]] is now in seconds,
+        rather than milliseconds.  You must edit your macros if you divide SS[[00]]
+        by 1000 anywhere.
+
+     5. The yyeessnnoo macro has been replaced by a yyeessnnoo(()) function.  You must edit
+        your macros if you invoke yyeessnnoo anywhere.
+
+USER INTERFACE
+
+     The hhiissttoorryy command now takes a numerical argument that limits the number
+     of the previous commands displayed.  In addition, if the the argument is
+     negative, the recalled commands are displayed in reverse order.  The number
+     of input lines saved for history recall has been increased from 50 to 100.
+
+     High resolution scan plots are how available with VGA, EGA and Hercules
+     graphics adapters on System V/386 and VENIX 286 platforms; with the X
+     Window System Version 11 on PS/2 AIX, Ultrix and SunOS; and with SunView on
+     SunOS.  You should set a GGTTEERRMM environment variable to vvggaa, eeggaa, ccggaa, hheerrcc,
+     xx1111 or ssuunn before invoking ssppeecc to select the appropriate graphics
+     parameters.  The sseettpplloott macro lets you select whether or not to use high
+     resolution plotting and if so, how to depict the data (lines, points,
+     dots).
+
+     Text-mode plotting has been moved from macros to built-in C code.  The
+     plots are drawn much faster and are now available with any terminal
+     described by the system terminal database.  The names of the macros used to
+     do the screen plots and the real time plots (sspplloott and rrpplloott) have not
+     changed, although terminal dependent macros such as aannssii__rrpplloott and
+     vvtt5522__pplloott have been eliminated.
+
+     The built-in symbols RROOWWSS and CCOOLLSS contain the screen size used for drawing
+     the plots (and displaying help files).  These are initially taken from the
+     environment variables LLIINNEESS and CCOOLLUUMMNNSS, or if unset, from the system
+     terminal database entry described by your TTEERRMM environment variable.  You
+     may reassign values to the variables if you change your screen size (for
+     example on an workstation using windows).
+
+     ssppeecc now prevents multiple instances of the program being run using the
+     same state files.
+
+     When ssppeecc is run from pseudo ttys (for example, on an X Windows workstation
+     or over the network), the state file is associated with the name ttttyypp##,
+     rather than the actual name of the pseudo tty.
+
+     You can now create a state not associated with any tty, by starting ssppeecc
+     with the --TT _n_a_m_e command line option.
+
+     A new variable, CCWWDD, keeps track of the current working directory of the
+     running program.  The ppwwdd macro has been changed accordingly to simply
+     print the value of CCWWDD, rather than spawn a subshell to execute the
+     command.
+
+     The help utility has been entirely rewritten.  Help files are formatted on
+     the fly to fit the size of the screen or workstation window.  In addition,
+     standout mode is used to highlight text that would be printed in an
+     alternate font.
+
+     The number of nested command files allowed has been increased from five to
+     eight.
+
+MACROS
+
+     If a macro named bbeeggiinn__mmaacc is defined, it will be run after the startup
+     command files are read but before input is read from the keyboard.
+
+     The motor scans aassccaann, aa22ssccaann and aa33ssccaann have been been rewritten in terms
+     of a general macro called __aassccaann that scans an arbitrary number of motors.
+     An aa44ssccaann that calls __aassccaann is now also provided, as is a dd44ssccaann.  These
+     scans introduce a number of new global variables (__nnmm, __mm[[]], __ff[[]], __ss[[]],
+     __dd[[]]) that you should avoid using in your own macros.
+
+     A new standard macro called cchhkk__bbeeaamm has been inserted into the macros that
+     do normal, updated and powder-mode counting during scans.  In general,
+     these macros are now written along the lines of:
+
+        ffoorr ((;;;;)) {{
+            ccoouunntt__ffuunncc((ccoouunntt__ttiimmee))
+            wwaaiittccoouunntt
+            ggeettccoouunnttss
+            cchhkk__bbeeaamm
+        }}
+
+     where ccoouunntt__ffuunncc(()) is ttccoouunntt(()), mmccoouunntt(()), etc.  By default, cchhkk__bbeeaamm is
+     defined as bbrreeaakk, meaning the infinite loop is immediately exited after
+     counting.  However, you can define cchhkk__bbeeaamm to not break out of the loop
+     unless the monitor counts, for example, are above some threshold.  Such a
+     feature can be useful at a synchrotron where beam dumps or fills that occur
+     during unattended data taking could result in many useless scans.  See the
+     ccoouunntt..mmaacc macro source file for an example of a complete cchhkk__bbeeaamm macro.
+
+     A new option to the sseettssccaannss macro asks you to enter a value for a sleep
+     (or settle) time to delay before counting at each point in a scan.  The
+     value is stored in the global variable __sslleeeepp (which you can also change
+     simply by assigning it a value).  The scans all execute a sslleeeepp((__sslleeeepp))
+     call before counting.  Set __sslleeeepp to zero for no delay.
+
+     The macro that continues aborted scans, ssccaann__oonn, now accepts an argument to
+     adjust the current point number in the scan (except for mesh scans).  For
+     example, ssccaann__oonn --11 redoes the previous point, while ssccaann__oonn 33 skips the
+     next three points.  Giving a very large number will force the end-of-scan
+     plots, etc., without taking any more data points.
+
+     A new set of macros lets you define a set of scans do be done together.
+     The scans must all be of the same type and must be in terms of a single
+     scan variable.  You may however define regions, point densities and count
+     times differently for each scan.  The sseettrreegg macro (for sseett rreeggiioonnss) asks
+     you to configure each scan.  The ddoorreegg macro executes the group of scans.
+     A number of global variables beginning with the characters __rreegg__ have been
+     introduced to keep track of the region scan configuration.
+
+     The cctt macro, if aborted with a ^^CC, will now execute a cclleeaannuupp macro that
+     reads the scalers and shows the counts that were accumulated before the ^^CC.
+
+     The names ddeett and mmoonn are no longer built into the macros, since scaler
+     mnemonics may now be set to arbitrary values in the ccoonnffiigg file.
+
+     The sshhooww__ccnnttss and uucctt macros have been rewritten to show the accumulated
+     counts in all the configured scalers.
+
+     The __hheeaadd and __lloooopp macros have been modified to include counts from all
+     configured scaler channels in the data file.  Previously, only the detector
+     and either monitor or seconds scaler contents were saved for each point.
+
+     The MMOONN__RRAATTEE global variable has been eliminated from the standard macros
+     due to lack of interest.
+
+     Many of the standard macros involving motor positions have had hooks
+     inserted to support a feature involving customizable position uunniittss.  This
+     feature is not currently available to most users of ssppeecc, and the changes
+     will not affect the functionality of any of the macros.  However, the names
+     __uunniittss, __sseettffmmttss, __ssuuffffiixx, PP, UU, UULL, UUNNIITTSS, PPFFMMTT and VVFFMMTT are used by this
+     feature and are henceforth reserved for use by the standard macros.
+
+FUNCTIONS
+
+     The function mmoottoorr__ppaarr(()) can now return several parameters from the ccoonnffiigg
+     file.  Also, the motor velocity and the number of steps to use for backlash
+     can be set from user level.  See the mmoottoorrss help file for details.
+
+     A new function, ccaa__ffnnaa(()), allows arbitrary CAMAC access.  See the ffuunnccss
+     help file for details.  At present, it is up to the user to avoid
+     addressing slots that are being used for motor control or counting.
+
+     A new function ggppiibb__ppoollll(()), returns the serial poll status of a device on
+     the GPIB bus.  This function is currently only available with National
+     Instruments GPIB controllers.  See the ggppiibb help file for details.
+
+     New functions, ccnntt__nnaammee((ii)) and ccnntt__mmnnee((ii)), return the name and mnemonic of
+     scalers as set in the ccoonnffiigg file.
+
+     A new function, pplloott__ccnnttll((mmooddee)), is used to control the built-in plotting
+     features.  The argument mmooddee is a string of comma- or space-delimited
+     options.  See the ffuunnccss help file for details.
+
+     A new function ttttyy__ccnnttll((mmooddee)) is used to send terminal-specific special
+     sequences to the screen.  The argument mmooddee is a string.  Recognized
+     strings are ""ccee"" (clear to end of line), ""ccll"" (clear screen and home
+     cursor), ""ccdd"" (clear to end of display), ""ssoo"" (begin standout mode), ""ssee""
+     (end standout mode) and ""hhoo"" (home cursor).
+
+     A new function ttttyy__mmoovvee((xx,, yy [[,, ss]])) positions the cursor at column xx and
+     row yy of the screen, and prints the optional string ss at that position.
+     The upper-left corner of the screen is column 0 and row 0.  If xx or yy are
+     negative, the position is taken from the left or bottom of the screen.
+     Output written by this function goes only to the ttttyy device, regardless of
+     what devices have been turned on with the oonn(()) function.
+
+     A new function pplloott__mmoovvee((xx,, yy[[,, ss]])) works just as ttttyy__mmoovvee(()), above, when
+     high-resolution graphics mode is off.  When high-resolution graphics mode
+     is on, pplloott__mmoovvee(()) draws to the graphics screen.
+
+     A new function pplloott__rraannggee((xxmmiinn,, xxmmaaxx,, yymmiinn,, yymmaaxx)) sets the ranges of the
+     internally generated plots.  If any of the arguments is the string ""aauuttoo""
+     the value is determined by the appropriate value from the current points.
+
+     A new function pplloott__ppttss((xxccooll,, ssttaarrtt,, nnppttss)) plots the current data from the
+     built-in plot array either on the screen if graphics mode is off, or on the
+     high-resolution graphics screen or window if graphics mode is on.  The plot
+     starts with point number ssttaarrtt and uses nnppttss points.  The xxccooll parameter
+     will be used in the future, when the number of values stored for each point
+     is increased, to designate which value to use for xx..
+
+     A new function yyeessnnoo(([[ ss,, ]] xx)) prompts the user with the optional string ss,
+     for a yes or no response.  The function returns 1 if the user answers with
+     a string beginning with YY, yy or 11.  The function returns -1 if the user
+     answers with a string beginning with something else.  The value of xx is
+     returned if the user simply enters a return.  Usage might be,
+
+         ffllaagg == yyeessnnoo((""SShhooww uuppddaatteedd mmoovviinngg"",, ffllaagg))
+
+     which produces (if ffllaagg is nonzero),
+
+         SShhooww uuppddaatteedd mmoovviinngg ((YYEESS))??
+
+GEOMETRY CODE
+
+     The geometry code and macros for the various ssuurrff diffractometer
+     configurations, as used at NSLS X20 and X22, CEA in France and at Exxon
+     have been rearranged to ease maintenance and installation of each version.
+
+     The NSLS X20 monochromator macros and geometry code have been isolated from
+     the four-circle code, so that references to the monochromator will only be
+     made if the monochromator option is selected at installation time.
+
+     The four-circle code now allows sector 1 to be used in modes 4, 5 and 6.
+
+     The four-circle code now prints an error message when a user tries to
+     calculate reciprocal lattice positions with both cchhii and pphhii at zero in
+     zzoonnee mode, as the current method of doing the calculations cannot handle
+     that case.
+
+     The three-circle mode with pphhii=0 has been generalized to a pphhii-fixed mode.
+     Also, the frozen modes now include pphhii fixed.
+
+     A new scan macro, aazziissccaann, is available in four-circle mode to scan the
+     azimuthal angle in aazziimmuutthhaall mode.
+
+     Bugs in the zzaaxxiiss geometry code calculations have been fixed.
+
+HARDWARE
+
+     The internal code implementing hardware support in ssppeecc has been
+     substantially revised to simplify adding support for new types of hardware.
+     The revisions for the most part should be transparent to the user.  If a
+     particular hardware device fails to perform as it did in previous versions,
+     notify CSS at once, (unless the difference is an improvement).
+
+     Support for the Kinetic Systems 3912 CAMAC crate controller is now provided
+     on DEC Q-Bus based systems.
+
+     Support for the Kinetic Systems 3988 GPIB CAMAC crate controller is now
+     included.  This module can only be used if a National Instruments GPIB
+     controller is also installed.  The board can be used in either
+     interrupt-driven or polled mode.  Interrupt driven mode is preferred, but
+     if interrupts are lost in the GPIB driver, polled mode can be selected.
+
+     Support for the Ortec 974/994/995 counters and counter/timers is now
+     provided over both GPIB and RS-232C interfaces.
+
+     Support for the Klinger MC4 motor controller is now provided over both GPIB
+     and RS-232C interfaces.
+
+     Support for the Advanced Control Systems MCU-2 motor controller is now
+     provided over an RS-232C interface.
+
+     Persistent timing problems with the Kinetic Systems 3388 GPIB CAMAC module
+     seem to be fixed now.
+
+     ssppeecc now recognizes the Joerger SMC 2601 otor controller, which allows for
+     programmable velocity and acceleration.
+
+     The code for the TS201 CAMAC timer/counter model now uses timer 2 to gate
+     counter 2, making it no longer necessary to use an external cable to gate
+     counter 2.
+
+     The ""nneeww aanndd iimmpprroovveedd"" E500 modules that use the F(10) A(0) command to
+     clear the module LAM are now supported.
+
+     The E500 LAM service routine has been modified to use fewer FNA commands
+     and to recheck for additional LAMs from the E500 before returning.  The
+     latter change improves performance when several motors in the same E500
+     complete their motions at nearly the same time.
+
+     The code that reads the LeCroy 2301 MCA unit has been changed to read the
+     device faster.  (On a 25 MHz 386 using the DSP 6001, the change is from
+     0.36 seconds previously to 0.16 seconds now for reading 1024 channels.)
+
+     Many options for use of the National Instruments GPIB controllers formerly
+     set by each site using the iibbccoonnff program are now set by ssppeecc at run time.
+     Specifically, ssppeecc sets the timeout period to 3 seconds, the EOS byte to a
+     newline (''\\nn''), reads to be terminated on EOS using an eight-bit compare,
+     REN to be asserted and the board to be the system controller.  The board's
+     primary address is set to 0 and the signal to be sent on service request
+     (if using the board with a GPIB-to-CAMAC controller) is set appropriately.
+     You may still use iibbccoonnff to set whether EOI will be asserted with EOS
+     and/or with the last byte of a write.
+
+     The length of a string that can be read using ggppiibb__ggeett(()) has been increased
+     from 64 to 255 bytes.
+
+     The GPIB functions ggppiibb__ggeett(()) and ggppiibb__ppuutt(()) no longer generate an
+     iinntteerrffaaccee cclleeaarr (IFC) message on the bus, unless a previous transaction had
+     resulted in an error.  The old code that sent an IFC before each
+     transaction not only slowed down I/O, but also caused some devices to time
+     out.  In addition, a brief delay is inserted after an IFC is sent to
+     accommodate slow devices.  (These devices did not follow GPIB standards and
+     used the IFC message to reset internal functions rather than just interface
+     functions.  The device were often not yet ready to respond to the next
+     interface message after the IFC period was over.)
+
+     If the National Instruments GPIB code has errors on two transactions in a
+     row, the GPIB device is reset by closing and reopening the //ddeevv//ggppiibb00 (or
+     whatever is configured) special file.  If this feature causes more problems
+     then it solves, inform CSS immediately so we may begin work on
+     alternatives.
+
+     Use of the sseerr__ggeett(()) function to read RS-232C devices has been changed to
+     increase its flexibility.  See the sseerriiaall help file for details.
+
+     ssppeecc used to silently enforce a rule that only one GPIB controller, MCA or
+     timer was allowed at a time.  A message is now printed if the ccoonnffiigg file
+     requests more than one GPIB controller, CAMAC controller, timer or MCA.
+     The first device of each type encountered in the ccoonnffiigg file is the one
+     that will be used.
+
+     Now that scaler numbers are assigned in the ccoonnffiigg file, it is possible to
+     configure more than one type of scaler device at a time.  Each scaler
+     should use hardware gating from the master timer.  Software gating does
+     take place, although there can be substantial latency between receipt of
+     the time-complete signal from the master timer and disabling of the
+     scalers.  Note also that for a number of combined timer/counter units, the
+     scaler assignment for the seconds and monitor channel are hard coded into
+     ssppeecc.
+
+     For versions of ssppeecc on most platforms, memory is allocated for the maximum
+     number of motors (and scalers) at program startup, so that it is no longer
+     necessary to restart the program to increase the number of motors (or
+     scalers) after editing the ccoonnffiigg file.
+
+UTILITIES
+
+     A stand-alone version of the CC--PPLLOOTT ssccaannss..44 user function, called ssccaannss, is
+     now provided for extracting a data set from a ssppeecc data file.  See the
+     RREEAADDMMEE file in the aauuxx subdirectory of the distribution.
+
+ADMINISTRATION
+
+     Version 2.14 has a new installation procedure, that is based on the new
+     IInnssttaallll script in the distribution directory.  A RREEAADDMMEE file explains the
+     use of the script.
+
+     The CAMAC drivers on all systems should be replaced with the new versions
+     in the ddrriivveerrss subdirectory of the distribution.  Versions of ssppeecc prior to
+     version 2.14 should work with the new drivers, but ssppeecc 2.14 will not work
+     with old versions of the drivers.  Changes to the drivers are as follows:
+     The new drivers can be configured at run time for the signal to send to the
+     user process when a LAM is generated.  The Q and X response of each dataway
+     transaction is now communicated by the driver to the user process in a way
+     that does not depend on which CAMAC controller is installed.
+
+     The ccaammaacc..hh include file has been revised to accommodate CAMAC drivers on
+     BSD 4.3 and ULTRIX operating systems and to include added functionality.
+     The copy of ccaammaacc..hh in the directory //uussrr//iinncclluuddee will be updated
+     automatically if you install the new CAMAC driver.
+
+     On System V/386 systems, a new nnaapp driver is included that performs
+     fractional second sleeps.  Run the shell script iinnssttaallll__nnaapp in the ddrriivveerrss
+     subdirectory as super user to perform the installation.
+
+     The GPIB driver for the National Instruments PCII board for the VENIX 286
+     system must be replaced with the new version of the driver in this release.
+     Run the script iinnssttaallll__ggppiibb in the ddrriivveerrss subdirectory as super user to
+     perform the installation.
+
+     Another command file can be automatically read on startup.  This file is
+     named ssiittee..mmaacc and resides in the auxiliary file directory (SSPPEECC) as, for
+     example, //uussrr//lliibb//ssppeecc..dd//ssiittee..mmaacc.  If this file exists, it will be read
+     every time a user starts the program, not just when starting fresh.  The
+     ssiittee..mmaacc file is also read when the nneewwmmaacc macro is run.
+
+     More work has been done on the eeddccoonnff program.  In particular, if you exit
+     before saving any changes, you will be asked to confirm whether you really
+     want to quit.  Also, there is now a fourth screen used to configure scaler
+     assignments.  The number of configurable scalers on the devices screen has
+     been increased to three.  The CAMAC slot assignments in the ccoonnffiigg file now
+     begin with CCAA__ rather than CC__, as in the old versions.  The old format is
+     still recognized on reading, but the new form will be written out.  Arrow
+     key sequences are now read from the terminal capability data base, and so
+     eeddccoonnff can be used with arrow keys on non-vt100-compatible terminals.  In
+     addition the vvii hhjjkkll motion keys are now recognized.
+
+     The hardware support in ssppeecc has been completely modularized.  The uu__hhddww..cc
+     file contains a simplified hook mechanism to select the installed hardware.
+     All other references to a particular hardware device are now contained in a
+     single source file, allowing sites to add support for new devices, without
+     requiring access to the complete source code.  (At present the eeddccoonnff
+     program cannot be changed at site to add new hardware types.)
+
+     When ssppeecc starts out it executes a call to nniiccee((--2200)).  This call raises the
+     priority of the process, but only when being run by root or if the process
+     is owned by root and has set-user-id execute mode set.  After raising the
+     priority, ssppeecc resets the effective user and group ids to that of the real
+     user, so there is no danger of the user spawning subshells or creating
+     files as root.  If ssppeecc is not set-user-id root, it will behave as before.
+
+     If the sseettttiinnggss file can't be opened for writing when ssppeecc starts up, or if
+     there are read or write errors accessing that file, ssppeecc switches to
+     simulate mode and suggests the user get assistance.
+
+MISCELLANEOUS
+
+     ssppeecc is now available for the IBM PS/2 running the AIX 1.2 operating
+     system.  CAMAC support is currently only through a Kinetic Systems 3988
+     GPIB-to-CAMAC crate controller.
+
+     ssppeecc is now available for DEC MicroVax computers running ULTRIX or UCB
+     operating systems.  CAMAC drivers are available for either the Kinetic
+     Systems 3912 or DSP DCC-11 crate controllers.
+
+     ssppeecc is now available for SCO Xenix 286 2.2.3 and SCO Xenix 2.3.2 operating
+     systems.  (Use on a 286 platform is discouraged, though.)
+
+     The motor number indirection array mmAA[[]] is now reinitialized when the
+     ccoonnffiigg macro is invoked, using the __aassssiiggnn macro that is defined in each
+     geometry's standard macro file.  Thus, if motor numbers are reassigned
+     while editing the ccoonnffiigg file, the macros that list motors in specific
+     order (wwaa, wwhh, ...)  will still list the motors in the same order after
+     __aassssiiggnn is run.
+
+     The pprriinntt command with no arguments will now print a newline.  In previous
+     versions, such usage was reported as a syntax error.
+
+     The number of command files that may be queued for reading has been
+     increased from five to eight.
+
+BUG FIXES
+
+     A design flaw, introduced in version 2.11, and having to do with reads of
+     the motor controller registers, has been corrected.  The problem was that
+     ssppeecc could lose track of motor positions if the motor controller registers
+     were changed using a remote control pod, or if they were cleared due to
+     loss of power, while ssppeecc was running.  If any of the commands that read
+     the controller registers (ggeettaanngglleess) or changed the sseettttiinnggss file
+     (cchhgg__ddiiaall(()), cchhgg__ooffffsseett(())), were executed before executing a ssyynncc command,
+     the motor positions would likely have gotten scrambled.
+
+     A bug, whereby the results calculated using the background subtraction
+     feature were incorrect, has been fixed.
+
+     All motor mnemonics are now freed when executing the rreeccoonnffiigg command and
+     then reestablished on rereading of the ccoonnffiigg file.  Previously, a motor
+     mnemonic, not used in the geometry code, that was removed from the ccoonnffiigg
+     file would remain as an immutable symbol until you ran ssppeecc with the --ff
+     flag for a fresh start.
+
+     A bug where motor control would hang when trying to start a motor on a
+     Joerger SMC motor controller that had both limits open has been fixed.
+
+     A bug with the TS201 timer/counter where LAMs would sometimes be lost
+     during updated counting has been fixed.
+
+     A bug with the TS201 timer/counter where readings of certain count times
+     (30 seconds, for example) would indicate the wrong period (although the
+     period over which the module counted was correct) has been fixed.
+
+     A bug where values assigned to variables declared llooccaall within a statement
+     block sometimes affected variables of the same name outside the statement
+     block has been fixed.
+
+     A potential bug where defining a macro recursively would cause a program
+     crash has been fixed by limiting the amount of input push back to 64
+     Kbytes.  (This limit is arbitrary and can be increased by CSS if found to
+     be too low.)
+
+     A bug where lloogg file names containing a slash were not treated as lloogg files
+     has been fixed.
+
+     An old bug, where reference to the string constant and then a number
+     constant of the same value, particularly with a value of zero, would cause
+     unexpected results, has been fixed.  In previous versions, the code:
+
+        {{
+          aa == ""00""
+          bb == 00
+          iiff ((bb)) pprriinntt ""TThhiiss sshhoouulldd nnoott hhaappppeenn""
+        }}
+
+     would result in the message being printed.
+

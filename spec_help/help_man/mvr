@@ -1,0 +1,51 @@
+.TH "mvr" "macro" "01/29/14" "mvr.rst 6.2  01/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBmvr\fP and \fBumvr\fP \- move a single motor relative to its current position
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mvr.rst  6.2  01/29/14  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mvr" "macro" "01/29/14" "mvr.rst 6.2  01/29/14 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.nf
+
+\fBmvr motor relative_position\fP
+\fBumvr motor relative_position\fP
+.fi
+.sp
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBmvr\fP macro moves \fBmotor\fP to a position at
+\fBrelative_position\fP from the current position.
+If the motor is initially at position \fBX\fP this macro will move the motor to
+\fBX + relative_position\fP.
+.sp
+The \fBumvr\fP macro also moves the motor, but provides an updated display of
+the motor position on the screen while the motor is moving.
+The update interval, in seconds, is set by the global variable
+\fBUPDATE\fP.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBmvr th \-1\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%mv\fP
+\fI\%mvd\fP
+\fI\%tw\fP
+\fI\%wait\fP
+

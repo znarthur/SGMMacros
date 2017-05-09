@@ -1,0 +1,40 @@
+changes                      spec 2.8 Release Notes                      changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.8
+
+DESCRIPTION
+
+     These notes summarize the modifications made for ssppeecc release 2.8, as
+     finalized on August 6, 1988.
+
+CHANGES
+
+     The four-circle motors are now consistently referred to in the order tttthh tthh
+     cchhii pphhii throughout ssppeecc.  (Previously, the order of cchhii and pphhii was
+     reversed.)  The macros with changed usage are ppll, uuppll and ccii.  All the
+     macros that produce output (wwhh, the scans, etc.)  use the new ordering
+     convention.
+
+     The global variable referring to the data file has been changed from
+     FFIILLEENNAAMMEE to the more revealing DDAATTAAFFIILLEE.
+
+     The order of arguments in the built-in functions ddiiaall(()), uusseerr(()), cchhgg__ddiiaall(())
+     and cchhgg__ooffffsseett(()) has been changed to make the motor number the first
+     argument in each case.  This change makes the argument ordering of these
+     four functions consistent with the functions ggeett__lliimm(()) and sseett__lliimm(()).
+
+     A new function named mmoottoorr__mmnnee((ii)) returns the mnemonic assigned to motor
+     number ii in the ccoonnffiigg file.  The internal __cchheecckk00 macro, called by all
+     standard macros that allow a motor number or mnemonic as an argument, now
+     checks its argument against all valid mnemonics, rather than just that for
+     motor 0, as it had previously.
+
+     Most scans macros now include prescan motor-limit checks.
+
+     Previously, certain of the ccaallcc(()) calls to the geometry code (ccaallccAA and
+     ccaallccAABB, in particular) filled the AA[[]] array with the current motor
+     positions.  That no longer happens.
+
+     The four-circle geometry code has been made more robust (we like to think).
+

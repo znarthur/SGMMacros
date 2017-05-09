@@ -1,0 +1,437 @@
+amptek                              hardware                              amptek
+
+NAME
+     dp5 - Amptek DP5/PX5/DP5G/MCA8000D MCA products
+
+INTRODUCTION
+
+     This help file describes the ssppeecc support for the Amptek DP5, PX5, DP5G and
+     MCA8000D (and products derived from those) using Amptek's version 6
+     firmware.  In the following text, although DP5 is named explicitly, the
+     descriptions apply to all the above models.
+
+     The ssppeecc support for the DP5 is available over serial, USB and ethernet
+     interfaces.
+
+     Not all functionality available on the DP5 is currently included in the
+     ssppeecc support.  If a missing feature is needed, please contact CSS.
+
+CONFIGURATION
+
+     The DP5 is configured on the MCA- and CCD-type AAcquisition screen of the
+     the configuration editor along the following lines:
+
+        MMCCAA-- aanndd CCCCDD--AAccqquuiissiittiioonn TTyyppee DDeevviiccee CCoonnffiigguurraattiioonn
+
+        MMCCAA--lliikkee       DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE                       <<>>TTYYPPEE
+         00  YYEESS    //ddeevv//ttttyySS11     <<>>  111155220000    AAmmpptteekk DDPP55 ((FFWW66)) ((SSeerriiaall))
+         11  YYEESS                 99446677               AAmmpptteekk DDPP55 ((FFWW66)) ((UUSSBB))
+         22  YYEESS  119922..116688..11..1133                   AAmmpptteekk DDPP55 ((FFWW66)) ((SSoocckkeett))
+
+     For the serial interface, ssppeecc sets the baud rate to 115200 when
+     initializing the device no matter what baud rate is set in the ccoonnffiigg file,
+     since the device only works at 115200 baud.
+
+     With the USB interface, the AADDDDRR field can optionally be set to the
+     module's serial number, which is useful if more than one DP5 is connected
+     via USB.  Otherwise it is not possible to distinguish one from the other in
+     the configuration.  If the AADDDDRR field is zero, the modules are assigned in
+     the order in which they are discovered on the USB interface, which works
+     fine if there is just one module.
+
+     For the socket interface, the DDEEVVIICCEE field contains a resolvable hostname
+     or an IP address.  The port number can be optionally appended with a colon,
+     as 119922..116688..11..1133::1100000011.  If missing, the default port, 10001 is used.  One
+     can set the DP5 IP address using the ""eetthheerrnneett"" option to mmccaa__ppaarr(()) as
+     described below.
+
+     Note, the DP5 firmware requires a 15 second timeout period after closing
+     the socket connection before the socket can be reopened from the same IP
+     address.  Normally ssppeecc's rreeccoonnffiigg command closes and reinitializes sockets
+     connections.  For the DP5, ssppeecc keeps the socket connection open across a
+     rreeccoonnffiigg if the DP5 configuration remains unchanged. If the DDEEVVIICCEE string
+     is altered or if ssppeecc is quit and restarted within 15 seconds, the DP5
+     socket access will fail until the timeout period on the DP5 completes.
+     ssppeecc will detect this failure and automatically pause for the required
+     interval.
+
+FUNCTIONS
+
+     The standard MCA commands supported by ssppeecc are described in the _m_c_a help
+     file.  Of the standard functions, the ssppeecc MCA support for the Amptek
+     DP5-type devices includes mmccaa__ggeett(()) but not mmccaa__ppuutt(()).  In addition to the
+     mmccaa__ppaarr(()) options described below, the the standard mmccaa__ppaarr(()) options
+     ""iinnffoo"", ""cchhaannss"", ""mmaaxx__cchhaannss"", ""mmaaxx__cchhaannnneellss"", ""ddiissaabbllee"" and ""nnaattiivvee__ttyyppee""
+     are supported.
+
+     As explained in the _m_c_a help file, when more than one MCA is configured in
+     ssppeecc the mmccaa__sseell(()) command or the mmccaa__ssggeett(()) and mmccaa__ssppaarr(()) commands can be
+     used to direct commands to particular modules.
+
+     In the mmccaa__ppaarr(()) options described below, the argument parsing is case
+     insensitive.  Either lower case or upper case may be used.  The DP5
+     requires upper case for parameters sent to it.  ssppeecc makes the conversion
+     automatically.
+
+STATE FILE
+
+     Several parameters are saved in the user state file so that the values will
+     persist when restarting ssppeecc as the same user.  The parameters that are
+     saved are those corresponding to ""nnppttss"" (the number of channels), the
+     presets ""pprreesseett__ttiimmee"", ""pprreesseett__rreeaall"", ""pprreesseett__lliivvee"" (for the MCA800D) and
+     ""pprreesseett__ccoouunnttss"", and the upper and lower region-of-interest (""rrooii"") limits.
+     In addition, the settings for ""aauuttoo__cclleeaarr"", ""aauuttoo__rruunn"" and ""ssoofftt__pprreesseett""
+     are saved.
+
+INTERFACE
+
+     mmccaa__ppaarr((""eetthheerrnneett"")) - Reads the current ethernet configuration and displays
+          the results along the following lines:
+
+                 AAddddrreessss:: 119922..116688..11..1133
+                 GGaatteewwaayy:: 119922..116688..11..11
+             SSuubbnneett mmaasskk:: 225555..225555..225555..00
+                    PPoorrtt:: 1100000011
+             MMAACC aaddddrreessss:: 0000::00bb::33cc::55cc::ff77::ff00
+
+          When using the USB or serial interface, if the DP5 fails to detect the
+          ethernet chip, the command will fail with the error message "CP2201
+          not found".  The problem can usually be solved by cycling the power on
+          the DP5.
+
+     mmccaa__ppaarr((""eetthheerrnneett"",, ""aaddddrreessss [[,, ggaatteewwaayy [[,, ssuubbnneett]]]]"")) - Sets the DP5
+          ethernet parameters for IP address, gateway address and subnet mask.
+          Values are entered using the standard dotted-decimal notation, as
+          shown in the previous display.  The gateway and subnet mask values are
+          optional.  The gateway defaults to an address with the first three
+          elements of the IP address with a "..11" in the fourth position.  The
+          subnet mask defaults to 225555..225555..225555..00.  The following commands would
+          set the same parameters:
+
+             mmccaa__ppaarr((""eetthheerrnneett"",, ""119922..116688..11..1133""))
+             mmccaa__ppaarr((""eetthheerrnneett"",, ""119922..116688..11..1133,,119922..116688..11..11,,225555..225555..225555..00""))
+
+          Note, the items in the second argument can be delimited by commas,
+          spaces, colons or semicolons.  After sending the command to set the
+          configuration, the new configuration is read back and displayed.  One
+          would normally connect to the DP5 over the USB or serial interface to
+          configure the ethernet settings.
+
+OPERATION
+
+     mmccaa__ppaarr((""cclleeaarr"")) - Sends commands to the DP5 to clear the spectrum and the
+          scalers.
+
+     mmccaa__ppaarr((""rruunn"")) - If ""aauuttoo__cclleeaarr"" mode is set, sends commands to clear the
+          spectrum and scalers.  If a preset value is nonzero, programs the DP5
+          with either the preset accumulation time, the preset real time or the
+          preset counts.  Finally, sends the command to start acquisition.
+
+     mmccaa__ppaarr((""hhaalltt"")) - Sends the command to halt acquisition.
+
+     mmccaa__ppaarr((""aauuttoo__cclleeaarr"" [[,, 00||11]])) - With no arguments returns the current value
+          of auto-clear mode.  Otherwise turns auto-clear mode off or on.  When
+          auto-clear mode is on, the spectrum and scalers are cleared
+          automatically each time an acquisition is started.
+
+     mmccaa__ppaarr((""aauuttoo__rruunn"" [[,, 00||11]])) - With no arguments returns the current value
+          of auto-run mode.  Otherwise turns auto-run mode off or on.  When
+          auto-run mode is on, the DP5 is started automatically with the
+          standard ssppeecc count commands.
+
+     mmccaa__ppaarr((""ssoofftt__pprreesseett"" [[,, 00||11]])) - With no arguments, returns the current
+          value of soft-preset mode.  Otherwise turns soft-preset mode off or
+          on.  When soft-preset mode is on in conjunction with auto-run mode,
+          the DP5 will be programmed for the same preset accumulation time as
+          the master timer when counting to time, or the same preset counts as
+          the master counter when counting to preset counts.  ssppeecc will include
+          the DP5 when polling for the end of counting when soft-preset mode is
+          on.
+
+     mmccaa__ppaarr((""nnppttss"" [[,, vvaalluuee]])) - With no arguments, returns the current number
+          of points configured for the DP5 spectrum.  Otherwise sets the number
+          of points to vvaalluuee.  Allowed values are 256, 512, 1024, 2048, 4096 and
+          8192.  Setting the DP5 number-of-channels parameter MMCCAACC has the same
+          effect.
+
+     mmccaa__ppaarr((""ggrroouupp__ssiizzee"" [[,, vvaalluuee]])) - Has the same meaning as ""nnppttss"" above.
+
+     mmccaa__ppaarr((""pprreesseett__ttiimmee"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          preset acquisition time in seconds.  Otherwise sets the preset
+          acquisition time to vvaalluuee.  The DP5 is not programmed with the value
+          until acquisition is started.
+
+     mmccaa__ppaarr((""pprreesseett"" [[,, vvaalluuee]])) - Has the same meaning as ""pprreesseett__ttiimmee"" above.
+
+     mmccaa__ppaarr((""pprreesseett__rreeaall"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          preset real time in seconds.  Otherwise sets the preset real time to
+          vvaalluuee.  The DP5 is not programmed with the value until acquisition is
+          started.
+
+     mmccaa__ppaarr((""pprreesseett__lliivvee"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          preset live time in seconds.  Otherwise sets the preset real time to
+          vvaalluuee.  Only available with the MCA8000D.  The MCA8000D is not
+          programmed with the value until acquisition is started.
+
+     mmccaa__ppaarr((""pprreesseett__ccoouunnttss"" [[,, vvaalluuee]])) - With no arguments, returns the value
+          for the current preset counts.  Otherwise sets the preset counts value
+          to vvaalluuee.  The DP5 is not programmed with the value until acquisition
+          is started.  The preset counts are the counts accumulated in the
+          region of interest programmed for scaler number 8.
+
+     mmccaa__ppaarr((""rrooii"" [[,, lloowweerr,, uuppppeerr]])) - With no arguments, returns the number of
+          channels in the current region of interest.  Otherwise, sets the
+          region of interest used with preset-counts mode.  Scaler 8 of the DP5
+          will be programmed with the region-of-interest values when acquisition
+          is started.
+
+     mmccaa__ppaarr((""rrooii"",, ""lloowweerr""||""uuppppeerr"" [[,, vvaalluuee]])) - With the argument ""lloowweerr"" or
+          ""uuppppeerr"", returns the associated region-of-interest limit.  With a
+          third argument, sets the associated region-of-interest limit to vvaalluuee
+          and returns the number of channels in the current region-of-interest.
+
+     mmccaa__ppaarr((""aauuttoosseett__iinnppuutt__ooffffsseett"")) - Sends the aauuttoosseett iinnppuutt ooffffsseett packet to
+          the DP5.
+
+     mmccaa__ppaarr((""aauuttoosseett__ffaasstt__tthhrreesshhoolldd"")) - Sends the aauuttoosseett ffaasstt tthhrreesshhoolldd packet
+          to the DP5.
+
+STATUS
+
+     mmccaa__ppaarr((""ssttaattuuss"")) - Reads the status packet from the DP5 and displays
+          elements of the status as shown:
+
+                              DDPP55::  ss//nn 99446677
+                     FFPPGGAA vveerrssiioonn::  66..11
+                         FFiirrmmwwaarree::  66..66..99
+                       FFaasstt ccoouunntt::  00
+                       SSllooww ccoouunntt::  99550022
+                         GGPP ccoouunntt::  00
+                      MMCCAA eennaabblleedd::  NNoo
+                AAccccuummuullaattiioonn ttiimmee::  44..999999 sseecc
+                        LLiivvee ttiimmee::  44..999999 sseecc
+                        RReeaall ttiimmee::  55 sseecc
+             PPrreesseett ccoouunntt rreeaacchheedd::  00
+              PPrreesseett rreeaall rreeaacchheedd::  11
+                  OOssccooppee ddaattaa rrddyy::  00
+              AAuuttoo FFaasstt TThhrreesshhoolldd::  nnoott lloocckkeedd
+                AAuuttoo IInnppuutt OOffffsseett::  lloocckkeedd
+                  UUnniitt ccoonnffiigguurreedd::  yyeess
+                       FFPPGGAA cclloocckk::  2200MMHHzz
+                CClloocckk sseett bbyy aauuttoo::  nnoo
+                       BBooaarrdd TTeemmpp::  4433CC
+                    DDeetteeccttoorr TTeemmpp::  00..00KK
+                      DDeetteeccttoorr HHVV::  00VV
+                  LLiisstt--mmooddee cclloocckk::  11uuss
+                   LLiisstt--mmooddee ssyynncc::  IINNTT
+
+     mmccaa__ppaarr((""ssllooww__ccoouunnttss"")) - Reads the status packet and returns the current
+          value for slow counts.  The DP5 documentation says, "Slow counts are
+          counts from the slow (shaped) channel.  Any event that is counted in
+          the spectrum is also counted here."
+
+     mmccaa__ppaarr((""eellaappsseedd__ccoouunnttss"")) - Reads the status packet and returns the same
+          value as returned by the ""ssllooww__ccoouunnttss"" option.
+
+     mmccaa__ppaarr((""ffaasstt__ccoouunnttss"")) - Reads the status packet and returns the current
+          value for fast counts.
+
+     mmccaa__ppaarr((""eellaappsseedd__ttiimmee"")) - Reads the status packet and returns the elapsed
+          (accumulation) time in seconds.
+
+     mmccaa__ppaarr((""lliivvee__ttiimmee"")) - Reads the status packet and returns the live time in
+          seconds.
+
+     mmccaa__ppaarr((""rreeaall__ttiimmee"")) - Reads the status packet and returns the real time in
+          seconds.
+
+     mmccaa__ppaarr((""ddiiaaggnnoossttiicc"")) - Reads the DP5 diagnostic packet and displays the
+          results along the following lines:
+
+             FFPPGGAA vveerrssiioonn::    66..11
+                 FFiirrmmwwaarree::    66..66
+                 DDPP55 TTeemmpp::   4433..559955CC
+                      PPWWRR::    55..004444VV
+                     33..33VV::    33..227799VV
+                     22..55VV::    22..449922VV
+                     11..22VV::    11..119999VV
+                    ++55..55VV::    55..448888VV
+                    --55..55VV::   --55..446633VV
+                    AAnn__IInn::    11..772288VV
+                  VVrreeff__IInn::    11..442233VV
+
+          Note, the DP5 takes up to 2.5 seconds to respond to a diagnostic
+          packet request.
+
+PARAMETERS
+
+     The DP5 has many parameters and ssppeecc offers many methods for accessing the
+     parameters.
+
+     mmccaa__ppaarr((""ppaarrss"")) - Displays a table containing a description, the name and
+          the current value for all the available parameters, along the lines of
+          the following:
+
+             DDPPPP DDeevviiccee TTyyppee:: DDPP55
+                                  DDeessccrriippttiioonn  NNaammee   VVaalluuee
+                   MMCCAA//MMCCSS nnuummbbeerr ooff cchhaannnneellss ""MMCCAACC"":: 11002244
+                 TThhrreesshhoolldd ffoorr sshhaappeedd cchhaannnneell ""TTHHSSLL"":: 44..000033%%
+                      PPrreesseett aaccqquuiissiittiioonn ttiimmee ""PPRREETT"":: OOFFFF
+                                PPrreesseett ccoouunnttss ""PPRREECC"":: OOFFFF
+                  PPrreesseett ccoouunnttss llooww tthhrreesshhoolldd ""PPRRCCLL"":: 00
+                 PPrreesseett ccoouunnttss hhiigghh tthhrreesshhoolldd ""PPRRCCHH"":: 88119911
+                             PPrreesseett rreeaall ttiimmee ""PPRREERR"":: OOFFFF
+                                 GGaattee ccoonnttrrooll ""GGAATTEE"":: OOFFFF
+                             PPeeaakk ddeetteecctt mmooddee ""PPDDMMDD"":: NNOORRMM
+                          SSeett ssppeeccttrruumm ooffffsseett ""SSOOFFFF"":: OOFFFF
+                      LLooww--lleevveell ddiissccrriimmiinnaattoorr ""TTLLLLDD"":: OOFFFF
+                             MMCCAA iinnppuutt ssoouurrccee ""MMCCAASS"":: NNOORRMM
+                                 MMCCSS ttiimmeebbaassee ""MMCCSSTT"":: 00..000000ss
+                            MMCCSS llooww tthhrreesshhoolldd ""MMCCSSLL"":: 00
+                           MMCCSS hhiigghh tthhrreesshhoolldd ""MMCCSSHH"":: 88119911
+                                 PPeeaakkiinngg ttiimmee ""TTPPEEAA"":: 88..000000uuss
+                               FFllaatt ttoopp wwiiddtthh ""TTFFLLAA"":: 22..000000uuss
+                      PPiillee--uupp rreejjeecctt iinntteerrvvaall ""PPUURREE"":: OOFFFF
+                   TThhrreesshhoolldd ffoorr ffaasstt cchhaannnneell ""TTHHFFAA"":: 8800..000000
+                    FFaasstt cchhaannnneell ppeeaakkiinngg ttiimmee ""TTPPFFAA"":: 440000nnss
+                          BBLLRR ddoowwnn ccoorrrreeccttiioonn ""BBLLRRDD"":: 22
+                            BBLLRR uupp ccoorrrreeccttiioonn ""BBLLRRUU"":: 11
+                            BBaasseelliinnee rreessttoorreerr ""BBLLRRMM"":: 11
+                                  2200MMHHzz//8800MMHHzz ""CCLLCCKK"":: 2200MMHHzz
+                      RRiisseettiimmee ddiissccrriimmiinnaattiioonn ""RRTTDDEE"":: OOFFFF
+                                RRTTDD tthhrreesshhoolldd ""RRTTDDTT"":: 00..000000%%
+                              RRTTDD sseennssiittiivviittyy ""RRTTDDSS"":: 00%%
+                      NNoonn--ttrraappeezzooiiddaall sshhaappiinngg ""CCUUSSPP"":: 00%%
+                                   TToottaall ggaaiinn ""GGAAIINN"":: 33..000000
+                                  CCooaarrssee ggaaiinn ""GGAAIIAA"":: 22
+                                    FFiinnee ggaaiinn ""GGAAIIFF"":: 11..22004433
+                                 IInnppuutt ooffffsseett ""IINNOOFF"":: DDEEFF
+                                 AAnnaalloogg iinnppuutt ""AAIINNPP"":: NNEEGG
+                       DDeetteeccttoorr rreesseett lloocckkoouutt ""RREESSLL"":: OOFFFF
+             TTuurrnn ssuupppplliieess oonn//ooffff aatt ppoowweerr uupp ""BBOOOOTT"":: OOFFFF
+                                   DDAACC oouuttppuutt ""DDAACCOO"":: SSHHAAPPEEDD
+                                   DDAACC ooffffsseett ""DDAACCFF"":: 119999mmVV
+                           AAuuxxiilliiaarryy oouuttppuutt 11 ""AAUUOO11"":: IICCRR
+                                  TTeesstt ppuullsseerr ""TTPPMMOO"":: --SS
+                           AAuuxxiilliiaarryy oouuttppuutt 22 ""AAUUOO22"":: IICCRR
+                              GGPP ccoouunntteerr eeddggee ""GGPPEEDD"":: FFAA
+                   GGPP ccoouunntteerr uusseess MMCCAA eennaabbllee ""GGPPMMEE"":: OONN
+                       GGPP ccoouunntteerr ggaattee eennaabbllee ""GGPPGGAA"":: OONN
+              GGPP ccoouunntteerr cclleeaarr wwiitthh MMCCAA cclleeaarr ""GGPPMMCC"":: OONN
+                      GGPP ccoouunntteerr iinnppuutt ssoouurrccee ""GGPPIINN"":: AAUUXX11
+                           SSccooppee ttrriiggggeerr eeddggee ""SSCCOOEE"":: RRII
+                       SSccooppee ttrriiggggeerr ppoossiittiioonn ""SSCCOOTT"":: 8877%%
+                           DDiiggiittaall ssccooppee ggaaiinn ""SSCCOOGG"":: 11
+                              SSCCAA ppuullssee wwiiddtthh ""SSCCAAWW"":: 110000nnss
+
+     mmccaa__ppaarr((""ppaarr__ooppttiioonnss"")) - Displays a table containing a description, the
+          name, the current value and the options for parameter values for all
+          the available parameters, along the lines of the following:
+
+               MMCCAA//MMCCSS nnuummbbeerr ooff cchhaannnneellss ""MMCCAACC"":: 11002244       225566||551122||11002244||22004488||44009966||88119922
+             TThhrreesshhoolldd ffoorr sshhaappeedd cchhaannnneell ""TTHHSSLL"":: 44..000033%%     ####..######[[%%]]
+                  PPrreesseett aaccqquuiissiittiioonn ttiimmee ""PPRREETT"":: OOFFFF        ################..######[[ss]]||OOFF||OOFFFF
+                                                   ......
+
+          Vertical bars separate valid options.  The ## characters indicate the
+          range of number values.  Unit strings shown in square brackets are
+          optional.
+
+     mmccaa__ppaarr((""ppaarr__aarrrraayy"")) - Returns an associative array indexed by the
+          four-letter parameter names with each element containing the parameter
+          value.  Elements will be string valued or number valued, as
+          appropriate.
+
+     mmccaa__ppaarr((""ssaavvee__ccoonnffiigg"",, ffiilleennaammee)) - Reads the current parameter values from
+          the DP5 and writes them to ffiilleennaammee using the Amptek parameter-file
+          format.
+
+     mmccaa__ppaarr((""rreeaadd__ccoonnffiigg"",, ffiilleennaammee)) - Reads parameter values from the given
+          ffiilleennaammee, which must be in the Amptek parameter-file format, and
+          programs the DP5 with those values.
+
+     mmccaa__ppaarr((""rreeaadd__ccoonnffiigg22"",, ffiilleennaammee)) - As above, but programs the DP5 one
+          parameter at a time.  The method takes longer, but if there are error
+          messages from the DP5 due to a parameter value, the error message will
+          be associated with the particular parameter.
+
+     mmccaa__ppaarr((""sseett__ccoonnffiigg"")) - Programs the DP5 using the current values for all
+          the parameters.  This command should not be needed, as the DP5 is
+          programmed with each parameter as it is set and when values are read
+          from a parameter file.
+
+     mmccaa__ppaarr((""sseett__ccoonnffiigg22"")) - As above, but programs the DP5 one parameter at a
+          time.  The method takes longer, but if there are error messages from
+          the DP5 due to a parameter value, the error message will be associated
+          with the particular parameter.
+
+     mmccaa__ppaarr((ppaarraammeetteerr [[,, vvaalluuee]])) - Sets or reads a single DP5 parameter.  The
+          parameter name is the first argument to mmccaa__ppaarr(()).  If only one
+          argument, the current value is read from the DP5 and returned.  If the
+          second argument is a valid parameter, the DP5 is programmed with that
+          value.
+
+     mmccaa__ppaarr((ppaarraammeetteerr,, ""ssyynnttaaxx"")) - Returns the syntax options for the specified
+          parameter.
+
+     mmccaa__ppaarr((""rreesseett"")) - Sends the command to reset the DP5 configuration to
+          default values.  Note, though, ssppeecc will reprogram the number of
+          channels parameters ""MMCCAACC"" to the value it had prior to the reset
+          command.
+
+     mmccaa__ppaarr((""sseenndd"",, ccoommmmaanndd)) - Sends the parameter configuration command
+          directly to the DP5.  The only time this command might be useful is if
+          a new parameter not recognized by ssppeecc is added to the DP5 firmware.
+          Usage would be:
+
+             mmccaa__ppaarr((""sseenndd"",, ""GGAATTEE==OOFFFF""))
+
+     mmccaa__ppaarr((""rreeaadd"",, ccoommmmaanndd)) - Can be used to read a parameter value directly
+          from the DP5.  The only time this command might be useful is if a new
+          parameter not recognized by ssppeecc is added to the DP5 firmware.  Usage
+          would be:
+
+             pprriinntt mmccaa__ppaarr((""rreeaadd"",, ""GGAATTEE""))
+
+SCALERS
+
+     Each of the 16 scalers can be programmed for an lower and upper region of
+     interest.  The scalers will accumulate counts that fall within that region.
+     Scaler 8 is special in that its region of interest values are programmed to
+     the region of interest set with the mmccaa__ppaarr((""rrooii"")) command when using
+     preset-counts mode.
+
+     mmccaa__ppaarr((""ssccaalleerrss"")) - Reads the current scaler values and displays a list of
+          current value, region of interest lower and upper limits and output
+          state for each of the scalers on the device.
+
+     mmccaa__ppaarr((""ssccaalleerr__aarrrraayy"")) - Reads the current scaler values and returns a
+          16-element data array (unsigned long) containing the data.
+
+     mmccaa__ppaarr((""ssccaalleerr##"")) - Reads and returns the current scaler value for scaler
+          number ##, where ## is from 1 to 16.
+
+     mmccaa__ppaarr((""ssccaalleerr##"",, ""lloowweerr"" [[,, vvaalluuee]])) - Sets or reads the lower region of
+          interest limit for scaler number ##, where ## is from 1 to 16.
+
+     mmccaa__ppaarr((""ssccaalleerr##"",, ""uuppppeerr"" [[,, vvaalluuee]])) - Sets or reads the upper region of
+          interest limit for scaler number ##, where ## is from 1 to 16.
+
+     mmccaa__ppaarr((""ssccaalleerr##"",, ""oouuttppuutt"" [[,, vvaalluuee]])) - Sets or reads the output
+          configuration for scaler number ##, where ## is from 1 to 8.  The vvaalluuee
+          argument can be ""OOFFFF"", ""LLOOWW"" or ""HHIIGGHH"".
+
+DIGITAL OSCILLOSCOPE
+
+     mmccaa__ppaarr((""aarrmm__ssccooppee"")) - Sends the command to arm the digital oscilloscope.
+
+     mmccaa__ppaarr((""ssccooppee"")) - Reads and returns the oscilloscope data as a 2048
+          element uusshhoorrtt data array.
+
+     mmccaa__ppaarr((""ssccooppee__rreeaarrmm"")) - Reads and returns the oscilloscope data as above
+          and rearms the digital oscilloscope.
+
+SEE ALSO
+
+     _m_c_a _a_m_p_t_e_k_._c_o_m
+

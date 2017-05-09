@@ -1,0 +1,52 @@
+newfile                               macro                              newfile
+
+NAME
+     nneewwffiillee - data file management
+
+SYNOPSIS
+
+     nneewwffiillee [[ffiillee__nnaammee]] [[ccuurrrreenntt__ssccaann__nnuummbbeerr]]
+
+DESCRIPTION
+
+     The nneewwffiillee macro is used to initialize a new data file or reopen an old
+     data file.  You might open a new data file for each new sample or each new
+     experiment.  There is no specific limit to the number of scans you can put
+     in a data file, although for practical considerations, you may want to
+     start a new file after you have accumulated one or two hundred scans or
+     when the size of the data file makes it unwieldy.
+
+     If ffiillee__nnaammee doesn't contain the // character, and if there is a directory
+     named ddaattaa in the current directory, the file is opened in that directory.
+     If you give nnuullll as a file name, //ddeevv//nnuullll is used.  Otherwise the file
+     name or path name given by ffiillee__nnaammee is used.
+
+     The next scan written to the file will have scan number ccuurrrreenntt__ssccaann__nnuummbbeerr
+     +1.
+
+     You can use nneewwffiillee to reopen an existing data file.  New scans will be
+     placed at then end of the file.  You can use command uu ggrreepp ##SS ffiillee__nnaammee to
+     find the last scan number in an existing file.
+
+GLOBALS
+
+     DDAATTAAFFIILLEE - Global variable holding name of the current data file.  Its
+          value is written in the data file header preceded by ##FF.
+
+     SSCCAANN__NN - Global variable holding current scan number.  Its value is written
+          in the data file scan headers preceded by ##SS.
+
+     EEPPOOCCHH - Constant variable holding the time at which the data file was
+          opened.  Its value is written in the data file header preceded by ##EE.
+
+     TTIITTLLEE - Global variable written as a comment in the data file header.  Its
+          value is an arbitrary string set by the user.
+
+EXAMPLE
+
+     nneewwffiillee AAuu111100..1122
+
+SEE ALSO
+
+     _s_t_a_r_t_u_p _s_c_a_n_s
+

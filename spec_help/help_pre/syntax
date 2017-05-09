@@ -1,0 +1,287 @@
+syntax                              reference                             syntax
+
+NAME
+     syntax - interpreter syntax
+
+DESCRIPTION
+
+     This syntax summary attempts to present all the built-in keywords,
+     operators and commands of ssppeecc.  The grammar rules listed below are very
+     similar to those given in the standard manuals describing the C language.
+     Operators are listed in order of precedence, with the highest precedence
+     operators listed first.
+
+     The following terms are used:
+
+     llvvaalluuee - "lleefftt vvaalluuee", something that can go on the left side of the equals
+          sign.
+
+     bbiinnoopp - binary operator (+, -, etc.)
+
+     aassggnnoopp - assignment operator (=, +=, etc.)
+
+     iiddeennttiiffiieerr - a variable
+
+     iiddeennttiiffiieerr--lliisstt - a space- or comma-separated list of identifiers
+
+     ppaatttteerrnn - An alphanumeric string possibly containing the meta characters ??
+          or **.
+
+     ppaatttteerrnn--lliisstt--oopptt - An optional space-separated list of patterns.
+
+     eexxpprr--oopptt - an optional expression
+
+     eexxpprr--lliisstt--oopptt - an optional expression list
+
+     [;;] - A semicolon or a newline.  (A semicolon after a statement is optional
+          if the statement is followed by a newline.)
+
+EXPRESSIONS
+
+     eexxpprreessssiioonn:
+
+         llvvaalluuee
+         nnuummeerriicc--ccoonnssttaanntt
+         ssttrriinngg--ccoonnssttaanntt
+         ( eexxpprreessssiioonn )
+         ffuunnccttiioonn ( eexxpprreessssiioonn--lliisstt  )
+         - eexxpprreessssiioonn
+         ! eexxpprreessssiioonn
+         ~ eexxpprreessssiioonn
+         ++ llvvaalluuee
+         -- llvvaalluuee
+         llvvaalluuee ++
+         llvvaalluuee --
+         eexxpprreessssiioonn ?  eexxpprreessssiioonn : eexxpprreessssiioonn
+         eexxpprreessssiioonn bbiinnoopp eexxpprreessssiioonn
+         llvvaalluuee aassggnnoopp eexxpprreessssiioonn
+
+     eexxpprreessssiioonn--lliisstt:
+
+         eexxpprreessssiioonn , eexxpprreessssiioonn
+
+     llvvaalluuee:
+
+         iiddeennttiiffiieerr
+         iiddeennttiiffiieerr [ eexxpprreessssiioonn ]
+
+     bbiinnoopp:
+
+         ** //  %%
+         ++ --
+         >>>> <<<<
+         >> <<  <<==  >>==
+         ==== !!==
+         &&
+         ^^
+         ||
+         &&&&
+         ||||
+
+     aassggnnoopp:
+
+         == ++==  --==  **==  //==  %%==  >>>>==  <<<<==  &&==  ^^==  ||==
+
+     aarrrraayy__ttyyppee:
+
+         bbyyttee
+         uubbyyttee
+         sshhoorrtt
+         uusshhoorrtt
+         lloonngg
+         uulloonngg
+         ffllooaatt
+         ddoouubbllee
+         ssttrriinngg
+
+     aarrrraayy__ddeeccll:
+
+         [ aarrrraayy__ttyyppee ] aarrrraayy iiddeennttiiffiieerr ] [ eexxpprr ]
+         [ aarrrraayy__ttyyppee ] aarrrraayy iiddeennttiiffiieerr ] [ eexxpprr ] [ eexxpprr ]
+
+     aarrrraayy__ddeeccll--lliisstt:
+
+         aarrrraayy__ddeeccll [ , ] aarrrraayy__ddeeccll
+
+Statements
+
+     ccoommppoouunndd--ssttaatteemmeenntt:
+
+         { ssttaatteemmeenntt--lliisstt }
+
+     ssttaatteemmeenntt--lliisstt:
+
+         ssttaatteemmeenntt--lliisstt
+         ssttaatteemmeenntt ssttaatteemmeenntt--lliisstt
+
+     ssttaatteemmeenntt:
+
+         ccoommppoouunndd--ssttaatteemmeenntt
+         eexxpprreessssiioonn [ ;; ]
+         iiff ( eexxpprreessssiioonn ) ssttaatteemmeenntt
+         iiff ( eexxpprreessssiioonn ) ssttaatteemmeenntt eellssee ssttaatteemmeenntt
+         wwhhiillee ( eexxpprreessssiioonn ) ssttaatteemmeenntt
+         ffoorr ( eexxpprr--lliisstt--oopptt; eexxpprr--oopptt;  eexxpprr--lliisstt--oopptt ) ssttaatteemmeenntt
+         ffoorr ( iiddeennttiiffiieerr iinn iiddeennttiiffiieerr ) ssttaatteemmeenntt
+
+         bbrreeaakk [ ;; ]
+         ccoonnttiinnuuee [ ;; ]
+         eexxiitt [ ;; ]
+         rreettuurrnn eexxpprr--oopptt [ ;; ]
+
+         hhiissttoorryy eexxpprr--oopptt [ ;; ]
+         llssccmmdd ppaatttteerrnn--lliisstt--oopp [ ;; ]
+         ssyymmss ppaatttteerrnn--lliisstt--oopp [ ;; ]
+
+         pprriinntt eexxpprreessssiioonn--lliisstt [ ;; ]
+         eepprriinntt eexxpprreessssiioonn--lliisstt [ ;; ]
+
+         gglloobbaall iiddeennttiiffiieerr--lliisstt [ ;; ]
+         ccoonnssttaanntt iiddeennttiiffiieerr eexxpprreessssiioonn [ ;; ]
+         uunngglloobbaall iiddeennttiiffiieerr--lliisstt [ ;; ]
+         llooccaall iiddeennttiiffiieerr--lliisstt [ ;; ]
+         ddeelleettee iiddeennttiiffiieerr [ eexxpprreessssiioonn ] [ ;; ]
+
+         aarrrraayy__ddeeccll--lliisstt [ ;; ]
+         llooccaall aarrrraayy__ddeeccll--lliisstt [ ;; ]
+         gglloobbaall aarrrraayy__ddeeccll--lliisstt [ ;; ]
+         sshhaarreedd aarrrraayy__ddeeccll--lliisstt [ ;; ]
+         eexxtteerrnn sshhaarreedd aarrrraayy__ddeeccll--lliisstt [ ;; ]
+
+         ddeeff iiddeennttiiffiieerr ssttrriinngg--ccoonnssttaanntt [ ;; ]
+         rrddeeff iiddeennttiiffiieerr eexxpprreessssiioonn [ ;; ]
+         uunnddeeff iiddeennttiiffiieerr--lliisstt [ ;; ]
+         pprrddeeff ppaatttteerrnn--lliisstt--oopp [ ;; ]
+         llssddeeff ppaatttteerrnn--lliisstt--oopp [ ;; ]
+
+         mmeemmssttaatt [ ;; ]
+         ssaavvssttaattee [ ;; ]
+         rreeccoonnffiigg [ ;; ]
+         ggeettccoouunnttss [ ;; ]
+         mmoovvee__aallll [ ;; ]
+         mmoovvee__ccnntt [ ;; ]
+         ssyynncc [ ;; ]
+         qquuiitt [ ;; ]
+
+FUNCTIONS
+
+     0 or 1 arguments:
+     xxcchhddiirr(())   iinnppuutt(())   oonn(())     ooppeenn(())
+     rraanndd(())     ssttoopp(())    ttiimmee(())   wwaaiitt(())
+
+     0 to 2 arguments:
+
+         ddaattee(())
+
+     0 to 3 arguments:
+
+         uunniixx(())
+
+     1 argument:
+     aaccooss(())     aasscc(())         aassiinn(())         aattaann(())        bbccdd(())
+     cclloossee(())    ccnntt__mmnnee(())     ccnntt__nnaammee(())     ccnntt__nnuumm(())
+     ccooss(())      ddccbb(())         ddeegg(())          eexxpp1100(())       eexxpp(())
+     ffaabbss(())     ggeetteennvv(())      ggeetthheellpp(())      ggppiibb__ppoollll(())
+     iinntt(())      lleennggtthh(())      lloogg1100(())        lloogg(())
+     mmccoouunntt(())   mmoottoorr__mmnnee(())   mmoottoorr__nnaammee(())   mmoottoorr__nnuumm(())
+     ooffff(())      pplloott__ccnnttll(())   ppoorrtt__ggeett(())     ppoorrtt__ggeettww(())
+     rraadd(())      sseett__ssiimm(())     ssiinn(())          sslleeeepp(())
+     ssqqrrtt(())     ssrraanndd(())       ttaann(())          ttccoouunntt(())      ttttyy__ccnnttll(())
+
+     1 or more arguments:
+
+         aarrrraayy__dduummpp(()) aarrrraayy__oopp(()) aarrrraayy__pplloott(()) ddaattaa__dduummpp(()) ddaattaa__pplloott(()) eepprriinnttff(())
+         pprriinnttff(()) ssoocckk__iioo(()) ssoocckk__ppaarr(()) sspprriinnttff(()) vvmmee__ggeett(()) vvmmee__ggeett3322(())
+
+     1 or 2 arguments:
+
+         aannkkaa__ppaarr(()) ccaa__ccnnttll(()) ccaallcc(()) ddooffiillee(()) eemm__iioo(()) eevvaall(()) ffbbuuss__ggeett(())
+         ffiillee__iinnffoo(()) ggeettlliinnee(()) ggeettssvvaall(()) ggeettvvaall(()) ggppiibb__ggeett(()) mmccaa__sseell(()) qqddooffiillee(())
+         rreeaadd__mmoottoorrss(()) rreemmoottee__ppoollll(()) rreemmoottee__ssttaatt(()) sseerr__ggeett(()) ssoocckk__ggeett(())
+         ssppeecc__ppaarr(()) wwhhaattiiss(()) yyeessnnoo(())
+
+     1 to 3 arguments:
+
+         eeppiiccss__ggeett(()) eeppiiccss__ppuutt(()) mmccaa__ppaarr(())
+
+     1 to 4 arguments:
+
+         aarrrraayy__ppiippee(()) ccddeeff(()) ddaattaa__ppiippee(()) eessrrff__ddcc(()) mmccaa__ggeett(()) mmccaa__ppuutt(())
+
+     1 to 5 arguments:
+
+         eessrrff__iioo(())
+
+     1 to 17 arguments:
+
+         ffbbuuss__ppuutt(())
+
+     2 arguments:
+
+         aarrrraayy__rreeaadd(()) aattaann22(()) ccaa__ggeett(()) cchhgg__ooffffsseett(()) cclloonnee(()) ddaattaa__iinnffoo(()) ddiiaall(())
+         ffmmtt__cclloossee(()) ggeett__lliimm(()) ggppiibb__ccnnttll(()) iimmaaggee__ggeett(()) iimmaaggee__ppuutt(()) iinnddeexx(())
+         ppoorrtt__ppuutt(()) ppoorrtt__ppuuttww(()) ppooww(()) pprroopp__ggeett(()) pprroopp__wwaattcchh(()) rreemmoottee__ccmmdd(())
+         rreemmoottee__eevvaall(()) uusseerr(())
+
+     2 or more arguments:
+
+         aarrrraayy__ffiitt(()) ddaattaa__ffiitt(()) ffpprriinnttff(()) pprroopp__sseenndd(()) ssssccaannff(()) vvmmee__mmoovvee(())
+         vvmmee__ppuutt(()) vvmmee__ppuutt3322(())
+
+     2 or 3 arguments:
+
+         cchhgg__ddiiaall(()) eeppiiccss__ppaarr(()) eessrrff__ddbb(()) ggppiibb__ppuutt(()) rreemmoottee__aassyynncc(()) sseerr__ppaarr(())
+         sseerr__ppuutt(()) ssoocckk__ppuutt(()) sspplliitt(()) ssuubbssttrr(()) ttttyy__mmoovvee(())
+
+     2 to 4 arguments:
+
+         ccoouunntteerr__ppaarr(()) ddaattaa__rreeaadd(()) mmccaa__ssppaarr(()) mmoottoorr__ppaarr(()) pplloott__mmoovvee(())
+
+     2 to 5 arguments:
+
+         mmccaa__ssggeett(()) mmccaa__ssppuutt(())
+
+     2 to 6 arguments:
+
+         iimmaaggee__ppaarr(())
+
+     3 arguments:
+
+         ccaa__ppuutt(()) ddaattaa__ggeett(()) ddaattaa__ggrrpp(()) pprroopp__ppuutt(()) sseett__lliimm(())
+
+     3 or more arguments:
+
+         ddaattaa__nnppuutt(())
+
+     3 or 4 arguments:
+
+         aannkkaa__ggeett(()) ccaa__ffnnaa(())
+
+     3 to 5 arguments:
+
+         ffmmtt__rreeaadd(()) ffmmtt__wwrriittee(())
+
+     4 arguments:
+
+         ddaattaa__ppuutt(()) pplloott__rraannggee(()) ttttyy__ffmmtt(())
+
+     4 or 5 arguments:
+
+         aannkkaa__ppuutt(())
+
+     5 or 6 arguments:
+
+         ddaattaa__uuoopp(())
+
+     6 or 7 arguments:
+
+         ddaattaa__aannaall(())
+
+     7 arguments:
+
+         ddaattaa__bboopp(())
+
+SEE ALSO
+
+     _f_u_n_c_s _f_l_o_w
+

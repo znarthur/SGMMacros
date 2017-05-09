@@ -1,0 +1,84 @@
+.TH "IP28" "hardware" "08/01/12" "IP28.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+IP28 \- Microcontrole motor indexer
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)IP28.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "IP28" "hardware" "08/01/12" "IP28.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Microcontrole IP28 is a 4\-axis motor indexer
+for use with stepping motors or with direct current motors with encoders.
+It is interfaced either via RS\-232C or by GPIB (IEEE 488).
+Being programmable, an entire motion sequence, including backlash,
+may be down loaded, thus retaining the asynchronous nature of moves.
+.sp
+Normally, power is supplied by TL78A power units which can be very simply
+multiplexed using the 4\-bits of the programmable outputs of the IP28.
+Thus, up to 32 motors can be controlled by one IP28.
+Unfortunately, this usage presents the two following difficulties:
+.sp
+.RS 4m
+.IP 1. 3
+only four motors (of the same bank) may be moved simultaneously, and
+.IP 2. 3
+the internal registers can only keep track of the positions of four axes.
+.RE
+.sp
+One solution is to keep track of all motor positions using
+separate readable up/down counters (such as the Microcontrole HC 88).
+Another solution is to always work with relative displacements and
+to keep track of the positions by the software.
+This is technique is currently employed by \fBspec\fP.
+Consistency is insured by searching for a mechanical origin
+(switch or optical encoder).
+Note that the TL78 power modules display a position
+(usually set to the user angle)
+so that angles are not really lost when switching banks.
+Generally, the hardware is homogeneous so there is little
+or no problem about loosing steps
+(which results in a "controle d\(aqecart", anyways).
+One must beware when restarting from a power failure, and search for
+the origin for each axe (see below).
+.sp
+One cannot set the internal registers \- only define zeros.  Thus, we ignore
+the IP28\(aqs floating zero and only use its mechanical zero.
+This is set by the command "O[WXYZ];\er" which
+is incorporated in \fBsync()\fP and in the
+\fBspec\fP command \fBchg_dial(motor, 0)\fP.
+Changing a dial setting to a non\-zero value disables hardware angle tracking,
+re\-enabled by searching for the mechanical origin.
+IP28 users will probably want to undefine the macro \fBset_dial\fP
+and define a new macro
+\fBzero\fP \- this macro SHOULD NOT MODIFY THE USER OFFSETS! (see
+\fBmacros/surf.cea\fP).
+.sp
+\fBspec\fP tries to make best use of the IP28.  Most of the above
+problems can be avoided if one puts the four, most often used motors
+(4\-axes) on one TL 78A bank.
+Note that a bank may consist of several TL78A chassis which may be
+not fully occupied when using large motors due to a limitation in power.
+.SH "BUGS AND CAVEATS"
+.rs
+.sp
+Besides being able to only track 4 motors at a time,
+positions may be read only after motion has terminated.
+Thus, \fBspec\fP updated move macros cannot be used with the IP28.
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%config\fP
+\fI\%zero\fP
+

@@ -1,0 +1,42 @@
+.TH "set" "macro" "08/01/12" "set.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBset\fP \- define the user angle of a motor
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)set.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "set" "macro" "08/01/12" "set.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBset motor user_angle\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBset\fP macro is used to establish the
+\fBuser_angle\fP for the motor specified by the argument
+\fBmotor\fP. It is most often used to set the zero of a motor
+during an alignment procedure.
+.sp
+The macro uses the built\-in function \fBchg_offset()\fP.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBset th 0\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%set_dial\fP
+\fI\%zero\fP
+

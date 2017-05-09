@@ -1,0 +1,34 @@
+.TH "wa" "macro" "08/01/12" "wa.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBwa\fP \- list all motor positions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)wa.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "wa" "macro" "08/01/12" "wa.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBwa\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBwa\fP macro lists the positions of all configured motors
+in both \fBuser\fP and \fBdial\fP units.
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%wh\fP
+\fI\%wm\fP
+

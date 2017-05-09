@@ -1,0 +1,144 @@
+.TH "vxi11" "hardware" "05/11/15" "vxi11.rst 6.2  05/11/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+vxi11 \- Connect to VXI\-11 RPC servers
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)vxi11.rst        6.2  05/11/15  CSS
+.
+.\" Copyright (c) 2012,2015
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "vxi11" "hardware" "05/11/15" "vxi11.rst 6.2  05/11/15 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP user\-level VXI\-11 functions
+connect and communicate with instruments (such as many digital oscilloscopes) that use
+the VXI\-11 protocol.
+The client/server protocol use the remote procedure call (RPC) model
+and is described in the document
+VXI 11 Revision (7/17/1995)
+TCP/IP Instrument Protocol Specification,
+available at \fI\%vxibus.org\fP.
+The support in \fBspec\fP currently consists of the \fBdevice_read\fP
+and \fBdevice_write\fP messages over the \fBcore\fP channel.  The
+\fBabort\fP and \fBinterrupt\fP channels described by the protocol are not used.
+.sp
+The user\-level access is through
+the functions \fBvxi11_get()\fP, \fBvxi11_put()\fP and
+\fBvxi11_par()\fP.
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.sp
+Most of the function calls require a string in the form
+\fB"host"\fP or
+\fB"host:instrument"\fP as the first argument.
+The \fBhost\fP can be specified by a symbolic name or by an IP address.
+For most devices, there is only one instrument per IP address (or host),
+and it is not necessary to specify the instrument name.
+\fBspec\fP supplies the placeholder name \fBinst0\fP.
+When an instrument name is required, the syntax is as above, where a colon separates the
+host name from the instrument name.
+In the syntax description below, the symbol \fBname\fP will be used
+to represent both options.
+.sp
+The default timeout for the RPC \fBclnt_call()\fP operations is set to two seconds.
+It doesn\(aqt appear possible to abort a nonresponsive
+RPC call prior to the expiration of the timeout
+with a \fB^C\fP.  Thus, do not make the timeout too large.
+.sp
+The following functions are available.  The syntax and behavior for the
+\fBvxi11_get()\fP and \fBvxi11_put()\fP functions is very similar to \fBspec\fP\(aqs corresponding
+user level I/O functions for \fI\%serial\fP, \fI\%socket\fP and \fI\%gpib\fP interfaces.
+.RS 0m
+.HP 5m
+."
+\fBvxi11_get("name")\fP
+\- 
+Reads up 8192 bytes from the device.  A device will usually indicate
+a read is finished by setting the end bit, resulting in the transfer
+of less than the maximum number.
+.HP 5m
+."
+\fBvxi11_get("name", n)\fP
+\- 
+Reads up to \fBn\fP bytes.
+.HP 5m
+."
+\fBvxi11_get("name", d)\fP
+\- 
+Reads incoming bytes into the data array \fBd\fP. The size of
+\fBd\fP determines how many bytes are to be read.
+Sub\-array syntax can be used to limit the number of bytes.
+The function returns the number of array elements read, or zero
+if the read times out.
+Note, no byte re\-ordering is done for short\- or long\-integer data, and
+no format conversions are done for float or double data.
+.HP 5m
+."
+\fBvxi11_get("name", mode)\fP
+\- 
+If \fBmode\fP is the string
+\fB"byte"\fP, reads and returns one unsigned binary byte.
+If \fBmode\fP is the string \fB"short"\fP, reads two binary
+bytes and returns the short integer so formed.
+If \fBmode\fP is the string \fB"long"\fP, reads four binary
+bytes and returns the long integer so formed.
+The last two modes work the same on both
+\fBbig\-endian\fP and \fBlittle\-endian\fP platforms.
+On both, the incoming data is treated as
+\fBbig endian\fP. If the incoming data is \fBlittle endian\fP, use
+\fB"short_swap"\fP or
+\fB"long_swap"\fP.
+.HP 5m
+."
+\fBvxi11_par("show")\fP
+\- 
+Lists the current open clients.
+.HP 5m
+."
+\fBvxi11_par("info")\fP
+\- 
+Returns a string that lists the current open clients.
+.HP 5m
+."
+\fBvxi11_par("timeout" [, t])\fP
+\- 
+Returns or sets the default timeout for the RPC calls.
+The units are seconds.
+.HP 5m
+."
+\fBvxi11_par("name", "timeout" [, t])\fP
+\- 
+Returns or sets the timeout for the named device.
+This value overrides the global default.
+The units are seconds.
+.HP 5m
+."
+\fBvxi11_par("name", "connect")\fP
+\- 
+Opens the RPC connection to the named device.  Returns true if successful
+and false for failure.  Connections are created automatically with the
+\fBvxi11_get()\fP and \fBvxi11_put()\fP functions.  It is not necessary to
+use the \fB"connect"\fP option.  However, it may be useful to check if
+a connection is possible.  There is no difference in behavior for a
+connection opened using this \fB"connect"\fP option or one opened
+automatically with \fBvxi11_get()\fP or \fBvxi_put()\fP.
+.HP 5m
+."
+\fBvxi11_par("name", "close")\fP
+\- 
+Closes the RPC connection to the named device and frees associated resources.
+Returns true whether or not the named device is open.  All connections are
+closed during a \fBreconfig\fP.
+.RE
+

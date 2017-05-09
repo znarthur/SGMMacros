@@ -1,0 +1,32 @@
+u                                     macro                                    u
+
+NAME
+     uu - create a UNIX subshell
+
+SYNOPSIS
+
+     uu [[sshheellll__ccoommmmaanndd]]
+
+DESCRIPTION
+
+     The uu macro is a general escape to a UNIX shell.  If invoked with
+     arguments, the arguments are executed as a command by the Bourne shell,
+     //bbiinn//sshh.
+
+     Without an argument, an interactive subshell is spawned.  The program used
+     for the subshell is taken from the environment variable SSHHEELLLL, if set.
+     Otherwise, the Bourne shell is used.  Exit the subshell to return to ssppeecc.
+     Don't launch ssppeecc again from the subshell.
+
+DEFINITION
+
+     ddeeff uu ''uunniixx((""$$**""))''
+
+EXAMPLE
+
+     uu ccoonntteennttss 990000111100
+
+SEE ALSO
+
+     _c_d _p_w_d _v_i _n_e_d _l _l_s
+

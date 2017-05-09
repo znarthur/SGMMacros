@@ -1,0 +1,54 @@
+.TH "a4scan" "macro" "08/01/12" "a4scan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBa4scan\fP \- four\-motor scan
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)a4scan.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "a4scan" "macro" "08/01/12" "a4scan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBa4scan m1 start1 end1 m2 start2 end2
+m3 start3 end3 start4 end4 intervals time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBa4scan\fP scans four motors, as specified
+by \fBm1\fP, \fBm2\fP, \fBm3\fP and \fBm4\fP.
+Each motor moves the same number of intervals with starting and ending
+positions given by \fBstart1\fP
+and \fBend1\fP, \fBstart2\fP and \fBend2\fP, \fBstart3\fP
+and \fBend3\fP, \fBstart4\fP and
+\fBend4\fP, respectively.  The step size for each motor is
+\fB(start\-end)/intervals\fP.
+The number of data points collected will be
+\fBintervals+1\fP.
+Count time is given by \fBtime\fP, which if positive,
+specifies seconds and if negative, specifies monitor counts.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBa4scan el1 0 10 el2 0 10 el3 0 10 el4 0 10 20 10\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%motors\fP
+\fI\%ascan\fP
+\fI\%a2scan\fP
+\fI\%a3scan\fP
+\fI\%dscan\fP
+\fI\%d2scan\fP
+\fI\%d3scan\fP
+\fI\%mesh\fP
+

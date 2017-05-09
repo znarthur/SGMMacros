@@ -1,0 +1,444 @@
+.TH "hdf5" "reference" "02/12/15" "hdf5.rst 6.3  02/12/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+HDF5 \- create HDF5 files
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)hdf5.rst 6.3  02/12/15 CSS
+.
+.\" Copyright (c) 2014,2015
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "hdf5" "reference" "02/12/15" "hdf5.rst 6.3  02/12/15 CSS"
+.
+.SH "Description"
+.rs
+.sp
+HDF5 is version 5 of a standardized hierarchical data format for storing and managing data.
+See the \fI\%HDF Group home page\fP and \fI\%documentation\fP pages for detailed
+information on the HDF5 specifications.
+\fBspec\fP implements a subset of the HDF5 functionality
+sufficient to archive the type of data that \fBspec\fP acquires.
+.sp
+The hierarchical part of the HDF5 format refers to the tree structure of named objects.
+Each object in the file belongs to an HDF5 group.
+Each group has a path in the HDF5 file starting from the
+root group which is named \fB/\fP.
+Path name components are separated by slash characters (\fB/\fP).
+.sp
+\fBspec\fP creates HDF5 objects called
+attributes and datasets.
+Attributes and datasets are similar in that both have names and
+both have associated data.
+The main difference is that attributes are intended to store a small
+amount of data.
+In addition, datasets may contain attributes, but attributes cannot contain
+additional attributes.
+\fBspec\fP can also create a dataset
+that contains a hard link (or pointer)
+to another named object.
+.sp
+Four built\-in functions are provided: \fBh5_file()\fP to create or open an HDF5 file,
+\fBh5_attr()\fP to create attributes, \fBh5_data()\fP to create or add to datasets and
+\fBh5_link()\fP to create soft links to objects in external files.
+.sp
+Although \fBspec\fP arrays have just one or two dimensions, it is possible to
+save a three\-dimensional dataset one 2D array at a time.
+It is also possible to save a two\-dimensional
+dataset one row at a time.
+.sp
+\fBspec\fP supports setting dataset maximum dimensions, setting the chunk sizes
+(important for efficient reading and writing of large datasets),
+setting the memory cache size (important for writing data efficiently to the file)
+and enabling dataset compression.
+.SH "Linking \fBspec\fP With HDF5"
+.rs
+.sp
+\fBspec\fP needs to be linked with the HDF5 library to enable the
+capabilities described in this help file.  The HDF5 library version should
+match the version used to build \fBspec\fP (see below).
+.sp
+The \fBspec\fP distribution includes a prebuilt static library archive
+named \fBlibhdf5.a\fP that is the matching version and
+can be linked with \fBspec\fP during installation.
+Because \fBspec\fP supports chunk compression, the ZLIB data compression library
+\fBlibz.a\fP is also needed and is also included in the spec distribution.
+.sp
+The static libraries are very large and nearly double the size of the \fBspec\fP
+executable image.  Installing a shared library on the system would be better,
+but would need to be done by a local system administrator.  Complete
+instructions for downloading and installing HDF5 are available
+by following the appropriate links on the \fI\%HDF group home page\fP.
+.sp
+The \fBspec\fP \fBInstall\fP script includes the following section for configuring the HDF5
+libraries:
+.sp
+.RS 4m
+.nf
+Choices for HDF5 libraries are:
+
+.in +2
+1) no               \- not using HDF5
+2) libhdf5.a libz.a \- use static libraries
+3) \-lhdf5 \-lz       \- use system libraries (possibly shared)
+4) libhdf5.a \-lz    \- use static hdf5 and system libz
+5) other            \- enter library arguments
+
+.in -2
+The location of the HDF5 libraries.  Include to enable
+use of the HDF (Hierarchical Data Format) data output
+commands.  Note, library version should match spec build.
+
+Choose HDF5 libraries (no)?
+.fi
+.sp
+.RE
+.sp
+In the current \fBspec\fP release, the default is not to link with the HDF5 libraries,
+as the HDF5 format
+is not yet widely used and linking with the static libraries greatly expands
+\fBspec\fP\(aqs memory footprint.
+Choice 2 enables linking with the included static libraries.
+Choice 3 will use the system libraries, as long as the libraries are in
+a standard place.
+.sp
+Sources corresponding to the libraries included in the current spec distribution
+can be downloaded at \fI\%certif.com/downloads/extras/hdf5.tgz\fP and
+\fI\%certif.com/downloads/extras/zlib.tgz\fP.
+.sp
+If \fBspec\fP is not linked with the matching HDF5 library version, one
+can set the environment variable \fBHDF5_DISABLE_VERSION_CHECK\fP to a value
+of 1 or greater to enable use of the functions.
+If the value is 1, then HDF5 libraries will produce a lengthy warning message
+on the first call of an HDF5 function.
+If the value is 2 or greater, the message from the libraries will be suppressed,
+although \fBspec\fP will print a one\-time short warning message.
+CSS cannot predict the results of using a mismatched version.
+Note, the version matching is done on the major and minor version numbers.
+For example,
+versions 1.8.13 and 1.8.14 differ only in release number, which will not
+produce a warning message.
+.SH "Mapping of \fBspec\fP Data Types to HDF5 Data Types"
+.rs
+.sp
+\fBspec\fP has three categories of data:  scalars, associative arrays
+and data arrays.
+Values for scalar and associative array elements are stored in \fBspec\fP
+as either strings or double\-precision floating point numbers.
+Data array values match the declared type of the data array.
+.sp
+By default, the \fBh5_attr()\fP and \fBh5_data()\fP functions
+will use an HDF5 data type that corresponds to the \fBspec\fP data type.
+An optional argument to the function can specify a particular HDF5
+data type as follows:
+.sp
+.RS 4m
+.nf
+\fB"byte"\fP    \fBH5T_NATIVE_INT8\fP
+\fB"ubyte"\fP   \fBH5T_NATIVE_UINT8\fP
+\fB"short"\fP   \fBH5T_NATIVE_INT16\fP
+\fB"ushort"\fP  \fBH5T_NATIVE_UINT16\fP
+\fB"long"\fP    \fBH5T_NATIVE_INT32\fP
+\fB"ulong"\fP   \fBH5T_NATIVE_UINT32\fP
+\fB"long64"\fP  \fBH5T_NATIVE_INT64\fP
+\fB"ulong64"\fP \fBH5T_NATIVE_UINT64\fP
+\fB"float"\fP   \fBH5T_NATIVE_FLOAT\fP
+\fB"double"\fP  \fBH5T_NATIVE_DOUBLE\fP
+\fB"string"\fP  \fBH5T_C_S1\fP with \fBH5T_VARIABLE\fP
+.fi
+.sp
+.RE
+.sp
+If the \fB"string"\fP option is used to convert numbers to strings, the
+numbers will be formatted using a \fB"%.15g"\fP specification.
+Each row of a string data array is written as a fixed length string.
+.SH "Writing \fBspec\fP Associative Arrays"
+.rs
+.sp
+In general,
+\fBspec\fP associative arrays can be  one\- or two\-dimensional.
+The array
+index values are stored as strings, although the strings can be
+representations of numbers.
+\fBspec\fP can only save associative arrays with non\-negative integer indexes
+to HDF5 files.
+\fBspec\fP will dimension the HDF5 array data space to the largest index
+in each dimension of the associative array.
+If an associative array has only one element with an index of 1000, the HDF5
+array will have space allocated for 1001 elements.
+Missing values will be written to the HDF5 file as zeroes.
+The best practice is to save only associative arrays that have
+consecutive integer indexes starting at zero.
+.sp
+Before writing the data, \fBspec\fP scans the associative array to find
+the maximum index dimension and to determine if the elements are
+all numbers or if one or more elements is a string.
+If any element of the array is not a number, all elements will
+be saved as strings.
+.sp
+When saving values as numbers, the data type can be specified with
+an optional argument, as described above.
+.SH "Writing \fBspec\fP Data Arrays"
+.rs
+.sp
+\fBspec\fP data arrays are one\- or two\-dimensional
+storage of fixed size and data type, indexed
+by integers starting at zero.  \fBspec\fP allocates
+data space in the HDF5 file to fit the entire array,
+unless options described in the next section are used
+to reserve additional space.
+By default, data is written using the declared array data
+type.
+The data type can be converted using one of the options described above.
+.sp
+For two\-dimensional arrays, \fBspec\fP will allocate rows and columns
+in an HDF5 data space to match the array declaration.
+For a one\-dimensional array (including a single row or single column subarray),
+the default is to write the data as
+a single row.  However, if the \fB"row_wise"\fP option
+has been explicitly set using \fBarray_op()\fP for the parent array
+(see the \fI\%arrays\fP help file),
+or as an optional argument to \fBh5_attr()\fP or \fBh5_data()\fP, the
+data will be saved as a column array.
+A one\-dimensional array declared explicitly as a column array, for example,
+\fBarr[20][1]\fP will also be saved as a column array.
+.sp
+Space for \fBspec\fP string data arrays is allocated for fixed length
+strings matching the storage size of the arrays.  Values for each
+row of the string array are written as strings to the HDF5 file.
+.SH "Additional Options For Data Arrays with \fBh5_data()\fP"
+.rs
+.sp
+In addition to the data\-type arguments and \fB"row_wise"\fP argument discussed
+above, the following additional arguments can be used with \fBh5_data()\fP
+when saving data arrays.
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fB"dims=[frames:]rows:columns"\fP
+\- 
+Sets the maximum dimensions of the array for arrays that are written
+one frame or one row at a time.  The first dimension can be \-1
+to set the dimension as unlimited.  The current dimensions of the
+dataset will be set to match the dimensions of the data array
+passed to the \fBh5_data()\fP function.
+.HP 5m
+."
+\fB"chunk=[frames:]rows:columns"\fP
+\- 
+Sets the dimensions of the contiguous blocks of
+data in the HDF5 file.  The values have a significant impact
+on the efficiency for reading and writing data.
+Chunk values must be set in order to enable data
+compression or to be able to add frames or rows to existing datasets.
+If the keyword \fB"chunk"\fP is
+used with no values, \fBspec\fP will set the first chunk dimension
+to 1 and the other dimensions to match the size of a single
+frame or row of the data array.
+Consult HDF5 documentation for suggestions
+on chunk optimization.
+.RE
+.RE
+.sp
+.RS 4m
+.RS 0m
+.HP 5m
+."
+\fB"cache=bytes[[:slots]:policy]"\fP
+\- 
+Sets the memory cache parameters for the raw data chunks.
+\fBbytes\fP is the total number of bytes in the cache.  The default
+is 1 MB per dataset.  \fBslots\fP is the number of chunk slots in the
+raw data cache.  This value should be a prime number to optimize the
+hashing algorithm.  The default value is 521.  \fBpolicy\fP is the
+chunk preemption policy and can be any value from zero to one.  The
+default is 0.75.  See the HDF5 documentation for a full explanation.
+.sp
+Setting the cache parameters with \fBh5_data()\fP only applies to the
+current function call.  To set the parameters for all data sets
+written to a file, set the option with \fBh5_file()\fP.
+.RE
+.HP 5m
+."
+\fB"frame=#"\fP or simply \fB#\fP
+\- 
+For adding to existing datasets that have the first dimension set
+as unlimited (see above).  The value \fB#\fP specifies the frame number
+when adding a 2D array to a 3D dataset,
+the row number when adding for a 1D array to a 2D dataset
+or the point number if adding a scalar value to a 1D dataset.
+.HP 5m
+."
+\fB"gzip[=deflation_factor]\fP
+\- 
+Enables compression for the dataset.  If the \fB"chunk"\fP option
+is missing, \fBspec\fP will enable chunking and set the dimensions
+automatically as described above.  Valid \fBdeflation_factor\fP
+values are from 1 to 9, with 9 being maximum compression, which
+is the default if no value is specified.
+.RE
+.RE
+.sp
+If the \fB"dims"\fP or \fB"gzip"\fP options are used, but the \fB"chunk"\fP values
+are not set, \fBspec\fP will automatically set the chunk sizes as specified above.
+.SH "Group Paths"
+.rs
+.sp
+The first argument to the \fBh5_attr()\fP and \fBh5_data()\fP functions is the path
+to the object.
+For each open HDF5 file, \fBspec\fP maintains a current\-path value.  When the file
+is first opened the current path is \fB/\fP.
+After each call to \fBh5_attr()\fP or \fBh5_data()\fP, the current path is set to
+the first argument of the functions.
+An argument \fB"."\fP refers to the current path.
+The path argument can also use the string \fB".."\fP to refer to the parent group.
+.SH "HDF5 Error Messages and Debugging"
+.rs
+.sp
+The built\-in variable \fBHDF5_ERROR_MODE\fP can be set to tune
+the verbosity level of the errors generated by the HDF5 library.
+The HDF5 library generates an error stack, where each function
+in the library adds a message to the stack when any function below it
+returns an error.
+One can choose to display just the error description associated with the
+function that generated the error, or the entire stack with varying
+degrees of detail.
+.sp
+.RS 4m
+.nf
+1 \- Display error description from bottom of error stack
+2 \- Display descriptions from entire error stack
+3 \- Include source file and line number of error
+4 \- Include major and minor error code texts
+.fi
+.sp
+.RE
+.sp
+A value less than the minimum or greater than the maximum will
+be treated as the minimum or maximum, respectively.
+.sp
+Adding 0x01000000 to the \fBspec\fP debug level enables
+\fBspec\fP\-generated HDF5 debugging messages.
+.SH "Built\-in Functions"
+.rs
+.sp
+The following functions are available.  Except for usage that
+returns the current file or current group, all functions return
+\fBtrue\fP (1) for success and \fBfalse\fP (0) otherwise.
+.RS 0m
+.HP 5m
+."
+\fBh5_file(filename, "open" [,"cache=bytes[[:slots]:policy]"])\fP
+\- 
+Opens \fBfilename\fP if it exists or creates it if it doesn\(aqt.
+The HDF5 file remains open across calls, although all objects
+and resources created by \fBh5_attr()\fP and \fBh5_data()\fP are
+closed and released when those functions return.
+The optional argument sets the raw data chunk cache parameters for
+all data sets saved to the file as long as it
+remains open.  The meaning of the parameters is explained \fI\%above\fP.
+.HP 5m
+."
+\fBh5_file(filename, "flush")\fP
+\- 
+Tells the HDF5 library to write buffered data for \fBfilename\fP
+out to disk.
+.HP 5m
+."
+\fBh5_file(filename, "close")\fP
+\- 
+Closes \fBfilename\fP.
+.HP 5m
+."
+\fBh5_file(filename)\fP
+\- 
+If more than one HDF5 file is open, makes \fBfilename\fP the active one.
+If no HDF5 file is open, attempts to open \fBfilename\fP.
+Returns \fBtrue\fP (1) for success.
+.HP 5m
+."
+\fBh5_file()\fP
+\- 
+Returns the name of the currently active HDF5 file, or the
+null string if no file is open.
+.HP 5m
+."
+\fBh5_attr(group_path, attribute_name, attribute_value [, option ...])\fP
+\- 
+Creates a new attribute with the name \fBattribute_name\fP and the
+value \fBattribute_value\fP.
+The \fBoptions\fP can be a \fBspec\fP data type
+as in the table above.
+.HP 5m
+."
+\fBh5_data(group_path, dataset_name, dataset_value [, option ...])\fP
+\- 
+Creates a new dataset with the name \fBdataset_name\fP and the
+value \fBdataset_value\fP.
+The \fBoptions\fP can be a \fBspec\fP data type, as in the table above.
+Additional options include
+\fB"dims=[frames:]rows:columns"\fP,
+\fB"chunk=[frames:]rows:columns"\fP,
+\fB"cache=bytes[[:slots]:policy]"\fP
+and \fB"gzip[=deflation_factor]\fP.
+.HP 5m
+."
+\fBh5_data(group_path, dataset_name, dataset_value, "frame=#"|#)\fP
+\- 
+Adds \fBdataset_value\fP to the existing dataset at the specified frame or row
+number.
+.HP 5m
+."
+\fBh5_data(group_path, dataset_name, dataset_link, "link")\fP
+\- 
+Creates a dataset containing a hard link from \fBdataset_link\fP to \fBdataset_name\fP.
+.HP 5m
+."
+\fBh5_attr()\fP or \fBh5_data()\fP
+\- 
+With no arguments, either function returns the path of the current group.
+.HP 5m
+."
+\fBh5_attr(group_path)\fP or \fBh5_data(group_path)\fP
+\- 
+Sets the current group to \fBgroup_path\fP.
+A call such as \fBh5_attr("..")\fP moves the current group up one level.
+.HP 5m
+."
+\fBh5_link(group_path, link_name, target_file, target_object)\fP
+\- 
+Creates a soft link named \fBlink_name\fP pointing to the specified target object
+in the target file.
+.RE
+.SH "Built\-in Symbols"
+.rs
+.sp
+The following built\-in symbols are available:
+.RS 0m
+.HP 5m
+."
+\fBHDF5_VERSION\fP
+\- 
+Contains the HDF5 version used when compiling \fBspec\fP,
+as in "1.8.13".  Note, its value will not be set until
+the first call of one of the above functions.
+.HP 5m
+."
+\fBHDF5_ERROR_MODE\fP
+\- 
+Sets the verbosity level of error messages.  Valid
+values are 1 through 4.  Higher levels are useful
+for debugging calls of the above functions
+in conjunction with the HDF5 library source code.
+The default value is 1.
+.RE
+

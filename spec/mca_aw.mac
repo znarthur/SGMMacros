@@ -1,0 +1,472 @@
+#
+# mca.mac
+# 
+# This is the base macro file for the chess MCA macros.
+# All macros here are based on SPEC's mca support using
+# the mca_* instructions.  Each function checks for a 
+# _mca_type_*name* function that can be used to override
+# the standard call for derives that don't support the
+# standard commands.  
+#
+# MCA device specific macros are placed in command 
+# files called from mcasetup.  These files are called
+# "mca_*name*.cmd" where *name* is defined in the 
+# mcasetup macro.
+#
+# Each device SHOULD provide a _mca_type_setup macro
+# that setups the hardware.  In particular, the MCA 
+# channels needs to be set to the proper value.
+#
+#
+# ONLY ONE MCA UNIT AT A TIME IS CURRENTLY SUPPORTED 
+#
+# Currently support MCA units:
+#   1. XFlash MAX
+#   2. Ortec Trump PCI
+#   3. Radiant Vortex
+#   
+#
+# $Id: mca.mac,v 1.1 2002/07/10 20:39:41 sorensen Exp $
+#
+# Edited 11/05 by AW to add format (MCA_FMT), header line...
+
+# DEPENDENCY INFO
+#   PROVIDES: _FILE_MCA_MAC_
+#   NEEDS:
+#
+#   Can use setup.mac if available
+#
+
+global _FILE_MCA_MAC_
+_FILE_MCA_MAC_ = 1
+
+
+
+#
+# MACRO DEFINITIONS
+#
+
+#
+# SETUP/UNSETUP macros
+#   (call device specific hooks)
+#
+
+#
+# mcasetup [%type%] [%chan%] [%options% ...]
+#   Setup MCA for use. The %type% selects which MCA
+#   you are using.  The number of channels used is
+#   selected by %chan%.  If not given on the command 
+#   line, the user is prompted for type.  The macro 
+#   loads command file "mca_*type*.cmd" and setups a
+#   call to _mca_type_setup macro on prompt passing 
+#   all the parameters.
+#
+#   NOTE: The arrays MCA_DATA and MCA_RAW are defined 
+#   as ulong.  If MCA uses a different format you will
+#   need to change the type in _mca_type_setup
+#
+def mcasetup '{
+	if(MCA_SETUP == 1) {
+		mcaunsetup
+	}
+
+	global MCA_SETUP MCA_TYPE MCA_NAME MCA_STRG MCA_CHAN MCA_SCAN
+	global MCA_RAW MCA_DATA 
+	# AW adds 18 Nov 2005 MCA_FMT
+	global MCA_FMT MCA_FILENAME
+
+
+	MCA_SETUP = 0
+	MCA_TYPE = $1
+	MCA_NAME = "unknown"
+	MCA_STRG = "Unknown"
+	MCA_CHAN = $2
+	MCA_SCAN = 0
+	MCA_FMT = "%s_%d.mca"
+
+	if($# < 1) {
+		print "Please select MCA type:"
+		print "\t1 -- XFlash MAX\n"
+		print "\t2 -- Ortec Trump\n"
+		print "\t3 -- Radiant Vortex\n"
+		MCA_TYPE = getval("Type", MCA_TYPE)
+	}
+	if(MCA_TYPE == 1) {
+		MCA_NAME = "xflash"
+		MCA_STRG = "XFlash MAX"
+	} else if(MCA_TYPE == 2) {
+		MCA_NAME = "trump"
+		MCA_STRG = "Ortec Trump"
+	} else if(MCA_TYPE == 3) {
+		MCA_NAME = "vortex"
+		MCA_STRG = "Radiant Vortex"
+		MCA_FMT = "%s_%03d.mca";
+		if (cnt_num("icr") == -1) {
+		   print "Warning: Counter \"icr\" not setup for dead time correction"
+		}
+		if (cnt_num("ocr") == -1) {
+		   print "Warning: Counter \"ocr\" not setup for dead time correction"
+		}
+	} else {
+		eprintf("ERROR: Unknown MCA type!  MCA macros NOT setup!!")
+		exit
+	}
+
+	if($# < 2) {
+		MCA_CHAN = 1024
+		MCA_CHAN = getval("Number of channels", MCA_CHAN)
+	}
+
+	ulong array MCA_RAW[MCA_CHAN]
+	ulong array MCA_DATA[MCA_CHAN][2]
+
+	#eval(sprintf("udo mca_%s.cmd", MCA_NAME))
+
+	cdef("prompt_mac", "mcasetup_end $*;", "_mca.mac_", 0x10)
+}'
+
+#
+# mcasetup_end [%mcasetup's args%]
+#   Bottom half of macsetup macro.  This is needed
+#   because reading device specific command file 
+#   is not done until the mcasetup macro exits.
+#
+def mcasetup_end '{
+#	if(whatis("_mca_type_setup") & 0x02)
+#		_mca_type_setup("$*")
+
+	MCA_SETUP = 1
+
+#	if(_FILE_SETUP_MAC_ == 1)
+#		setup_tail("mca")
+
+	printf("\n%s MCA unit successfully setup\n", MCA_STRG)
+
+	cdef("prompt_mac", "", "_mca.mac_", "delete")
+}'
+
+#
+# mcaunsetup
+#   Turns off any enable MCA modes and undefines all
+#   associated global variables.  Calls _mca_type_unsetup 
+#   for type specific unsetup  
+#
+def mcaunsetup '{
+	# turn things off
+
+	if(whatis("_mca_type_unsetup") & 0x2)
+		_mca_type_unsetup
+
+	unglobal MCA_SETUP MCA_TYPE MCA_NAME MCA_STRG MCA_CHAN MCA_SCAN
+	unglobal MCA_RAW MCA_DATA
+}'
+
+
+#
+# ACQUIRE/READ macros
+#   (can be overridden)
+#
+
+#
+# mcacq
+#   Start accumulating a spectrum. 
+#
+# Override: _mca_type_acq
+#
+def mcacq '{
+	if(MCA_SETUP != 1) {
+		eprint("MCA not setup.  Please type mcasetup.")
+		exit
+	}
+
+	if(whatis("_mca_type_acq") & 0x2) {
+		_mca_type_acq $*
+	} else {
+		mca_par("run")
+	}
+}'
+
+#
+# mcaoff
+#   Stop accumulating a spectrum.
+#
+# Override: _mca_type_off
+#
+def mcaoff '{
+	if(MCA_SETUP != 1) {
+		eprint("MCA not setup.  Please type mcasetup.")
+		exit
+	}
+
+	if(whatis("_mca_type_off") & 0x2) {
+		_mca_type_off $*
+	} else {
+		mca_par("halt")
+	}
+}'
+
+#
+# mcaclr
+#   Clear the accumulated spectrum.
+#
+# Override: _mca_type_clr
+#
+def mcaclr '{
+	if(MCA_SETUP != 1) {
+		eprint("MCA not setup.  Please type mcasetup.")
+		exit
+	}
+
+	if(whatis("_mca_type_clr") & 0x2) {
+		_mca_type_clr $*
+	} else {
+		mca_par("clear")
+	}
+}'
+
+#
+# mcaread
+#   Read the accumulated spectrum from mca.  It is 
+#   stored in array MCA_DATA.  The raw spectrum is
+#   stored in array MCA_RAW.  Any _mca_type_read
+#   function needs to fill MCA_RAW.
+#
+# Override: _mca_type_read
+#
+def mcaread '{
+	local i dead_percent
+
+	if(MCA_SETUP != 1) {
+		eprint("MCA not setup.  Please type mcasetup.")
+		exit
+	}
+
+	if(whatis("_mca_type_read") & 0x2) {
+		_mca_type_read $*
+	} else {
+		mca_get(MCA_RAW, 0, (MCA_CHAN-1))
+	}
+
+	for(i = 0; i < MCA_CHAN; i++)
+		MCA_DATA[i][1] = MCA_RAW[i]
+	
+	# AW adds 18 Nov 2005
+	if (MCA_TYPE == 3) {
+		dead_percent=cnt_num(dead) == -1? 1 : S[dead]
+		MCA_DATA[0][1] = 1000*dead_percent
+		mca_error = mca_par("errinfo")
+		if (mca_error != 0) {
+			eprintf("Error code %d -- Aborting\n", mca_error)
+			exit
+		}
+	}
+
+	array_op("fill", MCA_DATA[:][0], 1)
+
+	mcadisp
+}'
+
+
+#
+# DISPLAY AND DUMP macros
+#
+
+#
+# mcadisp [%min-chan% %max-chan% %y-max%] 
+#   Displays the MCA spectrum in MCA_DATA.  The data is
+#   plotted for %min-chan% through %max-chan% from 0 to
+#   %y-max%.  If no parameters are given then the plot
+#   auto-scales.
+def mcadisp '{
+	local xmin xmax ymax
+
+	plot_cntl("filter5")
+	plot_cntl("-ebars -dots lines")
+	plot_cntl("open")
+	plot_cntl("erase")
+
+	xmin = ($1 !=0) ? $1 : "1"
+	xmax = ($2 !=0) ? $2 : (MCA_CHAN - 1)
+
+	plot_range(xmin, xmax, 0, ($3 !=0) ? $3 : "auto")
+	plot_cntl("mca")
+	array_plot(MCA_DATA[xmin:xmax])
+
+	plot_move(0, 2, "Counts")
+	plot_move(0, -1, "Channel")
+	plot_move(-51, 0, sprintf("Peak at %.5g is %.5g. COM at %.5g", \
+	  array_op("x_at_max",MCA_DATA[xmin:xmax][0],MCA_DATA[xmin:xmax][1]),\
+	  array_op("max", MCA_DATA[xmin:xmax][1]), \
+	  array_op("com", MCA_DATA[xmin:xmax][0], MCA_DATA[xmin:xmax][1])))
+	plot_move(-51, 1, sprintf("FWHM is %.5g at %.5g.", \
+	  array_op("fwhm", MCA_DATA[xmin:xmax][0], MCA_DATA[xmin:xmax][1]),\
+	  array_op("cfwhm", MCA_DATA[xmin:xmax][0], MCA_DATA[xmin:xmax][1])))
+
+	plot_cntl("filter1")
+}'
+
+#
+# mcad [%filename%]
+#   Dumps the MCA spectrum to a file in the form of a
+#   SPEC scan.
+#
+def mcad '{
+	local i j str
+
+	dumpfile = "$1"
+
+	if($# != 1)
+		dumpfile = getval( "Dump file", dumpfile)
+
+	if(file_info(dumpfile, "-r")) {
+		if(!yesno( "\nFile already exists!  Overwrite it", 0))
+			exit
+		else
+			unix( sprintf( "rm -f %s", dumpfile))
+	}
+
+	fprintf(dumpfile, "#F %s\n", dumpfile)
+	fprintf(dumpfile, "#E %d\n", EPOCH)
+	fprintf(dumpfile, "#D %s\n", date())
+	fprintf(dumpfile, "#C %s  User = %s\n", TITLE, USER)
+	on(dumpfile); offt
+	for(i = 0; i < MOTORS; i += 8) {
+		printf("#O%d ", i/8)
+		s = ""
+		for(j = i; (j < i+8) && (j < MOTORS); j++) {
+			if(motor_name(mA[j]) != "unused")
+				s = s sprintf("%.8s  ", motor_name(mA[j]))
+		}
+		print s
+	}
+
+	HEADING = "Dump of MCA data"
+	printf("\n#S1 %s\n#D %s\n",HEADING,DATE)
+	_head_par G 0
+	_head_par U 1
+	_head_par M 2
+	printf("#Q %s\n", _hkl_val)
+	waitall; get_angles
+	for(i = 0; i < MOTORS; i += 8) {
+		printf("#P%d ", i/8)
+		s = ""
+		for(j = i; (j < i+8) && (j < MOTORS); j++) {
+			if(motor_name(mA[j]) != "unused")
+				s = s sprintf("%.8g  ", A[mA[j]])
+		}
+		print s
+	}
+	Fheader
+	printf("#N 2\n")
+	printf("#L Channel  Counts\n")  ### Calibrate ??? ###
+	array_dump(MCA_DATA)
+	ont; close(dumpfile)
+}'
+
+#
+# mca_s %file%
+#   Dumps the MCA spectrum to %file%. The format is
+#   a simple space seperated two column text output.
+#   Calls to the same file append the new data to 
+#   the existing file  
+#
+def mcad_s '{
+	dumpfile = $1
+	on(dumpfile); offt
+	array_dump(MCA_DATA)
+	print ""
+	ont; off(dumpfile)
+	close(dumpfile)
+}'
+
+#
+# ADD:
+#   mcal
+#   mroi
+#
+
+
+#
+# SCAN macros
+#
+
+#
+# mcasmode [%state%]
+#   Turn on and off the mode of taking a spectrum at
+#   each point of a scan or during any other count.
+#   The %state% toggles the mode on and off.  Without
+#   it the macros prompts for state.  The data is 
+#   dumped to files named datafile_scan.mca 
+#   with the mcad_s macros.
+#
+#  AW 18 NOV 2005: Added ref to MCA_FMT which may not work...
+def mcasmode '{
+	MCA_SCAN = $1
+
+	if($# != 1)
+		MCA_SCAN = yesno("Enable MCA scan mode", MCA_SCAN)
+
+	if(MCA_SCAN) {
+		mca_par("auto_run", 1)
+		cdef("user_getcounts", "mcaread; ", "_mca.mac_scan_")
+		MCA_FILENAME = sprintf(MCA_FMT,DATAFILE,SCAN_N)
+		cdef("user_scan_loop", \
+		     "mcad_s sprintf(MCA_FMT,DATAFILE,SCAN_N); ", \
+		     "_mca.mac_scan_")
+		cdef("user_postscan_head", \
+		     "MCA_FILENAME = sprintf(MCA_FMT,DATAFILE,SCAN_N); \
+		      fprintf( MCA_FILENAME,\"#MCA_NAME  %s\n#MCA_CHAN  %d\n\", \
+			       MCA_NAME, MCA_CHAN);", \
+		     "_mca.mac_scan_")
+	} else {
+		cdef("", "", "_mca.mac_scan_", "delete")
+		MCA_SCAN = 0
+	}
+	printf("MCA scan mode %s.\n", MCA_SCAN ? "enable" : "disable")
+	user_mcasmode
+}'
+
+def user_mcasmode '{}'
+
+
+#
+# MISC macros
+#
+
+#
+# mcahelp
+#   Prints list of MCA macros with brief discription.
+#   Calls _mac_type_help for any device specific 
+#   macros.  
+#
+def mcahelp '{
+	printf("The following MCA commands are available:\n\n");
+	printf("Setup Macros\n")
+	printf("\tmcasetup   -- setup the MCA and macros\n")
+	printf("\tmcaunsetup -- disable the MCA and macros\n")
+	printf("Device control\n")
+	printf("\tmcacq      -- start MCA data acquisition\n")
+	printf("\tmcaoff     -- stop MCA data acquisition\n")
+	printf("\tmcaclr     -- clear MCA data\n")
+	printf("\tmcaread    -- read data from MCA and plot it\n")
+	printf("Spectrum display, calibrate, and write\n")
+	printf("\tmcadisp    -- display spectrum\n")
+	printf("\tmcad       -- dump spectrum to a file\n")
+	printf("\tmcal       -- calibrate MCA\n")
+	printf("\tmroi       -- view a region of interest\n")
+	printf("Scan control\n")
+	printf("\tmcasmode   -- switch MCA scan mode\n")
+	printf("Misc. macros\n")
+	printf("\tmcahelp    -- prints this list.\n")
+	printf("Device specific macros\n")
+	if(whatis("_mca_type_help") & 0x02)
+		_mca_type_help
+	else
+		printf("\tNONE\n")
+}'
+
+
+#
+# COMMANDS RUN AT LOAD
+#
+

@@ -1,0 +1,103 @@
+agilis                              hardware                              agilis
+
+NAME
+     Agilis - Newport Agilis AG-UC2 and AG-UC8 Piezo Controllers
+
+DESCRIPTION
+
+     The Newport Agilis AG-UC2 and AG-UC8 piezo controller modules are both
+     supported by spec.  The Agilis AG-UC2 uses a USB interface while the AG-UC8
+     can use either a serial or USB interface.
+
+     The AG-UC2 controller handles two axes which can be operated
+     simultaneously.  The AG-UC8 has four channels, each of which functions as a
+     two-axis AG-UC2 for a total of eight axes.  However, only one of the
+     two-axis channels in the AG-UC8 can be active at a time.  The settings and
+     current positions for the channels are not maintained in the AG-UC8 when
+     switching from one two-axis channel to the next.  ssppeecc's AG-UC8 support
+     handles the multiplexing transparently, making it is possible to specify
+     new positions for all eight actuators on the AG-UC8 in one command.  ssppeecc
+     will take care of synchronizing parameters and moving the channels in
+     sequence.
+
+CONFIGURATION
+
+     Select "Newport Agilis (Serial)" as the controller type for both the AG-UC2
+     and the AG-UC8, even when using the USB connection.  The Agilis models use
+     an FTDI USB interface chip that is recognized by drivers available on both
+     LLiinnuuxx and Mac OS X.  The kernel driver makes the device appear as a serial
+     interface to ssppeecc.
+
+     On LLiinnuuxx, the standard ffttddii__ssiioo kernel module is required.  Recent LLiinnuuxx
+     kernels include recognition of the Agilis USB device IDs in the ffttddii__ssiioo
+     driver.  For older kernels, edit a file in //eettcc//mmoodduullee..dd// (a file could be
+     created named llooccaall..ccoonnff, for example) to add the line:
+
+        ooppttiioonnss ffttddii--ssiioo pprroodduucctt==00xx33000000 vveennddoorr==00xx110044dd
+
+     On OSX, the VCP driver available at the _f_t_d_i_c_h_i_p_._c_o_m must be installed.
+     The Newport Agilis USB vendor and product IDs need to be added to the
+     kernel extension IInnffoo..pplliisstt file as explained in the _F_T_D_I _T_e_c_h_n_i_c_a_l _N_o_t_e
+     _1_0_5 available at the FTDI website.  Contact CSS for assistance, if needed.
+
+     If using a direct serial connection to the AG-UC8, select a baud rate of
+     115200.  If connecting the AG-UC2 directly or using the USB port on the
+     AG-UC8, the baud rate should be 921600.
+
+     In some configurations, the serial communication between ssppeecc and the
+     Agilis may need to be slowed.  Non-standard optional parameters named
+     ""wwddeellaayy"" and ""rrddeellaayy"" can be set from the DDevices screen of the
+     configuration editor.  These parameters set a delay time before write
+     commands to the Agilis and before reading replies, respectively.  Units for
+     the parameters are seconds.  A delay of 0.010 seconds has been needed in at
+     least one installation.  ssppeecc limits the delay to a maximum of 0.5 seconds.
+     Type pp from the DDevices screen to create and edit nonstandard optional
+     controller parameters.  The delays can only be set in the ccoonnffiigg file.
+
+     The step amplitude associated with the controller's SSUU command can be
+     configured as a nonstandard optional parameter for each motor from the
+     MMotor screen of ssppeecc's hardware configuration editor.  There are separate
+     parameters for positive and negative movements, named ""aammpplliittuuddee++"" and
+     ""aammpplliittuuddee--"".
+
+     An additional nonstandard optional parameter named ""PPAA__ttaarrggeett"" can be
+     configured to set the target position used with the hhoommee command, as
+     explained in the next section.
+
+     Type pp from the MMotor screen to create and edit nonstandard optional motor
+     parameters.  All three parameters can also be changed and examined within
+     ssppeecc using mmoottoorr__ppaarr(()), whether or not they are added to the ccoonnffiigg file.
+
+HOMING
+
+     There are two types of home search implemented in ssppeecc for the Agilis
+     controllers.  The cchhgg__ddiiaall((mmnnee,, ""lliimm++"")) and cchhgg__ddiiaall((mmnnee,, ""lliimm--"")) commands
+     will use the controller's MMVV command to send the actuator to the positive
+     or negative limit switches.  Of course, the command will only work with
+     stages that have limit switches.  The movement can be done at four possible
+     speeds, which are set using the hhoommee__mmeetthhoodd optional motor parameter as
+     follows:
+
+         1   5 steps/sec at defined step amplitude
+         2   100 steps/sec at maximum step amplitude
+         3   1700 steps/sec at maximum step amplitude
+         4   666 steps/sec at defined step amplitude
+
+     If the hhoommee__mmeetthhoodd parameter is not set, method 4 will be used.
+
+     The second home search uses the PPAA command and is initiated with the
+     ""hhoommee"", ""hhoommee++"" and ""hhoommee--"" options to cchhgg__ddiiaall(()).  These are the options
+     used with cchhgg__ddiiaall(()) within ssppeecc's standard hhoommee macro.  All three options
+     produce the same action on the Agilis.
+
+     With the PPAA command, the controller first moves the stage to the positive
+     limit.  The stage is then moved to the negative limit while steps are
+     counted.  The stage is moved back to the positive limit, then moved the
+     number of steps needed to position the stage at a specified percentage of
+     the total distance.  That percentage is taken from the parameter
+     ""PPAA__ttaarrggeett"", which can have a value from 0 to 100, with a precision of one
+     part in a thousand.  If unset, a value of 50 is used.
+
+     Note, the PPAA procedure can take a couple of minutes to perform.  However,
+     the search can be interrupted with ^^CC.
+

@@ -1,0 +1,163 @@
+dxp                                 hardware                                 dxp
+
+NAME
+     dxp - XIA DXP CAMAC MCA
+
+DESCRIPTION
+
+     The X-ray Instrumentation Associates Digital X-ray processors (CAMAC models
+     DXP 4C and DXP 4C2X and parallel port model X10P) have one to four MCA
+     channels per module.  Each channel of the device contains a digital signal
+     processor (DSP).  The DSP chips require firmware and parameter downloads
+     for initialization.
+
+     As of ssppeecc release 4.05.10-8, ssppeecc must be linked with a special
+     vendor-supplied application library to use the DXP modules.  The XIA
+     libraries have not yet stabilized, so one must be sure to use a version of
+     the libraries compatible with the ssppeecc release.  Contact CSS for advice on
+     determining compatible versions.
+
+     In addition, the many XIA configuration files that will be read by routines
+     in the DXP library must be installed on the system.  Finally, the
+     environment variable XXIIAA__CCOONNFFIIGG must be set to the location of DXP system
+     configuration file.
+
+     The source files for creating the DXP library can be obtained from the XIA
+     site _h_t_t_p_:_/_/_w_w_w_._x_i_a_._c_o_m_/ or in a slightly more convenient format in the
+     downloads directory at _c_e_r_t_i_f_._c_o_m.  The latter includes a MMaakkeeffiillee to build
+     a library called lliibbddxxpp..aa.
+
+     When running the ssppeecc IInnssttaallll script, you must indicate the location of the
+     lliibbddxxpp..aa library in response to the "Extra library flags" query from the
+     IInnssttaallll script.  Use, for example //uussrr//llooccaall//xxiiaa//lliibbddxxpp..aa or
+     ""--LL//uussrr//llooccaall//xxiiaa --llddxxpp"".
+
+     The many XIA configuration files associated with the DXP modules need to be
+     carefully constructed to avoid the code in the DXP library from failing.
+     Please consult XIA documentation or XIA technical support for details
+     related to the format of these files.
+
+     Note, the CAMAC slot numbers listed in the ddxxpp..mmoodduullee (or equivalent) file
+     must agree with those in the ssppeecc hardware ccoonnffiigg file.  For the parallel
+     port device, the hexadecimal base address of the I/O port listed in the
+     ddxxpp..mmoodduullee file must also agree with the value set in the ssppeecc ccoonnffiigg file.
+
+FUNCTIONS
+
+     Since each DXP module can have up to four channels, the usual numbering
+     scheme in ssppeecc for selecting MCA devices has been extended.  For commands
+     that require access to individual channels beyond channel zero, the
+     mmccaa__ssppaarr(()) and mmccaa__ssggeett(()) must be used (instead of mmccaa__ppaarr(()) and mmccaa__ggeett(()))
+     where the first argument (that selects which MCA device) is a string.  The
+     string contains the number of the selected MCA, followed by a colon and a
+     DXP channel number from 0 to 3.  For the commands to set the DSP
+     parameters, if the channel number is -1, the parameter will be set in all
+     DXP modules.  For example, mmccaa__ssppaarr((""11::33"",, ""ffiinneeggaaiinn"",, 110000)) would set the
+     ffiinneeggaaiinn parameter to the value 100 for MCA number 1, DXP channel 3, while
+     mmccaa__ssppaarr((""00::--11"",, ""ffiinneeggaaiinn"",, 110000)) would set the ffiinneeggaaiinn parameter in all
+     channels in all DXP modules, not just those associated with module 0.
+
+     For commands that act on all channels, such as ""rruunn"", assuming that MCA 0
+     and MCA 1 are DXP modules, the commands mmccaa__ppaarr((""rruunn"")), mmccaa__ssppaarr((11,, ""rruunn"")),
+     mmccaa__ssppaarr((""00::33"",, ""rruunn"")) and mmccaa__ssppaarr((""00::--11"",, ""rruunn"")) would each start all
+     channels in all DXP modules.
+
+     Besides reading the spectrum data, the mmccaa__ssggeett(()) function can read the
+     baseline values or the DSP parameters.  Again, the first argument is a
+     string, formatted as described above, but with 16 (0x10) added to the
+     channel number to read back the baseline or 32 (0x20) added to the channel
+     number to read back the parameters.  For example,
+
+        uusshhoorrtt aarrrraayy ppaarrss[[11002244]]
+        mmccaa__ssggeett((""11::00xx2211"",, ppaarrss))
+
+     reads the current parameters into the ppaarrss[[]] array.  Note, the array must
+     be dimensioned to full size of the DXP data array, even though the
+     parameter and baseline arrays are smaller (150 and 512 values,
+     respectively).
+
+     Listed below are the functions available for the DXP device.
+
+     mmccaa__ppaarr((""??""))  - Lists the available commands, including the DSP parameters
+          that can be individually examined or set.
+
+     mmccaa__ppaarr((""ddiissaabbllee"" [[,, aarrgg]])) - With no arguments, returns nonzero if the
+          selected MCA device has been disabled by the user, otherwise returns
+          zero.  If aarrgg is 1, disables the MCA.  If aarrgg is 0, turns off the
+          disabled mode.  When the device is disabled, ssppeecc will not access the
+          hardware.  On startup, and after the standard ccoonnffiigg macro or the
+          rreeccoonnffiigg command is run, disabled mode is off.
+
+     mmccaa__ppaarr((""aauuttoo__rruunn"" [[,, aarrgg]])) - With no arguments, returns nonzero if the
+          selected MCA device has auto-run mode set, otherwise returns zero.  If
+          aarrgg is 1, enables auto-run mode.  If aarrgg is 0, turns off auto-run
+          mode.  When auto-run mode is set the device is started and stopped
+          with the counting functions ttccoouunntt(()), mmccoouunntt(()), etc.  When not set,
+          the counting functions are ignored, but the device can be controlled
+          with the ""rruunn"" and ""hhaalltt"" options described below.  In addition, the
+          device can be halted with the ssttoopp(()) function and will be halted with
+          ^^CC.  On startup, and after the standard ccoonnffiigg macro or the rreeccoonnffiigg
+          command is run, auto-run mode is on.
+
+     mmccaa__ppaarr((""rruunn"")) - Starts acquisition.
+
+     mmccaa__ppaarr((""hhaalltt"")) - Halts the MCA device.
+
+     mmccaa__ppaarr((""ssaavvee__ccoonnffiigg"",, ffiilleennaammee)) - Saves the current parameter
+          configuration to the file ffiilleennaammee using the DXP library routine
+          ddxxpp__ssaavvee__ccoonnffiigg(()).
+
+     mmccaa__ppaarr((""rreessttoorree__ccoonnffiigg"",, ffiilleennaammee)) - Loads parameters from the DXP
+          configuration file ffiilleennaammee using the DXP library routine
+          ddxxpp__rreessttoorree__ccoonnffiigg(()).
+
+     mmccaa__ppaarr((""ccaalliibb__ttrrkkddaacc"")) - Calls the ddxxpp__ccaalliibbrraattee(()) function with the
+          TTRRKKDDAACC argument.
+
+     mmccaa__ppaarr((""ccaalliibb__rreesseett"")) - Calls the ddxxpp__ccaalliibbrraattee(()) function with the RREESSEETT
+          argument.
+
+     mmccaa__ppaarr((""ggaattee"" [[,, aarrgg]])) - The DXP modules have an external gate capability.
+          If the optional argument aarrgg is nonzero, ssppeecc will program the modules
+          to obey the external gate signal.  Otherwise, the gate will be
+          ignored.  With no arguments, the current value of the gate parameter
+          is returned.
+
+     mmccaa__ppaarr((""mmooddiiffyy__oonnee__ggaaiinn"",, ffaaccttoorr)) - Scales the DXP amplifier gain for a
+          single channel by ffaaccttoorr by a call of the ddxxpp__mmooddiiffyy__oonnee__ggaaiinnss(())
+          routine.
+
+     mmccaa__ppaarr((""mmooddiiffyy__ggaaiinnss"",, ffaaccttoorr)) - Scales the DXP amplifier gains by ffaaccttoorr
+          by a call of the ddxxpp__mmooddiiffyy__ggaaiinnss(()) routine.
+
+     mmccaa__ppaarr((""dduummpp"")) - Calls the DXP library routine ddxxpp__mmeemm__dduummpp(()), which
+          prints the current values of all the DXP parameters.
+
+     mmccaa__ppaarr((""sshhooww__ffiilleess"")) - Displays the complete path names of the three
+          configuration files associated with the DXP system and the three
+          configuration files associated with the designated channel as provided
+          by the DXP library routines ddxxpp__llooccaattee__ssyysstteemm__ffiilleess(()) and
+          ddxxpp__llooccaattee__cchhaannnneell__ffiilleess(()).
+
+     mmccaa__ppaarr((""iiccrr"")) - Returns the input count rate.
+
+     mmccaa__ppaarr((""ooccrr"")) - Returns the output count rate.
+
+     mmccaa__ppaarr((""rreeaall"")) and mmccaa__ppaarr((""eellaappsseedd__rreeaall"")) - Returns the elapsed real
+          time.
+
+     mmccaa__ppaarr((""lliivvee"")) and mmccaa__ppaarr((""eellaappsseedd__lliivvee"")) - Returns the elapsed live
+          time.
+
+     mmccaa__ppaarr((""ddeeaadd"")) - Return the percent dead time.
+
+     mmccaa__ppaarr((aannyy__ddxxpp__ppaarr [[,, vvaalluuee]])) - Retrieves or sets (if vvaalluuee is given) any
+          of the DXP parameters, such as eerrrriinnffoo or lliivveettiimmee.  The parameter
+          name can be given in either lower or upper case.  Note, with long
+          integer parameters such as oovveerrfflloowwss that are labeled as OOVVEERRFFLLOOWWSS00
+          and OOVVEERRFFLLOOWWSS11 in the DXP configuration files, the parameter name
+          without the trailing digit will retrieve or set the long integer value
+          in one call of mmccaa__ppaarr(()), although the DXP name can also be used to
+          set the individual 16-bit portions of the long integers.  Type
+          mmccaa__ppaarr((""??"")) to get a list of all the parameters.
+

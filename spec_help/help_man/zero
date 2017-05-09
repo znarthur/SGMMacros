@@ -1,0 +1,34 @@
+.TH "zero" "macro" "08/01/12" "zero.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBzero\fP \- search for or set a motor\(aqs mechanical zero
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)zero.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "zero" "macro" "08/01/12" "zero.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBzero motor [motor ... ]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBzero\fP macro is used to set the dial angles to zero
+for motors equipped with a home\-position feature.
+A search for the mechanical zero is undertaken
+when using the Microcontrole IP28.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBzero the ome phi psi\fP
+

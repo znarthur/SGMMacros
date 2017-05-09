@@ -1,0 +1,233 @@
+scans.4                           user function                          scans.4
+
+NAME
+     ssccaannss..44 - read data from ASCII scan files
+
+SYNOPSIS
+
+     ffnn ssccaannss..44 [[ooppttiioonnss ssccaann__nnuummbbeerrss]]
+
+DESCRIPTION
+
+     The ssccaannss..44 function reads in files of ASCII data according to a modest set
+     of conventions.
+
+     When used with X-ray scattering data, ssccaannss..44 can perform scan averaging,
+     background subtraction, data normalization and error-bar calculation.
+     However, ssccaannss..44 works well with any kind of data file that follows the
+     conventions described below.
+
+     COMMAND LINE OPTIONS
+
+         ..         Use same options as last time
+         --ii        Initialize, used to start function and return
+         --ff  ffiillee   Select scan file name
+         --pp        Print scan-file contents
+         ++dd or --dd  Collect (or don't) 3 columns of data
+         ++ee or --ee  Calculate (or don't) error bars from statistics
+         ++MM or --MM  Use (or don't) special MCA data convention
+         ++nn or --nn  Normalize (or don't) data points
+         ++oo or --oo  Sort (or don't) data points
+         ++qq or --qq  Don't (or do) print messages (quiet)
+         ++rr or --rr  Rerange (or don't) plot axes for each new data set
+         ++ss or --ss  Sort and merge (or don't) data by xx values
+         ++vv or --vv  Print (or don't) each line of scan file (verbose)
+         ++II or --II  Use (or don't) ##II intensity normalization
+         ++SS or --SS  Retrieve scans by scan (or file) number
+         xx==##       Set column for xx values
+         yy==##       Set column for yy values
+         zz==##       Set column for zz values, turn on ++dd flag
+         mm==##       Set col for monitor normalization, turn on ++nn flag
+         tt==##       Set col for time normalization, turn on ++nn flag
+         xx==MM       Stuff MCA channel numbers in xx in 3D mode
+         yy==MM       Stuff MCA channel numbers in yy in 3D mode
+
+     The default settings correspond to the following options in 2D CC--PPLLOOTT mode
+
+        --ff ddaattaa  ++eeoossSSnn  --ddrrvvIIqqMM  xx==11  yy==--11
+
+     and
+
+        --ff ddaattaa  ++ddeeoossSSnn  --rrvvIIqqMM  xx==11  yy==22  zz==--11  xx==MM
+
+     in 3D CC--PPLLOOTT mode.
+
+     SPECIFYING SCANS
+
+     Scans can be retrieved by entering either the scan number (option ++SS, the
+     default) or the file position number (option --SS).  Scan numbers are
+     determined by the ##SS lines in the file.  The file position number is the
+     sequence position of the scan in the file, irrespective of scan number.
+
+     When selecting by scan numbers, if there is more than one scan with the
+     same number, the last of them is retrieved.  You can specify which instance
+     of a repeated scan number to retrieve by appending a decimal point and an
+     index number to the scan number.  For example, selecting scan number 1100..33
+     retrieves the third scan from the start of the file that has scan number
+     10.
+
+     Negative numbers count back from the end of the file and are always
+     considered to be file-position numbers.  For example,
+
+        ffnn .. --11
+
+     will always return the last scan in the file.
+
+     You can enter multiple scan numbers to select the scans you are interested
+     in.  Scan numbers that end with bb are used as background scans.  For
+     example,
+
+        ffnn .. 1122bb 1133 1144bb 1155bb 1166 1177bb
+
+     Data in the background scans will be subtracted from the data in the
+     non-background scans that has corresponding xx values.  Choosing a
+     background scan will force the data to be sorted by xx values.
+
+     You can read in a group of consecutive scans with
+
+        ffnn .. 33--77 1100--1144
+
+     This command would read in scans 3 through 7 and 10 through 14.
+
+     FILE CONVENTIONS
+
+     The scan files contain control lines, data lines and blank lines.  Control
+     lines contain a ## character in the first column followed by a command word.
+     Data lines generally contain a row of numbers.  Special data lines
+     containing MCA data begin with an @@ character followed by a row of numbers.
+     These data lines are ignored unless the use MCA data option ++MM is selected.
+
+     The control conventions used by ssccaannss..44 are as follows:
+
+     ##SS NN - starts a new scan.  Here, NN is the user's numbering scheme and is
+          the number used when retrieving by scan number (++SS).  Most often the
+          scan number is the position of the scan in the file.
+
+     ##MM NN - indicates data was taken counting to nnuummbbeerr monitor counts.
+
+     ##TT NN - indicates data was taken counting for NN seconds.
+
+     ##NN NN [[MM]] - indicates there are NN columns of data.  If MM is present, it
+          indicates there are MM sets of data columns on each line.  When
+          collecting data from a multi-channel analyzer, for example, the data
+          might be arranged with 16 points per line in the file to make the file
+          easier to scan by eye.  In such a case, the control line would be ##NN 11
+          1166.
+
+     ##II NN - is for an optional multiplicative intensity-normalization factor.
+
+     ##@@MMCCAA - indicates the scan contains MCA data.  If the ++MM option is
+          selected, xx (2D or 3D) or yy (3D only) values will be calculated
+          automatically.  In three-column mode, whether it is xx or yy depends on
+          whether the xx==MM or yy==MM command line option is selected or on which
+          interactive response was given.  Data in the lines starting with @@AA
+          will be stuffed into the yy (2D) or zz (3D) data array.
+
+     ##@@CCAALLIIBB aa bb cc - gives calibration factors for MCA data.  The xx (2D or 3D)
+          or yy (3D only) values will be calculated using the formula
+
+              x[i] = a + b * i + c * i * i
+
+          where ii is the point number, starting from zero.  Calibration factors
+          can be changed within the data portion of a scan for subsequent MCA
+          data by the line
+
+              @@CCAALLIIBB aa bb cc
+
+          Before each scan is read by ssccaannss..44, the calibration parameters are
+          initialized to zero.
+
+     The following control lines are not commands but are printed out as they
+     are encountered while reading a scan:
+
+     ##CC - is a comment line.
+
+     ##DD - is followed by the date and time the scan was taken.
+
+     ##LL llaabbeell11  llaabbeell22 - is the data-column labels, with each label separated
+          from the next by ttwwoo spaces.
+
+     For example, a very simple file might have:
+
+        ##SS 11
+        ##NN 33
+        ##LL TTeemmppeerraattuurree  VVoollttaaggee  CCoouunnttss
+        2233..44 11..0011 3300445566
+        2233..66 11..001155 2244000000
+
+        ##SS 22
+        eettcc..
+
+     DATA COLUMNS
+
+     When running CC--PPLLOOTT in 2D mode, the default behavior is to take xx values
+     from the first column and yy values from the last column.  If in 3D mode, xx
+     values are taken from the first column, yy values from the second and zz
+     values from the last column.  If normalizing the data, the default behavior
+     is to use the ##TT or ##MM values.  If neither appear, you must enter a column
+     number for the normalization values.
+
+     When entering column numbers, a negative number counts backward from the
+     last column.  If the column for xx is zero, the value put in for xx is just
+     the index number of the point.
+
+     ENTERING OPTIONS
+
+     If you give a dot ..  as the command-line argument or in response to
+     ""SSccaannss//ooppttiioonnss"", the same argument or option string will be used as last
+     time.  That is, the string is remembered, not the options chosen
+     interactively using ""CChhaannggee mmooddeess??"".  For instance, if you enter a long
+     sequence of scan numbers and read in the scans, then change something via
+     ""CChhaannggee mmooddeess??"", you can simply enter a dot in response to ""SSccaannss//ooppttiioonnss""
+     and recover the previous sequence of scan numbers.
+
+     When you do enter a string of flags and scan numbers, the modes set by the
+     flags only apply to the scans that follow the flags, not the preceding
+     scans.
+
+     THE INDEX FILE
+
+     Reading a long ASCII data file takes time.  When ssccaannss..44 first opens a
+     file, it scans the whole file and saves a directory of the scans in a
+     binary-format index file.  The name of the index file is formed by
+     appending ..II to the original data-file name.
+
+     As long as the index file is more recent than the data file, ssccaannss..44 will
+     use the information in the index file.
+
+     NORMALIZATION AND ERROR BARS
+
+     Data can be normalized to either monitor counts or time.  When normalizing
+     to monitor counts, the error bars will include the uncertainty in the
+     counting statistics of the monitor counts.  Otherwise there is no
+     difference between specifying time or monitor counts.
+
+     By default, ssccaannss..44 normalizes data to monitor counts, with the second to
+     last data column used for the monitor count values.  Use the --nn flag to
+     turn off normalization.  If a column number is selected using the mm==_c_o_l or
+     tt==_c_o_l arguments, normalization is set to monitor or time mode,
+     respectively, using the column number specified.  If the column number in
+     either case is given as zero, the normalization mode and value given by the
+     ##MM or ##TT directives for a particular scan in the data file are used.  It is
+     an error for normalization mode to be on, for the normalization column to
+     be set to zero and for no normalization directives to be present for a
+     scan.
+
+     The normalization modes selected remain in effect for subsequent scans.
+
+     The values returned as error bars are those due to counting statistics (the
+     square root of the number of counts).  When the counts are derived from the
+     algebraic combination of detector, background and monitor counts, the error
+     bars are calculated using the appropriate "propagation of errors"
+     formalism.  See the source code for details.
+
+     If the ++II option is selected, the counts for each point are multiplied by
+     the value given by the ##II control line in the scan header.  If the ++II
+     option is selected and the scan header doesn't contain a ##II control line,
+     the counts are not changed.
+
+     NUMBER OF POINTS AND SCANS
+
+     Earlier version of ssccaannss..44..cc had built-in limits to the number of scans or
+     raw data points that could be handled.  Those limits no longer exist.
+

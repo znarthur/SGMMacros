@@ -1,0 +1,23 @@
+rscan                                 macro                                rscan
+
+NAME
+     rrssccaann - specular reflectivity scan
+
+SYNOPSIS
+
+     rrssccaann ssttaarrtt eenndd iinntteerrvvaallss ttiimmee
+
+DESCRIPTION
+
+     rrssccaann is a scan within the condition of specular reflectivity with
+     AALLPPHHAA==BBEETTAA ranging from ssttaarrtt to eenndd while counting for ttiimmee for each of
+     the iinntteerrvvaallss.
+
+EXAMPLE
+
+     rrssccaann 00 66mmrr 1155 11
+
+SEE ALSO
+
+     _a_b_s_c_a_n _r_2_s_c_a_n
+

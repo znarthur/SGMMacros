@@ -1,0 +1,109 @@
+.TH "equipman" "hardware" "08/01/12" "equipman.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+equipman \- SPring\-8 Equipment Manager RPC interface
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)equipman.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2000,2001,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "equipman" "hardware" "08/01/12" "equipman.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+Developers at SPring\-8 (the 8\-GeV Super Photon Ring in Hyogyo, Japan)
+are developing an
+remote procedure call (RPC) protocol for controlling motors, counters
+and other hardware.  \fBspec\fP includes initial support
+for the motors and counters and
+(as of release 4.05.10) a built\-in function for sending arbitrary commands.
+.SH "THE \fBem_io()\fP FUNCTION"
+.rs
+.sp
+Arbitrary Equipment Manager commands can be sent using the
+\fBem_io([host, ] voc)\fP function.
+When invoked with two arguments, the first argument
+\fBhost\fP is a string containing the host name, such as
+\fB"bl35vme0"\fP, while the second argument is the
+\fBvoc\fP part of the command (verb\-object\-command?).
+If called with just the \fBvoc\fP argument,
+the same host name as the previous
+\fBem_io()\fP call is used.  If the command  is a
+"get" \fBvoc\fP, the reply is returned as a string.  Otherwise
+the return value is a zero.  If there is an error, the return value is \-1.
+.SH "EQUIPMENT MANAGER MOTORS"
+.rs
+.sp
+Configuration of the Equipment Manager (EM) motors is complicated by the
+length of the string needed to identify each motor.
+In fact, two strings are needed to identify each motor.  One is the
+host name (associated with an IP address) for each VME crate.
+The other string identifies the motor, for example as
+\fBbl_35in_st1_motor_1\fP. \fBspec\fP assumes that for
+a particular crate, the first components of the motor strings
+will all be the same.
+This assumption lets the strings be specified within the current
+constraints of \fBspec\fP\(aqs configuration editor.
+.sp
+To configure EM motors, on the \fBDevices\fP screen,
+select the type of motor controller as "SPring\-8 Equipment Manager (RPC)".
+One controller entry is for an entire VME crate.
+For the \fBDEVICE\fP, enter a string in the form \fBhostname:prefix\fP. The
+field width for this string is about 64 bytes, so very long strings can be
+accommodated.  An example for \fBDEVICE\fP
+would be \fBbl35vme0:bl_35in_st1\fP. For the
+\fBNUM\fP field, enter as many motors as will be used in the particular crate.
+It is alright for the value to be bigger than necessary.
+.sp
+By default, the unique part of the name will be \fBmotor_num\fP
+where \fBnum\fP is motor number.
+To configure an arbitrary string for the unique part of the name, use the
+optional motor\-parameter screen of the configuration editor, accessed by typing
+\fBm\fP (twice) from the main motor screen.
+Enter the rest of the EM motor name (minus the
+intervening underscore \fB_\fP) as a string under
+"Generic Parameter 1". The field length there is only 18 bytes.
+(That constraint is
+why the rest of the \fBprefix\fP is entered with the crate host name.)
+In the above example, the string would be \fBmotor_1\fP.
+.sp
+Note, the division between what is prefix
+and what is the unique part for each motor is arbitrary,
+but must be consistent for each motor crate, with
+the unique part of the name fitting in the 18\-character field
+on the second optional motor screen.
+.sp
+With the Equipment Manager identification done, the \fBspec\fP motor names
+and mnemonics can be chosen as desired.
+.sp
+Note, \fBspec\fP sets the software motor limits
+in the RPC server for each motor to
+agree with the software limits in the \fBspec\fP \fBsettings\fP file.
+That is to say,
+the current software motor limits that could be obtained
+from the RPC server are ignored.
+.SH "EQUIPMENT MANAGER COUNTERS"
+.rs
+.sp
+To configure EM counters and counter/timers, first go to the
+\fBDevices\fP screen of \fBspec\fP\(aqs hardware configuration editor.
+In the scalers section, select the type of counter as either
+"SPring\-8 EM Counters (RPC)" or "SPring\-8 EM Counter/Timer (RPC)".
+.sp
+For the \fBDEVICE\fP, enter a string in the form \fBhostname:prefix\fP. For the
+\fBADDR\fP, enter the module number of the counter in the crate.
+The counter name will be formed by appending
+\fB_counter_A\fP or \fB_counter_A_C\fP
+to the prefix (depending on whether the command is for the unit or
+an individual channel), where \fBA\fP is the value of the
+\fBADDR\fP field and \fBC\fP is the channel number of the counter
+from the scalers screen.
+

@@ -1,0 +1,123 @@
+splot                                 macro                                splot
+
+NAME
+     sspplloott - macro for screen plot
+
+SYNOPSIS
+
+     sspplloott
+
+     sspplloott yy--ccooll
+
+     sspplloott xx--ccooll yy--ccooll [[ nnuumm--ppttss ]]
+
+     sspplloott aarrrraayy [[ xx--ccooll [[ yy--ccooll [[ nnuumm--ppttss ]]]]]]
+
+DESCRIPTION
+
+     (This document describes sspplloott the macro, not sspplloott the Python utility.)
+
+     The sspplloott macro produces a screen plot of the current data.  The macro has
+     a number of configurable parameters, most set using the sseettpplloott macro.
+
+     With no arguments, sspplloott plots the SSCCAANN__DD array using the counters
+     specified in the PPLLOOTT__SSEELL[[]] array (which is configured with either the
+     pplloottsseelleecctt macro or the ccoouunntteerrss macro) versus the scan independent
+     variable in column 0 of the SSCCAANN__DD array.  The first through last data
+     point of the most recent scan (as contained in the LLDDTT global variable) are
+     plotted.
+
+     A single argument yy--ccooll (that is not an array name) can specify which
+     counters in SSCCAANN__DD to plot for the yy-axis.  The arguments can be counter
+     numbers or counter mnemonics.  The macros will automatically map the
+     counters to the correct column in the SSCCAANN__DD array.  If more than one
+     counter is to be plotted, the counter names or numbers must be in one
+     string.  Individual counters can be separated by commas as in ddeett,,cc33,,cc44 or
+     a range of counters can given as 33::66, which would plot counters 3 through
+     6.
+
+     A column for the xx-axis can be also specified as an additional argument
+     xx--ccooll prior to the yy--ccooll argument.  The value can be given as column number
+     in SSCCAANN__DD, motor mnemonic of any motor included in the scan or HH, KK or LL
+     for reciprocal space scans or motor scans that involve geometry motors.
+
+     An optional nnuumm--ppttss third argument specifies the points in the array to be
+     plotted, using conventional ssppeecc data-array syntax.  For example, 3300 or ::3300
+     would indicate the first point through the 30th point.  The parameter 2200::8800
+     would plot points 20 through 80.  An argument --5500::--11 or --5500:: would plot the
+     last 50 points of the array.
+
+     If the first argument aarrrraayy is the name of an array and with no additional
+     arguments, sspplloott will plot the last column versus the first column using
+     all the rows.  Additional arguments specify the column for xx with xx--ccooll,
+     the column for yy with yy--ccooll, then the number of points (or rows) with
+     nnuumm--ppttss.  As with plotting SSCCAANN__DD, the arguments for yy--ccooll and nnuumm--ppttss use
+     ssppeecc's data array syntax.  However, unlike the case for plotting SSCCAANN__DD,
+     the xx--ccooll value must be specified if there is a yy--ccooll argument.
+
+EXAMPLES
+
+     In the following examples, SSCCAANN__DD contains data from a tthh22tthh scan on a
+     four-circle instrument.
+
+     sspplloott
+
+         Plots the scan data in SSCCAANN__DD.  The counters selected via pplloottsseelleecctt
+         are plotted versus the primary scan independent variable in column 0,
+         usually a motor position.
+
+     sspplloott  ddeett
+
+         As above, but plots only the counter channel ddeett.
+
+     sspplloott  ddeett,,cc22
+
+         As above, but plots ddeett and cc22.
+
+     sspplloott  tthh   ddeett
+
+         Plots ddeett versus the motor tthh.
+
+     sspplloott  HH  ddeett  1100::2200
+
+         Plots ddeett versus reciprocal coordinate HH, but only points 10 through
+         20.
+
+     sspplloott ddaattaa
+
+         Plots the last column of the array ddaattaa versus the first column.
+
+     sspplloott ddaattaa 00 11::44
+
+         Plots columns 1 through 4 of ddaattaa versus the first column.
+
+GLOBAL VARIABLES
+
+     SSCCAANN__DD[[]][[]] - Shared data array declared as:
+
+              SHARED_SCAN_D array SCAN_D[rroowwss][ccoollss]
+
+          where the number of rroowwss corresponds to the number of points.
+          Initially, rroowwss is set to 4096, but the macros automatically increase
+          the size as needed.  The number of ccoollss is set for each scan to
+          accommodate all the configured counters and all the motors in the
+          scan.  If the scan involves motors associated with the diffractometer
+          reciprocal space calculations, HH, KK and LL are also saved for each scan
+          point.
+
+          SSHHAARREEDD__SSCCAANN__DD is a macro defined as sshhaarreedd, by default.  The SSCCAANN__DD
+          array needs to be a shared-data array for the external sspplloott utility
+          to have access to the data if ssppeecc is not running in server mode.
+
+     SSCCAANN__CCOOLLSS[[]] - An associative array containging string labels for each
+          column in SSCCAANN__DD.
+
+     PPLLOOTT__MMOOTTSS - The number of independent variables (motors) in SSCCAANN__DD columns.
+
+     PPLLOOTT__NNUUMM - The number of dependent variables (counters) in SSCCAANN__DD columns.
+
+     PPLLOOTT__SSEELL[[]] - An associative array containing the counter mnemonics for the
+          columns user to be plotted.
+
+     LLDDTT - The row number in SSCCAANN__DD of the most recently added data point.
+

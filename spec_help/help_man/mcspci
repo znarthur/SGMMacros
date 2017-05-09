@@ -1,0 +1,206 @@
+.TH "mcs\-pci" "hardware" "08/01/12" "mcspci.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+mcs\-pci \- Ortec MCS\-pci Multichannel Scaler
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mcspci.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2002,2004,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mcs-pci" "hardware" "08/01/12" "mcspci.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Ortec MCS\-pci Multichannel Scaler has count rates up to 150 MHz
+and up to 65,536 channels.
+Dwell times are selectable from 100 nanoseconds to 1300 seconds per channel.
+\fBspec\fP can control up to four MCS\-pci modules.
+.SH "FUNCTIONS"
+.rs
+.sp
+See the \fI\%mca\fP
+help file for a description of the
+\fBmca_get()\fP, \fBmca_put()\fP
+and other standard MCA\-type functions available in \fBspec\fP.
+.RS 0m
+.HP 5m
+."
+\fBmca_par("clear")\fP
+\- 
+Clears the data memory of the MCS.
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+Programs the MCS device with the appropriate parameters
+and starts acquisition.
+If \fB"auto_clear"\fP mode is set, clears the current data,
+otherwise, continues acquisition.
+The pass count is zeroed in both cases.
+.HP 5m
+."
+\fBmca_par("auto_clear" [, value])\fP
+\- 
+With no arguments, returns nonzero or zero to indicate
+whether auto\-clear mode is set.
+Otherwise sets the mode to \fBvalue\fP. When auto\-clear mode is set,
+the MCS data is cleared before data acquisition is started.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+Halts the current pass if acquisition is active.
+If entered a second time before the pass completes, the
+acquisition is terminated without completing the current pass.
+.HP 5m
+."
+\fBmca_par("dwell" [, value])\fP
+\- 
+With no arguments, returns the current dwell value.  Otherwise, sets
+the dwell to \fBvalue\fP. A negative argument selects external dwell.
+Valid values are from 100e\-9 to 1300 seconds.
+.HP 5m
+."
+\fBmca_par("npts" [, value])\fP
+\- 
+With no arguments, returns the current number of points or pass length.
+Otherwise, sets the pass length to \fBvalue\fP.
+Allowed values are from 4 to 65,536.
+.HP 5m
+."
+\fBmca_par("passes" [, value])\fP
+\- 
+With no arguments, returns the current preset passes value.
+Otherwise, sets the passes preset to \fBvalue\fP.
+A value of zero indicates no preset.
+.HP 5m
+."
+\fBmca_par("preset" [, value])\fP
+\- 
+The \fB"preset"\fP argument has the same function as \fB"passes"\fP.
+.HP 5m
+."
+\fBmca_par("elapsed_passes")\fP
+\- 
+Returns the number of elapsed passes since acquisition started.
+.HP 5m
+."
+\fBmca_par("current_bin")\fP
+\- 
+Returns the current channel number of the current pass.
+The first channel is numbered zero.
+.HP 5m
+."
+\fBmca_par("input" [, which])\fP
+\- 
+Returns the string \fB"sca"\fP or \fB"disc"\fP
+to indicate which input is used as the signal source.
+String arguments of of \fB"sca"\fP or \fB"disc"\fP for \fBwhich\fP
+select the setting.
+.HP 5m
+."
+\fBmca_par("impedance" [, value])\fP
+\- 
+Returns 50 or 1000 to indicate whether the discriminator input impedance
+is set to 50 ohms or 1 kohm.  An argument of 50 or 1000 for
+\fBvalue\fP sets the input impedance.  The default value is 1 kohm.
+.HP 5m
+."
+\fBmca_par("disc_level" [, value])\fP
+\- 
+With no arguments, returns the current discriminator threshold level.
+Otherwise sets the threshold to \fBvalue\fP.
+Valid values are from \-1.6 to +3.0V with steps of 0.0015256V.
+.HP 5m
+."
+\fBmca_par("disc_edge" [, which])\fP
+\- 
+Returns the string \fB"rising"\fP or
+\fB"falling"\fP to indicate whether the discriminator
+is rising\-edge or falling\-edge sensitive.
+String arguments of of \fB"rising"\fP or \fB"falling"\fP
+for \fBwhich\fP select the setting.
+.HP 5m
+."
+\fBmca_par("sca_low" [, value])\fP
+\- 
+With no arguments, returns the current lower\-level threshold value
+of the SCA input.
+Otherwise sets the threshold to \fBvalue\fP.
+Valid values are from 0 and +10V with steps of 0.002442V.
+.HP 5m
+."
+\fBmca_par("sca_high" [, value])\fP
+\- 
+With no arguments, returns the current upper\-level threshold value
+of the SCA input.
+Otherwise sets the threshold to \fBvalue\fP.
+Valid values are from 0 and +10V with steps of 0.002442V.
+.HP 5m
+."
+\fBmca_par("trigger" [, which])\fP
+\- 
+Returns the string \fB"internal"\fP or \fB"external"\fP
+to indicate whether new passes are started automatically or
+require an external trigger.
+The optional argument \fBwhich\fP can be either of the strings
+\fB"internal"\fP or \fB"external"\fP to select the trigger source.
+.HP 5m
+."
+\fBmca_par("trig_level" [, value])\fP
+\- 
+With no arguments, returns the current external
+channel\-advance threshold level.
+Otherwise sets the threshold to \fBvalue\fP.
+Valid values are from \-1.6 to +3.0V with steps of 0.0015256V.
+.HP 5m
+."
+\fBmca_par("reset")\fP
+\- 
+Stops acquisition, clears data memory and restores
+all MCS parameters to default values, as follows:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+mca_par("dwell", 1e\-7)
+mca_par("npts", 1000)
+mca_par("passes", 0)
+mca_par("input", "disc")
+mca_par("impedance", 1000)
+mca_par("disc_level", 1.4)
+mca_par("disc_edge", "rising")
+mca_par("sca_high", 6.5)
+mca_par("sca_low", 1.2)
+mca_par("trigger", "internal")
+mca_par("trig_level", 1.4)
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("dump")\fP
+\- 
+Displays current MCS parameters.
+.HP 5m
+."
+\fBmca_par("chan#")\fP
+\- 
+Returns the contents of channel number \fB#\fP.
+.HP 5m
+."
+\fBmca_par("chan#", value)\fP
+\- 
+Set the contents of channel number \fB#\fP to \fBvalue\fP.
+.RE
+

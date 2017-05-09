@@ -1,0 +1,125 @@
+PC-DIG                              hardware                              PC-DIG
+
+NAME
+     PC-DIG - Coreco Imaging (ITI) PC-DIG Frame Grabber
+
+INTRODUCTION
+
+     ssppeecc supports the PC-DIG frame grabber on LLiinnuuxx platforms by way of the
+     iittiiffgg driver available for download at the _f_t_p_._g_o_m_._c_o_m site.  Currently,
+     release 7.2 of the driver is supported by ssppeecc.  Before attempting to use
+     ssppeecc with the PC-DIG frame grabber, make sure the driver installation is
+     correct by ensuring the tteesstt__iittiiffgg program included with the driver package
+     can obtain images.
+
+     ssppeecc currently does not load the camera-specific FPGA firmware into the
+     frame-grabber cards, nor does ssppeecc initialize all the driver parameters for
+     a particular camera.  Thus, you should ensure that the ccoonnffiigg__ppccddiigg program
+     is run to load the FPGA files and the tteesstt__iittiiffgg program is run to
+     initialize the driver parameters after rebooting the computer (or inserting
+     the iittiiffgg..oo module into the kernel) and before running ssppeecc.
+
+     The frame grabber is selected in the ssppeecc eeddccoonnff configuration editor on
+     the AAcquisition devices screen as follows:
+
+        CCCCDD--lliikkee      DDEEVVIICCEE                                <<>>TTYYPPEE
+         00  YYEESS  //ddeevv//iicc00iiddII  IITTII PPCC--DDIIGG FFrraammee GGrraabbbbeerr ((rreeaadd mmooddee))
+         11  YYEESS  //ddeevv//iicc00iiddII  IITTII PPCC--DDIIGG FFrraammee GGrraabbbbeerr ((mmmmaapp mmooddee))
+
+     Up to four PC-DIG frame grabbers can be configured at a time.  Two
+     acquisition modes (read and memory-mapped) are supported, although read
+     mode seems to be the most useful.
+
+     In read mode, ssppeecc supplies a memory buffer that is filled by the driver.
+     The buffer can contain room for multiple frames.  After acquisition is
+     started, the frame grabber will run until all the frames are filled.  If a
+     data array of the appropriate size is assigned to the acquisition device
+     with the  ""lliivveebbuuffffeerr"" option to iimmaaggee__ppaarr(()), the associated memory will be
+     used by the driver.  Otherwise, ssppeecc allocates temporary memory from the
+     system with a mmaalllloocc(()) call.
+
+     In memory-mapped mode, the driver allocates kernel memory in a ring buffer
+     and continually fills the memory with images.
+
+FUNCTIONS
+
+     The iimmaaggee__ggeett(()) functions copies the images associated with the current
+     frame (see below) from the memory buffer used by the frame grabber to the
+     array provided as argument.  In live-buffer mode (see below), the frames
+     are written directly to the provided data array, so it is not necessary to
+     use iimmaaggee__ggeett(()) to copy the images.
+
+     The iimmaaggee__ppaarr(()) function controls the detector interface behavior as
+     follows.  The sseell parameter is the image-device number from the ccoonnffiigg
+     file.
+
+     iimmaaggee__ggeett((sseell,, aarrrr) - Copies data from the current frame into the array
+          aarrrr. Use the ""ffrraammee"" option of iimmaaggee__ppaarr(()) below to set the current
+          frame, if the number of frames is greater than one.  Note, the frame
+          grabber must be started with the ""rruunn"" command before an image is
+          available.
+
+     iimmaaggee__ppaarr((sseell,, ""rruunn"")) - Starts acquisition.
+
+     iimmaaggee__ppaarr((sseell,, ""hhaalltt"")) - Stops acquisition.
+
+     iimmaaggee__ppaarr((sseell,, ""ppoollll"")) - Returns the number of frames acquired during the
+          current (or most recent) acquisition.
+
+     iimmaaggee__ppaarr((sseell,, ""lliivveebbuuffffeerr"" [[,, aarrgg]])) - When aarrgg is the name a suitably
+          sized data array, that array will be used for the read-mode buffer.
+          If aarrgg is absent, returns the name of the current live-buffer array,
+          or ""??"" if none is set.
+
+     iimmaaggee__ppaarr((sseell,, ""ssttaattss"")) - Displays acquisition statistics obtained from the
+          driver.
+
+     iimmaaggee__ppaarr((sseell,, ""ffrraammee"" [[,, aarrgg]])) - Sets the frame number used for the next
+          iimmaaggee__ggeett(()) call and for retrieving the time stamp (see below).
+
+     iimmaaggee__ppaarr((sseell,, ""ffrraammeess"" [[,, aarrgg]])) - Sets the number of frames in the kernel
+          buffer to use for acquisition.  The frame grabber will allocate the
+          needed kernel memory and fill it during acquisition.
+
+     iimmaaggee__ppaarr((sseell,, ""ffrraammee__ccoouunntt"")) - During acquisition, returns the current
+          frame number using the llsseeeekk(()) system call to the driver.
+
+     iimmaaggee__ppaarr((sseell,, ""ttiimmeessttaammpp"")) - Returns the time stamp associated with the
+          current frame.
+
+     iimmaaggee__ppaarr((sseell,, ""hhooffff"" [[,, aarrgg]])) - Sets or gets the camera horizontal offset
+          parameter.
+
+     iimmaaggee__ppaarr((sseell,, ""vvooffff"" [[,, aarrgg]])) - Sets or gets the camera vertical offset
+          parameter.
+
+     iimmaaggee__ppaarr((sseell,, ""rroottiimmee"" [[,, aarrgg]])) - Sets or gets and returns the read-out
+          time.
+
+     iimmaaggee__ppaarr((sseell,, ""eexxttiimmee"" [[,, aarrgg]])) - Sets or gets and returns the exposure
+          time using the HHIIOOCC__PPCCDD__SSEETT__EEXXTTIIMMEE and HHIIOOCC__PPCCDD__GGEETT__EEXXTTIIMMEE iiooccttll(())
+          system calls, respectively.
+
+USAGE
+
+     The following commands should be sufficient to perform a quick test of the
+     frame grabber.
+
+        SSPPEECC..11>> rroowwss == iimmaaggee__ppaarr((00,, ""rroowwss""))
+
+        SSPPEECC..22>> ccoollss == iimmaaggee__ppaarr((00,, ""ccoollss""))
+
+        SSPPEECC..33>> uusshhoorrtt aarrrraayy iimmaaggee[[rroowwss]][[ccoollss]]
+
+        SSPPEECC..44>> iimmaaggee__ppaarr((00,, ""rruunn""))
+
+        SSPPEECC..55>> iimmaaggee__ggeett((00,, iimmaaggee))
+
+        SSPPEECC..66>> ffmmtt__wwrriittee((""ssoommee__ffiillee"",, ""ppggmm"",, iimmaaggee))
+
+        SSPPEECC..77>> uu xxvv ssoommee__ffiillee
+
+     The ffmmtt__wwrriittee(()) function here writes the data in ppggmm format to a file.  The
+     last command spawns the xxvv image viewing program (available at
+     _w_w_w_._t_r_i_l_o_n_._c_o_m if not already installed).
+

@@ -1,0 +1,96 @@
+.TH "changes" "spec 2.6 Release Notes" "08/01/12" "chg2_06.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.6
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_06.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.6 Release Notes" "08/01/12" "chg2_06.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes summarize the modifications made for \fBspec\fP release 2.6,
+as finalized on June 6, 1988.
+.SH "CHANGES"
+.rs
+.sp
+The
+\fBUser Manual\fP,
+\fBReference Manual\fP
+and
+\fBAdministrator\(aqs Guide\fP
+are now relatively complete.
+The
+\fBUser Manual\fP
+contains an introductory tutorial chapter
+on basic diffractometer operation.
+.sp
+The scan macros are substantially rewritten.
+Refer to the
+\fBReference Manual\fP
+for a discussion of their present
+form.
+.sp
+The temperature control macros are substantially rewritten.
+Refer to the
+\fBReference Manual\fP.
+In addition,
+thermistor conversions
+are now handled entirely within the macros.
+.sp
+The plot\-results output is now generated in a macro named
+\fBplot_res\fP,
+that can be invoked separately and can be easily modified by the user.
+.sp
+The motor name
+\fBunused\fP
+is special.
+Motors with that name won\(aqt appear on any of the standard\-macro
+generated output.
+.sp
+Bugs in the code for two CAMAC modules,
+the RTC018 clock and Joerger SMC motor controller,
+have been fixed.
+.sp
+Bugs in the code for the four\-circle
+\fBfrozen\fP
+modes have been fixed.
+.sp
+The geometry\-specific standard macro file is now kept in
+\fBspec.d/\fP
+rather than
+\fBspec.d/conf/\fP.
+The four\-circle file is called
+\fB/usr/lib/spec.d/four.mac\fP.
+.sp
+The modulus operator
+(\fB%\fP)
+now correctly converts its operands
+to integers before operating.
+.sp
+New options for
+\fBpl_anal()\fP
+return the minimum and maximum values of
+\fBx\fP.
+.sp
+The names
+\fBgpset\fP,
+\fBsaveusr\fP
+and
+\fBsavegeo\fP
+replace
+\fB_gpset\fP,
+\fB_saveusr\fP
+and
+\fB_savegeo\fP.
+

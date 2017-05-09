@@ -1,0 +1,49 @@
+.TH "kscan" "macro" "08/01/12" "kscan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBkscan\fP \- scan along the \fBK\fP\-axis in reciprocal space
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)kscan.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "kscan" "macro" "08/01/12" "kscan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBkscan start end intervals time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBkscan\fP is a linear scan in reciprocal space along the
+\fBK\fP\-axis from \fBstart\fP to \fBend\fP. The step size is
+\fB(start\-end)/intervals\fP.
+The number of data points collected will be \fBintervals+1\fP.
+Count time is given by
+\fBtime\fP, which if positive, specifies seconds and if negative,
+specifies monitor counts.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBkscan .9 1.1 10 10\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%hscan\fP
+\fI\%lscan\fP
+\fI\%hklscan\fP
+\fI\%hkcircle\fP
+\fI\%hlcircle\fP
+\fI\%klcircle\fP
+\fI\%hkradial\fP
+\fI\%hlradial\fP
+\fI\%klradial\fP
+

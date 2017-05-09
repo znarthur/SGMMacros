@@ -1,0 +1,987 @@
+.TH "changes" "spec 2.15+ Release Notes" "08/01/12" "chg2_15+.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.15+
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_15+.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1992,1993,1995,2010 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.15+ Release Notes" "08/01/12" "chg2_15+.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These
+notes summarize the incremental patches made to \fBspec\fP
+release 2.15 (released February 21, 1992),
+as of April 19, 1993.
+.SH "INCOMPATIBILITIES"
+.rs
+.SH "String Value Of Uninitialized Variables"
+.rs
+.sp
+A long standing inconsistency (bug) dealing with the string value
+of an uninitialized variable has been corrected.
+The string value of an uninitialized variable is now the null string,
+\fB""\fP.
+Previously, the string value would have been
+\fB"0"\fP.
+This change makes the values of uninitialized variables consistent with
+\fBawk\fP.
+The standard macros have been modified in several places to take account of
+this new behavior.
+If you are currently using expressions such as
+.RS 3m
+.sp
+.nf
+.ft CB
+if (some_name == "0") ...
+.ft P
+.fi
+.RE
+.sp
+to test whether a variable is uninitialized, you should
+change such expressions to
+.RS 3m
+.sp
+.nf
+.ft CB
+if (some_name == "") ...
+.ft P
+.fi
+.RE
+.sp
+to work with this new version of \fBspec\fP.
+.SH "NEW FEATURES"
+.rs
+.SH "Two High\-Res Plot Windows"
+.rs
+.sp
+The
+\fBplot_cntl()\fP
+function can now be used to create and select between
+two high resolution plot windows.
+See the
+\fBfuncs\fP
+help file for more information.
+.SH "Multiple Curves On A Single Plot"
+.rs
+.sp
+The
+\fBdata_plot()\fP
+function can now be used to plot multiple curves with one call.
+See the
+\fBdata\fP
+help file for more information.
+.SH "Including Local Help Files"
+.rs
+.sp
+Local help files can be included in this list of topics
+in the basic help file by including the local help file names
+in a file
+named
+\fBSPECD/help/.local\fP.
+The basic help file is only updated during a full installation of \fBspec\fP.
+.SH "Macro To Configure Counters"
+.rs
+.sp
+A new macro named
+\fBcounters\fP
+displays the current counter configuration and then
+prompts for counter channel
+numbers for the global variables
+\fBMON\fP
+and
+\fBDET\fP.
+Those variables hold the channels to be
+treated as monitor and detector in the counting
+and scan macros.
+The monitor and detector channel numbers can also be given as arguments
+to
+\fBcounters\fP.
+.SH "Reusing Macro Names As Local Variables"
+.rs
+.sp
+\fBspec\fP\(aqs syntax has been changed to allow macro names to be reused as
+local symbols.
+Previously, input such as the following would not be allowed:
+.RS 3m
+.sp
+.nf
+.ft CB
+def d \(aqprint date()\(aq
+{ local d ; d = 2 ; print d }
+.ft P
+.fi
+.RE
+.sp
+In the current version, reuse of the symbol
+\fBd\fP
+is accepted.
+.SH "Can Use \fB.log\fP Extension For Log Files"
+.rs
+.sp
+Previously,
+\fBlog\fP
+files (files that recorded all of \fBspec\fP\(aqs output)
+were any files with names that began with the
+three characters
+\fBlog\fP.
+Now files ending with the four characters
+\fB.log\fP,
+are also used as log files.
+.SH "Debugging Log Files"
+.rs
+.sp
+A new type of
+\fBlog\fP
+file is available.
+If an output file name begins with the characters
+\fBdlog\fP
+or ends with the characters
+\fB.dlog\fP,
+all of \fBspec\fP\(aqs output will be sent to that file, as with
+normal
+\fBlog\fP
+files.
+In addition, if any debugging output is being generated (by assigning
+a value to the built\-in
+\fBDEBUG\fP
+variable), the debugging output will only be sent to the
+\fBdlog\fP
+file and won\(aqt be printed on the screen or sent to any other files.
+.SH "New Function To Prompt For User Input"
+.rs
+.sp
+A new function named
+\fBgetval()\fP
+is available for reading values from the keyboard.
+See the
+\fBfuncs\fP
+help file for usage information.
+Macros that use the slightly awkward
+\fBgetvar\fP
+macro can be rewritten with this new function.
+.SH "New Random Number Function"
+.rs
+.sp
+A new function named
+\fBrand()\fP
+returns random numbers.
+See the
+\fBfuncs\fP
+help file for usage information.
+.SH "New \fB\ea\fP Attention Character"
+.rs
+.sp
+A new special character sequence,
+\fB\ea\fP
+(for attention or audible alert), has been added.
+This sequence sounds the terminal bell (and appears to be part of the
+ANSI C grammar).
+.SH "MCA No Longer Automatically Cleared"
+.rs
+.sp
+\fBspec\fP will no longer clear
+the LeCroy 2301, 3512 and 3521 MCA modules when counting using
+\fBtcount()\fP
+or
+\fBmcount()\fP.
+You will have to use the
+\fBmca_par("clear")\fP
+function before counting to clear the MCA channels.
+This change is made to accommodate the needs of some users.
+.SH "Multiple Processes Can Share GPIB Controller"
+.rs
+.sp
+On System V UNIX operating systems with IPC
+(inter\-process
+communication), it is now possible to share
+one National Instruments GPIB controller among multiple versions of
+\fBspec\fP running on the same computer.
+In addition, it is also possible to share a single KS 3988 GPIB\-to\-CAMAC
+controller among multiple processes.
+The IPC version of the GPIB controller is selected by the name
+\fBPC_GPIBPC_L\fP
+in the
+\fBconfig\fP
+file.
+.SH "Multiple Versions Of 386/486 NI GPIB Supported"
+.rs
+.sp
+Both the National Instruments PCII and AT\-GPIB cards and drivers are now
+supported within the same binary for 386 systems.
+The former is chosen using the
+\fBPC_GPIBPC\fP
+(or
+\fBPC_GPIBPC_L\fP)
+and the latter using
+\fBPC_GPIBPC2\fP
+(or
+\fBPC_GPIBPC2_L\fP)
+in the
+\fBconfig\fP
+file.
+\fBWarning\fP:  Selecting the wrong controller type
+may crash your computer or damage your file system.
+.SH "Multiple Versions of Sun NI GPIB Supported"
+.rs
+.sp
+Three versions of the National Instruments GPIB drivers are now available
+for Sun platforms.
+In the
+\fBconfig\fP
+file, the keywords
+\fBPC_GPIBPC\fP
+(or
+\fBPC_GPIBPC_L\fP)
+select the SB\-GPIB Version 1.3 driver, the keywords
+\fBPC_GPIBPC2\fP
+(or
+\fBPC_GPIBPC2_L\fP)
+select the GPIB 1014\-1S driver and the keywords
+\fBPC_GPIBPC3\fP
+(or
+\fBPC_GPIBPC3_L\fP)
+select the SB\-GPIB Version 2.1 driver.
+\fBWarning\fP:
+Selecting the wrong controller type may crash your system.
+.SH "Support For ACS MCB\-4 Motor Controller"
+.rs
+.sp
+Preliminary hardware support is available for the
+Advanced Control System MCB\-4 stepping motor controllers over
+RS\-232 and GPIB interfaces.
+.SH "Support For NSLS MMC32 Motor Controller"
+.rs
+.sp
+Preliminary hardware support is available for the
+MMC32 stepping motor controller (produced locally at NSLS)
+over a GPIB interface.
+.SH "Support For Oriel Encoder Mike 18011 Motor Controller"
+.rs
+.sp
+Preliminary hardware support is available for the Oriel Encoder Mike
+18011 controller over an RS\-232 interface.
+.SH "Support For Klinger Motion Master 2000"
+.rs
+.sp
+Preliminary hardware support is available for the Klinger Motion Master 2000
+DC and stepper motor controller over a GPIB interface.
+See the
+\fBkl2000\fP
+help file for more details.
+.SH "Support For the \fBkappa\fP Geometry"
+.rs
+.sp
+Preliminary support for the
+\fBkappa\fP
+diffractometer geometry is included.
+.SH "Support For ESRF"
+.rs
+.sp
+Support for the distributed computing,
+VME\-based hardware environment of the European Synchrotron Radiation
+Facility (ESRF) is now included.
+A general hardware control function
+\fBesrf_io()\fP
+has been added to \fBspec\fP (see the
+\fBesrf\fP
+help file)
+and support for the ESRF motor controllers is available.
+.SH "Allowing For Slop In E500 Motor Positions"
+.rs
+.sp
+An experimental new feature is available to deal with small discrepancies
+between the E500 controller and \fBspec\fP.
+The function
+\fBmotor_par(motor, "slop", steps)\fP
+sets a threshold value for the selected motor
+for which \fBspec\fP will automatically
+use the E500 value as the correct position.
+A message is printed if such a correction occurs.
+The values set are saved in the state file.
+.SH "CHANGED FEATURES"
+.rs
+.SH "New Definition For the \fBscan_plot\fP Macro"
+.rs
+.sp
+The
+\fBscan_plot\fP
+macro is now defined in the standard macros as
+\fB_plot\fP,
+which is a newly introduced name.
+The
+\fBsetplot\fP
+macro will change the definition of
+\fB_plot\fP,
+rather than
+\fBscan_plot\fP.
+Local sites that wish to redefine
+\fBscan_plot\fP
+no longer need to redefine the
+\fBsetplot\fP
+macro.
+.SH "New \fBget_angles\fP Macro"
+.rs
+.sp
+Occurrences of the built\-in command
+\fBgetangles\fP
+in the standard macros have been replaced with the
+macro
+\fBget_angles\fP.
+This new macro contains the
+\fBgetangles\fP
+command, along with invocation of a new macro named
+\fBuser_getangles\fP.
+The latter is initially defined as a null macro.
+.SH "New \fBget_counts\fP Macro"
+.rs
+.sp
+The built\-in command
+\fBgetcounts\fP
+in the standard macros has been replaced with the
+macro
+\fBget_counts\fP,
+which calls
+\fBgetcounts\fP
+and a new macro named
+\fBuser_getcounts\fP,
+which is initially defined as a null macro.
+The purpose of this change is to allow the user
+to insert code, if necessary, after the call to
+\fBgetcounts\fP
+either to postprocess the the counter values, or to implement user\-level
+counters.
+For one particular configuration, the distance of the detector from
+the sample varies with
+the cosine of an angle, so
+\fBuser_getcounts\fP
+is defined to multiply
+\fBS[DET]\fP
+by the appropriate factor.
+.SH "New \fBcount_em\fP Macro"
+.rs
+.sp
+A new
+\fBcount_em\fP
+macro replaces all the code and immediate logic surrounding calls to
+\fBmcount()\fP
+and
+\fBtcount()\fP.
+Included in
+\fBcount_em\fP
+are calls to new macros named
+\fBuser_precount\fP
+and
+\fBuser_postcount\fP.
+By default, these macros are defined as null macros.
+They can be given definitions by users for various purposes,
+including
+implementation of user\-level counters.
+See the
+\fBcount.mac\fP
+source file for details.
+.SH "Orientation Matrix Code Accommodates Six Angles"
+.rs
+.sp
+The maximum number of angles used by the orientation\-matrix code
+to describe each reflection has been increased from five to six, to
+accommodate the new
+six\-circle geometry.
+.SH "Increase In the Number Of Data Groups"
+.rs
+.sp
+The number of data groups has been increased from eight to 256.
+A limit has been placed on the total number of points allowed for
+all groups.
+That limit is currently 65,536 points, but can
+be increased by CSS if requested.
+.SH "Data Groups Can Be Deleted"
+.rs
+.sp
+Calling
+\fBdata_grp()\fP
+with the number\-of\-elements argument set to zero will now delete
+the group.
+.SH "Renaming Of Background\-Flag Variable"
+.rs
+.sp
+The flag for background subtraction in the macros, defined in the source file
+\fBplot.mac\fP,
+has been renamed
+\fBBG\fP.
+Previously the name of the flag was
+\fBPG\fP.
+.SH "New Measure Macros"
+.rs
+.sp
+The
+\fBmeasuretemp\fP
+macro, called after counting in the
+\fB_loop\fP
+macro,
+has been replaced with two new macros called
+\fBmeasure1\fP
+and
+\fBmeasure2\fP.
+Initially,
+\fBmeasure1\fP
+is defined as
+\fBmeasuretemp\fP
+to maintain compatibility with prior usage.
+Also introduced in the
+\fB_loop\fP
+macro is a new
+\fBmeasure0\fP
+macro that is called before counting.
+Both
+\fBmeasure0\fP
+and
+\fBmeasure2\fP
+are initially defined as null macros.
+.SH "Macros Work Without A Monitor Counter"
+.rs
+.sp
+The standard scan and counting macros
+have been modified so that they can still
+be used if there is no monitor counter configured.
+Set the global variable
+\fBMON\fP
+to \-1 if you don\(aqt have a monitor counter.
+.SH "IMPROVED FEATURES"
+.rs
+.SH "No More Need For So Many Underscores"
+.rs
+.sp
+The initial underscores in the names of many of the local symbols
+in the standard macros have
+been removed in order to improve the readability of the macros.
+The underscores no longer serve a purpose
+due to the improvements in the
+functionality of the
+\fBlocal\fP
+keyword.
+.SH "Improvements To Output File Handling"
+.rs
+.sp
+A number of changes have been made to improve the handling of
+output files.
+.IP 1. 3
+\fBspec\fP now keeps track of the current working
+directory when each file is opened.
+If you exit \fBspec\fP and then restart it from a different directory,
+the existing output files will be reopened in their correct directories.
+.IP 2. 3
+If you restart \fBspec\fP using an existing state file and
+there is an output file present in the
+state file that
+has disappeared from the file system,
+\fBspec\fP now prints a warning message.
+If possible, \fBspec\fP will create
+a new file using the previous name and directory, though.
+.IP 3. 3
+The
+\fBon()\fP
+and
+\fBopen()\fP
+functions, when used without arguments,
+now also print the full path name of the files, along with the name
+by which each was opened.
+.IP 4. 3
+When the
+\fBclose()\fP
+function is used
+with an unopened file, \fBspec\fP no longer prints an error message.
+.IP 5. 3
+Previously, if you removed a \fBspec\fP output
+file while \fBspec\fP still had it open,
+all subsequent output to the file would be lost until the file was
+closed, either through the
+\fBclose()\fP
+function, by exiting and restarting \fBspec\fP or through the
+\fBfixstate\fP
+command.
+\fBspec\fP will now detect
+when you attempt to write to
+an open file that has been removed from the file system.
+\fBspec\fP will
+print a warning message, close the old file descriptor,
+create a new version of the file and open that file for writing.
+As a general rule, it is a bad idea to use any other UNIX utility
+to change a file
+currently opened for
+writing by any program, including \fBspec\fP.
+.IP 6. 3
+The previous versions of the
+\fBnewfile\fP
+macro opened the data file in a directory named
+\fB./data\fP
+if it existed.
+A new global variable named
+\fBDATA_DIR\fP
+is now used to hold the name of the optional data directory.
+\fBDATA_DIR\fP
+is initially set to
+\fB./data\fP,
+so the default behavior is as before.
+.IP 7. 3
+If the file you enter in the
+\fBnewfile\fP
+macro has the same name
+as the current data file, but if you have changed
+directory, the previous file will be closed and a new one opened in
+the current directory.
+.IP 8. 3
+If the
+\fBnewfile\fP
+macro can\(aqt open the file asked for, the
+\fBDATAFILE\fP
+variable is set to
+\fB"/dev/null"\fP.
+.IP 9. 3
+The
+\fBnewfile\fP
+macro now prints warning messages if the file already exists, if the
+file exists and doesn\(aqt have the
+\fB#F\fP
+characters at the start of the file or if the file
+name given is the same as the current
+\fBDATAFILE\fP
+but doesn\(aqt exist.
+This feature uses a program called
+\fBchk_file\fP,
+which is installed in the
+\fBSPECD\fP
+directory.
+.SH "Monochromator Support Revamped"
+.rs
+.sp
+The monochromator support has been revamped.
+All of the functionality is now in macro code.
+The
+\fBgeo_mono.c\fP
+module has been eliminated.
+All of the monochromator macros are in the macro source file
+\fBmacros/energy.mac\fP.
+One\-, three\- and four\-motor monochromators are supported.
+The macros automatically detect which type of monochromator is being used
+based on the motor mnemonics present in the
+\fBconfig\fP
+file.
+The
+\fBget_E\fP,
+\fBset_E\fP
+and
+\fBmove_E\fP
+macros have been renamed
+\fBgetE\fP,
+\fBsetE\fP
+and
+\fBmoveE\fP,
+respectively.
+See the new
+\fBmono\fP
+help file for details.
+.SH "CAMAC Info In \fBinstall_data\fP File"
+.rs
+.sp
+The
+\fB\-C\fP
+flag to the
+\fBInstall\fP
+program has been replaced with
+a line in the
+\fBinstall_data\fP
+file that keeps track of whether or not to include CAMAC support.
+.SH "Non\-Super User Installation"
+.rs
+.sp
+The
+\fB\-S\fP
+option to the
+\fBInstall\fP
+program that lets you install \fBspec\fP without being super user
+as long as you have write permission on all the relevant files
+has been fixed to work on most, if not all, systems.
+Previously, the call of the
+\fBchown\fP
+UNIX command caused problems on some systems where it was only
+available to the super user.
+Now, the
+\fB\-S\fP
+option disables all calls to
+\fBchown\fP.
+.SH "Driver Files Can Be Installed Without Kernel Rebuild"
+.rs
+.sp
+The driver install scripts for the 386 systems now accepts a
+\fB\-n\fP
+option to indicate not to rebuild the kernel after installing the driver
+files.
+.SH "Improvements to \fBsurf\fP Geometry Code"
+.rs
+.sp
+The code in
+\fBgeo_surf.c\fP
+that determines which version of the available surface diffractometer
+configurations to use based on the configured motor mnemonics has been
+improved to check that all the necessary mnemonics are present, rather
+than just looking for one or two of them.
+Also, the code now
+does better error checking for mathematical
+singularities.
+In addition, the calculations between motor positions and reciprocal space
+now work correctly in all the available modes.
+.SH "Improvements To \fBfourc\fP and \fBfivec\fP Code"
+.rs
+.sp
+The
+\fBfourc\fP
+and
+\fBfivec\fP
+geometry code has a few more checks for unobtainable reflections
+in the
+\fBazimuthal\fP
+modes.
+.SH "Changes To \fBtwoc\fP Internals"
+.rs
+.sp
+The numbering of the
+\fBQ[]\fP
+parameters for the
+\fBtwoc\fP
+geometry has been changed to be consistent with the other geometries.
+The indices of the
+\fBLAMBDA\fP,
+\fBALPHA\fP
+and
+\fBBETA\fP
+parameters have all been increased by one.
+\fBQ[2]\fP,
+formerly
+\fBLAMBDA\fP,
+is now unused.
+.SH "Improvements to \fBbug\fP Macro"
+.rs
+.sp
+The
+\fBbug\fP
+macro now uses the value of the new global variable
+\fBMAIL\fP
+for the name of the mail program to run.
+The default value is the string
+\fBmail\fP.
+.SH "Faster, More Robust High\-Res Graphics"
+.rs
+.sp
+The interface code to the high\-resolution graphics filters has been
+rewritten for improved speed and robustness.
+.SH "X11 Graphics Automatically Brought To Front"
+.rs
+.sp
+The
+\fBx11filt\fP
+program will now automatically raise the window to the front each time
+its contents are changed.
+This feature can be disabled in your
+\fB.Xdefaults\fP
+file by setting the
+\fBspec.AutoRaise\fP
+parameter to off.
+.SH "X11 Graphics Checks For Backing Store"
+.rs
+.sp
+The
+\fBx11filt\fP
+code has been fixed to automatically detect whether
+\fB"backing store"\fP
+is available.
+If backing store is requested when it is
+not available, the code switches automatically to retained pixmap mode.
+.SH "Am9513 Counting Improved"
+.rs
+.sp
+The code for the Am9513 based counting boards for the PC has been improved.
+The maximum count has been increased from from 10.9 minutes to 71.5 minutes.
+When counting to time, the time base resolution (in seconds)
+is now set according to
+the following table:
+.sp
+.RS 4m
+.nf
+0.00001  for \fBt\fP < 0.6 sec
+0.0001   for \fBt\fP < 6 sec
+0.001    for \fBt\fP < 60 sec
+0.01     for \fBt\fP < 655.35 sec (10.9 min)
+0.0655   for \fBt\fP < 71.5 min
+.fi
+.sp
+.RE
+.sp
+When counting to monitor counts, the 0.01 second time base is used, and
+the value returned for
+the time channel will be corrected to account for the rollovers that
+occur every 655.36 seconds.
+Also, the powder\-mode counting mode used by the
+\fBsetpowder\fP
+macro is now implemented.
+.SH "MCU Code Improvements"
+.rs
+.sp
+The MCU code now only sends values for the base rate, steady\-state rate
+and acceleration parameters when \fBspec\fP starts, when the
+\fBreconfig\fP
+command is executed or when you change the steady\-state rate
+with the
+\fBmotor_par()\fP
+function.
+Previously, these values were sent before each move.
+.SH "Compumotor 4000 Code Updated"
+.rs
+.sp
+The code for the Compumotor 4000 has been updated to work with
+the revised PROMS that Compumotor is now shipping.
+.SH "BUG FIXES"
+.rs
+.SH "X11 Color Names Updated"
+.rs
+.sp
+The color definitions have been updated to agree with the X11R4
+values.
+Of the two (out of 175) color names used within the \fBspec\fP X11 filter
+that are no longer defined in X11R4,
+one, unfortunately, was the default background color for the
+\fBsplot\fP
+and
+\fBrplot\fP
+screens,
+resulting in a black text on a black background.
+.SH "Bugs in Assigning Values to Built\-in Variables Fixed"
+.rs
+.sp
+It is no longer legal to assign string values to built\-in number variables
+such as
+\fBCOLS\fP
+or
+\fBROWS\fP
+or number values to built\-in string variables such as
+\fBTERM\fP
+or
+\fBGTERM\fP.
+Attempts to do so will generate a warning message, but will not cause
+\fBspec\fP to reset to command level.
+.SH "Bugs Fixed in \fBedconf\fP"
+.rs
+.sp
+A bug in the
+\fBedconf\fP
+program, where deleting the highest numbered motor resulted in an
+incorrect display, has been fixed.
+.SH "Bug Fixed in \fBca_fna()\fP"
+.rs
+.sp
+A bug in the
+\fBca_fna()\fP
+function, where it required an unnecessary fourth argument for
+command\-type F codes (those with bit 3 set), has been fixed.
+.SH "Bug in Producing Lp\-Style Plots Fixed"
+.rs
+.sp
+A bug in release 2.15, where the lp\-style plots would not be
+produced if high\-resolution graphics were enabled, has been fixed.
+.SH "Bug in \fBbegin_mac\fP Fixed"
+.rs
+.sp
+A bug in the implementation of the
+\fBbegin_mac\fP
+feature has been fixed.
+Previously,
+\fBbegin_mac\fP
+wouldn\(aqt execute unless a startup command file, such as
+\fBsite.mac\fP
+or
+\fBspec.mac\fP,
+was read.
+Also, the message
+\fB(running begin_mac ...)\fP
+is now printed on the screen when \fBspec\fP starts up if the
+\fBbegin_mac\fP
+macro is defined.
+.SH "Bug in \fBdata_plot()\fP Fixed"
+.rs
+.sp
+A bug in the
+\fBdata_plot()\fP
+function, where if the number\-of\-points parameter was not zero, the plots
+weren\(aqt made, has been fixed.
+.SH "Bugs in \fBmove_poll()\fP Implementation Fixed"
+.rs
+.sp
+The way in which the
+\fBmove_poll\fP
+macro was added to the motor moving macros in
+release 2.15 broke the updated display of motor positions
+in the updated\-moving macros.
+The macros that use
+\fBmove_poll\fP
+have been rewritten so that the updated display will now work.
+The change involves reorganizing all the motor moving
+macros along the lines of
+.RS 3m
+.sp
+.nf
+.ft CB
+def mv  \(aq_mv $*; move_poll\(aq
+def umv \(aq_mv $*; _update1 $1\(aq
+.ft P
+.fi
+.RE
+.sp
+where the new
+\fB_mv\fP
+macro contains what used to be in
+\fBmv\fP.
+.SH "Bugs in CAMAC MCA Code Fixed"
+.rs
+.sp
+Bugs in the code for LeCroy 2301 and 3588 MCAs that handled large
+numbers incorrectly have been fixed.
+.SH "Bugs in \fBscans.4\fP Fixed"
+.rs
+.sp
+A bug, introduced in the last version of
+\fBscans.4.c\fP,
+where the error bars would be calculated incorrectly for a point with
+zero detector counts, has been fixed.
+.sp
+Another bug in
+\fBscans.4\fP
+(introduced in the January 1992 revision),
+where when
+\fB#C\fP
+comment lines contained numbers in columns that matched the data,
+the function included those numbers in the data that was returned,
+has been fixed.
+.SH "Bug in E500 Acceleration Parameter Interpretation Fixed"
+.rs
+.sp
+An inconsistency concerning the interpretation of the units of the
+CAMAC E500 stepping motor controller acceleration
+parameter has been clarified.
+The E500 has an eight\-bit register for each motor
+that contains the acceleration time in tens of milliseconds.
+Valid values for that register are from zero to 255, which translate to
+valid acceleration times
+from 10 milliseconds to 2.55 seconds.
+Since the very first versions of \fBspec\fP, the values given in the
+\fBconfig\fP
+file have been copied directly to the E500 registers.
+However, \fBspec\fP\(aqs documentation has always stated that the value in the
+\fBconfig\fP
+file was in milliseconds.
+Thus, the default value of 125 translated to 1.25 seconds when the
+number was copied directly to the E500 register.
+With this version,
+\fBspec\fP now properly treats the values in the
+\fBconfig\fP
+file as milliseconds.
+\fBspec\fP also prints a warning message if the values in the
+\fBconfig\fP
+are outside the
+legal range.
+A negative value causes a zero to be written to the acceleration
+register, which is a valid acceleration time on the E500.
+\fBspec\fP does not allow zero to be entered directly, though.
+You may want to check all the acceleration parameters for your motors
+after you install this version of \fBspec\fP.
+In particular, if you have values between 1 and 255 that seemed
+suitable for your motors, you should change those values by multiplying
+by ten.
+.SH "Bug in MCU Acceleration Parameter Interpretation Fixed"
+.rs
+.sp
+An error concerning the acceleration (ramp) parameter for the ACS MCU motor
+controller has been fixed.
+The values sent to the MCU were previously ten times greater than the
+values requested in the
+\fBconfig\fP
+file.
+Since the MCU often has communication problems during the ramp
+times at the start and end of a move, the long ramp times
+increased the chances of communication errors.
+.SH "Bug in DSP and OMS Driver Installation Fixed"
+.rs
+.sp
+The
+\fBinstall\fP
+scripts for DSP CAMAC driver and OMS motor driver have
+been fixed to correctly set the IO\-port end address in the kernel
+configuration files on AT&T System V/386 installations.
+Previously, if you changed the base address from the default using
+a command line option,
+the end address was not updated correctly.
+.SH "Bug in Macro Installation Fixed"
+.rs
+.sp
+A bug in the installation procedure that put the orientation matrix
+macros
+in
+\fBstandard.mac\fP
+rather than the appropriate configuration macro files
+(\fBfour.mac\fP, etc.)
+has been fixed.
+If the last macro package installed didn\(aqt use the orientation matrix
+macros, the orientation matrix macros would not be put in
+\fBstandard.mac\fP
+and thus would not be available to a previously installed geometry
+configuration that required them.
+.SH "Bugs in Ortec Counting Fixed"
+.rs
+.sp
+Many changes have been made for the Ortec 974/994/995/997 modules,
+(Apparently the previous code wasn\(aqt working as well as CSS
+was led to believe.)
+.SH "Microvax GPIB Bug Fixed"
+.rs
+.sp
+A possible bug with the code for the National Instruments GPIB controller for
+the DEC Microvax Q\-bus dealing with non\-terminated reads has
+been fixed.
+.SH "Simulate\-Mode Bug Fixed"
+.rs
+.sp
+A bug in simulate mode that occurred when the change
+to simulate mode took place before any motors had been moved
+has been fixed.
+The manifestation of the bug was the appearance of
+strange values for motor positions.
+The bug only occurred on some computer platforms and only affected
+the behavior in simulate mode.
+.SH "\fBdofile()\fP Bug Fixed"
+.rs
+.sp
+A bug of longstanding, where \fBspec\fP would hang if the file used with
+\fBdofile()\fP
+or
+\fBqdofile()\fP
+was empty, has been fixed.
+.SH "Bugs in \fBedconf\fP Wizard Mode Fixed"
+.rs
+.sp
+The main hole in the motor security features available with the
+\fBwizard\fP
+option of the
+\fBedconf\fP
+program
+(dealing with reading in backup files that describe a less secure
+configuration) has been plugged up.
+

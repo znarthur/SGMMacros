@@ -1,0 +1,38 @@
+.TH "rscan" "macro" "08/01/12" "rscan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBrscan\fP \- specular reflectivity scan
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)rscan.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "rscan" "macro" "08/01/12" "rscan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBrscan start end intervals time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBrscan\fP is a scan within the condition of specular reflectivity with
+\fBALPHA=BETA\fP ranging from \fBstart\fP to
+\fBend\fP while counting for \fBtime\fP for each of the \fBintervals\fP.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBrscan 0 6mr 15 1\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%abscan\fP
+\fI\%r2scan\fP
+

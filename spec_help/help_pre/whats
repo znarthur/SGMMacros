@@ -1,0 +1,31 @@
+whats                                 macro                                whats
+
+NAME
+     wwhhaattss - identify what an object is
+
+SYNOPSIS
+
+     wwhhaattss oobbjjeecctt
+
+DESCRIPTION
+
+     The wwhhaattss macro identifies whether oobbjjeecctt is a built-in keyword, function,
+     macro or variable.
+
+EXAMPLES
+
+        wwhhaattss AA
+            AA vvaarriiaabbllee wwiitthh tthhee ffoolllloowwiinngg aattttrriibbuutteess::
+            BBuuiilltt--iinn AArrrraayy
+        wwhhaattss AA[[00]]
+            AA vvaarriiaabbllee wwiitthh tthhee ffoolllloowwiinngg aattttrriibbuutteess::
+            BBuuiilltt--iinn NNuummbbeerr
+        wwhhaattss wwhhaattss
+            AA mmaaccrroo,, 775544 bbyytteess bbiigg..
+        wwhhaattss wwhhaattiiss
+            AA bbuuiilltt--iinn kkeeyywwoorrdd oorr ffuunnccttiioonn..
+
+SEE ALSO
+
+     _s_y_m_s _l_s_c_m_d _l_s_d_e_f
+

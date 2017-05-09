@@ -1,0 +1,122 @@
+.TH "debug" "macro" "10/26/14" "debug.rst 6.4  10/26/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBdebug\fP \- set debugging level of diagnostic messages
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)debug.rst        6.4  10/26/14  CSS
+.
+.\" Copyright (c) 1990-2005,2012,2013,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "debug" "macro" "10/26/14" "debug.rst 6.4  10/26/14 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBdebug\fP \fBlevel\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+A value assigned to the built\-in global variable \fBDEBUG\fP enables various
+levels of debugging message output.
+A debugging level can also be set on startup with the \fB\-d\fP option.
+The \fBdebug\fP standard macro can also select a debugging level.
+.sp
+The following values when added together set the debugging level.
+Decimal
+values are shown in the first column, hexadecimal in the second.
+(Adding hexadecimal values together is easier when higher order bits are involved!)
+.sp
+.RS 4m
+.TS
+;
+l l l l .
+			
+	1	0x1	Show input tokens during parsing.
+	2	0x2	Show node execution while running.
+	4	0x4	Show node allocate and free.
+	8	0x8	Show symbol table creation and lookup.
+	16	0x10	Show values get and set.
+	32	0x20	Show miscellaneous memory\-related info.
+	64	0x40	Show hardware related info.
+	128	0x80	Show additional hardware related info.
+	256	0x100	Show macro substitution.
+	512	0x200	Show memory allocate and free.
+	1024	0x400	Show input after macro expansion.
+	2048	0x800	Print warning messages.
+	4096	0x1000	Show some lower level hardware info.
+	8192	0x2000	Show data array allocation.
+	etc.	0x4000	Show signal blocking.
+		0x8000	Show low level hardware info.
+		0x10000	Show input file queuing and shell commands.
+		0x20000	Show readable runtime debugging.
+		0x40000	Print input context on execution\-time errors.
+		0x80000	Show sleeps.
+		0x100000	Show thread locking (enormous amount of output).
+		0x200000	Show state changes (not normally enabled).
+		0x400000	Use hexadecimal for socket/serial debugging output.
+		0x800000	Show server/client socket messages.
+.TE
+.RE
+.sp
+When invoking the \fBdebug\fP macro,
+an argument of \fB+value\fP or \fB\-value\fP adds
+or removes \fBvalue\fP from the current level.
+.sp
+For hardware debugging, the following levels may be useful.
+Level 128 generally displays higher level messages associated with hardware controllers.
+Level 64 displays lower level serial and socket messages.
+Level 4096 shows more detailed messages for some protocols, including the server mode
+messages between \fBspec\fP servers and clients.
+The detailed socket level messages used during \fBspec\fP server/client communication are
+only shown if level 0x800000 is active.
+Including level 0x400000 with level 64 or level 0x800000 will select a hex dump format
+for the low level serial and socket messages.
+.sp
+Level 0x40000 shows input context on execution errors and can be helpful to help pin down syntax
+errors in macros.
+.sp
+Other levels, such as those that show memory allocation (512), sleeps (0x80000) and thread locking
+(0x100000), produce copious output and are likely only useful to those working on the \fBspec\fP code.
+.sp
+Debugging mode can generate a large amount of output that
+will appear not only on the screen but also in any open output files,
+including the data file.
+However, if a special debugging log file is opened, the debugging output will
+only appear in that file, not on the screen and not in any other files.
+A debugging log file is an output file that is named \fBdlog\fP or ends with the string \fB.dlog\fP.
+For example:
+.RS 3m
+.sp
+.nf
+.ft CB
+fon hdw.dlog
+debug 192
+
+\&... commands to be debugged ...
+
+debug 0
+fclose hdw.dlog
+.ft P
+.fi
+.RE
+.SH "GLOBAL VARIABLES"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBDEBUG\fP
+\- 
+A built\-in global variable that holds the value of the debugging level.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%spec\fP
+

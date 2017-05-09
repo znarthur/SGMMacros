@@ -1,0 +1,235 @@
+macros                              reference                             macros
+
+NAME
+     macros - description of macro facility
+
+DESCRIPTION
+
+     The following commands and functions are associated with the macro
+     facility.
+
+     ddeeff mm ss - Define or redefine mm to have the definition ss, where ss is a
+          string.  Each time mm occurs on input, it is replaced with ss. The
+          definition is made immediately, so the macro can be used later in the
+          same statement block in in which it is defined and can be redefined
+          within the same statement block.
+
+          Note that the macro definition is made regardless of any surrounding
+          flow control statements, since the enclosing mini-program is not yet
+          completely parsed and is not executing.
+
+     rrddeeff mm ss - Define or redefine mm to have the definition ss, where ss is a
+          string.  Each time mm occurs on input, the value ss is substituted.
+          Unlike ddeeff, described above, the macro definition is not made until
+          all the encompassing statement blocks are parsed and executed and the
+          resulting mini-program is executed.
+
+     ddeeff mm(([[**aa11,, ......]])) ''{{ ...... }}'' or rrddeeff mm(([[**aa11,, ......]])) ''{{ ...... }}'' - Defines a
+          macro function named mm, possibly with arguments aa11, ..., that can
+          optionally return a value using the rreettuurrnn keyword.  The string
+          delimiter characters in the macro definition are optional.  The curly
+          brackets are required.
+
+     uunnddeeff mm11 [[mm22 ...... ]] - Remove macro definitions.
+
+     llssddeeff [[mm11 ......]]  - List the names and sizes of all (or selected) macros.
+          The arguments can use literal text with wildcard characters ?? and **,
+          which have the usual meaning:  ??  matches any single character and **
+          matches any string.
+
+     pprrddeeff [[mm11 ...... ]] - Print all (or selected) macro definitions.  The arguments
+          can contain wildcard characters as described above for llssddeeff.  The
+          definitions include are prepended with ddeeff nnaammee '' and terminated with
+          '' so if saved to a file can be read back.
+
+     ccddeeff((nnaammee,, ss,, [[kkeeyy,, [[ffllaaggss]]]])) - The function ccddeeff(()) is used to define
+          chained macros.  The function can be used to maintain a macro
+          definition in pieces that can be selectively included into a complete
+          macro definition.  The argument nnaammee is the name of the macro.  The
+          argument ss contains a piece to add to the macro.
+
+          The chained macro can have three parts:  a front, a middle and a back.
+          Pieces included in each of the parts of the macros are sorted
+          lexicographically by the keys.  Pieces without a key are placed in the
+          middle, in the order in which they were added, but after any middle
+          pieces that include a key.
+
+          With the optional kkeeyy argument, the pieces can be selectively replaced
+          or deleted.  The ffllaaggss argument controls whether the pieces are added
+          to the front or to the back of the macro or whether the pieces should
+          be selectively included in the definition based on whether kkeeyy is a
+          currently configured motor or counter mnemonic.
+
+          The bit meanings for ffllaaggss are as follows:
+
+          00xx0011 - only include if key is a motor mnemonic and the motor is not
+               disabled.
+          00xx0022 - only include if key is a counter mnemonic and the counter is
+               not disabled.
+          00xx1100 - place in the front part of the macro.
+          00xx2200 - place in the back part of the macro.
+
+          If ffllaagg is the string ""ddeelleettee"", the piece associated with kkeeyy is
+          deleted from the named macro, or if the name is the null string, from
+          all the chained macros.
+
+          If ffllaagg is the string ""eennaabbllee"", the parts of the named macro
+          associated with kkeeyy are enabled, and if ffllaagg is the string ""ddiissaabbllee"",
+          the associated parts are disabled.  If nnaammee is the null string """",
+          then all chained macros that have parts associated with kkeeyy will have
+          those parts enabled or disabled.
+
+          If kkeeyy is the null string, the ffllaaggss have no effect.
+
+          The ccddeeff(()) function will remove any existing macro defined using ddeeff
+          or rrddeeff. Likewise, ddeeff and rrddeeff will removed an existing ccddeeff(()) macro
+          with the same name.  However, the commands llssddeeff, pprrddeeff and uunnddeeff do
+          work with chained macros.  When ssppeecc starts, when the rreeccoonnffiigg command
+          is run (or the ccoonnffiigg macro is invoked) or when individual motors or
+          counters are enabled or disabled, all the chained macros are adjusted
+          for the currently configured and enabled motors and counters.
+
+     ccddeeff((""??""))  - Lists all the pieces of all the chained macros.
+
+     ccddeeff((nnaammee,, ""??""))  - Lists the pieces of the macro named nnaammee, as will a ""??""
+          as the third or fourth argument.
+
+     cclloonnee((ddeesstt,, ssrrcc)) - Duplicates the macro ssrrcc as a new macro named ddeesstt.
+          Currently a clone of a ccddeeff chained macro becomes an ordinary macro.
+          (Available as of ssppeecc release 5.00.03.)
+
+     ssttrrddeeff((ss)) - Returns a string containing the macro definition of ss. If ss is
+          not a defined macro, returns the string ss itself.  (Available as of
+          ssppeecc release 5.08.02-6.)
+
+     ssttrrddeeff((ss,, kkeeyy)) - If ss is a chained macro, returns a string containing only
+          the definition segment associated with kkeeyy.  If ss is not a defined
+          macro, returns the string ss itself.  If ss is a macro, but not a
+          chained macro, returns the definition.  If ss is a chained macro, but
+          doesn't contain a segment associated with kkeeyy, returns the null
+          string.  (Available as of ssppeecc release 6.03.04.)
+
+MACRO ARGUMENTS
+
+     Within an ordinary macro (not a macro function), the symbols $$11, $$22, ...
+     are replaced with the arguments with which the macro is invoked.  Also,
+
+         $$00   is replaced with the macro name,
+         $$**   is replaced with all the arguments,
+         $$@@   is replaced with arguments delimited by \\aa,
+         $$##   is replaced with the number of arguments,
+         \\$$   is a literal $.
+
+     A macro argument is a string of characters separated by spaces.  Use quotes
+     to include more than one string in a single argument.  Use \\"" or \\'', in
+     arguments to pass literal quotes to the macro.  You can continue supplying
+     arguments on subsequent lines by putting a backslash at the end of the
+     previous line.
+
+     When a macro is defined without arguments, only the macro name is replaced
+     with the definition.
+
+     When a macro is defined with arguments and is encountered by the program,
+     all characters on that line up to a ;;, a {{ or the end of the line are eaten
+     up, whether or not the macro uses them as arguments.  When numbered
+     arguments are referred to in the macro definition, but are missing when the
+     macro is invoked, they are replaced with zeros.  If $$** is used in the
+     definition and there are no arguments, no characters are substituted.
+
+     It is often useful when parsing macro arguments, particularly when the
+     macro is called with a variable number of arguments, to use the sspplliitt(())
+     function to place the arguments into an associative array.  Typical syntax
+     is:
+
+        {{
+          llooccaall aacc,, aavv[[]]
+          aacc == sspplliitt((""$$**"",, aavv))
+        }}
+
+     Note, that usage does not respect quoted arguments, since $$** removes
+     quotation marks when concatenating the macro arguments.
+
+     Introduced in ssppeecc release 6.03.04, the sequence $$@@ is replaced with the
+     concatenated arguments delimited by the special character \\aa (the audible
+     bell, ^^GG, ASCII 7).  The string can then be split as follows:
+
+        {{
+          llooccaall aacc,, aavv[[]]
+          aacc == sspplliitt((""$$@@"",, aavv,, ""\\aa""))
+        }}
+
+     The elements of aavv[[]] will respect the quoted arguments in the macro
+     invocation.  There is no syntax to escape the \\aa.
+
+     The length of a macro definition has been unlimited since ssppeecc release
+     3.03.10.  The number of macro arguments has been unlimited since ssppeecc
+     release 6.00.10.
+
+CAVEATS
+
+     Beware of unwanted side affects when referencing the same argument more
+     than once.  For example,
+
+         ddeeff tteesstt ''aa == $$11;; bb == 22 ** $$11''
+
+     invoked as tteesstt ii++++, would be replaced with aa == ii++++;; bb == 22 ** ii++++, with the
+     result that ii is incremented twice, even though that action is not apparent
+     to the user.  The previous definition also would cause problems if invoked
+     as tteesstt 22++33, as that would be replaced with aa == 22++33;; bb == 22 ** 22++33.  The
+     latter expression evaluates to 7, not 10, as might have been intended by
+     the user.  Use of parenthesis to surround arguments used in arithmetic
+     expressions in macro definitions will avoid such problems, as in bb == 22 **
+     (($$11)).
+
+MACRO FUNCTIONS
+
+     Macro functions (introduced in ssppeecc release 4) are a type of macro that can
+     return values and can be used as an operand in expressions.  The macro
+     definition can include function arguments, which then become available to
+     the body of the macro function.  For example:
+
+        ddeeff ffaaccttoorriiaall((nn)) ''{{
+               iiff ((nn <<== 11))
+                       rreettuurrnn((11));;
+               rreettuurrnn((nn ** ffaaccttoorriiaall((nn--11))))
+        ''
+
+     The syntax of macro functions requires the macro name followed by a set of
+     parenthesis which can contain a comma-separated list of argument names.
+     The argument  names become local variables within the macro definition.
+     The definition must be a statement block, that is, the statements must be
+     enclosed in curly brackets.
+
+EXAMPLES
+
+     ddeeff uu ''uunniixx((""$$**""))''
+
+     Notice the double quotes convert the arguments into a single string, as
+     required by the syntax of the uunniixx(()) built-in command.  When invoked with
+     no arguments, the macro evaluates to uunniixx(("""")).
+
+        ddeeff cctt ''{{
+          llooccaall   cc
+          iiff ((((cc == $$11)) ==== 00))
+             ttccoouunntt((11))
+          eellssee iiff ((cc << 00))
+             mmccoouunntt((--cc))
+          eellssee
+             ttccoouunntt((cc))
+          wwaaiittccoouunntt
+          ggeettccoouunnttss
+          pprriinntt SS[[00]],, SS[[11]],, SS[[22]]
+        }}''
+
+     Notice that the argument $$11 is referred to only once, by using the local
+     variable cc. When invoked with no arguments, the first line evaluates to iiff
+     ((((cc == 00)) ==== 00)).
+
+        ddeeff hhssccaann ''
+          hhkkllssccaann $$11 $$22 KK KK LL LL $$33 $$44
+        ''
+
+SEE ALSO
+
+     _d_e_f _u_n_d_e_f _l_s_d_e_f
+

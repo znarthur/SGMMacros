@@ -1,0 +1,551 @@
+oms                                 hardware                                 oms
+
+NAME
+     OMS - Oregon Micro Systems motor controllers
+
+DESCRIPTION
+
+     ssppeecc supports most models of the Oregon Micro Systems motor controllers,
+     including ISA, PCI, VME, Ethernet and serial  models.  ssppeecc includes
+     support for both the encoder and the servo-motor options available with
+     most of the cards.
+
+     The recognized ISA models are the PCX, PC34, PC38, PC39, PC46, PC48 and
+     PC58.  Both the PCI models PCIx and MAXp are recognized and supported.
+     Modern ssppeecc configurations control all these cards completely from user
+     level (no IRQ and no kernel driver is needed).
+
+     For VME crates, the VME8, VME44, VME58 and MAXv models are supported.  The
+     OMS VME cards are operated in polled mode in all currently recommended
+     configurations, so no VME IRQs will be used.
+
+     ssppeecc also supports the MAXnet model over both RS-232C and Ethernet
+     interfaces.
+
+DEVICE CONFIGURATION
+
+     The OMS motor controllers are selected in the ssppeecc ccoonnffiigg file by lines
+     similar to:
+
+        PPCC__OOMMSS == //ddeevv//oommss0000 44 IINNTTRR
+        PPCC__OOMMSSPP == 00xx333300 44
+        PPCC__OOMMSSPP5588 == 00xx330000 00xxee000000 44
+        PPCC__OOMMSSVV == 00xxffcc0000 88 PPOOLLLL
+        PPCC__OOMMSSVV5588 == 00xxee000000 88 PPOOLLLL
+        PPCC__OOMMSSMMAAXXVV == 00xxdd000000 88 PPOOLLLL
+        PPCC__OOMMSSPPCCII == 11 44
+        PPCC__OOMMSSPPCCIIMM == 11 88
+        HHWW__OOMMSSMMAAXXNN == 119922..116688..00..44::2233 1100
+        HHWW__OOMMSSMMAAXXNN__RRSS == //ddeevv//ttttyySS00 111155220000 1100
+        HHWW__OOMMSSUUMMXX == //ddeevv//ttttyyUUSSBB00 1199220000 44
+
+     The DDevice screen of the eeddccoonnff program (normally run from the ccoonnffiigg
+     macro) is used to select the controller type and to assign the parameters.
+     The above selection would be displayed as follows:
+
+        MMoottoorr aanndd CCoouunntteerr DDeevviiccee CCoonnffiigguurraattiioonn ((NNoott CCAAMMAACC))
+
+        MMOOTTOORRSS       DDEEVVIICCEE   AADDDDRR <<>>MMOODDEE NNUUMM                               <<>>TTYYPPEE
+           YYEESS   //ddeevv//oommss0000          IINNTTRR   44         OOMMSS PPCCXX//3344//3388//3399//4488 ((ddrriivveerr))
+           YYEESS               00xx333300          44      OOMMSS PPCCXX//3344//3388//3399//4488 ((nnoo ddrriivveerr))
+           YYEESS       00xxee000000  00xx330000          44            OOrreeggoonn MMiiccrroo SSyysstteemmss PPCC5588
+           YYEESS              00xxffcc0000   PPOOLLLL   88         OOrreeggoonn MMiiccrroo SSyysstteemmss VVMMEE88//4444
+           YYEESS              00xxee000000   PPOOLLLL   88           OOrreeggoonn MMiiccrroo SSyysstteemmss VVMMEE5588
+           YYEESS              00xxdd000000   PPOOLLLL   88        OOrreeggoonn MMiiccrroo SSyysstteemmss VVMMEE MMAAXXvv
+           YYEESS                   11          44            OOrreeggoonn MMiiccrroo SSyysstteemmss PPCCIIxx
+           YYEESS                   11          88        OOrreeggoonn MMiiccrroo SSyysstteemmss PPCCII MMAAXXpp
+           YYEESS   //ddeevv//ttttyySS00     <<>> 111155220000  1100 OOrreeggoonn MMiiccrroo SSyysstteemmss MMAAXXnneett ((SSeerriiaall))
+           YYEESS    mmaaxxnneett::2233                1100 OOrreeggoonn MMiiccrroo SSyysstteemmss MMAAXXnneett ((SSoocckkeett))
+           YYEESS //ddeevv//ttttyyUUSSBB00         1199220000   44    OOrreeggoonn MMiiccrroo SSyysstteemmss UUMMXX ((SSeerriiaall))
+
+     The first example is only of historical interest.  It selects the PC board
+     with the driver node //ddeevv//oommss0000. The special kernel-level driver could be
+     used in either interrupt or polled mode.  Interrupts would be generated
+     when motors completed their motions or hit a limit.
+
+     The second example selects one of the ISA card models with I/O port
+     polling, with the board's base address at 00xx333300 and with four motors on the
+     board.
+
+     The third example selects the PC58 board at I/O port 00xx330000. The PC58 also
+     requires 4,096 bytes of low memory.  In the example, the address entered as
+     00xxEE000000 in the DEVICE column of the configuration editor selects a real
+     memory address of 00xxEE00000000. (The value in the configuration is multiplied by
+     16.)
+
+     The fourth example selects the VME8 and VME44 modules, with the board's A16
+     base address jumpered at 00xxFFCC0000 and with the VME interrupt disabled, i.e.,
+     the board is used in polled mode.  ssppeecc's early VME implementation included
+     support for VME controllers with UNIX drivers that included IRQ support.
+     The currently active VME support in ssppeecc doesn't use IRQs, so all VME
+     modules should be configured for polled mode.
+
+     The next two examples select the VME58 and MAXv models, respectively.
+     Note, both models requires 4,096 bytes of A16 address space, so valid
+     addresses have one hexadecimal digit followed by three zeroes.  Note also,
+     ssppeecc currently only supports A16 addressing for the MAXv, so make sure the
+     card is jumpered appropriately.
+
+     The next two examples select the PCIx and the MAXp models.  Each OMS PCI
+     board should be set to a unique board address from 1 to 8, and that is the
+     value to be entered in the AADDDDRR field.
+
+     The next example is for the MAXnet controller over the serial interface.
+     The default baud rate of the device is 115200, and that is what is shown.
+     Following is the MAXnet controller using its ethernet interface.  The
+     DEVICE column contains either an IP address or a resolvable host name.  The
+     port number can optionally follow using a colon as delimiter.  If missing,
+     the default port, 23, will be used.
+
+     Finally, the configuration for the UMX model is shown.  The UMX has a USB
+     interface that is supported on LLiinnuuxx and Mac OSX using USB to serial kernel
+     drivers.  On LLiinnuuxx, the standard ffttddii__ssiioo kernel module is required along
+     with the special uuddeevv rules installed by ssppeecc in
+     //eettcc//uuddeevv//rruulleess..dd//1100--ssppeecc__uussbb..rruulleess.  On OSX, the VCP driver available at
+     the _f_t_d_i_c_h_i_p_._c_o_m must be installed.  The UMX USB vendor and product IDs
+     must be added to the kernel extension IInnffoo..pplliisstt file as explained in the
+     _F_T_D_I _T_e_c_h_n_i_c_a_l _N_o_t_e _1_0_5 available at the FTDI website.  Contact CSS for
+     assistance, if needed.
+
+MOTOR CONFIGURATION
+
+     On the MMotor screen of the configuration editor, all of the OMS models use
+     one of the symbols OOMMSS, OOMMSS__EE, OOMMSS__PP, OOMMSS__SS or OOMMSS__MM in the controller
+     field of the screen.  The OOMMSS__EE choice indicates the motor is being used
+     with an encoder.  The OOMMSS__PP option is for a stepping motor with an encoder
+     and which will use the position-maintenance feature (as of ssppeecc release
+     5.08.02-1).  The OOMMSS__SS configures a DC servo motor and also enables the
+     encoder features.  The OOMMSS__MM choice indicates the motor channel is being
+     used with special multiplexing hardware.  See the section on Multiplexing
+     below.
+
+     OMS motor controllers can have from two to eight motors.  ssppeecc numbers the
+     motors that OMS designates as XX, YY, ZZ, TT, UU, VV, RR and SS from 0 through 7,
+     in that order.
+
+     By default, motors are automatically assigned to the controller channels in
+     the same order as they appear on the MMotor screen.  If there is more than
+     one controller, the channels are assigned to the controllers in the order
+     in which the controllers appear on the DDevice screen.
+
+     Alternatively, the controller unit and motor channel numbers can be
+     assigned explicitly on the second line of the MMotor screen in any order.
+     Channel numbers start at zero.  Unit numbers are automatically assigned to
+     each OMS controller configured on the DDevice screen in the order in which
+     they appear, starting with unit zero.  All OMS controller types are
+     included in a single unit numbering sequence, and the unit numbering for
+     OMS controllers is independent of the unit numbering for any other
+     configured controller types.
+
+EMERGENCY STOP
+
+     For the MAX model controllers with firmware 1.21 or greater, ssppeecc will
+     treat the case where both limits are set simultaneously as a special event.
+     (Other OMS models do not have a command to read the status of both limit
+     switches.)  ssppeecc will generate an emergency stop when that happens.  As is
+     the normal case with hitting a limit, ssppeecc will stop all other active
+     motors and reset to command level.  For an emergency stop, a different
+     message is printed on the screen and, if in server mode, an
+     "emergency_stop" event is sent to clients.
+
+INITIALIZATION SEQUENCE
+
+     If the nonstandard optional motor parameter ""iinniitt__sseeqquueennccee"" is set in the
+     ccoonnffiigg file for any particular motor, ssppeecc will send that string during
+     hardware initialization (as of ssppeecc release 5.08.03-8).  (Non-standard
+     optional parameters are set from the configuration editor by typing a pp
+     from the motor screen.)  The string can be made up of a sequence of the
+     following commands:
+
+         AABBHH     Auxiliary bit on (fw >= 1.30)
+         AABBLL     Auxiliary bit off (fw >= 1.30)
+         AAFF      Auxiliary bit off (legacy)
+         AANN      Auxiliary bit on (legacy)
+         BBDDxx     Set direction of general purpose I/O bits
+         BBHHdd     Bit high
+         BBLLdd     Bit low
+         BBSSxx     Bit set
+         DDBBII     Invert step direction bit
+         DDBBNN     Normal step direction bit
+         HHHH      Home high (legacy)
+         HHLL      Home low (legacy)
+         HHTTHH     Home active high (fw >= 1.30)
+         HHTTLL     Home active low (fw >= 1.30)
+         IIOOdd,,tt   I/O bit direction, tt = 0 or 1
+         LLFF      Limits off (legacy)
+         LLHH      Limits high (legacy)
+         LLLL      Limits low (legacy)
+         LLMMFF     Limits off (fw >= 1.30)
+         LLMMHH     Limits on (fw >= 1.30)
+         LLNN      Limits on (legacy)
+         LLTTHH     Limits high (fw >= 1.30)
+         LLTTLL     Limits low (fw >= 1.30)
+         PPAAtt     Power automatic, tt = 0 or 1
+         PPHH      Auxiliary bit high (legacy)
+         PPLL      Auxiliary bit low (legacy)
+         SSEEvv     Settling time in PA mode, 0 <= v <= 1000
+
+     where xx is a hexadecimal value and dd is a decimal value, each with a
+     maximum value associated with the number of general purpose I/O bits.  If
+     there are 8, the maximum value for xx is FFFF, and the maximum value for dd is
+     77.  If there are 16 I/O bits, the maximum values are FFFFFFFF and 1155,
+     respectively.  Note, though, ssppeecc doesn't check if the values are in range.
+
+     The commands labeled "legacy" are deprecated by OMS for "MAX" controllers
+     with firmware versions at 1.30 or greater.  The commands labeled "fw >=
+     1.30" can be used with such controllers.
+
+     The commands should be placed in a string, delimited by semicolons.  For
+     example, the ccoonnffiigg file might contain entries like these:
+
+        MMOOTTPPAARR::iinniitt__sseeqquueennccee == LLHH;;AAFF
+        MMOOTTPPAARR::iinniitt__sseeqquueennccee == LLHH;;PPAA11;;SSEE225500;;BBDDFFFF0000;;BBHH11;;BBLL22
+        MMOOTTPPAARR::iinniitt__sseeqquueennccee == IIOO22,,11;;IIOO33,,11;;BBHH22;;BBHH33
+
+     Consult the OMS manual for details on the commands.
+
+     Not all commands are available on all models.  Bad commands or bad values
+     may produce unexpected errors from the controller.  The string value may be
+     examined with mmoottoorr__ppaarr(()). Assigning a value with mmoottoorr__ppaarr(()) will have no
+     effect, as the parameter is only sent to the controller when the ccoonnffiigg
+     file is read during hardware initialization.
+
+HOME SEARCH
+
+     Home and limit searches are started through ssppeecc's built-in cchhgg__ddiiaall(())
+     function and hhoommee macro.  The motor speed of the home search is determined
+     from the home-speed parameters, if set, otherwise from the normal base and
+     slew rates and acceleration.  (The home-speed parameters can be set on the
+     optional motor-parameter screen of the configuration editor.)
+
+     The cchhgg__ddiiaall(()) arguments ""hhoommee++"", ""hhoommee--"", ""lliimm++"" and ""lliimm--"" will use the
+     commands HHMM, HHRR, JJGG++NN and JJGG--NN, respectively, to perform the search.  Here,
+     NN is the home slew rate if set, otherwise the normal slew rate.  If the
+     optional home-position third argument to cchhgg__ddiiaall(()) is present, the
+     controller will mark the point where the home switch is triggered or where
+     the motor stops when hitting the limit as the home position.
+
+     The cchhgg__ddiiaall(()) argument ""hhoommee"" is treated differently, though.  By default,
+     the behavior associated with ""hhoommee++"" or ""hhoommee--"" will take place, depending
+     on whether the current dial position is less than or greater than the home
+     position, if set, or zero if not.
+
+     However, the home and limit search support for the OMS controllers was
+     greatly expanded in ssppeecc release 5.05.02-7.  If the optional motor
+     parameter, ""hhoommee__mmeetthhoodd"" is set and is a string, ssppeecc will use that string
+     as the actual home command sequence.  The string must be a list of valid
+     OMS commands, although a parameter substitution syntax is available for the
+     step speeds and the home position.
+
+     OMS commands that should be used in a home-method string include:
+
+         HHSS   Enable home-switch mode
+         HHEE   Enable encoder home mode
+         HHLL   Set home switch active low
+         HHHH   Set home switch active high
+         JJGG   Jog, specify direction and speed
+         HHMM   find home in forward direction
+         HHRR   find home in reverse direction
+
+     Use of other commands may cause problems with ssppeecc's communication with the
+     controller.  ssppeecc will include the proper axis addresses and terminators.
+     Multiple commands should be separated by a semicolon.
+
+     The possible parameter substitution strings are:
+
+         $$SS   Base rate (slow)
+         $$FF   Slew rate (fast)
+         $$AA   Acceleration time
+         $$HH   Home position
+
+     Example home sequences follow:
+
+         HHSS;;JJGG++11000000;;VVLL220000;;HHLL;;HHRR00 - Enable home switch mode, run clockwise at
+              1000 steps/second until hitting the limit switch, set the home
+              switch active low, set the speed to 200 steps/second, search for
+              the home switch in the counter-clockwise direction and set the
+              position to zero when the home switch is reached.
+
+         HHEE;;JJGG++11000000;;VVLL220000;;HHLL;;HHRR00 - As above, but enable the encoder-index home
+              mode.
+
+         HHSS;;JJGG++11000000;;HHLL;;HHRR00;;VVLL220000;;HHHH;;HHMM00 - Enable home switch mode, run clockwise
+              at 1000 steps/second until hitting the limit switch, set the home
+              switch active low and search for it in the counter-clockwise
+              direction, set the speed to 200 steps/second, make the home switch
+              active high, move counter clockwise until the switch is released,
+              and set that position as zero.
+
+         HHSS;;JJGG++$$FF;;HHLL;;HHRR00;;VVLL22$$SS;;HHHH;;HHMM$$HH - As above, but the speeds and final home
+              position are parameterized.
+
+     The sense of the home switch on the OMS controllers is set by software.
+     The default sense is for the switch to be active low.  The command pass
+     through feature, described below, can change the sense.  For example,
+
+         mmoottoorr__ppaarr((tttthh,, ""sseenndd"",, ""HHHH""))
+
+     will send the ""HHHH"" command to the controller to make the home switch for
+     the tttthh motor active high.  If the sense needs to be changed, a startup
+     command file could define the ccoonnffiigg__mmaacc macro to include code such as
+
+        {{
+           llooccaall ii
+           ffoorr ((ii == 00;; ii << MMOOTTOORRSS;; ii++++)) {{
+              iiff ((ssuubbssttrr((mmoottoorr__ppaarr((ii,, ""ccoonnttrroolllleerr"")),, 11,, 33)) ==== ""OOMMSS""))
+                 iiff ((mmoottoorr__ppaarr((ii,, ""rreessppoonnssiivvee""))))
+                    mmoottoorr__ppaarr((ii,, ""sseenndd"",, ""HHHH""))
+           }}
+        }}
+
+     The above will send the ""HHHH"" command to each OMS motor that passed the
+     presence test.  The ccoonnffiigg__mmaacc macro is run automatically after hardware is
+     (re)initialized.  Alternatively, the ""iinniitt__sseeqquueennccee"" feature, described
+     above, can be used as of ssppeecc release 5.08.03-8.
+
+SERVO MOTORS
+
+     If the servo motor configuration is selected with the controller type set
+     to OOMMSS__SS, additional parameters associated with the PID loop are recognized
+     and programmed.  If a parameter is not set, ssppeecc will not send a command to
+     change the value.  The following standard optional parameters may be set on
+     the first optional motor parameter screen of the configuration editor,
+     reached by typing an mm from the main motor screen.
+
+     ddcc__pprrooppoorrttiioonnaall__ggaaiinn - (OMS command KKPP) sets the proportional gain.
+
+     ddcc__ddeerriivvaattiivvee__ggaaiinn - (OMS command KKDD) sets the derivative gain.
+
+     ddcc__iinntteeggrraall__ggaaiinn - (OMS command KKII) sets the integral gain.
+
+     ddcc__iinntteeggrraattiioonn__lliimmiitt - (OMS command KKUU) sets the integration limit.
+
+     ddcc__vveelloocc__ffeeeeddffoorrwwaarrdd - (OMS command KKVV) sets the velocity feedforward
+          parameter.
+
+     ddcc__aacccceell__ffeeeeddffoorrwwaarrdd - (OMS command KKAA) sets the acceleration feedforward
+          parameter.
+
+     The following non-standard optional parameter can be configured on the
+     optional parameter screen reached by typing a pp from the main motor screen.
+
+     ppiidd__ooffffsseett - (OMS command KKOO) sets the PID offset parameter.
+
+     All of the parameters can also be set or accessed using the mmoottoorr__ppaarr(())
+     function.
+
+POSITION MAINTENANCE
+
+     In order to enable position-maintenance mode on encoder-equipped stepping
+     motors, in addition to setting the controller type to OOMMSS__PP, several
+     additional optional parameters need to be set.  The standard optional
+     parameter ""eennccooddeerr__sstteepp__ssiizzee"" must be set.  Its value is the number of
+     encoder steps per degree (or per unit), in line with the value of the
+     standard ""sstteepp__ssiizzee"" parameter, which is the number of steps per degree (or
+     per unit) as used by the positioning commands.  In addition, the following
+     non-standard optional parameters should be set:
+
+     hhoolldd__vveelloocciittyy - (OMS command HHVV) The maximum velocity to be used when
+          correcting position error.  Note, the controller's factory default
+          value is zero.  A non-zero value is required for position maintenance
+          to be enabled.
+
+     hhoolldd__ggaaiinn - (OMS command HHGG) The hold gain parameter, which is multiplied
+          by the position error to determine the velocity used during
+          correction.
+
+     hhoolldd__ddeeaaddbbaanndd - (OMS command HHDD) The number of encoder counts from the
+          target position in which no position correction is made.
+
+     See the OMS user manuals for additional details on these commands.
+
+     The non-standard optional parameters are set from the configuration editor
+     by typing a pp from the motor screen.  For non-standard optional parameters,
+     both the name of the parameter and the value are entered.
+
+     When position maintenance is enabled, ssppeecc will program the encoder ratio
+     (OMS command EERR) using the values of the ""sstteepp__ssiizzee"" and
+     ""eennccooddeerr__sstteepp__ssiizzee"" parameters.  ssppeecc will also program the hold velocity,
+     gain and deadband if the parameters have been set.  Finally, spec will
+     enable position maintenance by sending the OMS command HHNN before the first
+     move following hardware initialization and on the first moves following a
+     limit-switch event or a move abort.
+
+     By default, ssppeecc will turn off position maintenance when exiting.  To
+     override that default behavior, set the nonstandard optional parameter
+     ""kkeeeepp__ppooss__mmaaiinntt"" to a nonzero value.  The parameter can be a controller
+     parameter which will set values for all motors on the controller, or a
+     motor parameter which will only set values for the individual motor.  The
+     motor parameter will override the controller parameter setting.
+
+     Note, do not select position maintenance for a motor on which there is no
+     encoder.  The software cannot detect the error in configuration, and
+     sensible motor behavior is not guaranteed.
+
+SLIP DETECTION
+
+     If the non-standard optional parameter ""sslliipp__sstteeppss"" is set in the ccoonnffiigg
+     file, ssppeecc will enable slip detection for stepper motors with encoders.  If
+     the controller detects motor slip, ssppeecc will treat that notification as a
+     motor fault, which will cause ssppeecc to halt all moving motors and print an
+     error message.
+
+SPECIAL COMMANDS
+
+     The following special commands are available through the mmoottoorr__ppaarr(())
+     function.  The two letter commands are direct implementations of commands
+     described in the OMS manual.  Refer to that manual for more information.
+     Not all commands are available on all versions of the OMS controllers or on
+     all firmware versions for a particular controller.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""PPAA"",, mmooddee)) - If mmooddee is 1, the controller turns motor
+          power on before each move and off after the move (assuming motor power
+          is controlled by the auxiliary output pins).  If mmooddee is 0, motor
+          power stays on.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""SSEE"",, mmsseecc)) - Sets the settling time in milliseconds to be
+          used before the power is reduced in PPAA mode.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""AAFF"")) - Turns auxiliary power off.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""AANN"")) - Turns auxiliary power on.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""BBHH"",, bbiitt__nnuummbb)) - Sets general purpose output pin numbered
+          bbiitt__nnuummbb high.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""BBLL"",, bbiitt__nnuummbb)) - Sets general purpose output pin numbered
+          bbiitt__nnuummbb low.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""BBXX"")) - Returns the state of the general purpose input
+          pins.  A one in any binary position in the value returned indicates
+          that the corresponding pin is low.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""RRBB"")) - Returns the direction of the general purpose I/O
+          lines as bits in an integer.  Output bits are a one, while input bits
+          are a zero.
+
+MULTIPLEXING
+
+     The OMS support in ssppeecc contains special code to allow the last motor
+     channel on each controller to be multiplexed to control up to sixteen
+     stepping-motor channels.  The intent is that a single motor driver that
+     supplies the phased power to a stepping motor can be shared among multiple
+     motors.  ssppeecc will automatically sequence the moves transparently to the
+     user.  All motor commands and macros work the same, including those that
+     move multiple motors at once.  Each motor can have its own speed and
+     acceleration parameters.  In addition, ssppeecc will step the controller
+     register, if necessary, to make sure the next step signal when the output
+     is enabled will be in the correct phase for the particular motor.
+
+     Multiplexed channels are associated with the OOMMSS__MM controller type.  These
+     channels need the unit/channel configuration filled in.  The unit number
+     identifies the controller.  The channel numbers are from zero to 15 and are
+     numbered independently from the non-multiplexed channels on the same
+     controller unit.  The last channel on the multiplexed controller should not
+     be configured as an ordinary channel.
+
+     The code uses five digital output lines on the controller for channel
+     select and output enable.  Only controllers that support digital output
+     commands can be used with the multiplexing.  Output lines 0, 1, 2 and 3 are
+     used to select one of sixteen channels.  A high output is logic one.
+     Output line 4 is used as the enable/disable control signal.  When the
+     output is high, the driver signals to the motors should be disabled.
+
+     Note, the OMS digital I/O lines 0 through 4 must be configured for output.
+     On some models, configuration is by way of switches on the controller
+     board.  On other models, the command BBDD is needed.  The command with
+     appropriate arguments can be included in the ""iinniitt__sseeqquueennccee"" nonstandard
+     optional parameter.  Normally, the multiplexed motors are started in
+     sequence from lowest numbered channel to highest numbered channel.  If the
+     motor parameter ""mmpplleexx__rreevveerrssee"" is given a nonzero value, the starting
+     order is reversed.  If used in the ccoonnffiigg file, ""iinniitt__sseeqquueennccee"" and
+     ""mmpplleexx__rreevveerrssee"" must be associated with the first OOMMSS__MM motor for each
+     controller.
+
+     CSS does not have schematic diagrams for a hardware multiplexor.
+
+COMMAND PASS THROUGH
+
+     Command pass through is available using the following functions.  Command
+     pass through should be used with caution to avoid interfering with the
+     built-in programming commands ssppeecc sends to the OMS controllers.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the OMS channel
+          associated with mmoottoorr.  For example, set ccmmdd to ""LLFF"" to disable
+          hardware limits on the associated motor.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the OMS channel
+          associated with mmoottoorr, as above, and returns a string containing the
+          response.  For example,
+
+             pprriinntt mmoottoorr__ppaarr((tttthh,, ""rreeaadd"",, ""RRPP""))
+             224400000000
+
+          results in the string ""AAXX RRPP\\nn"" being sent to the controller.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""uusseenndd"",, ccmmdd)) - Sends the ccmmdd to the OMS controller
+          associated with mmoottoorr.  Unlike the ""sseenndd"" option above, no channel
+          address or terminator characters are added to the string.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""uurreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the OMS controller
+          associated with mmoottoorr, as above, and returns a string containing the
+          response.  Again, unlike the ""rreeaadd"" option above, no channel address
+          or terminator characters are added to the string.
+
+ASYNCHRONOUS SURFACE SCANNING
+
+     The following commands implement a special asynchronous, two-dimensional
+     scanning mode.  The purpose of the scan is to allow averaging of a signal
+     scattered from different regions of a surface.  The scan is in the form of
+     a repeating square wave, as illustrated below.
+
+         ----------   ----------   ----------
+         ||   ||   ||   ||   ||   ||
+        dd||   ||   ||   ||   ||   ||
+        yy||   ||   ||   ||   ||   ||
+         ||   ||   ||   ||   ||   ||
+         oo   ----------   ----------   ------>> ddxx
+
+     The scan starts at the point oo, as specified with the commands below, and
+     continues in the xx and yy directions in the range as specified with the
+     commands below.  At the end of the range, the motors are returned to the
+     starting position and the scan is repeated.
+
+     Two motors must be configured with the mnemonics ddxx and ddyy in order for the
+     asynchronous scanning mode to be available.  When not in scanning mode,
+     these motors may be moved normally.
+
+     Once started, the scanning will continue until explicitly stopped either
+     with the ssttoopp__ssccaann command (shown below), with a ^^CC typed at the keyboard
+     or with a ssyynncc command (which aborts the motors, but doesn't update ssppeecc's
+     positions).  While scanning, the wwaaiitt(()) function will not indicate these
+     motors are moving.  The ggeettaanngglleess command will, however, return the current
+     positions of these motors.
+
+     When the ddxx and ddyy motors are scanning, the remaining motors may be moved
+     independently.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""xx__ssttaarrtt"",, vvaalluuee)) - Sets the starting position for the ddxx
+          motor.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""xx__rraannggee"",, vvaalluuee)) - Sets the extent of the motion in the xx
+          direction.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""xx__sstteeppssiizzee"",, vvaalluuee)) - Sets the size of each step in xx.
+          The number of steps is determined by dividing this number into the
+          range for xx.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""yy__ssttaarrtt"",, vvaalluuee)) - Sets the starting position for the ddyy
+          motor.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""yy__rraannggee"",, vvaalluuee)) - Sets the extent of the motion in the yy
+          direction.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ssttaarrtt__ssccaann"")) - Starts the asynchronous scan.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""ssttoopp__ssccaann"")) - Stops the asynchronous scan.
+
+SEE ALSO
+
+     _w_w_w_._o_m_s_m_o_t_i_o_n_._c_o_m
+

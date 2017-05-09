@@ -1,0 +1,21 @@
+wh                                    macro                                   wh
+
+NAME
+     wwhh - where, principal axes and reciprocal space
+
+SYNOPSIS
+
+     wwhh
+
+DESCRIPTION
+
+     The wwhh macro prints the current reciprocal space coordinates (HH KK LL) and
+     the uusseerr positions of the principal motors.  Depending on the
+     diffractometer geometry, other parameters such as the angles of incidence
+     and reflection (AALLPPHHAA and  BBEETTAA) and the incident wavelength (LLAAMMBBDDAA) may
+     be displayed.
+
+SEE ALSO
+
+     _w_a _w_m
+

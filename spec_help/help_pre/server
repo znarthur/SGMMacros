@@ -1,0 +1,975 @@
+server                              reference                             server
+
+NAME
+     ssppeecc server/client - issue commands and control hardware remotely
+
+INTRODUCTION
+
+     Server mode ssppeecc allows communication between instances of ssppeecc on
+     different platforms or between ssppeecc and other client software.  The server
+     protocol includes special commands for motor and counter control, and
+     general commands for transfer of information.  When acting as a client,
+     ssppeecc can connect to a ssppeecc server and be configured for motors and counters
+     that are on the server, but that behave as if they were local.
+
+     The ssppeecc server can send asynchronous messages to the client when certain
+     events occur.  Clients can arrange to receive messages when
+     hardware-related events occur (such as a motor position change), when a
+     variable is assigned a new value or when certain server state changes
+     occur.  Clients can have commands executed on the server and retrieve the
+     result.  The ssppeecc client implements both synchronous and asynchronous
+     retrieval of results.
+
+     The new ssppeecc user-level commands for server/client communications are
+     described below, as is the protocol used by the ssppeecc server.  Although,
+     ssppeecc will very often be the client, the communication protocol is open so
+     arbitrary clients can be created.
+
+     See the UUppddaatteess section at the end of this file for a summary of changes to
+     the protocol associated with particular ssppeecc releases.
+
+Starting the Server
+
+     The ssppeecc server mode is started by invoking ssppeecc with the --SS flag (or --SS11
+     or --SS22, see below) one of three ways.  In the first instance, a specific
+     TCP/IP port number can be specified, as in:
+
+         sshheellll>> ffoouurrcc --SS 66778899
+
+     The server will attempt to listen for incoming connections at the specified
+     port number.  Only one server can listen at a particular port number at a
+     time.
+
+     The second invocation specifies a range of port numbers, as in:
+
+         sshheellll>> ffoouurrcc --SS 55332200--55333300
+
+     The server will use the first port number in the range that is available.
+
+     Finally, server mode can be invoked with no port number arguments, as in:
+
+         sshheellll>> ffoouurrcc --SS
+
+     In this case, ssppeecc will use its default port number range, which is 6510 to
+     6530.
+
+     Port numbers are arbitrary, but must be known by the client and must not
+     conflict with any other services currently configured.  (See _w_w_w_._i_a_n_a_._o_r_g
+     for an official list of port number assignments.)  Port numbers below 1024
+     should be avoided, as they require root privilege for binding.
+
+     There are currently two server modes possible (as of ssppeecc release
+     5.07.04-4).  The difference in the two modes relates to the handling of
+     motor-limit events.  The first mode, activated with --SS or --SS11, is the
+     original mode.  In this mode, unlike a standard non-server mode ssppeecc
+     session, if a motor hits a limit, although that motor is stopped, ssppeecc does
+     not stop other motors that may be moving nor does ssppeecc reset to command
+     level.  With a mode-2 server, activated with --SS22, behavior on hitting a
+     limit is the same as when operating in non-server mode.  Note, in both
+     modes events are sent to registered clients when a limit is hit.  Also, a
+     ssppeecc client will send a command to a ssppeecc server to abort all motors and
+     reset to command level in any case.  Note also, some motor controllers
+     implement an emergency stop and/or a motor fault condition, which results
+     in nearly the same actions as hitting a limit.  (The only differences are
+     in the text of the messages displayed and the name of the event sent to
+     clients.)
+
+     When started in server mode, ssppeecc creates three threads:  one to listen for
+     client connections and read command requests from clients, one to write
+     replies to clients and one to execute commands received from the client or
+     typed in to the interactive ssppeecc prompt.
+
+     Although the server provides an interactive prompt (at least in the current
+     implementation), the server has only one command thread.  Thus, if the
+     command thread is busy running a command entered at the server prompt,
+     commands sent by remote clients will remain in the command queue until the
+     interactive command has finished executing.  Certain client requests, such
+     as requests to get current motor positions don't put commands on the queue,
+     as the requests are instead satisfied using existing data.
+
+     CSS recommends that interactive use of the server be limited.  If an
+     interactive ssppeecc session is required on the same host on which the server
+     runs, it may be better to configure a second ssppeecc instance on the host that
+     will be a client to the server ssppeecc session.
+
+     Most motor controller types and all counter/timers associated with a ssppeecc
+     server can be controlled by a client.  Certain motor controllers (namely
+     the 18011, CM3000, CM4000, E500, ES_OMS, ES_VPAP, IP28, MC4, MCB, SIX19,
+     SMC and XRGCI_M) are not currently supported by the ssppeecc server for remote
+     control.  Contact CSS to discuss the feasibility of adding server support
+     for any of the above controllers.
+
+Configuring the ssppeecc Client
+
+     ssppeecc server motor and timer/counter controllers are selected on DDevices
+     screen of the eeddccoonnff configuration editor on the client along the following
+     lines:
+
+        MMoottoorr aanndd CCoouunntteerr DDeevviiccee CCoonnffiigguurraattiioonn ((NNoott CCAAMMAACC))
+
+         MMOOTTOORRSS        DDEEVVIICCEE  AADDDDRR <<>>MMOODDEE  NNUUMM                       <<>>TTYYPPEE
+            YYEESS  hhoosstt__AA::ffoouurrcc                1166          SSPPEECC MMoottoorr ((TTCCPP//IIPP))
+            YYEESS  hhoosstt__AA::ssppeeccXX                1166          SSPPEECC MMoottoorr ((TTCCPP//IIPP))
+            YYEESS   hhoosstt__BB::66778899                1166          SSPPEECC MMoottoorr ((TTCCPP//IIPP))
+
+        SSCCAALLEERRSS        DDEEVVIICCEE  AADDDDRR <<>>MMOODDEE  NNUUMM                       <<>>TTYYPPEE
+            YYEESS  hhoosstt__AA::ssppeeccXX                 44  SSPPEECC TTiimmeerr//CCoouunntteerr ((TTCCPP//IIPP))
+            YYEESS   hhoosstt__BB::66778899                 44  SSPPEECC CCoouunntteerrss OOnnllyy ((TTCCPP//IIPP))
+
+     The DEVICE entry contains the host name or IP address of the server
+     followed by a colon and either the name of a ssppeecc process that is being run
+     in server mode or a port number on which the server is listening.  If there
+     is nothing before the colon or if there is no colon, ""llooccaallhhoosstt"" will be
+     assumed (as of ssppeecc release 6.01).
+
+     If a ssppeecc process name is given, the ssppeecc client will try each of the port
+     numbers in the default range (6510 to 6530) and look for a matching server.
+
+     (Note, in ssppeecc releases prior to 6.01, a client must reference a particular
+     server consistently by port number or by ssppeecc process name.)
+
+     The scaler device can be configured as a timer/counter, making that device
+     the master timer, or as counters only.  When configured as counters only,
+     the associated ssppeecc client scaler channels passively mirror the values on
+     the server.
+
+     On the MMotor and SScaler screens, the controller types should be selected as
+     SSPPEECC__MM22 and SSPPEECC__SSCC respectively.  The specific motor or counter channel on
+     the server is selected by the mnemonic.  That is, the client and server
+     have to use the same mnemonic for the same motor or counter channel.
+
+Server/Client ssppeecc Built-in Functions
+
+     In the following functions, hhoosstt is a string of the form ""rreemmootteehhoosstt::66778899""
+     or ""rreemmootteehhoosstt::ssppeecc"" where rreemmootteehhoosstt is the host name or IP address of the
+     server, 66778899 is a specific port number on which the server is listening
+     (given by the --SS ppoorrtt start-up option on the server) or ssppeecc is the name of
+     the ssppeecc process using a port number in the default range (6510 to 6530).
+     If rreemmootteehhoosstt is missing, llooccaallhhoosstt is assumed (as of ssppeecc release 6.01).
+     (As mentioned above, prior to release 6.01 a client needed to reference a
+     particular server consistently by port number or by ssppeecc process name.)
+
+     The argument pprrooppeerrttyy is a string of the form ""mmoottoorr//tttthh//bbaassee__rraattee"" or
+     ""vvaarr//DDEEGGCC"", for example.  The built-in properties are documented below.
+
+Server Functions
+
+     There is only one built-in function available to the server to communicate
+     with its clients.
+
+     pprroopp__sseenndd((pprrooppeerrttyy,, vvaalluuee)) - Sends an event to all clients registered for
+          pprrooppeerrttyy. There is nothing to prevent a user-level call of pprroopp__sseenndd(())
+          from generating events for built-in properties, although that may lead
+          to an unexpected client response.
+
+Client Functions
+
+     pprroopp__ggeett((hhoosstt,, pprrooppeerrttyy)) - Reads and returns the current value of pprrooppeerrttyy
+          from the remote hhoosstt. Single-valued, associative-array and data-array
+          types can be returned.
+
+     pprroopp__ppuutt((hhoosstt,, pprrooppeerrttyy,, vvaalluuee)) - Sets pprrooppeerrttyy to vvaalluuee on the remote
+          hhoosstt. Single-valued, associative-array and data-array types can be
+          sent.
+
+     pprroopp__wwaattcchh((hhoosstt,, pprrooppeerrttyy)) - Registers pprrooppeerrttyy on the remote hhoosstt. When
+          the pprrooppeerrttyy value changes, the remote hhoosstt will send an event to the
+          client.  Consider:
+
+              pprroopp__wwaattcchh((""rreemmootteehhoosstt::66778899"",, ""vvaarr//TTEEMMPP""))
+
+          If a variable named TTEEMMPP exists on the local client, then the value of
+          the local client's instance will track changes to the value of the
+          same variable on the remote host.
+
+          The variable must exist on the server before the client requests it be
+          watched.  If the variable goes out of existence on the server, but is
+          subsequently recreated as the same type of global variable, the
+          watched status will be reinstated (as of ssppeecc release 5.05.05-1).  If
+          the variable doesn't exist on the client or goes out of existence, the
+          client will continue to receive events, and if the variable is
+          recreated on the client, its value will track the values sent with the
+          events (as of ssppeecc release 5.05.05-1).
+
+          Regular global variables, associative arrays and associative array
+          elements can be watched.  Data arrays cannot be watched.  The built-in
+          motor and scaler arrays AA[[]] and SS[[]] can be watched, but events will
+          only be generated when the elements are explicitly assigned values on
+          the server, not when the values change by way of built-in code, such
+          as from ccaallccAA, ggeettaanngglleess or ggeettccoouunnttss.
+
+     rreemmoottee__ssttaatt((hhoosstt)) - Returns nonzero if the connection to hhoosstt is up,
+          otherwise returns zero.
+
+     rreemmoottee__ssttaatt((hhoosstt,, ""??""))  - Returns the string ""uupp"" if the connection to hhoosstt
+          is up.  Returns the string ""lloosstt"" if the connection had been up, but
+          has been lost.  Returns the string ""ttrryyiinngg"" if in the process of
+          creating a connection.  Returns the string ""nnoo ccoonnnneeccttiioonn"" if unable
+          to contact the host.  Returns the string ""nnoott ccoonnnneecctteedd"" if the client
+          has not attempted to create a connection to the host.  (These options
+          available with ssppeecc release 5.06.03-7.)
+
+     rreemmoottee__ppaarr((hhoosstt,, ""ccoonnnneecctt"")) - Initiates a connection to hhoosstt.  Connections
+          are initiated automatically when ssppeecc server hardware is configured or
+          when a server is accessed with the commands below.  One might want to
+          explicitly create the connection, though, in order to set a timeout
+          for rreemmoottee__eevvaall(()) prior to accessing the host or to check the
+          availablity of a connection with rreemmoottee__ssttaatt(()), above.
+
+     rreemmoottee__ppaarr((hhoosstt,, ""cclloossee"")) - Closes the connection to the ssppeecc server hhoosstt,
+          but only if no server hardware is configured on the client.
+
+     rreemmoottee__ppaarr((hhoosstt,, ""aabboorrtt"")) - Sends an SSVV__AABBOORRTT message to the server hhoosstt,
+          which has the effect on the server as if a ^^CC had been typed at its
+          keyboard.
+
+     rreemmoottee__ppaarr((hhoosstt,, ""ttiimmeeoouutt"" [[,, vvaalluuee]])) - Returns or sets the timeout
+          interval for a rreemmoottee__eevvaall(()) call to complete.  The units are seconds,
+          and the default value is four seconds.
+
+     rreemmoottee__ccmmdd((hhoosstt,, ccmmdd)) - Puts the ssppeecc command ccmmdd on the execution queue of
+          the remote hhoosstt. This function does not wait for the command to
+          execute on the server.  The return is immediate.  Use rreemmoottee__eevvaall(()) or
+          rreemmoottee__aassyynncc(()) with rreemmoottee__ppoollll(()) for synchronous execution of
+          commands on the remote server.
+
+     rreemmoottee__eevvaall((hhoosstt,, ccmmdd)) - Puts the ssppeecc command ccmmdd on the execution queue
+          of the remote hhoosstt and returns the result.  The function will not
+          return until the command has been executed on the server.
+          Single-valued (number or string), associative-array and data-array
+          return values are allowed.  If a ^^CC keyboard interrupt is received
+          before the host returns a result and before the connection timeout
+          interval, an SSVV__AABBOORRTT message will be sent to the server, which will
+          have the same effect on the server as a ^^CC from the server's keyboard
+          (as of ssppeecc release 5.08.04-3).  In addition, any pending commands in
+          the server queue from the client will be removed.
+
+     iidd == rreemmoottee__aassyynncc((hhoosstt,, ccmmdd)) - Puts the ssppeecc command ccmmdd on the execution
+          queue of the remote hhoosstt and returns a unique iidd. The return value of
+          the command can be retrieved using the rreemmoottee__ppoollll(()) function, below.
+          A ^^CC keyboard interrupt will clear the local queue of all pending
+          events, but will not stop the commands from being executed on the
+          remote host.  The wwaaiitt(()) command can be used to wait for all
+          asynchronous remote events.  Bit 0x8 in the (optional) argument to
+          wwaaiitt(()) corresponds to remote events.
+
+     rreemmoottee__ppoollll((iidd,, ""ssttaattuuss"")) - Returns 1 (or 0) to indicate whether result
+          number iidd from rreemmoottee__aassyynncc(()) is available (or not).  Returns -1 if iidd
+          is no longer in queue or if the connection to the server has
+          disappeared.
+
+     rreemmoottee__ppoollll((iidd)) - Returns the result of the command associated with the iidd
+          value of a particular call to rreemmoottee__aassyynncc(()). Single-valued result
+          types (number or string), along with associative-array and data-array
+          results are allowed.  Note, if called before the result is available,
+          the iidd will be removed from the queue, and the return value will be
+          zero.  Always check first if the result is available using either the
+          ""ssttaattuuss"" option above or the wwaaiitt(()) function for remote events before
+          fetching the result.  Returns -1 if iidd is not in the queue or if the
+          connection to the server has disappeared.
+
+Protocol
+
+     The protocol used by the ssppeecc server is described below.  Clients other
+     than a ssppeecc client that follow the protocol can also communicate with ssppeecc
+     servers.
+
+     Messages are sent between the server and the clients via a TCP/IP socket
+     using a structured packet with a fixed-size header and an optional
+     variable-sized data section.
+
+     All definitions described below will be in the header file
+     SSPPEECCDD//iinncclluuddee//ssppeecc__sseerrvveerr..hh where SSPPEECCDD is the ssppeecc auxiliary file
+     directory, usually //uussrr//llooccaall//lliibb//ssppeecc..dd.
+
+     The default port range definitions appear in the header file as follows:
+
+        ##ddeeffiinnee SSVV__PPOORRTT__FFIIRRSSTT   66551100
+        ##ddeeffiinnee SSVV__PPOORRTT__LLAASSTT    66553300
+
+     Clients that wish to connect using ssppeecc process names rather than explicit
+     port numbers should scan through the ports in the above (inclusive) range
+     to look for the correct server, using the "hello" protocol described below.
+
+     The packet header structure is currently 132 bytes long and defined as
+     follows:
+
+        ##ddeeffiinnee SSVV__NNAAMMEE__LLEENN     8800
+
+        ssttrruucctt  ssvvrr__hheeaadd {{
+            iinntt     mmaaggiicc;;  //** SSVV__SSPPEECC__MMAAGGIICC **//
+            iinntt     vveerrss;;   //** PPrroottooccooll vveerrssiioonn nnuummbbeerr **//
+            uunnssiiggnneedd ssiizzee;;  //** SSiizzee ooff tthhiiss ssttrruuccttuurree **//
+            uunnssiiggnneedd ssnn;;    //** SSeerriiaall nnuummbbeerr ((cclliieenntt''ss cchhooiiccee)) **//
+            uunnssiiggnneedd sseecc;;   //** TTiimmee wwhheenn sseenntt ((sseeccoonnddss)) **//
+            uunnssiiggnneedd uusseecc;;  //** TTiimmee wwhheenn sseenntt ((mmiiccrroosseeccoonnddss)) **//
+            iinntt     ccmmdd;;    //** CCoommmmaanndd ccooddee **//
+            iinntt     ttyyppee;;   //** TTyyppee ooff ddaattaa **//
+            uunnssiiggnneedd rroowwss;;  //** NNuummbbeerr ooff rroowwss iiff aarrrraayy ddaattaa **//
+            uunnssiiggnneedd ccoollss;;  //** NNuummbbeerr ooff ccoollss iiff aarrrraayy ddaattaa **//
+            uunnssiiggnneedd lleenn;;   //** BByytteess ooff ddaattaa tthhaatt ffoollllooww **//
+        ##iiff SSVV__VVEERRSSIIOONN >>== 33
+            iinntt     eerrrr;;    //** EErrrroorr ccooddee **//
+        ##eennddiiff
+        ##iiff SSVV__VVEERRSSIIOONN >>== 44
+            iinntt     ffllaaggss;;  //** FFllaaggss **//
+        ##eennddiiff
+            cchhaarr    nnaammee[[SSVV__NNAAMMEE__LLEENN]];;      //** nnaammee ooff pprrooppeerrttyy **//
+        }};;
+
+     The element mmaaggiicc should be set to the following:
+
+        ##ddeeffiinnee SSVV__SSPPEECC__MMAAGGIICC   44227777000099110022
+
+     The server will reject any packets lacking the magic number.
+
+     The ssppeecc server will check the endianess of the mmaaggiicc element of the first
+     packet sent by the client and swap header and data bytes in that packet and
+     subsequent incoming and outgoing data, if necessary, to accommodate the
+     client.  The client can send and read packet headers (and binary array
+     data) using the native endian format of the client's platform.
+
+     The vveerrss element should be set to the current version number:
+
+        ##ddeeffiinnee SSVV__VVEERRSSIIOONN      44
+
+     The ssiizzee element should be set to the size of the header structure
+     (currently 132 bytes).  Clients should check both the version number and
+     size of the structure and be prepared to accommodate future ssppeecc releases
+     where the version number and structure size may change.
+
+     (Note, in ssppeecc release 5.05.04, the header version number changed from 2 to
+     3 due to the addition of the eerrrr error-code element to the header
+     structure.  In ssppeecc release 5.05.05, the header version number changed from
+     3 to 4 due to the addition of the ffllaaggss element to the header structure.
+     However, ssppeecc releases from 5.05.04-5 on should work with both clients and
+     servers using earlier or later header versions.)
+
+     The serial-number element ssnn is under the control of the client and can be
+     used to keep track of server replies.  For SSVV__RREEPPLLYY packets sent in
+     response to client commands, the server will set the serial number to that
+     of the request.  The serial number for all SSVV__EEVVEENNTT packets sent by the
+     server is zero.
+
+     The sseecc and uusseecc packet elements may be useful for debugging.  The server
+     sets them based on the host's real-time clock.  The client can do the same.
+     When the ssppeecc debug level is set to 4096 (0x1000), the elapsed time in
+     milliseconds between packets will be displayed.  When the elapsed time
+     between a packet and the previous becomes greater than one second, the time
+     difference is shown as zero.
+
+     The ccmmdd element contains one of the following command codes:
+
+        ##ddeeffiinnee SSVV__CCLLOOSSEE            11     //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__AABBOORRTT            22     //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__CCMMDD              33     //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__CCMMDD__WWIITTHH__RREETTUURRNN  44     //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__RREETTUURRNN           55     //** NNoott yyeett uusseedd **//
+        ##ddeeffiinnee SSVV__RREEGGIISSTTEERR         66     //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__UUNNRREEGGIISSTTEERR       77     //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__EEVVEENNTT            88     //** FFrroomm SSeerrvveerr **//
+        ##ddeeffiinnee SSVV__FFUUNNCC             99     //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__FFUUNNCC__WWIITTHH__RREETTUURRNN 1100    //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__CCHHAANN__RREEAADD        1111    //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__CCHHAANN__SSEENNDD        1122    //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__RREEPPLLYY            1133    //** FFrroomm SSeerrvveerr **//
+        ##ddeeffiinnee SSVV__HHEELLLLOO            1144    //** FFrroomm CClliieenntt **//
+        ##ddeeffiinnee SSVV__HHEELLLLOO__RREEPPLLYY      1155    //** FFrroomm SSeerrvveerr **//
+
+     SSVV__CCLLOOSSEE - Can be sent by the client to terminate a connection, allowing
+          the server to release resources.  Resources will be released in any
+          case, if the server loses the connection to the client.
+
+     SSVV__AABBOORRTT - Sent by the client to abort commands the server is currently
+          running.  Receiving an SSVV__AABBOORRTT packet is equivalent to typing ^^CC at
+          the server keyboard.
+
+     SSVV__CCMMDD - Sent by the client to place the commands from the data string
+          following the header onto the server command queue.
+
+     SSVV__CCMMDD__WWIITTHH__RREETTUURRNN - As above, but the output generated by the command will
+          be returned to the client in an SSVV__RREEPPLLYY packet.
+
+     SSVV__RREETTUURRNN - Not currently used.
+
+     SSVV__RREEGGIISSTTEERR - Sent by the client to register a property on which to receive
+          events.
+
+     SSVV__UUNNRREEGGIISSTTEERR - Sent by the client to unregister a property, so that events
+          will no longer be sent.
+
+     SSVV__EEVVEENNTT - Asynchronous packet sent by the server to clients registered for
+          a property when the property value changes.  The packet is also sent
+          when the property is registered with SSVV__RREEGGIISSTTEERR.
+
+     SSVV__FFUUNNCC - Sent by the client to put a single function (or command) on the
+          server command queue.  The data following the header contains the
+          function (or command) name and any arguments, separated by null bytes.
+          The server will add parentheses, commas or space characters, as
+          needed, depending on whether the first item is a function or a
+          command.
+
+     SSVV__FFUUNNCC__WWIITTHH__RREETTUURRNN - As above, but the result of the function will be
+          returned to the client in an SSVV__RREEPPLLYY packet.
+
+     SSVV__CCHHAANN__RREEAADD - Sent by the client to get the value of a property.
+
+     SSVV__CCHHAANN__SSEENNDD - Sent by the client to set the value of a property.
+
+     SSVV__RREEPPLLYY - Sent by the server with the result of a command.
+
+     SSVV__HHEELLLLOO - Sent by the client to check if the desired server is listening
+          on a particular port.  The client should then look for the expected
+          SSVV__HHEELLLLOO__RREEPPLLYY response.  The ssppeecc client puts a short message in the
+          property name field for debugging purposes, which the server otherwise
+          ignores.
+
+     SSVV__HHEELLLLOO__RREEPPLLYY - Sent by the server in response to an SSVV__HHEELLLLOO packet.  The
+          data section of the reply contains the name of the ssppeecc process by
+          which the server was invoked.  That name is used by clients to find
+          servers specified by ssppeecc process name.
+
+     The ttyyppee element of the header structure describes the type of data (if
+     any) that follow.  The recognized types are:
+
+        ##ddeeffiinnee SSVV__DDOOUUBBLLEE       11
+        ##ddeeffiinnee SSVV__SSTTRRIINNGG       22
+        ##ddeeffiinnee SSVV__EERRRROORR        33
+        ##ddeeffiinnee SSVV__AASSSSOOCC        44
+        ##ddeeffiinnee SSVV__AARRRR__DDOOUUBBLLEE   55
+        ##ddeeffiinnee SSVV__AARRRR__FFLLOOAATT    66
+        ##ddeeffiinnee SSVV__AARRRR__LLOONNGG     77
+        ##ddeeffiinnee SSVV__AARRRR__UULLOONNGG    88
+        ##ddeeffiinnee SSVV__AARRRR__SSHHOORRTT    99
+        ##ddeeffiinnee SSVV__AARRRR__UUSSHHOORRTT   1100
+        ##ddeeffiinnee SSVV__AARRRR__CCHHAARR     1111
+        ##ddeeffiinnee SSVV__AARRRR__UUCCHHAARR    1122
+        ##ddeeffiinnee SSVV__AARRRR__SSTTRRIINNGG   1133
+        ##ddeeffiinnee SSVV__AARRRR__LLOONNGG6644   1144
+        ##ddeeffiinnee SSVV__AARRRR__UULLOONNGG6644  1155
+
+     The ssppeecc client does not currently use the SSVV__DDOOUUBBLLEE data type, and the
+     ssppeecc server does not currently send any data using that type.  However, the
+     ssppeecc server will recognize incoming packets used to set a vvaarr// property
+     with SSVV__DDOOUUBBLLEE data.
+
+     The ssppeecc server sends both string-valued and number-valued items as
+     strings.  Numbers are converted to strings using a pprriinnttff((""%%..1155gg"")) format.
+
+     For the SSVV__EERRRROORR type, which is only sent by the server, the data following
+     the header is a string containing an error message.
+
+     The SSVV__AASSSSOOCC type is used for sending ssppeecc's associative arrays.  (An
+     associative array element has an arbitrary string or number index and a
+     string or number value.)  Number-valued indices and values are converted to
+     strings.  The associative array data is sent as a series of null-terminated
+     strings in the order index, value, index, value, etc.  There is an
+     additional null byte appended to the sequence.
+
+     When sending data to the server, any number of elements of the associative
+     array may be included.  Note, for the built-in associative arrays (AA[[]], SS[[]]
+     and possibly GG[[]], QQ[[]], ZZ[[]], UU[[]] and UUBB[[]], depending on geometry), only
+     existing elements may be sent to the server.  For non-built-in associative
+     arrays, the array must already exist, but new elements will be
+     automatically created if included in the data.
+
+     The SSVV__AARRRR__** data types are for transferring ssppeecc data arrays.  The data is
+     transferred in binary format row by row using the client's native byte
+     order.
+
+     For ssppeecc data arrays, the rroowwss and ccoollss header elements are set to the
+     array dimensions.  ssppeecc supports only one- and two-dimensional arrays.  For
+     a one-dimensional array, the value of one of rroowwss or ccoollss will be one.
+
+     For all packets containing data, the lleenn header element is the number of
+     additional bytes transmitted.  If there is no data, lleenn must be set to
+     zero.
+
+     Starting with version 3 headers, a new eerrrr element is included in the
+     header structure.  This element is set to a nonzero value if the
+     SSVV__CCMMDD__WWIITTHH__RREETTUURRNN or SSVV__FFUUNNCC__WWIITTHH__RREETTUURRNN commands fail with an
+     unrecoverable error (the type of error that causes an interactive ssppeecc
+     session to reset to the main command prompt, such as a syntax error or a
+     divide-by-zero error).  This element is needed to distinguish between an
+     unrecoverable error and a command or function that returns zero.
+
+     The ffllaaggss structure element was introduced with version 4 headers.
+     Currently, it is used only by the server to transmit the flag
+
+        ##ddeeffiinnee SSVV__DDEELLEETTEEDD      00xx11000000
+
+     in packets sent to clients when watched variables or associative array
+     elements are deleted.  The ssppeecc client currently does not take any action
+     on receipt of such events.
+
+     The nnaammee element of the header contains the null-terminated property name
+     in ASCII, when applicable.  Properties contain one, two or three parts,
+     separated by slashes.  Currently recognized property names begin with one
+     of the following:
+
+         eerrrroorr
+         ssttaattuuss//
+         vvaarr//
+         oouuttppuutt//
+         ssccaalleerr//
+         mmoottoorr//
+
+The eerrrroorr Property
+
+     The eerrrroorr property is used by the server to inform a client when the client
+     tries to register an unavailable property.
+
+     eerrrroorr
+
+         SSVV__EEVVEENNTT - Sent when an SSVV__RREEGGIISSTTEERR packet contains an unrecognizable
+              or unacceptable property string.  The data will contain an error
+              message.
+
+     Note, a client must register for the eerrrroorr property in order to receive
+     these events.
+
+The ssttaattuuss Properties
+
+     The ssttaattuuss properties reflect changes in the server state that may affect
+     the server's ability to execute client commands or control hardware.
+
+     ssttaattuuss//rreeaaddyy
+
+         SSVV__EEVVEENNTT - Sent when the server is waiting for input at the interactive
+              prompt (data is 1) and after a return has been typed at the
+              interactive prompt (data is 0).  The server is available to
+              execute commands from clients when it is ready.
+
+         SSVV__CCHHAANN__RREEAADD - Data is 1 if the server command thread is busy and
+              unable to immediately process a new command, otherwise data is 0.
+
+     ssttaattuuss//sshheellll
+
+         SSVV__EEVVEENNTT - Sent when the server enters a subshell (data is 1) or
+              returns from a subshell (data is 0).
+
+         SSVV__CCHHAANN__RREEAADD - Data is 1 if server command thread is in a subshell,
+              otherwise data is 0.
+
+     Note, when in a subshell, the server will not process commands on the input
+     queue.
+
+     ssttaattuuss//ssiimmuullaattee
+
+         SSVV__EEVVEENNTT - Sent when the server enters (data is 1) or leaves (data is
+              0) simulate mode.
+
+         SSVV__CCHHAANN__RREEAADD - Data is 1 if server is in simulate mode, otherwise data
+              is 0.
+
+     Note, when in simulate mode, the server will not send commands to hardware
+     devices.
+
+     ssttaattuuss//qquuiitt
+
+         SSVV__EEVVEENNTT - Sent when the server exits.
+
+         SSVV__CCHHAANN__RREEAADD - Always read back as zero.
+
+The vvaarr Properties
+
+     The vvaarr properties allow values of any variables to be transferred between
+     the server and the client.
+
+     vvaarr//vvaarr__nnaammee
+
+         SSVV__EEVVEENNTT - Sent to clients who have registered when the variable
+              vvaarr__nnaammee changes value.
+
+         SSVV__CCHHAANN__RREEAADD - Returns the value of the vvaarr__nnaammee in the data, if
+              vvaarr__nnaammee is an existing variable on the server.
+
+         SSVV__CCHHAANN__SSEENNDD - Sets the value of vvaarr__nnaammee on the server to the contents
+              of data.
+
+     All data types (numbers, strings, associative arrays and data arrays) are
+     supported.  Numbers and strings are always sent by the server as
+     null-terminated strings, although the server will accept SSVV__DDOOUUBBLLEE-type
+     data for number-valued single variables.
+
+     For built-in associative arrays (AA[[]], SS[[]] and possibly GG[[]], QQ[[]], ZZ[[]], UU[[]]
+     and UUBB[[]], depending on geometry), only existing elements can be set.  For
+     associative arrays created at user-level, any number of elements can be
+     sent and created in one call.
+
+     An associative array element can be sent to the server in two ways, either
+     with the array name and element specified in the property name (as in
+     ""vvaarr//aarrrr[[1133]]"")) and the value contained in the data, or with the array name
+     only specified in the property name (as in ""vvaarr//aarrrr"") and the index and
+     value specified in the data.  In the first case, the associative array
+     element must already exist on the server.  In the second case, any number
+     of elements can be sent as a series of null-terminated strings in the order
+     index, value, index, value, etc.
+
+     Data arrays are transferred in binary format row by row using the client's
+     native byte order.  The packet header contains the number of rows and
+     columns and the data type.
+
+The oouuttppuutt Property
+
+     The oouuttppuutt property puts copies of the strings written to files or to the
+     screen in events sent to clients.
+
+     oouuttppuutt//ffiilleennaammee
+
+         SSVV__EEVVEENNTT - Sent when the server sends output to the file or device
+              given by ffiilleennaammee, where ffiilleennaammee can be the built-in name ""ttttyy""
+              or a file or device name.  The data will be a string representing
+              the output.
+
+     Once a client has registered for output events from a particular file, the
+     server will keep track of the client's request as the file is opened and
+     closed.  File names are given relative to the server's current directory
+     and can be relative or absolute path names, just as with the built-in
+     commands that refer to files.
+
+     (The output property was introduced in ssppeecc release 5.07.04-1.)
+
+The ssccaalleerr Properties
+
+     The ssccaalleerr properties are used to control the hardware timer and monitor
+     counters on the server.
+
+     ssccaalleerr//..aallll..//ccoouunntt
+
+         SSVV__EEVVEENNTT - Sent when counting starts (data is 1) and when counting
+              stops (data is 0).
+
+         SSVV__CCHHAANN__RREEAADD - Data indicates counting (1) or not counting (0).
+
+         SSVV__CCHHAANN__SSEENNDD - If data is nonzero, the server pushes a
+
+                  ccoouunntt__eemm ddaattaa\\nn
+
+              onto the command queue.  If data is 0, counting is aborted as if a
+              ^^CC had been typed at the server.
+
+     ssccaalleerr//mmnnee//vvaalluuee
+
+         SSVV__EEVVEENNTT - Sent periodically while counting on the server with current
+              contents of scaler channel mmnnee. Also sent after counting has
+              finished.
+
+         SSVV__CCHHAANN__RREEAADD - Returns the current scaler value for channel mmnnee.
+
+     When configured as a timer/counter on a ssppeecc client, both ccoouunntt and vvaalluuee
+     events will be received from the server.  When configured as "counters
+     only" on a ssppeecc client, only vvaalluuee events will be received.  In fact, for
+     "counters only" counters on a ssppeecc client, the client count functions do
+     not trigger any activity on the server.
+
+The mmoottoorr Properties
+
+     The mmoottoorr properties are used to control the motors.  The parameters for
+     the commands that are sent from the client and the values in the replies
+     and events that sent from the server are always transmitted as ASCII
+     strings in the data that follows the packet header.
+
+     mmoottoorr//mmnnee//ppoossiittiioonn
+
+         SSVV__EEVVEENNTT - Sent when the dial position or user offset changes.  The
+              data contains the motor position in user units.
+
+         SSVV__CCHHAANN__RREEAADD - Returns the current motor position in user units.
+
+         SSVV__CCHHAANN__SSEENNDD - Sets the user offset on the server by pushing a
+
+                  sseett mmnnee ddaattaa\\nn
+
+              onto the command queue.
+
+     mmoottoorr//mmnnee//ddiiaall__ppoossiittiioonn
+
+         SSVV__EEVVEENNTT - Sent when the dial position changes.  The data contains the
+              motor position in dial units.
+
+         SSVV__CCHHAANN__RREEAADD - Returns the current motor position in dial units.
+
+         SSVV__CCHHAANN__SSEENNDD - Sets the dial position on the server by pushing a
+
+                  sseett__ddiiaall mmnnee ddaattaa\\nn
+
+              onto the command queue, unless the dial position is already set to
+              that value.
+
+     mmoottoorr//mmnnee//ooffffsseett
+
+         SSVV__EEVVEENNTT - Sent when the offset changes.  The data contains the user
+              offset in motor units (degrees, mm, etc.)
+
+         SSVV__CCHHAANN__RREEAADD - Returns the current user offset in dial units.
+
+         SSVV__CCHHAANN__SSEENNDD - Sets the user offset by pushing the
+
+                  sseett mmnnee vvaalluuee\\nn
+
+              command onto the command queue, unless the offset is already at
+              the value.  The data should contain the offset value in motor
+              units (degrees, mm, etc.).  The server will calculate vvaalluuee for
+              the argument in sseett appropriately.
+
+     mmoottoorr//mmnnee//sstteepp__ssiizzee
+
+         SSVV__EEVVEENNTT - Sent when the steps-per-unit parameter changes.
+
+         SSVV__CCHHAANN__RREEAADD - Returns the current steps-per-unit parameter.
+
+     The server doesn't allow clients to change this parameter.
+
+     mmoottoorr//mmnnee//ssiiggnn
+
+         SSVV__EEVVEENNTT - Sent when the sign-of-user*dial parameter changes.
+
+         SSVV__CCHHAANN__RREEAADD - Returns the current sign-of-user*dial parameter.
+
+     The server doesn't allow clients to change this parameter.
+
+     mmoottoorr//....//pprreessttaarrtt__aallll
+
+         SSVV__CCHHAANN__SSEENNDD - Should be sent in preparation of a move of more than one
+              motor.  Puts the string
+
+             {{ggeettaanngglleess;;
+
+         into a buffer that will be pushed onto the server command queue when
+         the move is started.  Must be followed by a ssttaarrtt__aallll packet, with
+         possible intervening ssttaarrtt__oonnee packets.
+
+     mmoottoorr//mmnnee//ssttaarrtt__oonnee
+
+         SSVV__CCHHAANN__SSEENNDD - If preceded by a pprreessttaarrtt__aallll, adds a
+
+             AA[[mmnnee]]==ddaattaa;;
+
+         to the buffer that will be pushed onto the server command queue.
+         Otherwise, pushes
+
+             {{ggeett__aanngglleess;;AA[[mmnnee]]==ddaattaa;;mmoovvee__eemm;;}}\\nn
+
+         onto the command queue in order to start the single motor moving.
+
+     mmoottoorr//....//ssttaarrtt__aallll
+
+         SSVV__CCHHAANN__SSEENNDD - When preceded by pprreessttaarrtt__aallll and one or more ssttaarrtt__oonnee
+              packets, adds a
+
+             mmoovvee__eemm;;}}\\nn
+
+         to the buffer created by those commands and pushes the entire buffer
+         onto the command queue.  Otherwise, does nothing.
+
+     mmoottoorr//....//aabboorrtt__aallll
+
+         SSVV__CCHHAANN__SSEENNDD - Causes a ^^CC-type interrupt in the server command thread.
+
+     mmoottoorr//mmnnee//mmoovvee__ddoonnee
+
+         SSVV__EEVVEENNTT - Sent when moving starts (data is 1) and when moving stops
+              (data is 0).
+
+         SSVV__CCHHAANN__RREEAADD - Returns one if the motor is busy, otherwise zero.
+
+     mmoottoorr//mmnnee//hhiigghh__lliimm__hhiitt
+
+         SSVV__EEVVEENNTT - Sent when the high-limit switch has been hit.
+
+         SSVV__CCHHAANN__RREEAADD - Returns nonzero if the high-limit switch has been hit.
+
+     mmoottoorr//mmnnee//llooww__lliimm__hhiitt
+
+         SSVV__EEVVEENNTT - Sent when the low-limit switch has been hit.
+
+         SSVV__CCHHAANN__RREEAADD - Returns nonzero if the low-limit switch has been hit.
+
+     mmoottoorr//mmnnee//eemmeerrggeennccyy__ssttoopp
+
+         SSVV__EEVVEENNTT - Sent when a motor controller indicates a hardware emergency
+              stop.
+
+         SSVV__CCHHAANN__RREEAADD - Returns nonzero if an emergency-stop switch or condition
+              has been activated.
+
+     mmoottoorr//mmnnee//mmoottoorr__ffaauulltt
+
+         SSVV__EEVVEENNTT - Sent when a motor controller indicates a hardware motor
+              fault.
+
+         SSVV__CCHHAANN__RREEAADD - Returns nonzero if a motor-fault condition has been
+              activated.
+
+                  mmoottoorr//mmnnee//hhiigghh__lliimmiitt
+
+         SSVV__EEVVEENNTT - Sent when the value of the high limit position changes.  The
+              data contains the high limit in dial units.
+
+         SSVV__CCHHAANN__RREEAADD - Returns the high limit in dial units.
+
+         SSVV__CCHHAANN__SSEENNDD - Sets the high limit by pushing
+
+                  sseett__llmm  mmnnee ddaattaa uusseerr((mmnnee,,ggeett__lliimm((mmnnee,,--11))))\\nn
+
+              onto the server command queue.
+
+     mmoottoorr//mmnnee//llooww__lliimmiitt
+
+         SSVV__EEVVEENNTT - Sent when the value of the low limit position changes.  The
+              data contains the low limit in dial units.
+
+         SSVV__CCHHAANN__RREEAADD - Returns the low limit in dial units.
+
+         SSVV__CCHHAANN__SSEENNDD - Sets the low limit by pushing
+
+                  sseett__llmm mmnnee ddaattaa uusseerr((mmnnee,,ggeett__lliimm((mmnnee,,++11))))\\nn
+
+              onto the server command queue.
+
+     mmoottoorr//mmnnee//lliimmiittss
+
+         SSVV__CCHHAANN__SSEENNDD - Sets both motor limits by pushing
+
+             sseett__llmm mmnnee ddaattaa\\nn
+
+         onto the server command queue, where ddaattaa should contain the low and
+         high motor limit values in a string.
+
+     mmoottoorr//mmnnee//sseeaarrcchh
+
+         SSVV__CCHHAANN__SSEENNDD - The server starts a home or limit search by pushing a
+
+             cchhgg__ddiiaall((mmnnee,, hhooww))\\nn
+             or a
+             cchhgg__ddiiaall((mmnnee,, hhooww,, hhoommee__ppooss))\\nn
+
+         onto the command queue, depending on whether the data contains one or
+         two arguments.  The hhooww argument is one of the strings recognized by
+         cchhgg__ddiiaall(()), namely ""hhoommee"", ""hhoommee++"", ""hhoommee--"", ""lliimm++"" or ""lliimm--"".  The
+         optional hhoommee__ppooss is the home position in dial units.
+
+     mmoottoorr//mmnnee//ssyynncc__cchheecckk
+
+         SSVV__EEVVEENNTT - Sent when a position discrepancy occurs between ssppeecc and the
+              motor controller that requires human intervention to resolve.  The
+              data contains two values: the position that ssppeecc has in memory and
+              the position read from the controller, both in dial units.  A
+              response is required, either from the server keyboard or by a
+              client sending the property described below.  Note, a motor's
+              rreeaadd__mmooddee can be configured to always accept the controller
+              position so that discrepancy events will never be generated.
+
+         SSVV__CCHHAANN__SSEENNDD - A client should send a yes or no (1 or 0) response when
+              the server needs to resolve a motor discrepancy.  The server
+              requires this response or a keyboard response on the server's
+              controlling terminal.
+
+     Note, until a response is received by the server, either from a client or
+     the server's interactive prompt, the server will not be able to process
+     commands in the command queue.
+
+     mmoottoorr//mmnnee//uunnuussaabbllee
+
+         SSVV__EEVVEENNTT - Sent when a ""ddiissaabbllee"" option to mmoottoorr__ppaarr(()) has changed the
+              enabled/disabled state of a motor on the server.  (This event
+              implemented in ssppeecc release 5.07.01-5.)
+
+         SSVV__CCHHAANN__RREEAADD - Returns nonzero if the motor is unusable.  The motor may
+              be unusable because it didn't respond to the presence test, it has
+              been explicitly disabled with the ""ddiissaabbllee"" option to mmoottoorr__ppaarr(()),
+              or it has received an uunnuussaabbllee event from another server.
+
+     The following properties correspond to standard and optional motor
+     parameters.  All behave the same with respect to server/client
+     communication.
+
+     SSttaannddaarrdd PPaarraammeetteerrss::
+
+         mmoottoorr//mmnnee//bbaassee__rraattee
+         mmoottoorr//mmnnee//sslleeww__rraattee
+         mmoottoorr//mmnnee//aacccceelleerraattiioonn
+         mmoottoorr//mmnnee//bbaacckkllaasshh
+
+     OOppttiioonnaall PPaarraammeetteerrss::
+
+         mmoottoorr//mmnnee//hhoommee__bbaassee__rraattee
+         mmoottoorr//mmnnee//hhoommee__sslleeww__rraattee
+         mmoottoorr//mmnnee//hhoommee__aacccceelleerraattiioonn
+         mmoottoorr//mmnnee//eennccooddeerr__sstteepp__ssiizzee
+         mmoottoorr//mmnnee//ddcc__ddeeaadd__bbaanndd
+         mmoottoorr//mmnnee//ddcc__sseettttllee__ttiimmee
+         mmoottoorr//mmnnee//ddcc__pprrooppoorrttiioonnaall__ggaaiinn
+         mmoottoorr//mmnnee//ddcc__ddeerriivvaattiivvee__ggaaiinn
+         mmoottoorr//mmnnee//ddcc__iinntteeggrraall__ggaaiinn
+         mmoottoorr//mmnnee//ddcc__iinntteeggrraattiioonn__lliimmiitt
+         mmoottoorr//mmnnee//ddcc__ffoolllloowwiinngg__eerrrroorr
+         mmoottoorr//mmnnee//ddcc__ssaammpplliinngg__iinntteerrvvaall
+         mmoottoorr//mmnnee//ddcc__vveelloocc__ffeeeeddffoorrwwaarrdd
+         mmoottoorr//mmnnee//ddcc__aacccceell__ffeeeeddffoorrwwaarrdd
+         mmoottoorr//mmnnee//sstteepp__mmooddee
+         mmoottoorr//mmnnee//ddiissaabbllee__lliimmiitt__cchheecckkss
+         mmoottoorr//mmnnee//sslloopp
+         mmoottoorr//mmnnee//rreeaadd__mmooddee
+         mmoottoorr//mmnnee//ddeecceelleerraattiioonn
+         mmoottoorr//mmnnee//ttoorrqquuee
+         mmoottoorr//mmnnee//mmiisscc__ppaarr__11
+         mmoottoorr//mmnnee//mmiisscc__ppaarr__22
+         mmoottoorr//mmnnee//mmiisscc__ppaarr__33
+         mmoottoorr//mmnnee//mmiisscc__ppaarr__44
+         mmoottoorr//mmnnee//mmiisscc__ppaarr__55
+         mmoottoorr//mmnnee//mmiisscc__ppaarr__66
+         mmoottoorr//mmnnee//ppoowwddeerr__bbaassee
+         mmoottoorr//mmnnee//ppoowwddeerr__sslleeww
+         mmoottoorr//mmnnee//ppoowwddeerr__aacccceelleerraattiioonn
+
+         SSVV__EEVVEENNTT - Sent when the parameter changes.  The data contains the
+              value of the parameter.
+
+         SSVV__CCHHAANN__RREEAADD - Returns the value of the parameter.
+
+         SSVV__CCHHAANN__SSEENNDD - Sets the parameter by pushing
+
+                  mmoottoorr__ppaarr((mmnnee,, ccmmdd,, ddaattaa))\\nn
+
+              onto the server command queue with the appropriate arguments,
+              using the value passed in the data portion of the packet.
+
+     The following property names correspond to features in ssppeecc's internal
+     motor control code, but aren't currently used with the server.
+
+         mmoottoorr//mmnnee//mmaaggnniittuuddee
+         mmoottoorr//mmnnee//bbaacckkllaasshh__rraattee
+         mmoottoorr//....//pprreerreeaadd__aallll
+         mmoottoorr//mmnnee//pprreerreeaadd__oonnee
+         mmoottoorr//mmnnee//aabboorrtt__oonnee
+         mmoottoorr//....//fflluusshh__aallll
+         mmoottoorr//mmnnee//fflluusshh__oonnee
+         mmoottoorr//mmnnee//sseett__ppoossiittiioonn
+         mmoottoorr//mmnnee//ddiiffff__ppoossiittiioonn
+         mmoottoorr//mmnnee//pprreessttaarrtt__oonnee
+
+Updates
+
+     The following summarizes updates to the ssppeecc server/client protocol that
+     mainly affect compatibility with older or newer servers or clients.  Search
+     for "server" in the _c_h_a_n_g_e_s help file for a complete list of updates.
+
+     Release 5.04.03 - July 20, 2003 - Initial server/client support released
+          with SSVV__VVEERRSSIIOONN at 2.
+
+     Release 5.05.04 - July 18, 2004 - Added eerrrr element to ssvvrr__hheeaadd structure.
+          SSVV__VVEERRSSIIOONN at 3, but maintained server compatibility with version 2
+          clients.
+
+     Release 5.05.04-4 - August 17, 2004 - Fixed server so that it can work with
+          future clients with higher SSVV__VVEERRSSIIOONN numbers.
+
+     Release 5.05.05 - Sept 30, 2004 - Added ffllaaggss element to ssvvrr__hheeaadd
+          structure.  SSVV__VVEERRSSIIOONN at 4.  ssppeecc clients and servers should be both
+          forward and backward compatible with respect to protocol version.
+
+     Release 6.01.01 - Nov 4, 2013 - Added SSVV__AARRRR__LLOONNGG6644 and SSVV__AARRRR__UULLOONNGG6644 data
+          types.
+

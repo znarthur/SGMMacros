@@ -1,0 +1,912 @@
+.TH "changes" "spec 2.15 Release Notes" "08/01/12" "chg2_15.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.15
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_15.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1991,1992,1995 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.15 Release Notes" "08/01/12" "chg2_15.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These
+notes summarize many of the modifications made for \fBspec\fP
+release 2.15,
+as of February 21, 1992.
+.SH "INCOMPATIBILITIES"
+.rs
+.sp
+Release 2.15 includes a number of changes that make certain
+prior usages obsolete.
+.IP 1. 3
+The
+\fBgetmca()\fP
+function has been eliminated.
+A new interface to MCA\-type devices has been established using the functions
+\fBmca_par()\fP,
+\fBmca_get()\fP
+and
+\fBmca_sel()\fP.
+See the
+\fBfuncs\fP
+help file for details.
+.IP 2. 3
+The syntax of the \fBC\-PLOT\fP user function
+\fBscans.4\fP
+has been modified slightly to clear up ambiguities concerning how
+the data points are to be normalized.
+The
+\fB\-m\fP
+and
+\fB\-t\fP
+flags have been replaced with a
+\fB+n\fP
+or
+\fB\-n\fP
+flag to indicate whether the data is to be normalized, and
+.BI m= col
+and
+.BI t= col
+arguments
+to specify column numbers for the monitor\-counts or time normalization
+values.
+If columns aren\(aqt specified, the normalization is taken from the
+\fB#M\fP
+or
+\fB#T\fP
+directives in the data file.
+.IP 3. 3
+The method for subtracting a linear background based on a scan\(aqs
+end points has been changed.
+A new macro, based on the new internal data\-handling routines and named
+\fBdo_bg\fP,
+is now provided.
+See the
+\fBplot\fP
+help file for more information.
+.IP 4. 3
+Two arguments to
+\fBplot_cntl()\fP
+have been renamed.
+Use
+\fBplot_cntl("open")\fP
+and
+\fBplot_cntl("close")\fP
+instead of
+\fBplot_cntl("openpl")\fP
+and
+\fBplot_cntl("closepl")\fP.
+Also, the arguments to
+\fBplot_cntl()\fP
+that specify the graphics terminal type have been eliminated.
+Instead, a new global variable named
+\fBGTERM\fP,
+which can take its value from the environment or be assigned to,
+is used to specify the graphics device type.
+.IP 5. 3
+The macros named
+\fBU\fP
+and
+\fBP\fP
+introduced in the last release are now named
+\fBUN\fP
+and
+\fBUP\fP.
+The name
+\fBU\fP
+is now reserved for the array of orientation matrix parameters
+used with a number of geometry configurations.
+.SH "USER INTERFACE"
+.rs
+.sp
+The internal data\-handling portion of \fBspec\fP has been entirely
+rewritten, adding greatly to the types of data manipulation
+that can be done within \fBspec\fP.
+The
+\fBdata\fP
+help file explains the new functions.
+In brief, the internally stored data points are divided into independent
+groups.
+Each data point can have several numbers associated with it, such as
+\fBH\fP,
+\fBK\fP,
+\fBL\fP
+and
+counts from the detector.
+In addition a number of functions are provided that allow
+math operations
+on all the data points in a group or among groups, and
+the reading of values into a group from a file.
+.sp
+Data points are now saved in the state files.
+Thus,
+when scans are continued after exiting and restarting \fBspec\fP,
+the entire data set can still be plotted and saved.
+.sp
+The
+\fBgethelp()\fP
+function, used by the
+\fBhelp\fP
+macros, now responds to single character commands to page forward
+and back or quit, instead of waiting for a newline to be typed.
+.sp
+When built\-in functions are used with the wrong number of arguments,
+an error message
+is now printed that indicates what the correct usage is.
+.sp
+A new built\-in macro named
+\fBcleanup1\fP
+will be called on errors or user aborts, if it has been defined.
+This new macro will be called after the
+\fBcleanup\fP
+macro if they are both defined.
+.sp
+The high resolution graphics programs for SunTools and X Windows
+have been improved.
+In particular, the X Window filter does a better in loading the correct font.
+The filter for SunTools has been entirely rewritten.
+.sp
+High resolution screen plots can now show error bars.
+Error bars are calculated as
+the square root of the
+\fBy\fP\-data
+values.
+Use the
+\fBsetplot\fP
+macro or call the function
+\fBplot_cntl("ebars")\fP
+to turn error\-bar drawing mode on.
+.sp
+The colors on high resolution plots on color display devices
+are now assigned using the
+\fBplot_cntl()\fP
+function.
+Also, use of colors can be turned on or off with the
+\fBplot_cntl()\fP
+function.
+See the
+\fBfuncs\fP
+help file for details.
+.sp
+Pseudomotors and pseudocounters can now be configured by selecting the
+controller
+named
+\fBNONE\fP.
+Pseudomotors may be linked to the motions of other motors in the geometry
+code (see how the
+\fBalf\fP
+motor is used in
+\fBgeo_w21h.c\fP
+for an example.)
+Otherwise choosing
+\fBNONE\fP
+as the controller type lets you execute counting and moving commands
+without being in simulate mode.
+.sp
+A software timer is now available.
+Use it by selecting the SFTWARE controller
+in the configuration file.
+This timer uses the system clock to gate the scalers, MCAs, etc.
+.sp
+The high\-resolution graphics on AT&T System V/386 systems
+can be displayed on a different virtual terminal then you use
+for the text.
+Set
+\fBGTERM\fP
+to something like
+\fBvga_vt07\fP
+to use
+\fB/dev/vt07\fP
+as the virtual terminal for graphics.
+You shouldn\(aqt be using the selected virtual terminal for a login session.
+You will have to use the terminal
+\fBhot\fP
+keys to switch back to the text screen in order to type commands to \fBspec\fP.
+.sp
+\fBspec\fP now checks for write errors after most output is sent to
+the various files and devices.
+In the event of a write error, \fBspec\fP resets to command level.
+.SH "MACROS"
+.rs
+.sp
+A new
+\fBgetscan\fP
+macro lets you read in scan data from an existing data file.
+With no arguments, you will be prompted for the
+name of the \fBspec\fP data file, the scan number,
+and columns for
+\fBx\fP
+and
+\fBy\fP.
+You can also provide all four values as arguments.
+Once the data file name and column numbers have been entered,
+you can subsequently call the macro with just the scan number as a single
+argument.
+.sp
+A new
+\fB_scan_time\fP
+macro prints the estimated counting time for a scan.
+The macro is called as part of the
+default
+\fBscan_head\fP
+macro.
+The reintroduced
+\fBMON_RATE\fP
+variable is used in the estimate
+of the scan time
+if counting to monitor counts.
+\fBMON_RATE\fP
+is the average monitor counts per second and is automatically calculated
+in the
+\fBcount\fP
+macro.
+If the global settle\-time variable
+\fB_sleep\fP
+is nonzero,
+that time for each point is also included in the estimate.
+.sp
+The
+\fBscan_on\fP
+macro that continues aborted scans
+can now also be invoked using the name
+\fBresume\fP.
+.sp
+The
+\fBteramp\fP
+macro which ramps the temperature controller to a new value has been
+upgraded.
+You can now specify an optional third argument, which is the desired
+controller step size.
+A small step size will result in shorter intervals between each temperature
+step.
+The macro won\(aqt let the step size get too small, though, as it insists on
+at least a 0.2 second interval (actually set by the global variable
+\fBTERAMP_MIN\fP)
+between changes, in order to give time
+to program a slow interface.
+.sp
+The scan macros now assign a value to
+\fBY_L\fP
+which is used as the
+\fBy\fP\-axis
+label in the plots.
+In most cases, the assignment is
+\fBY_L = cnt_name(DET)\fP.
+.sp
+The current scan number is now included on screen plots.
+.sp
+Mesh scans can now do real\-time screen plots.
+The screen plots are erased at the beginning of each row
+(or is it column?) of the scan.
+.sp
+The macros
+\fBpts\fP,
+\fBplot_res\fP,
+\fBlp_plot\fP
+and
+\fBsplot\fP
+now all take one to three optional arguments.
+The first argument specifies the data group to plot, the second
+argument specifies the element to use for the
+\fBx\fP\-axis
+and the third argument specifies the element to use for the
+\fBy\fP\-axis.
+.sp
+A new macro named
+\fBcplot_plot\fP
+creates a command file for the \fBC\-PLOT\fP program to plot the current
+data points.
+The plot is sent to the filter given by the
+\fBCP_FILTER\fP
+global variable.
+Optional arguments specify plot group and
+\fBx\fP\-axis
+and
+\fBy\fP\-axis
+elements, as described above.
+.sp
+The analysis results printed at the top of the plots are now defined by
+the macros
+\fBsplot_res1\fP,
+\fBsplot_res2\fP
+and
+\fBrplot_res\fP.
+These macros can be redefined to suit a particular experiment.
+.sp
+The colors used by the
+\fBsplot\fP
+and
+\fBrplot\fP
+macros for the various plot elements
+are contained in the global string variables
+\fBsplot_col\fP
+and
+\fBrplot_col\fP,
+which can be modified to suit individual tastes.
+See the description of
+\fBplot_cntl()\fP
+in the
+\fBfuncs\fP
+help file and the
+\fBcolors\fP
+help file.
+.sp
+The lp plots have been moved from macro code to built\-in code.
+If
+\fBplot_cntl("lp")\fP
+is called before a call to
+\fBdata_plot()\fP,
+the plot output will be all printable ASCII with no cursor positioning
+sequences and formatted for 132 column\-wide output.
+.sp
+Counters named
+\fB"unused"\fP
+will not be included in the output from the
+\fBuct\fP,
+\fBct\fP
+and
+\fBshow_cnts\fP
+macros
+or
+in the data files produced by the standard macros.
+.sp
+New standard macros,
+\fBfon\fP
+and
+\fBfoff\fP,
+are provided to turn on and off an arbitrary file.
+The macros take an argument, which is the name of the file.
+.sp
+To accommodate motor controllers that operate in polled mode,
+a new macro name
+\fBmove_poll\fP
+has been placed after the
+\fBmove_em\fP
+statement in macros such as
+\fBmv\fP,
+\fBmvr\fP,
+\fBbr\fP,
+etc.
+By default
+\fBmove_poll\fP
+is defined as a null macro.
+For polled controllers, it should be defined as
+\fBwaitmove\fP
+to have the backlash completed before the next prompt.
+.sp
+The warning message in the distributed
+\fBfourc.src\fP
+macro file regarding use of the default X\-ray wavelength of 1.54 Angstroms
+has been
+removed, as it confused certain synchrotron users who have monochromators.
+.SH "FUNCTIONS"
+.rs
+.sp
+A new form of the
+\fBinput()\fP
+function lets you check to see if something has been typed at the
+keyboard without getting stuck waiting for something to be typed.
+If invoked as
+\fBinput(0)\fP,
+the function will return a null string if nothing has been typed.
+Otherwise it returns
+a string consisting of the first character of what was typed.
+.sp
+The syntax of
+\fBchg_dial()\fP
+has been expanded to accommodate motor controllers that
+use home (or origin) switches.
+The second argument may be one of the strings
+\fB"home"\fP,
+\fB"home+"\fP,
+\fB"home\-"\fP,
+\fB"lim+"\fP
+or
+\fB"lim\-"\fP.
+With one of the above arguments, the motor indicated by
+the first argument will move until it hits the home switch or
+the clockwise or counter\-clockwise limit switch.
+At present, most motor controllers do not implement the home or limit search
+feature.
+See the new
+\fBhome\fP
+and
+\fBzero\fP
+macros for a sample implementation.
+.sp
+A new function,
+\fBfprintf()\fP,
+has been added.
+This function works as
+\fBprintf()\fP,
+but takes an initial string argument that is the name of a file or device.
+The text is printed only on the named file or device (and
+\fBlog\fP
+files), unlike
+\fBprintf()\fP,
+which prints to all turned on files and devices.
+.sp
+A new function,
+\fBgpib_cntl()\fP
+has been added.
+This function sends the GPIB messages GTL, LLO, DCL, SDC and GET
+to the addressed device.
+See the
+\fBgpib\fP
+or
+\fBfuncs\fP
+help files for details.
+.sp
+New functions,
+\fBport_get()\fP
+and
+\fBport_put()\fP,
+are available on PC (AT\-type bus) computers to read and write
+bytes to IO ports.
+Ports must be first selected in the
+\fBconfig\fP
+file.
+Ports may be configured read/write or read only.
+.sp
+A new function,
+\fBsplit()\fP,
+can be used to split a string into substrings
+and assign each substring to an array element.
+See the
+\fBfuncs\fP
+help file for usage.
+.SH "GEOMETRY CODE"
+.rs
+.sp
+The
+\fBfourc\fP
+geometry code and macros have been generally fixed up.
+The sign convention for
+\fBALPHA\fP
+has been changed due to popular demand.
+Negative two\-theta values are now handled correctly when calculating
+the orientation matrix and reciprocal space positions.
+The default orientation reflections have been changed to physically
+reasonable values.
+\fBZone\fP
+mode
+\fBphi\fP
+and
+\fBchi\fP
+angles are now treated as frozen angles and are saved in the state file,
+along with the two vectors that define the zone.
+Cut points are now also saved in the state file.
+The
+\fBfreeze\fP
+macro
+now takes arguments to specify the value(s) of the current mode\(aqs
+frozen angle(s).
+The two\-theta and omega cut points have been eliminated
+(two theta values will always be between \-180 and 180 degrees).
+New
+\fBsz\fP,
+\fBsetor0\fP
+and
+\fBsetor1\fP
+macros let you set the zone plane and the orientation reflections
+without moving motors.
+.sp
+The portion of the
+four\-circle geometry code in the source file
+\fBgeo_fourc.c\fP
+that dealt with orientation matrix calculations has been relocated
+and the orientation matrix code can now be used by any geometry.
+Also, a new macro file,
+\fBub.mac\fP,
+now contains the orientation\-matrix specific macros.
+.sp
+Since the orientation\-matrix code has been generalized to work with any
+geometry, the names used to refer to the primary and secondary reflection
+angles have been changed to
+\fBg_u00\fP,
+\fBg_u01\fP,
+etc., for the primary reflection, and
+\fBg_u10\fP,
+\fBg_u11\fP,
+etc., for the secondary reflection.
+New (redundant) macro aliases,
+\fBtth0\fP,
+\fBth0\fP,
+\fBchi0\fP,
+\fBphi0\fP,
+\fBtth1\fP,
+\fBth1\fP,
+\fBchi1\fP
+and
+\fBphi1\fP,
+have been created for the primary and secondary orientation reflections
+in the
+\fBfourc\fP
+geometry.
+.sp
+The
+\fBgpset\fP
+macro is redefined
+to include a
+\fBcalcG\fP
+call
+for geometries that use an orientation macro.
+(The
+\fBcalcG\fP
+call is necessary to have the orientation matrix recalculated.)
+.sp
+A new
+\fBsectors\fP
+macro is available with the
+\fBfourc\fP
+geometry.
+The macro prints the motor positions
+that would be used for all the possible sectors for the
+(\fBHKL\fP
+values given as arguments.
+.sp
+A geometry\-less version of \fBspec\fP can be installed by choosing
+the
+\fBspec\fP
+geometry target.
+.sp
+A new
+\fBsetrlat\fP
+macro can be used
+to set the reciprocal lattice parameters.
+(The
+\fBsetlat\fP
+macro sets lattice parameters in direct space.)
+New macros
+\fBcalcD\fP
+and
+\fBcalcR\fP
+calculate direct\-space lattice parameters from reciprocal\-space lattice
+parameters and vice\-versa.
+.sp
+New geometry code for configurations called
+\fBw21h\fP
+and
+\fBw21v\fP
+have been added.
+The code is for a diffractometer used at LURE W21.
+.sp
+New geometry code for a configuration called
+\fBfivec\fP
+has been added.
+The code is for a diffractometer built by MIT and used at NSLS X\-20.
+.sp
+New geometry code for a configuration called
+\fBs2d2\fP
+has been added.
+The code is for a diffractometer built by AT&T Bell Labs and used
+at NSLS X\-16 and X\-25.
+.sp
+The MIT surface diffractometer geometry code and macros
+have been revised
+to reflect
+the current diffractometer configuration.
+.sp
+The
+\fBsurf\fP
+geometry code has been expanded to include a
+liquid surface diffractometer used
+at the BNL HFBR.
+.SH "HARDWARE"
+.rs
+.sp
+On AIX systems, \fBspec\fP enforces a lock on the GPIB device, such that
+only one process can open it at a time.
+(On all systems that use a National Instruments GPIB board, only one
+process should be using the GPIB device at a time.)
+.sp
+The ACS Steppak MCU code has been revised to better handle certain
+read errors.
+Also, a motor controller keyword
+\fBMCU_E\fP
+is available in the
+\fBconfig\fP
+file to indicate that encoders are being used on a motor.
+If so indicated, when there are position discrepancies between \fBspec\fP and
+the controller that are below a threshold amount, the controller\(aqs
+position is automatically taken as correct.
+In addition, the home and limit search capabilities now available
+with
+\fBchg_dial()\fP
+have been implemented.
+.sp
+The code for the Ortec 9XX counter/timer code has been changed
+to better detect if the
+\fB"dwell"\fP
+switch is set incorrectly.
+.sp
+The Ortec 997 single channel counter is now recognized.
+.sp
+Support for the Oxford Tennelec/Nucleus PCAII MCA PC board is now included.
+The board supports multichannel scaling and pulse height analysis modes.
+The macros to use the board are still in an early stage of development.
+.sp
+Support for the Compumotor 3000 motor controller on serial and
+GPIB interfaces has been added.
+(There are problems, though, when using this motor controller with the
+National Instruments GPIB driver on IBM PS/2 AIX 1.2 due to bugs in
+the GPIB driver and the Compumotor controller.)
+.sp
+Support for the Compumotor 4000 motor controller on serial and
+GPIB interfaces has been added.
+.sp
+Support for the Microcontrole SIX19 motor controller on a serial interface
+has been added.
+.sp
+Support for the INEL XRGCI motor controller and timer\-counter device has
+been added.
+.sp
+Support for the Kinetic Systems
+2926 IBM PC Interface with
+3922 Parallel Bus Crate Controller has been added.
+The source to the driver is in the file
+\fBdrivers/ksc.c\fP.
+The script to install the driver is
+\fBinstall_ksc\fP.
+.sp
+Support for the Kinetic Systems
+3929 SCSI Crate Controller is now supported on Sun Sbus
+systems.
+The instructions for installing the driver are in
+\fBdrivers/ksc.README\fP.
+.sp
+Support for the National Instruments GPIB11\-2 for the Q\-bus is now
+supported on BSD 4.3 and Ultrix systems.
+.sp
+Support for the National Instruments GPIB\-SPARC1\-B for Sun
+computers is now supported.
+.sp
+Code for the Scientific Solutions GPIB board now supports the
+\fBgpib_poll()\fP
+and the new
+\fBgpib_cntl()\fP
+function.
+.sp
+The code for the LeCroy 2301 MCA has been rewritten to use the new
+\fBmca_par()\fP
+and
+\fBmca_get()\fP
+functions.
+See the
+\fBlc2301\fP
+help file for details.
+.sp
+The Nicomp TC\-100 autocorrelator is now supported.
+Access to it is through the
+\fBmca_par()\fP
+and
+\fBmca_get()\fP
+functions.
+See the
+\fBnicomp\fP
+help file
+for details.
+.sp
+The Klinger MC\-4 motor controller output pins used
+for gating an external counter and checking for completed moves
+have been changed
+from pins 1, 2 and 3 to pins 6, 7 and 8 to avoid conflict with the
+controller\(aqs plug\-in
+remote control device.
+.SH "UTILITIES"
+.rs
+.sp
+The number\-of\-columns directive in
+\fBscans.4\fP
+(\fB#N\fP)
+can now take an optional second argument which is the number of data points
+per line.
+The number of numbers per line of data is the product of the two arguments.
+For example,
+\fB#N 1 16\fP
+would indicate there are 16 data points per line, while
+\fB#N 4 4\fP
+would indicate there are four data points per line, with each data point
+having four numbers associated with it.
+In both examples, there would be 16 numbers printed on each line.
+The purpose of this new feature is to allow representation of MCA data
+in a visually compact form.
+(There is no saving in file space, as both a space character and a newline
+character consume one byte.)
+.SH "ADMINISTRATION"
+.rs
+.sp
+The
+\fBedconf\fP
+program (invoked by the
+\fBconfig\fP
+macro) has had
+the
+devices
+screen split into two screens, one for devices
+(motors, scalers and MCAs) and one for interfaces
+(CAMAC, GPIB, serial and I/O ports).
+.sp
+The number of motor controllers and scaler devices allowed has
+been increased.
+.sp
+Serial devices used with
+\fBser_get()\fP
+and
+\fBser_put()\fP
+can now have
+\fBraw\fP
+or
+\fBcooked\fP
+line characteristics selected using
+\fBedconf\fP.
+In
+\fBcooked\fP
+mode, you can also add
+\fBnoflow\fP,
+\fBigncr\fP,
+\fBevenp\fP
+or
+\fBoddp\fP
+modes.
+.sp
+The
+\fB"user can move motor"\fP
+and
+\fB"user can change limits"\fP
+fields displayed by the
+\fBedconf\fP
+program have been combined into just one field.
+Also the number of wizard protection levels has been increased from one
+to three.
+Parameters that are protected are now indicated on the motor screen
+with square brackets.
+.sp
+A facility for sharing a single copy of the
+\fBconfig\fP
+and
+\fBsettings\fP
+files among several spectrometers that have some motors in common
+is now available.
+See the
+\fBconfig_adm\fP
+help file for more information.
+.sp
+New commands to insert
+\fBi\fP
+or delete
+\fBd\fP
+motors using
+\fBedconf\fP
+are available.
+.sp
+When installing \fBspec\fP for the first time, a default
+\fBconfig\fP
+file is created that contains names and mnemonics for all the
+required geometry motors.
+.sp
+A new administrative utility called
+\fBtidy_spec\fP
+is provided to clean out old user state files from
+the \fBspec\fP auxiliary file directory.
+Invoked without arguments, the utility prints the disk usage by
+user, terminal, geometry and age.
+Arguments are available to remove files by user, terminal, geometry or
+age.
+Type
+\fBtidy_spec \-\fP
+to see usage.
+When installed by the
+\fBInstall\fP
+script, the file modes of the program restrict its use to owner and
+group.
+The
+\fBInstall\fP
+script also patches the
+\fBtidy_spec\fP
+executable to make the configured auxiliary file directory the
+default.
+.sp
+The
+\fBspec.msgs\fP
+messages file, used in earlier versions to help cope with the limited program
+size available
+on the 286 and PDP 11/73 platforms, has been done away with.
+All currently
+supported platforms
+can easily accommodate the extra 30 kilobytes or so of data space
+that are thus needed by the program.
+.SH "MISCELLANEOUS"
+.rs
+.sp
+\fBspec\fP is now available for the IBM RS/6000 running the AIX operating
+system.
+CAMAC support is currently only through a Kinetic Systems 3988
+GPIB\-to\-CAMAC crate controller.
+.sp
+New startup options,
+\fB\-p\fP
+and
+\fB\-q\fP,
+have been added to make \fBspec\fP work as the tail end of a windowing
+front\-end program.
+The
+\fB\-p\fP
+option says that input from \fBspec\fP is from a pipe.
+The
+\fB\-q\fP
+option can only be used with
+\fB\-p\fP
+and says that \fBspec\fP should operate quietly and
+not write messages to the
+\fB"tty"\fP
+device unless it is explicitly turned on.
+.sp
+Internal signal handling (signals are associated with typing
+\fB^C\fP,
+with internal timers
+and with certain hardware controllers) code has been rewritten
+(again) to make \fBspec\fP more robust.
+.sp
+A number of internal limits have been increased, including the maximum
+number of bytes of macros, the size of the internal memory arena and the
+length of strings that can be printed.
+.SH "BUG FIXES"
+.rs
+.sp
+The
+\fBshowscans\fP
+program is now automatically patched when
+it is installed to reflect the correct
+auxiliary file directory.
+Previously, the path name
+\fB/usr/lib/spec.d\fP
+was built in.
+.sp
+A bug in the
+\fBscans.4\fP
+\fBC\-PLOT\fP user function that calculated error bars incorrectly when the
+\fB#I\fP
+second normalization was being used has been fixed.
+.sp
+A bug in the motor moving code where, when in simulate mode,
+simulated motor positions would change when they weren\(aqt supposed to
+has been fixed.
+.sp
+A bug in the powder\-mode macros where powder mode would not
+work properly if the powder\-mode motor was not one of the motors
+involved in the geometry calculations has been fixed.
+.sp
+A bug in the CAMAC TS201 counter/timer code where the variable that
+kept track of detector overflows never got cleared has been fixed.
+.sp
+Another bug in the CAMAC TS201 counter/timer code where, when
+counting to certain values of monitor counts,
+the count time was off by a factor
+of two or so from what it should be, has been fixed.
+.sp
+A bug in the Oregon Micro Systems PCX code where backlash was done
+on the wrong motor for certain multi\-motor moves has been fixed.
+Also, several modifications were made to make the code more robust.
+.sp
+A bug in the code for the Ortec 9XX counter/timers
+where the program would get stuck printing an error message
+under certain conditions has been fixed.
+.sp
+A bug in the code for the LeCroy 2301 MCA, where channel counts
+greater than 32,768 were saved as negative numbers,
+has been fixed.
+.sp
+Bugs in the code for the Scientific Solutions GPIB board that prevented
+it from working on 386 machines have been fixed.
+

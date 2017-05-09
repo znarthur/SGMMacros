@@ -1,0 +1,262 @@
+.TH "changes" "\fBspec\fP 2.11 Release Notes" "08/01/12" "chg2_11.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.11
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_11.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.11 Release Notes" "08/01/12" "chg2_11.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes summarize the modifications made for \fBspec\fP release 2.11,
+as finalized on February 6, 1989.
+.SH "CHANGES"
+.rs
+.sp
+If the command file
+\fB/usr/lib/spec.d/site.mac\fP
+exists,
+it will be read each time any user runs \fBspec\fP.
+Site administrators are encouraged to put site\-specific commands
+in this file, for example, commands to assign
+synchrotron\-beamline monochromator parameters.
+.sp
+The
+\fBascan\fP
+and
+\fBa2scan\fP
+macros now include the values of
+\fBH\fP,
+\fBK\fP
+and
+\fBL\fP
+at each data point in the data file.
+.sp
+In the prescan limit checking for the various
+\fBhkl\fP
+scans,
+a check for motor\-limit problems at the last point of the scan
+has been added before the limit checking at the rest of the points
+in the scan.
+Thus, a limit problem that occurs at the extreme points in
+\fBH\fP,
+\fBK\fP
+and
+\fBL\fP
+will be caught earlier.
+.sp
+New scan macros
+\fBa3scan\fP
+and
+\fBd3scan\fP
+are included for scanning three
+motors at a time.
+.sp
+A new scan macro
+\fBhklmesh\fP
+is provided that does a mesh scan of any
+two of
+\fBH\fP,
+\fBK\fP
+and
+\fBL\fP.
+.sp
+The
+\fBscan_on\fP
+macro that restarts aborted scans
+now also works with mesh scans.
+.sp
+A
+\fBsetplot\fP
+macro is now included that lets you configure
+the output generated
+at the conclusion of a scan.
+You can choose from several combinations of printer and screen output.
+.sp
+The
+\fBdo\fP
+and
+\fBqdo\fP
+macros have been modified to look for command files
+in a directory given by the global variable
+\fBDO_DIR\fP
+if they can\(aqt
+be found in the current directory.
+.sp
+A new macro
+\fBscan_tail\fP,
+defined by default as
+\fB_tail\fP,
+is called
+at the end of each scan.
+This construction is similar to the
+\fBscan_head\fP
+and
+\fBscan_loop\fP
+macros
+already in place and is related to the
+\fBsetplot\fP
+macro described above.
+.sp
+New macros for the folks at X\-20 NSLS related to setting the X\-ray
+beam energy are included in the standard distribution.
+These macros are
+\fBset_E\fP,
+\fBget_E\fP,
+\fBmove_E\fP
+and
+\fBEscan\fP.
+.sp
+The
+\fBconfig\fP
+macro now does a
+\fBwaitall\fP
+and a
+\fBsync\fP
+before
+invoking the
+\fBedconf\fP
+program.
+.sp
+The CAMAC driver for the VENIX system on the AT computers
+has been changed to solve
+a problem with losing LAM interrupts that come in during servicing
+of a prior LAM interrupt.
+The bug would manifest itself with \fBspec\fP being hung and DSP 6001
+LAM lights being
+lit.
+(Affected sites should be sure to install the new driver.)
+(The problem does not occur on PDP systems.)
+.sp
+For folks running \fBspec\fP using VENIX on AT clones, \fBspec\fP is now
+compiled using the
+large\-model compiler.
+This gives
+a larger memory arena than otherwise available.
+The added memory comes at a slight loss of
+execution speed, though.
+(The regular\-model version is still available.)
+.sp
+\fBspec\fP now allows you to use more than one kind of motor controller
+at a time.
+(This feature entailed revising much motor\-related code \- please
+inform CSS if you notice any new bug manifestations.)
+.sp
+The
+\fBedconf\fP
+program (invoked by the
+\fBconfig\fP
+macro) has undergone
+some changes.
+A third screen is used to configure the device names.
+The order of the screens is changed so that the motor
+screen appears first.
+A new parameter for each motor indicates the type of controller
+to be used for that motor.
+.sp
+A presence check is now performed on all types of motor controllers,
+not just on the E500.
+The check is performed with the
+\fBreconfig\fP
+command now, rather than
+with the
+\fBsync\fP
+command.
+When a controller fails the presence test, the associated motors are
+marked as
+\fBunusable\fP.
+.sp
+The
+\fB"clearing remaining steps"\fP
+message that occurred on
+\fB^C\fP
+aborts
+of E500 motors has been eliminated from normal operation.
+The message will appear when hardware debugging is turned on, though.
+.sp
+A bug with using the
+\fBmcount()\fP
+function (counting to monitor) with
+the RTC\-018 controller has been fixed.
+Previously the monitor counts
+would be off by a factor of 64.
+.sp
+The first draft of general serial device routines,
+\fBser_get()\fP
+and
+\fBser_put()\fP
+is now available.
+See the
+\fBserial\fP
+help file
+for more information.
+.sp
+A bug where \fBspec\fP tended to dump core after you typed three
+\fB^C\fP\(aqs
+to
+stop motors and
+got the message
+.sp
+.RS 4m
+\fBGiving up on waiting.\fP
+.sp
+\fBIf motor control is hung, type \(gasync\(aq.\fP
+.RE
+.sp
+is fixed.
+.sp
+A bug where \fBspec\fP would screw up if you had more than nine
+arguments in a macro has been
+fixed.
+.sp
+A bug where macro definitions very close to the maximum
+length caused \fBspec\fP to screw up badly has been fixed.
+.sp
+To aid in debugging and testing new versions of \fBspec\fP, a
+new command line argument,
+.BI \-D " specdir"
+is available.
+It selects
+the name of the
+auxiliary file directory to be used instead of the compiled in
+directory, normally
+\fB/usr/lib/spec.d\fP.
+It is also possible to change the compiled in directory
+name when remaking \fBspec\fP
+on site.
+See the comments at the top of the file
+\fBu_hook.c\fP
+for an explanation
+of how.
+.sp
+There is an
+\fBawk\fP
+script,
+\fBaux/show.awk\fP
+in the distribution directory
+that can be used with \fBC\-PLOT\fP to produce summary plots of scans,
+twelve per page.
+The file contains comments explaining its usage.
+.sp
+The scripts to install kernel drivers,
+\fBinstall_dsp\fP
+and
+\fBinstall_386\fP,
+now take several command\-line options.
+See the
+\fBREADME\fP
+file in the
+\fBcamac\fP
+subdirectory of the distribution for details.
+

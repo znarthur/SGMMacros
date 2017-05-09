@@ -1,0 +1,316 @@
+changes                      spec 2.13 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 2.13
+
+DESCRIPTION
+
+     These notes summarize the modifications made for ssppeecc release 2.13, as
+     finalized on March 3, 1990.
+
+USER INTERFACE
+
+     The commands llssccmmdd, ssyymmss, llssddeeff and pprrddeeff now allow arguments containing
+     the metacharacters ??  and **, which have the conventional meanings.  Thus,
+     for example, typing llssddeeff **ssccaann will list all the macros whose names end
+     with the characters ssccaann.
+
+     Commands recalled using the history feature can now be modified using a
+     subset of the standard ccsshh history-feature syntax.  Appending
+     ::ss//lleefftt//rriigghhtt// to a history recalled item will modify the first occurrence
+     of the string lleefftt in the recalled command to the characters rriigghhtt.  The
+     delimiter of the left and right strings may be any character.  The final
+     delimiter is optional.  If lleefftt is empty, the last entered left string is
+     used as the pattern to match.  In addition, ^^lleefftt^^rriigghhtt^^ is short hand for
+     !!--11::ss//lleefftt//rriigghhtt//.  In this case the circumflex (^^) must be used as the
+     delimiter.
+
+     The debugging messages printed with DDEEBBUUGG==11002244 have been revised to show
+     more clearly the input text after macro expansion.
+
+     The help files have been reformatted in the style of the standard UNIX
+     manual pages, and many new help topics have been added.
+
+MACROS
+
+     The ssttaarrttuupp macro has been expanded to ask for values for most of the
+     variables and mode settings a user normally might change.  Besides
+     prompting for the title, printer device and data file, as before, the
+     ssttaarrttuupp macro now also invokes the ssttaarrtttteemmpp, sseettssccaannss, sseettpplloott and
+     ssttaarrttggeeoo macros.  It also prompts for values for the default count time
+     (CCOOUUNNTT), the user's command file directory (DDOO__DDIIRR) and the frequency of
+     screen updates during updated moving and counting (UUPPDDAATTEE).
+
+     The ssttaarrttuupp and nneewwffiillee macros now test if the specified printer or data
+     file can be opened, before assigning values to PPRRIINNTTEERR and DDAATTAAFFIILLEE.  Also,
+     the ssttaarrttuupp macro insists the printer name must begin with the characters
+     //ddeevv//.  One can still assign an arbitrary file or device to the printer,
+     though, by assigning a value to PPRRIINNTTEERR.
+
+     The macros have been revised to place the geometry-dependent parts in the
+     specific geometry macro source files.  In particular, the standard scan
+     macros no longer have four-circle motor names built in.
+
+     Most of the macros now explicitly declare local variables as llooccaall to
+     minimize name conflicts when macros are nested or new variable names are
+     used.
+
+     Most instances of ggeettaanngglleess in the standard macros are now preceded by a
+     wwaaiittmmoovvee.  Previously, macros such as hhssccaann, kkssccaann, etc., would read the
+     current angles, even if a motor was moving, when determining the starting
+     reciprocal space coordinates of the scan.
+
+     An updated-count macro uucctt has been added.  It continuously displays scaler
+     contents during the counting interval.
+
+     A new sseettssccaannss macro asks the user to configure scan options.  A new scan
+     option allows a user to eliminate the possibly time-consuming prescan limit
+     check performed for reciprocal space scans.  Another option causes the
+     motor positioning and counting during scans to use updated moving and
+     counting in the style of the uummvv and uucctt macros.  (On VENIX 286 systems
+     with CAMAC, these updated moves appear to sometimes hang.  VENIX 286 users
+     are advised to not rely on updated moves during unattended operation.)
+
+     The sseettpplloott macro has been substantially revised to reflect a number of new
+     plotting options available, including updated plots during scans, a
+     logarithmic yy axis and pinning the minimum yy value at zero.  See the pplloott
+     help file for details.
+
+     The information displayed above the screen plots can now be modified by the
+     user by redefining the macros rrpplloott__rreess and sspplloott__rreess.  The first of these
+     prints out information during the real-time screen plotting, while the
+     second is for the final screen plot.
+
+     A mmvvdd macro moves a motor with the position argument specified in ddiiaall
+     units.
+
+     There has been a difference in opinion among ssppeecc users as to whether the
+     ccaa macro should leave the calculated positions in HH, KK, LL and AA[[]], or
+     whether these variables should be restored to the current diffractometer
+     position after printing the results of the calculation.  To accommodate
+     both classes of users, a new macro ccaall is provided that leaves the
+     calculated positions in the appropriate variables.  The ccaa macro will
+     restore the variables to the current spectrometer position.
+
+     A new ssaavvccmmdd macro sends the output of any command to a file.  The first
+     argument to ssaavvccmmdd is the command to save, the second argument is the file
+     name.  Multiple commands or multi-word commands can be saved by enclosing
+     them in quotes, as in ssaavvccmmdd ""wwmm tthh tttthh"" mmoottoorr__ffiillee.
+
+     The ddeebbuugg macro now examines its argument or the prompted-for value for an
+     initial ++ or --.  A ++ adds the specified level to the current debugging
+     variable, while a -- removes the specified level.
+
+FUNCTIONS
+
+     The built-in commands ooppeenn, cclloossee, oonn and ooffff have been replaced by the
+     functions ooppeenn(()), cclloossee(()), oonn(()) and ooffff(()).  Functions are more versatile
+     than commands as their return values can be used in expressions.  Macros
+     that open files can now look at the return value of the ooppeenn(()) function and
+     take appropriate action if the file can't be opened, rather than be reset
+     to command level.  See the ffiilleess help file for details of the new usage.
+     All standard macros have been adapted to the new usage.
+
+     The sslleeeepp(()) function now takes fractional-valued arguments to specify sleep
+     periods of sub-second resolution.  Periods greater than five seconds are
+     rounded to the nearest second.  The previous syntax that used negative
+     integer arguments to specify sleeps in units of a sixtieth of a second will
+     continue to be recognized for the time being.
+
+     The ttccoouunntt(()) function now accepts nonintegral count times.
+
+     A new function, mmoottoorr__ppaarr(()), returns configuration parameters for a
+     particular motor.  Presently, only the step-size parameter is returned.
+     See the mmoottoorrss help file for usage.
+
+     A new function, ppll__dduummpp(()), efficiently prints all or a portion of the
+     built-in plot array to output devices and files.  See the pplloott help file
+     for details.
+
+     The ppll__aannaall(()) function now returns the sum of the squares of the yy values
+     when called with an argument of 12.  The macro ppll__SSUUMMSSQQ is defined to be
+     this quantity.
+
+     The ppll__aannaall(()) function can now do a simple linear-background subtraction
+     before doing the standard analyses.  The linear background is calculated
+     from the scan endpoints.  The new built-in variable BBGGPPTTSS can be set to the
+     number of points from each end of the scan to average together before
+     calculating the linear background.  The macros, ppll__bbggMMAAXX, ppll__bbggUUHHMMXX,
+     ppll__bbggLLHHMMXX, ppll__bbggSSUUMM, ppll__bbggFFWWHHMM, ppll__bbggCCFFWWHHMM and ppll__bbggxxMMAAXX have been defined
+     as appropriate calls of ppll__aannaall(()).  The sseettpplloott macro can be used to select
+     the background subtraction mode.  See the pplloott help file for more
+     information.  This is a trial feature, implemented in response to a
+     specific user request and may be modified substantially in future releases.
+
+GEOMETRY CODE
+
+     The four-circle pphhii--zzeerroo geometry mode has been changed to a pphhii--ffiixxeedd
+     mode.  To recover the previous operation, use the ffrreeeezzee macro to freeze
+     the value of pphhii at zero.
+
+     The macros for the four-circle lattice-parameter-refinement feature (or the
+     fitting-the-orientation-matrix feature) have been renamed from bbeegg__rreefflleexx,
+     aadddd__rreefflleexx and eenndd__rreefflleexx to rreefflleexx__bbeegg, rreefflleexx and rreefflleexx__eenndd.
+
+     Support for a new geometry configuration, zzaaxxiiss (see J.M. Bloch, JJ.. AAppppll..
+     CCrryysstt..  (1985) 1188, 33-36), is included.  The source code is in the file
+     ggeeoo__zzaaxxiiss..cc.
+
+     The code for the ssuurrff geometry configuration has been expanded to
+     accommodate a similar spectrometer used at Saclay.
+
+HARDWARE
+
+     Support for the DSP TS-201 counter/timer CAMAC module is included.  Count
+     intervals can only be specified to within 1.5 percent when counting to time
+     and to a power of two when counting to monitor.  When counting to monitor,
+     gating requires software intervention, causing an unavoidable latency in
+     disabling the counter, resulting in variable count intervals.
+
+     Code to support the LeCroy CAMAC Model 2301 interface for the QVT
+     Multichannel Analyzer used with a wire linear detector is now included.
+     The ggeettmmccaa(()) command is used to read the MCA.  See the ccoouunnttiinngg help file
+     for more information.  The ttccoouunntt(()) and mmccoouunntt(()) functions will clear,
+     start and stop the MCA using the configured timing generator.  The software
+     gating will not interfere with hardware gating, if hardware gating is
+     present.
+
+     The code for the Joerger SMC CAMAC motor controller has been expanded to
+     support Model SMC-LP, which has programmable velocity and acceleration
+     registers.  The eeddccoonnff program now accepts these parameters for all SMC
+     controllers, although the values entered are ignored for the other models.
+
+     Timing problems with the Kinetic Systems 3388 GPIB CAMAC module on fast 386
+     computers have been fixed.
+
+     PC counting boards based on the Am9513 counter/timer chip, such as the
+     MetraByte CTM-05 and the Scientific Solutions Lab Master, may now be used
+     with ssppeecc.  Presently, the board is handled using user-level busy-wait
+     loops.  In the future, an interrupt-driven driver will be provided.
+
+     The Advanced Control Systems Step Pak RS-232C motor controllers are now
+     supported.
+
+     Timeout errors on the National Instrument GPIB interface no longer cause a
+     return to command level.  On a timeout error, a ggppiibb__ggeett(()) will return an
+     empty string, and a ggppiibb__ppuutt(()) will return zero.  Other errors, such as no
+     GPIB listener, still reset to command level.
+
+     Trailing newlines and carriage returns are now stripped from the strings
+     returned by ggppiibb__ggeett(()) when using the National Instruments GPIB board.
+     Code for the other supported GPIB hardware has always done this.
+
+     The CAMAC driver for VENIX 286 can now be installed to support the modified
+     DSP 6001/2 crate controllers by invoking the iinnssttaallll__ddsspp script with the --MM
+     flag.
+
+UTILITIES
+
+     A new utility command to be run from the shell called sshhoowwssccaannss is
+     included.  The sshhoowwssccaannss utility uses the CC--PPLLOOTT package and the sshhooww..aawwkk
+     script (introduced in release 2.11) to produce summary plots of scans.
+     When you install ssppeecc, sshhoowwssccaannss (and also ccoonntteennttss) are now also installed
+     automatically.  A new file aauuxx//RREEAADDMMEE describes sshhoowwssccaannss and the other
+     auxiliary files included with the ssppeecc package.
+
+ADMINISTRATION
+
+     The distribution no longer comes with a prelinked version of the ffoouurrcc
+     executable.  When you install the software for the first time, several
+     source files will be compiled and all the object modules linked to produce
+     the target executable.
+
+     The eeddccoonnff program has been revised to accommodate the increasing number of
+     hardware devices that ssppeecc supports.  Most of these changes affect the
+     format of the device screen.
+
+     Changes in the way eeddccoonnff backs up the ccoonnffiigg and sseettttiinnggss files should
+     lesson instances of accidental total loss of motor positions through user
+     inattention.  The files are now backed up only once when running eeddccoonnff,
+     and then only when you try to write out the files, not when starting up.
+
+     There is also a new undocumented security feature offered by eeddccoonnff that
+     implements an additional level of protection to prevent unauthorized users
+     from changing the configuration of selected motors.  ssppeecc administrators
+     who require this additional security should contact CSS for instructions.
+
+     It is now possible to link versions of ssppeecc that contain only the hardware
+     modules that will be used by a specific site.  You must edit MMaakkeeffiillee and
+     uu__hhddww..cc in the the distribution directory and relink the appropriate
+     binaries.  See the ssiittee__eegg target in MMaakkeeffiillee for an example.
+
+MISCELLANEOUS
+
+     A newly revised and indexed manual is included in this release of ssppeecc.
+
+     When ssppeecc in invoked with the --ss flag, it is no longer possible to turn off
+     simulate mode without restarting the program from the shell.  This
+     eliminates ambiguities about whether or not the configured hardware devices
+     are opened and properly initialized when simulate mode is turned off.
+
+     When simulate mode is in effect, the rreeccoonnffiigg command will read the
+     sseettttiinnggss file, but will not read the ccoonnffiigg file or change the hardware
+     configuration.
+
+     The names of the state files in the uusseerrffiilleess subdirectories have been
+     changed to use more characters from the user's login and terminal name.
+
+     When invoking ssppeecc from the shell the ttttyy part of the --tt _t_t_y option must
+     now contain the complete name of the device, either as //ddeevv//ttttyy1122 or as
+     ttttyy1122.
+
+     The memory arena routines have been rewritten to accommodate an arena twice
+     as large on the VENIX LMC version of ssppeecc.  Users can now include entire
+     scans within single statement blocks without running out of memory.
+
+     The distributed version of ssppeecc is now compiled for 40 motors.
+
+BUG FIXES
+
+     A bug that caused unintended motor movement under a particular scenario has
+     been fixed.  If you had commanded a move involving several motors (with the
+     bbrr macro, for example) and one of the motors was out of limits the move
+     would be canceled.  However, the next time you moved a motor, the motors
+     that were not out of limits in the previous move would move to the
+     previously commanded positions under some conditions.  This rather serious
+     bug has been fixed.
+
+     A bug where the next command typed in after hitting a hard motor limit was
+     ignored has been fixed.  Previously, any type ahead from the keyboard would
+     be flushed after hitting a hard limit.  Type ahead is no longer flushed,
+     although command files are still closed after hitting a limit.
+
+     In previous versions, there were small intervals of time where keyboard
+     interrupts (^^CC's) were ignored to prevent critical code from being
+     disturbed.  Ignoring interrupts is poor programming, as it makes the
+     program response unpredictable to the user.  In addition, on rare
+     occasions, ssppeecc would enter a state where ^^CC's were ignored while motors
+     were moving or counters were counting.  In this release, the critical code
+     is protected in ways other than ignoring ^^CC's.  The method now used still
+     has flaws due to fundamental limitations in the system calls being used.
+     In the next release, the code will employ system calls available on systems
+     other than VENIX for the 286 and PDP 11/73 to enable much more robust
+     interrupt handling.  Users of VENIX will, unfortunately, not benefit from
+     those changes.
+
+     A bug in the grammar where expressions using the Boolean operators !!, &&&&
+     and |||| reported syntax errors in a number of contexts has been fixed.
+
+     A bug, whereby number values obtained from strings (returned by iinnppuutt(()),
+     for example) were not scanned for octal or hexadecimal prefixes has been
+     fixed.
+
+     The implementation of the llooccaall command has been totally revised to fix
+     numerous bugs, the most serious of which made a built-in variable disappear
+     if it was declared llooccaall.
+
+     Error messages are now printed if you use the gglloobbaall, uunngglloobbaall or ccoonnssttaanntt
+     commands with built-in symbols.
+
+     A bug, whereby the code that calculated the values returned by ppll__aannaall(())
+     for the FWHM and the center of the FWHM did poorly for certain unusual sets
+     of data points, has been fixed.
+
+     A bug, where trying to print a very long string using pprriinntt, pprriinnttff or
+     sspprriinnttff, would cause a core dump, has been fixed.
+

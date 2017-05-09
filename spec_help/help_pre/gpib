@@ -1,0 +1,147 @@
+gpib                                hardware                                gpib
+
+NAME
+     gpib - GPIB (IEEE 488) interface
+
+BUILT-IN FUNCTIONS
+
+     ggppiibb__ccnnttll((aa,, ss)) - Performs the selected GPIB command on the device with
+          address aa.  The string ss is one of the following:
+
+          ""ggttll"" - Go to local.
+          ""lllloo"" - Local lockout.
+          ""ssddcc"" - Selected device clear.
+          ""ddccll"" - Device clear (sent to all devices).
+          ""ggeett"" - Group execute trigger (only sent to the single addressed
+               device).
+          ""iiffcc"" - Interface clear.  This command resets the GPIB bus by sending
+               the IFC message.  The address aa is ignored.  ssppeecc runs the same
+               code sequence with the ""iiffcc"" command as it does when it
+               initializes the GPIB controller on start up or on the rreeccoonnffiigg
+               command.  For most controllers, ssppeecc sleeps for some fraction of
+               a second after resetting the bus.  Also, for most controllers,
+               ssppeecc asserts the REN (remote enable) command after sending IFC.
+          ""rreessppoonnssiivvee"" - Not a GPIB command, but returns 1 or 0 indicating
+               whether the associated controller is configured and working.
+               Note, the test is on the controller, not the device.  To test
+               controllers other than unit 0, the address syntax for aa is ""11::11""
+               or 110011 for unit 1, etc.  See the section on multiple GPIB
+               controllers below.  The device address isn't used.
+
+     ggppiibb__ggeett((aa)) - Returns a string from the GPIB device with address aa.
+          Requires the device to terminate the string with a newline, although
+          the trailing newline (and carriage return, if present) is removed from
+          the string before it is returned.
+
+     ggppiibb__ggeett((aa,, nn)) - As above, but reads nn bytes and doesn't look for a
+          terminator.
+
+     ggppiibb__ggeett((aa,, eeooss)) - As above, but reads up until a terminator given by the
+          first character of the string eeooss, except for the special cases
+          described below.  The terminator is removed.
+
+     ggppiibb__ggeett((aa,, dd)) - Reads incoming bytes into the data array dd. The size of dd
+          determines how many bytes are to be read.  Sub-array syntax can be
+          used to limit the number of bytes.  The function returns the number of
+          array elements read, or zero if the read times out.  Note, no byte
+          re-ordering is done for short- or-long integer data, and no format
+          conversions are done for float or double data.
+
+     ggppiibb__ggeett((aa,, mmooddee)) - If mmooddee is the string ""bbyyttee"", reads and returns one
+          unsigned binary byte.  If mmooddee is the string ""sshhoorrtt"", reads two binary
+          bytes and returns the short integer so formed.  If mmooddee is the string
+          ""lloonngg"", reads four binary bytes and returns the long integer so
+          formed.  The last two modes work the same on both bbiigg--eennddiiaann and
+          lliittttllee--eennddiiaann platforms.  On both, the incoming data is treated as bbiigg
+          eennddiiaann.  If the incoming data is lliittttllee eennddiiaann, use ""sshhoorrtt__sswwaapp"" or
+          ""lloonngg__sswwaapp"".  (For ssppeecc versions prior to release 5.01.01, use iinntt22
+          for sshhoorrtt and iinntt44 for lloonngg.)
+
+     ggppiibb__ppoollll((aa)) - Returns the serial-poll status from the device with address
+          aa.
+
+     ggppiibb__ppuutt((aa,, ss)) - Writes the string ss to the GPIB device with address aa.
+          Returns the number of bytes written.
+
+     ggppiibb__ppuutt((aa,, dd,, [[ccnntt]])) - Writes the contents of the data array dd to the GPIB
+          device with address aa.  By default, the entire array (or subarray, if
+          specified) will be sent.  The optional third argument ccnntt can be used
+          to specify the number of array elements to send.  For short and long
+          integer arrays, the data will be sent using native byte order.  The
+          ""sswwaapp"" option of the aarrrraayy__oopp(()) function can be used to change the
+          byte order, if necessary.  No format conversions are available for
+          float or double data.  Returns the number of bytes written.
+
+     ggppiibb__ppuutt((aa,, """")) - Performs a listener check at device address aa. Writing a
+          null string (zero-length message) generates a return value of 1 if
+          there is a listener, zero if there is no listener and -1 if the GPIB
+          controller doesn't support the test (as of ssppeecc release 5.07.03-4).
+
+     ggppiibb__ppaarr((aaddddrr,, ""ttiimmeeoouutt"" [[,, tt]])) - Returns or sets the timeout for the
+          device with address aaddddrr. The units are seconds.  A value less than or
+          equal to zero resets the timeout to the default value of three
+          seconds.  Timeouts are per device (rather than per controller).  The
+          timeouts only apply to the user-level GPIB commands.  Timeouts used by
+          built-in hardware support will continue to apply to that access.  (As
+          of ssppeecc release 5.09.02-3.)
+
+MULTIPLE GPIB CONTROLLERS
+
+     ssppeecc allows up to eight GPIB controllers to be configured by the same
+     instance of ssppeecc.  In the configuration editor, use the ^^FF and ^^BB command
+     on the GPIB controller line of the Interfaces screen to configure each
+     controller.  To include a unit number in a GPIB address for a device, enter
+     the address using the notation uunniitt::aaddddrreessss.  An absent uunniitt:: prefix
+     implies GPIB controller unit zero.
+
+     In the ccoonnffiigg file, the unit number associated with a GPIB controller is
+     specified with @@ggppiibb__00, @@ggppiibb__11, etc.  Also, GPIB unit numbers are encoded
+     using
+
+         uunniitt ** 110000 ++ aaddddrreessss
+
+     for the GPIB address.  From ssppeecc, the ggppiibb__ggeett(()), ggppiibb__ppuutt(()), etc.,
+     commands described above, can use either the above coding, the syntax
+     ""uunniitt::aaddddrreessss"" (the quotes are required) or the syntax uunniitt..aaddddrreessss (as of
+     release 5.07.02-2).
+
+SECONDARY GPIB ADDRESS
+
+     Secondary GPIB addresses are supported for all the above functions.  The
+     address argument must be passed as a string however, of the form ""pprrii__sseecc"",
+     where pprrii is the primary GPIB address and sseecc is the secondary GPIB
+     address.  For example,
+
+         pprriinntt ggppiibb__ggeett((""33__1122""))
+
+     will display the string read from the device with a primary GPIB address of
+     3 and a secondary GPIB address of 12.  There is no provision to include
+     secondary addresses as part of the device configuration information
+     contained in the hardware ccoonnffiigg file.
+
+SHARING GPIB CONTROLLERS
+
+     ssppeecc communicates with the GPIB controllers at board (rather than device)
+     level.  That makes it unlikely that an arbitrary program could also use the
+     same GPIB controller successfully simultaneously.  However, ssppeecc can share
+     a GPIB controller among multiple instances of itself.  The state of the
+     controller is communicated between the processes using the interprocess
+     communications (IPC) semaphore and shared-memory facilities.  Thus sharing
+     is only available on platforms that include these facilities in the kernel.
+
+     When sharing multiple GPIB controllers, please note it is essential each
+     shared controller have the same GPIB controller unit number in the ssppeecc
+     configuration file.
+
+     Note that ssppeecc uses only one semaphore to regulate access to all the shared
+     controllers.  Thus, if there are two GPIB controllers configured as shared,
+     when any process accesses either controller, other processes will be
+     blocked from accessing both controllers until the first process releases
+     the semaphore.  Note also that when the Kinetic Systems KS-3929
+     SCSI-to-CAMAC controller is configured as a shared controller, the same
+     semaphore is again used.
+
+SEE ALSO
+
+     _s_e_r_i_a_l _c_o_n_f_i_g___a_d_m
+

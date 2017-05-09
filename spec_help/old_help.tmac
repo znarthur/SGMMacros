@@ -1,0 +1,443 @@
+'\" @(#)old_help.tmac	6.3  07/18/13 CSS
+'\" @(#)an.src  1.2 - 87/07/30
+'\"
+'\" "spec" Release 6
+'\"
+'\" Copyrighted as an unpublished work.
+'\" Copyright (c) 1991,1992,1994,1995,2004,2010,2012,2013
+'\" by Certified Scientific Software.
+'\" All rights reserved.
+'\"
+'\"   Number Registers:
+'\"     nr #X   indent factor from argument within .HP and .hp
+'\"     nr )E
+'\"     nr )I
+'\"     nr )L   page length (sort of)
+'\"     nr )M
+'\"     nr )M   indent?
+'\"     nr )R
+'\"     nr )V   vertical spacing
+'\"     nr )f   font for bold
+'\"     nr )p
+'\"     nr :m   distance to bottom trap
+'\"     nr :m   header margin
+'\"     nr IN
+'\"     nr LL   line length
+'\"     nr PD   spacing between paragraphs
+'\"
+'\"   Macros:
+'\"     de TH  - Called first to set things up
+'\"     de SH  - Section header
+'\"     de I   - Italic font
+'\"     de B   - Bold font
+'\"     de C   - Courier font
+'\"     de O   - Courier Oblique font
+'\"     de RI  - Alternating Roman/Italic
+'\"     de IR  - ... Italic/Roman
+'\"     de BI  - ... Bold/Italic
+'\"     de IB  - ... Italic/Bold
+'\"     de RB  - ... Roman/Bold
+'\"     de BR  - ... Bold/Roman
+'\"     de RC  - ... Roman/Courier
+'\"     de CR  - ... Courier/Roman
+'\"     de CI  - ... Courier/Italic
+'\"     de IC  - ... Italic/Courier
+'\"     de CB  - ... Courier Bold/Roman
+'\"     de CO  - ... Courier/Courier Oblique
+'\"     de OC  - ... Courier Oblique/Courier
+'\"     de OR  - ... Courier Oblique/Roman
+'\"     de RO  - ... Roman/Courier Oblique
+'\"     de PP  - Paragraph
+'\"     de P   - calls PP
+'\"     de LP  - calls LP
+'\"     de Q   - Enclose argument in quotes
+'\"     de HP  - Hanging tag paragraph
+'\"     de IP  - Indented Paragraph
+'\"     de RS  - Increase relative indent
+'\"     de RE  - Decrease relative indent
+'\"     de (L  - Begin indented no-fill block
+'\"     de )L  - End it
+.ftr W   R
+.ftr WI  I
+.ftr WB  B
+.ftr WD  I
+.ftr A   R
+.ftr AO  I
+.ftr TR  R
+.ftr TB  B
+.ftr TI  I
+.ftr C   B
+.de }E
+.}f 
+.in \\n()Ru+\\n(INu
+.lt \\n(LTu
+..
+.de DT
+.ta 5n 10n 15n 20n 25n 30n 35n 40n 45n 50n 55n 60n 65n 70n 75n 80n 85n 90n 95n 100n
+..
+.de }f
+.ft 1
+..
+.de }H
+.ev 1
+.}E 
+'sp 3v
+.if "\\*(]L"" .tl "\\*(]H"\\*(]D"\\*(]H"
+.el \{\
+.       ie "\\*(]D"" .tl "\\*(]H"\\*(]L"\\*(]H"
+.       el .tl "\\*(]H\|\\*(]L"\\*(]D"\\*(]H\|\\*(]L"
+.\}
+'sp 3v
+.ev 
+.ns 
+.\" For screen display, just want one instance of the header
+.\" Old nroff versions screw up with .pl 1100i
+.rm }H
+..
+.de }F
+.ev 1
+.}E 
+.       ev
+'       bp
+..
+.de }K
+.}N 
+..
+.\" Avoid getting % G % eaten up by SCCS
+.ds %G %G
+.as %G %
+.de HR
+.if "\\$2"C" \\f\\*(#C\c
+.if "\\$2"I" \\f\\*(#I\c
+\\$1 \c
+.if "\\$2"C" \\fP\c
+.if "\\$2"I" \\fP\c
+..
+.de TH
+.PD 
+.nr % 1
+.nr IN \\n()Mu
+.ds ]H \\$1
+.ie "\\$3"\\*(%G" .ds ]W
+.el .ds ]W "Last Modified: \\$3
+.ds ]T \\$4
+.ie "\\$5"" .ds ]L
+.el .ds ]L (\^\\$5\^)
+.ds ]U \\n(mo/\\n(dy/\\n(yr
+.ds ]V
+.ds ]Y
+.ds ]Z
+.ds ]D \\$2
+.wh 0 }H
+.wh -\\n(:mu }F
+.nr )I \\n()Mu
+.nr )R 0
+.}E
+.hy 14
+.DT
+.na
+.\".rm TH
+..
+.de SH
+.}X  0 "\\$1" smaller
+.nr )E 2
+\&\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6
+..
+.de SS
+.}X  3n "" ""
+.nr )E 2
+\&\\$1 \|\\$2 \|\\$3 \|\\$4 \|\\$5 \|\\$6
+..
+.de }X
+.}E 
+.ti \\$1
+.sp \\n(PDu
+.ne 2.2v
+.nr )R 0
+.fi 
+.it 1 }N
+..
+.de }2
+.nr )E 0
+.}E 
+.nr )I \\n()Mu
+.ns 
+..
+.de }r
+.}f 
+.lt \\n(LTu
+..
+.de I
+\&\f\\*(#I\c
+.if \\n(.$=0  .it 1 }N
+.if \\n(.$=1  \&\\$1\fP
+.if \\n(.$>1  \&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\fP
+..
+.de B
+\&\f\\*()f\c
+.if \\n(.$=0  .it 1 }N
+.if \\n(.$=1  \&\\$1\fP
+.if \\n(.$>1  \&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\fP
+..
+.de C
+\&\f\\*(#C\c
+.if \\n(.$=0  .it 1 }N
+.if \\n(.$=1  \&\\$1\fP
+.if \\n(.$>1  \&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\fP
+..
+.de O
+\&\f\\*(#O\c
+.if \\n(.$=0  .it 1 }N
+.if \\n(.$=1  \&\\$1\fP
+.if \\n(.$>1  \&\\$1 \\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9\fP
+..
+.de RI
+\&\\$1\f\\*(#I\\$2\fP\\$3
+..
+.de ri
+\&\\$1\f\\*(#I\\$2\fP\\$3\\c
+..
+.de RB
+\&\\$1\f\\*()f\\$2\fP\\$3
+..
+.de rb
+\&\\$1\f\\*()f\\$2\fP\\$3\\c
+..
+.de RC
+\&\\$1\f\\*(#C\\$2\fP\\$3
+..
+.de rc
+\&\\$1\f\\*(#C\\$2\fP\\$3\\c
+..
+.de IR
+\&\f\\*(#I\\$1\fP\\$2\\$3
+..
+.de ir
+\&\f\\*(#I\\$1\fP\\$2\\$3\\c
+..
+.de BI
+\&\f\\*()f\\$1\fP\f\\*(#I\\$2\fP\\$3
+..
+.de IB
+\&\f\\*(#I\\$1\fP\f\\*()f\\$2\fP\\$3
+..
+.de BR
+\&\f\\*()f\\$1\fP\\$2\\$3
+..
+.de CR
+\&\f\\*(#C\\$1\fP\\$2\\$3
+..
+.de CB
+\&\f\\*(#B\\$1\fP\\$2\\$3
+..
+.de CI
+\&\f\\*(#C\\$1\fP\f\\*(#I\\$2\fP\\$3
+..
+.de ci
+\&\f\\*(#C\\$1\fP\f\\*(#I\\$2\fP\\$3\\c
+..
+.de IC
+\&\f\\*(#I\\$1\fP\f\\*(#C\\$2\fP\\$3
+..
+.de ic
+\&\f\\*(#I\\$1\fP\f\\*(#C\\$2\fP\\$3\\c
+..
+.de CO
+\&\f\\*(#C\\$1\fP\f\\*(#O\\$2\fP
+..
+.de co
+\&\f\\*(#C\\$1\fP\f\\*(#O\\$2\fP\\c
+..
+.de OC
+\&\f\\*(#O\\$1\fP\f\\*(#C\\$2\fP
+..
+.de oc
+\&\f\\*(#O\\$1\fP\f\\*(#C\\$2\fP\\c
+..
+.de OR
+\&\f\\*(#O\\$1\fP\\$2\\$3
+..
+.de RO
+\&\\$1\f\\*(#O\\$2\fP\\$3
+..
+.de ro
+\&\\$1\f\\*(#O\\$2\fP\\$3\\c
+..
+.de PP
+.sp \\n(PDu
+.ne 1.1v
+.}E 
+.nr )I \\n()Mu
+.ns 
+..
+.de Q
+\&\\*(lq\\$1\\*(rq\\$2
+..
+.de P
+.PP 
+..
+.de LP
+.PP 
+..
+.de PD
+.nr PD 1v
+.if !"\\$1"" .nr PD \\$1v
+..
+.\" List item
+.de LI
+\&\\$1\t
+..
+.\" Begin list
+.de BL
+.sp 1v/5u
+.sp
+..
+.\" End list
+.de EL
+.sp 1v/5u
+.sp
+.ns
+..
+.de DL
+..
+.de DD
+.if !"\\$1"" \&\\$1 \&\c
+..
+.de HP
+.if "\\$1"" .sp \\n(PDu
+.if "\\$1"0" .sp \\n(PDu
+.ne 1.1v
+.nr #X 0
+.if !"\\$1"" .nr #X \\$1
+.in \\n()Ru+(\\n(INu*(1u+\\n(#Xu))+\\n()Iu
+.ti \\n()Ru+(\\n(INu*(1u+\\n(#Xu))
+.}f 
+..
+.de hp
+.sp .5
+.ne 1.1v
+.nr #X 0
+.if !"\\$1"" .nr #X \\$1
+.in \\n()Ru+(\\n(INu*(1u+\\n(#Xu))+\\n()Iu
+.}f 
+..
+.de IP
+.TP  \\$2
+\&\\$1
+..
+.de TP
+.if !"\\$1"" .nr )I \\$1n
+.sp \\n(PDu
+.ne 1.1v
+.in \\n()Ru
+.lg 0
+.ns 
+.it 1 }N
+.nr )E 1
+.di ]B
+..
+.de }1
+.ds ]X \&\\*(]B\\
+.rm ]B
+.nr )E 0
+.if !"\\$1"" .nr )I \\$1n
+.}f 
+.in \\n()Ru+\\n(INu+\\n()Iu
+.ti \\n(INu
+.ie !\\n()Iu+\\n()Ru-\w"\\*(]X"u-3p \{\
+\\*(]X
+.       br
+.\}
+.el \\*(]X\h"|\\n()Iu+\\n()Ru"\c
+.}f 
+.lg 
+..
+.de }N
+.if \\n()E .br
+.di 
+.if "\\n()E"0" .}f
+.if "\\n()E"1" .}1
+.if "\\n()E"2" .}2
+..
+.de RS
+.nr ]\\n+()p \\n()I
+.nr )\\n()p \\n()R
+.ie !"\\$1"" .nr )R +\\$1n
+.el .nr )R +\\n()I
+.nr )I \\n()Mu
+.}E 
+..
+.de RE
+.if !"\\$1"" \{\
+.       ie "\\$1"0" .nr )p 1 1
+.       el .nr )p \\$1 1
+.\}
+.ds ]i \\*(]I\\n()p
+.ds ]r \\*(]R\\n()p
+.nr )I \\*(]i
+.nr )R \\*(]r
+.if \\n()p .nr )p -1
+.}E 
+..
+.de (L
+.br
+.if !"\\$2"" .ne \\$2v
+.if !"\\$3"" .RS \\$3
+.sp 1v
+.if "\\$1"R" \&\f1\c
+.if "\\$1"I" \&\f\\*(#I\c
+.if "\\$1"B" \&\f3\c
+.if "\\$1"C" \&\f\\*(#C\c
+.if "\\$1"O" \&\f\\*(#O\c
+.if "\\$1"CO" \&\f\\*(#O\c
+.nf
+.in \\n()Ru+\\n(INu+\\n()Iu
+.\".in \\n()Ru+\\n(INu
+..
+.de )L
+.br
+.RE
+.sp 1v
+.fi
+.}E
+..
+.rn sp @s
+.de sp
+.ie "\\$1"1v/4u" .@s 1
+.el .@s 1
+.fi
+..
+.ds T \t
+.ds #I 3
+.nr )L 11i
+.}f
+.nr :m 6v
+.ds R (Reg.)
+.ds S
+.ds E \&...
+.ds Tm \uTM\d
+.ds )f 3
+.nr )M 5n
+.ds #C 3
+.ds #O 3
+.ds #B 3
+.ds lq ""
+.ds rq ""
+.ds CP \f\*(#CC\(hyPLOT\fP
+.ds SP \f3spec\fP
+.ds UN UNIX
+.nr LT \n(LLu
+.nr )p 0 1
+.ds ]I \\\\n(]
+.ds ]R \\\\n()
+.ev 0
+.}r 
+.ev 
+.ev 1
+.}r 
+.ev 
+.ev 2
+.}r 
+.ev 
+.em }K
+.tr @"

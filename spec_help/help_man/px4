@@ -1,0 +1,491 @@
+.TH "px4" "hardware" "05/16/13" "px4.rst 6.2  05/16/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+px4 \- Amptek PX4 USB/Serial MCA
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)px4.rst  6.2  05/16/13  CSS
+.
+.\" Copyright (c) 2006,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "px4" "hardware" "05/16/13" "px4.rst 6.2  05/16/13 CSS"
+.
+.SH "INTRODUCTION"
+.rs
+.sp
+\fBspec\fP supports the Amptek PX4 over both USB and RS\-232C interfaces.
+(USB support in \fBspec\fP is currently available on Linux and Mac OS X
+platforms.) The serial baud rate is fixed at 57.6K.
+.sp
+In USB mode, the maximum number of data channels is 8,192.
+With the serial interface, the PX4 can be configured for
+up to 4,096 channels.
+.sp
+Multiple PX4 units can be configured for simultaneous use with \fBspec\fP.
+When using the USB interface, the module serial number can be configured
+in the \fBADDR\fP field of the configuration editor.
+If the configured serial number or numbers are zero,
+\fBspec\fP will assign the USB PX4 modules in the order they are discovered
+on the USB bus.
+.sp
+The PX4 has many operational parameters.
+Amptek provides Windows\-compatible software to control the PX4.
+That software can read and create parameter configuration files that
+are interchangeable with \fBspec\fP.
+See the \fB"read_config"\fP and \fB"save_config"\fP options to
+\fBmca_par()\fP below.
+.SH "FUNCTIONS"
+.rs
+.sp
+The standard MCA commands supported by \fBspec\fP are described in the
+\fI\%mca\fP help file.
+Of the standard functions, the Amptek PX4 MCA supports
+\fBmca_get()\fP (but not \fBmca_put()\fP). The standard
+\fBmca_par()\fP options
+\fB"info"\fP, \fB"chans"\fP, \fB"max_chans"\fP, \fB"max_channels"\fP,
+\fB"disable"\fP, \fB"auto_run"\fP, \fB"soft_preset"\fP,
+\fB"auto_clear"\fP, \fB"native_type"\fP, \fB"run"\fP, \fB"halt"\fP,
+\fB"clear"\fP, \fB"group_size"\fP
+and \fB"select_group"\fP, are supported by the Amptek PX4 MCA.
+.sp
+The option \fB"npts"\fP is a synonym for \fB"group_size"\fP. The option
+\fB"buffer"\fP is a synonym for \fB"select_group"\fP.
+.sp
+The \fB"auto_clear"\fP mode is on by default.
+.sp
+Options specific to the PX4 are described below.
+.sp
+\fBMCA\fP
+.RS 0m
+.HP 5m
+."
+\fBmca_par("npts" [, value])\fP
+\- 
+With the optional argument, sets the number of channels to
+\fBvalue\fP. Allowed settings are 256, 512, 1024, 2048 and 4096.
+When using the USB interface, 8192 is also allowed.
+Returns the current number of channels.
+.HP 5m
+."
+\fBmca_par("input_gate" [, value])\fP
+\- 
+With the optional argument, sets the TTL gate according to
+\fBvalue\fP, which can be a number or a string, as below:
+.nf
+\fB0 or "off"\fP
+\fB1 or "high"\fP
+\fB2 or "low"\fP
+.fi
+.sp
+.sp
+Returns one of the above strings, indicating the state of the TTL gate.
+.HP 5m
+."
+\fBmca_par("slow_threshold" [, value])\fP
+\- 
+With the optional argument, sets the slow threshold percent to
+\fBvalue\fP. The allowed range is from 0 to 24.41% of full scale.
+Returns the current setting.
+.HP 5m
+."
+\fBmca_par("SCA#" [, value])\fP
+\- 
+With the optional argument, sets the SCA channel indicated by
+\fB#\fP (a number from 1 to 8) to \fBvalue\fP.
+Returns the value of \fBSCA#\fP.
+.HP 5m
+."
+\fBmca_par("SCA#", "enable")\fP
+\- 
+Enables the designated SCA by setting the high order bit.
+Returns the contents of the SCA register.
+.HP 5m
+."
+\fBmca_par("SCA#", "disable")\fP
+\- 
+Disables the designated SCA by clearing the high order bit.
+Returns the contents of the SCA register.
+.HP 5m
+."
+\fBmca_par("SCA#", "lower" [, value])\fP
+\- 
+With the optional argument, sets the lower bytes of the designated
+SCA register to \fBvalue\fP. Allowed values are from 0 to 8191.
+Returns the current setting.  The value is the lower ROI limit for
+the designated scaler channel.
+.HP 5m
+."
+\fBmca_par("SCA#", "upper" [, value])\fP
+\- 
+With the optional argument, sets the upper bytes of the designated
+SCA register to \fBvalue\fP. Allowed values are from 0 to 8191.
+Returns the current setting.  The value is the upper ROI limit for
+the designated scaler channel.
+.RE
+.sp
+\fBShaping\fP
+.RS 0m
+.HP 5m
+."
+\fBmca_par("rise_time" [, value])\fP
+\- 
+With the optional argument, sets the rise (or peaking) time to
+\fBvalue\fP. The argument is in microseconds.
+Permitted values are from 0.8 to 102.4, although only 24 discrete
+values are available.
+The software will select the value closed to the argument.
+Returns the current rise time in microseconds.
+.RE
+.HP 5m
+."
+\fBmca_par("flat_top" [, value])\fP
+\- 
+With the optional argument,
+sets the value of the flat\-top width.
+The argument \fBvalue\fP is in microseconds.
+Permitted values are between 0.2 and 51.2 altogether, but only 16 discrete
+values are allowed for each value of rise time.
+Returns the value of the flat\-top width in microseconds.
+.HP 5m
+."
+\fBmca_par("pileup_reject" [, value])\fP
+\- 
+With the optional argument,
+turns pileup rejection mode on for
+\fBvalue\fP set to 1 or a string starting with \fBY\fP or
+\fBy\fP. Otherwise turns pileup rejection mode off.
+Returns 0 or 1 indicating whether the mode is off or on.
+.HP 5m
+."
+\fBmca_par("fast_threshold" [, value])\fP
+\- 
+With the optional argument, sets the current fast\-channel threshold.
+The argument \fBvalue\fP can be an integer from 0 to 250.
+Returns the current fast\-channel threshold setting.
+.HP 5m
+."
+\fBmca_par("rise_time_disc" [, value])\fP
+\- 
+With the optional argument, turns rise\-time discrimination mode on for
+\fBvalue\fP set to 1 or a string starting with \fBY\fP or
+\fBy\fP. Otherwise turns rise\-time discrimination mode off.
+Returns 0 or 1 indicating whether the mode is off or on.
+.HP 5m
+."
+\fBmca_par("rtd_slow" [, value])\fP
+\- 
+With the optional argument,
+sets the rise\-time discrimination threshold percent to
+\fBvalue\fP. The allowed range is from 0 to 48.83% of full scale.
+Returns the current setting.
+.HP 5m
+."
+\fBmca_par("rtd_fast" [, value])\fP
+\- 
+With the optional argument,
+sets the rise\-time discrimination fast full width at half maximum to
+\fBvalue\fP. The valid range is from 4 to 19.
+Returns the current setting.
+.HP 5m
+."
+\fBmca_par("auto_baseline" [, value])\fP
+\- 
+With the optional argument, turns baseline restoration mode on for
+\fBvalue\fP set to 1 or a string starting with \fBY\fP or
+\fBy\fP. Otherwise turns baseline restoration mode off.
+Returns 0 or 1 indicating whether baseline restoration is off or on.
+.HP 5m
+."
+\fBmca_par("baseline_restoration" [, value])\fP
+\- 
+With the optional argument, sets the baseline restoration to
+\fBvalue\fP, which can be a number from 63 to 124, or one of the strings
+\fB"slow"\fP, \fB"medium"\fP or \fB"fast"\fP.
+Returns a number indicating the current baseline restoration setting.
+.RE
+.sp
+\fBGain and Pole Zero\fP
+.RS 0m
+.HP 5m
+."
+\fBmca_par("gain" [, value])\fP
+\- 
+With the optional argument, sets the gain to
+\fBvalue\fP, which can be from 3.1 to 562.83.
+Returns the current gain value as derived from the coarse\- and fine\-gain
+settings.
+.RE
+.HP 5m
+."
+\fBmca_par("pole_zero" [, value])\fP
+\- 
+With the optional argument, sets the pole zero to
+\fBvalue\fP. The valid range is from 0 to 250.
+Returns the current pole\-zero setting.
+.HP 5m
+."
+\fBmca_par("input_offset" [, value])\fP
+\- 
+With the optional argument, sets the input offset to
+\fBvalue\fP, which is in volts.
+The valid range is \-2.050V to 1.95V.  Returns the current setting.
+.HP 5m
+."
+\fBmca_par("input_polarity" [, value])\fP
+\- 
+With the optional argument, sets the input polarity according to
+\fBvalue\fP, which can be a number or a string, as below:
+.sp
+.RS 5m
+.RS 4m
+.nf
+\fB\-1 or "negative"\fP
+\fB1 or "positive"\fP
+.fi
+.sp
+.RE
+.sp
+Returns one of the above strings indicating the current setting.
+.RE
+.HP 5m
+."
+\fBmca_par("detector_reset" [, value])\fP
+\- 
+Sets the detector\-reset lockout period to the setting closest to
+\fBvalue\fP, in milliseconds.
+Possible values are 0, 0.102, 0.205, 0.410, 0.819,
+1.64, 3.28, 6.55 and 13.11.
+Returns the current value.
+.RE
+.sp
+\fBPower\fP
+.RS 0m
+.HP 5m
+."
+\fBmca_par("power" [, value])\fP
+\- 
+With the optional argument the string
+\fB"on"\fP or a nonzero value, enables the on\-board power supplies.
+Otherwise disables the power supplies.
+Returns 0 or 1 to indicate whether the on\-board power supplies are disabled
+enabled.
+.RE
+.HP 5m
+."
+\fBmca_par("TEC" [, value])\fP
+\- 
+With the optional argument, sets the thermo\-electric cooler to
+\fBvalue\fP, which is in degrees Kelvin.
+The allowed range is from 180.0K to 299.9K.
+Returns the current setting.
+.HP 5m
+."
+\fBmca_par("high_voltage" [, value])\fP
+\- 
+With the optional argument, sets the high\-voltage supply to
+\fBvalue\fP in volts, or disables the high\-voltage supply if
+\fBvalue\fP is the string
+\fB"off"\fP. Returns the current setting or the string
+\fB"off"\fP if the high\-voltage is disabled.
+.HP 5m
+."
+\fBmca_par("preamp_voltage" [, value])\fP
+\- 
+With the optional argument, sets the preamplifier voltage to
+\fBvalue\fP, which must be 5 or 8.5.
+Returns 5 or 8.5, indicating the current preamplifier voltage setting.
+.RE
+.sp
+\fBMiscellaneous\fP
+.RS 0m
+.HP 5m
+."
+\fBmca_par("analog_out" [, value])\fP
+\- 
+With the optional argument, sets the analog output according to
+\fBvalue\fP, a number from 0 to 4, as follows:
+.sp
+.RS 4m
+.nf
+\fB0\fP Fast channel
+\fB1\fP Shaped Pulse
+\fB2\fP Decimated Input
+\fB3\fP Test
+\fB4\fP Off
+.fi
+.sp
+.RE
+.sp
+Returns one of the above strings indicating the current setting.
+.RE
+.HP 5m
+."
+\fBmca_par("output_offset" [, value])\fP
+\- 
+With the optional argument, sets the output offset to
+\fBvalue\fP with units in millivolts.
+The valid range is from \-500mV to 492mV.
+Returns the current setting.
+.HP 5m
+."
+\fBmca_par("aux_output" [, value])\fP
+\- 
+Sets the auxiliary output according to
+\fBvalue\fP, which can be a number or a string, as below:
+.sp
+.RS 5m
+.RS 4m
+.nf
+\fB0\fP or \fB"icr"\fP
+\fB1\fP or \fB"pileup"\fP
+\fB2\fP or \fB"hold"\fP
+\fB3\fP or \fB"oneshot"\fP
+\fB4\fP or \fB"det_res"\fP
+\fB5\fP or \fB"mca_en"\fP
+\fB6\fP or \fB"trigger"\fP
+\fB7\fP or \fB"sca8"\fP
+.fi
+.sp
+.RE
+.sp
+Returns one of the above strings indicating the current setting.
+.RE
+.HP 5m
+."
+\fBmca_par("audio" [, value])\fP
+\- 
+With the optional argument, sets the audio output according to
+\fBvalue\fP, which can be a number or a string, as below:
+.sp
+.RS 5m
+.RS 4m
+.nf
+\fB0\fP or \fB"off"\fP
+\fB2\fP or \fB"low"\fP
+\fB1\fP or \fB"medium"\fP
+\fB3\fP or \fB"high"\fP
+.fi
+.sp
+.RE
+.sp
+Returns one of the above strings.
+.RE
+.RE
+.sp
+\fBOther\fP
+.RS 0m
+.HP 5m
+."
+\fBmca_par("buffer" [, value])\fP
+\- 
+With the optional argument,
+sets the active buffer to A or B according to whether
+\fBvalue\fP is 0 or 1, respectively.
+The \fBmca_get()\fP command reads from the active buffer.
+The \fB"status"\fP option to
+\fBmca_par()\fP displays the status for the active buffer.
+The clear commands clear the active buffer.
+When the MCA is started, the configuration is set to
+acquire to the active buffer.
+Returns 0 or 1 to indicate whether buffer A or B is active.
+.RE
+.HP 5m
+."
+\fBmca_par("elapsed_counts"|"slow_counts")\fP
+\- 
+Returns the slow counts value for the current acquisition.
+.HP 5m
+."
+\fBmca_par("fast_counts")\fP
+\- 
+Returns the fast counts value for the current acquisition.
+.HP 5m
+."
+\fBmca_par("elapsed_time")\fP
+\- 
+Returns the elapsed time of the current acquisition.
+.HP 5m
+."
+\fBmca_par("status")\fP
+\- 
+Reads and displays the current PX4 status buffer information.
+.HP 5m
+."
+\fBmca_par("pars")\fP
+\- 
+Displays the current PX4 software configuration.
+.HP 5m
+."
+\fBmca_par("get_config")\fP
+\- 
+Reads the hardware configuration buffer from the PX4.
+The parameters can be displayed with the \fB"pars"\fP option above.
+.HP 5m
+."
+\fBmca_par("set_config")\fP
+\- 
+Writes the PX4 hardware configuration buffer with the current
+software settings.
+.HP 5m
+."
+\fBmca_par("read_config", filename)\fP
+\- 
+Reads the PX4 configuration from
+\fBfilename\fP, which must conform the Amptek PX4 configuration file format.
+This command does not update the hardware configuration.
+The hardware settings corresponding to the file configuration can be
+displayed with the \fB"pars"\fP option above.
+The settings can be transferred to the PX4 using the
+\fB"set_config"\fP option above.
+.HP 5m
+."
+\fBmca_par("save_config", filename)\fP
+\- 
+Saves the current configuration to \fBfilename\fP
+using the Amptek PX4 configuration file format.
+.HP 5m
+."
+\fBmca_par("preset_time" [, value])\fP
+\- 
+With the optional argument, sets the preset count time to
+\fBvalue\fP and sets time\-preset mode.  When using the
+\fB"run"\fP \fBmca_par()\fP option, the MCA will run
+for the specified number of seconds.
+Set the preset time to zero to run indefinitely.
+Returns the current preset count time.
+.HP 5m
+."
+\fBmca_par("preset_counts" [, value])\fP
+\- 
+With the optional argument, sets the preset count to
+\fBvalue\fP and sets count\-preset mode.  When using the
+\fB"run"\fP \fBmca_par()\fP option,
+the MCA will run until the accumulated number of counts in
+the region\-of\-interest (set with \fB"roi"\fP below) is reached.
+Set the preset counts to zero to run indefinitely.
+Returns the current preset count value.
+.HP 5m
+."
+\fBmca_par("roi" [, roi_begin, roi_end])\fP
+\- 
+With the optional arguments,
+sets the region\-of\-interest to channels from \fBroi_begin\fP to
+\fBroi_end\fP. When counting to in preset\-counts mode,
+counting continues until
+the total counts in the region of interest reaches the preset count value.
+The region\-of\-interest values are written to SCA 8 when counting in
+preset\-count mode is started.
+Returns the number of channels in the region of interest.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%amptek.com\fP
+\fI\%mca\fP
+

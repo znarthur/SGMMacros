@@ -1,0 +1,87 @@
+.TH "lc2301" "hardware" "08/01/12" "lc2301.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+lc2301 \- LeCroy 2301 CAMAC MCA Module
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)lc2301.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1991,1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "lc2301" "hardware" "08/01/12" "lc2301.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The LeCroy 2031 MCA is selected in the \fBconfig\fP file as
+.sp
+.RS 4m
+\fBCA_2301 = slot_number\fP
+.RE
+.sp
+When running \fBedconf\fP (or the \fBconfig\fP macro),
+use the \fBCAMAC\fP screen to select this MCA module.
+.SH "FUNCTIONS"
+.rs
+.sp
+The \fBmca_par()\fP function controls the MCA module\(aqs behavior as follows:
+.RS 0m
+.HP 5m
+."
+\fBmca_par("clear")\fP
+\- 
+clears the MCA.
+\fBspec\fP inserts a 1.5 second delay to give the device time to clear.
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+start the MCA.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+stops the MCA.
+.HP 5m
+."
+\fBmca_par("first_ch")\fP
+\- 
+returns the first channel to be read out.
+.HP 5m
+."
+\fBmca_par("first_ch", value)\fP
+\- 
+sets the first channel to be read out to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("npts")\fP
+\- 
+returns the number of channels to be read out.
+.HP 5m
+."
+\fBmca_par("npts", value)\fP
+\- 
+sets the number of channels to be read out to
+\fBvalue\fP. The maximum number of channels is 1,024.
+.HP 5m
+."
+\fBmca_par("delay")\fP
+\- 
+returns the delay time in seconds that \fBspec\fP
+sleeps after the MCA is cleared.
+.HP 5m
+."
+\fBmca_par("delay", value)\fP
+\- 
+sets the time for \fBspec\fP to delay after sending the clear command.
+The hardware does require some delay.
+Some users have reported 1.5 seconds are needed, others report
+0.1 seconds is adequate.  The default value is 0.1 seconds.
+.RE
+

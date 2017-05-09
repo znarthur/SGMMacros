@@ -1,0 +1,52 @@
+.TH "mesh" "macro" "08/01/12" "mesh.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBmesh\fP \- 2d grid scan
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mesh.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mesh" "macro" "08/01/12" "mesh.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBmesh motor1 start1 end1 intervals1
+motor2 start2 end2 intervals2 time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBmesh\fP scan traces out a grid using \fBmotor1\fP and
+\fBmotor2\fP. The first motor scans from \fBstart1\fP to
+\fBend1\fP using the specified number of intervals.
+The second motor similarly scans from
+\fBstart2\fP to \fBend2\fP. Each point is counted for for
+\fBtime\fP seconds (or monitor counts).
+.sp
+The scan of \fBmotor1\fP is done at each point scanned by \fBmotor2\fP.
+That is, the first motor scan is nested within the second motor scan.
+.sp
+A \fBmesh\fP scan creates only one scan entry in the \fBspec\fP data file
+with a total of \fB(intervals1+1) * (intervals2+1)\fP points.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBmesh th 0 1 10 phi 0 2 10 10\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%ascan\fP
+\fI\%a2scan\fP
+\fI\%a3scan\fP
+\fI\%dscan\fP
+\fI\%d2scan\fP
+\fI\%d3scan\fP
+

@@ -1,0 +1,28 @@
+ct                                    macro                                   ct
+
+NAME
+     cctt - count and print results
+
+SYNOPSIS
+
+     cctt [[ttiimmee]]
+
+DESCRIPTION
+
+     The cctt macro counts for ttiimmee. If ttiimmee is negative, counting is to monitor
+     counts, otherwise ttiimmee specifies seconds.  If there is no argument, the
+     count time is taken from the global symbol CCOOUUNNTT.  If interrupted with ^^CC,
+     the counts accumulated to that time are shown.
+
+EXAMPLE
+
+     cctt 1100
+
+GLOBALS
+
+     CCOOUUNNTT - default counting time
+
+SEE ALSO
+
+     _c_o_u_n_t_i_n_g
+

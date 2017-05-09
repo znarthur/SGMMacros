@@ -1,0 +1,399 @@
+.TH "ni63xx" "hardware" "03/23/14" "ni63xx.rst 6.1  03/23/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+ni63xx \- National Instruments 63xx PCIe counter/timer
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)ni63xx.rst       6.1  03/23/14  CSS
+.
+.\" Copyright (c) 2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "ni63xx" "hardware" "03/23/14" "ni63xx.rst 6.1  03/23/14 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The National Instruments X series data acquisition boards
+have four
+32\-bit counter channels and 8 or 32 digital I/O (DIO) channels (depending on
+model).
+Different models include a varying number of analog\-to\-digital converters (ADC)
+and digital\-to\-analog converters (DAC).
+However, the ADC and DAC functionality is not yet supported by \fBspec\fP.
+.sp
+Recognized models are
+PCIe\-6320, PCIe\-6321, PCIe\-6323, PCIe\-6341, PCIe\-6343, PCIe\-6351,
+PCIe\-6353, PCIe\-6361 and PCIe\-6363, along
+with PXIe\-6323, PXIe\-6341, PXIe\-6343, PXIe\-6356, PXIe\-6358,
+PXIe\-6361, PXIe\-6366, PXIe\-6368, PXIe\-6376 and PXIe\-6378.
+.sp
+All models support a 100 MHz count rate.
+In addition, counter inputs may be prescaled by a factor of two or eight
+extending the usable maximum count rates to 200 MHz or 800 MHz,
+and adding one or three more bits to the effective counter size.
+.sp
+When counting to time,
+for shorter count times (less than 42.95 seconds), \fBspec\fP uses the 100 MHz built\-in clock.
+For longer count times, \fBspec\fP uses the 100 KHz clock,
+allowing for a maximum count time of nearly 12 hours.
+.sp
+\fBspec\fP will keep track of overflows to the channel counting time (when
+not counting to a time preset), but
+does not currently correct for counter overflows in the other channels.
+.sp
+\fBspec\fP also provides commands for selecting the hardware\(aqs digital
+debouncing filter for external inputs and for accessing the DIO
+pins available on these cards.  See the \fBFUNCTIONS\fP section below for details.
+.SH "SOFTWARE CONFIGURATION"
+.rs
+.sp
+Use \fBspec\fP\(aqs configuration editor (\fBedconf\fP, normally invoked by the
+\fBconfig\fP macro) to select the timer and to configure the scaler channels.
+On the \fBD\fPevices screen, enter the
+the number of counters on the board, which should be four.
+.RS 3m
+.sp
+.nf
+.ft CB
+SCALERS  DEV  ADDR  <>MODE  NUM                          <>TYPE
+    YES        0:0            4    NI PCI 63xx as Counter/Timer
+    YES        0:0            4         NI PCI 63xx as Counters
+.ft P
+.fi
+.RE
+.sp
+The ADDR field can be optionally used to configure the PCI bus:slot
+numbers if more than one of these cards is installed in the same computer.
+Leaving the default value of 0:0 means the card can be in any slot.
+Note, the values must be entered as decimal numbers in \fBspec\fP\(aqs
+configuration editor, even though the
+\fBLinux\fP \fB/sbin/lspci\fP utility will list the values in hexadecimal.
+For cards with ADDR set to the default 0:0, \fBspec\fP will
+assign unit numbers in the order in which the cards are detected.
+.sp
+The parameters \fB"active_low"\fP and \fB"io_config"\fP can be set as
+optional controller
+parameters by typing the \fBp\fP command.
+Enter the parameter name and value on the optional parameter screen.
+Possible values are described in the FUNCTIONS section below.
+When set only as a controller parameter, the parameter value
+cannot be changed from the \fBspec\fP command line.
+.sp
+On the \fBS\fPcaler screen, choose \fBNI63xx\fP as the device type.
+The unit numbers are assigned consecutively to
+the NI PCI counter/timers according to the order they are listed on the
+\fBD\fPevices screen, starting with unit zero:
+.RS 3m
+.sp
+.nf
+.ft CB
+NUMBER      NAME  MNEMONIC  <>DEVICE  UNIT  CHAN   <>USE AS  SCALE
+     0   Seconds       sec    NI63xx     0     0   timebase      1
+     1   Monitor       mon    NI63xx     0     1    monitor      1
+     2  Detector       det    NI63xx     0     2    counter      1
+     3 Counter 2        c2    NI63xx     0     3    counter      1
+     3 Counter 3        c3    NI63xx     1     0    counter      1
+     3 Counter 4        c4    NI63xx     1     1    counter      1
+.ft P
+.fi
+.RE
+.sp
+Any channel can be used as the time base.
+Also, any channel can be used as the monitor\-preset channel.
+In addition, the monitor channel assignment can be changed
+from the \fBspec\fP command line with
+\fBcounter_par()\fP, as described in the \fBFUNCTIONS\fP section below.
+.sp
+The scale factor is ignored for the time\-base channel, since the time base
+is set and accounted for internally in the C code.
+.sp
+Values for the optional parameters \fB"filter"\fP and \fB"prescale"\fP can be
+set on the optional counter parameter screen accessed by typing the \fBp\fP
+command.
+Enter the parameter name and a value.
+Possible values are described in the FUNCTIONS section below.
+.sp
+Also, the \fB"active_low"\fP and \fB"io_config"\fP
+controller parameters, which are not associated with a particular
+channel,
+can each be set as an optional scaler parameter for any scaler
+associated with the controller.
+When set as a scaler parameter, the value can be modified using
+\fBcounter_par()\fP from the \fBspec\fP command line.
+Configuring as a scaler parameter overrides the controller parameter
+setting and behavior.
+.SH "THEORY OF OPERATION"
+.rs
+.sp
+One of the key requirements for counter/timers in \fBspec\fP is the capability
+to have a master channel that will gate the slave counter channels
+by way of a hardware signal.
+A second requirement is that at least two channels (one for time and
+one for monitor) can be used as the master channel.
+Even better is hardware that allows any channel to be used
+as the master channel.
+The NI 63xx boards meet these requirements.
+.sp
+The 63xx card architecture allows
+any channel to be configured to use any other channel\(aqs associated
+gate input pin as its own gate.  \fBspec\fP requires
+each possible master counter\(aqs output to be connected to its associated gate
+via a jumper.
+That counter\(aqs output will then serve as gate for all the counters.
+See the \fBHardware Configuration\fP section below.
+.sp
+Normally all outputs are disabled and set to a high impedance state.
+When a particular counter is the
+master, \fBspec\fP configures just that channel to have its output
+activated during counting to serve as gate for all channels.
+When the master counter counts down from its preset and reaches zero,
+the last count changes the state of the output,
+which disables the slave counters.
+This achieves a reliable hardware gating.
+.sp
+If the card is set up as only counters, \fBspec\fP configures the card so that
+all channels will gate off the
+gate pin associated with the lowest numbered channel included in the
+\fBconfig\fP file.  The external gate from the
+master timer device can be connected to that pin.
+.sp
+If the 63xx is to be used as master to gate other cards, one must
+connect the various designated output pins
+of the possible master counter channels together
+and use that signal.
+\fBspec\fP will only activate one output pin at a time.
+All the other pins will be in the default power\-on
+high\-impedance state, so there is no danger of overloading
+the outputs as long as \fBspec\fP is used to control the card.
+.sp
+By default, \fBspec\fP programs each channel for
+an active\-high gate.
+That is, during counting the output signal from the master channel
+will be nominally at +5V.
+If it would make gating other devices more convenient,
+the \fBcounter_par()\fP command can be used to configure
+the gate signal as active low
+(see below).
+.sp
+Although hardware gating is preferred for counters, \fBspec\fP does in any case
+send appropriate commands to arm and disarm the counters in the absence
+of hardware gating.
+The arm command occurs before the master timer is started.
+The disarm command occurs after the master timer has stopped.
+.SH "HARDWARE CONFIGURATION"
+.rs
+.sp
+For each counter channel that will be used as a master timing
+channel (either with the internal time base or with
+an external monitor\-count
+preset), you need to connect the associated output pin to the associated
+gate pin.
+It doesn\(aqt hurt to make all the connections, even if you don\(aqt anticipate
+the channel
+being used for a monitor preset channel.
+\fBspec\fP uses the conventional pin assignments for the counter input, output
+and gate connections.
+These pins are the PFI lines numbered 0, 1, 3, 4, 5, 6, 8, 9, 12, 13, 14, 15.
+(That is, all but 2, 7 and 10.)
+All models should have the following connections:
+.sp
+.RS 4m
+.nf
+Out(0) pin  2 to Gate(0) pin  3
+Out(1) pin 40 to Gate(1) pin 41
+Out(2) pin  1 to Gate(2) pin 10
+Out(3) pin  5 to Gate(3) pin 39
+.fi
+.sp
+.RE
+.sp
+For boards with two connectors, the pin numbers refer to connector 0.
+Note, a master timing channel will not work properly until its corresponding
+output\-to\-gate jumper is installed.
+.sp
+Input signals connect to the following pins.
+One channel will probably be used for the time base,
+as selected in the \fBconfig\fP file.
+There\(aqs no need to connect an input signal to that channel, since it will
+be programmed to use the internal clock.
+.sp
+.RS 4m
+.nf
+Source(0) pin 37
+Source(1) pin 42
+Source(2) pin 11
+Source(3) pin  6
+.fi
+.sp
+.RE
+.sp
+Choose any of the many ground pins (4, 7, 9, 12, 13, 15, 18, 35, 36, 44, 50, 53) as ground.
+.SH "FUNCTIONS"
+.rs
+.sp
+The following \fBcounter_par()\fP options are available.
+The first three commands are associated with particular counter channels:
+.RS 0m
+.HP 5m
+."
+\fBcounter_par(mne, "monitor")\fP
+\- 
+Sets the channel assigned to mnemonic \fBmne\fP to be
+the monitor preset channel.
+The monitor channel gets reset when the \fBconfig\fP file
+is read on start up or on
+\fBreconfig\fP.
+.HP 5m
+."
+\fBcounter_par(mne, "prescale" [, how])\fP
+\- 
+Without the optional argument, returns 2 if the channel for
+\fBmne\fP has been configured with the divide\-by\-two prescale and returns
+8 if the divide\-by\-eight prescale has been selected.
+If called with \fBhow\fP set to 2, turns on the divide\-by\-two prescale.
+If set to 8, turns on the divide\-by\-eight prescale.
+If set to zero, turns off prescaling.
+The \fB"prescale"\fP parameter can be set as an optional scaler
+parameter using the hardware configuration editor.
+If the parameter is not set in the \fBconfig\fP file, rereading the \fBconfig\fP
+file resets the mode to prescale off.
+.HP 5m
+."
+\fBcounter_par(mne, "filter" [, val])\fP
+\- 
+The boards have three possible input filters:  small, medium and large.
+Filters are as follows:
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l l l .
+Value	Rejects Pulses	Delays Pulse	Adds Jitter
+\fB"small"\fP	< 100 ns	100 ns	25 ns
+\fB"medium"\fP	< 6.4 us	6.4 us	25 ns
+\fB"large"\fP	< 2.54 ms	2.54 ms	10.025 us
+.TE
+.RE
+.sp
+The \fB"filter"\fP parameter can be set as an optional scaler
+parameter using the hardware configuration editor.
+If the parameter is not set in the \fBconfig\fP file, rereading the \fBconfig\fP
+file resets the mode to filter off.
+.RE
+.RE
+.sp
+The following options are associated with the operation of the
+card, not with a particular channel.
+The \fBmne\fP argument is necessary for the syntax of the command and should be
+the mnemonic or counter number of any of the configured channels
+associated with the card.
+The DIO bits are 0 to 7 or 0 to 31, depending on what is available on the particular card.
+.RS 0m
+.HP 5m
+."
+\fBcounter_par(mne, "active_low" [, how])\fP
+\- 
+Without the optional argument, returns nonzero
+if the counting card associated
+with channel \fBmne\fP has been configured for active\-low gates.
+If called with \fBhow\fP nonzero, turns on the active\-low mode for gating.
+Otherwise, sets the default active\-high gate mode.
+The mode only needs to be set for one channel to affect all channels on
+the card.
+The \fB"active_low"\fP parameter can be set as an optional controller
+parameter from the \fBD\fPevices screen of the hardware configuration editor
+or as an optional scaler
+parameter from the \fBS\fPcaler screen.
+When set as a controller parameter, its value cannot be changed
+using \fBcounter_par()\fP.
+If the parameter is not set in the \fBconfig\fP file, rereading the \fBconfig\fP
+file resets the mode to active low off.
+.RE
+.HP 5m
+."
+\fBcounter_par(mne, "io_config" [, val])\fP
+\- 
+Bits set in \fBval\fP will be configured as outputs
+on the digital I/O lines.
+On power up, all lines are configured as inputs.
+If the optional argument is missing, \fBspec\fP will return the
+current value as set by the user.
+(The value can\(aqt be read from the card itself.)
+The \fB"io_config"\fP parameter can be set as an optional controller
+parameter from the \fBD\fPevices screen of the hardware configuration editor
+or as an optional scaler
+parameter from the \fBS\fPcaler screen.
+When set as a controller parameter, its value cannot be changed
+using \fBcounter_par()\fP.
+The configured value for "io_config" is saved across readings of the \fBconfig\fP
+file.
+.HP 5m
+."
+\fBcounter_par(mne, "set_bit", val)\fP
+\- 
+Set output lines corresponding to bit number
+\fBval\fP to high, where bits and lines are numbered from 0 to 7 or 31
+(depending on the number of DIO lines).
+Set bits are saved across readings of the \fBconfig\fP file.
+For example,
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+counter_par(sec, "set_bit", 5)
+.ft P
+.fi
+.RE
+.sp
+would set bit 5 to a high state, if bit 5 has been configured for output.
+.RE
+.HP 5m
+."
+\fBcounter_par(mne, "clr_bit", val)\fP
+\- 
+Set output line corresponding to bit number
+\fBval\fP to low, where bits and lines are numbered from 0 to 7 or 31
+(depending on the number of DIO lines).
+.HP 5m
+."
+\fBcounter_par(mne, "put_bits", val)\fP
+\- 
+Sets output lines corresponding to the bits set in
+\fBval\fP to high and bits not set in \fBval\fP to low.
+Set bits are saved across readings of the \fBconfig\fP file.
+For example,
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+counter_par(sec, "put_bits", 0x13)
+.ft P
+.fi
+.RE
+.sp
+would set bits 0, 1 and 4 to a high state, if the bits were configured for output.
+.RE
+.HP 5m
+."
+\fBcounter_par(mne, "get_bit", val)\fP
+\- 
+Returns 0 or 1 based on whether the input line corresponding to bit number
+\fBval\fP is high or low, where lines and bits are numbered from 0 to 7 or 31
+(depending on the number of DIO lines).
+.HP 5m
+."
+\fBcounter_par(mne, "get_bits")\fP
+\- 
+Returns an 8\-bit or 32\-bit value (depending on the number of DIO lines) that reflects the setting of
+the input lines.
+.RE
+

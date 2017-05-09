@@ -1,0 +1,98 @@
+nt2400                              hardware                              nt2400
+
+NAME
+     nt2400 - Laboratory Equipment Corporation NT-2400 Ethernet Hardware
+
+DESCRIPTION
+
+     The NT-2400 from Laboratory Equipment Corporation is an ethernet-based
+     instrument providing motor control, timer/counter functions and MCA
+     capability.
+
+     Note, as there is a 20-character limit to the device names entered using
+     ssppeecc's hardware configuration editor, it will be helpful to have a short
+     name in the //eettcc//hhoossttss file to identify the NT-2400 host, such as
+
+         119922..4422..117722..1133   nntt22440000..llooccaallnneett..eedduu nntt22440000
+
+     To configure ssppeecc for the NT-2400 hardware, either run the ccoonnffiigg macro
+     from ssppeecc or the configuration editor eeddccoonnff directly.  Change to the
+     DDevices screen to configure the hostname and port number of the motor
+     controllers and counter/timers.  The selections will look something like
+     the following, with the NNUUMM field specifying the total number of
+     motors/counters at the specified host.  (Note, type the single quote '' to
+     begin string-entry mode to enter the DEVICE name.  Use the << and >>
+     characters to select from the TYPE menu.)
+
+        MMoottoorr aanndd CCoouunntteerr DDeevviiccee CCoonnffiigguurraattiioonn ((NNoott CCAAMMAACC))
+
+         MMOOTTOORRSS      DDEEVVIICCEE AADDDDRR <<>>MMOODDEE NNUUMM                           <<>>TTYYPPEE
+            YYEESS nntt22440000::66005511               66         LLaabboo NNTT--22440000 MMoottoorr ((UUDDPP))
+
+        SSCCAALLEERRSS      DDEEVVIICCEE AADDDDRR <<>>MMOODDEE NNUUMM                           <<>>TTYYPPEE
+            YYEESS nntt22440000::66005511               88 LLaabboo NNTT--22440000 CCoouunntteerr//TTiimmeerr ((UUDDPP))
+            YYEESS nntt22440000::66005511               88      LLaabboo NNTT--22440000 CCoouunntteerrss ((UUDDPP))
+
+     For the scaler configuration, the first example is for when one of the
+     scaler channels is to be used as master timer.  With the second example,
+     all the scalers are used only as counters.
+
+     The MCA devices are configured on the AAcquisition-type device screen of the
+     configuration editor.  For two MCA modules on the same NT-2400 host, the
+     screen would look something like:
+
+        MMCCAA-- aanndd CCCCDD--AAccqquuiissiittiioonn TTyyppee DDeevviiccee CCoonnffiigguurraattiioonn
+
+        MMCCAA--lliikkee     DDEEVVIICCEE AADDDDRR <<>>MMOODDEE                               <<>>TTYYPPEE
+         00  YYEESS nntt22440000::66005511                           LLaabboo NNTT--22440000 MMCCAA ((UUDDPP))
+         11  YYEESS nntt22440000::66005511                           LLaabboo NNTT--22440000 MMCCAA ((UUDDPP))
+
+     Configure individual motor channels on the MMotor screen.  Select the NT2400
+     controller type for each motor channel.
+
+        NNuummbbeerr:: <<>>CCoonnttrroolllleerr  00::  NNTT22440000  11::  NNTT22440000  22::  NNTT22440000  33::  NNTT22440000
+        UUnniitt//CChhaannnneell                 00//11         00//22         00//33         00//44
+        NNaammee                   TTwwoo TThheettaa       TThheettaa         CChhii         PPhhii
+        MMnneemmoonniicc                     tttthh          tthh         cchhii         pphhii
+
+     Unit numbers are assigned in the order in which the NT-2400 motor
+     controller units are specified on the Devices screen, and start at zero.
+     Channel numbers start at one to match the NT-2400 numbering convention.  It
+     is not necessary for the motors to be consecutively ordered in the
+     configuration.
+
+     The ppuullssee--mmooddee parameter (100 or 200) can optionally be entered on the
+     second optional motor parameter screen (accessed by typing mm twice from the
+     main motor screen).  Enter values for the pulse mode in the field for
+     Generic parameter 1.  If no value is entered, the default value of 100 is
+     used.  In addition, the limit and home switch polarity can be optionally
+     configured by entering a value for Generic parameter 2.  The coding for
+     switch polarities is as follows:
+
+         Bit 0 set: ccw limit positive
+         Bit 1 set: home switch positive
+         Bit 2 set: cw limit positive
+
+     Configure the NT-2400 scaler channels on the SScaler screen to look
+     something like the following:
+
+        SSccaalleerr ((CCoouunntteerr)) CCoonnffiigguurraattiioonn
+
+        NNuummbbeerr      NNaammee  MMnneemmoonniicc  <<>>DDeevviiccee  UUnniitt  CChhaann   <<>>UUssee AAss  SSccaallee
+             00   SSeeccoonnddss       sseecc    NNTT22440000     00     22   ttiimmeebbaassee   11000000
+             11   MMoonniittoorr       mmoonn    NNTT22440000     00     11    mmoonniittoorr      11
+             22  DDeetteeccttoorr       ddeett    NNTT22440000     00     33    ccoouunntteerr      11
+
+     For the NT-2400, only channel 2 can be used as the time base channel and
+     only channel 1 can be used for the monitor preset counter.  If there is no
+     monitor-type preset counter, and there are only two counter channels, then
+     channel 1 should be configured as the ordinary counter detector channel.
+
+     With such a configuration, all the standard commands for moving motors,
+     counting and accessing the MCA are available.
+
+     Note, setting ssppeecc's debug level to 128 (using the ddeebbuugg macro or by
+     assigning a value to the DDEEBBUUGG built-in variable) will have ssppeecc display
+     the commands sent and data returned from the NT-2400 in a semi-readable
+     form.
+

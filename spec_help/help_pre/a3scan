@@ -1,0 +1,26 @@
+a3scan                                macro                               a3scan
+
+NAME
+     aa33ssccaann - three-motor scan
+
+SYNOPSIS
+
+     aa33ssccaann mm11 ssttaarrtt11 eenndd11 mm22 ssttaarrtt22 eenndd22 mm33 ssttaarrtt33 eenndd33 iinntteerrvvaallss ttiimmee
+
+DESCRIPTION
+
+     aa33ssccaann scans three motors, as specified by mm11, mm22 and mm33. Each motor moves
+     the same number of intervals with starting and ending positions given by
+     ssttaarrtt11 and eenndd11, ssttaarrtt22 and eenndd22, ssttaarrtt33 and eenndd33, respectively.  The step
+     size for each motor is ((ssttaarrtt--eenndd))//iinntteerrvvaallss.  The number of data points
+     collected will be iinntteerrvvaallss++11.  Count time is given by ttiimmee, which if
+     positive, specifies seconds and if negative, specifies monitor counts.
+
+EXAMPLE
+
+     aa33ssccaann ttaabb11 00 1100 ttaabb22 00 1100 ttaabb33 00 1100 2200 1100
+
+SEE ALSO
+
+     _m_o_t_o_r_s _a_s_c_a_n _a_2_s_c_a_n _a_4_s_c_a_n _d_s_c_a_n _d_2_s_c_a_n _d_3_s_c_a_n _m_e_s_h
+

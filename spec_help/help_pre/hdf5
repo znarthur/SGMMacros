@@ -1,0 +1,313 @@
+hdf5                                reference                               hdf5
+
+NAME
+     HDF5 - create HDF5 files
+
+Description
+
+     HDF5 is version 5 of a standardized hierarchical data format for storing
+     and managing data.  See the _H_D_F _G_r_o_u_p _h_o_m_e _p_a_g_e and _d_o_c_u_m_e_n_t_a_t_i_o_n pages for
+     detailed information on the HDF5 specifications.  ssppeecc implements a subset
+     of the HDF5 functionality sufficient to archive the type of data that ssppeecc
+     acquires.
+
+     The hierarchical part of the HDF5 format refers to the tree structure of
+     named objects.  Each object in the file belongs to an HDF5 group.  Each
+     group has a path in the HDF5 file starting from the root group which is
+     named //.  Path name components are separated by slash characters (//).
+
+     ssppeecc creates HDF5 objects called attributes and datasets.  Attributes and
+     datasets are similar in that both have names and both have associated data.
+     The main difference is that attributes are intended to store a small amount
+     of data.  In addition, datasets may contain attributes, but attributes
+     cannot contain additional attributes.  ssppeecc can also create a dataset that
+     contains a hard link (or pointer) to another named object.
+
+     Four built-in functions are provided: hh55__ffiillee(()) to create or open an HDF5
+     file, hh55__aattttrr(()) to create attributes, hh55__ddaattaa(()) to create or add to
+     datasets and hh55__lliinnkk(()) to create soft links to objects in external files.
+
+     Although ssppeecc arrays have just one or two dimensions, it is possible to
+     save a three-dimensional dataset one 2D array at a time.  It is also
+     possible to save a two-dimensional dataset one row at a time.
+
+     ssppeecc supports setting dataset maximum dimensions, setting the chunk sizes
+     (important for efficient reading and writing of large datasets), setting
+     the memory cache size (important for writing data efficiently to the file)
+     and enabling dataset compression.
+
+Linking ssppeecc With HDF5
+
+     ssppeecc needs to be linked with the HDF5 library to enable the capabilities
+     described in this help file.  The HDF5 library version should match the
+     version used to build ssppeecc (see below).
+
+     The ssppeecc distribution includes a prebuilt static library archive named
+     lliibbhhddff55..aa that is the matching version and can be linked with ssppeecc during
+     installation.  Because ssppeecc supports chunk compression, the ZLIB data
+     compression library lliibbzz..aa is also needed and is also included in the spec
+     distribution.
+
+     The static libraries are very large and nearly double the size of the ssppeecc
+     executable image.  Installing a shared library on the system would be
+     better, but would need to be done by a local system administrator.
+     Complete instructions for downloading and installing HDF5 are available by
+     following the appropriate links on the _H_D_F _g_r_o_u_p _h_o_m_e _p_a_g_e.
+
+     The ssppeecc IInnssttaallll script includes the following section for configuring the
+     HDF5 libraries:
+
+         Choices for HDF5 libraries are:
+
+           1) no               - not using HDF5
+           2) libhdf5.a libz.a - use static libraries
+           3) -lhdf5 -lz       - use system libraries (possibly shared)
+           4) libhdf5.a -lz    - use static hdf5 and system libz
+           5) other            - enter library arguments
+
+         The location of the HDF5 libraries.  Include to enable
+         use of the HDF (Hierarchical Data Format) data output
+         commands.  Note, library version should match spec build.
+
+         Choose HDF5 libraries (no)?
+
+     In the current ssppeecc release, the default is not to link with the HDF5
+     libraries, as the HDF5 format is not yet widely used and linking with the
+     static libraries greatly expands ssppeecc's memory footprint.  Choice 2 enables
+     linking with the included static libraries.  Choice 3 will use the system
+     libraries, as long as the libraries are in a standard place.
+
+     Sources corresponding to the libraries included in the current spec
+     distribution can be downloaded at _c_e_r_t_i_f_._c_o_m_/_d_o_w_n_l_o_a_d_s_/_e_x_t_r_a_s_/_h_d_f_5_._t_g_z and
+     _c_e_r_t_i_f_._c_o_m_/_d_o_w_n_l_o_a_d_s_/_e_x_t_r_a_s_/_z_l_i_b_._t_g_z.
+
+     If ssppeecc is not linked with the matching HDF5 library version, one can set
+     the environment variable HHDDFF55__DDIISSAABBLLEE__VVEERRSSIIOONN__CCHHEECCKK to a value of 1 or
+     greater to enable use of the functions.  If the value is 1, then HDF5
+     libraries will produce a lengthy warning message on the first call of an
+     HDF5 function.  If the value is 2 or greater, the message from the
+     libraries will be suppressed, although ssppeecc will print a one-time short
+     warning message.  CSS cannot predict the results of using a mismatched
+     version.  Note, the version matching is done on the major and minor version
+     numbers.  For example, versions 1.8.13 and 1.8.14 differ only in release
+     number, which will not produce a warning message.
+
+Mapping of ssppeecc Data Types to HDF5 Data Types
+
+     ssppeecc has three categories of data:  scalars, associative arrays and data
+     arrays.  Values for scalar and associative array elements are stored in
+     ssppeecc as either strings or double-precision floating point numbers.  Data
+     array values match the declared type of the data array.
+
+     By default, the hh55__aattttrr(()) and hh55__ddaattaa(()) functions will use an HDF5 data
+     type that corresponds to the ssppeecc data type.  An optional argument to the
+     function can specify a particular HDF5 data type as follows:
+
+         ""bbyyttee""    HH55TT__NNAATTIIVVEE__IINNTT88
+         ""uubbyyttee""   HH55TT__NNAATTIIVVEE__UUIINNTT88
+         ""sshhoorrtt""   HH55TT__NNAATTIIVVEE__IINNTT1166
+         ""uusshhoorrtt""  HH55TT__NNAATTIIVVEE__UUIINNTT1166
+         ""lloonngg""    HH55TT__NNAATTIIVVEE__IINNTT3322
+         ""uulloonngg""   HH55TT__NNAATTIIVVEE__UUIINNTT3322
+         ""lloonngg6644""  HH55TT__NNAATTIIVVEE__IINNTT6644
+         ""uulloonngg6644"" HH55TT__NNAATTIIVVEE__UUIINNTT6644
+         ""ffllooaatt""   HH55TT__NNAATTIIVVEE__FFLLOOAATT
+         ""ddoouubbllee""  HH55TT__NNAATTIIVVEE__DDOOUUBBLLEE
+         ""ssttrriinngg""  HH55TT__CC__SS11 with HH55TT__VVAARRIIAABBLLEE
+
+     If the ""ssttrriinngg"" option is used to convert numbers to strings, the numbers
+     will be formatted using a ""%%..1155gg"" specification.  Each row of a string data
+     array is written as a fixed length string.
+
+Writing ssppeecc Associative Arrays
+
+     In general, ssppeecc associative arrays can be  one- or two-dimensional.  The
+     array index values are stored as strings, although the strings can be
+     representations of numbers.  ssppeecc can only save associative arrays with
+     non-negative integer indexes to HDF5 files.  ssppeecc will dimension the HDF5
+     array data space to the largest index in each dimension of the associative
+     array.  If an associative array has only one element with an index of 1000,
+     the HDF5 array will have space allocated for 1001 elements.  Missing values
+     will be written to the HDF5 file as zeroes.  The best practice is to save
+     only associative arrays that have consecutive integer indexes starting at
+     zero.
+
+     Before writing the data, ssppeecc scans the associative array to find the
+     maximum index dimension and to determine if the elements are all numbers or
+     if one or more elements is a string.  If any element of the array is not a
+     number, all elements will be saved as strings.
+
+     When saving values as numbers, the data type can be specified with an
+     optional argument, as described above.
+
+Writing ssppeecc Data Arrays
+
+     ssppeecc data arrays are one- or two-dimensional storage of fixed size and data
+     type, indexed by integers starting at zero.  ssppeecc allocates data space in
+     the HDF5 file to fit the entire array, unless options described in the next
+     section are used to reserve additional space.  By default, data is written
+     using the declared array data type.  The data type can be converted using
+     one of the options described above.
+
+     For two-dimensional arrays, ssppeecc will allocate rows and columns in an HDF5
+     data space to match the array declaration.  For a one-dimensional array
+     (including a single row or single column subarray), the default is to write
+     the data as a single row.  However, if the ""rrooww__wwiissee"" option has been
+     explicitly set using aarrrraayy__oopp(()) for the parent array (see the _a_r_r_a_y_s help
+     file), or as an optional argument to hh55__aattttrr(()) or hh55__ddaattaa(()), the data will
+     be saved as a column array.  A one-dimensional array declared explicitly as
+     a column array, for example, aarrrr[[2200]][[11]] will also be saved as a column
+     array.
+
+     Space for ssppeecc string data arrays is allocated for fixed length strings
+     matching the storage size of the arrays.  Values for each row of the string
+     array are written as strings to the HDF5 file.
+
+Additional Options For Data Arrays with hh55__ddaattaa(())
+
+     In addition to the data-type arguments and ""rrooww__wwiissee"" argument discussed
+     above, the following additional arguments can be used with hh55__ddaattaa(()) when
+     saving data arrays.
+
+         ""ddiimmss==[[ffrraammeess::]]rroowwss::ccoolluummnnss"" - Sets the maximum dimensions of the array
+              for arrays that are written one frame or one row at a time.  The
+              first dimension can be -1 to set the dimension as unlimited.  The
+              current dimensions of the dataset will be set to match the
+              dimensions of the data array passed to the hh55__ddaattaa(()) function.
+
+         ""cchhuunnkk==[[ffrraammeess::]]rroowwss::ccoolluummnnss"" - Sets the dimensions of the contiguous
+              blocks of data in the HDF5 file.  The values have a significant
+              impact on the efficiency for reading and writing data.  Chunk
+              values must be set in order to enable data compression or to be
+              able to add frames or rows to existing datasets.  If the keyword
+              ""cchhuunnkk"" is used with no values, ssppeecc will set the first chunk
+              dimension to 1 and the other dimensions to match the size of a
+              single frame or row of the data array.  Consult HDF5 documentation
+              for suggestions on chunk optimization.
+
+         ""ccaacchhee==bbyytteess[[[[::sslloottss]]::ppoolliiccyy]]"" - Sets the memory cache parameters for
+              the raw data chunks.  bbyytteess is the total number of bytes in the
+              cache.  The default is 1 MB per dataset.  sslloottss is the number of
+              chunk slots in the raw data cache.  This value should be a prime
+              number to optimize the hashing algorithm.  The default value is
+              521.  ppoolliiccyy is the chunk preemption policy and can be any value
+              from zero to one.  The default is 0.75.  See the HDF5
+              documentation for a full explanation.
+
+              Setting the cache parameters with hh55__ddaattaa(()) only applies to the
+              current function call.  To set the parameters for all data sets
+              written to a file, set the option with hh55__ffiillee(()).
+
+         ""ffrraammee==##"" or simply ## - For adding to existing datasets that have the
+              first dimension set as unlimited (see above).  The value ##
+              specifies the frame number when adding a 2D array to a 3D dataset,
+              the row number when adding for a 1D array to a 2D dataset or the
+              point number if adding a scalar value to a 1D dataset.
+
+         ""ggzziipp[[==ddeeffllaattiioonn__ffaaccttoorr]] - Enables compression for the dataset.  If the
+              ""cchhuunnkk"" option is missing, ssppeecc will enable chunking and set the
+              dimensions automatically as described above.  Valid
+              ddeeffllaattiioonn__ffaaccttoorr values are from 1 to 9, with 9 being maximum
+              compression, which is the default if no value is specified.
+
+     If the ""ddiimmss"" or ""ggzziipp"" options are used, but the ""cchhuunnkk"" values are not
+     set, ssppeecc will automatically set the chunk sizes as specified above.
+
+Group Paths
+
+     The first argument to the hh55__aattttrr(()) and hh55__ddaattaa(()) functions is the path to
+     the object.  For each open HDF5 file, ssppeecc maintains a current-path value.
+     When the file is first opened the current path is //.  After each call to
+     hh55__aattttrr(()) or hh55__ddaattaa(()), the current path is set to the first argument of
+     the functions.  An argument "".."" refers to the current path.  The path
+     argument can also use the string ""...."" to refer to the parent group.
+
+HDF5 Error Messages and Debugging
+
+     The built-in variable HHDDFF55__EERRRROORR__MMOODDEE can be set to tune the verbosity
+     level of the errors generated by the HDF5 library.  The HDF5 library
+     generates an error stack, where each function in the library adds a message
+     to the stack when any function below it returns an error.  One can choose
+     to display just the error description associated with the function that
+     generated the error, or the entire stack with varying degrees of detail.
+
+         1 - Display error description from bottom of error stack
+         2 - Display descriptions from entire error stack
+         3 - Include source file and line number of error
+         4 - Include major and minor error code texts
+
+     A value less than the minimum or greater than the maximum will be treated
+     as the minimum or maximum, respectively.
+
+     Adding 0x01000000 to the ssppeecc debug level enables ssppeecc-generated HDF5
+     debugging messages.
+
+Built-in Functions
+
+     The following functions are available.  Except for usage that returns the
+     current file or current group, all functions return ttrruuee (1) for success
+     and ffaallssee (0) otherwise.
+
+     hh55__ffiillee((ffiilleennaammee,, ""ooppeenn"" [[,,""ccaacchhee==bbyytteess[[[[::sslloottss]]::ppoolliiccyy]]""]])) - Opens
+          ffiilleennaammee if it exists or creates it if it doesn't.  The HDF5 file
+          remains open across calls, although all objects and resources created
+          by hh55__aattttrr(()) and hh55__ddaattaa(()) are closed and released when those
+          functions return.  The optional argument sets the raw data chunk cache
+          parameters for all data sets saved to the file as long as it remains
+          open.  The meaning of the parameters is explained _a_b_o_v_e.
+
+     hh55__ffiillee((ffiilleennaammee,, ""fflluusshh"")) - Tells the HDF5 library to write buffered data
+          for ffiilleennaammee out to disk.
+
+     hh55__ffiillee((ffiilleennaammee,, ""cclloossee"")) - Closes ffiilleennaammee.
+
+     hh55__ffiillee((ffiilleennaammee)) - If more than one HDF5 file is open, makes ffiilleennaammee the
+          active one.  If no HDF5 file is open, attempts to open ffiilleennaammee.
+          Returns ttrruuee (1) for success.
+
+     hh55__ffiillee(()) - Returns the name of the currently active HDF5 file, or the null
+          string if no file is open.
+
+     hh55__aattttrr((ggrroouupp__ppaatthh,, aattttrriibbuuttee__nnaammee,, aattttrriibbuuttee__vvaalluuee [[,, ooppttiioonn ......]]))  -
+          Creates a new attribute with the name aattttrriibbuuttee__nnaammee and the value
+          aattttrriibbuuttee__vvaalluuee.  The ooppttiioonnss can be a ssppeecc data type as in the table
+          above.
+
+     hh55__ddaattaa((ggrroouupp__ppaatthh,, ddaattaasseett__nnaammee,, ddaattaasseett__vvaalluuee [[,, ooppttiioonn ......]]))  - Creates
+          a new dataset with the name ddaattaasseett__nnaammee and the value ddaattaasseett__vvaalluuee.
+          The ooppttiioonnss can be a ssppeecc data type, as in the table above.
+          Additional options include ""ddiimmss==[[ffrraammeess::]]rroowwss::ccoolluummnnss"",
+          ""cchhuunnkk==[[ffrraammeess::]]rroowwss::ccoolluummnnss"", ""ccaacchhee==bbyytteess[[[[::sslloottss]]::ppoolliiccyy]]"" and
+          ""ggzziipp[[==ddeeffllaattiioonn__ffaaccttoorr]].
+
+     hh55__ddaattaa((ggrroouupp__ppaatthh,, ddaattaasseett__nnaammee,, ddaattaasseett__vvaalluuee,, ""ffrraammee==##""||##)) - Adds
+          ddaattaasseett__vvaalluuee to the existing dataset at the specified frame or row
+          number.
+
+     hh55__ddaattaa((ggrroouupp__ppaatthh,, ddaattaasseett__nnaammee,, ddaattaasseett__lliinnkk,, ""lliinnkk"")) - Creates a dataset
+          containing a hard link from ddaattaasseett__lliinnkk to ddaattaasseett__nnaammee.
+
+     hh55__aattttrr(()) or hh55__ddaattaa(()) - With no arguments, either function returns the
+          path of the current group.
+
+     hh55__aattttrr((ggrroouupp__ppaatthh)) or hh55__ddaattaa((ggrroouupp__ppaatthh)) - Sets the current group to
+          ggrroouupp__ppaatthh.  A call such as hh55__aattttrr((""...."")) moves the current group up
+          one level.
+
+     hh55__lliinnkk((ggrroouupp__ppaatthh,, lliinnkk__nnaammee,, ttaarrggeett__ffiillee,, ttaarrggeett__oobbjjeecctt)) - Creates a soft
+          link named lliinnkk__nnaammee pointing to the specified target object in the
+          target file.
+
+Built-in Symbols
+
+     The following built-in symbols are available:
+
+     HHDDFF55__VVEERRSSIIOONN - Contains the HDF5 version used when compiling ssppeecc, as in
+          "1.8.13".  Note, its value will not be set until the first call of one
+          of the above functions.
+
+     HHDDFF55__EERRRROORR__MMOODDEE - Sets the verbosity level of error messages.  Valid values
+          are 1 through 4.  Higher levels are useful for debugging calls of the
+          above functions in conjunction with the HDF5 library source code.  The
+          default value is 1.
+

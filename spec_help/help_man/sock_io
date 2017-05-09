@@ -1,0 +1,131 @@
+.TH "sockets" "function" "08/01/12" "sock_io.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+sock_io (deprecated) \- Connect to sockets
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)sock_io.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1997,1998,1999,2001,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "sockets" "function" "08/01/12" "sock_io.rst 6.1  08/01/12 CSS"
+.
+.SH "IMPORTANT NOTE"
+.rs
+.sp
+The \fBsock_io()\fP functions are deprecated as of \fBspec\fP release 5.01.01.
+Please see the \fI\%sockets\fP help file for a description of the
+\fBsock_get()\fP, \fBsock_put()\fP and \fBsock_par()\fP replacement functions.
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBsock_io(host:port, cmd [, arg\fP])
+\- 
+Connects and communicates with sockets created by other processes
+on the local or a remote host.
+The \fBhost\fP can be specified by a symbolic name or by an IP address.
+The string \fBcmd\fP is one of the following:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"?"\fP
+\- 
+Lists the command options available.
+.HP 5m
+."
+\fB"show"\fP
+\- 
+Lists the current open sockets and their status.
+.HP 5m
+."
+\fB"info"\fP
+\- 
+Returns a string that lists the current open sockets and their status.
+.HP 5m
+."
+\fB"connect"\fP
+\- 
+Opens the socket to the specified host and port.
+Returns \fBtrue\fP for success and \fBfalse\fP for failure.
+.HP 5m
+."
+\fB"listen"\fP
+\- 
+Sets up a socket for listening, allowing another instance of \fBspec\fP or
+some other program to make a connection.
+.HP 5m
+."
+\fB"close"\fP
+\- 
+Closes the socket associated with the specified host and port.
+.HP 5m
+."
+\fB"send"\fP
+\- 
+Sends the string
+\fBarg\fP to the specified socket, opening it if not already connected.
+.HP 5m
+."
+\fB"read"\fP
+\- 
+Reads from the specified socket, opening it if not already connected.
+Currently, the message to be read can be no longer than 1,024 bytes.
+With no argument, reads until a newline or until the timeout expires.
+An optional string argument can specify
+an end\-of\-string (EOS) delimiter,
+in which case the socket will be read until characters matching the EOS
+sequence are read or until the timeout expires.
+Trailing newlines and carriage returns will be removed from the returned
+string.
+Also, if the optional argument is a number, it specifies
+the number of bytes to be read.
+That number of bytes (or less, if the timeout expires)
+will be read and returned.
+.HP 5m
+."
+\fB"timeout"\fP
+\- 
+With no argument, returns the current read\-timeout value in seconds.
+Otherwise, sets the read timeout to \fBarg\fP.
+A negative timeout value causes the socket read to block until
+it is satisfied.
+The default timeout value is 5 seconds.
+.PD
+.RE
+.RE
+.RE
+.sp
+Note, the \fB"connect"\fP command
+isn\(aqt required, as the connection will be made if needed with the
+other commands.  However, the return value from the
+\fB"connect"\fP command may be used to test if a socket can be created.
+The connection remains open until the \fB"close"\fP option is used.
+Simultaneous connections to multiple ports are allowed.
+.sp
+The following example connects to the \fBecho\fP service
+on port 7 of the local host.
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC.1> sock_io("localhost:7", "send", "This is a test.\en")
+
+SPEC.2> print sock_io("localhost:7", "read")
+This is a test.
+.ft P
+.fi
+.RE
+

@@ -1,0 +1,49 @@
+.TH "ls" "macro" "08/01/12" "ls.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBls\fP \- UNIX file listing
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)ls.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "ls" "macro" "08/01/12" "ls.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBls [options] [files ... ]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBls\fP macro executes the UNIX command
+\fBls\fP in the current directory.  Some of the more useful options to
+\fBls\fP are:
+.sp
+\fB\-t\fP Sort by last\-modification time.
+.sp
+\fB\-u\fP Sort by last\-access time.
+.sp
+\fB\-r\fP Reverse the sort order.
+.sp
+\fB\-R\fP Recursively descend directories and list.
+.SH "DEFINITION"
+.rs
+.sp
+\fBdef ls \(aqunix("ls $*")\(aq\fP
+.SH "EXAMPLE"
+.rs
+.sp
+\fBls \-tr do.*\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fBUNIX User Reference Manual\fP
+

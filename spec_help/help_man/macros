@@ -1,0 +1,369 @@
+.TH "macros" "reference" "05/11/15" "macros.rst 6.2  05/11/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+macros \- description of macro facility
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)macros.rst       6.2  05/11/15  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2010,2012,2015
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "macros" "reference" "05/11/15" "macros.rst 6.2  05/11/15 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The following commands and functions are associated with the macro facility.
+.RS 0m
+.HP 5m
+."
+\fBdef m s\fP
+\- 
+Define or redefine \fBm\fP to have the definition \fBs\fP, where \fBs\fP is a string.
+Each time \fBm\fP occurs on input, it is replaced with \fBs\fP. The definition is
+made immediately, so the macro can be used later in the same statement block in
+in which it is defined and can be redefined within the same statement block.
+.sp
+Note that the macro definition is made regardless of any surrounding flow control
+statements, since the enclosing mini\-program is not yet completely parsed and is not executing.
+.HP 5m
+."
+\fBrdef m s\fP
+\- 
+Define or redefine \fBm\fP to have the definition \fBs\fP, where \fBs\fP is a string.
+Each time \fBm\fP occurs on input, the value \fBs\fP is substituted.
+Unlike \fBdef\fP, described above, the macro definition is not made until all the
+encompassing statement blocks are parsed and executed and the resulting mini\-program
+is executed.
+.HP 5m
+."
+\fBdef m([*a1, ...]) \(aq{ ... }\(aq\fP or \fBrdef m([*a1, ...]) \(aq{ ... }\(aq\fP
+\- 
+Defines a macro function named \fBm\fP, possibly with arguments \fBa1\fP, ...,
+that can optionally return a value using the \fBreturn\fP keyword.  The string
+delimiter characters in the macro definition are optional.  The curly brackets
+are required.
+.HP 5m
+."
+\fBundef m1 [m2 ... ]\fP
+\- 
+Remove macro definitions.
+.HP 5m
+."
+\fBlsdef [m1 ...]\fP
+\- 
+List the names and sizes of all (or selected) macros.  The arguments can use literal
+text with wildcard characters \fB?\fP and \fB*\fP, which have the usual meaning:  \fB?\fP
+matches any single character and \fB*\fP matches any string.
+.HP 5m
+."
+\fBprdef [m1 ... ]\fP
+\- 
+Print all (or selected) macro definitions.  The arguments can contain wildcard characters
+as described above for \fBlsdef\fP.  The definitions include are prepended with \fBdef name \(aq\fP
+and terminated with \fB\(aq\fP so if saved to a file can be read back.
+.HP 5m
+."
+\fBcdef(name, s, [key, [flags]])\fP
+\- 
+The function \fBcdef()\fP is used to define chained macros.
+The function can be used
+to maintain a macro definition in pieces
+that can be selectively included into a complete macro definition.
+The argument \fBname\fP is the name of the macro.  The argument
+\fBs\fP contains a piece to add to the macro.
+.sp
+The chained macro can have three parts:  a front, a middle and a back.
+Pieces included in each of the parts of the macros
+are sorted lexicographically by the keys.
+Pieces without a key are placed in the middle, in the order in which they
+were added, but after any middle pieces that include a key.
+.sp
+With the optional \fBkey\fP argument,
+the pieces can be selectively replaced or deleted.
+The \fBflags\fP argument controls whether the pieces are
+added to the front or to the back of the macro or whether the pieces
+should be selectively included in the definition based on whether
+\fBkey\fP is a currently configured motor or counter mnemonic.
+.sp
+The bit meanings for \fBflags\fP are as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB0x01\fP
+\- 
+only include if key is a motor mnemonic
+and the motor is not disabled.
+.HP 5m
+."
+\fB0x02\fP
+\- 
+only include if key is a counter mnemonic
+and the counter is not disabled.
+.HP 5m
+."
+\fB0x10\fP
+\- 
+place in the front part of the macro.
+.HP 5m
+."
+\fB0x20\fP
+\- 
+place in the back part of the macro.
+.PD
+.RE
+.sp
+If \fBflag\fP is the string \fB"delete"\fP, the piece associated with
+\fBkey\fP is deleted from the named macro,
+or if the name is the null string,
+from all the chained macros.
+.sp
+If \fBflag\fP is the string \fB"enable"\fP, the parts of the named macro
+associated with \fBkey\fP are enabled, and if \fBflag\fP is the string
+\fB"disable"\fP, the associated parts are disabled.
+If \fBname\fP is the null string
+\fB""\fP, then all chained macros that have parts associated with
+\fBkey\fP will have those parts enabled or disabled.
+.sp
+If \fBkey\fP is the null string, the \fBflags\fP have no effect.
+.sp
+The \fBcdef()\fP function will remove any existing macro defined using
+\fBdef\fP or \fBrdef\fP. Likewise, \fBdef\fP and
+\fBrdef\fP will removed an existing \fBcdef()\fP macro with the same name.
+However, the commands \fBlsdef\fP, \fBprdef\fP and
+\fBundef\fP do work with chained macros.  When \fBspec\fP starts, when the
+\fBreconfig\fP command is run (or the \fBconfig\fP macro is invoked)
+or when individual motors or counters are enabled or disabled,
+all the chained macros are adjusted for the currently configured
+and enabled motors and counters.
+.RE
+.HP 5m
+."
+\fBcdef("?")\fP
+\- 
+Lists all the pieces of all the chained macros.
+.HP 5m
+."
+\fBcdef(name, "?")\fP
+\- 
+Lists the pieces of the macro named \fBname\fP, as will a
+\fB"?"\fP as the third or fourth argument.
+.HP 5m
+."
+\fBclone(dest, src)\fP
+\- 
+Duplicates the macro \fBsrc\fP as a new macro named
+\fBdest\fP.
+Currently a clone of a \fBcdef\fP chained macro becomes an ordinary macro.
+(Available as of \fBspec\fP release 5.00.03.)
+.HP 5m
+."
+\fBstrdef(s)\fP
+\- 
+Returns a string containing the macro definition of \fBs\fP. If
+\fBs\fP is not a defined macro, returns the string \fBs\fP itself.
+(Available as of \fBspec\fP release 5.08.02\-6.)
+.HP 5m
+."
+\fBstrdef(s, key)\fP
+\- 
+If \fBs\fP is a chained macro, returns
+a string containing only the definition segment associated
+with \fBkey\fP.
+If \fBs\fP is not a defined macro, returns the string \fBs\fP itself.
+If \fBs\fP is a macro, but not a chained macro, returns the definition.
+If \fBs\fP is a chained macro, but doesn\(aqt contain a segment associated
+with \fBkey\fP, returns the null string.
+(Available as of \fBspec\fP release 6.03.04.)
+.RE
+.SH "MACRO ARGUMENTS"
+.rs
+.sp
+Within an ordinary macro (not a macro function),
+the symbols \fB$1\fP, \fB$2\fP, ... are replaced with the
+arguments with which the macro is invoked.  Also,
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fB$0\fP	is replaced with the macro name,
+\fB$*\fP	is replaced with all the arguments,
+\fB$@\fP	is replaced with arguments delimited by \fB\ea\fP,
+\fB$#\fP	is replaced with the number of arguments,
+\fB\e$\fP	is a literal $.
+.TE
+.RE
+.sp
+A macro argument is a string of characters separated by spaces.
+Use quotes to include more than one string in a single argument.
+Use \fB\e"\fP or \fB\e\(aq\fP, in arguments to pass literal quotes to the macro.
+You can continue supplying arguments on subsequent lines by putting
+a backslash at the end of the previous line.
+.sp
+When a macro is defined without arguments,
+only the macro name is replaced with the definition.
+.sp
+When a macro is defined with arguments and is encountered by the program,
+all characters on that line
+up to a \fB;\fP, a \fB{\fP or the end of the line are eaten up, whether or
+not the macro uses them as arguments.
+When numbered arguments are referred to in the macro definition,
+but are missing when the macro is invoked, they are replaced with zeros.
+If \fB$*\fP is used in the definition and there are no arguments, no characters
+are substituted.
+.sp
+It is often useful when parsing macro arguments, particularly
+when the macro
+is called with a variable number of arguments, to use the \fBsplit()\fP
+function to place the arguments into an associative array.
+Typical syntax is:
+.RS 3m
+.sp
+.nf
+.ft CB
+{
+  local ac, av[]
+  ac = split("$*", av)
+}
+.ft P
+.fi
+.RE
+.sp
+Note, that usage
+does not respect quoted arguments, since \fB$*\fP removes quotation marks when
+concatenating the macro arguments.
+.sp
+Introduced in \fBspec\fP release 6.03.04, the sequence \fB$@\fP is replaced with
+the concatenated arguments delimited
+by the special character \fB\ea\fP (the audible bell, \fB^G\fP, ASCII 7).
+The string can then be split as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+{
+  local ac, av[]
+  ac = split("$@", av, "\ea")
+}
+.ft P
+.fi
+.RE
+.sp
+The elements of \fBav[]\fP will respect the quoted arguments in the macro invocation.
+There is no syntax to escape the \fB\ea\fP.
+.sp
+The length of a macro definition has been unlimited since \fBspec\fP release 3.03.10.
+The number of macro arguments has been unlimited since \fBspec\fP release 6.00.10.
+.SH "CAVEATS"
+.rs
+.sp
+Beware of unwanted side affects when referencing the same argument
+more than once.
+For example,
+.sp
+.RS 4m
+\fBdef test \(aqa = $1; b = 2 * $1\(aq\fP
+.RE
+.sp
+invoked as \fBtest i++\fP, would be replaced with
+\fBa = i++; b = 2 * i++\fP, with the result that
+\fBi\fP is incremented twice, even though that action is not apparent to the user.
+The previous definition also would cause problems if invoked as
+\fBtest 2+3\fP, as that would be replaced with \fBa = 2+3; b = 2 * 2+3\fP.
+The latter expression evaluates to 7, not 10, as might have been
+intended by the user.  Use of parenthesis to surround arguments used in
+arithmetic expressions in macro definitions will avoid such problems, as in
+\fBb = 2 * ($1)\fP.
+.SH "MACRO FUNCTIONS"
+.rs
+.sp
+Macro functions
+(introduced in \fBspec\fP release 4)
+are a type of macro
+that can return values and can be used as an operand in
+expressions.
+The macro definition can include function arguments, which then
+become available to the
+body of the macro function.
+For example:
+.RS 3m
+.sp
+.nf
+.ft CB
+def factorial(n) \(aq{
+       if (n <= 1)
+               return(1);
+       return(n * factorial(n\-1))
+\(aq
+.ft P
+.fi
+.RE
+.sp
+The syntax of macro functions requires the macro name followed by
+a set of parenthesis which can contain a comma\-separated list of
+argument names.
+The argument  names become local variables within the macro definition.
+The definition must be a statement block, that is, the statements
+must be enclosed
+in curly brackets.
+.SH "EXAMPLES"
+.rs
+.sp
+\fBdef u \(aqunix("$*")\(aq\fP
+.sp
+Notice the double quotes convert the arguments into a single string,
+as required by the syntax of the \fBunix()\fP built\-in command.
+When invoked with no arguments, the macro evaluates to
+\fBunix("")\fP.
+.RS 3m
+.sp
+.nf
+.ft CB
+def ct \(aq{
+  local   c
+  if ((c = $1) == 0)
+     tcount(1)
+  else if (c < 0)
+     mcount(\-c)
+  else
+     tcount(c)
+  waitcount
+  getcounts
+  print S[0], S[1], S[2]
+}\(aq
+.ft P
+.fi
+.RE
+.sp
+Notice that the argument \fB$1\fP is referred to only once, by using the
+local variable \fBc\fP. When invoked with no arguments,
+the first line evaluates to \fBif ((c = 0) == 0)\fP.
+.RS 3m
+.sp
+.nf
+.ft CB
+def hscan \(aq
+  hklscan $1 $2 K K L L $3 $4
+\(aq
+.ft P
+.fi
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%def\fP
+\fI\%undef\fP
+\fI\%lsdef\fP
+

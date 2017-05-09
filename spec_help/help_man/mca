@@ -1,0 +1,498 @@
+.TH "mca" "hardware" "05/16/13" "mca.rst 6.2  05/16/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+mca \- Multichannel Analyzer Support
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mca.rst  6.2  05/16/13  CSS
+.
+.\" Copyright (c) 1997,1998,1999,2002,2007,2010,2012,2013
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mca" "hardware" "05/16/13" "mca.rst 6.2  05/16/13 CSS"
+.
+.SH "INTRODUCTION"
+.rs
+.sp
+In \fBspec\fP, an MCA\-type device is something
+that returns a one\-dimensional array of data.
+Such devices include multichannel analyzers,
+multichannel scalers, and digital correlators.
+Operation of most of these devices is through either
+manual commands to start and stop acquisition when appropriate to
+the experiment or automatic operation with the standard counting
+commands and macros.
+.sp
+A list of currently supported MCA\-type devices is at the end of this
+document.
+.sp
+All MCA\-type devices (except CAMAC) are assigned
+a device number from 0 to 31 in the
+\fBconfig\fP file.  \fBspec\fP\(aqs MCA functions \fBmca_get()\fP, \fBmca_put()\fP and
+\fBmca_par()\fP operate on the MCA device last selected
+with the \fBmca_sel()\fP function.
+The functions \fBmca_sget()\fP, \fBmca_sput()\fP and
+\fBmca_spar()\fP take the assigned device number
+as an additional initial parameter.
+.sp
+Currently, one cannot assign arbitrary device numbers
+to CAMAC MCA\-type devices.
+Instead the numbers are automatically assigned starting
+with the lowest available device number not otherwise taken when
+\fBspec\fP reads the \fBconfig\fP file.
+Use the \fBmca_sel("?")\fP to see what device numbers have been assigned.
+.SH "DATA ARRAYS AND DATA GROUPS"
+.rs
+.sp
+The \fBmca_get()\fP and \fBmca_put()\fP functions, which transfer data between the
+MCA\-type hardware and \fBspec\fP, can use either data arrays or data groups.
+(Data groups are an older method of handling
+arrays of numbers in \fBspec\fP and are explained in the \fI\%data\fP help file.)
+.sp
+The recommended method of handling MCA data is with data arrays.
+The \fI\%arrays\fP help file explains general features of the array data type.
+In brief, the arrays are declared with a type and dimension.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC.1> ulong array mca_data[8192]
+.ft P
+.fi
+.RE
+.sp
+declares an unsigned\-long data array of 8,192 elements.
+The \fBmca_get()\fP and \fBmca_put()\fP functions can be invoked
+with the array name as an argument.
+If the declared type of the array matches that of the hardware, the
+data will be transferred directly to the array.
+If the type doesn\(aqt match, \fBspec\fP will create a temporary buffer of
+the correct type, read the data into that, then copy the data to
+the user\(aqs array, all transparently to the user.  Either way will work, though
+there is a slight efficiency advantage in declaring the array
+to match the native type of the hardware.
+The command
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC.2> print mca_par("native_type")
+long
+.ft P
+.fi
+.RE
+.sp
+shows the native type of the selected MCA device.
+.SH "FUNCTIONS"
+.rs
+.sp
+Not all functions or \fBmca_par()\fP options are implemented for all MCA devices.
+Some functions can\(aqt be implemented due to hardware limitations.
+Others just haven\(aqt been implemented yet.
+If the hardware\-specific documentation doesn\(aqt yet exist,
+contact CSS to determine which features are implemented for
+particular devices.
+.RS 0m
+.HP 5m
+."
+\fBmca_sel(n)\fP
+\- 
+Selects which MCA\-type device to use for subsequent calls of the
+\fBmca_get()\fP, \fBmca_put()\fP and \fBmca_par()\fP functions.
+The MCA device numbering is set in the \fBconfig\fP file with the string
+\fB@mca_N\fP, where \fBN\fP is the device number (from 0 to 31).
+Returns \-1 if not configured for device \fBn\fP, otherwise returns zero.
+It is not necessary to use \fBmca_sel()\fP if only one MCA\-type device is
+configured and is configured as device 0.
+.HP 5m
+."
+\fBmca_sel("?")\fP
+\- 
+Lists the configured MCA devices and indicates which device is
+currently selected for the \fBmca_get()\fP, \fBmca_put()\fP and
+\fBmca_par()\fP functions with an asterisk.
+Also displays the MCA device number for use with the
+\fBmca_sget()\fP, \fBmca_sput()\fP and \fBmca_spar()\fP functions
+and displays whether the presence test found
+the unit unresponsive or if the
+user has disabled the unit.
+Returns the total number of MCA devices recognized in the \fBconfig\fP file.
+Note, the value of the built\-in global variable
+\fBMCAS\fP is always set to the number of MCA devices
+(as of \fBspec\fP release 5.02.02\-7).
+.HP 5m
+."
+\fBmca_sel(n, "?")\fP
+\- 
+Returns a string containing one line of information about MCA device
+\fBn\fP, or 0 if \fBspec\fP isn\(aqt configured for device \fBn\fP.
+.HP 5m
+."
+\fBmca_get(arr [, roi_beg [, roi_end]])\fP
+\- 
+Gets data from the currently selected MCA\-type device, and transfers it to
+the array \fBarr\fP.
+If the optional starting channel and ending channel are given,
+the data is read from those hardware channels and placed starting
+at the beginning of the array.  For example,
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC.1> ulong array data[1024]
+SPEC.2> mca_get(data)
+SPEC.3> mca_get(data, 32, 128)
+SPEC.4> mca_get(data[32:128], 32, 128)
+.ft P
+.fi
+.RE
+.sp
+The last example uses subarray syntax to position the data in
+array elements corresponding to the MCA channel positions.
+.RE
+.HP 5m
+."
+\fBmca_get(g, e [, roi_beg [, roi_end]])\fP
+\- 
+As above, but transfers the data to element \fBe\fP of data group
+\fBg\fP instead of an array.  Returns the number of points transferred.
+.HP 5m
+."
+\fBmca_sget(sel, ...)\fP
+\- 
+Like the above functions, but uses the MCA device numbered
+\fBsel\fP in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmca_put(...)\fP and \fBmca_sput(sel, ...)\fP
+\- 
+These functions have the same syntax as the above, but transfer data
+to the MCA device (for devices that support transfer in that direction).
+.HP 5m
+."
+\fBmca_par(cmd [, arg])\fP
+\- 
+A function to access various features and parameters
+of the currently selected MCA device.  The string
+\fBcmd\fP selects an option.
+The argument \fBarg\fP contains an optional value.
+Some values for \fBcmd\fP apply to all MCA devices,
+while some apply only to certain devices.
+.HP 5m
+."
+\fBmca_spar(sel, cmd [, arg])\fP
+\- 
+Like the above, but uses the MCA device numbered \fBsel\fP in the
+\fBconfig\fP file.
+.HP 5m
+."
+\fBmca_par("info")\fP
+\- 
+Displays the native type, the currently configured number of channels
+and the maximum number of hardware channels for the selected MCA device.
+Also displays the current settings for auto\-clear mode, auto\-run mode
+and soft\-preset mode (as of \fBspec\fP release 6.00.06).
+.HP 5m
+."
+\fBmca_par("chans")\fP
+\- 
+Returns the currently configured number of channels.
+.HP 5m
+."
+\fBmca_par("max_chans")\fP or \fBmca_par("max_channels")\fP
+\- 
+Returns the maximum number of hardware channels.
+.HP 5m
+."
+\fBmca_par("disable" [, arg])\fP
+\- 
+With no arguments, returns nonzero if the selected MCA device has been
+disabled by the user, otherwise returns zero.
+If \fBarg\fP is 1, disables the MCA.
+If \fBarg\fP is 0, turns off the disabled mode.
+When the device is disabled, \fBspec\fP will not access the hardware.
+On start up, and after the standard
+\fBconfig\fP macro or the \fBreconfig\fP command is run, disabled mode is off.
+.HP 5m
+."
+\fBmca_par("auto_run" [, arg])\fP
+\- 
+With no arguments, returns nonzero if the selected MCA device has auto\-run
+mode set, otherwise returns zero.
+If \fBarg\fP is 1, enables auto\-run mode.
+If \fBarg\fP is 0, turns off auto\-run mode.
+When auto\-run mode is set the device is
+started and stopped with the counting functions \fBtcount()\fP,
+\fBmcount()\fP, etc.
+When not set, the counting functions are ignored, but
+the device can be controlled with the \fB"run"\fP
+and \fB"halt"\fP options described below.
+In addition, the device can be halted with the
+\fBstop()\fP function and will be halted with \fB^C\fP.
+Some devices default to auto\-run mode on and some to auto\-run mode off
+on start up and after the standard \fBconfig\fP macro
+or the \fBreconfig\fP command is run.
+.HP 5m
+."
+\fBmca_par("soft_preset" [, arg])\fP
+\- 
+With no arguments,
+returns nonzero if the selected MCA device has soft\-preset mode set,
+otherwise returns zero.
+If \fBarg\fP is 1, enables soft\-preset mode.
+If \fBarg\fP is 0, turns off soft\-preset mode.
+When set, and if auto\-run mode is enabled (see above),
+the MCA device is set to count for the time preset given
+as an argument to the \fBtcount()\fP function.
+The \fBwait()\fP function will wait until both the
+timer and the MCA device have counted to their respective presets.
+When soft\-preset mode is not set, but auto\-run mode is,
+the device is programmed for continuous data acquisition and will
+be stopped when the timer\(aqs preset is reached.
+Currently, when both soft\-preset and auto\-run modes are in effect,
+when counting to monitor (using \fBmcount()\fP) rather than to time,
+the device is also programmed for continuous data acquisition, as above.
+.HP 5m
+."
+\fBmca_par("auto_clear" [, arg])\fP
+\- 
+With no arguments, returns nonzero if the selected MCA device has
+auto\-clear mode set, otherwise returns zero.
+If \fBarg\fP is 1, enables auto\-clear mode.
+If \fBarg\fP is 0, turns off auto\-clear mode.
+When set, \fBspec\fP automatically sends commands
+to clear the MCA data before acquisition is started.
+Note, for some MCA devices, the clear operation takes time, so may affect
+the duration of data acquisition when not in soft\-preset mode.
+Auto\-clear mode is set at start up and after each hardware reconfiguration.
+Auto\-clear mode is currently implemented for
+the XIA DXP; Nucleus PCA II, PCA\-3, Multiport and
+Microfast; Ortec Trump MCA (ISA and PCI) and MCS (PCI);
+Fast Comtec MCD; Seiko EG&G MCA 7700; MBraun PSD\-50M;
+Silena 7328 and 7329; Roentec XFlash MAX; Amptek 8000 and 8000A;
+Labo 2400; the EPICS MCA record and the TACO (ESRF) MCA device server.
+.HP 5m
+."
+\fBmca_par("native_type")\fP
+\- 
+Returns one of the strings
+\fBbyte\fP, \fBubyte\fP, \fBshort\fP, \fBushort\fP,
+\fBlong\fP, \fBulong\fP, \fBfloat\fP, \fBdouble\fP or
+\fBunknown\fP to describe the native data type of the MCA device.
+.HP 5m
+."
+\fBmca_par("preset" [, arg])\fP
+\- 
+With no arguments, returns the current preset value.
+Otherwise, sets the preset to
+\fBarg\fP. The preset value is in seconds for live\-time and real\-time modes
+or number of counts for integral mode.
+If the preset is zero, the device will programmed for continuous run,
+except when the soft\-preset mode is in effect, as described above.
+.HP 5m
+."
+\fBmca_par("live")\fP
+\- 
+Sets the MCA device to live\-time mode.
+.HP 5m
+."
+\fBmca_par("real")\fP
+\- 
+Sets the MCA device to real\-time (or true\-time) mode.
+.HP 5m
+."
+\fBmca_par("integral")\fP
+\- 
+Sets the MCA device to a mode where it runs
+until the counts in a region of interest reach the preset.
+.HP 5m
+."
+\fBmca_par("elapsed_live")\fP
+\- 
+Returns the elapsed live time in seconds.
+.HP 5m
+."
+\fBmca_par("elapsed_real")\fP
+\- 
+Returns the elapsed real time in seconds.
+.HP 5m
+."
+\fBmca_par("dead")\fP
+\- 
+Returns the dead\-time percentage,
+calculated as 100 * (\fBreal_time\fP \- \fBlive_time\fP) / \fBreal_time\fP.
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+Programs the MCA device with the appropriate parameters
+and starts acquisition.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+Halts the MCA device.
+.HP 5m
+."
+\fBmca_par("clear")\fP
+\- 
+Clears the data in the current group.
+.HP 5m
+."
+\fBmca_par("group_size")\fP
+\- 
+Returns the current group size.
+.HP 5m
+."
+\fBmca_par("group_size", size)\fP
+\- 
+Sets the group size to \fBsize\fP.
+.HP 5m
+."
+\fBmca_par("select_group")\fP
+\- 
+Returns the currently active group.  Groups are numbered starting at zero.
+.HP 5m
+."
+\fBmca_par("select_group", group)\fP
+\- 
+Sets the active group to \fBgroup\fP.
+.HP 5m
+."
+\fBmca_par("gain")\fP
+\- 
+Returns the current gain value used in pulse\-height analysis mode.
+.HP 5m
+."
+\fBmca_par("gain", value)\fP
+\- 
+Sets the gain parameter to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("send", msg)\fP
+\- 
+For message\-based devices, sends the string \fBmsg\fP to the device.
+.HP 5m
+."
+\fBmca_par("read", msg)\fP
+\- 
+For message\-based devices, sends the string
+\fBmsg\fP to the device, and returns the device\(aqs reply.
+.HP 5m
+."
+\fBmca_par("chan#")\fP
+\- 
+Returns the contents of channel number \fB#\fP.
+.HP 5m
+."
+\fBmca_par("chan#", value)\fP
+\- 
+Set the contents of channel number \fB#\fP to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("set_hdw_roi", beg, end)\fP
+\- 
+Sets the hardware region of interest to the channels from \fBbeg\fP to
+\fBend\fP. Several calls may be made to select noncontiguous regions.
+.HP 5m
+."
+\fBmca_par("clr_hdw_roi")\fP
+\- 
+Clears the hardware region of interest
+.RE
+.SH "CURRENTLY SUPPORTED DEVICES"
+.rs
+.sp
+Currently supported MCA\-type devices include:
+.sp
+.RS 4m
+.nf
+\fI\%AI Solutions DAQ\-ATDC/NDAQ\fP (USB)
+\fI\%Amptek DP5/PX5/MCA8000D\fP (FW6) (USB)
+\fI\%Amptek PX4 Digital Processor\fP (USB)
+\fI\%Canberra Multiport II\fP (USB)
+\fI\%Ketek DPP2\fP (USB)
+\fI\%XIA Saturn MCA\fP (USB)
+
+\fI\%Amptek DP5/PX5/MCA8000D\fP (FW6) (Ethernet)
+Bruker Vantec\-1 (Ethernet)
+Canberra LYNX/DSA\-3000 (Ethernet)
+\fI\%Canberra Multiport II\fP (Ethernet)
+\fI\%Dectris Mythen 1K\fP (Ethernet)
+\fI\%Laboratory Equipment Corporation NT\-2400\fP (Ethernet)
+Seiko/EG&G Orsim MCA 7700 (Ethernet)
+
+ESRF MUSST MCA (GPIB)
+Princeton Applied Research Model 283 (GPIB)
+Princeton Instruments ST116 PDA (GPIB)
+\fI\%Oxford/Tennelec/Nucleus PCA Multiport\fP (GPIB)
+Ortec 918A Multichannel Buffer (GPIB)
+Silena 7328 MCA (8K) (GPIB)
+Silena 7329 MCA (16K) (GPIB)
+
+\fI\%Amptek DP5/PX5/MCA8000D\fP (FW6) (Serial)
+\fI\%Amptek Pocket MCA 8000/8000A\fP (Serial)
+\fI\%Amptek PX4 Digital Processor\fP (Serial)
+MBraun PSD\-50M (Serial)
+Bruker (Roentec) XFlash MAX MCA (Serial)
+
+Ortec TRUMP PCI (PCI Board)
+\fI\%Ortec MCS\-PCI\fP (PCI Board)
+
+\fI\%XIA X10P MCA\fP (parallel port)
+
+EPICS MCA Record
+TACO MCA Device Server
+
+Hasylab Model 8701 MCA (VME)
+
+FAST ComTec MCD/PC (ISA Board)
+FAST ComTec MCDLAP (ISA Board)
+\fI\%Hecus ASA\-32 MCA\fP (ISA Board)
+\fI\%Oxford/Tennelec/Nucleus MicroFast MCA\fP (ISA Board)
+\fI\%Oxford/Tennelec/Nucleus PCA\-3 MCA\fP (ISA Board)
+\fI\%Oxford/Tennelec/Nucleus PCA II MCA\fP (ISA Board)
+Ortec TRUMP 8K/2K Multichannel Buffer (ISA Board)
+
+DSP 2190 MCS Averager (CAMAC)
+\fI\%LeCroy 2301 Interface for qVT MCA\fP (CAMAC)
+LeCroy 3512 Spectroscopy ADC (CAMAC)
+LeCroy 3521A Multichannel Scaler (CAMAC)
+\fI\%LeCroy 3588 Fast Histogram Memory\fP (CAMAC)
+\fI\%XIA DXP\fP (CAMAC)
+
+Brookhaven Instruments BI\-9000 Autocorrelator (ISA Board)
+\fI\%Nicomp TC\-100 Autocorrelator\fP (RS\-232C)
+
+Keithley 2001 Multimeter (GPIB)
+.fi
+.sp
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%amptek\fP
+\fI\%dp5\fP
+\fI\%dxp\fP
+\fI\%hecus\fP
+\fI\%kisim\fP
+\fI\%lc2301\fP
+\fI\%lc3588\fP
+\fI\%mcspci\fP
+\fI\%microfast\fP
+\fI\%MPII\fP
+\fI\%mythen\fP
+\fI\%nicomp\fP
+\fI\%nt2400\fP
+\fI\%pca\fP
+\fI\%px4\fP
+

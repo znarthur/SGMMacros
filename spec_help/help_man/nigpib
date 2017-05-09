@@ -1,0 +1,377 @@
+.TH "nigpib" "hardware" "03/14/15" "nigpib.rst 6.4  03/14/15 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+nigpib \- National Instruments GPIB Controllers
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)nigpib.rst       6.4  03/14/15  CSS
+.
+.\" Copyright (c) 2000-2007,2009,2011,2012,2013,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "nigpib" "hardware" "03/14/15" "nigpib.rst 6.4  03/14/15 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP supports a number of
+National Instruments GPIB controllers on a variety of platforms.
+The support is available using \fBspec\fP\(aqs built\-in code (highly recommended),
+kernel\-level drivers supplied by National Instruments (on
+\fBLinux\fP, driver release 0.8.6 or prior, or driver release 2.9 or later)
+or freely available open\-source drivers.
+If the \fBlinux\-gpib\fP open\-source driver from Source Forge
+is installed, GPIB controllers from
+other vendors can also be used with the \fBspec\fP\(aqs NI GPIB support.
+In addition, \fBspec\fP supports the National Instruments VME\-GPIB
+module via \fBspec\fP\(aqs built\-in code.
+.SH "NI GPIB on \fBLinux\fP With Built\-In Support"
+.rs
+.sp
+The easiest and recommended configuration for using National Instruments PCII, PCIIA,
+AT\-GPIB and PCI\-GPIB cards and GPIB\-ENET
+and VME\-GPIB modules with \fBspec\fP is the
+built\-in support. (AT\-GPIB and PCI\-GPIB/rev 01 support available
+as of \fBspec\fP release 5.07.02\-01, GPIB\-ENET and GPIB\-ENET/100 as of release 5.07.02\-04,
+GPIB\-ENET/1000 as of release 5.10.02\-3,
+all PCI\-GPIB as of \fBspec\fP release 5.7.02\-06,
+VME\-GPIB as of \fBspec\fP release
+5.08.03\-10).
+The built\-in support means no kernel\-level driver is used, so there is no
+dependency on \fBLinux\fP kernel version.
+No additional software needs to be installed and no additional
+modules or libraries need to be linked with \fBspec\fP.
+In fact, it is recommended not to install any of the National Instruments \fBLinux\fP
+software drivers or libraries.
+.sp
+Configuration is along the following lines for the particular devices:
+.RS 3m
+.sp
+.nf
+.ft CB
+Interface Configuration
+
+   GPIB DEVICE  ADDR <>MODE                        <>TYPE
+ 0  YES        0x2b8             Nat Inst PCII (built\-in)
+ 0  YES        0x2e0            Nat Inst PCIIA (built\-in)
+ 0  YES        0x2c0          Nat Inst AT\-GPIB (built\-in)
+ 0  YES          1:3         Nat Inst PCI\-GPIB (built\-in)
+ 0  YES       0x2100         Nat Inst VME\-GPIB (built\-in)
+ 0  YES  host               Nat Inst GPIB\-ENET (built\-in)
+.ft P
+.fi
+.RE
+.sp
+For the ISA cards (PCII, PCIIA, AT\-GPIB), the board\(aqs base address
+must be configured.
+The built\-in support operates through user\-level access to the I/O ports
+and registers.
+No interrupts are involved, and no DMA is used.
+For the ISA cards, the IRQ and DMA jumpers can be left open.
+All data transfers between \fBspec\fP and the controllers
+are done using polled I/O.
+For most applications, the built\-in support works well.
+.sp
+For the PCI cards, the \fBADDR\fP field can contain zero, or numbers
+identifying the PCI bus and slot number.
+The latter configuration is useful if more than one PCI\-GPIB
+card is installed.
+If the \fBADDR\fP is zero, the boards are assigned to the GPIB unit in the
+order in which they are discovered.
+PCI bus and slot numbers can be found using the
+\fBLinux\fP utility \fB/sbin/lspci\fP.
+Note, though, that utility displays hexadecimal numbers
+while \fBspec\fP\(aqs configuration uses decimal.
+.sp
+For the GPIB\-ENET module, an IP address or resolvable host name must
+be entered as the \fBDEVICE\fP.
+.sp
+The VME\-GPIB module has two GPIB connectors, so can be configured
+as two GPIB controllers for \fBspec\fP.  For each controller,
+\fBADDR\fP is the base address set via the DIP switches on the controller card
+plus 0x100 for GPIB port A and plus 0x180 for GPIB port B.
+Thus, for the default VME address of 0x2000, one would configure the
+\fBADDR\fP parameter as 0x2100 for port A and 0x2180 for port B.
+.sp
+No GPIB drivers should be used or installed for any GPIB controllers that
+\fBspec\fP will be accessing using the built\-in support.
+Installing such drivers may conflict with \fBspec\fP\(aqs use of the board.
+.SH "NI GPIB On \fBLinux\fP With the NI Driver"
+.rs
+.sp
+\fBspec\fP supports some versions of the \fBLinux\fP drivers that
+National Instruments provides for the PCI\-GPIB and
+AT\-GPIB/TNT cards and the GPIB\-ENET models.
+However, \fBspec\fP\(aqs built\-in support, described above, is usually the
+best choice.
+.sp
+Old versions of the National Instruments drivers can downloaded from
+ftp.ni.com
+in the directory \fI\%support/gpib/linux\fP.
+The most recent driver package (circa August 2014) is
+available from the download pages at the NI website at \fI\%ni.com/download/ni\-488.2\-3.2/4916/en\fP.
+.sp
+With the old drivers for the PC cards,
+\fBspec\fP supports the 0.x series drivers (last version 0.8.6).
+Those drivers
+work with Linux kernels through release 2.4.
+Versions 2.2 though 2.8 of the NI driver packages are not compatible with \fBspec\fP.
+Version 2.9 of the NI driver can be linked with
+\fBspec\fP release 5.10.02\-3, although use has not been well tested.
+Version 3.2 of the NI driver can be linked as of
+\fBspec\fP release 6.02.08.
+.sp
+Old versions of the NI software for use with the GPIB\-ENET module,
+namely the \fBnienet\-linux\-1.1.tar.gz\fP or
+\fBnienet\-linux\-1.2.tar.gz\fP packages, can also be used.
+The GPIB\-ENET support works at user level and doesn\(aqt depend on kernel version.
+Again, the NI 2.2 through 2.8 driver packages that also contain GPIB\-ENET support
+are not compatible with \fBspec\fP.
+.sp
+The NI driver distribution contains instructions for installation,
+which should be followed.
+Note, though, there is no need to run the \fBibconf\fP utility
+to configure the driver for \fBspec\fP
+for the PC cards (although \fBibconf\fP must be used with the GPIB\-ENET
+device to initialize the \fB/etc/gpibrc\fP file.)
+\fBspec\fP does all GPIB access from the board level device, normally
+\fB/dev/gpib0\fP. No other special device files are needed.
+\fBspec\fP also sets the device parameters, such as timeouts and end\-of\-string
+behavior, as needed at run time.
+.sp
+For the 0.x and 2.9 drivers and the nienet\-linux packages,
+\fBspec\fP needs to be linked with
+the \fBcib.o\fP file included in the driver distribution.
+When running the \fBspec\fP installation script
+\fBInstall\fP, enter the appropriate path for the file\(aqs location
+when presented with the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+Choices for Extra object files are:
+
+ 1) no    \- no additional object files
+ 2) other \- your choice
+
+If there are additional site\-dependent objects files, such
+as those provided by hardware vendors, enter the names here.
+
+Choose Extra object files (no)? /usr/local/nigpib/cib.o
+.ft P
+.fi
+.RE
+.sp
+For version 3.2 of the NI driver, choose instead the file \fBni4882.o\fP,
+along these lines:
+.RS 3m
+.sp
+.nf
+.ft CB
+Choose Extra object files (no)? /usr/local/natinst/ni4882/lib64/ni4882.o
+.ft P
+.fi
+.RE
+.sp
+In addition, for version 3.2 drivers, add \fB\-dl\fP as extra library flags:
+.RS 3m
+.sp
+.nf
+.ft CB
+Choose Extra library flags (no)? \-dl
+.ft P
+.fi
+.RE
+.sp
+If \fBspec\fP has already been installed, remove the file
+\fBspec\fP in the \fBspec\fP distribution directory before running the installation
+script to insure that the \fBspec\fP executable gets relinked.
+.sp
+When running the configuration editor, select either of the following
+options for the PCI cards:
+.RS 3m
+.sp
+.nf
+.ft CB
+Interface Configuration
+
+   GPIB     DEVICE ADDR <>MODE                       <>TYPE
+ 0  YES /dev/gpib0                      Nat Inst with cib.o
+ 0  YES /dev/gpib0             Nat Inst with cib.o (shared)
+.ft P
+.fi
+.RE
+.sp
+For the Ethernet device, choose from the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+Interface Configuration
+
+   GPIB  DEVICE ADDR <>MODE                               <>TYPE
+ 0  YES   gpib0                    Nat Inst GPIB\-ENET with cib.o
+ 0  YES   gpib0           Nat Inst GPIB\-ENET with cib.o (shared)
+.ft P
+.fi
+.RE
+.sp
+The "shared" version allows the GPIB interface to be shared among more than one
+instance of \fBspec\fP running on the same platform.
+\fBspec\fP uses kernel semaphores and shared memory to coordinate access
+to the driver.
+If only one instance of \fBspec\fP is using the GPIB interface, then
+one can avoid a little overhead by selecting the non\-shared configuration.
+.SH "Using Both GPIB\-ENET and PCI Cards With Old NI Drivers"
+.rs
+.sp
+If using the version 0.x NI drivers for the PCI\-GPIB (not necessary, if the
+\fBspec\fP\(aqs built\-in support is used), it
+would normally not be possible to use both the PCI\-GPIB card
+and the ENET\-GPIB device at the same time.
+Both devices require linking with different NI
+\fBcib.o\fP files, which results in a name\-space conflict.
+However, there is a workaround for \fBspec\fP, at least for NI driver
+releases 0.8.6 and earlier.
+.sp
+The \fBspec\fP distribution contains a script called
+\fBmakeCIB\fP in the distribution directory
+that will create a file called \fBCIB.c\fP. Such a file is
+a modified version of the National Instruments
+\fBcib.c\fP, with the function names starting with ib replaced with names
+starting with IB, and the 488.2 functions (unused by \fBspec\fP)
+eliminated.  See the comments in the \fBmakeCIB\fP file
+for more information on creating the \fBCIB.c\fP file.
+.sp
+Beginning with release 0.8.4, NI has dropped the
+\fBcib.c\fP file from the driver package.  However, the version of
+\fBcib.c\fP from early driver packages (0.8.3, for example) can be used.
+.sp
+One then links \fBspec\fP with both this new \fBCIB.o\fP file and the
+\fBcib.o\fP file included with the GPIB\-ENET distribution.
+In the \fBspec\fP configuration file, you select the
+"with CIB.o" device for the PC card GPIB interfaces.
+.SH "Using the Source\-Forge GPIB Driver"
+.rs
+.sp
+The Source Forge \fBLinux\fP GPIB project
+GPIB drivers work with \fBspec\fP using the
+"Nat Inst with cib.o" configuration options described above.
+The package distribution is available at the
+project\(aqs home at \fI\%http://linux\-gpib.sourceforge.net\fP
+along with documentation.
+(The Source Forge GPIB project is the successor to the deprecated
+linux\-lab GPIB project used with \fBspec\fP prior to the release of a driver by
+National Instruments.)
+.sp
+To install the \fBlinux\-gpib\fP driver you need first to have the
+\fBLinux\fP kernel source installed.
+To properly configure the sources to match the running kernel,
+change to the appropriate \fB/usr/src/linux\-\fP directory and run the commands:
+.RS 3m
+.sp
+.nf
+.ft CB
+make mrproper
+make oldconfig
+make dep
+.ft P
+.fi
+.RE
+.sp
+Note, the \fBLinux\fP kernel is something of a moving target.
+Instructions for building compatible modules change often.
+Check the "how\-to" files associated with the
+\fBlinux\-gpib\fP driver for current instructions.
+.sp
+Next, you can go the directory with the extracted
+\fBlinux\-gpib\fP sources and execute the commands:
+.RS 3m
+.sp
+.nf
+.ft CB
+\&./configure
+make
+make install
+.ft P
+.fi
+.RE
+.sp
+Finally, to link the \fBlinux\-gpib\fP library with
+\fBspec\fP, go to the \fBspec\fP distribution directory.
+Enter the complete path name of the library, such as
+\fB/usr/local/lib/libgpib.so\fP, as an
+"extra object file" option to the \fBspec\fP \fBInstall\fP script.
+(The \fBspec\fP linking won\(aqt work with a
+\fB\-lgpib\fP type of argument due to the idiosyncrasies of the \fBspec\fP linking.)
+.sp
+Be sure to configure appropriate entries in
+\fB/etc/gpib.conf\fP for the card(s) to be controlled by \fBspec\fP.
+Entries should be configured along the lines of
+.RS 3m
+.sp
+.nf
+.ft CB
+interface {
+      minor = 0
+      board_type = "ni_pci"
+      name = "gpib"
+      pad = 0
+      master = yes
+}
+.ft P
+.fi
+.RE
+.sp
+for the National Instruments PCI\-GPIB card.
+Important points are that the interface should be configured as the master,
+the primary address of the master should be zero as in
+\fBpad = 0\fP, and the value in the
+\fBname\fP field will be the string that must appear in the
+\fBDEVICE\fP field in the \fBspec\fP configuration editor, as in the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+Interface Configuration
+
+   GPIB     DEVICE ADDR <>MODE                       <>TYPE
+ 0  YES       gpib                      Nat Inst with cib.o
+.ft P
+.fi
+.RE
+.sp
+(Even though the text reads "Nat Inst with cib.o",
+it is the correct configuration for using the Source Forge
+\fBlinux\-gpib\fP driver with a \fBlibgpib.so\fP libary!)
+.sp
+Next, make sure the new driver is loaded with the command:
+.sp
+.RS 4m
+\fBmodprobe tnt4882\fP
+.RE
+.sp
+Also, be sure to run the \fBgpib_config\fP utility after installing the driver.
+.sp
+If all works, the following lines can be added to \fB/etc/modules.conf\fP
+so that the driver is loaded automatically when needed, and you won\(aqt
+need to use \fBmodprobe\fP or \fBgpib_config\fP after rebooting:
+.RS 3m
+.sp
+.nf
+.ft CB
+alias char\-major\-160 gpib_common
+alias char\-major\-160\-0 tnt4882
+post\-install tnt4882 /usr/local/sbin/gpib_config \-\-minor 0
+.ft P
+.fi
+.RE
+.sp
+Note, the Source Forge GPIB library supports GPIB cards from vendors other than
+National Instruments, and those cards should also be usable with \fBspec\fP.
+

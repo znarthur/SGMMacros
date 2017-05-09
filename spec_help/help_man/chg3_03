@@ -1,0 +1,1307 @@
+.TH "changes" "\fBspec\fP 3.03 Release Notes" "09/24/12" "chg3_03.rst 6.2  09/24/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 3.03
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg3_03.rst      6.2  09/24/12  CSS
+.
+.\" Copyright (c) 1995,1996,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 3.03 Release Notes" "09/24/12" "chg3_03.rst 6.2  09/24/12 CSS"
+.
+.SH "RELEASE 3.03.26"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.26 as of May 27, 1996.
+.SH "Default Hardware Poll Interval Changed From 40 To 10 msec"
+.sp
+The hardware poll interval, used with non\-interrupt driven devices, has
+been changed from 40 to 10 milliseconds.
+The value can be changed using
+.sp
+.RS 4m
+\fBspec_par("hdw_poll_interval", msec)\fP
+.RE
+.sp
+where
+\fBmsec\fP
+is the poll interval in milliseconds.
+The function
+\fBspec_par("hdw_poll_interval")\fP
+returns the current value.
+Note that the actual interval may vary.
+Most platforms have a resolution of only ten milliseconds in the
+system clock, and different platforms round
+\fBmsec\fP
+up or down.
+.SH "Improvements For the Microcontrole ITL09 Motor Controller"
+.sp
+A number of improvements have been made for the
+Microcontrole ITL09 motor controller.
+In particular,
+the nonconsecutive unit/channel numbering feature of the
+configuration editor is now supported for this controller.
+.SH "Support For Newport Model MM2500 and MM4000 Controllers Added"
+.sp
+The Newport Model MM2500 and MM4000 motor controllers are now supported
+by \fBspec\fP.
+.SH "MMC32 Delay Is Now Configurable"
+.sp
+The sleep delay inserted after each command sent to the NSLS MMC32
+motor controller is now user configurable.
+Use
+.sp
+.RS 4m
+\fBmotor_par(mne, "delay",  msec)\fP
+.RE
+.sp
+where
+\fBmne\fP
+is the mnemonic of any motor controlled by the MMC32 and
+\fBmsec\fP
+is the delay time in milliseconds.
+The delay affects all motors controlled by the MMC32.
+The default value is 100 msec.
+.SH "RELEASE 3.03.25"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.25 as of May 7, 1996.
+.SH "The \fBtwoc\fP Code Has Been Revised"
+.sp
+The geometry code and macros for the two\-circle diffractometer
+have been rewritten to use an orientation matrix and to allow
+least squares refinement of the lattice parameters.
+The
+\fBsetlat\fP
+and
+\fBsetrlat\fP
+macros are used to set the direct or reciprocal lattice parameters.
+The
+\fBor0\fP
+and
+\fBsetor0\fP
+macros are used to set the orientation reflection.
+The
+\fBreflex_beg\fP,
+\fBreflex_end\fP
+and
+\fBreflex\fP
+macros are used to save reflections used to refine the lattice parameters,
+in the same way as described in the
+\fBFour\-Circle Reference\fP.
+The
+\fBALPHA\fP
+and
+\fBBETA\fP
+parameters have been eliminated.
+Note,
+if you desire, the previous version of
+\fBtwoc\fP
+can be installed by selecting
+\fBtwoc_old\fP
+from the installation menu.
+Be sure to start fresh the first time running the new
+version of
+\fBtwoc\fP.
+.SH "New \fB.Xdefaults\fP Option For Size Of Plot Points"
+.sp
+You can
+now choose among several pixel patterns for drawing the
+smallest points on the \fBspec\fP X11 high\-resolution plots.
+The selection is made in the
+\fB.Xdefaults\fP
+resource file.
+See the explanation of the
+\fBDotSize\fP
+resource in the
+\fI\%x11\fP help file for details.
+.SH "No CAMAC Z Issued On Startup With DSP 6001 In Driverless Mode"
+.sp
+By user request,
+\fBspec\fP no longer issues the CAMAC Z crate initialization command
+on startup when using the DSP 6001/2 CAMAC crate controller in
+driverless mode.
+(With the CSS driver, whether the automatic Z is issued is
+determined by a driver\-installation option.)
+The function
+\fBca_cntl("Z")\fP
+can always be issued at the \fBspec\fP prompt to initialize the crate,
+if necessary.
+.SH "Small Change In \fBcount_em\fP Macro"
+.sp
+The
+\fBCOUNT_TIME\fP
+variable is now set to the current count time before
+(instead of after)
+the call of the
+\fBuser_precount\fP
+macro in the
+\fBcount_em\fP
+macro that is called by all the standard counting macros.
+.SH "RELEASE 3.03.24"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.24 as of April 1, 1996.
+.SH "Improvements For Newport MM2000 and MM3000 Motor Controllers"
+.sp
+A number of improvements have been made for the
+Newport (formerly Klinger) MM2000 motor controller.
+The nonconsecutive unit/channel numbering feature of the
+configuration editor is supported for this controller.
+Also, serial\-interface daisy\-chaining is now supported.
+The Newport MM3000 model has firmware compatible with the MM2000,
+so is also now supported by \fBspec\fP.
+.SH "Improvements For Huber SMC 9000 Motor Controller"
+.sp
+The nonconsecutive unit/channel numbering feature of the
+configuration editor is now supported for the Huber SMC 9000 motor controller.
+\fBspec\fP now allows more than one of these controllers to be configured.
+In addition, the error checking has been improved, although the nature of
+the controller makes the potential for recovery after a communications
+error unlikely.
+In addition,
+a command pass through capability is now available
+using
+.sp
+.RS 4m
+\fBmotor_par(mne, "send",  cmd)\fP
+.RE
+.sp
+to send the
+command
+\fBcmd\fP
+to the controller
+and
+.sp
+.RS 4m
+\fBmotor_par(mne, "read",  cmd)\fP
+.RE
+.sp
+to send the command
+\fBcmd\fP
+and return as a string an expected reply.
+The motor mnemonic argument
+\fBmne\fP
+only serves to select which controller to use.
+Unlike the implementation for other controllers,
+the motor number must be explicitly included in the user message for
+the Huber SMC 9000.
+For example,
+.sp
+.RS 4m
+\fBmotor_par(tth, "send", "BEEPOFF")\fP
+.RE
+.sp
+results in the string
+\fB"BEEPOFF;\er\en"\fP
+being sent to the controller associated with the
+\fBtth\fP
+motor.
+.SH "Pseudomotor \fBchg_dial()\fP Bug Fixed"
+.sp
+A bug, where the
+\fBchg_dial()\fP
+function (as used by the
+\fBset_dial\fP
+macro), didn\(aqt work properly for pseudomotors or any motor with
+\fBNONE\fP
+as controller in
+the
+\fBconfig\fP
+file, has been fixed.
+.SH "Bug Fix For Alternate Command\-Line History"
+.sp
+A bug, where the number of commands saved in the run\-time
+history list
+was not limited when using
+the optional, alternate command\-line history library,
+has been fixed.
+The run\-time history is now limited to 1,000 commands, just as is
+the history saved in the state file.
+.SH "RELEASE 3.03.23"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.23 as of March 13, 1996.
+.SH "New Site\-Dependent \fBInstall\fP Parameters"
+.sp
+The \fBspec\fP
+\fBInstall\fP
+program now prompts for additional parameters for
+site\-dependent compiler flags,
+site\-dependent object modules and site\-dependent libraries.
+.SH "Experimental User\-Configurable Pseudomotor Code"
+.sp
+Files dealing with an experimental, user\-configurable, compile\-time
+pseudomotor capability are included in this distribution.
+Consult CSS before attempting to use.
+.SH "RELEASE 3.03.22 \- Several Portability Fixes"
+.rs
+.sp
+March 5, 1996:  Several minor changes have been made for portability
+considerations.
+.SH "RELEASE 3.03.21 \- Bug In \fBedconf\fP Wizard\-Mode Fixed"
+.rs
+.sp
+February 21, 1996:  A bug, where the optional motor parameters
+could not be read in
+on wizard\-mode protected motors, has been fixed.
+.SH "RELEASE 3.03.20"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.20 as of February 13, 1996.
+.SH "Code For CAMAC Kinetic Systems 3640 Counter/Timer Overhauled"
+.sp
+Problems with the software handling of the custom
+hardware gating on the Kinetic Systems 3640 CAMAC
+counter/timer, as used at CHESS (and elsewhere), have been fixed.
+.SH "New \fBmotor_par()\fP Option for ESRF Maxe Motor Device Server"
+.sp
+The new
+\fBmotor_par()\fP
+option,
+.sp
+.RS 4m
+\fBmotor_par(mne, "get_pars")\fP
+.RE
+.sp
+reads the current base rate, acceleration and slew rate parameters from
+the ESRF Maxe device server and updates the values that will be returned
+by
+\fBmotor_par()\fP
+with the
+\fB"base_rate"\fP,
+\fB"acceleration"\fP
+and
+\fB"velocity"\fP
+arguments.
+.SH "RELEASE 3.03.19"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.19 as of February 1, 1996.
+.SH "Improvements To the \fBchelp\fP Stand\-Alone Help Viewer"
+.sp
+The stand\-alone \fBspec\fP help file viewer
+\fBchelp\fP
+will now use the same rules
+as \fBspec\fP for selecting the auxiliary file directory.
+A
+.BI \-D " directory"
+option will override a
+\fBSPECD\fP
+environment variable,
+and the environment variable will override the compiled\-in default.
+Also,
+\fBchelp\fP
+has been fixed to no longer change tty terminal modes if the
+standard output is not a tty, such as when the output of
+\fBchelp\fP
+is piped through a standard file browser such as
+\fBmore\fP
+or
+\fBless\fP.
+.SH "Wizard\-Mode \fBedconf\fP Bug Fixed"
+.sp
+A bug, whereby optional motor parameters (from the
+\fBedconf\fP
+\fBm\fP
+screens) would not be read in by
+\fBedconf\fP
+for motors with
+wizard\-level protection, has been fixed.
+.SH "RELEASE 3.03.18"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.18 as of January 19, 1996.
+.SH "\fBDISPLAY\fP Can Now Be Assigned and Exported"
+.sp
+\fBspec\fP now includes
+\fBDISPLAY\fP
+as one of its built\-in variables.
+The environment variable
+\fBDISPLAY\fP
+is used by X Window clients to figure out on which host to run.
+On startup, \fBspec\fP will set the value of
+\fBDISPLAY\fP
+from the environment variable.
+If
+\fBDISPLAY\fP
+is not set in the environment, the value saved in the user\(aqs state file
+will be used.
+The value of
+\fBDISPLAY\fP
+can be changed while running \fBspec\fP, and the current value will be
+exported to new
+\fBx11filt\fP
+processes as they are spawned.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+DISPLAY="host1:0"; plot_cntl("filter1,open")
+DISPLAY="host2:0"; plot_cntl("filter2,open")
+.ft P
+.fi
+.RE
+.sp
+will create plot windows on two different hosts.
+.SH "Argument Restrictions For \fBchg_dial()\fP, \fBgpib_get()\fP and \fBser_get\fP Eased"
+.sp
+Previously, when string values were needed for the second argument of the
+\fBchg_dial()\fP,
+\fBgpib_get()\fP
+or
+\fBser_get()\fP
+functions,
+the argument had to be in the form of literal string constant.
+Now, a string\-valued variable can be used.
+To call
+\fBgpib_get()\fP
+or
+\fBser_get()\fP
+with an end\-of\-string delimiter that starts with a number, use a
+string constant.
+.SH "Keithley\-Metrabyte CTM\-10 Fully Supported"
+.sp
+The second AMD Am9513 counter chip on the
+Keithley\-Metrabyte CTM\-10 PC timer/counter board can now be accessed from
+\fBspec\fP.
+In the configuration file, select the
+\fBMetrabyte or Labmaster PC Board\fP
+device as for the CTM\-05 board, but configure it for five channels.
+With the CTM\-10, two additional 32\-bit scaler channels are available.
+In addition to the jumpers need for the CTM\-05 board, you must also
+connect output 1 of the first chip to gates
+2 and 4 of the second chip.
+The additional scaler channels should be
+connected to the source 3 and source 5 inputs
+of the second chip.
+.SH "Initialization Problem with Nucleus PCA\-3 Fixed"
+.sp
+\fBspec\fP now includes a longer delay (1 second) after resetting the
+Nucleus PCA\-3 board during hardware initialization to give the board
+time to become responsive to commands issued from \fBspec\fP.
+.SH "Either Compumotor 4000 Serial Port Can Now Be Used"
+.sp
+The Compumotor 4000 motor controller has two serial ports.
+Previously, port 1 had to be used with \fBspec\fP.
+Now either port can be used.
+As this motor controller is so little used, the change in the
+configuration file to select among the two ports is not backwards
+compatible.
+.SH "EPICS Motor Control Improvements"
+.sp
+A number of changes have been made in the support for the EPICS motor
+driver as used at APS.
+The
+\fBDMOV\fP
+record is now monitored for motor status, rather than
+\fBMOVN\fP.
+The automatic backlash capabilities in the driver are now used.
+\fBspec\fP now also loads the values for base rate and backlash steps from
+\fBspec\fP\(aqs configuration file into the EPICS data base, along with the
+other motor parameters such as steady\-state speed and acceleration.
+.SH "RELEASE 3.03.17"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.17 as of January 9, 1996.
+.SH "New Startup Option To Set \fBspec_par()\fP Parameters"
+.sp
+The parameters available through the
+\fBspec_par()\fP
+function can now also be set on the command line when \fBspec\fP is invoked
+using a \fB\-o par=value\fP syntax.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+fourc \-o auto_file_close=2 \-o check_file_names=no
+.ft P
+.fi
+.RE
+.sp
+turns on the option to close idle output files after two hours
+and turns off the option to check output file names for nonstandard
+and unprintable characters.
+In the future,
+\fBspec_par()\fP\-type
+options may
+may be introduced that must be set on the command line as they relate
+to initialization actions taken before the first prompt is issued.
+.SH "Bug In SunOS 4.x Support Of KS\-3929 SCSI\-CAMAC Code Fixed"
+.sp
+A bug, introduced in the Sun platform support for the Kinetic
+Systems 3929 SCSI\-CAMAC controller in \fBspec\fP release 2.02.01
+(when the HP platform support was added),
+which sometimes made \fBspec\fP unusable with that module on the Sun platform
+has been fixed.
+Also, crate inhibit is now automatically cleared when \fBspec\fP initializes
+the 3929 on the Sun platforms (as \fBspec\fP already does for the 3929 on the
+HP platform).
+.SH "Bug In Setting CAMAC Inhibit Fixed"
+.sp
+A bug, where trying to set CAMAC crate inhibit using the command
+\fBca_cntl("inhibit", 1)\fP,
+was both ineffective and also led to segmentation violations on some
+platforms, has been fixed.
+.SH "RELEASE 3.03.16 \- PCA\-II Driver For \fBlinux\fP Available"
+.rs
+.sp
+December 17, 1995:  \fBspec\fP now supports operation of the Nucleus PCA\-II
+MCA card in live\-time mode on
+\fBlinux\fP
+systems with a CSS\-provided loadable\-module driver.
+The driver is installed with the
+\fBinstall_pca\fP
+script in the
+\fBdrivers\fP
+subdirectory of the \fBspec\fP distribution.
+The interrupt number and base address, as set by the dip switches on
+the PCA\-II board, should be specified when installing the driver if they
+differ from the defaults.
+See the
+\fBREADME\fP
+file in the
+\fBdrivers\fP
+directory for further information on installing the driver.
+See the
+\fI\%pca\fP help file for important information on the need to replace
+a resistor on the PCA\-II board for interrupts to work with certain
+PC motherboards.
+(Note, if you are using the CSS PCA driver on System V/386\-type
+UNIX platforms, you must install the new version of the driver for use with
+this and subsequent \fBspec\fP releases due to a small, but incompatible
+change made in the driver to accommodate
+\fBlinux\fP.)
+.SH "RELEASE 3.03.15"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.15 as of November 28, 1995.
+.SH "New Auto\-Close Option For \fBspec\fP Output Files"
+.sp
+A new option is available to automatically close output files
+that haven\(aqt been accessed for some interval of time.
+Calling
+.sp
+.RS 4m
+\fBspec_par("auto_file_close", hours)\fP
+.RE
+.sp
+sets the interval to
+\fBhours\fP,
+which can have a non\-integral value.
+When the auto\-close option is enabled,
+each time an
+\fBon()\fP,
+\fBoff()\fP,
+\fBopen()\fP,
+\fBclose()\fP
+or
+\fBfprintf()\fP
+function is called,
+\fBspec\fP will check its list of opened output files.
+Any files which
+have not been written to for the length of time given by
+\fBhours\fP
+will be closed.
+Enabling this option can help prevent errors
+when your macros or commands
+do not close files when appropriate, resulting
+in \fBspec\fP running out of resources to open additional files.
+As files are opened automatically when sent output,
+auto\-close mode operates transparently for the most part.
+However, if you change to a different working
+directory between the time the file is first
+opened and subsequently automatically closed,
+and if the file is not opened by an
+absolute path name, the next time you refer to the file,
+\fBspec\fP will reopen it using a relative path based on the current directory.
+Calling
+\fBspec_par("auto_file_close", 0)\fP
+disables the mode.
+By default, the mode is initially disabled.
+.SH "New \fBplot_cntl()\fP Option To Set X11 Window Geometry"
+.sp
+The option
+\fBplot_cntl("geometry=string")\fP,
+is now available.
+With the
+\fBx11\fP
+high\-resolution plot windows only,
+this function sets the size and position of the window.
+The format of the geometry string is the same as expected by
+standard X windows applications, as in
+.sp
+.RS 4m
+\fBplot_cntl("geometry=512x380\-0+10")\fP
+.RE
+.sp
+As with the conventional syntax, not all parts of the geometry string
+are required.
+.SH "New \fBshowscans\fP Options"
+.sp
+The
+\fBshowscans\fP
+utility, which makes twelve mini\-plots per page of a \fBspec\fP data file
+using \fBC\-PLOT\fP, has two new options.
+The new
+\fB\-w\fP
+option will cause \fBC\-PLOT\fP to wait for a
+\fB<return>\fP
+from the keyboard after each page is displayed.
+(This option should not be used when sending the output to a printer.)
+The new
+\fB\-x\fP
+option is a shorthand for the options
+\fB\-zi "x11 \-rotate" \-w\fP,
+which are the best options to use to interactively view
+\fBshowscans\fP
+results on an X windows display.
+.SH "Improved Debugging For ESRF Device Servers"
+.sp
+The debugging messages printed for all \fBspec\fP calls of the
+\fBdev_putget()\fP
+routine, used to access the ESRF device servers,
+now show the command name and the values of the
+input and output
+arguments in a consistent format.
+These messages are displayed when hardware debugging
+is enabled by including bit 0x40 (64)
+in the value assigned to the built\-in
+variable
+\fBDEBUG\fP.
+.SH "RELEASE 3.03.14"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.14 as of November 16, 1995.
+.SH "Easier\-To\-Use Choice Menus For Configuration Editor"
+.sp
+The configuration editor
+\fBedconf\fP
+now displays all the choices for such things as motor\-controller type and
+serial\-device baud rates in a menu box.
+The up and down or <> keys can be used to select among the choice
+items.
+.SH "New Invocation Options For Configuration Editor"
+.sp
+The configuration editor
+\fBedconf\fP
+takes two new options.
+The
+\fB\-D specdir\fP
+option can be used to specify the \fBspec\fP auxiliary file directory.
+The
+\fB\-g geo\fP
+option can be used to specify the geometry to be edited if the
+multiple geometry feature (selected using the
+\fBGEO#\fP
+keywords in the
+\fBconfig\fP
+file) is enabled.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+edconf \-D /usr/local/lib/spec.d \-g fourc spec
+.ft P
+.fi
+.RE
+.sp
+will edit the configuration file in the directory
+\fB/usr/local/lib/spec.d/spec\fP,
+and while in the configuration editor, the
+\fBG\fP
+command will toggle between displaying all motors and only those
+associated with the
+\fBfourc\fP
+geometry group.
+.SH "New \fB\-g geo\fP Flag"
+.sp
+\fBspec\fP can now be invoked with a
+\fB\-g geo\fP
+flag to force loading of macro files and activation of geometry calculations
+for a particular geometry such as
+\fBfourc\fP,
+\fBsurf\fP
+or
+\fBkappa\fP
+while using the configuration files taken from the name by which \fBspec\fP is
+invoked.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+spec \-g fourc
+.ft P
+.fi
+.RE
+.sp
+will use the configuration files from the
+\fBSPECD/spec\fP
+directory but will operate in four\-circle mode.
+.SH "Alarms Blocked During Critical Code When Using Software Timer"
+.sp
+The
+\fBSIGALRM\fP
+signal, used by the software timer in \fBspec\fP,
+is now blocked during critical code, such as during the RPC
+calls used by the ESRF device server libraries, to prevent those
+calls from being interrupted and generating error returns.
+.SH "Minor Bug Relating to Text Output Fixed"
+.sp
+A bug in the implementation of the unlimited length
+output strings introduced in release 3.03.10 has been fixed.
+A manifestation of the bug was that when \fBspec\fP debugging was turned on and
+used with a debugging log file, some messages generated by the
+\fBprint\fP
+command would not appear on the screen.
+.SH "Bug In Data\-Pipe Installation Fixed"
+.sp
+An error in a
+\fBMakefile\fP
+in release 3.03.11
+that generated an error message during \fBspec\fP installation when copying the
+\fBdpmake\fP
+utility has been fixed.
+.SH "RELEASE 3.03.13"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.13 as of October 19, 1995.
+.SH "More Significant Digits For Motors In Data File"
+.sp
+The
+\fB_ascan\fP,
+\fBmesh\fP
+and
+\fBEscan\fP
+standard macros have been changed to write up to eight significant
+digits of the positions of the scanned motors to the data file.
+The
+\fB_head\fP
+macro has also been changed to write up to eight significant digits
+of the positions of all the motors in the standard scan header.
+Previously, the maximum number of significant digits was six.
+However, when \fBspec\fP calculates motor positions, it rounds the
+calculated value to the motor step size.
+Thus for most motors, there will be no visible change in the data files.
+.SH "Support For Bit 3 Model 403 ISA\-To\-VME Controller On \fBlinux\fP"
+.sp
+\fBspec\fP now has direct support for VME devices using the Bit 3 Model 403
+ISA bus to VME bus adapter.
+Currently, this support is only available under
+\fBlinux\fP.
+Support on the HP 700 platforms with E/ISA bus will be added shortly.
+As for VME devices,
+\fBspec\fP currently supports the Mizar 8310 VME counting module
+and the Oregon Micro Systems VME8 motor controller module.
+Support for the Joerger Model VSC8 8\-channel scaler and the
+Highland V540 micro\-stepping controller will be added shortly.
+.SH "Linux I/O Port Access Checks For CSS Kernel Patch"
+.sp
+CSS provides a kernel patch for
+\fBlinux\fP
+that allows non\-root users access to I/O ports for hardware control.
+Previously, if \fBspec\fP was run without the patch by a non\-root user,
+\fBspec\fP would die from a segmentation violation at the first attempt at
+accessing an I/O port.
+Now, \fBspec\fP will print a message that the I/O ports are unavailable and
+suggest the kernel patch be installed.
+.SH "Support For Simultaneous HP and IOtech SICL GPIB"
+.sp
+The CSS\-modified IOtech SICL GPIB library introduced in \fBspec\fP release
+3.03.01 is now available and supported in \fBspec\fP in a version with
+with SICL function names that occupy a different name space from the
+standard SICL library.
+This changes allows, for example,
+both an HP SICL library and the CSS\-modified
+library to be linked into the same \fBspec\fP executable.
+The disjoint name\-space version is selected in the
+.i config
+file with the keyword
+\fBPC_IOTSICL_H\fP
+(\fBPC_IOTSICL_H_L\fP
+for the
+\fBshared\fP
+version).
+From the configuration editor, select the
+\fB"IOtech SCSI GPIB (ESRFized)"\fP
+GPIB device.
+.SH "RELEASE 3.03.12"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.12 as of October 10, 1995.
+.SH "\fBGTERM\fP Defaults To \fB\(dqx11\(dq\fP"
+.sp
+\fBspec\fP now sets the
+\fBGTERM\fP
+environment variable to
+\fB"x11"\fP
+by default if the variable is unset in the environment.
+.SH "New Clean\-and\-Fresh Flag \fB\-F\fP"
+.sp
+A new
+\fB\-F\fP
+command line argument
+not only starts \fBspec\fP fresh (as with the
+\fB\-f\fP
+flag) but also disables the reading of all startup macro files.
+This flag can be of use to front\-end programs that want to
+ensure which macros are defined by explicitly
+specifying macro files to be read.
+.SH "\fBconfig\fP\-File Motor Flags Saved In Hex"
+.sp
+The flags column for motors in the hardware
+\fBconfig\fP
+file is now saved in hexadecimal in order to make it easier to
+interrupt geometry assignments in linked geometry configurations
+when viewing the
+\fBconfig\fP
+file directly.
+.SH "Klinger Motion\-Master Doesn\(aqt \fBsync\fP Motors Before Move"
+.sp
+\fBspec\fP no longer performs
+automatic synchronization of hardware registers
+and software positions before each move for motors controlled by the
+Klinger Motion Master 2000.
+This change apparently solves some problems reported by users.
+.SH "Support For HP E2050 LAN/HP\-IB Gateway"
+.sp
+\fBspec\fP now recognizes the HP E2050 LAN/HP\-IB Gateway device.
+The
+\fBconfig\fP
+file entry for the device name, which is used as
+the argument to the
+\fBSICL\fP
+\fBiopen()\fP
+subroutine, must have the format
+.sp
+.RS 4m
+\fBlan[hostname]:interface\fP
+.RE
+.sp
+where
+\fBlan\fP
+is the symbolic name for the device set in the
+\fB/usr/pil/etc/hwconfig.hw\fP
+file,
+\fBhostname\fP
+is the host name or IP address of the gateway
+and
+\fBinterface\fP
+is
+\fBhost\-name\fP
+parameter in the gateway on\-board configuration (set via telnet to the
+gateway).
+.SH "Support For Bi Ra 5302 64\-Channel ADC as Counters"
+.sp
+\fBspec\fP now supports the Bi Ra Model 5302 ADC CAMAC module.
+This module allows up to 64 analog inputs.
+\fBspec\fP treats each channel as a counter, so each channel
+should be configured on the configuration editor
+scaler screen.
+The value entered for the scale factor is interpreted as the
+channel gain.
+The ADC conversions are performed on the
+\fBgetcounts\fP
+command.
+.SH "Bug Fixed in \fBdata_pipe()\fP Overhead Code"
+.sp
+A bug in the
+\fBdata_pipe.o\fP
+overhead function where the user\-callable function
+\fBget_input_data()\fP
+transferred the number of data points, rather than the number of points
+times the number of elements for double\-sized \fBspec\fP data,
+has been fixed.
+.SH "RELEASE 3.03.11 \- \fBdata_pipe()\fP Beta Release"
+.rs
+.sp
+August 7, 1995:  The
+\fBdata_pipe()\fP
+facility is now in beta release.
+This facility allows integration of external programs with \fBspec\fP,
+somewhat along the lines of
+\fBC\-PLOT\fP user functions.
+See the
+\fI\%data_pipe\fP help file for detailed information.
+.SH "RELEASE 3.03.10"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.10 as of July 29, 1995.
+.SH "Unlimited Length For Input Strings"
+.sp
+Previously, string constants in \fBspec\fP were limited to 8,192 bytes.
+That limit has been removed.
+\fBspec\fP now allocates memory for strings as needed.
+.SH "Unlimited Length Strings For \fBprintf()\fP"
+.sp
+Previously, the length of the result of a
+\fBprintf()\fP,
+\fBfprintf()\fP
+or
+\fBsprintf()\fP
+was limited to 8,192 bytes.
+That limit has been removed.
+.SH "Unlimited Length Macros"
+.sp
+Previously, the length of macro definitions was limited to
+8,064 bytes.
+Macros may now be as long as one desires.
+.SH "Input Push\-Back Space Increased"
+.sp
+The size of the input push\-back space has been doubled from
+65,536 to 131,072 bytes.
+The input push\-back space holds macro expansion text, so does
+effectively limit the maximum length of a macro.
+.SH "More Format Specifiers Recognized By \fBprintf()\fP"
+.sp
+The
+\fBprintf()\fP
+function now recognizes the
+\fB%X\fP,
+\fB%E\fP,
+\fB%G\fP,
+\fB%i\fP,
+\fB%b\fP
+and
+\fB%p\fP
+format specifiers
+if they are recognized by the underlying C library version
+of
+\fBprintf()\fP.
+.SH "Better Checking For \fBport_getw()\fP and \fBport_putw()\fP"
+.sp
+Previously, the
+16\-bit PC I/O port access functions
+\fBport_putw()\fP
+and
+\fBport_getw()\fP
+did not check if the high\-byte port was included in the
+\fBconfig\fP
+file I/O port configuration.
+In the configuration file, the number of consecutive addresses to
+be enabled is in terms of 8\-bit addresses.
+If the high\-byte port was not configured,
+\fBspec\fP
+would not have enabled access to the high\-byte port, and a
+\fBport_getw()\fP
+or
+\fBport_putw()\fP
+call
+would result in \fBspec\fP terminating
+with a segmentation violation.
+\fBspec\fP now prints an error message and resets to command level if
+access is attempted without proper configuration.
+.SH "X11 Geometry Parsing Fixed"
+.sp
+A bug, where the X11 high\-resolution graphics filter
+didn\(aqt treat negative values for the
+\fBx\fP
+and
+\fBy\fP
+position in the geometry string correctly, has been fixed.
+A negative
+value for
+\fBx\fP
+or
+\fBy\fP,
+including the value \-0, now specifies the position of the
+right side of the X11 window relative to right side of the root
+window, as is the usual convention.
+.SH "RELEASE 3.03.09"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.09 as of July  8, 1995.
+.SH "More Simultaneous High\-Resolution Plots"
+.sp
+The number of allowed simultaneous
+high\-resolution plot\-filter processes has been increased from two to five.
+The functions
+\fBplot_cntl("filter1")\fP
+through
+\fBplot_cntl("filter5")\fP
+select the active filter.
+.SH "New \fBplot_cntl()\fP Option To Set X11 Window Title"
+.sp
+The option
+\fBplot_cntl("title=string")\fP,
+is now available.
+With the
+\fBx11\fP
+high\-resolution plot windows, the title given by
+\fBstring\fP
+is used in the
+\fBXSetWindowProperties()\fP
+call to set the window and icon labels.
+On most X11 window managers, that means the title will
+appear in the window\(aqs title bar.
+.SH "EPICS Support On Linux Platforms Now Available"
+.sp
+\fBspec\fP is now working with EPICS (Release 3.12.13Beta) on
+\fBlinux\fP
+platforms.
+When installing \fBspec\fP, select the
+\fBepics_linux\fP
+target.
+.SH "Install Script Now Prompts For EPICS or ESRF Directories"
+.sp
+When installing \fBspec\fP on platforms that use the ESRF device
+servers or the EPICS channel access libraries, the installation
+script will now prompt for the directory that contains the
+appropriate libraries.
+Previously, the installation
+\fB"makefile"\fP
+used the names
+\fB./dserver\fP
+for the ESRF platforms
+and
+\fB./epics\fP
+for the EPICS platforms, and
+the local \fBspec\fP administrator was responsible for making those
+names symbolic links to the correct directories.
+.SH "Obscure Macro Bug Fixed"
+.sp
+A fairly old bug that caused the wrong definition
+to be returned for the first macro
+defined after starting fresh has been fixed.
+The bug was most often manifested by the repeated message
+\fBcleanup:  undefined\fP
+appearing
+when starting fresh when there was an error in the startup macro files.
+.SH "RELEASE 3.03.08 \- Fixes For SGI Platforms"
+.rs
+.sp
+June 28, 1995: This release includes fixes to restore \fBspec\fP source
+code portability to Silicon Graphics platforms.
+.SH "RELEASE 3.03.07 \- Kappa Geometry Improvements"
+.rs
+.sp
+June 27, 1995: \fBspec\fP now supports
+a vertical configuration of the
+\fBkappa\fP
+diffractometer.
+The new
+\fBsetvmode\fP
+macro (from
+the
+\fBkappa.src\fP
+macro file)
+can be used to enable the vertical configuration features in the
+\fBgeo_kappa.c\fP
+source file.
+.SH "RELEASE 3.03.06"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.06 as of June 18, 1995.
+.SH "Support For Heidenhain Encoders on MCU\-2"
+.sp
+\fBspec\fP now supports the
+MCU\-2 motor controllers that have been specially modified to read
+Heidenhain absolute encoders.
+Select the
+\fBMCU_H\fP
+motor controller type on the motor screen of the configuration
+editor and enter a value for the
+\fB"encoder steps per deg/mm"\fP
+parameter on the motor parameter screen when using that
+hardware combination.
+.SH "Bug In PCA\-3/Multiport Code Fixed"
+.sp
+A recently introduced bug (12/94) in the code
+for the Nucleus PCA\-3 and Multiport devices
+that prevented
+the
+\fBoffset\fP
+parameter to be set to zero using
+\fBmotor_par()\fP
+has been fixed.
+.SH "RELEASE 3.03.05"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.05 as of June 11, 1995.
+.SH "New \fBVERSION\fP Built\-in Variable"
+.sp
+A new read\-only built\-in variable
+\fBVERSION\fP
+contains the current \fBspec\fP version number.
+.SH "Allow Multiple CAMAC QS\-450 Quad Scalers"
+.sp
+\fBspec\fP now allows more than one CAMAC DSP QS\-450 Quad Scalers
+to be used at the same time.
+.SH "RELEASE 3.03.04"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.04 as of May 30, 1995.
+.SH "Hardware Poll Interval Is Now Adjustable"
+.sp
+When the
+\fBwait()\fP
+function is called to
+wait for polled motors, timers or other acquisition devices to finish,
+\fBspec\fP sleeps for a small interval between each check of the hardware.
+Previously, that interval was built into the code and set
+(in recent releases)
+to 40 msec.
+That sleep time can now be changed using the new
+\fB"hdw_poll_interval"\fP
+parameter to the
+\fBspec_par()\fP
+function.
+The units of the parameter are milliseconds.
+The default value is 40 msec.
+A value of zero is allowed, though
+not recommended if the computer is being used for
+anything else.
+.SH "RELEASE 3.03.03"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.03 as of May 28, 1995.
+.SH "New \fBOmega\fP\-Type Four\-Circle Diffractometer"
+.sp
+The four\-circle geometry code and macros have been modified to
+work with an
+\fBomega\fP\-type
+four\-circle diffractometer.
+With this diffractometer, the
+\fBtheta\fP
+and
+\fBtwo\-theta\fP
+circles are mechanically coupled, such that the when the
+\fBtwo\-theta\fP
+circle is moved, the
+\fBtheta\fP
+circle moves half the distance.
+The
+\fBtheta\fP
+circle can also be moved independently of
+\fBtwo\-theta\fP.
+This configuration corresponds to replacing the independent
+\fBtheta\fP
+motion with an
+\fBomega\fP  = \fBtheta\fP  \- \fBtwo\-theta\fP/2
+motion.
+If there is a motor with the mnemonic
+\fBth\fP
+in the
+\fBconfig\fP
+file, \fBspec\fP assumes a standard four\-circle diffractometer.
+If there is no
+\fBth\fP
+motor, but if there is a motor configured with the mnemonic
+\fBom\fP,
+\fBspec\fP assumes the
+\fBomega\fP\-type
+configuration.
+The
+\fBfourc.src\fP
+macro file should be reread after changing the configuration.
+One can start fresh or type
+\fBnewmac\fP
+to do that.
+.SH "RELEASE 3.03.01"
+.rs
+.sp
+These
+notes summarize the cumulative changes made for \fBspec\fP
+release 3.03.01 as of May 24, 1995.
+.SH "New Option To Change Step Size With \fBmotor_par()\fP"
+.sp
+For the rare circumstances where it may be necessary, \fBspec\fP
+now allows the motor step\-size parameter to be changed using
+.sp
+.RS 4m
+\fBmotor_par(mne, "step_size",  value)\fP
+.RE
+.sp
+Since such changes should not be undertaken lightly, \fBspec\fP requires
+they be explicitly enabled using
+.sp
+.RS 4m
+\fBspec_par("modify_step_size", 1)\fP
+.RE
+.sp
+Rereading the
+\fBconfig\fP
+file resets the step size parameter to the value in the
+\fBconfig\fP
+file.
+.SH "No\-Echo Option With \fB\-p\fP"
+.sp
+If the file descriptor argument to \fBspec\fP\(aqs
+\fB\-p\fP
+startup option is zero, \fBspec\fP will not echo text received from
+that file descriptor to the standard output, as was the case previously.
+(The
+\fB\-p\fP
+option is used by GUI\-type programs that invoke \fBspec\fP as child process.)
+.SH "New Continued\-Lines Option With \fBdata_dump()\fP"
+.sp
+The optional
+argument
+\fBfmt1\fP
+to the
+\fBdata_dump()\fP
+function, which has
+the form
+\fB"%#"\fP,
+and specifies how many data points (specified by the number
+\fB#\fP)
+are to be printed on each line, has a new option.
+If the number
+\fB#\fP
+is followed by the letter
+\fBC\fP,
+a backslash is added to each continued line, appropriate for saving
+MCA data in manageable length lines.
+New versions (since May 1, 1995) of the \fBC\-PLOT\fP
+\fBscans.4\fP
+user function interpret the continued lines correctly for MCA data.
+.SH "Improvements To \fBscans.4\fP"
+.sp
+The version of the
+\fBscans.4\fP
+\fBC\-PLOT\fP user function distributed in the \fBspec\fP
+\fBaux\fP
+directory has new features.
+In particular, there is no longer a compiled\-in limit for the
+number of points that can be read as raw data or the number of scans
+that can be contained in one data file.
+Also, the data file syntax recognized by
+\fBscans.4\fP
+has been expanded.
+Directives of more than one letter that begin with
+\fB#@\fP
+are now recognized.
+New directives for reading MCA\-type data have been added.
+See the \fBspec\fP
+\fI\%scans\fP help file for more information.
+.SH "New \fBmotor_par()\fP Options for OMS Controllers"
+.sp
+A command pass through capability is now available for all versions of
+the OMS motor
+controller using
+.sp
+.RS 4m
+\fBmotor_par(mne, "send",  cmd)\fP
+.RE
+.sp
+to send the
+command
+\fBcmd\fP
+to the controller
+and
+.sp
+.RS 4m
+\fBmotor_par(mne, "read",  cmd)\fP
+.RE
+.sp
+to send the command
+\fBcmd\fP
+and return as a string an expected reply.
+For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+print motor_par(tth, "read", "RP")
+240000
+.ft P
+.fi
+.RE
+.sp
+results in the string
+\fB"AX RP\en"\fP
+being sent to the controller.
+.SH "Bug With the Klinger MotionMaster 2000 Fixed"
+.sp
+\fBspec\fP\(aqs code to support the Klinger MotionMaster 2000 motor controller
+was developed on units that did not have all four motor modules
+installed.
+It turns out that with all modules installed on the ISA bus
+version, \fBspec\fP must pause
+about half a second after
+sending the emergency stop character
+\fB#\fP
+(which it sends when initializing the board)
+before the board is able to communicate again.
+Such a pause
+is now part of the code.
+.SH "New \fBmotor_par()\fP Option for ACS MCU\-2"
+.sp
+On ACS MCU\-2 motor controllers equipped with the option to
+read Heidenhain absolute encoders, the function
+.sp
+.RS 4m
+\fBmotor_par(mne, "encoder_position")\fP
+.RE
+.sp
+will return the current encoder position.
+.SH "CSS\-Modified Library Available For IOtech SCSI488/H"
+.sp
+CSS now provides an alternative
+\fBlibsicl.a\fP
+for use with the IOtech SCSI488/H SCSI\-to\-GPIB module on the HP 700
+platform.
+This version doesn\(aqt require a daemon process, as does the IOtech
+version.
+Contact CSS to obtain this version of the library.
+.SH "CAMAC Crate Sharing Available With KS 3929 on HP 700"
+.sp
+When using the Kinetic Systems 3929 SCSI\-to\-CAMAC module on the HP 700
+platform with the CSS\-provided software interface, CSS now allows more
+than one version of \fBspec\fP to have access to the crate at a time.
+.SH "Standalone Library For KS 3929 on HP 700"
+.sp
+CSS has created
+a subroutine library for use with local programs that require access to
+the Kinetic Systems 3929 SCSI\-to\-CAMAC module on the HP 700.
+This library allows simultaneous access to the CAMAC crate by \fBspec\fP
+and the local programs.
+Contact CSS to obtain the library.
+

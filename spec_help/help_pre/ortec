@@ -1,0 +1,154 @@
+ortec                               hardware                               ortec
+
+NAME
+     ortec - Ortec 974/994/995/996/997 Counters and Timers
+
+DESCRIPTION
+
+     ssppeecc supports the Ortec 974, 994, 995, 996 and 997 counter and
+     counter-timer NIM modules over both GPIB and RS-232C interfaces.  When
+     running the configuration editor, select from the following descriptions on
+     the device configuration screen to specify which Ortec modules you are
+     using and how you are using them:
+
+         Ortec 974/994 Counter/Timer (GPIB)
+         Ortec 974/994 Counter/Timer (Serial)
+         Ortec 974/994/995/996/997 Counter (GPIB)
+         Ortec 974/994/995/996/997 Counter (Serial)
+         Ortec 994/996 Counter and Blind Timer (GPIB)
+         Ortec 994/996 Counter and Blind Timer (Serial)
+
+     Only one module can be selected as a counter/timer.  The 974 module can be
+     assigned a maximum of four channels.  The 994 should be assigned two
+     channels normally and three channels when used as a blind timer.  The 996
+     should be assigned one channel normally and two channels when used as a
+     blind timer.  The 995 has two channels and the 997 has one.
+
+     On the scaler configuration screen, choose OORR99XXXX as the controller for all
+     channels associated with an Ortec module.  The unit numbers selected for
+     each channel correspond to the order the Ortec modules appear on the device
+     configuration screen.  When using the 994 as a blind timer, you must select
+     channel number 2 for the timebase.  When using the 996 as a blind timer,
+     you must select channel number 1 for the timebase.
+
+Using the 974
+
+     The 974 is a four-channel counter/timer having a minimum 0.1 second time
+     base.  You should connect the monitor counts through a tee to the EXT IN
+     connector on the back of module and to the COUNTER INPUT 2 connector on the
+     front of the module.  Use the COUNTER INPUT 3 and 4 connectors for one or
+     two detector input channels.  Also, make sure that the internal dip switch
+     S-1 has position 6 set to one-cycle (ON/closed).
+
+Using the 994 As a Normal Timer
+
+     The 994 is a two-channel counter/timer with a minimum 0.01 second time
+     base.  In order to obtain accurate elapsed time readings, one counter
+     channel is used to count time and the other is used to count monitor
+     counts.  An additional counter, such as the 995 or 997 is normally used to
+     accumulate detector counts and is gated by the 994.  The monitor count
+     source should be connected to both the IN A and IN B front panel connectors
+     of the 994 using a tee.  The internal jumpers W3 and W4 (located underneath
+     the interface board) must both be set to the TIME position (the rightmost
+     two pins on W3, the leftmost two pins on W4).  Jumper W1 must be set to the
+     NORMAL position (the two rightmost pins).  Also, make sure the internal dip
+     switch on the interface card has position 6 set to one-cycle (ON), position
+     7 set to COUNTER/TIMER (OFF) and position 8 set to NORMAL (ON).  Finally,
+     make sure the front panel DWELL switch is turned all the way off.
+
+Using the 994 or 996 as a Blind Timer
+
+     In the blind timer mode, the 994 has the monitor counts connected to IN A
+     and detector counts connected to IN B.  The 996 has only one input which
+     would be used for detector counts.  The internal jumpers W3 and W4 (for the
+     994) must be set to the COUNTS position (the leftmost two pins on W3, the
+     rightmost two pins on W4).  Jumper W1 must be set to the NORMAL position
+     (the two rightmost pins).  Also, make sure the internal dip switch S-1 has
+     position 6 set to one-cycle (ON), position 7 set to COUNTER/TIMER (OFF) and
+     position 8 set to NORMAL (ON).  Finally, make sure the front panel DWELL
+     switch on the 994 is turned all the way off.
+
+     When operated as a blind timer, ssppeecc cannot read back the elapsed time from
+     the module.  Instead, the elapsed count time is estimated from the software
+     clock when counting to monitor counts, when counting in powder mode, when
+     reading the counters during updated counting and when counting is aborted
+     with a ^^CC.
+
+Polling and Alarm Mode
+
+     Initially, spec used alarm mode to detect when counting was over, but an
+     Ortec firmware update in the late 1990s changed the behavior of alarm mode.
+     With the new firmware, ssppeecc sometimes missed the end of the counting
+     interval.
+
+     The alternative to alarm mode is to read the counter values until the
+     elapsed time or the preset count has reached the programmed value.  For
+     non-blind-timer configurations, ssppeecc stopped using alarm mode for
+     GPIB-interfaced units with release 4.03.10 and for serial-interfaced units
+     with release 5.09.1-11.
+
+     For blind-timer configurations, alarm mode isn't necessary when counting to
+     a monitor preset, but the ssppeecc Ortec support was not updated to eliminate
+     alarm mode in that specific configuration until ssppeecc release 6.00.11-2.
+     Alarm mode is still required when counting to time in blind-timer mode.
+     However, when doing updated counting (where ssppeecc reads the counters
+     periodically and where the problems with alarm mode occur most often), ssppeecc
+     checks the software clock after reading the counters.  If the elapsed time
+     is 0.5 seconds beyond the programmed count time, ssppeecc will stop the current
+     count interval.
+
+Gating
+
+     An external enable signal from certain motor controllers may be be fed into
+     the rear-panel gate BNC input on the 974 or the front panel enable BNC
+     input on the 994 for precise counter gating in powder-mode scans.
+
+     If using a second Ortec module as a counter, you must connect the INTERVAL
+     BNC connector (rear panel on 974, front panel on 994) to the master GATE on
+     the 974 rear panel or to the ENABLE or individual GATE inputs on the 994,
+     995, 996 or 997 modules.
+
+Setting Operational Parameters
+
+     The ccoouunntteerr__ppaarr(()) function can be used to set various parameters associated
+     with the Ortec module code in ssppeecc.  The first argument to ccoouunntteerr__ppaarr(()) is
+     a channel number, although all the commands affect all channels of the
+     associated module, or all of the Ortec modules, if appropriate.
+
+     ccoouunntteerr__ppaarr((ccoouunntteerr,, ""aallaarrmm"",, mmooddee)) - If mmooddee is zero, turns off the alarm
+          mode of operation of the timer, and turns on a polled mode.  If mmooddee
+          is one, alarm mode is turned on.
+
+          When alarm mode is enabled and the counter is using a GPIB interfaces,
+          the counter sets a special bit in the GPIB serial poll byte at the end
+          of counting.  On serial interfaces, the counter sends an asynchronous
+          message containing the count results.
+
+          The default operation used to be for alarm mode to be turned on.
+          However, a late twentieth century firmware update from Ortec changed
+          the behavior of alarm mode such that it was no longer robust with
+          ssppeecc.  Thus, alarm mode is disabled by default except for blind-timer
+          mode with the 994 and 996 when counting to a time preset.
+
+     ccoouunntteerr__ppaarr((ccoouunntteerr,, ""aallaarrmm"")) - Returns one if alarm mode is on.  Otherwise
+          returns zero.
+
+     ccoouunntteerr__ppaarr((ccoouunntteerr,, ""ddiissppllaayy"",, cchhaannnneell)) - Sets the counter channel that
+          will be displayed on the associated module.  For the 974 modules,
+          valid values for cchhaannnneell are 1 to 4.  For the the 994 and 995 modules,
+          valid values for cchhaannnneell are 0 and 1.
+
+     ccoouunntteerr__ppaarr((ccoouunntteerr,, ""ddiissppllaayy"")) - Returns the channel number currently
+          being displayed.
+
+     ccoouunntteerr__ppaarr((ccoouunntteerr,, ""llooccaall"",, mmooddee)) - If mmooddee is nonzero, will force the
+          associated module to go into local mode to allow front panel
+          operation.  In addition, the module will be placed in local mode after
+          each count interval.  If mmooddee is zero, the module will be set to
+          remote mode at the start of the next count interval, and will not be
+          set back to local mode after counting.  When ssppeecc starts up, not
+          switching to local mode is the default behavior to minimize overhead.
+
+     ccoouunntteerr__ppaarr((ccoouunntteerr,, ""llooccaall"")) - Returns zero if the associated module is to
+          be kept in remote mode.  Otherwise, returns one.
+

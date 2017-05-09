@@ -1,0 +1,49 @@
+.TH "lscan" "macro" "08/01/12" "lscan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBlscan\fP \- scan along the \fBL\fP\-axis in reciprocal space
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)lscan.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "lscan" "macro" "08/01/12" "lscan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBlscan start end intervals time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBlscan\fP is a linear scan in reciprocal space along the
+\fBL\fP\-axis from \fBstart\fP to \fBend\fP. The step size is
+(\fBstart\-end)/intervals\fP.
+The number of data points collected will be \fBintervals+1\fP.
+Count time is given by
+\fBtime\fP, which if positive, specifies seconds and if negative,
+specifies monitor counts.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBlscan .9 1.1 10 10\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%hscan\fP
+\fI\%kscan\fP
+\fI\%hklscan\fP
+\fI\%hkcircle\fP
+\fI\%hlcircle\fP
+\fI\%klcircle\fP
+\fI\%hkradial\fP
+\fI\%hlradial\fP
+\fI\%klradial\fP
+

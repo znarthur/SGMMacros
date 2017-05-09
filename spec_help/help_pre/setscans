@@ -1,0 +1,79 @@
+setscans                              macro                             setscans
+
+NAME
+     sseettssccaannss - configure scan options
+
+DESCRIPTION
+
+     The sseettssccaannss macro asks the following questions:
+
+     SSlleeeepp ((sseettttllee)) ttiimmee bbeeffoorree eeaacchh ssccaann ppooiinntt ((00))??
+
+         Setting the sleep time to a nonzero value causes the scan macros to
+         delay for that many seconds before counting at each point.
+
+         The value entered here is assigned to the __sslleeeepp global variable, which
+         can also be assigned to directly.
+
+         The default value is zero.
+
+     SShhooww uuppddaatteedd mmoovviinngg aanndd ccoouunnttiinngg dduurriinngg ssccaannss ((NNOO))??  - This option turns on
+          a feature where during moving and counting in scans, the motor
+          positions or scaler contents are continually read and displayed on the
+          screen.  This feature works by redefining the standard macros __ccoouunntt
+          and __mmoovvee.
+
+          The default value is no.
+
+     DDoo hhkkllssccaann pprreessccaann lliimmiitt--cchheecckk llooooppss ((YYEESS))??
+
+         The prescan limit checks calculate motor positions for each point of
+         the reciprocal space scans before moving any motors.  On slower
+         computers and for long scans these calculations can be annoyingly slow.
+         You can disable these checks if you are reasonably sure your scans will
+         not take motors outside their configured limits.  Disabling prescan
+         limit checks doesn't disable limit checking during the actual moves.
+         Rather, it simply avoids having a scan aborted because of an attempt to
+         move to a reciprocal space position that takes motors beyond their
+         limits.
+
+         The value entered here is assigned to the __pprree__cchhkk global variable,
+         which can also be assigned a zero or nonzero value directly.
+
+         The default value is 1 (yes).
+
+     SSaavvee mmoottoorrss ttoo ddaattaa ffiillee aatt eeaacchh ppooiinntt ffoorr HHKKLL ssccaannss ((NNOO))??
+
+         Normally, ssppeecc doesn't write motor positions to the data file at each
+         point in a scan when scanning over reciprocal space coordinates.  The
+         reason is that the motor positions can be recovered, if necessary, from
+         the HHKKLL coordinates that are saved, saving the motor positions can
+         double the size of the data file, and as a rule, users use the
+         reciprocal space coordinates rather than the motor positions in
+         subsequent analysis of the data.  However, if this option is selected,
+         the positions of the geometry-related motors will be saved at each
+         point for all standard HHKKLL linear, arc, radial and mesh scans.  (This
+         option was introduced to the standard macros in ssppeecc release
+         5.05.01-7.)
+
+         The value entered here is assigned to the __ssaavv__ggeeoo__mmoott global variable,
+         which can also be assigned a zero or nonzero value directly.
+
+         The default value is 0 (no).
+
+GLOBALS
+
+     UUPPDDAATTEE - The number of seconds between screen updates during updated moving
+          and counting.
+
+     __sslleeeepp - The settle time, in seconds.
+
+     __pprree__cchhkk - If set, do the prescan limit checks for reciprocal-space scans.
+
+     __ssaavv__ggeeoo__mmoott - If set, save geometry-related motor positions in the data
+          file for reciprocal-space scans.
+
+SEE ALSO
+
+     _s_c_a_n_s _s_t_a_r_t_u_p
+

@@ -1,0 +1,21 @@
+mvd                                   macro                                  mvd
+
+NAME
+     mmvvdd - move a motor in dial units
+
+SYNOPSIS
+
+     mmvvdd mmoottoorr ddiiaall__vvaalluuee
+
+DESCRIPTION
+
+     The mmvvdd macro moves mmoottoorr to the dial angle given by ddiiaall__vvaalluuee.
+
+EXAMPLE
+
+     mmvvdd tthh 00
+
+SEE ALSO
+
+     _m_o_t_o_r_s _m_v _m_v_r _w_a_i_t
+

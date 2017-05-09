@@ -1,0 +1,62 @@
+.TH "do" "macro" "01/29/14" "do.rst 6.2  01/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBdo\fP \- execute a command file
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)do.rst   6.2  01/29/14  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "do" "macro" "01/29/14" "do.rst 6.2  01/29/14 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.nf
+
+\fBdo\fP \fBcommand_file\fP
+\fBdo\fP .
+.fi
+.sp
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBdo\fP macro reads commands contained in the ASCII file
+\fBcommand_file\fP, echoing each command to the screen as it is read.
+.sp
+If the argument is a single dot (.), the previous command file is used.
+.sp
+The global variable \fBDO_DIR\fP may be set to the name
+of directory that will be searched for
+\fBcommand_file\fP, if \fBcommand_file\fP is not in the current directory.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBdo do.scans\fP
+.SH "GLOBAL VARIABLES"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBDOFILE\fP
+\- 
+Last command file used.
+.HP 5m
+."
+\fBDO_DIR\fP
+\- 
+Name of private command file directory.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%qdo\fP
+\fI\%startup\fP
+\fI\%vi\fP
+

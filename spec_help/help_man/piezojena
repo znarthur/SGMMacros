@@ -1,0 +1,285 @@
+.TH "piezojena" "hardware" "12/01/12" "piezojena.rst 6.1  12/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+piezojeno \- Piezosystem Jena GmbH Voltage Amplifier
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)piezojena.rst    6.1  12/01/12 CSS
+.
+.\" Copyright (c) 2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "piezojena" "hardware" "12/01/12" "piezojena.rst 6.1  12/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Piezosystem Jena Voltage Amplifier is
+a controller for up to three piezo actuators.
+\fBspec\fP has been tested with model NV40/3CLE, but
+should also work with models NV40/3, NV120/1 and
+NV120/1CLE.
+The Piezosystem Jena controller
+has both serial and USB interfaces, although
+\fBspec\fP accesses the USB as a serial
+interface using the standard USB\-to\-serial
+drivers available on modern \fBLinux\fP and OS X
+platforms.
+See
+\fI\%www.piezojena.com\fP for details on the hardware.
+.SH "CONFIGURATION"
+.rs
+.sp
+From \fBspec\fP\(aqs hardware configuration editor (\fBedconf\fP, normally run from the
+\fBconfig\fP macro),
+select the controller type and
+assign the interface parameters along the following lines:
+.RS 3m
+.sp
+.nf
+.ft CB
+Motor and Counter Device Configuration (Not CAMAC)
+
+MOTORS     DEVICE ADDR <>MODE NUM                                <>TYPE
+   YES /dev/ttyS0   <>  19200   3  Piezosystem Jena Controller (Serial)
+.ft P
+.fi
+.RE
+.sp
+On the \fBM\fPotor
+screen of the configuration editor, choose the controller type as
+\fBPZOJENA\fP.
+The steps\-per\-degree parameter should be set to 10000.
+The slew rate, base rate and acceleration time are not used by \fBspec\fP
+for this controller.  Several of the standard optional motor parameters,
+reached by typing a lower case \fBm\fP from the main motor configuration screen,
+are recognized by \fBspec\fP for this controller and may be useful, as
+described below.
+.sp
+There is no status available from the
+controller as to whether the move has completed or if the stage
+is on target, so moves are considered complete
+immediately after sending the move command.
+A delay can be added by
+configuring the optional settle\-time and dead\-band parameters.
+.sp
+To configure a settle time at the end of each move, set the optional
+parameters DC dead band (\fB"dc_dead_band"\fP)
+and DC settle time (\fB"dc_settle_time"\fP).
+If both of these parameters are configured,
+\fBspec\fP will wait
+for at least the time given by the settle time before reporting the move complete.
+In addition, \fBspec\fP will also wait
+for the difference between the target position and
+the actual position to be within the dead band.
+If the motor doesn\(aqt settle within five seconds, \fBspec\fP reports an error.
+.sp
+The read\-back slop parameter (\fB"slop"\fP)
+can be used to suppress position discrepancy messages.
+If the slop parameter is set to some number of steps,
+\fBspec\fP will not report position discrepancies
+smaller than that value and will instead silently accept the reported
+hardware value as the position.
+.sp
+The hardware read\-mode parameter (\fB"read_mode"\fP)
+controls when the position is read
+from the hardware and can also tell \fBspec\fP to always accept the reported
+hardware value, no matter how large the discrepancy between it and the software position.
+\fBspec\fP normally assumes a motor is at its last position.
+If the \fBPREMOVE\fP read\-mode option is set,
+\fBspec\fP will always read the hardware before
+moving the motor.  If the
+\fBALWAYS\fP option is set, \fBspec\fP will read the hardware whenever the
+\fBget_angles\fP command is run from user level.
+If the \fBNO QUERY\fP option is set,
+\fBspec\fP will always assume the hardware is correct and not query
+the user as to how to resolve the discrepancy
+if the returned hardware position differs from the current software position.
+Note, the \fB"slop"\fP parameter is not used
+when the \fBNO QUERY\fP option is set,
+.sp
+There are a number of encoder parameters associated with the controller that affect
+all channels.  These parameters are named to match the commands used to program the
+controller:
+\fB"encmode"\fP,
+\fB"enctime"\fP,
+\fB"enclim"\fP,
+\fB"encexp"\fP,
+\fB"encstol"\fP and
+\fB"encstcl"\fP.
+(See the controller user manual for details on the meaning of the parameters.)
+These parameters can be set as non\-standard optional parameters on the
+\fBD\fPevice screen associated with the controller by typing a lower case \fBp\fP
+when the row containing the controller is highlighted.
+Parameters set in the \fBconfig\fP file this way can be accessed using
+\fBmotor_par()\fP, but are read only.
+These parameters can also be set as non\-standard optional parameters
+associated with a single motor channel by typing \fBp\fP
+from the
+\fBM\fPotor screen.
+Parameter values set this way can be accessed via \fBmotor_par()\fP for both
+reading and writing.
+Although the parameter is assigned to a particular motor channel, the value
+affects all channels on the same controller.
+If different values are set for different motor channels, the
+value set for the highest numbered motor will be the value sent to the controller.
+.SH "PARAMETERS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "cloop" [, 0|1])\fP
+\- 
+Sets or returns the current operating mode
+for the actuator \fBmne\fP.
+A value of 1 sets or
+indicates closed\-loop mode.  A value of 0 sets or indicates
+open\-loop mode.  This parameter can also be set as a non\-standard
+optional motor parameter in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmotor_par(mne, "fenable" [, 0|1])\fP
+\- 
+Sets or returns the soft\-start setting
+for the actuator \fBmne\fP.
+When enabled, the controller runs the actuator through the
+entire range of motion on power up.
+.HP 5m
+."
+\fBmotor_par(mne, "monwpa" [, 0|1|2])\fP
+\- 
+Sets or returns the the value for the monitor output configuration
+for the actuator \fBmne\fP.
+A value of 0 sets it to actuator voltage.  A value of 1 sets the output
+to a value proportional to the position (if the hardware has that functionality).
+A value of 2 sets the output to the actuator voltage when in open\-loop mode
+and proportional to the position when in closed\-loop mode.
+See the controller user manual for details.
+This parameter can
+also be set as a non\-standard optional motor parameter in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmotor_par(mne, "encmode" [, 0|1|2])\fP
+\- 
+Sets or returns the encoder mode parameter
+for all channels on the controller associated with \fBmne\fP.
+Mode 0 is normal with acceleration.
+Mode 1 is adjustable interval.  Mode 2 is adjustable interval with acceleration.
+Can be set as a non\-standard optional controller or motor parameter in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmotor_par(mne, "enctime" [, value])\fP
+\- 
+Sets or returns the scanning interval parameter
+for all channels on the controller associated with \fBmne\fP.
+Allowed values are from 0 to 5.1 seconds.
+Can be set as a non\-standard optional controller or motor parameter in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmotor_par(mne, "enclim" [, value])\fP
+\- 
+Sets or returns the limit on stroke or voltage
+for all channels on the controller associated with \fBmne\fP.
+Allowed values are from 1 to 65535.
+Can be set as a non\-standard optional controller or motor parameter in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmotor_par(mne, "encexp" [, value])\fP
+\- 
+Sets the exponent for acceleration in encoder mode 0
+for all channels on the controller associated with \fBmne\fP.
+Allowed values are from 1 to 10.
+Can be set as a non\-standard optional controller or motor parameter in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmotor_par(mne, "encstol" [, value])\fP
+\- 
+Sets the step size for open\-loop mode
+for all channels on the controller associated with \fBmne\fP.
+Allowed values are from 0.001 to 150 Volts.
+Can be set as a non\-standard optional controller or motor parameter in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmotor_par(mne, "encstcl" [, value])\fP
+\- 
+Sets the step size for closed\-loop mode
+for all channels on the controller associated with \fBmne\fP.
+Allowed values are from 0.001 to 100 um.
+Can be set as a non\-standard optional controller or motor parameter in the \fBconfig\fP file.
+.HP 5m
+."
+\fBmotor_par(mne, "light" [, value])\fP
+\- 
+Sets or returns the brightness setting
+on the controller associated with \fBmne\fP.
+Allowed values are from 0 to 255.
+.HP 5m
+."
+\fBmotor_par(mne, "dump")\fP
+\- 
+Displays current values for parameters along the following lines:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+Controller parameters:
+                  Mode ("encmode"): Normal with acceleration (0)
+     Scanning interval ("enctime"): 2 sec (100)
+                  Limit ("enclim"): 2
+    Exponent for mode 0 ("encexp"): 3
+   Open\-loop step size ("encstol"): 0.500 V
+ Closed\-loop step size ("encstcl"): 0.500 um
+      Display brightness ("light"): 1
+
+Parameters for motor m0:
+          Operation mode ("cloop"): Closed loop (1)
+         Monitor output ("monwpa"): Always actuator position (1)
+   Soft start function ("fenable"): Enabled (1)
+.ft P
+.fi
+.RE
+.sp
+The controller parameters are for the controller associated with motor \fBmne\fP.
+Values in parenthesis are the actual command arguments sent to the controller.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "send", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the channel associated with
+\fBmne\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "read", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the channel associated with \fBmne\fP,
+as above, and returns a string containing the response.
+.HP 5m
+."
+\fBmotor_par(mne, "usend", cmd)\fP
+\- 
+Sends the string
+\fBcmd\fP
+to the controller unit associated with
+\fBmne\fP.
+Use this option for commands that are not associated with a specific
+channel.
+.HP 5m
+."
+\fBmotor_par(mne, "uread", cmd)\fP
+\- 
+Sends the string
+\fBcmd\fP
+to the controller unit assigned with
+\fBmne\fP,
+and returns the reply.
+Use this option for commands that are not associated with a specific
+channel.
+.RE
+

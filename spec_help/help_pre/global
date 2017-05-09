@@ -1,0 +1,23 @@
+global                               command                              global
+
+NAME
+     gglloobbaall - declare global variables
+
+SYNOPSIS
+
+     gglloobbaall nnaammee [[ nnaammee ...... ]]
+
+DESCRIPTION
+
+     Declares nnaammee to be a global symbol.  A global symbol retains its value
+     outside of statement blocks.  If nnaammee is used as an array name, each
+     element of the array is global.
+
+EXAMPLE
+
+     gglloobbaall CCOOUUNNTT__RRAATTEE
+
+SEE ALSO
+
+     _c_o_n_s_t_a_n_t
+

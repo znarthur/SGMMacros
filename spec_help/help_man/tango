@@ -1,0 +1,390 @@
+.TH "tango" "hardware" "05/21/14" "tango.rst 6.3  05/21/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+tango \- TANGO specific functions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)tango.rst        6.3  05/21/14  CSS
+.
+.\" Copyright (c) 2008,2012,2013,2014
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "tango" "hardware" "05/21/14" "tango.rst 6.3  05/21/14 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+TANGO is an object\-oriented distributed control system using
+CORBA, developed as a collaborative effort among
+the Alba, Desy, Elettra, ESRF and Soleil institutes.
+See \fI\%http://www.tango\-controls.org/\fP for complete details.
+The support built into \fBspec\fP requires the
+C\-binding library for TANGO.
+.sp
+In addition to generic access to TANGO properties via the \fBtango_io()\fP
+function and TANGO attributes with the \fBtango_put()\fP and \fBtango_get()\fP
+functions, \fBspec\fP also supports the TANGO GPIB server as a
+standard GPIB interface.
+.SH "PROPERTIES"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBtango_io(dev, "?")\fP
+\- 
+Lists the command properties for
+\fBdev\fP in a concise format, showing the input and output data types for
+each available command.
+.HP 5m
+."
+\fBtango_io(dev, "??")\fP
+\- 
+Lists the command properties for \fBdev\fP in a more verbose format,
+showing not only the input and output data types, but also
+the command description, as supplied by the TANGO server.
+.HP 5m
+."
+\fBtango_io(dev, cmd [, argin [, argout])\fP
+\- 
+Allows general access to TANGO devices.
+If \fBcmd\fP returns a scalar, the \fBargout\fP argument is
+optional.  If present, the return value for \fBcmd\fP will be placed
+there and \fBtango_io()\fP will return zero on success.  If absent,
+\fBtango_io()\fP will return the value for \fBcmd\fP.
+If \fBcmd\fP returns an array, the \fBargout\fP array argument
+is required.  On success, \fBtango_io()\fP returns
+the number of elements in the array.
+.HP 5m
+."
+\fBtango_io(dev, "timeout")\fP
+\- 
+Returns the current connection timeout for \fBdev\fP in seconds.
+.HP 5m
+."
+\fBtango_io(dev, "timeout", sec)\fP
+\- 
+Sets the connection timeout for \fBdev\fP in seconds.
+.HP 5m
+."
+\fBtango_io(dev, "source")\fP
+\- 
+Returns the data source for \fBdev\fP.
+A value of 0 indicates data is read directly from the device.
+A value of 1 means data is read from the polling cache.
+A value of 2 indicates data is read from the cache or the device.
+.HP 5m
+."
+\fBtango_io(dev, "source", value)\fP
+\- 
+Sets the data source for \fBdev\fP.
+Allowed values are 0, 1 and 2, with meanings as described above.
+.RE
+.SH "ATTRIBUTES"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBtango_get(dev, "?")\fP or \fBtango_put(dev, "?")\fP
+\- 
+Lists the attributes, the read\-write permissions and data type for
+\fBdev\fP in a concise format.
+.HP 5m
+."
+\fBtango_get(dev, "??")\fP or \fBtango_put(dev, "??")\fP
+\- 
+Lists the attributes, the read\-write permissions,
+data type and command description for \fBdev\fP.
+.HP 5m
+."
+\fBtango_get(dev, "?", attr)\fP
+\- 
+Displays elements of the attribute information structure for the
+selected attribute.
+.HP 5m
+."
+\fBtango_get(dev, "?", attr, info)\fP
+\- 
+Fills the associative array \fBinfo\fP
+with the elements of the attribute information structure for the
+selected attribute.
+Elements are indexed as shown:
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l .
+\fBinfo["data_format"]\fP	Scalar, spectrum or image
+\fBinfo["data_name"]\fP	Data type as a string
+\fBinfo["data_type"]\fP	Data type code number
+\fBinfo["description"]\fP	Description text
+\fBinfo["disp_level"]\fP	Operator or expert
+\fBinfo["display_unit"]\fP	Conversion factor to GUI display unit
+\fBinfo["format"]\fP	Format specification string for GUI display
+\fBinfo["label"]\fP	GUI label
+\fBinfo["max_alarm"]\fP	Max value, checked when reading
+\fBinfo["max_dim_x"]\fP	Max data size in X
+\fBinfo["max_dim_y"]\fP	Max data size in Y
+\fBinfo["max_value"]\fP	Max value, checked when writing
+\fBinfo["min_alarm"]\fP	Min value, checked when reading
+\fBinfo["min_value"]\fP	Min value, checked when writing
+\fBinfo["name"]\fP	Attribute name
+\fBinfo["standard_unit"]\fP	Conversion factor to MKS units
+\fBinfo["unit"]\fP	Unit string
+\fBinfo["writable"]\fP	Read, write, read_write or read_with_write
+\fBinfo["writable_attr_name"]\fP	Needed for read_with_write
+.TE
+.RE
+.sp
+In addition, the function returns an associative array containing
+the information.
+.RE
+.HP 5m
+."
+\fBtango_get(dev, "timeout")\fP or \fBtango_put(dev, "timeout")\fP
+\- 
+Returns the current connection timeout for \fBdev\fP in seconds.
+.HP 5m
+."
+\fBtango_get(dev, "timeout", sec)\fP or \fBtango_put(dev, "timeout", sec)\fP
+\- 
+Sets the connection timeout for \fBdev\fP in seconds.
+Returns \-1 on error, otherwise returns the new timeout value.
+.HP 5m
+."
+\fBtango_get(dev, attr [, argout ] [, extras])\fP
+\- 
+Reads one device attribute.
+If the attribute is a \fBSPECTRUM\fP or \fBIMAGE\fP
+type, then the \fBargout\fP argument is needed and is the name of an
+associative or data array that will receive the attribute data.
+.sp
+For \fBSCALAR\fP data types, the \fBargout\fP argument is optional.
+If present, \fBargout\fP will be assigned the value.  If absent, the \fBtango_get()\fP
+call will return the value.
+With the optional \fBargout\fP argument,
+barring other errors,
+the return value of \fBtango_get()\fP will be zero unless
+the data quality is \fBINVALID\fP, in which case the return value is 1.
+Without the optional \fBargout\fP argument, if the data quality is \fBINVALID\fP
+the return value will be the string \fB"invalid"\fP.
+.sp
+For \fBSPECTRUM\fP and \fBIMAGE\fP data types, the return value will be the number of array
+elements returned and the string \fB"invalid"\fP if the data quality is \fBINVALID\fP.
+.sp
+If there is a TANGO error, the function returns \-1, with the \fBTANGO_ERR\fP
+global variable set to the error message.
+.sp
+If the optional argument
+\fBextras\fP is included, it must be an associative array.
+The elements of the \fBextras\fP array will be assigned attribute
+data elements indexed as follows:
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l .
+\fBextras["data_name"]\fP	String name of data type
+\fBextras["data_type"]\fP	Data scalar\-type code
+\fBextras["dim_x"]\fP	Data dimension for X
+\fBextras["dim_y"]\fP	Data dimension for Y
+\fBextras["name"]\fP	Attribute name
+\fBextras["quality"]\fP	Data quality factor
+\fBextras["time_stamp"]\fP	Time stamp
+.TE
+.RE
+.sp
+For scalar data \fB"dim_y"\fP is zero.
+The quality factor values are as follows:
+.sp
+.RS 4m
+.TS
+;
+l l .
+0	VALID
+1	INVALID
+2	ALARM
+3	CHANGING
+4	WARNING
+.TE
+.RE
+.sp
+The \fB"time_stamp"\fP element contains the time in seconds
+and milliseconds from the UNIX epoch.
+.RE
+.HP 5m
+."
+\fBtango_get(dev, at1, argout1, at2, argout2 [, ... ]] [, extras])\fP
+\- 
+Reads multiple device attributes.
+An \fBargout\fP argument must be provided for each
+attribute, whether scalar or array.
+.sp
+When reading multiple attributes, if there are no errors,
+the return value of \fBtango_get()\fP will be the number of attributes
+that have \fBINVALID\fP quality.
+If no attributes have \fBINVALID\fP quality, the return value is zero.
+The \fBextras\fP array will be needed to sort out which attributes
+have \fBINVALID\fP data.
+.sp
+If there is a TANGO error, the function returns \-1, with the \fBTANGO_ERR\fP
+global variable set to the error message.
+.sp
+If present, the
+\fBextras\fP array will be two dimensional, with the first index being
+the attribute name and the second index as above.
+.HP 5m
+."
+\fBtango_put(dev, attr1, argin1 [, attr2, argin2 [, ...]])\fP
+\- 
+Writes one or more device attributes.  Each attribute is followed
+by its value.  Attributes can be scalar or arrays.
+.sp
+On success, the return value is 0.
+.sp
+If there is a TANGO error, the function returns \-1, with the \fBTANGO_ERR\fP
+global variable set to the error message.
+.RE
+.SH "ERROR CONSIDERATIONS"
+.rs
+.sp
+For all the TANGO functions, \fBspec\fP will assign values to
+the built\-in variables \fBTANGO_ERR\fP and \fBTANGO_ERR_STACK\fP
+on TANGO errors.
+The former is a string\-type variable containing the lowest\-level
+reason given by the TANGO library for an error or the null string
+if no error occurred.
+The variable \fBTANGO_ERR_STACK\fP is an associative array containing the
+complete error stack for commands generating an error.
+The elements of the stack are indexed as:
+.sp
+.RS 4m
+.nf
+TANGO_ERR_STACK[0]["reason"]
+TANGO_ERR_STACK[0]["origin"]
+TANGO_ERR_STACK[0]["desc"]
+TANGO_ERR_STACK[0]["severity"]
+TANGO_ERR_STACK[1]["reason"]
+TANGO_ERR_STACK[1]["origin"]
+TANGO_ERR_STACK[1]["desc"]
+TANGO_ERR_STACK[1]["severity"]
+...
+.fi
+.sp
+.RE
+.sp
+If there is no TANGO error the array will be empty.
+.sp
+If the built\-in variable \fBTANGO_ERR\fP is set to \-1 prior
+to the call of \fBtango_io()\fP, \fBtango_put()\fP or \fBtango_get()\fP,
+and if there is a TANGO ERR the function will not print the error message
+but will return \-1.  The error message will be available in \fBTANGO_ERR\fP.
+If there is no error, \fBTANGO_ERR\fP will be reset to zero.
+.sp
+In general, TANGO errors are those conditions caught by the TANGO libraries,
+in contrast to
+the errors caught by \fBspec\fP and described below.
+One error that is caught by \fBspec\fP but is treated as a TANGO error
+is requesting an attribute or property
+that doesn\(aqt exist on the device.
+For such errors, \fBspec\fP sets \fBTANGO_ERR\fP with a message
+containing the device name and the requested attribute and returns \-1.
+.sp
+A number of errors in the \fBtango_io()\fP, \fBtango_get()\fP and \fBtango_put()\fP calls will
+cause \fBspec\fP to print an error message and reset to command level.
+These are generally
+the type of errors where there is little point in continuing, since there
+is a problem with the syntax of the call.
+.sp
+Errors with \fBtango_io()\fP that cause a reset to command level include:
+.sp
+.RS 4m
+.IP \(bu 2
+need additional arguments
+.IP \(bu 2
+bad value for "source"
+.IP \(bu 2
+needs unsupported input type
+.IP \(bu 2
+missing input argument
+.IP \(bu 2
+need numeric assoc array indicies \- when sending an array
+.IP \(bu 2
+need a 1D assoc array
+.IP \(bu 2
+needs an array input arg
+.IP \(bu 2
+needs unsupported output type
+.IP \(bu 2
+missing output argument
+.IP \(bu 2
+need array for output argument
+.IP \(bu 2
+unsupported encoded format
+.IP \(bu 2
+unrecognized encoded magic number
+.IP \(bu 2
+inconsistent dimensions
+.IP \(bu 2
+impossible data type
+.IP \(bu 2
+data length inconsistency
+.RE
+.sp
+Errors with \fBtango_get()\fP that cause a reset to command level include:
+.sp
+.RS 4m
+.IP \(bu 2
+needs unsupported data type
+.IP \(bu 2
+missing value argument
+.IP \(bu 2
+attribute is write only
+.IP \(bu 2
+missing argument for return
+.IP \(bu 2
+Various errors associated with using an unassignable variable (such as a constant)
+or an array when a scalar is needed.
+.IP \(bu 2
+need array for return
+.RE
+.sp
+Errors with \fBtango_put()\fP that cause a reset to command level include:
+.sp
+.RS 4m
+.IP \(bu 2
+needs unsupported data type
+.IP \(bu 2
+attribute is read only
+.IP \(bu 2
+missing value argument
+.IP \(bu 2
+needs scalar input value \-
+when the \fBret\fP parameter is an array.
+.IP \(bu 2
+need numeric assoc array indicies \-
+when sending an array for \fBSPECTRUM\fP or \fBIMAGE\fP attribute types.
+.IP \(bu 2
+need a consistent 1D or 2D assoc array \-
+when sending an array and some associative array elements are one
+dimensional and some are two dimensional.
+.IP \(bu 2
+too many rows in input assoc array
+.IP \(bu 2
+too many columns in input assoc array
+.IP \(bu 2
+too many rows in input string array
+.IP \(bu 2
+too many columns in input array
+.IP \(bu 2
+too many rows in input array
+.RE
+

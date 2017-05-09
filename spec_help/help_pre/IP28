@@ -1,0 +1,59 @@
+IP28                                hardware                                IP28
+
+NAME
+     IP28 - Microcontrole motor indexer
+
+DESCRIPTION
+
+     The Microcontrole IP28 is a 4-axis motor indexer for use with stepping
+     motors or with direct current motors with encoders.  It is interfaced
+     either via RS-232C or by GPIB (IEEE 488).  Being programmable, an entire
+     motion sequence, including backlash, may be down loaded, thus retaining the
+     asynchronous nature of moves.
+
+     Normally, power is supplied by TL78A power units which can be very simply
+     multiplexed using the 4-bits of the programmable outputs of the IP28.
+     Thus, up to 32 motors can be controlled by one IP28.  Unfortunately, this
+     usage presents the two following difficulties:
+
+         1. only four motors (of the same bank) may be moved simultaneously, and
+
+         2. the internal registers can only keep track of the positions of four
+            axes.
+
+     One solution is to keep track of all motor positions using separate
+     readable up/down counters (such as the Microcontrole HC 88).  Another
+     solution is to always work with relative displacements and to keep track of
+     the positions by the software.  This is technique is currently employed by
+     ssppeecc.  Consistency is insured by searching for a mechanical origin (switch
+     or optical encoder).  Note that the TL78 power modules display a position
+     (usually set to the user angle) so that angles are not really lost when
+     switching banks.  Generally, the hardware is homogeneous so there is little
+     or no problem about loosing steps (which results in a "controle d'ecart",
+     anyways).  One must beware when restarting from a power failure, and search
+     for the origin for each axe (see below).
+
+     One cannot set the internal registers - only define zeros.  Thus, we ignore
+     the IP28's floating zero and only use its mechanical zero.  This is set by
+     the command "O[WXYZ];\r" which is incorporated in ssyynncc(()) and in the ssppeecc
+     command cchhgg__ddiiaall((mmoottoorr,, 00)).  Changing a dial setting to a non-zero value
+     disables hardware angle tracking, re-enabled by searching for the
+     mechanical origin.  IP28 users will probably want to undefine the macro
+     sseett__ddiiaall and define a new macro zzeerroo - this macro SHOULD NOT MODIFY THE
+     USER OFFSETS! (see mmaaccrrooss//ssuurrff..cceeaa).
+
+     ssppeecc tries to make best use of the IP28.  Most of the above problems can be
+     avoided if one puts the four, most often used motors (4-axes) on one TL 78A
+     bank.  Note that a bank may consist of several TL78A chassis which may be
+     not fully occupied when using large motors due to a limitation in power.
+
+BUGS AND CAVEATS
+
+     Besides being able to only track 4 motors at a time, positions may be read
+     only after motion has terminated.  Thus, ssppeecc updated move macros cannot be
+     used with the IP28.
+
+SEE ALSO
+
+     _c_o_n_f_i_g _z_e_r_o
+

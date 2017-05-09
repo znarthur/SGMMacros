@@ -1,0 +1,55 @@
+set_sim                             function                             set_sim
+
+NAME
+     set_sim - set simulate (no hardware) mode
+
+DESCRIPTION
+
+     Simulate mode allows a user to exercise the program without accessing any
+     of the hardware interfaces (for the most part, see below) or updating the
+     motor-settings file.
+
+     The function sseett__ssiimm(()) is used to turn simulate mode on and off.
+
+     sseett__ssiimm((00)) - Turns simulate mode off.  Returns previous state.
+
+     sseett__ssiimm((aarrgg)) - Turns simulate mode on if aarrgg is greater than zero.  If bit
+          4 (0x10) is set in aarrgg, the user-level sslleeeepp(()) function is simulated,
+          that is, ssppeecc does not sleep (as of ssppeecc release 6.00.06).  Returns
+          previous state.
+
+     sseett__ssiimm((--11)) - Doesn't change mode, but returns current state.  Bit
+          assignments in the return value are as follows:
+
+              Bit 0   0x01   Simulate mode by sseett__ssiimm(()) command
+              Bit 1   0x02   Simulate mode on start up (--ss flag)
+              Bit 2   0x04   No write access to sseettttiinnggss file
+              Bit 3   0x08   Hardware locked by another user
+              Bit 4   0x10   User-level sleep simulated
+
+     Both sseett__ssiimm((00)) and sseett__ssiimm((aarrgg)), where aarrgg is greater than zero, wait for
+     moving and counting to finish before changing the mode.  Also sseett__ssiimm((00))
+     always rereads the motor settings file to restore the motor positions.
+
+     Access to the user-level socket interface is disabled when in simulate
+     mode, but can be left on by using the command ssoocckk__ppaarr((""iiggnnoorree__ssiimm"",, 11)).
+     See the _s_o_c_k_e_t_s help file for details.
+
+     Simulate mode is turned on when ssppeecc is invoked with the --ss flag and can't
+     be turned off without restarting ssppeecc.  Also, if there is no write access
+     to the ssppeecc sseettttiinnggss file or if the hardware is locked because another user
+     is running an instance of ssppeecc using the same hardware configuration file,
+     simulate mode is also turned on and cannot be turned off without restarting
+     ssppeecc.
+
+     Users normally use the macros oonnssiimm and ooffffssiimm to turn simulate mode on and
+     off.  The macros document the changes in the data file.
+
+     The ccoonnffiigg macro automatically invokes eeddccoonnff with the --ss flag when
+     simulate mode is on.  This means the configuration file can't be changed
+     using ccoonnffiigg when in simulate mode.
+
+SEE ALSO
+
+     _s_p_e_c _c_o_n_f_i_g
+

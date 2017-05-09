@@ -1,0 +1,273 @@
+spec_menu                           function                           spec_menu
+
+NAME
+     spec_menu() - create interactive menu from specifications
+
+DESCRIPTION
+
+     The ssppeecc__mmeennuu(()) function creates interactive menus that might be used for
+     configuring macros and other ssppeecc options.  When the menu is active, the
+     user can use arrow and control keys to navigate the options and edit
+     strings.
+
+     While waiting for input in ssppeecc__mmeennuu(()), ssppeecc will continue to poll hardware
+     and respond to client commands if in server mode, just as ssppeecc does while
+     waiting for input at the main command prompt.
+
+USAGE
+
+     ssppeecc__mmeennuu((mmeennuu [[,, mmooddeess [[,, dduummbbtteerrmm]]]]))
+
+     The mmeennuu argument is a two-dimensional associative array that completely
+     describes the menu as detailed below.  The first index of the array is a
+     number that identifies an item.  The second index of the array is a string
+     that matches one of a set of keys that identify an attribute for the item.
+     The value of the array element depends on the key.
+
+     The optional mmooddeess argument is a single value where each bit can be
+     associated with a menu item.  Up to 52 items may have associated bits.
+
+     If the number of menu items plus the number of lines needed to display the
+     hints and ""iinnffoo"" strings is greater than the number of rows in the terminal
+     window, the menu items will be scrollable.  The number of additional lines
+     above or below the visible window will be displayed in the left of the
+     screen.  Navigating past the top or bottom will automatically scroll the
+     menu.
+
+     If the width of the menu is greater than the width of the window, the menu
+     items will be compressed or scrolled horizontally, to fit the available
+     space.
+
+     If dduummbbtteerrmm is nonzero, ssppeecc__mmeennuu(()) will not use cursor positioning.
+     Instead, the menu options will be displayed one at a time in sequence and
+     the user will be prompted for a value.  In this mode, entering a single --
+     for any response will jump back and prompt again for the previous item in
+     the sequence.
+
+     The function will return a possibly modified value for mmooddeess, reflecting
+     the user's choices.  If the menu is exited with ^^CC or the xx command, the
+     values of the mmeennuu items on entry are restored.
+
+MENU KEYS
+
+     Each item selected by the first index into the mmeennuu[[]][[]] array can have
+     various attributes configured via the following string keys placed in the
+     second array index.
+
+     The ""ttiittllee"", ""hheeaadd"" and ""ssuubbhheeaadd"" items don't have any other modifiers.
+     All other items require at least a ""ddeesscc"" key.  An item with a ""ddeesscc"" key
+     also needs at least one of ""bbiitt"", ""vvaalluuee"", ""ssvvaalluuee"", ""@@"" or ""lliisstt"".  The
+     other keys are optional.
+
+     ""ttiittllee"" - The title for the menu.  No further attributes apply to a ""ttiittllee""
+          item.  Only one title will be displayed, and it will be displayed at
+          the top of the page.
+
+     ""wwiiddtthh"" - The width of the menu.  If not specified, the entire window will
+          be used.
+
+     ""hheeaadd"" - A section header for the menu.  It will be preceded by a blank
+          line.
+
+     ""ssuubbhheeaadd"" - A subsection header for the menu.  It will not be preceded by a
+          blank line.
+
+     ""ddeesscc"" - A required descriptive text string for each item.  The string is
+          displayed when prompting for the value.  A null description creates a
+          blank line.
+
+     ""iinnffoo"" - Optional text that gives a description of the parameter.  The
+          ""iinnffoo"" text is displayed only when the current item is active.  The
+          text will be formatted for width using the rules of the ttttyy__ffmmtt(())
+          function.  Formatting will work best if there are no embedded newlines
+          in the string.
+
+     The value of a menu item is modifiable if at least one of the following
+     five keys is included in the item description.
+
+     ""bbiitt"" - Associates a bit in the mmooddeess argument to this item.  The element
+          value should be a single bit and each item in the array that has a bit
+          set should have a unique value.  The associated bit will be set or
+          cleared in the return value of ssppeecc__mmeennuu(()).  Also, a ""bbiitt"" attribute
+          can be associated with items that have a ""vvaalluuee"", ""ssvvaalluuee"", ""ttooggggllee""
+          or  ""lliisstt"" attribute so that such items can be enabled or disabled for
+          editing using the ""bbiitt__aanndd"", ""bbiitt__oorr"" and ""bbiitt__nnoott"" attributes.
+
+          Currently, bits 0 through 51 can be used.
+
+     ""ttooggggllee"" - Similar to the ""bbiitt"" key in that the value can be toggled on or
+          off, but there is no limit to the number of such items and no
+          connection to the mmooddeess argument.  The item's value contains the
+          initial state on entry and the selected state when ssppeecc__mmeennuu(())
+          returns.
+
+     ""vvaalluuee"" - Indicates a number value is wanted.  Also used to hold the ""lliisstt""
+          item selection.  This item's value will be modified.  Not used if the
+          ""@@"" indirection key is present.
+
+          Note, the number value can be entered as an expression which will be
+          evaluated with the result displayed.
+
+     ""ssvvaalluuee"" - Indicates a string value is wanted.  Can also be used to select
+          the current ""lliisstt"" item.  This item's value will be modified.  Not
+          used if the ""@@"" indirection key is present.
+
+     ""lliisstt"" - Presents a list of possible values, only one of which can be
+          selected.  The selection is set and returned in ""vvaalluuee"", ""ssvvaalluuee"" or
+          indirectly via the ""@@"" key.  Use ""vvaalluuee"" to indicate selection based
+          on position in the list, counting from one.  Use ""ssvvaalluuee"" to indicate
+          selection based on a matching strings.  If ""@@"" is used, ssppeecc will use
+          a number or string as appropriate.
+
+          By default, one or more space characters separate the list items.  An
+          alternate delimiter character or string can be specified using the
+          ""ddeelliimm"" attribute.
+
+     ""@@"" - The value of this element contains the string name of a ssppeecc variable
+          that is to be modified.  If its current value is a number, then the
+          rules for entering number values will be followed.  If its current
+          value is a string or the parameter is unset, the string rules will be
+          followed.  This key takes precedence over ""vvaalluuee"" or ""ssvvaalluuee""
+          attributes.  Names of scalars and associative array elements are
+          allowed, but data array elements are not.  If the named variable
+          doesn't exist, ssppeecc__mmeennuu(()) will display the variable name and "not
+          found" as the value.
+
+     ""ffoorrmmaatt"" - Can be used to set an alternative pprriinnttff(()) format for display of
+          a number-valued item.  For example, ""00xx%%XX"" can be used to display a
+          value in hexadecimal.  In fact, the format can be used to specify the
+          same number value in multiple formats, such as ""hheexx==00xx%%xx ddeecc==%%dd"".  The
+          default format is ""%%..99gg"".
+
+     ""ddeelliimm"" - Provides an alternative delimiter for ""lliisstt"" items.  Can be one
+          or more characters.  The default delimiter is a space character.  When
+          the delimiter is a space character, multiple space and tab characters
+          count as one delimiter.  When the delimiter is any other character or
+          string, each instance is a delimiter.
+
+     ""ddeeffaauulltt"" - For ""lliisstt"" items, sets the default choice if the value passed
+          via ""vvaalluuee"", ""ssvvaalluuee"" or ""@@"" is invalid or out of range.
+
+     ""mmiinn"" - For ""vvaalluuee"" items, a minimum value to allow.
+
+     ""mmaaxx"" - For ""vvaalluuee"" items, a maximum value to allow.
+
+     The item types ""bbiitt"", ""vvaalluuee"", ""ssvvaalluuee"", ""ttooggggllee"" and ""lliisstt"" can have the
+     following attributes set to enable or disable the item for editing based on
+     the bit values of other items in the current value of mmooddeess.
+
+     ""bbiitt__aanndd"" - Editable if all the matching bits (or bit) are set in mmooddeess.
+
+     ""bbiitt__oorr"" - Editable if any of the matching bits (or bit) are set in mmooddeess.
+
+     ""bbiitt__nnoott"" - Editable if the matching bits (or bit) are not set in mmooddeess.
+
+     Finally, this key applies to bit-toggle items:
+
+     ""bbiitt__fflliipp"" - Flip the YES/NO sense of this item.  Normally, when a bit  is
+          set in mmooddeess, the value is presented as "YES".  If "bit_flip" is
+          present, the logic is reversed.  This option can be used to avoid
+          double negatives in the query/response, particularly when one doesn't
+          have the freedom to define what a set bit means.  For example, "Draw
+          error bars (YES)?" is preferable to "Don't draw error bars (NO)".
+
+RETURN VALUES
+
+     On a normal return with the qq or ^^DD keys, ssppeecc__mmeennuu(()) will return an
+     updated value for mmooddeess that reflects the new values of all the ""bbiitt""
+     items.  In addition, new values for ""vvaalluuee"", ""ssvvaalluuee"" and variables passed
+     indirectly using ""@@"" will be assigned.  Finally, for any items that have
+     been modified an element will be added to the mmeennuu array with a second
+     index named ""uuppddaatteedd"" and a value set to one.
+
+NAVIGATION AND EDITING
+
+     The menu is presented as a list with the cursor positioned at the current
+     value for a modifiable item.  The up- and down-arrow keys, the ^^PP
+     (previous) and ^^NN (next) control keys and the return key accept the current
+     choice and move up or down the list.
+
+     One exits the menu saving the modifications using the qq (quit) key or ^^DD.
+     One can abandon the menu without saving the modifications using the xx
+     (exit) key or ^^CC.
+
+     The display is refreshed with ^^LL, taking into account the current window
+     size.
+
+     Bit-value and toggle items are toggled using the space bar or the left- or
+     right-arrow keys.  In addition, the yy, YY and 11 keys select YES, while the
+     nn, NN and 00 keys select NO.
+
+     List items are also navigated using the left- and right-arrow keys and the
+     ^^BB (back) and ^^FF (forward) to move one position.  The ^^AA and ^^EE keys move
+     to the first item and last item, respectively.  Also, typing the first
+     character of a list item will move the cursor to the first item in the list
+     that begins with that character.  The space bar makes the currently
+     highlighted item the list selection.
+
+     Text entry items (both string- and number-valued) allow insertion and
+     deletion of text from any point in the string.  The left- and right-arrow
+     keys and the ^^BB (back) and ^^FF (forward) move one position.  The ^^AA and ^^EE
+     keys move the cursor to the start and end of the entry, respectively.  The
+     ^^DD key and the keyboard forward-delete key both delete forward.  The
+     backspace and delete key delete backward.  The ^^UU and ^^KK keys delete from
+     the current position to the beginning and end of line, respectively.
+
+     For number-valued items, the text entered will be evaluated.  Thus
+     expressions are allowed.  For example, PPII//22, 22 ++ 22 or ppooww((22,,1122)) are all
+     valid entries.  Note, though, currently whatever is typed is executed by
+     the spec interpreter.  Entering arbitrary ssppeecc commands may take the user
+     out of the menu or produce output that overlays the menu.  The ^^LL refresh
+     command will redraw the menu in the latter case.
+
+     To enter a string that starts with one of the navigation command letters,
+     namely qq or xx, use one of the text-editing keys, such as left- or
+     right-arrow to switch to text-entry mode.
+
+     When items are disabled by way of the ""bbiitt__aanndd"", ""bbiitt__oorr"" and ""bbiitt__nnoott""
+     logic, the values appear as ------, and the up/down navigation passes over
+     those items.
+
+EXAMPLES
+
+     The standard ssppeecc macros sseettpplloott, sseettsshhooww, mmssttaarrttuupp and pplloottsseelleecctt all use
+     the ssppeecc__mmeennuu(()) function.  Here is another example:
+
+         ddeeff mmeennuu11 ''{{
+             llooccaall ii,, mmeennuu[[]],, mmooddeess
+             llooccaall   ggrroouupp__ssiizzee
+
+             mmooddeess == 11
+             ggrroouupp__ssiizzee == 551122
+             mmeennuu[[++++ii]][[""ttiittllee""]] == ""MMeennuu EExxaammppllee""
+             mmeennuu[[++++ii]][[""ddeesscc""]] == ""EEnnaabbllee LLiisstt EExxaammpplleess""
+             mmeennuu[[  ii]][[""bbiitt""]] == 00xx00000011
+
+             mmeennuu[[++++ii]][[""ddeesscc""]] == ""  LLiisstt EExxaammppllee 11""
+             mmeennuu[[  ii]][[""bbiitt__aanndd""]] == 00xx00000011
+             mmeennuu[[  ii]][[""lliisstt""]] == ""NNooww iiss tthhee ttiimmee ffoorr aallll ggoooodd mmeenn""
+             mmeennuu[[  ii]][[""ssvvaalluuee""]] == ""ttiimmee""
+
+             mmeennuu[[++++ii]][[""ddeesscc""]] == ""  LLiisstt EExxaammppllee 22""
+             mmeennuu[[  ii]][[""bbiitt__aanndd""]] == 00xx00000011
+             mmeennuu[[  ii]][[""lliisstt""]] == ""TThhee qquuiicckk::::bbrroowwnn ffooxx::::jjuummppss oovveerr::::tthhee llaazzyy ddoogg""
+             mmeennuu[[  ii]][[""ddeelliimm""]] == ""::::""
+             mmeennuu[[  ii]][[""vvaalluuee""]] == 33
+
+             mmeennuu[[++++ii]][[""ddeesscc""]] == ""  LLiisstt EExxaammppllee 33""
+             mmeennuu[[  ii]][[""bbiitt__aanndd""]] == 00xx00000011
+             mmeennuu[[  ii]][[""lliisstt""]] == ""112288 225566 551122 11002244 22004488 44009966 88119922""
+             mmeennuu[[  ii]][[""@@""]] == ""ggrroouupp__ssiizzee""
+
+             mmeennuu[[++++ii]][[""ddeesscc""]] == """"
+             mmeennuu[[++++ii]][[""ddeesscc""]] == ""UUssee llooggaarriitthhmmiicc yy--aaxxiiss""
+             mmeennuu[[  ii]][[""bbiitt""]]     == PPLL__YYLLOOGG
+             mmeennuu[[++++ii]][[""ddeesscc""]] == ""FFoorrccee yy--aaxxiiss mmiinniimmuumm ttoo zzeerroo""
+             mmeennuu[[  ii]][[""bbiitt""]]     == PPLL__YYZZEERROO
+             mmeennuu[[  ii]][[""bbiitt__nnoott""]] == PPLL__YYLLOOGG
+
+             mmooddeess == ssppeecc__mmeennuu((mmeennuu,, mmooddeess))
+
+             pprriinntt mmooddeess,, ggrroouupp__ssiizzee
+        }}''
+

@@ -1,0 +1,48 @@
+.TH "te" "macro" "08/01/12" "te.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBte\fP \- read or set the temperature
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)te.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "te" "macro" "08/01/12" "te.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBte [new_set_point]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+With an argument, the
+\fBte\fP macro changes the temperature\-controller set point.
+With or without an argument, the macro
+reads and displays the current temperature
+and the current set point.
+.sp
+As with all of \fBspec\fP\(aqs temperature\-control macros,
+you need to define a \fBmeasuretemp\fP and
+a \fB_settemp\fP macro that work correctly with your instruments.
+See the \fBTemperature Control Macros\fP section in the
+\fBspec\fP \fBStandard Macro Guide\fP for details.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBte 1.3\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%teramp\fP
+\fI\%tscan\fP
+\fI\%dtscan\fP
+\fI\%showtemp\fP
+

@@ -1,0 +1,429 @@
+psic                                reference                               psic
+
+NAME
+     psic - PSI-circle geometry modes
+
+DESCRIPTION
+
+     The ppssiicc version of ssppeecc operates a type of six-circle diffractometer that
+     has two circles to orient the detector and four circles to orient the
+     sample.  Unlike the traditional six-circle configuration, the sample
+     circles are not coupled to the motions of the detector circles.
+
+     The angle calculations and operating modes for the psi-circle
+     diffractometer are based on those presented in a paper by H. You of Argonne
+     National Lab in JJ.. AAppppll.. CCrryysstt.., 3322, 614-623 (1999).  (See
+     _h_t_t_p_:_/_/_j_o_u_r_n_a_l_s_._i_u_c_r_._o_r_g_/_j_/_i_s_s_u_e_s_/_1_9_9_9_/_0_4_/_0_0_/_h_n_0_0_9_3)
+
+CONVENTIONS
+
+     The psi-circle motor names and mnemonics are as follows:
+         DDeellttaa     ddeell    - Rotates detector arm
+         EEttaa       eettaa    - Holds cchhii and pphhii circles
+         CChhii       cchhii    - Sample tilt
+         PPhhii       pphhii    - Sample rotation
+         MMuu        mmuu     - Rotates sample circles around vertical
+         NNuu        nnuu     - Rotates detector arm around vertical axis
+         KK--eettaa     kkeettaa   - For kkaappppaa geometry
+         KKaappppaa     kkaapp    - For kkaappppaa geometry
+         KK--pphhii     kkpphhii   - For kkaappppaa geometry
+         DDeett RRoott   ddaazz    - Optional azimuthal detector slit rotation
+
+     The mnemonics are compiled into the C code, so must match those given
+     above, while the motor names can be anything.
+
+     The kkeettaa, kkaapp and kkpphhii motors are associated with the kappa variation of
+     the psi-circle diffractometer.  In such a configuration, these motors are
+     the real motors, while the eettaa, cchhii and pphhii are pseudo-motors (indicated by
+     controller-type NNOONNEE in the configuration file).
+
+     The last motor, ddaazz, corresponds to an optional azimuthal rotation of the
+     detector used to maintain a specific angular acceptance.  See the section
+     on detector rotation below.
+
+PSI-CIRCLE MODES
+
+     The psi-circle modes represent various constraints that can be made on the
+     extra three degrees of freedom available in the transformation from
+     reciprocal space to diffractometer angles.  Use the sseettmmooddee macro to select
+     a psi-circle mode.
+
+     The psi-circle geometry code uses a different formalism for specifying
+     operating modes than previous ssppeecc geometries.  Instead of just one value
+     to select a mode, up to five small numbers select the mode.  The following
+     table shows what the five numbers represent.
+
+               gg__mmooddee11       gg__mmooddee22      gg__mmooddee33  gg__mmooddee44  gg__mmooddee55
+        00            ..             ..  ........oommeeggaa--ffiixxeedd..........        XX  00
+        11  DDeellttaa--ffiixxeedd    AAllpphhaa==BBeettaa  ....................EEttaa--ffiixxeedd....................  11
+        22     NNuu--ffiixxeedd   AAllpphhaa--ffiixxeedd  ......................MMuu--ffiixxeedd....................  22
+        33    QQaazz--ffiixxeedd    BBeettaa--ffiixxeedd  ....................CChhii--ffiixxeedd....................  33
+        44    NNaazz--ffiixxeedd     PPssii--ffiixxeedd  ....................PPhhii--ffiixxeedd....................  44
+        55         ZZoonnee             XX    EEttaa==DDeell//22        XX        XX  55
+        66            XX             XX      MMuu==NNuu//22        XX        XX  66
+
+     The first row indicates the names used to refer to the five mode
+     parameters.  The first and last columns are the possible values for those
+     parameters.  The XX positions are not used.  Some modes allow zero for
+     gg__mmooddee11 and/or gg__mmooddee22.
+
+     In general, the first two columns are related to detector angles and
+     pseudo-angles, while the last three columns are used to set sample circles.
+     The implemented modes are:
+
+     sseettmmooddee 55 - Selects zzoonnee mode.  In zzoonnee mode, the scattering vector is
+          confined to a plane specified by two reciprocal lattice vectors.
+          Values for cchhii and pphhii are chosen to keep QQ in that plane.  See the
+          sszz, cczz and mmzz macros below.
+
+     sseettmmooddee 00 00 ss11 ss22 ss33 - Selects a mode where three sample circles are fixed,
+          as specified by the values for ss11 ss22 and ss33, which must all be
+          different.
+
+     sseettmmooddee dd11 dd22 ss11 - Requires nonzero values for the first three mode
+          parameters.  The ss11 mode can be any sample circle, or the special
+          values 5 or 6 to set eettaa=ddeell/2 or mmuu=nnuu/2, respectively.
+
+     sseettmmooddee 00  dd22 ss11 ss22 - Requires a nonzero gg__mmooddee22 if gg__mmooddee11 is zero.
+          (Currently, the mmuu-fixed + pphhii-fixed modes aren't working.)
+
+     sseettmmooddee dd11 00 ss11 ss22 - Requires a nonzero gg__mmooddee11 if gg__mmooddee22 is zero.
+          (Currently, the eettaa-fixed + cchhii-fixed, the eettaa-fixed + pphhii-fixed and
+          the nnaazz-fixed modes aren't working.)
+
+     sseettmmooddee  dd11 00 00 00 - Selects oommeeggaa-fixed mode, where oommeeggaa is defined as the
+          angle of the scattering vector QQ with respect to the plane of the cchhii
+          circle.  Requires a nonzero gg__mmooddee11.
+
+CUT POINTS
+
+     Cut points affect the direction the diffractometer circles turn to get from
+     one position to the next.  For example, if a cut point is at zero, the
+     corresponding circle will only move through angles of 0 to 360 degrees.
+     Thus, to get from 355 (=-5) to 5 degrees, the circle will turn 350 degrees.
+     If a cut point is at -180, the circle will move through angles from -180 to
+     180.  Thus the same motion from -5 to 5 will require only 10 degrees of
+     movement.  Use the ccuuttss macro to select cut points for all the
+     diffractometer angles.
+
+SECTORS
+
+     The calculation of HHKKLL from the six diffractometer circles involves sums
+     and products of the sines and the cosines of each angle.  If one takes each
+     angle xx and substitutes --xx, 180 + xx and 180 - xx (which only affects the
+     sign of the sines and cosines), one can find sixteen combinations where the
+     sign changes cancel out, resulting in identical HHKKLL values for any set of
+     diffractometer angles.  Some of these alternative angle settings may be
+     better suited to constraints of a particular experiment or experimental
+     configuration.  For historical reasons, ssppeecc refers to these alternative
+     angle settings as sseeccttoorrss.
+
+     If one or more of the diffractometer angles is set to a multiple of ppii/2,
+     it is possible that additional combinations of angles, other than the
+     sixteen combinations mentioned above, become available.  As of ssppeecc release
+     5.06.04-1, the ppssiicc geometry code does a exhaustive search through all
+     possible transformations in order to find any additional available sectors.
+     In addition, besides ruling out the transformations that violate the
+     frozen-angle constraints or wind up at a different HHKKLL, the new code also
+     rules out angle combinations that are outside the software motor limits.
+
+     ssppeecc provides two methods of choosing sectors.  One can have one of the 16
+     legacy transformations always performed (although the resulting angles may
+     well violate the fixed conditions associated with the current geometry
+     mode).  Or one can have ssppeecc run through all the transformations, and after
+     rejecting those that violate the frozen conditions or motor limits, select
+     the one that best conforms to a built-in ranking scheme.
+
+     The sixteen transformations that always result in identical HHKKLL are as
+     follows:
+
+         --      ddeell     eettaa     cchhii     pphhii     nnuu      mmuu
+         11      ..       ..       ..       ..       ..       ..
+         22      ..       --xx      118800--xx   118800++xx   ..       118800++xx
+         33      ..       118800--xx   118800++xx   ..       ..       118800++xx
+         44      ..       118800++xx   --xx      118800++xx   ..       ..
+         55      --xx      ..       --xx      118800++xx   --xx      118800--xx
+         66      --xx      --xx      118800++xx   ..       --xx      --xx
+         77      --xx      118800--xx   118800--xx   118800++xx   --xx      --xx
+         88      --xx      118800++xx   ..       ..       --xx      118800--xx
+         99      118800--xx   ..       ..       ..       118800++xx   ..
+        1100      118800--xx   --xx      118800--xx   118800++xx   118800++xx   118800++xx
+        1111      118800--xx   118800--xx   118800++xx   ..       118800++xx   118800++xx
+        1122      118800--xx   118800++xx   --xx      118800++xx   118800++xx   ..
+        1133      118800++xx   ..       --xx      118800++xx   118800--xx   118800--xx
+        1144      118800++xx   --xx      118800++xx   ..       118800--xx   --xx
+        1155      118800++xx   118800--xx   118800--xx   118800++xx   118800--xx   --xx
+        1166      118800++xx   118800++xx   ..       ..       118800--xx   118800--xx
+
+     Note, for sector transformations on the detector circles when used with the
+     nnaazz- and qqaazz-fixed modes and the constraints eettaa=ddeell/2 or mmuu=nnuu/2 the eettaa
+     or mmuu angles will be modified to maintain the constraint and the remaining
+     sample circles will be recalculated to keep the same reciprocal space
+     coordinates (as of ssppeecc release 5.05.04-01).
+
+     To have one of the above transformations always performed, use the sseeccttoorr
+     macro (or assign a value to the gg__sseecctt symbol).  Set the sector to zero to
+     have ssppeecc use the ranking method and examine a greater number of possible
+     sector transformations.
+
+     So far, three ranking schemes are implemented.  The first is for a
+     pseudo-vertical orientation, the second for a pseudo-horizontal orientation
+     and the third to accommodates users at ESRF's ID01 beamline.  Each scheme
+     favors keeping particular circles within angular ranges as follows:
+
+        11 PPsseeuuddoo--vveerrtt::  00 <<== ddeell    cchhii << 118800   --9900 <<==  nnuu mmuu eettaa << 9900
+        22 PPsseeuuddoo--hhoorrzz::  00 <<==     nnuu cchhii << 118800   --9900 <<== ddeell mmuu eettaa << 9900
+        33 EESSRRFF IIDD11::     00 <<== ddeell nnuu cchhii << 118800   --9900 <<==     mmuu eettaa << 9900
+
+     For the kappa configuration, cchhii is kept between two times the kappa angle
+     (gg__kkaappppaa) and that angle minus 180 degrees.
+
+     For ranking sector transformations, ssppeecc currently uses a somewhat aadd hhoocc
+     weighting scheme.  Weights for the ddeell, nnuu, mmuu, eettaa and cchhii transformations
+     are assigned values of 16, 8, 4, 2 and 1, respectively, if the angle falls
+     in the preferred range.  The transformation with the highest ranking (that
+     doesn't violate the constraints of the geometry mode) is then selected.
+
+     The ranking scheme is selected by assigning values to gg__pprreeffeerr. A value of
+     one selects the vertical orientation ranking scheme, a value of two selects
+     the horizontal ranking scheme and a value of three selects the ESRF ID1
+     scheme.
+
+     Users are encouraged to suggest additional ranking schemes that meet
+     particular needs, and CSS will endeavor to include them in future releases.
+
+     If both gg__sseecctt and gg__pprreeffeerr are zero, then the sector 1 angles (no
+     transformations) are used.
+
+     See the sseeccttoorrss and the SShhoowwSSeecctt macros below for options on displaying the
+     possible transformations.
+
+GLOBALS AND MACROS
+
+     QQ[[]] - a built-in array which holds the following psic-circle parameters:
+
+          ddeeff HH ''QQ[[00]]'' - Reciprocal space coordinate.
+          ddeeff KK ''QQ[[11]]'' - Reciprocal space coordinate.
+          ddeeff LL ''QQ[[22]]'' - Reciprocal space coordinate.
+          ddeeff LLAAMMBBDDAA ''QQ[[33]]'' - Wavelength of X rays.
+          ddeeff AALLPPHHAA ''QQ[[44]]'' - The angle between the reference vector and the  xx-zz
+               plane.  Also, the incident angle when the reference vector is the
+               surface normal.
+          ddeeff BBEETTAA ''QQ[[55]]'' - Exit angle when the reference vector is the surface
+               normal.
+          ddeeff OOMMEEGGAA ''QQ[[66]]'' - The angle between QQ and the plane of the cchhii
+               circle.
+          ddeeff TTTTHH ''QQ[[77]]'' - Twice the Bragg angle.  Also, the angle between QQ and
+               the xx-zz plane.
+          ddeeff PPSSII ''QQ[[88]]'' - Azimuthal angle of reference vector with respect to QQ
+               and the scattering plane.
+          ddeeff TTAAUU ''QQ[[99]]'' - Longitudinal angle of reference vector with respect
+               to QQ and the scattering plane.
+          ddeeff QQAAZZ ''QQ[[1100]]'' - Azimuthal angle of QQ, i.e., the angle between QQ and
+               the yy-zz plane.
+          ddeeff NNAAZZ ''QQ[[1111]]'' - Azimuthal angle of reference vector, i.e., the angle
+               between the reference vector and the yy-zz plane.
+          ddeeff SSIIGGMMAA__AAZZ ''QQ[[1122]]'' - Angle used in alternate method of specifying
+               reference vector.
+          ddeeff TTAAUU__AAZZ ''QQ[[1133]]'' - Angle used in alternate method of specifying
+               reference vector.
+          ddeeff FF__AALLPPHHAA ''QQ[[1144]]'' - Frozen value of AALLPPHHAA for aallpphhaa-fixed mode.
+          ddeeff FF__BBEETTAA ''QQ[[1155]]'' - Frozen value of BBEETTAA for bbeettaa-fixed mode.
+          ddeeff FF__OOMMEEGGAA ''QQ[[1166]]'' - Frozen value of OOMMEEGGAA for oommeeggaa-fixed mode.
+          ddeeff FF__PPSSII ''QQ[[1177]]'' - Frozen value of PPSSII for ppssii-fixed mode.
+          ddeeff FF__NNAAZZ ''QQ[[1188]]'' - Frozen value of NNAAZZ for nnaazz-fixed mode.
+          ddeeff FF__QQAAZZ ''QQ[[1199]]'' - Frozen value of QQAAZZ for qqaazz-fixed mode.
+          ddeeff FF__DDEELL ''QQ[[2200]]'' - Frozen value of AA[[ddeell]] for ddeellttaa-fixed mode.
+          ddeeff FF__EETTAA ''QQ[[2211]]'' - Frozen value of AA[[eettaa]] for eettaa-fixed mode.
+          ddeeff FF__CCHHII ''QQ[[2222]]'' - Frozen value of AA[[cchhii]] for cchhii-fixed mode.
+          ddeeff FF__PPHHII ''QQ[[2233]]'' - Frozen value of AA[[pphhii]] for pphhii-fixed mode.
+          ddeeff FF__MMUU ''QQ[[2244]]'' - Frozen value of AA[[mmuu]] for mmuu-fixed mode.
+          ddeeff FF__NNUU ''QQ[[2255]]'' - Frozen value of AA[[nnuu]] for nnuu-fixed mode.
+          ddeeff FF__CCHHII__ZZ ''QQ[[2266]]'' - Value calculated for AA[[cchhii]] in zzoonnee mode.
+          ddeeff FF__PPHHII__ZZ ''QQ[[2277]]'' - Value calculated for AA[[pphhii]] in zzoonnee mode.
+          ddeeff CCUUTT__DDEELL ''QQ[[2288]]'' - Cut point for ddeell circle.
+          ddeeff CCUUTT__EETTAA ''QQ[[2299]]'' - Cut point for eettaa circle.
+          ddeeff CCUUTT__CCHHII ''QQ[[3300]]'' - Cut point for cchhii circle.
+          ddeeff CCUUTT__PPHHII ''QQ[[3311]]'' - Cut point for pphhii circle.
+          ddeeff CCUUTT__MMUU ''QQ[[3322]]'' - Cut point for mmuu circle.
+          ddeeff CCUUTT__NNUU ''QQ[[3333]]'' - Cut point for nnuu circle.
+          ddeeff CCUUTT__KKEETTAA ''QQ[[3344]]'' - Cut point for kkeettaa circle.
+          ddeeff CCUUTT__KKAAPP ''QQ[[3355]]'' - Cut point for kkaapp circle.
+          ddeeff CCUUTT__KKPPHHII ''QQ[[3366]]'' - Cut point for kkpphhii circle.
+
+     GG[[]] - a built-in array which holds the following psic-circle parameters:
+
+          ddeeff gg__pprreeffeerr ''GG[[00]]'' - Holds sector preference value.
+          ddeeff gg__sseecctt ''GG[[11]]'' - Holds sector mode.
+          ddeeff gg__ffrrzz ''GG[[22]]'' - Nonzero when frozen mode is on.
+          ddeeff gg__hhaazz ''GG[[33]]'' - HH of azimuthal reference vector.
+          ddeeff gg__kkaazz ''GG[[44]]'' - KK of azimuthal reference vector.
+          ddeeff gg__llaazz ''GG[[55]]'' - LL of azimuthal reference vector.
+          ddeeff gg__zzhh00 ''GG[[66]]'' - HH of first zone-mode vector.
+          ddeeff gg__zzkk00 ''GG[[77]]'' - KK of first zone-mode vector.
+          ddeeff gg__zzll00 ''GG[[88]]'' - LL of first zone-mode vector.
+          ddeeff gg__zzhh11 ''GG[[99]]'' - HH of second zone-mode vector.
+          ddeeff gg__zzkk11 ''GG[[1100]]'' - KK of second zone-mode vector.
+          ddeeff gg__zzll11 ''GG[[1111]]'' - LL of second zone-mode vector.
+          ddeeff gg__kkaappppaa ''GG[[1122]]'' - Kappa tilt angle.
+          ddeeff gg__ssiiggttaauu ''GG[[1155]]'' - Nonzero if using angles SSIIGGMMAA__AAZZ and TTAAUU__AAZZ to
+               specify azimuthal reference vector.
+          ddeeff gg__mmooddee11 ''GG[[1166]]'' - Holds a geometry mode parameter.
+          ddeeff gg__mmooddee22 ''GG[[1177]]'' - Holds a geometry mode parameter.
+          ddeeff gg__mmooddee33 ''GG[[1188]]'' - Holds a geometry mode parameter.
+          ddeeff gg__mmooddee44 ''GG[[1199]]'' - Holds a geometry mode parameter.
+          ddeeff gg__mmooddee55 ''GG[[2200]]'' - Holds a geometry mode parameter.
+          ddeeff gg__uussee__ddaazz ''GG[[2211]]'' - If set and the detector-rotation motor ddaazz is
+               configured, enables detector-rotation calculations.
+
+     ccaa HH KK LL - Calculates and display the motor positions and values for the
+          pseudo-angles at the given reciprocal space position.
+
+     ppaa - Displays most of the geometry mode and orientation matrix parameters.
+
+     ffrreeeezzee [[vvaalluueess ...... ]] - Sets ffrroozzeenn mode and assigns frozen values using
+          either the current angle settings or the optional arguments.  In
+          frozen mode, angles and pseudo-angles fixed by the selected geometry
+          mode are assigned their frozen values before calculating motor
+          positions for the non-fixed angles.  If present, the arguments are
+          assigned to the frozen parameters in the same order that the gg__mmooddee
+          parameters fix values.  With no arguments, the current positions of
+          the fixed angles and/or pseudo-angles are used in the assignment.
+
+     uunnffrreeeezzee - Turns off ffrroozzeenn mode
+
+     sseettmmooddee [[mmooddeess ......]]  - Sets the up-to-five geometry mode parameters.  If no
+          arguments are given, the macro displays a table of possible modes, the
+          current mode and queries for a new mode.
+
+     ccuuttss [[aannggllee ccuutt]]||[[aallll__ccuuttss ......]]  - Sets the cut points.  A single motor
+          mnemonic and one cut point can be given as arguments, or all six (or
+          nine in kappa-mode) cut points may be given as arguments in the order
+          ddeell eettaa cchhii pphhii mmuu nnuu (kkeettaa kkaappppaa kkpphhii).  With no arguments, the macro
+          queries for all cut points.
+
+     ssiiggttaauu [[11||00]] - Turns on or off the mode where the azimuthal reference
+          vector is specified by two angles, conventionally referred to as ssiiggmmaa
+          and ttaauu, or the mode mode where the azimuthal reference vector is
+          specified by HHKKLL values.  A value of one enables the first of the
+          above.  The default method is the second of the above.
+
+     sseettaazz [[ssiiggmmaa ttaauu]]||[[HH KK LL]] - Defines the azimuthal reference vector
+          according to the method selected by the ssiiggttaauu macro.
+
+     sseeccttoorr [[wwhhiicchh]] - Selects the current sector transformation.  Values from 1
+          to 16 correspond to specific transformations.  A value of zero allows
+          the ranking and preference scheme.  See the Sectors discussion above.
+
+     pprreeffeerr [[hhooww]] - Selects the preferred sector calculation.  A value of zero
+          turns off the preference ranking.  See the Sectors discussion above.
+
+     sseeccttoorrss [[HH KK LL]] - Displays the possible motor positions corresponding to
+          the different allowed sectors for a particular reciprocal space
+          position.  If none is given as an argument, the current HHKKLL values are
+          used.
+
+     SShhoowwSSeecctt [[aarrgg]] - Displays the possible sectors corresponding to the current
+          HHKKLL values.  The bits in aarrgg have the following meaning:
+
+              0x01   Show the basic 16 sectors
+              0x02   Show all 4096 sectors
+              0x04   Show values for oommeeggaa, qqaazz and nnaazz
+              0x08   If kappa mode, show both real and pseudo angles
+              0x10   Show ruled-out sectors
+              0x20   Show sectors ruled out by limits
+
+          Sectors with duplicate values are never displayed.  When bit 0x10 is
+          set, sectors that are ruled out are displayed with a code that
+          indicates the reason, as follows:
+
+              F   Violates Frozen angle
+              o   Violates a frozen pseudoangle oommeeggaa, qqaazz and nnaazz
+              Q   Produces different HHKKLL values
+              L   Violates motor Limit
+
+          The sector numbers for the legacy 16 sectors are displayed as decimal
+          values.  The sector number of the remaining 4080 sectors are displayed
+          in hexadecimal.  If aarrgg is missing, the default behavior is the same
+          as if aarrgg=0x02.
+
+     sseettkkaappppaa [[kkaappppaa__ttiilltt__aannggllee]] - For kappa-type diffractometers, tells the
+          software the fixed value of the kkaappppaa tilt angle.
+
+     ssttaarrttggeeoo - Calls the several macros used to setup the geometry mode.
+
+     ssaavveeggeeoo - Prints the values of all the geometry configuration parameters in
+          assignment format.  Can be used to save the parameters as a command
+          file that can be read back later.
+
+     sszz [[hh00 kk00 ll00 hh11 kk11 ll11]] - For zzoonnee mode, sets the two reciprocal space
+          vectors zz00 and zz11 that define the plane of the scattering vector.
+
+     cczz aa bb - For the two zone vectors zz00 and zz11 calculates and displays QQ for
+          the vector aa zz00 + bb zz11.
+
+     mmzz aa bb - For the two zone vectors zz00 and zz11 moves the diffractometer to the
+          QQ value corresponding to the vector aa zz00 + bb zz11.
+
+     oonn__ddaazz - Enables detector rotation.
+
+     ooffff__ddaazz - Disables detector rotation.
+
+ZEROS AND ROTATION SENSE
+
+     In order for the calculations in the ppssii-circle code to work correctly, you
+     must set the rotation sense and zeros of the circles according to the
+     conventions built into the code.
+
+     The laboratory coordinate system used in the code is right handed.  The xx
+     axis points upward and the yy axis points along the direction of the
+     incident beam.  When all circle are at zero, the zz axis points outward from
+     a sample mounted on the pphhii circle.
+
+     The rotation sense is defined with respect to the positive unit vectors of
+     the coordinate system described above.  For a right-handed rotation, if
+     your thumb points along the unit vector that is in line with the rotation
+     axis, your fingers will point in the positive rotation direction.
+
+     The rotation sense of an axis can be changed by changing the sign of the
+     sstteeppss--ppeerr--ddeeggrreeee parameter or the ssiiggnn--ooff--uusseerr**ddiiaall parameter in the ccoonnffiigg
+     file.  You should set the sign of the first parameter so that the ssppeecc dial
+     positions agree with the dial indicators of each circle.  Set the sign of
+     the second parameter as necessary to make the ssppeecc user angles agree with
+     the rotation sense described below.
+
+     The mmuu and nnuu circles are in the yy-zz plane, with the rotation axes along
+     the xx axis with a right-handed rotation convention.  The zero of mmuu is such
+     that the eettaa circle is on the negative side of the xx-yy plane with its
+     rotation axis along the zz axis.  Likewise, the zero of nnuu is such that the
+     ddeellttaa circle is also on the negative side of the xx-yy plane with the
+     rotation axis also along the zz axis.
+
+     The ddeellttaa, eettaa and pphhii circles all have a left-handed rotation sense.  The
+     ddeellttaa circle is at zero when the detector arm is along the positive yy
+     direction.  EEttaa is zero when the cchhii circle is in the xx-zz plane, with the
+     cchhii axis along the yy axis.  The cchhii rotation is right-handed.  The zero of
+     cchhii puts the pphhii rotation axis along the zz direction with the "surface
+     normal" of the pphhii table pointed in the positive zz direction.  The zero of
+     the pphhii circle is arbitrary.
+
+     In the kkaappppaa configuration, the eettaa, cchhii and pphhii real motors are replaced
+     with kkeettaa, kkaapp and kkpphhii. The kkeettaa and kkpphhii circles have the same
+     left-handed rotation convention as eettaa and pphhii, while kkaapp is right handed.
+     The zero of kkeettaa is chosen so that the rotation axis of the kkaapp motor lies
+     in the positive yy-zz quadrant.  The zero of kkaapp places the pphhii rotation axis
+     in the positive zz direction.  The zero of kkpphhii is arbitrary.
+
+AZIMUTHAL DETECTOR ROTATION
+
+     The optional motor ddaazz (for detector azimuth) corresponds to an azimuthal
+     rotation of the detector or detector slits that can be used to maintain a
+     specific angular acceptance at the detector.  The theory for this motion is
+     described  by E. Vlieg in JJ.. AAppppll.. CCrryysstt.., 3311, 198-203 (1998).  (See
+     _h_t_t_p_:_/_/_j_o_u_r_n_a_l_s_._i_u_c_r_._o_r_g_/_j_/_i_s_s_u_e_s_/_1_9_9_8_/_0_2_/_0_0_/_p_e_0_0_2_8)
+
+     The macros oonn__ddaazz and ooffff__ddaazz are available to enable and disable the
+     rotation.  The automatic rotation only occurs when moving to reciprocal
+     space positions.  That is, the target position is calculated along with the
+     other geometry motor positions by ccaallccAA.
+

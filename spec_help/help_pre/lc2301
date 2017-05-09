@@ -1,0 +1,43 @@
+lc2301                              hardware                              lc2301
+
+NAME
+     lc2301 - LeCroy 2301 CAMAC MCA Module
+
+DESCRIPTION
+
+     The LeCroy 2031 MCA is selected in the ccoonnffiigg file as
+
+         CCAA__22330011 == sslloott__nnuummbbeerr
+
+     When running eeddccoonnff (or the ccoonnffiigg macro), use the CCAAMMAACC screen to select
+     this MCA module.
+
+FUNCTIONS
+
+     The mmccaa__ppaarr(()) function controls the MCA module's behavior as follows:
+
+     mmccaa__ppaarr((""cclleeaarr"")) - clears the MCA.  ssppeecc inserts a 1.5 second delay to give
+          the device time to clear.
+
+     mmccaa__ppaarr((""rruunn"")) - start the MCA.
+
+     mmccaa__ppaarr((""hhaalltt"")) - stops the MCA.
+
+     mmccaa__ppaarr((""ffiirrsstt__cchh"")) - returns the first channel to be read out.
+
+     mmccaa__ppaarr((""ffiirrsstt__cchh"",, vvaalluuee)) - sets the first channel to be read out to
+          vvaalluuee.
+
+     mmccaa__ppaarr((""nnppttss"")) - returns the number of channels to be read out.
+
+     mmccaa__ppaarr((""nnppttss"",, vvaalluuee)) - sets the number of channels to be read out to
+          vvaalluuee. The maximum number of channels is 1,024.
+
+     mmccaa__ppaarr((""ddeellaayy"")) - returns the delay time in seconds that ssppeecc sleeps after
+          the MCA is cleared.
+
+     mmccaa__ppaarr((""ddeellaayy"",, vvaalluuee)) - sets the time for ssppeecc to delay after sending the
+          clear command.  The hardware does require some delay.  Some users have
+          reported 1.5 seconds are needed, others report 0.1 seconds is
+          adequate.  The default value is 0.1 seconds.
+

@@ -1,0 +1,37 @@
+.TH "wh" "macro" "08/01/12" "wh.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBwh\fP \- where, principal axes and reciprocal space
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)wh.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "wh" "macro" "08/01/12" "wh.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBwh\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBwh\fP macro prints the current reciprocal space coordinates
+(\fBH K L\fP) and the \fBuser\fP positions of the principal motors.
+Depending on the diffractometer geometry, other parameters
+such as the angles of incidence and reflection
+(\fBALPHA\fP and  \fBBETA\fP) and the incident wavelength
+(\fBLAMBDA\fP) may be displayed.
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%wa\fP
+\fI\%wm\fP
+

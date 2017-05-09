@@ -1,0 +1,259 @@
+.TH "gpib" "hardware" "05/31/13" "gpib.rst 6.2  05/31/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+gpib \- GPIB (IEEE 488) interface
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)gpib.rst 6.2  05/31/13  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,1996,1997,1998,2007,2012,2013
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "gpib" "hardware" "05/31/13" "gpib.rst 6.2  05/31/13 CSS"
+.
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBgpib_cntl(a, s)\fP
+\- 
+Performs the selected GPIB command on the device with address \fBa\fP.
+The string \fBs\fP is one of the following:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"gtl"\fP
+\- 
+Go to local.
+.HP 5m
+."
+\fB"llo"\fP
+\- 
+Local lockout.
+.HP 5m
+."
+\fB"sdc"\fP
+\- 
+Selected device clear.
+.HP 5m
+."
+\fB"dcl"\fP
+\- 
+Device clear (sent to all devices).
+.HP 5m
+."
+\fB"get"\fP
+\- 
+Group execute trigger (only sent to the single addressed device).
+.HP 5m
+."
+\fB"ifc"\fP
+\- 
+Interface clear.
+This command resets the GPIB bus by sending the IFC message.
+The address \fBa\fP is ignored.
+\fBspec\fP runs the same code sequence with the
+\fB"ifc"\fP command as it does when it initializes
+the GPIB controller on start up or on the \fBreconfig\fP command.
+For most controllers, \fBspec\fP sleeps for some fraction
+of a second after resetting the bus.
+Also, for most controllers,
+\fBspec\fP asserts the REN (remote enable) command after sending IFC.
+.HP 5m
+."
+\fB"responsive"\fP
+\- 
+Not a GPIB command, but
+returns 1 or 0 indicating whether the associated controller
+is configured and working.
+Note, the test is on the controller, not the
+device.  To test controllers other than unit 0, the address
+syntax for \fBa\fP is \fB"1:1"\fP or \fB101\fP for unit 1, etc.
+See the section on multiple GPIB controllers below.
+The device address isn\(aqt used.
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBgpib_get(a)\fP
+\- 
+Returns a string from the GPIB device with address \fBa\fP.
+Requires the device to terminate the string with
+a newline, although the trailing newline
+(and carriage return, if present) is removed
+from the string before it is returned.
+.HP 5m
+."
+\fBgpib_get(a, n)\fP
+\- 
+As above, but reads \fBn\fP bytes and doesn\(aqt look for a terminator.
+.HP 5m
+."
+\fBgpib_get(a, eos)\fP
+\- 
+As above, but reads up until a terminator given
+by the first character of the string \fBeos\fP,
+except for the special cases described below.  The terminator is removed.
+.HP 5m
+."
+\fBgpib_get(a, d)\fP
+\- 
+Reads incoming bytes into the data array \fBd\fP. The size of
+\fBd\fP determines how many bytes are to be read.
+Sub\-array syntax can be used to limit the number of bytes.
+The function returns the number of array elements read,
+or zero if the read times out.
+Note, no byte re\-ordering is done for short\- or\-long integer data, and
+no format conversions are done for float or double data.
+.HP 5m
+."
+\fBgpib_get(a, mode)\fP
+\- 
+If \fBmode\fP is the string \fB"byte"\fP,
+reads and returns one unsigned binary byte.
+If \fBmode\fP is the string \fB"short"\fP, reads two binary
+bytes and returns the short integer so formed.
+If \fBmode\fP is the string \fB"long"\fP,
+reads four binary bytes and returns the long integer so formed.
+The last two modes work the same on both \fBbig\-endian\fP and
+\fBlittle\-endian\fP platforms.
+On both, the incoming data is treated as \fBbig endian\fP.
+If the incoming data is \fBlittle endian\fP, use \fB"short_swap"\fP or
+\fB"long_swap"\fP.
+(For \fBspec\fP versions prior to release 5.01.01, use \fBint2\fP for
+\fBshort\fP and \fBint4\fP for \fBlong\fP.)
+.HP 5m
+."
+\fBgpib_poll(a)\fP
+\- 
+Returns the serial\-poll status from the device with address \fBa\fP.
+.HP 5m
+."
+\fBgpib_put(a, s)\fP
+\- 
+Writes the string \fBs\fP to the GPIB device with address
+\fBa\fP. Returns the number of bytes written.
+.HP 5m
+."
+\fBgpib_put(a, d, [cnt])\fP
+\- 
+Writes the contents of the data array \fBd\fP
+to the GPIB device with address \fBa\fP.
+By default, the entire array (or subarray, if specified) will be sent.
+The optional third argument \fBcnt\fP can be used
+to specify the number of array elements to send.
+For short and long integer arrays,
+the data will be sent using native byte order.
+The \fB"swap"\fP option of the \fBarray_op()\fP function can be used
+to change the byte order, if necessary.
+No format conversions are available for float or double data.
+Returns the number of bytes written.
+.HP 5m
+."
+\fBgpib_put(a, "")\fP
+\- 
+Performs a listener check at device address
+\fBa\fP. Writing a null string (zero\-length message) generates
+a return value of 1 if there is a listener,
+zero if there is no listener and \-1
+if the GPIB controller doesn\(aqt support the test
+(as of \fBspec\fP release 5.07.03\-4).
+.HP 5m
+."
+\fBgpib_par(addr, "timeout" [, t])\fP
+\- 
+Returns or sets the timeout for the device
+with address \fBaddr\fP. The units are seconds.
+A value less than or equal to zero resets the timeout
+to the default value of three seconds.
+Timeouts are per device (rather than per controller).
+The timeouts only apply to the user\-level GPIB commands.
+Timeouts used by built\-in hardware support will continue
+to apply to that access.  (As of \fBspec\fP release 5.09.02\-3.)
+.RE
+.SH "MULTIPLE GPIB CONTROLLERS"
+.rs
+.sp
+\fBspec\fP allows up to eight GPIB controllers
+to be configured by the same instance of \fBspec\fP.
+In the configuration editor, use the \fB^F\fP and
+\fB^B\fP command on the GPIB controller line of the Interfaces screen to
+configure each controller.
+To include a unit number in a GPIB address for a device,
+enter the address using the notation \fBunit:address\fP.
+An absent \fBunit:\fP prefix implies GPIB controller unit zero.
+.sp
+In the \fBconfig\fP file, the unit number associated
+with a GPIB controller is specified with
+\fB@gpib_0\fP, \fB@gpib_1\fP, etc.  Also, GPIB unit numbers are encoded using
+.sp
+.RS 4m
+\fBunit * 100 + address\fP
+.RE
+.sp
+for the GPIB address.  From \fBspec\fP, the
+\fBgpib_get()\fP, \fBgpib_put()\fP, etc., commands described above, can use either
+the above coding, the syntax \fB"unit:address"\fP
+(the quotes are required) or the syntax \fBunit.address\fP
+(as of release 5.07.02\-2).
+.SH "SECONDARY GPIB ADDRESS"
+.rs
+.sp
+Secondary GPIB addresses are supported for all the above functions.
+The address argument must be passed as a string however, of the form
+\fB"pri_sec"\fP, where \fBpri\fP is the primary GPIB address and
+\fBsec\fP is the secondary GPIB address.  For example,
+.sp
+.RS 4m
+\fBprint gpib_get("3_12")\fP
+.RE
+.sp
+will display the string read from the device with a primary GPIB
+address of 3 and a secondary GPIB address of 12.
+There is no provision to include secondary addresses as part of the device
+configuration information contained in the hardware \fBconfig\fP file.
+.SH "SHARING GPIB CONTROLLERS"
+.rs
+.sp
+\fBspec\fP communicates with the GPIB controllers
+at board (rather than device) level.
+That makes it unlikely that an arbitrary program could also use the
+same GPIB controller successfully simultaneously.
+However, \fBspec\fP can share a GPIB controller
+among multiple instances of itself.
+The state of the controller is communicated between the processes
+using the interprocess communications (IPC)
+semaphore and shared\-memory facilities.
+Thus sharing is only available on platforms that include these
+facilities in the kernel.
+.sp
+When sharing multiple GPIB controllers, please note it is essential each
+shared controller have the same GPIB controller unit number in the
+\fBspec\fP configuration file.
+.sp
+Note that \fBspec\fP uses only one semaphore
+to regulate access to all the shared controllers.
+Thus, if there are two GPIB controllers configured as shared,
+when any process accesses either controller, other processes
+will be blocked from accessing
+both controllers until the first process releases the semaphore.
+Note also that when the Kinetic Systems KS\-3929 SCSI\-to\-CAMAC controller
+is configured as a shared controller, the same semaphore is again used.
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%serial\fP
+\fI\%config_adm\fP
+

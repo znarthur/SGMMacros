@@ -1,0 +1,271 @@
+trinamic                            hardware                            trinamic
+
+NAME
+     Trinamic - Trinamic QUADpack/SIXpack motor controllers
+
+DESCRIPTION
+
+     The Trinamic QUADpack and SIXpack motor controllers are supported by ssppeecc
+     over both serial (RS-232C) and CAN-bus interfaces.  ssppeecc support for
+     Trinamic controllers was introduced in release 5.05.03-2 (May 2004).  A
+     number of bug fixes and updates have been included in subsequent release.
+     A major upgrade in parameter configuration was included in release
+     5.07.04-1 (October 2007).  Details are included in the text below.
+
+CONFIGURATION
+
+     Configure the motor controllers on the DDevices screen of the configuration
+     editor as follows, choosing the CAN bus or serial entry, as appropriate:
+
+        MMoottoorr aanndd CCoouunntteerr DDeevviiccee CCoonnffiigguurraattiioonn ((NNoott CCAAMMAACC))
+
+        MMOOTTOORRSS     DDEEVVIICCEE   AADDDDRR <<>>MMOODDEE NNUUMM                               <<>>TTYYPPEE
+           YYEESS                 00         1166  TTrriinnaammiicc QQUUAADDppaacckk//SSIIXXppaacckk ((CCAANN bbuuss))
+           YYEESS //ddeevv//ttttyySS00     <<>>  1199220000  1100   TTrriinnaammiicc QQUUAADDppaacckk//SSIIXXppaacckk ((SSeerriiaall))
+
+     If using the CAN-bus interface, configure the CAN-bus controller in use in
+     the field-bus section of the IInterfaces screen of the configuration editor.
+     Multiple field-bus controllers can be configured with each assigned an
+     index number starting from zero.  The ADDR field in the example holds the
+     index number of the field-bus controller to be used.
+
+     For the serial interface, the baud rate is entered in the MODE column.  Use
+     19200 baud for the Trinamic controllers.
+
+     On the MMotor screen of the configuration editor, choose TTRRIINNAAMMIICC as the
+     controller type.  Note, also, that Trinamic motor channels require the
+     uunniitt//mmoodduullee//cchhaannnneell configuration for each motor channel.  The uunniitt numbers
+     refer to the entries on the DDevices screen for the controller configuration
+     and start at zero for each type of controller.  That is, the first Trinamic
+     controller is unit 0, even if other controller types appear before it in
+     the listing.  The mmoodduullee number is the board address set using switches on
+     the controller card.  The cchhaannnneell numbers run from 0 to 3 for the QUADpack
+     and 0 to 5 for the SIXpack.
+
+FUNCTIONS
+
+     The Trinamic controllers support many configuration parameters that are not
+     normally used by ssppeecc.  ssppeecc does provide the capability to set practically
+     all of the parameters.  Note, though, changing the values of some of the
+     parameters may interfere with ssppeecc's operation of the motor controller.
+
+     The following mmoottoorr__ppaarr(()) options are available while running ssppeecc.  The
+     parameter names are not sensitive to case (upper and lower case letters are
+     equivalent).
+
+     mmoottoorr__ppaarr((mmnnee,, ""ggeett__iioo11"")) - Returns the logic state of the TTLIO1 pin.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseett__iioo11"",, aarrgg)) - Sets the logic state of the TTLIO1 pin,
+          using it as an output.  Note, the TTLOUT1 pin is set simultaneously
+          using the value given with the ""sseett__oouutt11"" option.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseett__oouutt11"",, aarrgg)) - Sets the logic state of the TTLOUT1 pin.
+          Note, the TTLIO1 pin is set simultaneously using the value given with
+          the ""sseett__iioo11"" option.
+
+     The following three options can be set on the standard optional-parameters
+     screen in ssppeecc's hardware configuration editor.  (Type pp when on the MMotor
+     screen.)  As of ssppeecc release 5.07.04-6, there are additional ways to set
+     the same motor parameters.  See below.
+
+     mmoottoorr__ppaarr((mmnnee,, ""mmiisscc__ppaarr__11"" [[,, aarrgg]])) - Sets or gets the peak current in
+          percent.  See ""PPeeaakkCCuurrrreenntt"" below.
+
+     mmoottoorr__ppaarr((mmnnee,, ""mmiisscc__ppaarr__22"" [[,, aarrgg]])) - Sets or gets the power-down current
+          in percent.  See ""PPoowweerrDDoowwnnCCuurrrreenntt"" below.
+
+     mmoottoorr__ppaarr((mmnnee,, ""mmiisscc__ppaarr__33"" [[,, 00||11]])) - Sets or gets the limit
+          configuration.  A zero configures normally closed limits, while a one
+          configures normally open limits.  See ""NNuullllPPoossiittiivvee"" below.
+
+     The following parameters allow setting of all the power parameters
+     associated with the Trinamic controller.
+
+     mmoottoorr__ppaarr((mmnnee,, ""PPeeaakkCCuurrrreenntt"" [[,, aarrgg]])) - Sets or returns the peak current in
+          percent.  Note the maximum peak current is configured via a DIP switch
+          on the SIXpack2 models.  Note also, the peak current is set in pairs,
+          i.e., channels 0 and 1 share the setting, as do channels 2 and 3 and
+          channels 4 and 5.  Default value is 50.
+
+     mmoottoorr__ppaarr((mmnnee,, ""PPoowweerrDDoowwnnCCuurrrreenntt"" [[,, aarrgg]])) - Sets or returns the power-down
+          current as a percent of the peak current.  The power-down current
+          kicks in after the power-down delay interval.  Default value is 0.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSttaannddiinnggCCuurrrreenntt"" [[,, aarrgg]])) - Sets or returns the stand-still
+          current as a percent of the peak current.  The stand-still current
+          kicks in at the end of a move.  Default value is 50.
+
+     mmoottoorr__ppaarr((mmnnee,, ""RRuunnnniinnggCCuurrrreenntt"" [[,, aarrgg]])) - Sets or returns the
+          constant-velocity current as a percent of the peak current.  Default
+          value is 75.
+
+     mmoottoorr__ppaarr((mmnnee,, ""AAcccceelleerraattiioonnCCuurrrreenntt"" [[,, aarrgg]])) - Sets or returns the
+          acceleration current as a percent of the peak current.  Default value
+          is 100.
+
+     mmoottoorr__ppaarr((mmnnee,, ""PPoowweerrDDoowwnnDDeellaayy"" [[,, aarrgg]])) - Sets or returns the power-down
+          delay time in milliseconds.  The power-down delay is the time between
+          when a motor has reached its target position and the time the current
+          is set to the power-down value.  Default value is 1000 (1 second).
+
+     The following fifteen parameters can be set individually or all at once by
+     using the built-in optional ""hhoommee__mmeetthhoodd"" parameter, also described below.
+     Setting any of the following parameters individually will override values
+     set via the home-method parameter.
+
+     Note, although these parameters can all be set, certain settings may
+     interfere with ssppeecc's ability to control the motors.  In general, one
+     shouldn't modify the values from the defaults without a good reason and an
+     understanding of the consequences.
+
+     The meaning and significance for these parameters can be sought in
+     Trinamic's documentation.
+
+     mmoottoorr__ppaarr((mmnnee,, ""RRoottaarryyAAxxiiss"" [[,, 00||11]])) - Sets or returns the value of the
+          rotary-axis parameter (zero or one).  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""AAuuttooNNuullllCCmmdd"" [[,, 00||11]])) - Sets or returns the value of the
+          auto-null flag (zero or one).  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""TTeessttNNuullll"" [[,, 00||11]])) - Sets or returns the value of the
+          test-null flag.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""NNuullllLLeefftt"" [[,, 00||11]])) - Sets or returns the value of the
+          null-left flag.  Default value is one.
+
+     mmoottoorr__ppaarr((mmnnee,, ""NNuullllCCeenntteerr"" [[,, 00||11]])) - Sets or returns the value of the
+          null-center flag.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSttooppNNuullll"" [[,, 00||11]])) - Sets or returns the value of the
+          stop-null flag.  Default value is one.
+
+     mmoottoorr__ppaarr((mmnnee,, ""FFiilltteerrSSwwiittcchh"" [[,, 00||11]])) - Sets or returns the value of the
+          filter-switch flag.  Default value is one.
+
+     mmoottoorr__ppaarr((mmnnee,, ""WWaayyOOppttiimmiizzaattiioonn"" [[,, 00||11]])) - Sets or returns the value of
+          the way-optimization flag.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""FFaassttRReeff"" [[,, 00||11]])) - Sets or returns the value of the
+          fast-reference flag.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""MMeecchhRReeff"" [[,, 00||11]])) - Sets or returns the value of the
+          mechanical-reference flag.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""DDeellaayyTTeessttNNuullll"" [[,, 00||11]])) - Sets or returns the value of the
+          delay-test-null flag.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSttooppSSoofftt"" [[,, 00||11]])) - Sets of returns the value of the
+          stop-soft flag.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSttooppNNooRReeff"" [[,, 00||11]])) - Sets or returns the stop-no-ref flag.
+          Default value is one.
+
+     mmoottoorr__ppaarr((mmnnee,, ""NNuullllPPoossiittiivvee"" [[,, 00||11]])) - Sets or returns the null-positive
+          flag.  Default value is one.
+
+     mmoottoorr__ppaarr((mmnnee,, ""hhoommee__mmeetthhoodd"" [[,, aarrgg]])) - Sets or returns the value of the
+          Trinamic-specific home-method parameter.  For the Trinamic controller,
+          the home method is a 16-bit number that encodes the flags included in
+          the above parameters as follows:
+
+              0x0002   RotaryAxis
+              0x0004   AutoNullCmd
+              0x0008   TestNull
+              0x0010   NullLeft
+              0x0020   NullCenter
+              0x0040   StopNull
+              0x0080   FilterSwitch
+              0x0100   WayOptimization
+              0x0200   FastRef
+              0x0400   MechRef
+              0x0800   DelayTestNull
+              0x1000   StopSoft
+              0x2000   StopNoRef
+              0x4000   NullPositive
+              0x8000   StopAtFullSteps
+
+          The ""hhoommee__mmeetthhoodd"" option provides an alternative to setting the
+          parameters individually.  However, setting parameters individually
+          will override the value selected with this parameter.
+
+     mmoottoorr__ppaarr((mmnnee,, ""PPoossLLiimmiitt"" [[,, aarrgg]])) - Set or returns the value of the
+          position-limit parameter used in the home search.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSttooppAAttFFuullllSStteeppss"" [[,, 00||11]])) - Sets or returns the
+          stop-at-full-steps flag.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""DDeebboouunncciinnggTTiimmee"" [[,, aarrgg]])) - Sets or returns the debouncing
+          time.  Default value is 22 msec.
+
+     mmoottoorr__ppaarr((mmnnee,, ""SSttooppAAfftteerrSSeeaarrcchh"" [[,, 00||11]])) - Sets or returns the
+          stop-after-search flag.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""NNuullllOOffffsseett"" [[,, aarrgg))]])) - Sets or returns the null-point
+          offset value.  Default value is zero.
+
+     mmoottoorr__ppaarr((mmnnee,, ""TTeessttNNuullllRRaannggee"" [[,, aarrgg]])) - Sets or returns the test-null
+          range.  Default value is 240.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp"")) - Displays current values for the above
+          Trinamic-specific parameters along the following lines:
+
+                     PPeeaakkCCuurrrreenntt ==     5500 %%
+             AAcccceelleerraattiioonnCCuurrrreenntt ==    110000 %%
+                  RRuunnnniinnggCCuurrrreenntt ==     7755 %%
+                 SSttaannddiinnggCCuurrrreenntt ==     5500 %%
+                PPoowweerrDDoowwnnCCuurrrreenntt ==      00 %%
+                  PPoowweerrDDoowwnnDDeellaayy ==   11000000 mmsseecc
+                  DDeebboouunncciinnggTTiimmee ==     2222 mmsseecc
+                 SSttooppAAfftteerrSSeeaarrcchh ==      00
+                      NNuullllOOffffsseett ==      00 sstteeppss
+                   TTeessttNNuullllRRaannggee ==    224400 sstteeppss
+                        PPoossLLiimmiitt == 440000000000 sstteeppss
+                      RRoottaarryyAAxxiiss ==      00 ((00xx00000022))
+                     AAuuttooNNuullllCCmmdd ==      00 ((00xx00000044))
+                        TTeessttNNuullll ==      00 ((00xx00000088))
+                        NNuullllLLeefftt ==      11 ((00xx00001100))
+                      NNuullllCCeenntteerr ==      00 ((00xx00002200))
+                        SSttooppNNuullll ==      11 ((00xx00004400))
+                    FFiilltteerrSSwwiittcchh ==      11 ((00xx00008800))
+                 WWaayyOOppttiimmiizzaattiioonn ==      00 ((00xx00110000))
+                         FFaassttRReeff ==      00 ((00xx00220000))
+                         MMeecchhRReeff ==      00 ((00xx00440000))
+                   DDeellaayyTTeessttNNuullll ==      00 ((00xx00880000))
+                        SSttooppSSoofftt ==      00 ((00xx11000000))
+                       SSttooppNNooRReeff ==      11 ((00xx22000000))
+                    NNuullllPPoossiittiivvee ==      11 ((00xx44000000))
+                 SSttooppAAttFFuullllSStteeppss ==      00 ((00xx88000000))
+                   ""hhoommee__mmeetthhoodd"" == 00xx6600DD00
+
+     mmoottoorr__ppaarr((mmnnee,, ""ddiissaabbllee__lliimmiitt__cchheecckkss"" [[,, 00||11]])) - Sets or returns the value
+          of the standard optional motor parameter to disable limit checks.  Set
+          this parameter if the limit inputs are to be used for a reference
+          search but not to stop motion.
+
+CHECKING FOR RESET
+
+     Trinamic parameters need to be reprogrammed after a power cycle.  It is
+     possible to have ssppeecc continuously check whether power has been cycled by
+     requesting a particular status response from the controller.  To enable
+     such an automatic check (as of ssppeecc release 5.09.01-1), set the custom
+     controller parameter ""cchheecckk__iinntteerrvvaall"" in the hardware ccoonnffiigg file.  If this
+     parameter has a value greater than zero, ssppeecc will check for reset no more
+     frequently than that number of seconds.  If a reset is noted, all
+     parameters will be reprogrammed.  The check will be performed before
+     moving, reading positions, on the ssyynncc command, and before changing
+     parameters with mmoott__ppaarr(()), but no more often than the specified interval.
+     When the controller is idle, there is no checking done.
+
+     To set the parameter, go the controller configuration line on the DDevices
+     screen of the configuration editor and type pp to enter the parameter:
+
+        CCuussttoomm PPaarraammeetteerrss ffoorr ""TTrriinnaammiicc QQUUAADDppaacckk//SSIIXXppaacckk ((SSeerriiaall))""
+
+        NNAAMMEE                      VVAALLUUEE
+        cchheecckk__iinntteerrvvaall            22
+
+     The above example configures the checking at no more often than every two
+     seconds.  In the current implementation, the parameter needs to be
+     separately configured for each controller for which checks are to be
+     enabled.
+

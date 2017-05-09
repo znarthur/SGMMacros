@@ -1,0 +1,47 @@
+.TH "pwd" "macro" "08/01/12" "pwd.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBpwd\fP \- print \fBspec\fP\(aqs current working directory
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)pwd.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "pwd" "macro" "08/01/12" "pwd.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBpwd\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBpwd\fP macro prints the current working directory
+used by \fBspec\fP.
+.SH "DEFINITION"
+.rs
+.sp
+\fBdef pwd \(aqprint CWD\(aq\fP
+.SH "GLOBALS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBCWD\fP
+\- 
+A built\-in variable that contains the name of the current working
+directory.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%cd\fP
+\fI\%u\fP
+

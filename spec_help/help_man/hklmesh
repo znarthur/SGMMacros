@@ -1,0 +1,58 @@
+.TH "hklmesh" "macro" "08/01/12" "hklmesh.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBhklmesh\fP \- scan over a 2d grid in reciprocal space
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)hklmesh.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "hklmesh" "macro" "08/01/12" "hklmesh.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBhklmesh Q1 start1 end1 intervals1
+Q2 start2 end2 intervals2 time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBhklmesh\fP macro scans over a grid in reciprocal space in the
+\fBQ1\-Q2\fP plane, putting the results in one scan entry in the data file
+(as opposed to an \fBhklscan\fP inside a for\-loop which creates many scans).
+\fBQ1\fP and \fBQ2\fP are literally \fBH\fP, \fBK\fP or \fBL\fP. The grid runs from
+\fBstart1\fP to \fBend1\fP for \fBintervals1+1\fP points
+for the reciprocal space coordinate \fBQ1\fP and from
+\fBstart2\fP to \fBend2\fP for \fBintervals2+1\fP points
+for the \fBQ2\fP coordinate.
+Count time is given by \fBtime\fP, which if positive,
+specifies seconds and if negative, specifies monitor counts.
+.sp
+The scan over \fBQ1\fP is done at each point in the scan over
+\fBQ2\fP. That is, the scan of the first coordinate is nested
+within the scan of the second coordinate.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBhklmesh H 0 1 10 K 0 1 10 60\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%hklscan\fP
+\fI\%hscan\fP
+\fI\%kscan\fP
+\fI\%lscan\fP
+\fI\%hkcircle\fP
+\fI\%hlcircle\fP
+\fI\%klcircle\fP
+\fI\%hkradial\fP
+\fI\%hlradial\fP
+\fI\%klradial\fP
+

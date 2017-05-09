@@ -1,0 +1,403 @@
+.TH "mmc100" "hardware" "08/28/12" "ketek.rst 6.3  08/28/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+ketek \- Ketek DPP2 MCA\-type device
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)ketek.rst        6.3  08/28/12  CSS
+.
+.\" Copyright (c) 2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mmc100" "hardware" "08/28/12" "ketek.rst 6.3  08/28/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Ketek DPP2 is a digital pulse processor used in instruments
+such as the GE Measurement & Control Meteor0D energy dispersive X\-ray detector.
+.sp
+The DPP2 connects to the computer via a USB interface but
+appears as a serial device to \fBspec\fP.
+On modern
+\fBLinux\fP
+distributions the serial\-to\-USB driver will load automatically.
+On Mac OSX,
+the VCP driver available at \fI\%ftdichip.com\fP must be installed.
+.sp
+The controller is selected on the
+hardware configuration editor
+\fBD\fPevices
+screen along the lines of:
+.RS 3m
+.sp
+.nf
+.ft CB
+MCA\-like       DEVICE   ADDR  <>MODE                 <>TYPE
+ 0  YES  /dev/ttyUSB0     <>   19200    Ketek DPP2 (Serial)
+.ft P
+.fi
+.RE
+.SH "FUNCTIONS"
+.rs
+.sp
+The standard MCA commands supported by \fBspec\fP are described in the
+\fI\%mca\fP help file.
+Of the standard functions, the
+Ketek DPP2 MCA supports
+\fBmca_get()\fP,
+but not
+\fBmca_put()\fP.
+Of the standard
+\fBmca_par()\fP
+options,
+\fB"info"\fP,
+\fB"chans"\fP,
+\fB"max_chans"\fP,
+\fB"max_channels"\fP,
+\fB"disable"\fP,
+\fB"auto_run"\fP,
+\fB"soft_preset"\fP,
+\fB"auto_clear"\fP,
+\fB"native_type"\fP,
+\fB"run"\fP,
+\fB"halt"\fP
+and
+\fB"clear"\fP
+are included in \fBspec\fP\(aqs support for the DPP2.
+.sp
+The
+\fB"auto_clear"\fP
+mode is on by default.
+.sp
+Options specific to the DPP2 are described below.
+.RS 0m
+.HP 5m
+."
+\fBmca_par("gain_index" [, v])\fP
+\- 
+With the optional argument, sets the gain to the value
+associated with the gain index \fBv\fP, as follows:
+.TS
+;
+l l l l l l l l l l l l l .
+												
+	\fBv\fP	Gain		\fBv\fP	Gain		\fBv\fP	Gain		\fBv\fP	Gain	
+	0	0		4	10.6		8	5.3		12	3.6	
+	1	42.4		5	8.5		9	4.7		13	3.3	
+	2	21.2		6	7.1		10	4.2		14	3.0	
+	3	14.1		7	6.0		11	3.9		15	2.8	
+.TE
+.sp
+Returns the current index.
+Note, zero gain switches the MCA off.
+.sp
+According to the DPP technical specifications,
+the digital gain "determines the slope of the system transfer characteristic."
+Larger values shift "the spectrum lines right."
+The "appropriate gain should be chosen in accordance with the maximum energy
+measured and user preferences."
+The gain values in the above table are
+"the approximate charge sensitivity (CS) in [eV/channel]."
+.HP 5m
+."
+\fBmca_par("gain" [, value])\fP
+\- 
+With the optional argument, sets the gain to the closet value
+to the argument \fBvalue\fP.
+With or without the argument, returns the current setting.
+.HP 5m
+."
+\fBmca_par("shaping" [, v])\fP
+\- 
+Sets or returns the shaping parameter, a value from 0 to 15, that
+selects shaping constants as given in the following table:
+.TS
+;
+l l l l l .
+				
+		Peaking	Analog	Differential
+	\fBv\fP	Time	Equivalent	Nonlinearity
+		(usec)	(usec)	(%)
+	0	1.32	0.44	1.0
+	1	2.1	0.7	0.7
+	2	2.9	1	0.5
+	3	3.72	1.25	0.4
+	4	4.5	1.5	0.3
+	5	5.3	1.8	0.26
+	6	6.1	2	0.23
+	7	6.9	2.3	0.2
+	8	7.7	2.6	0.18
+	9	8.52	2.85	0.17
+	10	9.3	3.1	0.15
+	11	10.1	3.4	0.14
+	12	10.9	3.65	0.13
+	13	11.7	3.9	0.12
+	14	12.5	4.2	0.11
+	15	13.3	4.5	0.1
+.TE
+.sp
+According to the DPP technical specifications, "the
+shaped pulse has duration equal to half of the equivalent shaping
+time pulse duration for semi\-Gaussian analog shaper. Due to the
+shaping function chosen, the peaking time equals the pulse duration.
+Digitally shaped pulses terminate in a single clock cycle."
+In addition, "Due to the built in sliding scale correction applied during each
+individual pulse shaping, the [differential nonlinearity]
+depends on the number of clock cycles needed to shape the pulse."
+.HP 5m
+."
+\fBmca_par("threshold" [, value])\fP
+\- 
+Sets or returns the threshold, which is a value from 0 to 15.
+The DPP technical specifications state:
+.sp
+.RS 5m
+.RS 4m
+The DPP detects pulses that have amplitude above certain value
+settable by the threshold. There are 16 equidistant thresholds. The
+threshold should be set just above the noise level. If set lower,
+the dead time increases. If set higher than needed, the energy
+resolution may decrease and lower energy pulses shall not be detected.
+The needed value should be chosen experimentally; however in most
+cases threshold value of 4 \- 6 is fine.
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("preset" [, value])\fP
+\- 
+With the optional argument, sets the preset time to \fBvalue\fP, in seconds.
+The preset time resolution is 0.256 seconds.
+With or without the argument, returns the rounded preset time.
+.HP 5m
+."
+\fBmca_par("preset_mode" [, value])\fP
+\- 
+Sets or returns the current preset mode.  The argument can be given
+as a string or a number.  Valid strings are \fB"real"\fP (or 0)
+and \fB"live"\fP (or 1).
+The return value will be 0 or 1.
+.HP 5m
+."
+\fBmca_par("live")\fP
+\- 
+Sets \fBlive\fP\-time preset mode.
+.HP 5m
+."
+\fBmca_par("real")\fP
+\- 
+Sets \fBreal\fP\-time preset mode.
+.HP 5m
+."
+\fBmca_par("icr")\fP
+\- 
+Returns the input count rate.
+.HP 5m
+."
+\fBmca_par("elapsed_live")\fP
+\- 
+Returns the elapsed live time.
+.HP 5m
+."
+\fBmca_par("elapsed_real")\fP
+\- 
+Returns the elapsed real time.\(ga
+.HP 5m
+."
+\fBmca_par("dead")\fP
+\- 
+Returns the calculated dead time, as
+.sp
+.RS 5m
+.RS 4m
+.nf
+100 * (\fBreal_time\fP \- \fBlive_time\fP) / \fBreal_time\fP
+.fi
+.sp
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("scope")\fP
+\- 
+Returns a data array of 1024 unsigned short values containing the
+oscilloscope data.
+.HP 5m
+."
+\fBmca_par("pars")\fP
+\- 
+Returns an associative array containing parameters indexed
+by keywords, with each element containing
+the appropriate value, as shown below.
+The \fB"busy"\fP keyword is nonzero when the
+device is acquiring data:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+123.SPEC> pars = mca_par("pars"); p pars
+pars["busy"] = 1
+pars["dead"] = 84.12
+pars["elapsed_live"] = 1.585
+pars["elapsed_real"] = 9.984
+pars["gain"] = 8
+pars["icr"] = 0
+pars["preset"] = 9.984
+pars["preset_mode"] = 0
+pars["shaping"] = 4
+pars["threshold"] = 6
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("state")\fP
+\- 
+Prints the current state of the device in the following format:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+Acquisition not complete.
+Spectrum not cleared.
+Acquisition is started.
+Real time = 4.57
+.ft P
+.fi
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("dump")\fP
+\- 
+Displays the current parameters formatted as follows:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+Preset     = 9.984 sec
+Count mode = Real
+Busy       = No
+Gain       = 8 (5.3 eV/channel)
+Threshold  = 6
+Shaping    = 4
+  Peaking time              = 4.5 usec
+  Analog equivalent         = 1.5 usec
+  Differential nonlinearity = 0.3%
+
+Elapsed live time = 9.984 sec
+Elapsed real time = 1.748 sec
+Percent dead time = 82.5%
+Input count rate  = 1234 cts/sec
+.ft P
+.fi
+.RE
+.RE
+.RE
+.\" ``mca_par("sensor", *num*)``
+.
+.\" Returns the reading from sensor ``*num*``, as follows.
+.
+.\" 
+.
+.\" .. csv-table::
+.
+.\" 
+.
+.\" , ,
+.
+.\" , num, name, , num, name
+.
+.\" , 0, ADC0  , , 4, RD/FETB
+.
+.\" , 1, R1    , , 5, R18
+.
+.\" , 2, IGR   , , 6, TEMP
+.
+.\" , 3, BACK  , , 7, ADC7
+.
+.\" 
+.
+.\" ``mca_par("dac", *num* [, *value*])``
+.
+.\" Sets or returns the setting for DAC number ``*num*``.
+.
+.\" 
+.
+.\" .. csv-table::
+.
+.\" 
+.
+.\" , ,
+.
+.\" , num, name, , num, name
+.
+.\" , 0, R18,       , 4, R1,
+.
+.\" , 1, RD/FETB,   , 5, D5,
+.
+.\" , 2, BACK,      , 6, TEMP,
+.
+.\" , 3, IGR,       , 7, Cooling,
+.
+.\" 
+.
+.\" ``mca_par("dump2")``
+.
+.\" Displays the current parameters as above and also includes
+.
+.\" the DAC settings and sensor readings (which may or may not
+.
+.\" be implemented in the hardware)::
+.
+.\" 
+.
+.\" DAC settings:
+.
+.\" R18 = 0 V
+.
+.\" RD/FETB = -1.5568 V
+.
+.\" BACK = -11.209 V
+.
+.\" IGR = -1.5568 V
+.
+.\" R1 = -1.5568 V
+.
+.\" D5 = -0.15568
+.
+.\" TEMP = 234.5 K
+.
+.\" Cooling = -0.15568 V
+.
+.\" 
+.
+.\" Sensor readings:
+.
+.\" ADC0 = 0.0006105 V
+.
+.\" R1 = 0.06105 nA
+.
+.\" IGR = 0.006105 nA
+.
+.\" BACK = 0.006105 nA
+.
+.\" RD/FETB = 0.06105 nA
+.
+.\" R18 = 0.06105 uA
+.
+.\" TEMP = 226.02 K
+.
+.\" ADC7 = 0.0006105 V
+.
+

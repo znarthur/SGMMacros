@@ -1,0 +1,186 @@
+ssppeecc                                reference                               ssppeecc
+
+NAME
+     ssppeecc, ffoouurrcc, ttwwoocc, ssuurrff, etc. - X-ray diffractometer operation for specific
+     configurations
+
+SYNOPSIS
+
+     ffoouurrcc [ --ffFFLLssyy ] [ --dd ddeebbuugg ] [ --gg ggeeoommeettrryy ] [ --NN mmyy__nnaammee ] [ --uu uusseerr ] [
+     --tt ttttyy ] [ --TT ffaakkee__ttttyy ] [ --oo ooppttiioonn==vvaalluuee [...]]  [ --CC ffiillee [...]]  [ --DD
+     ddiirreeccttoorryy ] [ --pp ffdd ppiidd ] [ --SS | --SS  pp11 | --SS  pp11--pp22 ] [[ --ll oouuttppuuttffiillee
+     [...]]
+
+DESCRIPTION
+
+     ssppeecc provides a software environment for the operation of an X-ray
+     diffractometer and other data-acquisition instruments.  ssppeecc contains a
+     sophisticated command interpreter that uses a C-like grammar and is
+     partially modeled on the standard UNIX utility aawwkk. ssppeecc supports a variety
+     of X-ray diffractometer configurations.  The diffractometer geometry is
+     chosen by the program name.  Some of the more popular geometries currently
+     supported include:
+
+         ssppeecc - General instrument control and data acquisition
+
+         ffoouurrcc - Standard four-circle diffractometer
+
+         ttwwoocc - Standard two-circle diffractometer
+
+         ssiixxcc - Six-circle diffractometer (ddeellttaa, tthheettaa, cchhii, pphhii, mmuu, ggaammmmaa)
+
+         kkaappppaa - kappa diffractometer
+
+         ppssiicc - Psi-circle, including kappa type
+
+         ssuurrff - Various liquid surface diffractometer configurations
+
+     The following options are recognized:
+
+         --ff - Fresh start.  All symbols are set to their default values and the
+              standard macros are read to establish the default state.
+
+         --FF - Clean and fresh start.  All symbols are set to their default
+              values but no command files are read and no macros are defined.
+              Only the built-in commands are available.
+
+         --ss - Simulation mode.  No hardware commands are issued.  If started in
+              simulation mode, simulation mode cannot be turned off without
+              restarting the program.
+
+         --yy - Yes, change motor controller registers initially if they disagree
+              with the sseettttiinnggss file.  Normally, ssppeecc requires you to confirm
+              such a change.  This flag would be useful if you know controller
+              power had been turned off.
+
+         --LL - Do not check or create the state-file lock.  Normally, ssppeecc
+              prevents more than one instance of itself using the same user-name
+              plus terminal-name derived state file.  In some situations,
+              particularly if a site configures the state files to reside on an
+              NFS-mounted disk, the lock test that spec uses always indicates
+              another instance of ssppeecc is running, making it impossible to
+              start.  This flag overrides that test.  Normally, this flag will
+              not be used.
+
+         --dd ddeebbuugg - Set the initial value of the debugging variable DDEEBBUUGG to
+              ddeebbuugg.  See the _d_e_b_u_g help file for a list of the debugging
+              categories.  A value of 192 is useful for debugging hardware
+              problems.
+
+         --gg ggeeoommeettrryy - Force loading of macro files and activation of geometry
+              calculations for the specified geometry, while using the
+              configuration files taken from the name by which ssppeecc is invoked.
+
+         --NN mmyy__nnaammee - Use mmyy__nnaammee for setting the ssppeecc prompt and the name of
+              the configuration file directory.  Also sets the geometry as if --gg
+              was given as an argument.  To select a geometry not corresponding
+              to mmyy__nnaammee, use the --gg flag after the --NN flag.
+
+         --uu uusseerr - Use uusseerr's last saved state as the current user's initial
+              state.
+
+         --tt ttttyy - Use the current user (or uusseerr's) last saved state from the
+              terminal specified by ttttyy.  The terminal can be specified as --tt
+              //ddeevv//ttttyy0011 or --tt ttttyy0011. Note, ssppeecc uses the string ttttyypp## to refer
+              to a pseudoterminal.
+
+         --TT ffaakkee__ttttyy - This option creates a user state associated with
+              ffaakkee__ttttyy, which may be any name (although only the first six
+              characters are used).  This option allows you to bypass the
+              locking feature that prevents multiple instances of ssppeecc to be
+              started by the same user from the same terminal.
+
+         --oo ooppttiioonn==vvaalluuee - Initializes the ssppeecc__ppaarr(()) ooppttiioonn to vvaalluuee.  See the
+              _s_p_e_c___p_a_r help file for a list of the available options.  Multiple
+              --oo options may be given.
+
+         --CC ffiillee - Open the command file ffiillee as a start-up command file to be
+              read after the standard start-up command files, but before the
+              optional file ssppeecc..mmaacc in the current directory, which will always
+              be read last.  If there is an error in reading or executing the
+              commands in these files, ssppeecc will jump to the main prompt and not
+              read any remaining queued command files.  Up to 32 files may be
+              specified with multiple --CC options.  (This flag added in ssppeecc
+              release 5.07.01-1.)
+
+         --DD ddiirreeccttoorryy - Use ddiirreeccttoorryy instead of the compiled-in name (usually
+              //uussrr//llooccaall//lliibb//ssppeecc..dd) or the value of the SSPPEECCDD environmental
+              variable (if set) as the auxiliary file directory.
+
+         --pp ffdd ppiidd - Indicates that ssppeecc input is coming from a pipe from
+              another program.  The argument ffdd is the file descriptor that ssppeecc
+              should use for standard input.  The argument ppiidd is the process ID
+              of the spawning process.  If ffdd is zero, ssppeecc will not re-echo
+              input from the file descriptor to ssppeecc's standard output.
+
+         --SS - Starts ssppeecc in server mode listening at the first available port
+              in the default range of 6510 to 6530.
+
+         --SS pp11 - Starts ssppeecc in server mode listening at the specified port
+              number pp11.
+
+         --SS pp11--pp22 - Starts ssppeecc in server mode listening on the first available
+              port in the given range.
+
+         --ll oouuttppuuttffiillee - Specifies an output file.  Output to the file will
+              begin immediately, so will include the initial hardware
+              configuration messages.  Files will be opened even when starting
+              fresh.  (Added in ssppeecc release 5.09.02-2.)
+
+ENVIRONMENT
+
+     ssppeecc uses the following environment variables:
+
+         SSPPEECCDD - An auxiliary file directory to use instead of the compiled in
+              name.
+
+         TTEERRMM - The text terminal type.
+
+         GGTTEERRMM - The graphics terminal type for high-resolution graphics
+
+         HHOOMMEE - The user's home directory.
+
+         SSHHEELLLL - The shell program to be used for interactive subshells.
+
+         SSPPEECC__PPAAGGEERR or PPAAGGEERR - A program through which to pipe the help files.
+              If unset, the lleessss command with special arguments is used.
+
+         DDIISSPPLLAAYY - The display name and screen number on which to display the
+              X-window plots.
+
+FILES
+
+     ssppeecc..dd is the auxiliary file directory, often //uussrr//llooccaall//lliibb//ssppeecc..dd.  ggccoonnff
+     is the name by which ssppeecc was invoked, as in ffoouurrcc, ttwwoocc, etc.
+
+     ..//ssppeecc..mmaacc - Optional private command file always read at startup.
+
+     ssppeecc..dd//ssiittee..mmaacc - Optional site command file always read at startup.
+
+     ssppeecc..dd//ssiittee__ff..mmaacc - Optional site command file read on fresh start.
+
+     ssppeecc..dd//ssttaannddaarrdd..mmaacc - Standard macro definitions read on fresh start.
+
+     ssppeecc..dd//ggccoonnff..mmaacc - Standard geometry macro definitions read on fresh start.
+          Uses only first 4 letters of ggccoonnff.
+
+     ssppeecc..dd//ggccoonnff//ccoonnffiigg - Hardware configuration file.
+
+     ssppeecc..dd//ggccoonnff//sseettttiinnggss - Motor settings file.
+
+     ssppeecc..dd//ggccoonnff//ccoonnff..mmaacc - Optional configuration command file always read at
+          startup.
+
+     ssppeecc..dd//ggccoonnff//uusseerrffiilleess//hhddww__lloocckk - Hardware lock file.
+
+     ssppeecc..dd//ggccoonnff//uusseerrffiilleess//uusseerr__ttttyyLL - UUsseerr's lock file.  Uses only first 6
+          letters of uusseerr and of ttttyy.
+
+     ssppeecc..dd//ggccoonnff//uusseerrffiilleess//uusseerr__ttttyySS - UUsseerr's state file.  Uses only first 6
+          letters of uusseerr and of ttttyy.
+
+     ssppeecc..dd//ggccoonnff//uusseerrffiilleess//uusseerr__ttttyyPP - UUsseerr's data points file.  Only first 6
+          letters of uusseerr and of ttttyy.
+
+     ssppeecc..dd//hheellpp//** - Help files.
+

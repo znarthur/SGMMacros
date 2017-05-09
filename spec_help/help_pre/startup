@@ -1,0 +1,52 @@
+startup                               macro                              startup
+
+NAME
+     ssttaarrttuupp - procedure to initialize parameters
+
+SYNOPSIS
+
+     ssttaarrttuupp
+
+DESCRIPTION
+
+     The ssttaarrttuupp macro lets you change the default parameters that are used by
+     many of the macros in the standard library.  The ssttaarrttuupp macro gathers
+     together initialization macros such as nneewwffiillee, sseettssccaannss, sseettpplloott and
+     ssttaarrttggeeoo into one place. Also, ssttaarrttuupp prompts you for a title, the name of
+     a command file directory, the default count time and the
+     updated-move-and-count update interval.
+
+     The title you enter will appear in the scan headers that are printed in the
+     data file and on the screen.
+
+     The command file directory name is used by the ddoo and qqddoo macros.  These
+     macros look for command files in the command file directory if they are not
+     in the current directory.  If you want to keep your ssppeecc command files in a
+     special directory, you can enter that directory name.  Otherwise, you can
+     enter a single dot to indicate the current directory.
+
+     The default count time is initially one second and is used by the cctt and
+     uucctt macros as the count time if no arguments are given.
+
+     The update time controls how often the motor controllers or counters are
+     read and the readings displayed on the screen during updated moving and
+     counting.  The default value is 0.25 seconds.  Setting the value to zero is
+     allowed, and causes the hardware registers to be read as often as possible.
+     Entering zero or a small value may slow down other processes on the
+     computer, though, so beware if you or someone else is trying to do
+     something else from another window or terminal.
+
+GLOBALS
+
+     TTIITTLLEE - Scan title.
+
+     DDOO__DDIIRR - Alternate command file directory.
+
+     CCOOUUNNTT - Default count time.
+
+     UUPPDDAATTEE - Update interval for screen displays.
+
+SEE ALSO
+
+     _n_e_w_f_i_l_e _s_e_t_p_l_o_t _s_e_t_s_c_a_n_s
+

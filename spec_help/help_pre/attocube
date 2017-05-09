@@ -1,0 +1,252 @@
+attocube                            hardware                            attocube
+
+NAME
+     Attocube - Attocube ANC350 motor controller
+
+DESCRIPTION
+
+     ssppeecc supports the ANC350 piezo controller over an Ethernet connection.
+
+     The controller is selected on the hardware configuration editor DDevices
+     screen along the lines of:
+
+        MMOOTTOORRSS    DDEEVVIICCEE  AADDDDRR <<>>MMOODDEE NNUUMM                     <<>>TTYYPPEE
+           YYEESS aattttoo__hhoosstt                88   AAttttooccuubbee AANNCC335500 ((SSoocckkeett))
+
+     Here, aattttoo__hhoosstt is a resolvable host name or IP address.  The default port
+     number, 2101, is built into the code.  If the controller is set up to use
+     another port, enter the DEVICE as aattttoo__hhoosstt::ppoorrtt.  On the Motors screen,
+     choose AANNCC335500 as the controller type.
+
+     The parameter descriptions below are brief.  Consult Attocube and the
+     ANC350 documentation for complete details on operation of the controller.
+     The current support for the ANC350 (as of ssppeecc release 5.08.03-4) does not
+     support all the controller capabilities.  Please contact CSS if support for
+     additional functionality is needed.
+
+HOME SEARCH
+
+     The ""hhoommee++"", ""hhoommee--"" and ""hhoommee"" options to cchhgg__ddiiaall(()) will all send the
+     command to go to the reference position as defined by the ""rreeffppooss""
+     parameter.  The ""lliimm++"" and ""lliimm--"" options will send commands to move to the
+     forward and backward limits, respectively (as of ssppeecc release 5.10.01-12).
+     The limit search should only be used when hump detection is enabled.
+
+PARAMETERS
+
+     The ANC350 controller has many configuration parameters for the individual
+     axis channels. All the parameters names used in the "actor profile" (..aappss)
+     files supplied by Attocube for use with their software are recognized by
+     ssppeecc.  Note, ssppeecc can also read the ..aappss files directly with the ""llooaadd""
+     option described below.  Additional parameters particular to the ANC350 are
+     also recognized by ssppeecc.
+
+     Values for the parameters can also be included in ssppeecc's hardware
+     configuration file and maintained with the hardware configuration editor on
+     the non-standard optional parameter screen.  (Type pp from the MMotor
+     screen.)  Values for each of the parameters may also be set or read via the
+     mmoottoorr__ppaarr(()) function.
+
+     The device units (mm, deg, etc.) for many of the parameters are determined
+     by the ""sseennssoorruunniitt"" parameter value as described below.
+
+     Note, setting either of the parameters ""hhuummppeennaabbllee"" and ""ssttiicckkyyhhuummpp"" to
+     zero will interfere with ssppeecc's ability to detect limits. Setting the
+     parameter ""rreellaayyss"" to zero will disable the channel's output. ssppeecc will set
+     each of these three parameters to one on hardware configuration.
+
+     The first set of mmoottoorr__ppaarr(()) examples below lists parameters with the same
+     names used in the Attocube ..aappss files:
+
+     mmoottoorr__ppaarr((mmnnee,, ""aaccttoorrddiirr"" [[,, aarrgg]])) - Actuator direction, forward is 0,
+          backward is 1.
+
+     mmoottoorr__ppaarr((mmnnee,, ""aaccttoorrggaaiinn"" [[,, aarrgg]])) - Loop gain in device units per Volt.
+          The value is scaled by a factor of 1e6.
+
+     mmoottoorr__ppaarr((mmnnee,, ""aaccttoorrooffffsseett"" [[,, aarrgg]])) - Loop offset in millivolts.
+
+     mmoottoorr__ppaarr((mmnnee,, ""aaddaappttsseettppccttrrll"" [[,, aarrgg]])) - Enables (1) or disables (0)
+          approach speed function.
+
+     mmoottoorr__ppaarr((mmnnee,, ""aammppllccttrrll"" [[,, aarrgg]])) - Indicates the piezo drive control mode
+          - 0 is speed, 1 is amplitude and 2 is step width.
+
+          In speed-control mode, the controller maintains a constant travel
+          speed in a closed-loop mode.  The speed is set by the ""ffrreeqquueennccyy"" and
+          ""aammpplliittuuddee"" parameters, and can be retrieved using the ""ssppeeeedd""
+          parameter.
+
+          In amplitude-control mode, the speed and step width are varied in an
+          open-loop mode to maintain a constant amplitude level as set by the
+          ""aammpplliittuuddee"" parameter.
+
+          In step-width mode, the amplitude is controlled via a closed-loop to
+          maintain a constant step width.  The speed may vary depending on the
+          value set for the ""ffrreeqquueennccyy"" parameter.  The step width is set with
+          the ""aammpplliittuuddee"" parameter and can be retrieved using the ""sstteepp__wwiiddtthh""
+          parameter.
+
+     mmoottoorr__ppaarr((mmnnee,, ""aammppllccttrrllaavvgg"" [[,, aarrgg]])) - Average factor for speed feedback.
+
+     mmoottoorr__ppaarr((mmnnee,, ""aammppllccttrrllsseennssiittiivviittyy"" [[,, aarrgg]])) - Sensitivity for speed
+          feedback. The value is scaled by a factor of 1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""hhuummppeennaabbllee"" [[,, aarrgg]])) - Enables (1) or disables (0) hump
+          detection.  ssppeecc enables hump detection on hardware configuration in
+          order to enable limit detection.
+
+     mmoottoorr__ppaarr((mmnnee,, ""mmaaxxaammppll"" [[,, aarrgg]])) - Maximum amplitude in millivolts.
+
+     mmoottoorr__ppaarr((mmnnee,, ""mmaaxxffrreeqquu"" [[,, aarrgg]])) - Maximum frequency in Hz.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ppeerriioodd"" [[,, aarrgg]])) - Number of periods per device unit for
+          optical sensors.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ppoossiittiioonnmmiinn"" [[,, aarrgg]])) - The minimum position of the sensor
+          in device units.  The value is scaled by a factor of 1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ppoossiittiioonnmmaaxx"" [[,, aarrgg]])) - The maximum position of the sensor
+          in device units.  The value is scaled by a factor of 1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ppoosslloooopprraannggee"" [[,, aarrgg]])) - The position loop range in device
+          units.  The value is scaled by a factor of 1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreeffooffffsseett"" [[,, aarrgg]])) - The reference offset in device units.
+          The value is scaled by a factor of 1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rroottaarryy"" [[,, aarrgg]])) - The value is 0 for linear and 1 for
+          rotary stages.  This parameter can be set as one of the standard
+          optional parameters on the second optional motor parameter screen of
+          the configuration editor.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseennssoorraavvgg"" [[,, aarrgg]])) - The sensor-average factor.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseennssoorrddiirr"" [[,, aarrgg]])) - Sensor direction, forward is 0,
+          backward is 1.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseennssoorrrreess"" [[,, aarrgg]])) - Value for internal signal averaging.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseennssoorruunniitt"" [[,, aarrgg]])) - The code for the sensor device
+          units, as given in the table below:
+          0    millimeter
+          1    micrometer
+          2    nanometer
+          3    picometer
+          20   degree
+          21   millidegree
+          22   microdegree
+
+     mmoottoorr__ppaarr((mmnnee,, ""ssiinngglleecciirrccllee"" [[,, aarrgg]])) - Enables (1) or disables (0) the
+          shortest way algorithm.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sslloowwssppeeeedd"" [[,, aarrgg]])) - Target approach speed in device units
+          per second.  The value is scaled by a factor of 1e6.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ssppeeeeddggaaiinn"" [[,, aarrgg]])) - Approach speed gain in Hz. The value
+          is scaled by a factor of 1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ttaarrggeettccttrrllaavvgg"" [[,, aarrgg]])) - Averaging factor for position
+          feedback.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ttaarrggeettccttrrllsseennssiittiivviittyy"" [[,, aarrgg]])) - Sensitivity for position
+          feedback. The value is scaled by a factor of 1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ttaarrggeettrraannggee"" [[,, aarrgg]])) - Positioning accuracy in device
+          units.  The value is scaled by a factor of 1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ttaarrggeettttiimmee"" [[,, aarrgg]])) - Minimum time (in milliseconds) at
+          position to consider approach to target a success.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ttrraannssffeerrggaaiinn"" [[,, aarrgg]])) - Gain for resistive transfer
+          function in device units per Volt.  The value is scaled by a factor of
+          1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ttrraannssffeerrooffffss"" [[,, aarrgg]])) - This obsolete parameter appears in
+          the ..aappss files, but is no longer supported by the controller firmware.
+          ssppeecc recognizes but ignores the parameter.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ttrraannssffeerrttyyppee"" [[,, aarrgg]])) - Type of sensor, 0 is optical, 1 is
+          resistive.
+
+     The following parameters do not appear in the ..aappss files, but are also
+     available:
+
+     mmoottoorr__ppaarr((mmnnee,, ""aammpplliittuuddee"" [[,, aarrgg]])) - The amplitude of the drive voltage
+          for the piezo drive in minivolts.  Changing this value changes the
+          step size.  Allowed values are from 0 to 70 Volts.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ddcclleevveell"" [[,, aarrgg]])) - The DC level represents the applied DC
+          voltage to the piezo.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ffrreeqquueennccyy"" [[,, aarrgg]])) - The frequency is used to adjust the
+          travel speed in speed and step-width drive-control modes. This
+          parameter is used as and tracks the standard steady-state rate
+          parameter from the config file.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreeffvvoolltt"" [[,, aarrgg]])) - Global controller reference voltage in
+          millivolts.  The value is applied to the controller associated with
+          motor mmnnee.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreellaayyss"" [[,, aarrgg]])) - Enables (1) or disables (0) the output
+          relays.  The relays must be enabled for the actuators to function.
+          ssppeecc enables the relays during hardware configuration.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ssttiicckkyyhhuummpp"" [[,, aarrgg]])) - Enables (1) or disables (0) the
+          "sticky"  hump bit.  ssppeecc enables this bit during hardware
+          configuration in order for limit detection to work properly.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ttaarrggeettggrroouunndd"" [[,, aarrgg]])) - When enabled (1), the output
+          voltage is set to zero when the positioning loop is finished.  A value
+          of zero disables the mode.  (Available as of ssppeecc release 5.10.02-3.)
+
+     The following parameters are read only:
+
+     mmoottoorr__ppaarr((mmnnee,, ""ccaappaacciittaannccee"")) - Returns the result of a capacitance
+          measurement of the connected positioner.
+
+     mmoottoorr__ppaarr((mmnnee,, ""mmaaxxppooss"")) - Maximum position for actuator in device units.
+
+     mmoottoorr__ppaarr((mmnnee,, ""mmiinnppooss"")) - Minimum position for actuator in device units.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ppoossiittiioonn"")) - Current position of actuator in device units.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreeffppooss"")) - Reference position of actuator in device units.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ssppeeeedd"")) - The speed setting in device units per second.
+          The value is scaled by a factor of 1000.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sstteepp__wwiiddtthh"")) - The width per step in device units.  The
+          value is scaled by a factor of 1000.
+
+     Finally, ssppeecc supports the following additional commands for the ANC350
+     controller:
+
+     mmoottoorr__ppaarr((mmnnee,, ""llooaadd"",, ffiilleennaammee)) - Reads the named file, which should be in
+          the format of the Attocube ..aappss "actor profile" files, and sets the
+          parameters to the values given in the file.  The format of the files
+          is the parameter name followed by a space and then a value, with one
+          entry per line.
+
+     mmoottoorr__ppaarr((mmnnee,, ""dduummpp"")) - Prints a formatted display of all the motor
+          parameters for the given motor. The display includes the parameter
+          description, the scaled value with units, the unscaled value in
+          parenthesis and the parameter name in quotation marks.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sstteepp"",, vvaalluuee)) - Single steps the given axis the number of
+          steps given by vvaalluuee.  Positive values step forward using the
+          IIDD__AANNCC__SSGGLL__FFWWDD command.  Negative values step backward using the
+          IIDD__AANNCC__SSGGLL__BBKKWWDD command.  The change in position detected by the
+          sensor may be greater than the number of steps given as an argument,
+          depending on values of other parameters, such as the amplitude.  If
+          the change in position steps is greater than the motor read-back
+          ""sslloopp"" parameter and the hardware ""rreeaadd__mmooddee"" parameter requires
+          queries on position discrepancies greater than the read-back slop
+          parameter, ssppeecc will issue the standard position discrepancy message
+          when motor positions are next requested.
+
+     mmoottoorr__ppaarr((mmnnee,, ""mmeeaassuurree__ccaappaacciittaannccee"")) - ssppeecc initiates a capacitance
+          measurement, pauses 0.5 seconds for the measurement to complete, then
+          returns the measured value.  The ""ccaappaacciittaannccee"" option, above, returns
+          the last measured value, but doesn't initiate a measurement.
+

@@ -1,0 +1,49 @@
+TDC                                 hardware                                 TDC
+
+NAME
+     TDC - Risoe TDC
+
+DESCRIPTION
+
+     The Risoe Time-to-Digital Converter (TDC) P2011a/P2012a processes events
+     from the Risoe 2D multiwire small angle neutron scattering detector.  ssppeecc
+     supports the TDC over a GPIB interface.
+
+     The controller is selected in the ccoonnffiigg file with the line
+
+         GGPP__RRIISSOOTTDDCC == ggppiibb__aaddddrreessss @@iimmgg__sseell
+
+     where sseell is the image-device number used as the first argument in the
+     iimmaaggee__ppaarr(()) and iimmaaggee__ggeett(()) functions below.  When running the
+     configuration editor, switch to  the MCA- and CCD-like device configuration
+     screen to select the Risoe TDC as a CCD-like device.
+
+     The size of the 2D data array sent by the TDC is 128x128.  The native data
+     type is unsigned long.
+
+FUNCTIONS
+
+     The iimmaaggee__ppaarr(()) function controls the TDC behavior as follows:
+
+     iimmaaggee__ppaarr((sseell,, ""cclleeaarr"")) - Clears the TDC memory.
+
+     iimmaaggee__ppaarr((sseell,, ""rruunn"")) - Start data collection.  Memory is not cleared.
+
+     iimmaaggee__ppaarr((sseell,, ""hhaalltt"")) - Halt data collection.
+
+     iimmaaggee__ppaarr((sseell,, ""XXYYmmooddee"")) - Set 2D mode, 128x128 pixels.  This is the
+          default mode.
+
+     iimmaaggee__ppaarr((sseell,, ""XXmmooddee"")) - Set data collection to 1D mode along the
+          horizontal direction.
+
+     iimmaaggee__ppaarr((sseell,, ""YYmmooddee"")) - Set data collection to 1D mode along the vertical
+          direction.
+
+     iimmaaggee__ppaarr((sseell,, ""mmaapp"",, nnuumm)) - Set the map number as described in the TDC
+          manual.  The default value for nnuumm is zero, which is appropriate for
+          2D data collection.  For 1D data collection, a value of 2 is
+          recommended.
+
+     iimmaaggee__ggeett((sseell,, aarrrr)) - Reads data into the array aarrrr.
+

@@ -1,0 +1,271 @@
+.TH "xiahsc" "hardware" "08/01/12" "xiahsc.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+XIA HSC\-1 \- XIA Huber Slit Controller
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)xiahsc.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1998,2004,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "xiahsc" "hardware" "08/01/12" "xiahsc.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The X\-Ray Instrumentation Associates Huber Slit Controller
+Model HSC\-1 is a specialized device only used to control
+Huber slits.
+The HSC\-1 communicates through a serial port, and several
+HSC\-1 modules can be daisy\-chained together and run off
+a single serial port.
+.sp
+The controller is selected on the \fBedconf\fP devices screen along the lines of:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS        DEVICE   ADDR  <>MODE  NUM                  <>TYPE
+   YES    /dev/ttyS0     <>    9600    2      XIA HSC\-1 (Serial)
+.ft P
+.fi
+.RE
+.sp
+The \fBNUM\fP field is set to the number of HSC\-1 modules on the serial port.
+.sp
+The \fBconfig\fP file will have:
+.sp
+.RS 4m
+\fBRS_XIAHSC = device_name baud_rate number_of_slits\fP
+.RE
+.sp
+A sample \fBedconf\fP motor screen
+for a complete set of slits would begin as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+Number: <>Controller 0:  XIAHSC 1:  XIAHSC 2:  XIAHSC 3:  XIAHSC
+Unit/Channel                0/0        0/1        0/2        0/3
+Name                    Slit1 A    Slit1 B  Slit1 Gap  Slit1 Cen
+Mnemonic                    s1a        s1b        s1g        s1c
+Steps per degree/mm         400        400        400        400
+.ft P
+.fi
+.RE
+.sp
+The HSC\-1 module needs to be sent a calibration command
+before the HSC\-1 motors can be moved with the normal move commands.
+The HSC\-1 manual describes a manual calibration procedure.
+It is also possible to set the controller to the calibrated state by
+sending the \fB"calibrate"\fP command with \fBmotor_par()\fP as described below.
+.sp
+Each HSC\-1 contains two motors that control the slit blades.
+Each blade can be moved independently.
+The HSC\-1 also implements commands to move both blades simultaneously
+to change either the gap or the center\-of\-the\-gap position.
+\fBspec\fP can be configured to control just the two blades, just the
+gap and the center position, or all four motions.
+When all four motions are configured,
+moving either blade changes the positions reported for gap and center, and
+moving either the gap or the center causes the positions reported
+for each blade to change.
+.sp
+Configuration for the HSC\-1 requires the unit/channel field on
+the second line of the motor screen of the configuration editor
+to be filled in according to
+the following special format.
+The unit number corresponds to successive
+entries on the devices screen \-
+each unit is associated with a different serial port.
+Unit numbers start with zero for the first HSC\-1 entry.
+The channel number combines two values.
+Each HSC\-1 module requires an arbitrary module number \fBN\fP (see below).
+This number is multiplied by 10 and added to the channel number that
+identifies the motion, as follows:
+For motor controller \fBN\fP, channel \fBN\fP*10 + 0 corresponds to blade A,
+channel \fBN\fP*10 + 1 corresponds to blade B,
+channel \fBN\fP*10 + 2 corresponds to the gap
+and channel \fBN\fP*10 + 3 corresponds to the center of the gap.
+Channel numbers ending in 4 through 9 are invalid.
+.SH "ENTERING THE SERIAL NUMBER"
+.rs
+.sp
+The module number \fBN\fP (see above) is used only for internal bookkeeping and
+does not designate a particular HSC\-1 module.  Each module
+is identified by a thirteen\-character unique serial number of the form
+\fBXIAHSC\-B\-0014\fP.
+The serial number needs to be entered
+as a string in the field \fBgeneric parameter 1\fP
+on the optional motor\-parameter screen of the configuration editor.
+Use the \fBm\fP command twice from the motor screen of the
+configuration editor to
+reach the screen where you can enter \fBgeneric parameter 1\fP.
+Type an initial single quote
+\fB\(aq\fP to enter a string.  Note, the serial number can also be entered as
+\fBB\-0014\fP, \fB0014\fP or \fB14\fP if such a string
+is sufficient to distinguish among modules.
+Also note, the serial number should be entered
+for just one of the motors associated with module \fBN\fP.
+.sp
+If the alias feature of the HSC\-1 is used,
+and bit 6 of the \fBcontrol word\fP (see below) is set for
+"use alias as ID", enter the alias rather than the serial number
+as \fBgeneric parameter 1\fP.
+Note, \fBspec\fP requires there be no space characters in the alias.
+Setting and changing aliases requires establishing
+serial communication with the modules, which may be difficult for
+novice \fBspec\fP administrators, so
+CSS recommends simply using the serial numbers as they exist
+in the factory configuration.
+.sp
+Note, some users have reported that the serial numbers burned
+into the firmware don\(aqt quite match those stamped on the casing, and also are
+sometimes less than 13 characters.
+When \fBspec\fP does the hardware configuration on start up or on a
+\fBreconfig\fP, serial numbers found on the connected slit controllers, but not
+entered in the \fBconfig\fP file will be listed (as of release 5.05.02\-7).
+(On earlier \fBspec\fP releases, setting the debug level to 128
+will display messages from the slit controllers
+showing all the serial numbers.)
+.SH "MOTOR PARAMETERS"
+.rs
+.sp
+The \fBsteps per deg/mm\fP parameter should be set to 400 for the HSC\-1 modules.
+.sp
+Normally, the positions for each blade become more positive
+as the blade is opened.  However, if the
+\fBsign of user * dial\fP parameter is negative for either blade (or both),
+the motor position will become more negative as the blade opens.
+The sense of the center\-of\-the\-gap motion can also be changed by
+changing the sign of the \fBsign of user * dial\fP parameter.
+The gap motion is always positive as the gap increases, though.
+.sp
+The backlash, speed and acceleration parameters
+in the \fBconfig\fP file are ignored.
+.sp
+CSS recommends using the calibration feature
+of the HSC modules to set the zero positions, rather than using the
+\fBset\fP macro to set the user \fBoffset\fP parameter.
+That is, it is best to keep the user and dial positions the same.
+The \fBchg_dial()\fP function will, in fact, send the
+"immediate calibration" command to the controller,
+but only when setting the position to zero.
+Note, the gap should be physically at zero before using \fBset_dial\fP.
+Use of the standard \fBset_dial\fP macro should be followed
+by the \fBset\fP macro to set the user\-dial offset back to zero.
+.sp
+The HSC\-1 controller stores a number of parameters in nonvolatile memory.
+\fBspec\fP will read and display them with the command
+\fBmotor_par(motor, "dump")\fP, where \fBmotor\fP is the mnemonic
+for any of the motions on the particular HSC\-1 module.
+The display format is as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+1    Outer motion limit (rw) = 4400 (11 mm)
+2       Origin position (rw) = 400 (1 mm)
+3      Motor A position (ro) = 900 (2.25 mm)
+4      Motor B position (ro) = 900 (2.25 mm)
+5      Motor step delay (rw) = 200 (roughly 0.272 mm/sec)
+6         Gear backlash (rw) = 10 (0.25 mm)
+7          Control word (rw) = 142 (0x8e)
+8      Escape character (rw) = 33
+9  Arbitration priority (rw) = 8
+10        Motor A phase (ro) = 0
+11        Motor B phase (ro) = 0
+12 Calibration complete (ro) = 150
+13     EEPROM signature (ro) = 23205
+14       EEPROM version (ro) = 4
+.ft P
+.fi
+.RE
+.sp
+These parameters can be modified using a command such as
+.sp
+.RS 4m
+\fBmotor_par(motor, "send", "W 6 20")\fP
+.RE
+.sp
+which changes memory location 6 (gear backlash) to 20.
+.SH "SPECIAL COMMANDS"
+.rs
+.sp
+The \fBmotor_par()\fP options implemented for the HSC\-1 are as follows:
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "calibrate")\fP
+\- 
+Sends the "immediate calibration" command to the unit.
+The effect is to set the current position of each blade
+in the controller to the \fBorigin\fP parameter.
+It also sets \fBspec\fP\(aqs positions for the gap, center and blades to zero.
+Thus the gap should physically be at zero before sending this command.
+.HP 5m
+."
+\fBmotor_par(motor, "origin" [, value])\fP
+\- 
+Sets the controller\(aqs \fBorigin\fP parameter
+(parameter 2 of the controller\(aqs memory map) to
+\fBvalue\fP. The units of \fBvalue\fP are steps,
+where 400 steps corresponds to 1 mm.
+The origin parameter determines how far beyond
+the zero position each slit blade can be moved.
+Note, changing the origin parameter will change the setting
+of the current position of the blades.
+The blades should thus be both at zero before sending
+the \fB"origin"\fP command, and a
+\fB"calibrate"\fP command should be sent immediately afterwards.
+The factory default value for \fBorigin\fP is 400.
+.HP 5m
+."
+\fBmotor_par(motor, "range" [, value])\fP
+\- 
+Sets the controller\(aqs "outer limit" parameter
+(parameter 1 of the controller\(aqs memory map) to
+\fBvalue\fP, where the units of \fBvalue\fP are steps.
+This parameter controls how far each blade can be moved.
+The factory default value for this parameter is 4400.
+.HP 5m
+."
+\fBmotor_par(motor, "step+")\fP or \fBmotor_par(motor, "step\-")\fP
+\- 
+Moves blade A or blade B one step in the specified direction.
+This command can be used to position the slits whether or not they
+have been calibrated.
+.HP 5m
+."
+\fBmotor_par(motor, "send", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the HSC\-1 unit associated with \fBmotor\fP.
+The module serial number will be included automatically.
+.HP 5m
+."
+\fBmotor_par(motor, "read", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the HSC\-1 unit associated with \fBmotor\fP,
+as above, and returns a string containing the response.
+.HP 5m
+."
+\fBmotor_par(motor, "usend", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the serial port connected
+to the HSC\-1 unit associated with \fBmotor\fP. The
+\fBcmd\fP must include the full HSC\-1 command syntax.
+.HP 5m
+."
+\fBmotor_par(motor, "uread", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the serial port connected
+to the HSC\-1 unit associated with \fBmotor\fP, as above,
+and returns a string containing the response.
+.RE
+

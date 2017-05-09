@@ -1,0 +1,366 @@
+usbctr                              hardware                              usbctr
+
+NAME
+     USB-CTR - Measurement Computing USB-CTR4 and USB-CTR8
+
+DESCRIPTION
+
+     The _M_e_a_s_u_r_e_m_e_n_t _C_o_m_p_u_t_i_n_g USB-CTR4 and USB-CTR8 are USB counter/timer
+     modules introduced in 2014 to replace the USB-4300 series that were based
+     on the no longer available _a_m_9_5_1_3 chips.  The USB-CTR models feature four
+     or eight 64-bit counter channels along with eight digital I/O (DIO) pins
+     and four programmable frequency generators.  Each DIO pin can be configured
+     for input or output.
+
+     A requirement of timer/counters supported by ssppeecc is that the counter
+     channels be hardware gated by the master timer channel.  The master timer
+     counts time or can be a counter programmed to allow counting until a preset
+     number of input pulses is received from a detector.  In ssppeecc, those modes
+     correspond to counting to time and counting to monitor.  A drawback with
+     the USB-CTR models is that it is not possible to change the master preset
+     channel via software while maintaining hardware gating.  The USB-CTR can
+     only be used in one mode or the other.
+
+     To work around the gating limitation of the USB-CTR hardware, ssppeecc supports
+     two special configurations.  In the "split-configuration" mode, an
+     eight-channel USB-CTR8 is used with no more than four input signals.  One
+     one side of the counter is operated in preset-time mode and the other side
+     in monitor-preset mode.  In this configuration, each signal to be measured
+     is connected to input pins of two counters.  In the "external-gate-select"
+     mode, a single TTL 74151 1-of-8 data-selector chip is connected to the
+     USB-CTR and allows any counter channel to be software selected as the
+     master timing channel.
+
+CONFIGURATION
+
+     Use ssppeecc's configuration editor (eeddccoonnff, normally invoked by the ccoonnffiigg
+     macro) to select the timer and to configure the scaler channels.  On the
+     DDevices screen choose one of the following configurations depending on
+     whether you are using the USB-CTR as master timer or as just as counters:
+
+        SSCCAALLEERRSS   DDEEVVIICCEE  AADDDDRR  <<>>MMOODDEE  NNUUMM                 <<>>TTYYPPEE
+            YYEESS  ddeeffaauulltt     00            88  UUSSBB--CCTTRR CCoouunntteerr//TTiimmeerr
+            YYEESS  ddeeffaauulltt     00            88  UUSSBB--CCTTRR CCoouunntteerrss OOnnllyy
+
+     The DEVICE field is available to enter an optional firmware file.  If field
+     contains the string "default", ssppeecc will load a copy of the firmware file
+     that is built into the ssppeecc code.  Otherwise, the field can contain the
+     path name to an alternate file.  The firmware is loaded automatically the
+     first time ssppeecc accesses the USB-CTR after it has been connected to the USB
+     port.
+
+     The ADDR field can contain the serial number of the USB-CTR.  If more than
+     one module is being used, the serial number can be used to distinguish
+     between units.  If the field contains the value zero, ssppeecc will assign the
+     unit numbers in the order in which USB probing discovers the modules.
+
+     In counters-only mode, an external gate must be connected to each counter's
+     gate input.  By default, the counters use an active-high gate.  The
+     ""aaccttiivvee__llooww"" parameter (see below) can be configured to specify active-low
+     gating.  With no external gate, the counters will never increment in the
+     default active-high gating, or will count continuously in active-low gating
+     mode.
+
+     On the SScaler screen of the configuration editor, choose USB-CTR for the
+     controller type:
+
+        SSccaalleerr ((CCoouunntteerr)) CCoonnffiigguurraattiioonn
+
+        NNuumm     NNaammee  MMnnee <<>>DDeevviiccee UUnniitt CChhaann <<>>UUssee AAss SSccaallee FFaaccttoorr
+          00  SSeeccoonnddss  sseecc  UUSSBB--CCTTRR    00    00 ttiimmeebbaassee      11000000000000
+          11  MMoonniittoorr  mmoonn  UUSSBB--CCTTRR    00    11  mmoonniittoorr            11
+          22 DDeetteeccttoorr  ddeett  UUSSBB--CCTTRR    00    22  ccoouunntteerr            11
+          33       cc33   cc33  UUSSBB--CCTTRR    00    33  ccoouunntteerr            11
+          44       cc44   cc44  UUSSBB--CCTTRR    00    44  ccoouunntteerr            11
+          55       cc55   cc55  UUSSBB--CCTTRR    00    55  ccoouunntteerr            11
+          66       cc66   cc66  UUSSBB--CCTTRR    00    66  ccoouunntteerr            11
+          77       cc77   cc77  UUSSBB--CCTTRR    00    77  ccoouunntteerr            11
+
+     In general, any channel may be assigned as the timebase and any channel as
+     the monitor.  The exception is in eexxtteerrnnaall--ggaattee--sseelleecctt mode (see below)
+     when the ""ddiioo__ggaattiinngg"" parameter is set to other than the default value.  If
+     ""ddiioo__ggaattiinngg"" is 2, only channels 0 and 1 can be timebase or monitor.  If
+     ""ddiioo__ggaattiinngg"" is 4 on an 8-channel card, only channels 0, 1, 2 or 3 can be
+     timebase or monitor.
+
+     The timebase scale factor should be set to 1e6 if the recommended
+     connections are used.  ssppeecc programs timer 0 (TMR0) to output a 1 MHz
+     signal which is expected to be connected to the counter input used as the
+     timebase.
+
+CONFIGURATION MODES
+
+     There are several modes of operation for the USB-CTR implemented in ssppeecc.
+     The mode is selected based on the contents of the ccoonnffiigg file and on which
+     board is detected.  The modes are as follows:
+
+     Counters Only - The mode is selected on the DDevices screen of the
+          configuration editor.  This mode relies on external hardware to gate
+          the counters.  If there is no gate signal the counters will either
+          never count or always count, depending on whether or not they are
+          configured for an active-low gate.
+
+     Time Preset Only - Only supports counting to time presets.  This mode is
+          selected if one USB-CTR scaler is configured as ttiimmeebbaassee and no
+          USB_CTR scaler is configured as mmoonniittoorr.
+
+     Monitor Preset Only - Only supports counting to monitor presets.  This mode
+          is selected if on USB-CTR scaler is configured as mmoonniittoorr and no
+          USB_CTR scaler is configured as ttiimmeebbaassee.  It is not possible to
+          change the monitor-preset channel with ccoouunntteerr__ppaarr(()).
+
+     Split Configuration - Supports counting to time and counting to monitor.
+          This mode is available with a USB-CTR8 that is configured for only
+          four channels.  The mode works by using the first four channels in
+          time-preset mode and the second four channels in monitor-preset mode.
+          The four inputs are each fed into two counters.  It is not possible to
+          change the monitor-preset channel with ccoouunntteerr__ppaarr(()).
+
+     External Gate Selector - This mode uses a single external TTL chip to
+          select which counter output will gate the counters.  Both the USB-CTR4
+          or USB-CTR8 are supported.  If both a ttiimmeebbaassee and a mmoonniittoorr scaler
+          channel are configured, eexxtteerrnnaall--ggaattee--sseelleecctt mode is selected.  If
+          using a USB-CTR8 card, more than four channels need to be configured
+          to rule out sspplliitt--ccoonnffiigguurraattiioonn mode.  The monitor-preset channel can
+          be changed with ccoouunntteerr__ppaarr((mmnnee,, ""mmoonniittoorr"")).
+
+FIRMWARE
+
+     The USB-CTR requires a firmware download when it is powered on, that is,
+     whenever it is plugged into a USB port.  ssppeecc will automatically download a
+     default firmware image (currently version 0.29) on startup or rreeccoonnffiigg, but
+     only if necessary.  The firmware download requires approximately ten
+     seconds.  An alternate firmware file can be specified in the hardware
+     ccoonnffiigg file or loaded using the ""ffiirrmmwwaarree"" ccoouunntteerr__ppaarr(()) option described
+     below.
+
+CONNECTIONS
+
+     ssppeecc programs the USB-CTR to output a 1 MHz signal on the TMR0 (timer 0)
+     pin.  That signal should be connected to the counter input selected as
+     timebase and the scale factor for that channel should be configured to be
+     1e6.  (Another timebase source could be used with the scale factor set
+     appropriately.)  The example configuration above uses C0IN as the timebase
+     input.
+
+     Other input signals are connected to the associated counter inputs (C1IN,
+     C2IN, etc).  If using the split-configuration mode on at USB-CTR8 card,
+     each input signal feeds two counter channels, paired as C0IN:C4IN,
+     C1IN:C5IN, C2IN:C6IN and C3IN:C7IN.
+
+     Hardware gating is accomplished by using the output signal of the master
+     counter channel to gate all the counters including the master channel.
+     Note, only one output can be connected to the gate signals at a time.
+     However, all the gate inputs can be tied together.  The outputs are labeled
+     C0O, C1O, C2O, etc.  Gate inputs are labled C0GT, C1GT, C2GT, etc.
+
+     If configured as time-preset only or monitor-preset only, all the gate
+     signals are connected to the one counter output associated with the
+     ttiimmeebbaassee or mmoonniittoorr channel, respectively.
+
+     If using the split-configuration mode, the four gate signals from counters
+     0 through 3 are connected to the ttiimmeebbaassee preset channel output, which must
+     be among counters 0 through 3.  The four gate signals from counters 4
+     through 7 are connected to the mmoonniittoorr preset channel output, which must be
+     among counters 4 through 7.
+
+     If the gate input from any channel is not tied to the master counter output
+     pin, that channel will not accumulate counts, including the master counter
+     channel itself.
+
+     The eexxtteerrnnaall--ggaattee--sseelleecctt connections are a bit more involved and are
+     covered in the next section.
+
+EXTERNAL PRESET DECODER
+
+     The addition of a single TTL 74151 chip to the USB-CTR configuration allows
+     complete flexibility in assigning master counter channels while maintaining
+     hardware gating.
+
+     The chip is a decoder which uses three inputs to select one of eight
+     signals to be presented as an output.  The eight signals are the counter
+     outputs from the USB-CTR.  The output of the 74151 is connected to all the
+     gate signals of the USB-CTR.  USB-CTR DIO pins are used to do the
+     selection.  By default, ssppeecc will use three DIO pins to allow a
+     one-of-eight selection.  However, if DIO pins are needed for another
+     purpose, ssppeecc can be configured to use only two pins to allow a one-of-four
+     selection or even just one DIO pin to allow a one-of-two selection.
+
+     The 74151 is connected to the USB-CTR terminals as follows.  The first two
+     columns are the 74151 pin number and signal name.  The remaining columns
+     are the connections to the USB-CTR using three, two or one DIO pins.
+
+             74151   74151    One of   One of   One of
+             Pin     Name     Eight    Four     Two
+             1       D3       C3O      C3O      -nc-
+             2       D2       C2O      C2O      -nc-
+             3       D1       C1O      C1O      C1O
+             4       D0       C0O      C0O      C0O
+             5       Y        Gates    Gates    Gates
+             6       W        -nc-     -nc-     -nc-
+             7       STROBE   GND      GND      GND
+             8       GND      GND      GND      GND
+             9       C        DIO5     GNC      GND
+             10      B        DIO6     DIO6     GND
+             11      A        DIO7     DIO7     DIO7
+             12      D7       C7O      -nc-     -nc-
+             13      D6       C6O      -nc-     -nc-
+             14      D5       C5O      -nc-     -nc-
+             15      D4       C4O      -nc-     -nc-
+             16      Vcc      VO       VO       VO
+
+         Gates are C0G, C1G, C2G, C3G (and C4G, C5G, C6G, C7G)
+
+     In the one-of-two and one-of-four configurations, the time-preset and
+     monitor-preset channels must be selected from the first two or four counter
+     channels.
+
+     Note, the STROBE pin of the 74151 must be grounded to enable the chip.
+     Unused input select pins must also be grounded.  Note that spec uses the
+     upper most DIO pins.
+
+FUNCTIONS
+
+     The following ccoouunntteerr__ppaarr(()) options are available.  The first three
+     commands are associated with particular counter channels.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""mmoonniittoorr"")) - Sets the channel assigned to mnemonic mmnnee to
+          be the monitor preset channel.  The monitor channel gets reset when
+          the ccoonnffiigg file is read on start up or on rreeccoonnffiigg.  The monitor
+          channel can only be changed if the counter is using
+          eexxtteerrnnaall--ggaattee--sseelleecctt mode in one-of-four mode or one-of-eight mode.
+
+     The USB-CTR models include input debounce circuitry that, according to the
+     device manual, "eliminates switch-induced transients that are typically
+     associated with electro-mechanical devices including relays, proximity
+     switches, and encoders."  Such a feature may not be particularly useful
+     with photon counting, but the parameters are accessible with the following
+     two commands.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ddeebboouunnccee__ttiimmee"" [[,, aarrgg]])) - With no arguments, returns the
+          current debounce time, or zero if the debounce circuitry is bypassed.
+          If present, aarrgg can be either a time or an integer code from 0 through
+          16 to specify a time.  If the value is not an exact match to the
+          allowed times, the next largest value is used.  The correspondence
+          between code and time is as follows:
+
+         0    no debounce
+         1    500ns
+         2    1500ns
+         3    3500ns
+         4    7500ns
+         5    15500ns
+         6    63500ns
+         7    31500ns
+         8    27500ns
+         9    100us
+         10   300us
+         11   700us
+         12   1500us
+         13   3100us
+         14   6300us
+         15   12700us
+         16   25500us
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ddeebboouunnccee__mmooddee"" [[,, aarrgg]])) - With no arguments, returns the
+          string ""bbeeffoorree"" or ""aafftteerr"" which indicates the mode is ttrriiggggeerr aafftteerr
+          ssttaabbllee or ttrriiggggeerr bbeeffoorree ssttaabbllee, respectively.  If aarrgg is present and
+          is nonzero or the string ""bbeeffoorree"" (case insensitive), the mode is set
+          to ttrriiggggeerr bbeeffoorree ssttaabbllee.  If aarrgg is anything else, the mode is set to
+          ttrriiggggeerr aafftteerr ssttaabbllee.  The default mode is ttrriiggggeerr aafftteerr ssttaabbllee.
+
+     The following commands are associated with the module, not particular
+     counter channels.  The mmnnee argument can be any counter associated with the
+     USB-CTR.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""bblliinnkk"",, ccoouunntt)) - Programs the bottom LED on the module to
+          blink the number of times specified by ccoouunntt.  May be useful in
+          confirming communication.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ssnnuumm"")) - Returns the module serial number, which is a
+          hexadecimal number up to eight digits in length.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ttiimmeerr00""||""ttiimmeerr11""||""ttiimmeerr22""||""ttiimmeerr33"" [[,, ffrreeqq]])) - Without an
+          argument returns the currently programmed frequency for the indicated
+          timer.  Otherwise sets the timer frequency to the value specified by
+          ffrreeqq.  It is not allowed to change the frequency of timer 0, which
+          ssppeecc programs to 1 MHz to be used as the timebase counter input.  The
+          valid frequency range is from 0.022 Hz to 48 MHz.  The function
+          returns the actual frequency, which may differ a bit from the
+          requested frequency due to the limited precision allowed by the
+          USB-CTR.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ffiirrmmwwaarree"" [[,, ffiillee]])) - With no arguments returns the
+          version number of the currently loaded firmware.  The value should be
+          considered as a 16-bit hexadecimal number with the upper byte holding
+          the major firmware version number and the low-order byte the minor
+          firmware version.  For example, a value of 0x0102 would be version
+          1.02.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""aaccttiivvee__llooww"" [[,, hhooww]])) - Without the optional argument,
+          returns nonzero if the counting card associated with channel mmnnee has
+          been configured for active-low gates.  The default mode is active
+          high.  If called with hhooww nonzero, turns on the active-low mode for
+          gating.  If hhooww is zero, sets active-high gate mode.  Setting the mode
+          for one channel affects all channels on the card.  The ""aaccttiivvee__llooww""
+          parameter can be set as an optional controller parameter from the
+          DDevices screen of the hardware configuration editor or as an optional
+          scaler parameter from the SScaler screen.  When set as a controller
+          parameter, its value cannot be changed using ccoouunntteerr__ppaarr(()).  If the
+          parameter is not set in the ccoonnffiigg file, rereading the ccoonnffiigg file
+          resets the mode to active-low off.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ddiioo__ggaattiinngg"")) - Returns a value of 2, 4 or 8 if
+          ""ddiioo__ggaattiinngg"" is configured as an optional controller parameter from
+          the DDevices screen of the configuration editor.  The value reflects
+          whether one, two or three DIO pins will be used in
+          eexxtteerrnnaall--ggaattee--sseelleecctt mode.  The parameter can only be set from the
+          ccoonnffiigg file.  If not set in the ccoonnffiigg file, a value equal to the
+          number of counter channels on the board (4 or 8) is used internally.
+          The ""ddiioo__ggaattiinngg"" parameter is only relevant if eexxtteerrnnaall--ggaattee--sseelleecctt
+          mode is detected.  See _C_O_N_F_I_G_U_R_A_T_I_O_N _M_O_D_E_S above.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""iioo__ccoonnffiigg"" [[,, vvaall]])) - Bits set in vvaall will configure the
+          corresponding DIO pins as outputs.  On power up, all pins are
+          configured as inputs.  If the optional argument is missing, ssppeecc will
+          return the current value.  The ""iioo__ccoonnffiigg"" parameter can be set as an
+          optional controller parameter from the DDevices screen of the hardware
+          configuration editor or as an optional scaler parameter from the
+          SScaler screen.  When set as a controller parameter, its value cannot
+          be changed using ccoouunntteerr__ppaarr(()).
+
+          When using eexxtteerrnnaall--ggaattee--sseelleecctt mode, the highest numbered digital I/O
+          pins are automatically set as outputs and can not be set or cleared
+          via the ccoouunntteerr__ppaarr(()) commands below.  If one-of-two mode is selected,
+          DIO7 is reserved.  For one-of-four mode, DIO6 and DIO7 are reserved.
+          If one-of-eight mode is configured, DIO5, DIO6 and DIO7 are reserved.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""sseett__bbiitt"",, vvaall)) - Set output pin corresponding to bit
+          number vvaall to high, where bits and pins are numbered from 0 to 7.  For
+          example,
+
+             ccoouunntteerr__ppaarr((sseecc,, ""sseett__bbiitt"",, 44))
+
+          would set DIO4 to a high state, if pin 4 has been configured for
+          output.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ccllrr__bbiitt"",, vvaall)) - Set output pins corresponding to bit
+          number vvaall to low, where bits and pins are numbered from 0 to 7.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""sseett__bbiittss""||""ppuutt__bbiittss""||""ppuutt__bbyyttee"" [[,, vvaall]])) - With no
+          arguments, returns a value indicating the current settings of the
+          output pins.  Otherwise, sets output pins corresponding to the bits
+          set in vvaall to high and bits not set in vvaall to low.  For example,
+
+             ccoouunntteerr__ppaarr((sseecc,, ""sseett__bbiittss"",, 00xx1133))
+
+          would set DIO0, DIO1 and DIO4 to a high state, if the pins were
+          configured for output.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ggeett__bbiitt"",, vvaall)) - Returns 0 or 1 based on whether the
+          input pin corresponding to bit number vvaall is high or low, where pins
+          and bits are numbered from 0 to 7.
+
+     ccoouunntteerr__ppaarr((mmnnee,, ""ggeett__bbiittss""||""ggeett__bbyyttee"")) - Returns an 8-bit value that
+          reflects the setting of the DIO pins configured as inputs.
+

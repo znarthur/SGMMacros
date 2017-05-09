@@ -1,0 +1,546 @@
+.TH "MPII" "hardware" "08/01/12" "MPII.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+MPII \- Canberra Multiport II USB/Socket MCA
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)MPII.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2007,2011,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "MPII" "hardware" "08/01/12" "MPII.rst 6.1  08/01/12 CSS"
+.
+.SH "INTRODUCTION"
+.rs
+.sp
+The Canberra Multiport II (MPII) is a NIM module containing from one to six
+independent multichannel analyzer (MCA) devices.  The MPII can be used with
+\fBspec\fP over both socket and USB interfaces.
+Each MCA device can be configured for up to 16,384 channels and can
+be operated in either pulse\-height analysis (PHA) or
+multichannel scaling (MCS) mode.
+.SH "CONFIGURATION"
+.rs
+.sp
+Each MPII module interfaced to spec over a socket interface
+can be uniquely identified by its assigned IP address.
+USB units cannot be assigned addresses, so if more than one
+MPII is used with spec over USB, assignment of specific modules
+is done by including the module\(aqs unique serial number in \fBspec\fP\(aqs hardware
+\fBconfig\fP file.  If the serial number is entered as zero, \fBspec\fP
+will simply assign the MCA units in the order in which they are found.
+.sp
+In the \fBedconf\fP configuration editor, possible MPII configurations
+include:
+.RS 3m
+.sp
+.nf
+.ft CB
+MCA\- and CCD\-Acquisition Type Device Configuration
+
+MCA\-like      DEVICE  ADDR  <>MODE                         <>TYPE
+ 0  YES   host1:6000               Canberra Multiport II (Socket)
+ 1  YES  192.168.1.5               Canberra Multiport II (Socket)
+ 2  YES              12345            Canberra Multiport II (USB)
+ 3  YES                  0            Canberra Multiport II (USB)
+ 4  YES                  0            Canberra Multiport II (USB)
+.ft P
+.fi
+.RE
+.sp
+The first entry configures a socket\-based MCA using a resolvable
+host name and an explicit port number.
+Note, the default port for the MPII is 6000, and doesn\(aqt need to be specified.
+The second entry specifies an IP address without the optional port number.
+Three USB configurations follow, the first with
+an explicit module serial number.
+The last two entries are also for USB units,
+but with the serial number set to zero.
+For those two units, it won\(aqt be possible to know
+in advance which MPII will be assigned
+to MCA unit number 3 and which to MCA unit number 4.
+.SH "ADDRESSING"
+.rs
+.sp
+The \fBspec\fP \fBmca_get()\fP, \fBmca_put()\fP and
+\fBmca_par()\fP functions work with the default MCA unit.
+If there is only one MCA unit configured, that unit is the default.
+Otherwise, the \fBmca_sel()\fP function can be used
+to select the default unit number.
+The \fBmca_spar()\fP, \fBmca_sget()\fP and \fBmca_sput()\fP
+take an initial argument that specifies a specific MCA unit number,
+independent of the default MCA unit number.
+See the \fI\%mca\fP help file for more details.
+.sp
+Because each MPII can have up to 6 independent MCA devices, the
+MCA selection syntax for the commands \fBmca_spar()\fP, \fBmca_sget()\fP, and
+\fBmca_sput()\fP is expanded. To select a specific MCA device on an MPII,
+address arguments may be given as
+\fB0.1\fP, \fB0.2\fP, ..., \fB0.6\fP, where the first digit
+is the MCA unit number from the \fBconfig\fP file,
+and the digit right of the decimal point is the
+MCA device, where the devices are numbered from 1 to 6.
+The syntax \fB"0:1"\fP, \fB"0:2"\fP, ..., \fB"0:6"\fP is also recognized,
+where the arguments are strings.
+.sp
+For writing data to the MCA with \fBmca_sput()\fP
+and for setting parameter values with
+\fBmca_spar()\fP, if no subaddress is specified, the command
+will apply to all of the up\-to\-six MCA devices available.
+That is, the same data or parameters can be written to all MCA devices
+on a Canberra module with one command.
+For reading data or reading parameters values, only one
+MCA device can be accessed since only one set of data
+or a single value can be returned.
+Thus, a subaddress needs to be specified for commands
+that return data if there
+is more than one MCA device on the MPII unit.
+.sp
+If no subaddress is specified for any of the commands,
+subaddress 1 is assumed.
+If the subaddress doesn\(aqt specify a valid MCA device for any command,
+subaddress 1 is still assumed.
+If there is only one MCA device on the unit, no subaddress is necessary.
+If the MPII is the default MCA and there is only one MCA device,
+\fBmca_get()\fP, \fBmca_put()\fP and
+\fBmca_par()\fP functions can be used unambiguously.
+Although the \fBmca_sel()\fP function can select the default unit,
+it is not possible to assign a default subaddress.
+.SH "FUNCTIONS"
+.rs
+.sp
+The standard MCA commands supported by \fBspec\fP are described in the
+\fI\%mca\fP help file.
+Refer to that document for more details on usage of the
+\fBmca_get()\fP, \fBmca_sget()\fP, \fBmca_put()\fP and \fBmca_sput()\fP functions.
+Also, refer to the \fI\%mca\fP help file for a description of the standard
+\fBmca_par()\fP and \fBmca_spar()\fP options
+\fB"info"\fP, \fB"chans"\fP, \fB"max_chans"\fP, \fB"disable"\fP,
+\fB"auto_run"\fP, \fB"soft_preset"\fP, \fB"auto_clear"\fP and \fB"native_type"\fP.
+.sp
+The default settings for the MPII are for \fB"auto_run"\fP and
+\fB"soft_preset"\fP to be disabled and \fB"auto_clear"\fP to be enabled.
+These default settings are restored on start up and hardware reconfiguration.
+When \fB"auto_run"\fP and
+\fB"soft_preset"\fP modes are in effect,
+the available MPII devices will be programmed
+with a time preset when counting to time and with the gross\-counts
+preset when counting to monitor.
+When counting to time, the mode will be real\-time or live\-time depending on
+whether the MPII is in real\- or live\-preset mode.
+That mode is set by using \fBmca_par()\fP with \fB"preset_live"\fP or
+\fB"preset_real"\fP.
+.sp
+Of the preset modes, real, live and gross counts,
+only one can be active at a time.
+.sp
+Note, of the parameters described below, the following are saved in the
+state file and will maintain values between \fBspec\fP invocations:
+\fB"xstart_enable"\fP, \fB"xstop_enable"\fP,
+\fB"mcs_xsync"\fP, \fB"mcs_start_chan"\fP,
+\fB"mcs_stop_chan"\fP, \fB"overflow_enable"\fP,
+\fB"preset_passes"\fP, \fB"preset_real"\fP,
+\fB"preset_live"\fP and \fB"preset_counts"\fP.
+When starting fresh, values will be restored to defaults.
+All other MPII parameters are retained in the module\(aqs flash memory, and
+\fBspec\fP will use those values, including the values for
+\fB"npts"\fP (or \fB"adc_gain"\fP).
+.sp
+Additional options for the MPII are described below.
+The string arguments are case insensitive.
+.SH "Basic Operation"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_par("clear")\fP
+\- 
+Clears the current data and the elapsed real\-time,
+live\-time, gross\-counts and sweep\-counts registers.
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+Sets the current acquisition parameters and starts acquisition.
+If \fB"auto_clear"\fP mode is set, clears the existing data first.
+Otherwise, if the device hasn\(aqt been explicitly cleared,
+new data will be added to the existing.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+Halts acquisition.
+.HP 5m
+."
+\fBmca_par("pha")\fP
+\- 
+Sets pulse\-height analysis mode.
+.HP 5m
+."
+\fBmca_par("npts" [, value])\fP
+\- 
+With no arguments, returns the current number of points.
+Otherwise, sets the number of points by setting the ADC gain to the
+\fBvalue\fP specified.  Synonymous with
+\fB"adc_gain"\fP.
+Allowed values are 256, 512, 1024, 2048, 4096, 8192 and 16384.
+.HP 5m
+."
+\fBmca_par("preset_real" [, value])\fP
+\- 
+With no arguments, returns the current PHA\-mode real (true) time preset
+in seconds.  Otherwise, sets the real\-time preset to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("preset_live" [, value])\fP
+\- 
+With no arguments, returns the current PHA\-mode live\-time preset in
+seconds.  Otherwise, sets the live\-time preset to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("preset_counts" [, value])\fP
+\- 
+With no arguments, returns the current PHA\-mode gross\-counts preset.
+Otherwise, sets the gross\-counts preset to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("overflow_enable" [, value])\fP
+\- 
+If no arguments, returns 0 if channel overflows are ignored and 1
+if channel overflows halt acquisition.
+Otherwise sets the overflow\-enable mode according to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("xstart_enable" [, value])\fP
+\- 
+With no arguments, returns nonzero if the \fBXINPUT\fP signal
+is to be used to start acquisition.
+Otherwise sets external\-start enable mode according to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("xstop_enable" [, value])\fP
+\- 
+With no arguments, returns nonzero if the \fBXINPUT\fP signal
+is to be used to stop acquisition.
+Otherwise sets external\-stop enable mode according to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("save_interval" [, value])\fP
+\- 
+With no arguments, returns the interval in minutes
+at which the Mulitport II saves its
+parameters to built\-in flash memory.
+Otherwise sets the interval as specified by \fBvalue\fP.
+Allowed values are from 1 to 60 minutes.
+.RE
+.SH "Status"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_par("dump")\fP
+\- 
+Displays all the parameters and settings.
+.HP 5m
+."
+\fBmca_par("elapsed_real")\fP
+\- 
+Returns the elapsed real (or true) time in seconds.
+.HP 5m
+."
+\fBmca_par("elapsed_live")\fP
+\- 
+Returns the elapsed live time in seconds.
+.HP 5m
+."
+\fBmca_par("elapsed_counts")\fP
+\- 
+Returns the total elapsed counts.
+.HP 5m
+."
+\fBmca_par("start_time")\fP
+\- 
+Returns the starting time of the most recent acquisition in
+seconds since January 1, 1970, 00:00:00 GMT.
+The value can be converted to an ASCII string using \fBspec\fP\(aqs
+\fBdate()\fP function.
+.HP 5m
+."
+\fBmca_par("stop_time")\fP
+\- 
+Returns the stopping time of the most recent acquisition in
+seconds since January 1, 1970, 00:00:00 GMT.
+The value can be converted to an ASCII string
+using \fBspec\fP\(aqs \fBdate()\fP function.
+.HP 5m
+."
+\fBmca_par("stop_event")\fP
+\- 
+Returns a code with bits indicating the type of event that halted the most
+recent acquisition as follows:
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l .
+0x00	None
+0x01	Real\-time preset reached
+0x02	Live\-time preset reached
+0x04	Total\-counts preset reached
+0x08	External input
+0x10	MCS\-preset passes reached
+0x20	Power lost
+0x40	Channel overflow
+.TE
+.RE
+.RE
+.HP 5m
+."
+\fBmca_par("overflow_chan")\fP
+\- 
+If acquisition was stopped by an overflow, returns the channel
+number that overflowed.
+.HP 5m
+."
+\fBmca_par("suspend_active")\fP
+\- 
+Returns nonzero if the XSUSPEND input is active, otherwise returns zero.
+.HP 5m
+."
+\fBmca_par("collecting")\fP
+\- 
+Returns nonzero if the MCA device is busy collecting data.
+.HP 5m
+."
+\fBmca_par("waiting_xinput")\fP
+\- 
+Returns nonzero if the MCA is waiting for the XINPUT to become active.
+.HP 5m
+."
+\fBmca_par("start_delay")\fP
+\- 
+Returns the internal delay time in seconds for the MCA to begin
+the most recent acquisition.
+This is a measure of latency within the MCA device.
+.HP 5m
+."
+\fBmca_par("changer_state")\fP
+\- 
+Returns the sample\-changer state, where nonzero indicates the
+sample changer is active.
+.RE
+.SH "External Connection Configuration"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_par("xcoinc_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity of the \fBXCOINC\fP input signal.
+Otherwise, sets the polarity.
+.HP 5m
+."
+\fBmca_par("xdt_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity of the \fBXDT\fP
+pileup\-reject dead\-time input signal.
+Otherwise, sets the polarity.
+.HP 5m
+."
+\fBmca_par("xlg_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity of the
+\fBXLG\fP pileup\-reject linear\-gate output signal,
+which is active when the ADC
+acquires an input pulse.  Otherwise, sets the polarity.
+.HP 5m
+."
+\fBmca_par("xrej_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity of the \fBXREJ\fP pileup\-reject input signal.
+Otherwise, sets the polarity.
+.HP 5m
+."
+\fBmca_par("xcollectstatus_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity of the
+\fBXCOLLECTSTATUS\fP external acquire status output signal.
+Otherwise, sets the polarity.
+.HP 5m
+."
+\fBmca_par("xinput_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity of the
+\fBXINPUT\fP external start/stop and sample\-changer ready input signal.
+Otherwise, sets the polarity.
+.HP 5m
+."
+\fBmca_par("xoutput_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity of the
+\fBXOUPUT\fP advance\-sample\-changer output signal.
+Otherwise, sets the polarity.
+.RE
+.SH "ADC Configuration"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_par("adc_gain" [, value])\fP
+\- 
+With no arguments, returns the ADC gain.
+Otherwise, sets the ADC gain (and the number of points) to the
+\fBvalue\fP specified.  Synonymous with \fB"npts"\fP.
+Allowed values are 256, 512, 1024, 2048, 4096, 8192 and 16384.
+.HP 5m
+."
+\fBmca_par("adc_LLD" [, value])\fP
+\- 
+With no arguments, returns the current setting of the low\-level
+discriminator as a percent.
+Otherwise, set the low\-level discriminator to the
+\fBvalue\fP given as a percent from 0 to 100.
+.HP 5m
+."
+\fBmca_par("adc_ULD" [, value])\fP
+\- 
+With no arguments, returns the current setting of the upper\-level
+discriminator as a percent.
+Otherwise, set the upper\-level discriminator to the
+\fBvalue\fP given as percent from 0 to 110.
+.HP 5m
+."
+\fBmca_par("adc_zero" [, value])\fP
+\- 
+With no arguments, returns the current zero\-discriminator
+setting as a percent.
+Otherwise, sets the zero discriminator to the
+\fBvalue\fP given as a percent from \-2.5 to 2.5.
+.HP 5m
+."
+\fBmca_par("adc_coincidence" [, value])\fP
+\- 
+With no arguments, returns the current ADC coincidence mode, where
+0 indicates normal and 1 indicates anti\-coincidence mode.
+Otherwise, sets the ADC coincidence mode as specified by \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("adc_high_pulse_action" [, value])\fP
+\- 
+If no arguments, returns zero if input pulses above the upper\-level
+discriminator are rejected and nonzero if such pulses are added to the
+last channel.
+Otherwise sets the high\-pulse action based on \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("adc_coinc_trigger" [, value])\fP
+\- 
+If no arguments, returns zero if the coincidence trigger is level sensitive
+and nonzero if the trigger is edge sensitive.
+Otherwise sets the trigger mode according to \fBvalue\fP.
+.RE
+.SH "Multichannel Scaler"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmca_par("mcs")\fP
+\- 
+Set multi\-channel scaling mode.
+.HP 5m
+."
+\fBmca_par("dwell" [, value])\fP
+\- 
+With no arguments, returns the MCS\-mode dwell time in seconds.
+Otherwise, sets the dwell time to \fBvalue\fP.
+A negative argument selects external dwell.
+.HP 5m
+."
+\fBmca_par("mcs_start_chan" [, value])\fP
+\- 
+With no arguments, returns the start channel in MCS mode.
+Otherwise, sets the MCS start channel to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("mcs_stop_chan" [, value])\fP
+\- 
+With no arguments, returns the stop channel in MCS mode.
+Otherwise, sets the MCS stop channel to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("preset_passes" [, value])\fP
+\- 
+With no arguments, returns the current MCS\-mode pass\-preset value.
+Otherwise, sets the number of passes.
+.HP 5m
+."
+\fBmca_par("elapsed_passes")\fP
+\- 
+Returns the elapsed number of passes in MCS mode.
+.HP 5m
+."
+\fBmca_par("current_chan")\fP
+\- 
+In MCS mode, returns the current channel of the current sweep.
+.HP 5m
+."
+\fBmca_par("elapsed_dwell")\fP
+\- 
+In MCS mode, returns the elapsed dwell of the current channel of the
+current sweep.
+.HP 5m
+."
+\fBmca_par("mcs_xsync" [, value])\fP
+\- 
+With no arguments, returns 0 if MCS\-mode external sync is disabled or
+1 if enabled.
+Otherwise, sets the MCS external sync as specified by \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("pulse_source" [, value])\fP
+\- 
+In MCS mode, with no arguments, returns zero
+if the input pulses are taken from the LLD/ULD
+filtered PHA input or nonzero if the input pulses
+are taken as TTL pulses from
+the \fBXMCSPULSE\fP input.
+Otherwise, sets the pulse source according to \fBvalue\fP.
+.HP 5m
+."
+\fBmca_par("xmcsadvance_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity of the \fBXMCSADVANCE\fP
+external channel advance input signal.
+Otherwise, sets the polarity.
+.HP 5m
+."
+\fBmca_par("xmcspulse_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity of the \fBXMCSPULSE\fP MCS input signal.
+Otherwise, sets the polarity.
+.HP 5m
+."
+\fBmca_par("xmcsrestart_polarity" [, "low"|"high"|0|1])\fP
+\- 
+With no arguments, returns 0 (for active low) or 1 (for active high)
+to indicate the polarity
+of the \fBXMCSRESTART\fP MCS sweep advance input signal.
+Otherwise, sets the polarity.
+.RE
+

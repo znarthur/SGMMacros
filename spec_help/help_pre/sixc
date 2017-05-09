@@ -1,0 +1,349 @@
+sixc                                reference                               sixc
+
+NAME
+     sixc - 6-circle geometry modes
+
+DESCRIPTION
+
+     ssiixxcc configuration of ssppeecc operates a standard six-circle diffractometer.
+     The six-circle diffractometer combines the features of a four-circle and a
+     z-axis diffractometer.
+
+CONVENTIONS
+
+     The standard six-circle motor names and mnemonics are as follows:
+
+         DDeellttaa   ddeell   Detector arm rotation
+         TThheettaa   tthh    Rotates sample circles
+         CChhii     cchhii   Sample tilt
+         PPhhii     pphhii   Sample rotation
+         MMuu      mmuu    Diffractometer rotation
+         GGaammmmaa   ggaamm   Out-of-plane detector rotation
+
+     The following optional motors select among various pseudomotor
+     configurations (see the following section on pseudomotors).
+
+         GGaammTTrraann    ggaammTT   Translation component of ggaamm
+         GGaammRRoott     ggaammRR   Rotation component of ggaamm
+         GGaammSSccrreeww   ggaammSS   Screw displacement for ggaamm
+         MMuuTTrraann     mmuuTT    Translation component of mmuu
+         MMuuRRoott      mmuuRR    Rotation component of mmuu
+
+     Two configurations of the diffractometer are available.  At synchrotrons,
+     the configuration is dictated by the layout of the experimental hutch with
+     respect to the incident X rays.  The sseettccoonnffiigg macro selects the
+     configuration.  The differences between the configurations are described
+     further down, as is the rotation sense and zero position of each circle.
+
+SIX-CIRCLE MODES
+
+     The six-circle modes represent various constraints that can be made on the
+     transformation equations from reciprocal space to diffractometer angles.
+     Use the sseettmmooddee macro to select a six-circle mode.  The modes are as
+     follows:
+
+         0 - OOmmeeggaa fixed (mmuu = ggaammmmaa = 0, traditional four circle)
+         1 - PPhhii fixed (mmuu = ggaammmmaa = 0, traditional four circle)
+         2 - Zone (mmuu = ggaammmmaa = 0, traditional four circle)
+         3 - AAzziimmuutthh, mmuu and ggaammmmaa fixed
+         4 - AAllpphhaa, mmuu and ggaammmmaa fixed
+         5 - BBeettaa, mmuu and ggaammmmaa fixed
+         6 - AAzziimmuutthh and ggaammmmaa fixed, mmuu varies
+         7 - AAllpphhaa and ggaammmmaa fixed, mmuu varies
+         8 - BBeettaa and ggaammmmaa fixed, mmuu varies
+         9 - AAzziimmuutthh and mmuu fixed, ggaammmmaa varies
+         10 - AAllpphhaa and mmuu fixed, ggaammmmaa varies
+         11 - BBeettaa and mmuu fixed, ggaammmmaa varies
+         12 - Z-Axis with aazziimmuutthh fixed, cchhii, pphhii set to -ssiiggmmaa, -ttaauu
+         13 - Z-Axis with aallpphhaa fixed, cchhii, pphhii set to -ssiiggmmaa, -ttaauu
+         14 - Z-Axis with bbeettaa fixed, cchhii, pphhii set to -ssiiggmmaa, -ttaauu
+         15 - Specular with tthheettaa = 90, ggaammmmaa = 0 and pphhii fixed
+         16 - CChhii, pphhii and mmuu fixed
+
+     In the aazziimmuutthh-fixed modes (3, 6, 9 and 12), when the azimuthal angle is
+     set to 90 degrees, the incident angle aallpphhaa will be equal to the exit angle
+     bbeettaa.
+
+     In the zz--aaxxiiss modes, use the ssiiggttaauu macro to calculate the azimuthal
+     reference vector from the cchhii and pphhii angles used to align the sample.
+
+FROZEN ANGLES
+
+     Each of the six-circle modes has associated an angle (or angles) that are
+     fixed in that mode.  As a convenience, there is a ffrreeeezzee macro that turns
+     on ssppeecc's ffrroozzeenn mode.  When in frozen mode, all moves that specify
+     reciprocal space coordinates will use the frozen value(s) of the current
+     mode's fixed angle(s).  Thus you can move motors around for lining up,
+     etc., but have the the fixed angle(s) automatically restored to the frozen
+     value when doing reciprocal space scans, bbrr moves, etc.  The uunnffrreeeezzee macro
+     turns frozen mode off.
+
+     The frozen values are stored in variables (actually macros) named FF__OOMMEEGGAA
+     (omega-fixed mode), FF__CCHHII__ZZ and FF__PPHHII__ZZ (zone mode), FF__PPHHII (pphhii-fixed
+     modes), FF__CCHHII (cchhii-fixed modes), FF__AAZZIIMMUUTTHH (aazziimmuutthh-fixed modes), FF__AALLPPHHAA
+     (aallpphhaa-fixed modes), FF__BBEETTAA (bbeettaa-fixed modes), FF__MMUU (mmuu-fixed modes) and
+     FF__GGAAMMMMAA (ggaammmmaa-fixed modes).  You can assign values to these variables by
+     hand, or you can pass the values as arguments to the ffrreeeezzee macro.  For
+     example, if you are in mode 4 (aazziimmuutthh, mmuu and ggaammmmaa fixed), typing
+
+         ffrreeeezzee 9900 00 1100
+
+     will set FF__AAZZIIMMUUTTHH to 90 degrees FF__MMUU to zero and FF__GGAAMMMMAA to 10 degrees.
+     Without arguments, the ffrreeeezzee macro freezes the corresponding angles at
+     their current values.
+
+SIX-CIRCLE SECTORS
+
+     (The six-circle sector code is still in development.)
+
+CUT POINTS
+
+     Cut points affect the direction the diffractometer circles turn to get from
+     one position to the next.  For example, if a cut point is at zero, the
+     corresponding circle will only move through angles of 0 to 360 degrees.
+     Thus, to get from 355 (=-5) to 5 degrees, the circle will turn 350 degrees.
+     If a cut point is at -180, the circle will move through angles from -180 to
+     180.  Thus the same motion from -5 to 5 will require only 10 degrees of
+     movement.  Use the ccuuttss macro to select cut points for tthheettaa, cchhii and pphhii
+     (and the aazziimmuutthh). The ddeellttaa, mmuu and ggaammmmaa motors always use -180 as the
+     cut point.  (Only the sign of the aazziimmuutthh cut point is used, and it
+     determines the sign of the aazziimmuutthh angle.)
+
+LATTICE PARAMETERS
+
+     The sseettllaatt and sseettrrllaatt macros let you set the lattice parameters in direct
+     space or reciprocal space, respectively.
+
+ORIENTATION MATRIX
+
+     With known lattice parameters, you need to find two (nonparallel)
+     reflections in order to determine the orientation matrix.  The macros oorr00 HH
+     KK LL and oorr11 HH KK LL are used to associate the current diffractometer angles
+     with the primary and secondary reflections.  Macros called sseettoorr00 and
+     sseettoorr11 also let you set the orientation reflections, but don't require you
+     to move the diffractometer to the correct position.  Instead, you are
+     prompted for each of the angles and values for HH, KK and LL. The oorr__sswwaapp
+     macro is available to exchange the primary and secondary reflections.
+
+     You can also fit an orientation matrix if you have three or more known
+     reflections (not all in the same plane), but unknown lattice parameters.
+     Use rreefflleexx__bbeegg to initialize a reflections data file.  Use rreefflleexx HH KK LL to
+     add the current reflection to the file.  Use rreefflleexx__eenndd to complete the
+     file.  You then run the reflections file as a ssppeecc command file in order to
+     fit the reflections to obtain a new orientation matrix.  To calculate
+     lattice parameters from the new orientation matrix, type ccaallccLL. You can
+     then display the lattice parameters with the ppaa macro.  You can edit the
+     reflections file to delete or modify any of the reflection data there.
+
+PSEUDOMOTORS
+
+     ssppeecc supports configurations where the ggaammmmaa detector rotation and/or the
+     mmuu diffractometer rotation involves multiple motors or is done indirectly.
+     In one ggaammmmaa configuration, the detector is mounted on a small rotation
+     stage that tracks the desired gamma angle.  Another motor translates that
+     stage to keep the detector oriented towards the sample.  That configuration
+     is selected by configuring two motors having mnemonics ggaammRR and ggaammTT in the
+     ccoonnffiigg file.
+
+     In another ggaammmmaa configuration, the rotation is created by translating the
+     detector along a curved track using a linear screw pivoted at one end.  The
+     screw motor must have the mnemonic ggaammSS. In both configurations, a motor
+     with mnemonic ggaamm must also be configured, but with the controller set to
+     NNOONNEE.  In another configuration, the mmuu rotation is made up of a rotation
+     and a translation, just as described for ggaammmmaa, above.  This configuration
+     is selected when there are motors having mnemonics mmuuRR and mmuuTT in the
+     ccoonnffiigg file.  The motor configured as mmuu must have the controller type set
+     to NNOONNEE.  In normal operation, a "tracking" mode is on such that commands
+     to move the pseudomotors ggaamm or mmuu are automatically converted to motions
+     of the associated real motors, and the positions of the pseudomotors are
+     calculated based on the positions of the real motors.  With "tracking" mode
+     off, the real motors will be unconnected from their associated pseudomotor.
+     Commands to move the pseudomotors won't affect the real motors, and the
+     real motor positions won't change the value of the pseudomotors.
+     "Tracking" mode is stored in gg__ttrraacckk. The oonnttrraacckk, ooffffttrraacckk and sseettttrraacckk
+     macros can be used to set gg__ttrraacckk. The "tracking" macros will apply to both
+     ggaammmmaa and mmuu pseudomotors together.
+
+     (The mmuu pseudomotor was added in ssppeecc release 5.10.01-6.)
+
+GLOBALS AND MACROS
+
+     QQ[[]] - a built-in array which holds the following six-circle parameters:
+
+          ddeeff HH ''QQ[[00]]'' - Reciprocal space coordinate.
+          ddeeff KK ''QQ[[11]]'' - Reciprocal space coordinate.
+          ddeeff LL ''QQ[[22]]'' - Reciprocal space coordinate.
+          ddeeff LLAAMMBBDDAA ''QQ[[33]]'' - Wavelength of X rays.
+          ddeeff AALLPPHHAA ''QQ[[44]]'' - Incident angle, useful for surface diffraction.
+          ddeeff BBEETTAA ''QQ[[55]]'' - Exit angle, useful for surface diffraction.
+          ddeeff OOMMEEGGAA ''QQ[[66]]'' - The tthheettaa - ttwwoo--tthheettaa / 2 parameter.
+          ddeeff TTTTHH ''QQ[[77]]'' - The Bragg angle.
+          ddeeff AAZZIIMMUUTTHH ''QQ[[88]]'' - Rotation angle of a reference vector about the
+               scattering vector, useful for surface diffraction.
+          ddeeff SSIIGGMMAA ''QQ[[99]]'' - With TTAAUU, an alternative description of the
+               azimuthal reference vector.
+          ddeeff TTAAUU ''QQ[[1100]]'' - With SSIIGGMMAA, an alternative description of the
+               azimuthal reference vector.
+          ddeeff FF__AALLPPHHAA ''QQ[[1111]]'' - Frozen value of AALLPPHHAA for aallpphhaa-fixed mode.
+          ddeeff FF__BBEETTAA ''QQ[[1122]]'' - Frozen value of BBEETTAA for bbeettaa-fixed mode.
+          ddeeff FF__OOMMEEGGAA ''QQ[[1133]]'' - Frozen value of OOMMEEGGAA for oommeeggaa-fixed mode.
+          ddeeff FF__AAZZIIMMUUTTHH ''QQ[[1144]]'' - Frozen value of AAZZIIMMUUTTHH for aazziimmuutthh-fixed
+               mode.
+          ddeeff FF__PPHHII ''QQ[[1155]]'' - Frozen value of AA[[pphhii]] for pphhii-fixed modes.
+          ddeeff FF__CCHHII__ZZ ''QQ[[1166]]'' - Frozen value of AA[[cchhii]] for zone mode.
+          ddeeff FF__PPHHII__ZZ ''QQ[[1177]]'' - Frozen value of AA[[pphhii]] for zone mode.
+          ddeeff FF__MMUU ''QQ[[1188]]'' - Frozen value of AA[[mmuu]] for mmuu-fixed modes.
+          ddeeff FF__GGAAMMMMAA ''QQ[[1199]]'' - Frozen value of AA[[ggaamm]] for ggaammmmaa-fixed modes.
+          ddeeff CCUUTT__AAZZII ''QQ[[2200]]'' - The aazziimmuutthh cut point flag.
+          ddeeff CCUUTT__DDEELL ''QQ[[2211]]'' - The ddeellttaa cut point.
+          ddeeff CCUUTT__TTHH ''QQ[[2222]]'' - The tthheettaa cut point.
+          ddeeff CCUUTT__CCHHII ''QQ[[2233]]'' - The cchhii cut point.
+          ddeeff CCUUTT__PPHHII ''QQ[[2244]]'' - The pphhii cut point.
+          ddeeff CCUUTT__MMUU ''QQ[[2255]]'' - The mmuu cut point.
+          ddeeff CCUUTT__GGAAMM ''QQ[[2266]]'' - The ggaammmmaa cut point.
+          ddeeff FF__CCHHII ''QQ[[1166]]'' - Frozen value of AA[[cchhii]] for cchhii-fixed, pphhii-fixed,
+               mmuu-fixed mode.
+
+     GG[[]] - a built-in array which holds the following six-circle parameters:
+
+          ddeeff gg__mmooddee ''GG[[00]]'' - Holds current six-circle mode.
+          ddeeff gg__sseecctt ''GG[[11]]'' - Holds current six-circle sector.
+          ddeeff gg__ffrrzz ''GG[[22]]'' - Nonzero when frozen mode is on.
+          ddeeff gg__hhaazz ''GG[[33]]'' - HH of azimuthal reference vector.
+          ddeeff gg__kkaazz ''GG[[44]]'' - KK of azimuthal reference vector.
+          ddeeff gg__llaazz ''GG[[55]]'' - LL of azimuthal reference vector.
+          ddeeff gg__zzhh00 ''GG[[66]]'' - HH of first zone-mode vector.
+          ddeeff gg__zzkk00 ''GG[[77]]'' - KK of first zone-mode vector.
+          ddeeff gg__zzll00 ''GG[[88]]'' - LL of first zone-mode vector.
+          ddeeff gg__zzhh11 ''GG[[99]]'' - HH of second zone-mode vector.
+          ddeeff gg__zzkk11 ''GG[[1100]]'' - KK of second zone-mode vector.
+          ddeeff gg__zzll11 ''GG[[1111]]'' - LL of second zone-mode vector.
+          ddeeff gg__lleenn ''GG[[1122]]'' - When using either of the ggaammmmaa-pseudomotor
+               configurations, the distance from the sample to the ggaammmmaa stage
+               when ggaammmmaa = 0.
+          ddeeff gg__ccoonnffiigg ''GG[[1133]]'' - If zero, the default configuration is selected.
+               Otherwise, the alternate configuration is used.
+          ddeeff gg__ttrraacckk ''GG[[1144]]'' - If nonzero, the ggaammTT and ggaammRR motors track the
+               pseudomotor ggaamm. Must be set to zero to move ggaammTT and ggaammRR
+               directly.
+          ddeeff gg__ssiiggttaauu ''GG[[1155]]'' - If nonzero, SSIIGGMMAA and TTAAUU are considered
+               fundamental and the azimuthal reference vector is calculated from
+               their values.  Otherwise SSIIGGMMAA and TTAAUU are calculated from the
+               azimuthal reference vector.  Use the sseettccoonnffiigg macro to change
+               the value of gg__ssiiggttaauu.
+          ddeeff gg__lleenn22 ''GG[[1166]]'' - When using the screw ggaammmmaa-pseudomotor
+               configuration, the distance from the screw pivot point to the
+               gamma stage when ggaammmmaa = 0.
+
+     ccaallccHHKKLL - calculates HH, KK, LL, AALLPPHHAA, BBEETTAA, AAZZIIMMUUTTHH, TTTTHH, OOMMEEGGAA, SSIIGGMMAA and
+          TTAAUU from the six-circle angles in the motor array AA[[]].
+
+     ccaallccAA - calculates AA[[]], OOMMEEGGAA, AALLPPHHAA, BBEETTAA and AAZZIIMMUUTTHH from HH, KK and LL.
+
+     ccaallccZZ - calculates the pphhii and cchhii to put the two vectors specified by the
+          six elements of the built-in ZZ[[]] array in the scattering plane.
+
+     cczz HH00 KK00 LL00 HH11 KK11 LL11 - "calculate zone", prints the cchhii and pphhii necessary
+          to put the two vectors specified as arguments in the scattering plane.
+
+     mmzz HH00 KK00 LL00 HH11 KK11 LL11 - "move zone", moves to the cchhii and pphhii values that
+          put the two vectors specified as arguments into the scattering plane.
+          Also sets zone mode and turns on frozen mode using the calculated cchhii
+          and pphhii values.
+
+     sszz HH00 KK00 LL00 HH11 KK11 LL11 - "set zone", calculates the cchhii and pphhii values that
+          put the two vectors specified as arguments into the scattering plane.
+          Also sets zone mode and turns on frozen mode using the calculated cchhii
+          and pphhii values.
+
+     sseettaazz [[HH KK LL]] - Sets the azimuthal reference vector.
+
+     ssiiggttaauu [[ssiiggmmaa ttaauu]] - Sets the azimuthal reference vector according to the
+          angles given as arguments.  If no arguments are given, the macro will
+          prompt for ssiiggmmaa and ttaauu, using the negative of the current values of
+          cchhii and pphhii, respectively, as the defaults.
+
+     ppaa - Displays the current geometry parameters.
+
+     ssttaarrttggeeoo - Prompts for the various geometry parameters.
+
+     sseettlleenn [[lleennggtthh]] - Prompts for the ddeellttaa-arm length needed for the
+          ggaammmmaa-pseudomotor calculations.
+
+     sseettccoonnffiigg [[wwhhiicchh]] - Prompts for the configuration.  Zero selects the
+          zz-outward configuration.  Nonzero selects the zz-inward configuration.
+
+     sseettttrraacckk [[11||00]] - Sets the value of gg__ttrraacckk to the argument, if any,
+          otherwise prompts for a value.
+
+     oonnttrraacckk - equivalent to sseettttrraacckk 11.
+
+     ooffffttrraacckk - equivalent to sseettttrraacckk 00.
+
+     aazziissccaann ssttaarrtt ffiinniisshh iinntteerrvvaallss ttiimmee - Does a scan of the azimuthal angle.
+
+ZEROS AND ROTATION SENSE
+
+     For the two supported diffractometer configurations, the xx axis points
+     upward and the yy axis points along the direction of the incident beam.  The
+     two configurations are mirror images of each other in the xx-yy plane, but
+     both use a right-handed coordinate system.  When all circle are at zero,
+     the default configuration (gg__ccoonnffiigg = 0) has the zz axis pointing outward
+     from a sample mounted on the pphhii circle.  In the alternate configuration
+     (gg__ccoonnffiigg != 0), the zz axis points inward.  The choice of configuration is
+     generally dictated by the the dimensions and layout of a synchrotron hutch.
+
+     In order for the calculations in the six-circle code to work correctly, you
+     must set the rotation sense and zeros of the circles according to the
+     conventions built into the code.  The rotation sense is defined with
+     respect to the positive unit vectors of the laboratory coordinate system
+     described above.  For a right-handed rotation, if your thumb points along
+     the unit vector that is in line with the rotation axis, your fingers will
+     point in the positive rotation direction.
+
+     The rotation sense of an axis can be changed by changing the sign of the
+     sstteeppss--ppeerr--ddeeggrreeee parameter or the ssiiggnn--ooff--uusseerr**ddiiaall parameter in the ccoonnffiigg
+     file.  You should set the sign of the first parameter so that the ssppeecc dial
+     positions agree with the dial indicators of each circle.  Set the sign of
+     the second parameter as necessary to make the ssppeecc user angles agree with
+     the rotation sense described below.
+
+     In the default (zz-outward) configuration, the mmuu circle is in the yy-zz
+     plane, with the rotation axis along the xx axis with a right-handed rotation
+     convention.  The zero of mmuu is such that the ddeellttaa and tthheettaa circles are on
+     the negative side of the xx-yy plane with their rotation axes along the zz
+     axis.
+
+     The ddeellttaa, tthheettaa and pphhii circles all have a left-handed rotation sense.
+     The ddeellttaa circle is at zero when the detector arm is along the negative yy
+     direction.  TThheettaa is zero when the cchhii circle is in the xx-zz plane, with the
+     cchhii axis along the yy axis.  The cchhii rotation is right-handed.  The zero of
+     cchhii puts the pphhii rotation axis along the zz direction with the "surface
+     normal" of the pphhii table pointed in the positive zz direction.  The zero of
+     the pphhii circle is arbitrary.
+
+     Finally, with mmuu and ddeellttaa at zero, the ggaammmmaa circle is located in the yy-zz
+     plane with the zero of ggaammmmaa chosen so that the detector is pointed in the
+     negative yy direction towards the X-ray source.  The gamma rotation is right
+     handed.
+
+     In the alternate, mirror image, zz-inward configuration, all rotations are
+     left handed.
+
+SEE ALSO
+
+     ggeeoo__ssiixxcc..cc, C source file for the six-circle geometry calculations.
+     ssiixxcc..ssrrcc, macro source file for the six-circle macros.
+     hhkkll..mmaacc, macro source file for reciprocal space macros.
+     uubb..mmaacc, macro source file for orientation matrix macros.
+     The FFoouurr--CCiirrccllee RReeffeerreennccee in the ssppeecc manual.
+
+REFERENCES
+
+     Angle calculations and operating modes for a six-circle diffractometer were
+     presented by M. Lohmeier and E. Vlieg in JJ.. AAppppll.. CCrryysstt.., 2266, 706 (1993).
+     Extensions, including explicit formulas for the setting of diffractometer
+     motors based on the surface normal direction, were given by D. Abernathy
+     (PhD thesis, MIT 1993), who also assisted in developing the C code used in
+     ssppeecc.
+

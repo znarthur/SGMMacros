@@ -1,0 +1,25 @@
+abscan                                macro                               abscan
+
+NAME
+     aabbssccaann - incident-reflected angle scan
+
+SYNOPSIS
+
+     aabbssccaann aallpphhaa__ssttaarrtt aallpphhaa__eenndd bbeettaa__ssttaarrtt bbeettaa__eenndd iinntteerrvvaall ttiimmee
+
+DESCRIPTION
+
+     aabbssccaann is a macro designed to scan the incident and reflected angles from
+     aallpphhaa__ssttaarrtt and bbeettaa__ssttaarrtt to aallpphhaa__eenndd and bbeettaa__eenndd, respectively, while
+     counting for ttiimmee during each of the iinntteerrvvaallss.
+
+EXAMPLE
+
+     aabbssccaann 22 22 00 44 4400 1100
+
+     (In this example, the incident angle aallpphhaa remains fixed).
+
+SEE ALSO
+
+     _r_s_c_a_n _r_2_s_c_a_n _l_s_c_a_n _h_k_l_s_c_a_n
+

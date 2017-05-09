@@ -1,0 +1,112 @@
+mcs-pci                             hardware                             mcs-pci
+
+NAME
+     mcs-pci - Ortec MCS-pci Multichannel Scaler
+
+DESCRIPTION
+
+     The Ortec MCS-pci Multichannel Scaler has count rates up to 150 MHz and up
+     to 65,536 channels.  Dwell times are selectable from 100 nanoseconds to
+     1300 seconds per channel.  ssppeecc can control up to four MCS-pci modules.
+
+FUNCTIONS
+
+     See the _m_c_a help file for a description of the mmccaa__ggeett(()), mmccaa__ppuutt(()) and
+     other standard MCA-type functions available in ssppeecc.
+
+     mmccaa__ppaarr((""cclleeaarr"")) - Clears the data memory of the MCS.
+
+     mmccaa__ppaarr((""rruunn"")) - Programs the MCS device with the appropriate parameters
+          and starts acquisition.  If ""aauuttoo__cclleeaarr"" mode is set, clears the
+          current data, otherwise, continues acquisition.  The pass count is
+          zeroed in both cases.
+
+     mmccaa__ppaarr((""aauuttoo__cclleeaarr"" [[,, vvaalluuee]])) - With no arguments, returns nonzero or
+          zero to indicate whether auto-clear mode is set.  Otherwise sets the
+          mode to vvaalluuee. When auto-clear mode is set, the MCS data is cleared
+          before data acquisition is started.
+
+     mmccaa__ppaarr((""hhaalltt"")) - Halts the current pass if acquisition is active.  If
+          entered a second time before the pass completes, the acquisition is
+          terminated without completing the current pass.
+
+     mmccaa__ppaarr((""ddwweellll"" [[,, vvaalluuee]])) - With no arguments, returns the current dwell
+          value.  Otherwise, sets the dwell to vvaalluuee. A negative argument
+          selects external dwell.  Valid values are from 100e-9 to 1300 seconds.
+
+     mmccaa__ppaarr((""nnppttss"" [[,, vvaalluuee]])) - With no arguments, returns the current number
+          of points or pass length.  Otherwise, sets the pass length to vvaalluuee.
+          Allowed values are from 4 to 65,536.
+
+     mmccaa__ppaarr((""ppaasssseess"" [[,, vvaalluuee]])) - With no arguments, returns the current preset
+          passes value.  Otherwise, sets the passes preset to vvaalluuee.  A value of
+          zero indicates no preset.
+
+     mmccaa__ppaarr((""pprreesseett"" [[,, vvaalluuee]])) - The ""pprreesseett"" argument has the same function
+          as ""ppaasssseess"".
+
+     mmccaa__ppaarr((""eellaappsseedd__ppaasssseess"")) - Returns the number of elapsed passes since
+          acquisition started.
+
+     mmccaa__ppaarr((""ccuurrrreenntt__bbiinn"")) - Returns the current channel number of the current
+          pass.  The first channel is numbered zero.
+
+     mmccaa__ppaarr((""iinnppuutt"" [[,, wwhhiicchh]])) - Returns the string ""ssccaa"" or ""ddiisscc"" to indicate
+          which input is used as the signal source.  String arguments of of
+          ""ssccaa"" or ""ddiisscc"" for wwhhiicchh select the setting.
+
+     mmccaa__ppaarr((""iimmppeeddaannccee"" [[,, vvaalluuee]])) - Returns 50 or 1000 to indicate whether the
+          discriminator input impedance is set to 50 ohms or 1 kohm.  An
+          argument of 50 or 1000 for vvaalluuee sets the input impedance.  The
+          default value is 1 kohm.
+
+     mmccaa__ppaarr((""ddiisscc__lleevveell"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          discriminator threshold level.  Otherwise sets the threshold to vvaalluuee.
+          Valid values are from -1.6 to +3.0V with steps of 0.0015256V.
+
+     mmccaa__ppaarr((""ddiisscc__eeddggee"" [[,, wwhhiicchh]])) - Returns the string ""rriissiinngg"" or ""ffaalllliinngg""
+          to indicate whether the discriminator is rising-edge or falling-edge
+          sensitive.  String arguments of of ""rriissiinngg"" or ""ffaalllliinngg"" for wwhhiicchh
+          select the setting.
+
+     mmccaa__ppaarr((""ssccaa__llooww"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          lower-level threshold value of the SCA input.  Otherwise sets the
+          threshold to vvaalluuee.  Valid values are from 0 and +10V with steps of
+          0.002442V.
+
+     mmccaa__ppaarr((""ssccaa__hhiigghh"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          upper-level threshold value of the SCA input.  Otherwise sets the
+          threshold to vvaalluuee.  Valid values are from 0 and +10V with steps of
+          0.002442V.
+
+     mmccaa__ppaarr((""ttrriiggggeerr"" [[,, wwhhiicchh]])) - Returns the string ""iinntteerrnnaall"" or ""eexxtteerrnnaall""
+          to indicate whether new passes are started automatically or require an
+          external trigger.  The optional argument wwhhiicchh can be either of the
+          strings ""iinntteerrnnaall"" or ""eexxtteerrnnaall"" to select the trigger source.
+
+     mmccaa__ppaarr((""ttrriigg__lleevveell"" [[,, vvaalluuee]])) - With no arguments, returns the current
+          external channel-advance threshold level.  Otherwise sets the
+          threshold to vvaalluuee.  Valid values are from -1.6 to +3.0V with steps of
+          0.0015256V.
+
+     mmccaa__ppaarr((""rreesseett"")) - Stops acquisition, clears data memory and restores all
+          MCS parameters to default values, as follows:
+
+             mmccaa__ppaarr((""ddwweellll"",, 11ee--77))
+             mmccaa__ppaarr((""nnppttss"",, 11000000))
+             mmccaa__ppaarr((""ppaasssseess"",, 00))
+             mmccaa__ppaarr((""iinnppuutt"",, ""ddiisscc""))
+             mmccaa__ppaarr((""iimmppeeddaannccee"",, 11000000))
+             mmccaa__ppaarr((""ddiisscc__lleevveell"",, 11..44))
+             mmccaa__ppaarr((""ddiisscc__eeddggee"",, ""rriissiinngg""))
+             mmccaa__ppaarr((""ssccaa__hhiigghh"",, 66..55))
+             mmccaa__ppaarr((""ssccaa__llooww"",, 11..22))
+             mmccaa__ppaarr((""ttrriiggggeerr"",, ""iinntteerrnnaall""))
+             mmccaa__ppaarr((""ttrriigg__lleevveell"",, 11..44))
+
+     mmccaa__ppaarr((""dduummpp"")) - Displays current MCS parameters.
+
+     mmccaa__ppaarr((""cchhaann##"")) - Returns the contents of channel number ##.
+
+     mmccaa__ppaarr((""cchhaann##"",, vvaalluuee)) - Set the contents of channel number ## to vvaalluuee.
+

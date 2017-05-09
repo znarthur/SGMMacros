@@ -1,0 +1,62 @@
+.TH "qdo" "macro" "08/01/12" "qdo.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBqdo\fP \- execute a command file without echo
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)qdo.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "qdo" "macro" "08/01/12" "qdo.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBqdo command_file\fP
+.sp
+\fBqdo .\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBqdo\fP macro reads commands
+contained in the ASCII file \fBcommand_file\fP.
+Unlike the
+\fBdo\fP macro, the commands from the file are not printed on the screen.
+.sp
+If the argument is a single dot (\fB.\fP), the previous command file is used.
+.sp
+The global variable \fBDO_DIR\fP may be set to the name of directory
+that will be searched for
+\fBcommand_file\fP, if \fBcommand_file\fP is not in the current directory.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBdo do.scans\fP
+.SH "GLOBAL VARIABLES"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBDOFILE\fP
+\- 
+Last command file used.
+.HP 5m
+."
+\fBDO_DIR\fP
+\- 
+Name of private command file directory.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%do\fP
+\fI\%startup\fP
+\fI\%vi\fP
+

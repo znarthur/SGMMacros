@@ -1,0 +1,39 @@
+.TH "prdef" "command" "08/01/12" "prdef.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBprdef\fP \- print macro definitions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)prdef.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "prdef" "command" "08/01/12" "prdef.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBprdef [pattern_name ... ]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The command \fBprdef\fP prints macro definitions.
+With no arguments, all the macro definitions are printed.
+Otherwise, only the macros specified as arguments are printed.
+Arguments may contain the \fB*\fP and \fB?\fP metacharacters.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBprdef pl_*\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%lsdef\fP
+\fI\%def\fP
+

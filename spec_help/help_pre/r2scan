@@ -1,0 +1,25 @@
+r2scan                                macro                               r2scan
+
+NAME
+     rr22ssccaann - reflectivity background scans
+
+SYNOPSIS
+
+     rr22ssccaann aallpphhaa__ssttaarrtt aallpphhaa__eenndd aallpphhaa__iinntteerrvvaallss --bbeettaa__ooffff bbeettaa__ooffff
+     bbeettaa__iinntteerrvvaallss ttiimmee
+
+DESCRIPTION
+
+     The rr22ssccaann macro runs a series of detector in-plane scans (beta) for
+     different angles of incidence (alpha) from aallpphhaa__ssttaarrtt to aallpphhaa__eenndd with
+     aallpphhaa__iinntteerrvvaallss. Each scan runs beta from alpha-bbeettaa__ooffff to alpha+bbeettaa__ooffff
+     counting for ttiimmee for each of the bbeettaa__iinntteerrvvaallss.
+
+EXAMPLE
+
+     rr22ssccaann 1100mmrr 2200mmrr 1100 --44mmrr 22mmrr 33 11000000
+
+SEE ALSO
+
+     _a_b_s_c_a_n _r_s_c_a_n _m_e_s_h
+

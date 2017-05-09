@@ -1,0 +1,283 @@
+.TH "counting" "hardware" "01/29/14" "counting.rst 6.2  01/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+counting \- timer/scaler/mca commands and variables
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)counting.rst     6.2  01/29/14  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,1996,1997,2012,2014
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "counting" "hardware" "01/29/14" "counting.rst 6.2  01/29/14 CSS"
+.
+.SH "BUILT\-IN COMMANDS AND FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBmcount(t)\fP
+\- 
+Begins counting for \fBt\fP monitor counts. Returns \fBtrue\fP.
+.HP 5m
+."
+\fBtcount(t)\fP
+\- 
+Begins counting for \fBt\fP seconds. Returns \fBtrue\fP.
+.HP 5m
+."
+\fBcnt_mne(i)\fP
+\- 
+Returns the string mnemonic of counter \fBi\fP
+as given in the configuration file.
+.HP 5m
+."
+\fBcnt_name(i)\fP
+\- 
+Returns the string name of counter \fBi\fP
+as given in the configuration file.
+.HP 5m
+."
+\fBcnt_num(mne)\fP
+\- 
+Returns the counter number corresponding
+to the counter mnemonic \fBmne\fP,
+or \-1 if there is no such counter configured.
+.HP 5m
+."
+\fBcounter_par(i, s [, v])\fP
+\- 
+Returns or sets configuration parameters for counter \fBi\fP.
+Recognized values for the string \fBs\fP include:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"monitor"\fP
+\- 
+Reassigns the scaler channel used as the monitor\-preset counter
+to the channel associated with counter \fBmne\fP.
+Rereading the hardware configuration file
+with the \fBconfig\fP macro or \fBreconfig\fP command
+will restore the monitor channel to that set in the \fBconfig\fP file.
+This feature is only available with certain counters.
+Counters that currently support this feature
+include the KS 3640 CAMAC counter,
+the Joerger VSC16/8 VME scaler and the generic EPICS scaler.
+.HP 5m
+."
+\fB"timer"\fP
+\- 
+Reassigns the scaler channel used as the time\-preset counter
+to the channel associated with counter \fBmne\fP.
+Rereading the hardware configuration file
+with the \fBconfig\fP macro or \fBreconfig\fP command
+will restore the time channel to that set in the \fBconfig\fP file.
+Currently no timers support this feature.
+.HP 5m
+."
+\fB"controller"\fP
+\- 
+returns a string containing the controller name
+of the specified counter.
+The controller names are those used in \fBspec\fP\(aqs \fBconfig\fP files.
+.HP 5m
+."
+\fB"unit"\fP
+\- 
+returns the unit number of the specified counter.
+Each counter controller unit may contain more than one counter channel.
+.HP 5m
+."
+\fB"channel"\fP
+\- 
+returns the channel number of the specified counter.
+.HP 5m
+."
+\fB"responsive"\fP
+\- 
+returns a nonzero value if the counter responded
+to an initial presence test or appears otherwise to be working.
+.HP 5m
+."
+\fB"disable"\fP
+\- 
+returns a nonzero value if the counter has been disabled by software.
+If \fBv\fP is given and is nonzero, then the counter is disabled.
+If \fBv\fP is given and is zero, the counter becomes no longer disabled.
+A disabled counter channel will not be accessed
+by any of \fBspec\fP\(aqs commands.
+Any \fBcdef()\fP\-defined macros will automatically exclude
+the portions of the macro keyed to the particular counter
+when the counter is software disabled.
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBgetcounts\fP
+\- 
+Loads the built\-in array \fBS[]\fP with the scaler counts.
+.RE
+.SH "VARIABLES"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBS[]\fP
+\- 
+Built\-in array that holds scaler contents after a \fBgetcounts\fP command.
+.HP 5m
+."
+\fBCOUNT\fP
+\- 
+Global variable that holds the default count time
+used by the \fBct\fP, \fBuct\fP and \fBuctn\fP macros.
+.HP 5m
+."
+\fBCOUNT_TIME\fP
+\- 
+Global variable that holds the actual count time
+used by the \fBct\fP, \fBuct\fP and \fBuctn\fP macros.
+.HP 5m
+."
+\fBDET\fP
+\- 
+Global variable that is set to the channel
+to be used as the detector during scans, usually set to \fBdet\fP.
+.HP 5m
+."
+\fBMON\fP
+\- 
+Global variable that is set to channel
+to be treated as the monitor during scans, usually set to \fBmon\fP.
+.HP 5m
+."
+\fBMON_RATE\fP
+\- 
+Global variable that holds the value \fBS[MON]/S[sec]\fP
+and is updated in the count macro.
+.RE
+.sp
+Scaler channel assignments and scaler mnemonics are set in the \fBconfig\fP file.
+The standard assignments for the first three channels are:
+.sp
+.RS 4m
+.nf
+\fBsec\fP = channel 0
+\fBmon\fP = channel 1
+\fBdet\fP = channel 2
+.fi
+.sp
+.RE
+.SH "MACROS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBcounters [new_mon new_det]\fP
+\- 
+With scaler channel arguments, this macro assigns
+those channels to the \fBMON\fP and \fBDET\fP symbols
+and displays the changed scaler assignment.
+Without arguments, the macro displays the current counter assignments,
+then prompts for new counter channels for \fBMON\fP and \fBDET\fP.
+.HP 5m
+."
+\fBct\fP
+\- 
+A macro that counts for \fBCOUNT\fP time if invoked without arguments,
+or for the time given as an argument.
+After counting, the macro prints the scaler contents.
+If interrupted with a \fB^C\fP,
+the counts at the time of the interrupt are displayed.
+.HP 5m
+."
+\fBuct\fP
+\- 
+As above, but updates the screen with the scaler contents while counting.
+The screen is updated every \fBUPDATE\fP seconds.
+Only the first six counter channels are displayed.
+.HP 5m
+."
+\fBuctn\fP
+\- 
+As above, but uses cursor control commands
+to update a multiple line display at the bottom of the screen
+and will work with more than six counters.
+.HP 5m
+."
+\fBshow_cnts\fP
+\- 
+A macro that reads counters and displays the scaler contents on the screen.
+.HP 5m
+."
+\fBscan_count\fP
+\- 
+Normally defined as \fB_count\fP, it is called by all the scan macros.
+It is redefined in powder mode to be \fB_pcount\fP.
+.HP 5m
+."
+\fB_count\fP
+\- 
+Normally defined as \fBcount\fP, redefined by the \fBsetscans\fP macro
+when updated counting during scans is in effect.
+.HP 5m
+."
+\fBcount\fP
+\- 
+Default routine for counting during scans.
+It waits for moving to end, counts, waits and reads scalers.
+It also uses the \fBchk_beam\fP macro.
+.HP 5m
+."
+\fBchk_beam\fP
+\- 
+A \fBhook\fP macro, normally defined as \fBbreak\fP.
+Can be used to wait for sufficient counts during scans.
+See the macro source file \fBcount.mac\fP for details.
+.HP 5m
+."
+\fBuser_getcounts\fP
+\- 
+A \fBhook\fP macro that allows the user to insert code, if necessary,
+after the call to \fBgetcounts\fP either to postprocess the counter values,
+or to implement user\-level counters.
+For example, in a configuration where the distance between
+the detector and the sample varies with the cosine of an angle,
+\fBuser_getcounts\fP is defined
+to multiply \fBS[DET]\fP by an appropriate factor.
+.HP 5m
+."
+\fBuser_precount\fP
+\- 
+A \fBhook\fP macro that allows the user to insert code
+to be run before the call to \fBtcount()\fP or \fBmcount()\fP.
+.HP 5m
+."
+\fBuser_postcount\fP
+\- 
+A \fBhook\fP macro that allows the user to insert code
+to be run after the call to \fBtcount()\fP or \fBmcount()\fP.
+.RE
+.sp
+A negative argument to \fBct\fP, \fBuct\fP, \fBuctn\fP or \fBcount\fP
+means count to monitor counts.
+.SH "SEE ALSO"
+.rs
+.nf
+
+\fI\%ct\fP \fI\%wait\fP
+Hardware notes in the \fBspec\fP Reference Manual
+.fi
+.sp
+

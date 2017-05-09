@@ -1,0 +1,260 @@
+.TH "dxp" "hardware" "08/01/12" "dxp.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+dxp \- XIA DXP CAMAC MCA
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)dxp.rst  6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1998,1999,2000,2001,2002,2005,2007,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "dxp" "hardware" "08/01/12" "dxp.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The X\-ray Instrumentation Associates Digital X\-ray
+processors (CAMAC models DXP 4C and DXP 4C2X and parallel port model X10P)
+have one to four MCA channels per module.
+Each channel of the device contains
+a digital signal processor (DSP).
+The DSP chips require firmware and parameter downloads for initialization.
+.sp
+As of \fBspec\fP release 4.05.10\-8,
+\fBspec\fP must be linked with a special vendor\-supplied
+application library to use the DXP modules.
+The XIA libraries have not yet stabilized,
+so one must be sure to use a version
+of the libraries compatible with the \fBspec\fP release.
+Contact CSS for advice on determining compatible versions.
+.sp
+In addition, the many XIA configuration files
+that will be read by routines in the
+DXP library must be installed on the system.
+Finally, the environment variable \fBXIA_CONFIG\fP
+must be set to the location of DXP system configuration file.
+.sp
+The source files for creating the DXP library can be obtained from the
+XIA site \fI\%http://www.xia.com/\fP
+or in a slightly more convenient format
+in the downloads directory at \fI\%certif.com\fP.
+The latter includes a \fBMakefile\fP to build a library called \fBlibdxp.a\fP.
+.sp
+When running the \fBspec\fP \fBInstall\fP script,
+you must indicate the location of the
+\fBlibdxp.a\fP library in response to the "Extra library flags" query from the
+\fBInstall\fP script.  Use, for example \fB/usr/local/xia/libdxp.a\fP or
+\fB"\-L/usr/local/xia \-ldxp"\fP.
+.sp
+The many XIA configuration files associated with the DXP modules need
+to be carefully constructed to avoid the code in the DXP library from failing.
+Please consult XIA documentation or XIA technical support for details
+related to the format of these files.
+.sp
+Note, the CAMAC slot numbers listed in the \fBdxp.module\fP
+(or equivalent) file must agree with those in the
+\fBspec\fP hardware \fBconfig\fP file.
+For the parallel port device, the hexadecimal base address of the
+I/O port listed in the \fBdxp.module\fP file must
+also agree with the value set in the \fBspec\fP \fBconfig\fP file.
+.SH "FUNCTIONS"
+.rs
+.sp
+Since each DXP module can have up to four channels, the usual
+numbering scheme in \fBspec\fP for selecting MCA devices has been extended.
+For commands that require access to individual
+channels beyond channel zero, the
+\fBmca_spar()\fP and \fBmca_sget()\fP must be used (instead of
+\fBmca_par()\fP and \fBmca_get()\fP)
+where the first argument (that selects which MCA device)
+is a string.  The string contains the number of the selected MCA,
+followed by a colon and a DXP channel number from 0 to 3.
+For the commands to set the DSP parameters, if the channel number
+is \-1, the parameter will be set in all DXP modules.  For example,
+\fBmca_spar("1:3", "finegain", 100)\fP would set the
+\fBfinegain\fP parameter to the value 100 for MCA number 1, DXP channel 3, while
+\fBmca_spar("0:\-1", "finegain", 100)\fP
+would set the \fBfinegain\fP parameter in all channels
+in all DXP modules, not just those associated with module 0.
+.sp
+For commands that act on all channels,
+such as \fB"run"\fP, assuming that MCA 0 and MCA 1 are DXP modules,
+the commands \fBmca_par("run")\fP, \fBmca_spar(1, "run")\fP,
+\fBmca_spar("0:3", "run")\fP and
+\fBmca_spar("0:\-1", "run")\fP would each start all channels in all DXP modules.
+.sp
+Besides reading the spectrum data,
+the \fBmca_sget()\fP function can read the baseline values or the DSP parameters.
+Again, the first argument is a string, formatted as described above, but
+with 16 (0x10) added to the channel number to read back the baseline or
+32 (0x20) added to the channel number
+to read back the parameters.  For example,
+.RS 3m
+.sp
+.nf
+.ft CB
+ushort array pars[1024]
+mca_sget("1:0x21", pars)
+.ft P
+.fi
+.RE
+.sp
+reads the current parameters into the \fBpars[]\fP array.
+Note, the array must be dimensioned to full size of the DXP data array, even
+though the parameter and baseline arrays are smaller (150 and 512 values,
+respectively).
+.sp
+Listed below are the functions available for the DXP device.
+.RS 0m
+.HP 5m
+."
+\fBmca_par("?")\fP
+\- 
+Lists the available commands, including the DSP parameters that can
+be individually examined or set.
+.HP 5m
+."
+\fBmca_par("disable" [, arg])\fP
+\- 
+With no arguments, returns nonzero if the selected MCA device has been
+disabled by the user, otherwise returns zero.
+If \fBarg\fP is 1, disables the MCA.
+If \fBarg\fP is 0, turns off the disabled mode.
+When the device is disabled, \fBspec\fP will not access the hardware.
+On startup, and after
+the standard \fBconfig\fP macro
+or the \fBreconfig\fP command is run, disabled mode is off.
+.HP 5m
+."
+\fBmca_par("auto_run" [, arg])\fP
+\- 
+With no arguments, returns nonzero if the selected MCA device has auto\-run
+mode set, otherwise returns zero.  If \fBarg\fP is 1, enables auto\-run mode.
+If \fBarg\fP is 0, turns off auto\-run mode.
+When auto\-run mode is set the device is started and stopped with
+the counting functions \fBtcount()\fP, \fBmcount()\fP, etc.
+When not set, the counting functions are ignored,
+but the device can be controlled with the
+\fB"run"\fP and \fB"halt"\fP options described below.
+In addition, the device can be halted with the
+\fBstop()\fP function and will be halted with \fB^C\fP.
+On startup, and after the standard \fBconfig\fP macro
+or the \fBreconfig\fP command is run, auto\-run mode is on.
+.HP 5m
+."
+\fBmca_par("run")\fP
+\- 
+Starts acquisition.
+.HP 5m
+."
+\fBmca_par("halt")\fP
+\- 
+Halts the MCA device.
+.HP 5m
+."
+\fBmca_par("save_config", filename)\fP
+\- 
+Saves the current parameter configuration to the file \fBfilename\fP
+using the DXP library routine \fBdxp_save_config()\fP.
+.HP 5m
+."
+\fBmca_par("restore_config", filename)\fP
+\- 
+Loads parameters from the DXP configuration file \fBfilename\fP
+using the DXP library routine \fBdxp_restore_config()\fP.
+.HP 5m
+."
+\fBmca_par("calib_trkdac")\fP
+\- 
+Calls the \fBdxp_calibrate()\fP function with the \fBTRKDAC\fP argument.
+.HP 5m
+."
+\fBmca_par("calib_reset")\fP
+\- 
+Calls the \fBdxp_calibrate()\fP function with the \fBRESET\fP argument.
+.HP 5m
+."
+\fBmca_par("gate" [, arg])\fP
+\- 
+The DXP modules have an external gate capability.
+If the optional argument \fBarg\fP is nonzero,
+\fBspec\fP will program the modules to obey the external gate signal.
+Otherwise, the gate will be ignored.
+With no arguments, the current value of the gate parameter is returned.
+.HP 5m
+."
+\fBmca_par("modify_one_gain", factor)\fP
+\- 
+Scales the DXP amplifier gain for a single channel
+by \fBfactor\fP by a call of the \fBdxp_modify_one_gains()\fP routine.
+.HP 5m
+."
+\fBmca_par("modify_gains", factor)\fP
+\- 
+Scales the DXP amplifier gains
+by \fBfactor\fP by a call of the \fBdxp_modify_gains()\fP routine.
+.HP 5m
+."
+\fBmca_par("dump")\fP
+\- 
+Calls the DXP library routine \fBdxp_mem_dump()\fP,
+which prints the current values of all the DXP parameters.
+.HP 5m
+."
+\fBmca_par("show_files")\fP
+\- 
+Displays the complete path names of the three configuration
+files associated with the DXP system and the three configuration files
+associated with the designated channel as provided
+by the DXP library routines
+\fBdxp_locate_system_files()\fP and \fBdxp_locate_channel_files()\fP.
+.HP 5m
+."
+\fBmca_par("icr")\fP
+\- 
+Returns the input count rate.
+.HP 5m
+."
+\fBmca_par("ocr")\fP
+\- 
+Returns the output count rate.
+.HP 5m
+."
+\fBmca_par("real")\fP and \fBmca_par("elapsed_real")\fP
+\- 
+Returns the elapsed real time.
+.HP 5m
+."
+\fBmca_par("live")\fP and \fBmca_par("elapsed_live")\fP
+\- 
+Returns the elapsed live time.
+.HP 5m
+."
+\fBmca_par("dead")\fP
+\- 
+Return the percent dead time.
+.HP 5m
+."
+\fBmca_par(any_dxp_par [, value])\fP
+\- 
+Retrieves or sets (if \fBvalue\fP is given) any
+of the DXP parameters, such as \fBerrinfo\fP or \fBlivetime\fP.
+The parameter name can be given in either lower or upper case.
+Note, with long integer parameters such as \fBoverflows\fP that are labeled as
+\fBOVERFLOWS0\fP and \fBOVERFLOWS1\fP in the DXP configuration files,
+the parameter name without
+the trailing digit will retrieve or set the long integer value
+in one call of
+\fBmca_par()\fP, although the DXP name can also be used to set the individual
+16\-bit portions of the long integers.
+Type \fBmca_par("?")\fP to get a list of all the parameters.
+.RE
+

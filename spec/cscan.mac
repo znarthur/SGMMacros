@@ -1,0 +1,931 @@
+#%TITLE% CSCAN.MAC
+#%NAME%
+#   Continuous 1- and 2-dimensional scans
+#%CATEGORY% Scans
+#%DESCRIPTION%
+#   This macro set provides the possibility to execute continuous
+#   scans with one or two motors. During these scans peaks can be searched.
+#
+#%OVERVIEW%
+# The following macros are provided:
+#%DL%
+#%DT%cscan%DD% to scan one motor continuously with a defined speed.
+#%DT%c2scan%DD% to scan two motors continuously with a defined speed.
+#%DT%cmesh%DD% to execute a mesh scan where one of the motors is scanned continuously
+#              with a defined speed.
+#%DT%cscansetup%DD% to set options for the previous macros, like
+# saving the results or searching for peaks.
+#%XDL%
+#
+#%EXAMPLE%
+#%DL%
+#%DT%cscansetup%DD%
+# Allows to chose the options for the macros cscan and cmesh and asks the following
+# questions:
+#%PRE%
+# Do you want to save (NO)? yes
+# Do you want to plot (YES)? 
+# Plotting (Only for cmesh)
+#   1: every slice
+#   2: the whole scan (1)? 
+# Count unit for plotting and peaksearch:
+#   1: Counts
+#   2: Counts/s
+#   3: Counts/Monitor counts (2)? 
+# Peaksearch
+#   0 : No peaksearch
+#   1 : Maximal Counts/s bigger than threshold (1)? 
+#       Threshold in Counts/s (1000)? 
+#%PRE%
+#%DT%cscan m0 80 85 1 0.5%DD%
+# Scans the motor m0 continuously from 80 to 85. The moving speed is 1 degrees/minute
+# and the sleeptime is 0.5 seconds.
+#%DT%c2scan m0 16 17 5 m1 5 5.5 0%DD%
+# Scans motor m0 continuously from 16 to 17 and motor m1 continuously from 5 to 5.5. 
+# The moving speed of motor m0 is 5 degrees/minute. The speed of motor m1 is
+# automatically set to 2.50 degrees/minute so that the motors arrive both at the same time.
+#%DT%cmesh m0 80 85 1 m1 70 80 10  1 %DD%
+# Executes the following mesh scan: The motor m1 is moved in 10 intervals from 
+# 80 to 90. For every point of m1, m0 is moved with the speed 1 degree/minute from
+# 80 to 85 or vice-versa.
+#%XDL%
+#
+#%END%
+
+unglobal CSC_SPEED
+unglobal CSC_OLD_SPEED
+unglobal CSC_OLD_BASE
+unglobal CSC_OLD_VELO
+
+#%UU% <motor> <start> <stop> <speed> [sleeptime]
+#%MDESC% Scans %B%motor%B% continuously from %B%start%B% to 
+# %B%stop%B%. During the scan the moving speed is set to %B%speed%B%. Is 0 given
+# as the moving speed, the actual moving speed isn't changed. If the parameter
+# %B%sleeptime%B% isn't specified, the sleeptime is 0.%BR%
+# It is possible to search for peaks during the scan (see %B%cscansetup%B%). %BR%%BR%
+
+def cscan '
+#~~~~~~~~
+global CSC_SPEED CSC_TIME CSC_CMESH
+{
+   if (($# != 4)&&($# != 5)) {
+      p "Usage: cscan motor start finish speed sleeptime"
+      exit
+   }
+   else {
+      _m[0]=$1; _s[0]=$2; _f[0]=$3; CSC_SPEED[0]=$4; _nm=1 ; CSC_TIME=$5 
+   }
+   CSC_MESH = 0
+  
+   HEADING = sprintf("cscan $*")
+   DATE = date()
+    
+   _check0 "$1"
+   _cscan_check
+
+   _cscan_init
+   _cscan _m[0] _f[0]
+   _cscan_end
+   undef cleanup
+}   
+'
+
+#%UU% <m1> <s1> <f1> <speed1> <m2> <s2> <f2> <speed2> [sleeptime]
+#%MDESC% As %B%cscan%B% but two motors are scanned continously. If one of the moving 
+# speeds is 0, the second one is calculated that manner, that both motors arrive at the
+# same time.  If both are omitted the current moving speeds are kept. If the parameter
+# %B%sleeptime%B% isn't specified, the sleeptime is 0.%BR%
+# It is possible to search for peaks during the scan (see %B%cscansetup%B%). %BR%%BR%
+
+def c2scan '
+#~~~~~~~~
+global CSC_SPEED CSC_TIME CSC_CMESH
+{
+   if (($# != 8)&&($# != 9)) {
+      p "Usage: c2scan m1 s1 f1 speed1 m2 s2 f2 speed2 [sleeptime]"
+      exit
+   }
+   else {
+      _m[0]=$1; _s[0]=$2; _f[0]=$3; CSC_SPEED[0]=$4
+      _m[1]=$5; _s[1]=$6; _f[1]=$7; CSC_SPEED[1]=$8
+      _nm=2 ; CSC_TIME=$9 
+   }
+   CSC_MESH = 0
+  
+   HEADING = sprintf("c2scan $*")
+   DATE = date()
+      
+   _check0 "$1"
+   _check0 "$5"
+   _cscan_check
+
+   _cscan_init
+   _cscan _m[0] _f[0] _m[1] _f[1]
+   _cscan_end
+   undef cleanup
+}   
+'
+
+
+#%UU% <m1> <s1> <f1> <speed>  <m2> <s2> <f2> <intervals> [sleeptime]
+#%MDESC% Traces out a grid using the motors %B%m1%B% and %B%m2%B%. The 
+# first motor scans continuously with the moving speed %B%speed%B% from %B%s1%B% to %B%e1%B% while the second one
+# scans from %B%s2%B% to %B%f2%B% using the specified number of %B%intervals%B%: The scan of %B%m1%B% is done at 
+# each point scanned by %B%m2%B%.  That is, the first motor scan is nested within the 
+# second motor scan. If the parameter
+# %B%sleeptime%B% isn't specified, the sleeptime is 0.%BR%
+# It is possible to to search for peaks during the scan (see %B%cscansetup%B%). %BR%%BR%
+
+def cmesh '
+#~~~~~~~~
+global CSC_SPEED CSC_TIME CSC_CMESH
+{
+   if (($# != 8)&&($# != 9)) {
+      p "Usage: cmesh m1 s1 f1 speed  m2 s2 f2 intervals sleeptime"
+      exit
+   }
+   else {
+      _m[0] = $1; _s[0] = $2; _f[0] = $3; CSC_SPEED[0] = $4
+      _m[1] = $5; _s[1] = $6; _f[1] = $7; CSC_SPEED[1] = 0
+      _n1 = int($8) ; CSC_TIME = $9   
+      _nm = 2
+   }
+   CSC_MESH = 1
+  
+   HEADING = sprintf("cmesh $*")
+   DATE = date()
+      
+   _check0 "$1"
+   _check0 "$5"
+   _cscan_check
+
+   _cmesh_init 
+   _cmesh
+   _cscan_end
+   undef cleanup
+}  
+'
+
+
+
+#%UU%
+#%MDESC% Defines options for the macros %B%cscan%B% and %B%cmesh%B%. You will
+# be asked the following questions:
+#%PRE%
+#  Do you want to save (NO)? 
+#%PRE%
+# It is possible to save the results. 
+#%PRE%
+#  Do you want to plot (YES)? 
+#%PRE%
+# You can plot the results.
+#%PRE%
+#  Plotting (Only for cmesh)
+#    1 : for every slice
+#    2 : for the whole scan (2)? 
+#%PRE%
+# If you chose the first option one slice is plotted after the other, otherwise
+# all slices are plotted in the same graph.
+#%PRE%
+#  Count unit for plotting and peaksearch:
+#    1: Counts
+#    2: Counts/s
+#    3: Counts/Monitor counts (2)? 
+#%PRE%
+# You can specify if you want to plot Counts, Counts/s or Counts/Monitor counts.
+# This selection is also used for the peaksearch.
+#%PRE%
+#  Peaksearch
+#    0 : No peaksearch
+#    1 : Maximal counts/s bigger than threshold (1)? 
+#        Threshold in counts/s (0)? 
+#%PRE%
+# You can execute a peaksearch over the scan results, in this case you have to 
+# give the minimal value (threshold) for a peak.   
+
+def cscansetup '
+#~~~~~~~~~~~~~
+global CSC_TIME CSC_SPEED 
+global CSC_PEAK_SEARCH CSC_PEAK_CONDITION CSC_PEAK_BORNE
+global CSC_SAVE 
+global CSC_PLOT CSC_PLOT_MODE CSC_LABEL CSC_COUNTS
+global CSC_SAFETY_FACTOR CSC_SAVE_TIME CSC_PLOT_TIME CSC_GETANGLES_TIME
+{
+   # internal initialisations
+   CSC_SAFETY_FACTOR = 1
+   CSC_SAVE_TIME = 0.04
+   CSC_PLOT_TIME = 0.009
+   CSC_GETANGLES_TIME = 0.01
+   
+   # gets user options
+   printf("\n")
+   CSC_SAVE = yesno("Do you want to save", CSC_SAVE)
+   CSC_PLOT = yesno("Do you want to plot", CSC_PLOT)
+   if (CSC_PLOT) {
+      printf("Plotting (Only for cmesh)\n")      
+      printf("  1: every slice\n")
+      CSC_PLOT_MODE = getval("  2: the whole scan", CSC_PLOT_MODE)
+   }
+
+   printf("Count unit for plotting and peaksearch:\n")
+   printf("  1: Counts\n")      
+   printf("  2: Counts\/s\n")
+   CSC_COUNTS = getval("  3: Counts\/Monitor counts", CSC_COUNTS)   
+   if (CSC_COUNTS == 1) CSC_LABEL = "Counts"
+   if (CSC_COUNTS == 2) CSC_LABEL = "Counts\/s"
+   if (CSC_COUNTS == 3) CSC_LABEL = "Counts\/Monitor counts"
+   
+   printf("Peaksearch\n")
+   printf("  0 : No peaksearch\n")
+   CSC_PEAK_SEARCH = getval(sprintf("  1 : Maximal %s bigger than threshold", CSC_LABEL), CSC_PEAK_SEARCH)
+   if (CSC_PEAK_SEARCH == 1) 
+       CSC_PEAK_BORNE = getval(sprintf("      Threshold in %s", CSC_LABEL), CSC_PEAK_BORNE)
+      
+   
+   # configurates peaksearch
+   if (CSC_PEAK_SEARCH == 0) {
+      rdef _cscan_peak \'\'
+      rdef _cmesh_peak \'\'
+      rdef _cmesh_peak_all \'\'
+   }
+   else if (CSC_PEAK_SEARCH == 1) {
+      rdef _cscan_peak \'_cscan_peak1\'
+      rdef _cmesh_peak \'_cscan_peak1\'
+      rdef _cmesh_peak_all \'\'
+   }
+}
+'
+# Initialisation of the global variables
+global CSC_SAVE CSC_PLOT CSC_PLOT_MODE CSC_COUNTS CSC_LABEL CSC_PEAKSEARCH
+CSC_SAVE = 1
+CSC_PLOT = 1; CSC_PLOT_MODE = 1
+CSC_COUNTS = 1; CSC_LABEL = "Counts"
+CSC_PEAKSEARCH = 0
+
+
+#%IU%
+#%MDESC% Parameter check for the macros %B%cscan%B%, %B%c2scan%B%  and %B%cmesh%B% 
+def _cscan_check '
+#~~~~~~~~~~~~~
+{
+   local mot
+   for (mot = 0; mot < _nm; mot ++) {
+      _bad_lim = 0
+      _chk_lim _m[mot] _s[mot]
+      _chk_lim _m[mot] _f[mot]
+      if (_bad_lim) exit 
+   }
+}   
+'
+
+
+
+#%IU%
+#%MDESC% Initialisations for the macros %B%cscan%B% and %B%c2scan%B% 
+def _cscan_init '
+#~~~~~~~~~~~~~~
+global CSC_GRP CSC_GRP_POINTS 
+global CSC_POINT CSC_SLICE_START
+global CSC_LAST_CNT
+global CSC_PLOT
+global CSC_PLOTGRP CSC_PLOTGRP_POINTS CSC_PLOTPOINT CSC_REDUCTION
+global CSC_TOTAL_TIME CSC_TOTAL_CNTS 
+{
+   local mot_list i_mot
+   
+   mot_list = motor_mne(_m[0])
+   for (i_mot = 1; i_mot < _nm; i_mot++) {
+      mot_list = sprintf("%s, %s", mot_list, motor_mne(_m[i_mot]))
+   }
+   printf("Moving %s to the start position..\n", mot_list)
+   waitmove; get_angles; 
+   for (i_mot = 0; i_mot < _nm; i_mot++) {
+      A[_m[i_mot]] = _s[i_mot] 
+   }
+   move_em; waitmove
+   
+   _cscan_set_speed
+   _cscan_init_group1
+   _cscan_save_header
+   rdef cleanup "undef cleanup ; _cscan_cleanup;"
+   if (CSC_PLOT) {
+      plot_cntl(sprintf("colors=%s",splot_col))   
+      plot_cntl("open")
+      plot_cntl("addpoint")
+      plot_range(_s[0], _f[0], "auto", "auto")
+      plot_cntl("erase")
+      plot_move(0,2,CSC_LABEL)
+      plot_move(0,-1,sprintf("  %.8s", motor_mne(_m[0])))
+   }
+   
+   CSC_PLOTPOINT = 0
+   CSC_POINT = 0
+   CSC_SLICE_START = 0
+   _reset_CSC_LAST_CNT  
+   CSC_TOTAL_TIME = 0
+   CSC_TOTAL_CNTS = 0
+}   
+'
+
+
+
+#%IU%
+#%MDESC% Initialisations for the macro %B%cmesh%B% 
+def _cmesh_init '
+#~~~~~~~~~~~~~~
+global CSC_GRP CSC_GRP_POINTS 
+global CSC_POINT CSC_SLICE_START
+global CSC_LAST_CNT
+global CSC_PLOT
+global CSC_PLOTGRP CSC_PLOTGRP_POINTS CSC_PLOTPOINT CSC_REDUCTION
+global CSC_TOTAL_TIME CSC_TOTAL_CNTS 
+{
+   printf("Moving %s to the start position..\n", motor_mne(_m[0]))
+   waitmove; get_angles; A[_m[0]] = _s[0]; move_em; waitmove
+   _d[_m[1]] = (_f[1] - _s[1])/_n1++
+   _cscan_set_speed
+   _cscan_init_group1
+   _cscan_save_header
+   rdef cleanup "undef cleanup ; _cscan_cleanup;"
+   if (CSC_PLOT) {
+      plot_cntl(sprintf("colors=%s",splot_col))   
+      plot_cntl("open")
+      plot_cntl("addpoint")
+      plot_range(_s[0], _f[0], "auto", "auto")
+      plot_cntl("erase")
+      plot_move(0,2,CSC_LABEL)
+      plot_move(0,-1,sprintf("  %.8s", motor_mne(_m[0])))
+   }
+   
+   CSC_PLOTPOINT = 0
+   CSC_POINT = 0
+   CSC_SLICE_START = 0
+   _reset_CSC_LAST_CNT  
+   CSC_TOTAL_TIME = 0
+   CSC_TOTAL_CNTS = 0
+}   
+'
+
+
+
+#%IU%
+#%MDESC% Initialisation of the group used for plotting and peaksearching: 
+#        Tests if the group has enough points to plot the probably needed 
+#        number of points. If more points are needed than available, a
+#        data reduction factor is calculated (e.g. only every second point is 
+#        taken into account for plotting and peaksearching). %BR%This data
+#        reduction doesn't concern the data which is saved. Every data point
+#        is saved.
+
+def _cscan_init_group1 '
+#~~~~~~~~~~~~~~~~~~~~~
+global CSC_SAFETY_FACTOR CSC_SAVE_TIME CSC_PLOT_TIME CSC_GETANGLES_TIME
+{
+   local _grp_points _needed_points _time_needed _time_needed0 _time_needed1 
+   
+   CSC_SAVE_TIME = 0.038; CSC_SAFETY_FACTOR = 1
+   CSC_POINT = 0; CSC_PLOTPOINT = 0; CSC_SLICE_START = 0; CSC_REDUCTION = 1
+    _reset_CSC_LAST_CNT; 
+   
+   ### Test counting
+   count_em 10000
+    _old_time = time()
+   for (i_read=0; i_read<50; i_read++) {
+      getcounts
+   }
+   _time_per_point = (time()-_old_time)/50 + \
+                     CSC_TIME+CSC_GETANGLES_TIME+CSC_SAVE*CSC_SAVE_TIME+CSC_PLOT_TIME
+   stop(2)
+   
+   ### Calculating the needed points
+   if ((_nm == 2) && !(CSC_MESH)) {
+      _time_needed0 = fabs(_f[0] - _s[0]) / CSC_SPEED[0] * 60
+      _time_needed1 = fabs(_f[1] - _s[1]) / CSC_SPEED[1] * 60
+      if (_time_needed0 > _time_needed1) {
+         _time_needed = _time_needed0
+      } else {
+         _time_needed = _time_needed1
+      }
+   } else {
+      _time_needed = fabs(_f[0] - _s[0]) / CSC_SPEED[0] * 60
+   }
+   _points_needed = _time_needed / _time_per_point * CSC_SAFETY_FACTOR
+   if (CSC_MESH) {
+      _time_needed=_time_needed*_n1      
+      if (CSC_PLOT_MODE==2) _points_needed=_points_needed*_n1; 
+   }
+   
+   
+   if (_points_needed > data_info(PL_G, "npts")) {
+      CSC_REDUCTION = int(_points_needed / data_info(PL_G, "npts")) + 1
+      printf("%.2f s/point, %.2f s, saving %d points, plotting every %d. point..\n\n", \
+             _time_per_point, _time_needed, _points_needed, CSC_REDUCTION)
+   } else {
+      CSC_REDUCTION=1   
+      printf("%.2f s/point, %.2f s, saving %d points, plotting all points..\n\n", \
+             _time_per_point, _time_needed, _points_needed)
+   }
+}
+'
+
+
+
+#%IU%
+#%MDESC% Cleanup macro which is called after a normal end of the macros
+#        %B%cscan%B% und %B%cmesh%B%.  
+
+def _cscan_end '
+#~~~~~~~~~~~~~
+   _cscan_unset_speed
+   printf("Total time : %d s, total detector counts: %d, %d points saved. \n",\
+           CSC_TOTAL_TIME, CSC_TOTAL_CNTS,CSC_POINT)
+   if (CSC_SAVE) {
+      fprintf(DATAFILE, "# Total time : %d s, total detector counts: %d, %d points saved. \n",\
+             CSC_TOTAL_TIME, CSC_TOTAL_CNTS,CSC_POINT)
+   }
+'
+
+
+#%IU%
+#%MDESC% Cleanup macro which is called in the case of the abort of 
+#        %B%cscan%B% or %B%cmesh%B% with Ctrl-C:
+#        Closes the datafile and resets the old speed.  
+
+def _cscan_cleanup '
+#~~~~~~~~~~~~~~~~~
+   stop(2)
+   if (_nm==1) { 
+     if (CSC_SAVE) fprintf(DATAFILE, "# cscan aborted with Ctrl-C\n")
+   } else {
+        if (CSC_MESH) {
+           if (CSC_SAVE) fprintf(DATAFILE, "# cmesh aborted with Ctrl-C\n")
+        } else {
+           if (CSC_SAVE) fprintf(DATAFILE, "# c2scan aborted with Ctrl-C\n")
+        }
+   }
+   _cscan_end  
+'
+
+
+
+
+#%IU% 
+#%MDESC% Sets the new speed for the continuous scan. 
+
+def _cscan_set_speed '
+#~~~~~~~~~~~~~~~~~~~
+global CSC_OLD_VELO CSC_OLD_SPEED CSC_SPEED CSC_OLD_BASE CSC_MESH
+{
+   local old_speed i_mot
+   
+   for (i_mot = 0; i_mot < _nm; i_mot++) {
+      CSC_OLD_VELO[i_mot] = motor_par(_m[i_mot],"velocity")
+      CSC_OLD_BASE[i_mot] = motor_par(_m[i_mot],"base_rate")
+      CSC_OLD_SPEED[i_mot] = CSC_OLD_VELO[i_mot] / fabs(motor_par(_m[i_mot],"step_size"))
+   }
+  
+   if ((_nm == 2) && !(CSC_MESH)) {
+      if ((CSC_SPEED[0] == 0) && (CSC_SPEED[1] != 0)) {
+         _time_needed = fabs(_f[1] - _s[1]) / CSC_SPEED[1]
+         CSC_SPEED[0] = fabs(_f[0] - _s[0]) / _time_needed 
+         printf("Calculated speed for %s : %.2f degrees/min\n", motor_mne(_m[0]), CSC_SPEED[0]) 
+      } else {
+         if ((CSC_SPEED[1] == 0) && (CSC_SPEED[0] != 0)) {
+            _time_needed = fabs(_f[0] - _s[0]) / CSC_SPEED[0]
+            CSC_SPEED[1] = fabs(_f[1] - _s[1]) / _time_needed     
+            printf("Calculated speed for %s : %.2f degrees/min\n", motor_mne(_m[1]), CSC_SPEED[1]) 
+         }
+      }
+   }
+
+   for (i_mot = 0; i_mot < _nm; i_mot++)
+   {
+      if (CSC_SPEED[i_mot] != 0) {
+         if (CSC_OLD_SPEED[i_mot] != CSC_SPEED[i_mot]/60) {
+            local newspeed
+            newspeed = CSC_SPEED[i_mot]/60 * fabs(motor_par(_m[i_mot],"step_size"))
+            motor_par(_m[i_mot],"velocity", newspeed)
+            if (newspeed < CSC_OLD_BASE[i_mot]) {
+                 motor_par(_m[i_mot],"base_rate", newspeed)
+            }
+#            printf("New speed of %s : %2f degrees/min (%.2f degrees/min)\n", \
+#                    motor_mne(_m[i_mot]), CSC_SPEED[i_mot], CSC_OLD_SPEED[i_mot]*60)
+         }
+      } else {
+         CSC_SPEED[i_mot] = CSC_OLD_SPEED[i_mot]*60
+      }
+   }
+}   
+' 
+ 
+ 
+#%IU%
+#%MDESC% Resets the old speed. 
+
+def _cscan_unset_speed '
+#~~~~~~~~~~~~~~~~~~~~~
+global CSC_OLD_VELO CSC_OLD_SPEED CSC_SPEED
+{
+   local i_mot
+   
+   for (i_mot = 0; i_mot < _nm; i_mot++) {
+      if (CSC_OLD_SPEED[i_mot] != CSC_SPEED[i_mot]/60) {
+          motor_par(_m[i_mot],"velocity", CSC_OLD_VELO[i_mot])
+          motor_par(_m[i_mot],"base_rate", CSC_OLD_BASE[i_mot])
+#          printf("Reset old speed of motor %s : %2f degrees/min\n", \
+#                    motor_mne(_m[i_mot]), CSC_OLD_SPEED[i_mot]*60)
+       }
+   }
+   printf("Reset speed.\n")
+}   
+'
+
+
+#%IU% <motor> <to>
+#%MDESC% Execution of the continuous scan of motor %B%motor%B% to the
+# position %B%to%B%. 
+def _cscan '
+#~~~~~~~~~
+global CSC_GRP 
+global CSC_TIME
+global CSC_PLOT
+{
+   local last_count last_time
+   
+   # Starts the move
+   waitmove; get_angles;
+   
+   # First point (before moving)
+   _cscan_get_first_point
+   _cscan_save_point 
+   _cscan_plot_point
+   
+   # Points dureing the move
+   A[$1] = $2; if ($# == 4) A[$3] = $4
+   count_em 86400; move_em
+   while (chk_move) {
+      # Reads the values if the sleep time is over
+      sleep(CSC_TIME)
+      _cscan_get_point
+      _cscan_save_point 
+      _cscan_plot_point
+   }
+      
+   stop(2)
+   if (! CSC_MESH) {
+      _cscan_peak 
+   }
+}   
+'
+
+
+#%IU%
+#%MDESC% Execution of the 2d grid scan with one motor moving continuously. 
+def _cmesh '
+#~~~~~~~~~~~~~~
+global CSC_POINT CSC_SLICE_START
+global CSC_PLOT_MODE
+{
+   local i_int
+
+   printf("%9s    %9s\n", motor_name(_m[1]), motor_name(_m[0])) 
+   printf("%9s    %9s\n", motor_mne(_m[1]), motor_mne(_m[0])) 
+
+   for (i_int = 0; i_int < _n1; i_int++) {
+      # One interval of motor 2
+      waitmove; get_angles
+      A[_m[1]] = _s[1] + _d[_m[1]]*i_int; move_em
+      
+      if (CSC_PLOT_MODE==1) {
+         CSC_PLOTPOINT = 0
+         CSC_SLICE_START = 0
+      } else {
+         CSC_SLICE_START = CSC_PLOTPOINT
+      }
+      _reset_CSC_LAST_CNT  
+                
+      # Scan of motor 1
+      if ((i_int%2) == 0) {
+         printf("\r%9.4f    %9.4f --> %.4f", A[_m[1]], _s[0], _f[0])
+         _cscan _m[0] _f[0]
+      }
+      else {
+         printf("\r%9.4f    %9.4f <-- %.4f", A[_m[1]], _s[0], _f[0])
+         _cscan _m[0] _s[0]
+      }
+      _cmesh_peak
+      fprintf(DATAFILE, "\n")
+   }
+   _cmesh_peak_all
+   printf("\n")  
+}   
+'
+
+#%IU%
+#%MDESC% Gets the first point (only the motor position)
+
+def _cscan_get_first_point '
+#~~~~~~~~~~~~~~~~~~~~
+global CSC_POINT CSC_LAST_CNT 
+global CSC_PLOTPOINT CSC_LAST_PCNT
+global CSC_MOTDAT CSC_EPOCH CSC_CNTDAT
+{
+   local i_mot i_cnt j_cnt pl_gi pl_g2i _div
+
+   if((CSC_COUNTS == 3) && ((MON == 0) || (MON == -1)))
+   {
+     printf("WARNING: no MONitor selected, use \"counters\"\n")
+     exit
+   }
+
+   if(DET==0)
+   {
+     printf("WARNING: no DETector selected, use \"counters\"\n")
+     exit
+   }
+
+   get_angles
+   
+   # Data to be written in the datafile
+   for (i_mot = 0; i_mot < _nm; i_mot++) {
+      CSC_MOTDAT[i_mot] = A[_m[i_mot]]
+   }
+   CSC_EPOCH = time()
+   for (i_cnt = 0; i_cnt < COUNTERS; i_cnt++) {
+      CSC_CNTDAT[i_cnt] = 0
+   }
+
+   # Data to be plotted and kept in the plot group for further calculations
+   # (e.g. peaksearch)
+   if ((CSC_POINT%CSC_REDUCTION)==0) {
+      data_put(PL_G, CSC_PLOTPOINT, 0, A[_m[0]])
+      _div = 1
+  
+      for (i=0;i<PLOT_NUM;i++) {
+ 	    cntnum = cnt_num(PLOT_SEL[i])
+            data_put(PL_G, CSC_PLOTPOINT, i+1, 0)
+      }
+      CSC_PLOTPOINT++
+   } 
+   CSC_POINT++
+  
+}   
+'
+
+#%IU%
+#%MDESC% Gets data of one point in the data group.
+
+def _cscan_get_point '
+#~~~~~~~~~~~~~~~~~~~~
+global CSC_POINT CSC_LAST_CNT 
+global CSC_PLOTPOINT CSC_LAST_PCNT
+global CSC_MOTDAT CSC_EPOCH CSC_CNTDAT
+global CSC_TOTAL_TIME CSC_TOTAL_CNTS 
+{
+   local i_mot i_cnt j_cnt pl_gi pl_g2i _div
+
+   get_angles; get_counts
+   
+   # Data to be written in the datafile
+   for (i_mot = 0; i_mot < _nm; i_mot++) {
+      CSC_MOTDAT[i_mot] = A[_m[i_mot]]
+   }
+   CSC_EPOCH = time()
+   i_cnt = 0
+   CSC_CNTDAT[i_cnt++] = S[sec] - CSC_LAST_CNT[sec]
+   for (j_cnt = 0; j_cnt < COUNTERS; j_cnt++) {
+      if (j_cnt != MON && j_cnt != sec && j_cnt != DET) {
+         CSC_CNTDAT[i_cnt++] = S[j_cnt] - CSC_LAST_CNT[j_cnt]
+      }
+   } 
+   if(MON != -1)
+    CSC_CNTDAT[i_cnt++] = S[MON] - CSC_LAST_CNT[MON];
+
+   CSC_CNTDAT[i_cnt++] = S[DET] -  CSC_LAST_CNT[DET];
+     
+   CSC_TOTAL_TIME = CSC_TOTAL_TIME + S[sec] -  CSC_LAST_CNT[sec]
+   CSC_TOTAL_CNTS = CSC_TOTAL_CNTS + S[DET] -  CSC_LAST_CNT[DET]
+   
+   for (i_cnt = 0; i_cnt < COUNTERS; i_cnt++) {
+      CSC_LAST_CNT[i_cnt] = S[i_cnt]
+#      if (index (cnt_mne(i_cnt),"enc")) CSC_LAST_CNT[i_cnt] = 0
+   }
+
+   # Data to be plotted and kept in the plot group for further calculations
+   # (e.g. peaksearch)
+   if ((CSC_POINT%CSC_REDUCTION)==0) {
+      data_put(PL_G, CSC_PLOTPOINT, 0, A[_m[0]])
+      if (CSC_COUNTS == 1) _div = 1
+      if (CSC_COUNTS == 2) _div = S[sec] - CSC_LAST_PCNT[sec]
+      if (CSC_COUNTS == 3) _div = S[MON] - CSC_LAST_PCNT[MON]
+  
+      for (i=0;i<PLOT_NUM;i++) {
+            data_put(PL_G, CSC_PLOTPOINT,i+1,(S[cnt_num(PLOT_SEL[i])]-CSC_LAST_PCNT[cnt_num(PLOT_SEL[i])])/_div)
+      }
+      CSC_PLOTPOINT++
+      for (i_cnt = 0; i_cnt < COUNTERS; i_cnt++) {
+         CSC_LAST_PCNT[i_cnt] = S[i_cnt]
+      }
+   } 
+   CSC_POINT++
+  
+}   
+'
+
+
+#%IU%  
+#%MDESC% Peaksearch for one slice.  
+
+def _cscan_peak1 '
+#~~~~~~~~~~~~~~~
+global PL_G CSC_POINT CSC_SLICE_START
+global CSC_PEAK_BORNE
+{
+   local _max_value _m1_at_max _i_at_max
+   
+   _max_value = data_anal(PL_G, CSC_SLICE_START, CSC_PLOTPOINT-CSC_SLICE_START, 0, PLOT_NUM, "max")   
+   _m1_at_max = data_anal(PL_G, CSC_SLICE_START, CSC_PLOTPOINT-CSC_SLICE_START, 0, PLOT_NUM, "x_at_max") 
+   _i_at_max  = data_anal(PL_G, CSC_SLICE_START, CSC_PLOTPOINT-CSC_SLICE_START, 0, PLOT_NUM, "i_at_max") 
+   
+   if (_max_value >= CSC_PEAK_BORNE) {
+      _cscan_display_peak _max_value _m1_at_max
+   }
+   else {
+      _cscan_display_no_peak
+   }
+}
+'
+
+
+#%IU% <peak> <motorpos at max> 
+#%MDESC% Displays a peak (in the plot window and in spec).
+
+def _cscan_display_peak '
+#~~~~~~~~~~~~~~~~~~~~~~
+global CSC_SAVE CSC_PLOT
+{   
+   local _plot_string _spec_string
+
+   if (!CSC_MESH) {
+      _plot_string = sprintf("Peak found at %s=%.4f: %.4f %s %20s", \
+                              motor_mne(_m[0]), $2, \
+                              $1, CSC_LABEL, " ")      
+      _spec_string = sprintf("Peak found at %s=%.4f: %.4f %s ", \
+                              motor_mne(_m[0]), $2, \
+                              $1, CSC_LABEL)
+      printf("%s\n\n", _spec_string)
+   }
+   else {
+      _plot_string = sprintf("Peak found at %s=%.4f, %s=%.4f: %.4f %s %20s", \
+                              motor_mne(_m[0]), $2, \
+                              motor_mne(_m[1]), A[_m[1]], \
+                              $1, CSC_LABEL, " ")      
+      _spec_string = sprintf("             %9.4f", $2)
+      _spec_string = sprintf("%s Peak found: %.4f %s ", _spec_string, \
+                                $1, CSC_LABEL)
+      printf("\n%s\n\n", _spec_string)
+   }
+   
+   if (CSC_PLOT) {
+      plot_move(-70, 0 , _plot_string)
+   }
+   if (CSC_SAVE) {
+      fprintf(DATAFILE, "# %s\n\n\n", _plot_string)
+   }
+}
+'  
+
+ 
+#%IU%
+#%MDESC% Displays that there is no peak (in the plot window and in spec).
+
+def _cscan_display_no_peak '
+#~~~~~~~~~~~~~~~~~~~~~~~~~
+global CSC_PLOT
+{
+   local _plot_string _spec_string
+
+   if (_nm == 1) {
+      _plot_string = sprintf("No peak found %50s", " ")      
+      _spec_string = sprintf("No peak found")
+      printf("%s\n\n", _spec_string)
+   }
+   
+   if (CSC_PLOT) {
+      plot_move(-60, 0, _plot_string)
+   }
+}
+'  
+
+
+#%IU%
+#%MDESC% Plots one point.  
+
+def _cscan_plot_point '
+#~~~~~~~~~~~~~~~~~~~~
+{
+   if (CSC_PLOT) {
+      plot_cntl("addpoint")
+      data_plot(PL_G,0,0,"all")
+   }
+}
+'
+ 
+ 
+#%IU%
+#%MDESC% Writes the scan header to the data file.  
+
+def _cscan_save_header '
+#~~~~~~~~~~~~~~~~~~~~
+global CSC_SAVE
+{
+   local _label_string
+  
+   if (CSC_SAVE) {
+      ond; offt
+      printf("\n#S %d  %s\n#D %s\n",++SCAN_N,HEADING,DATE)
+      if (_ctime < 0)
+         printf("#M %g  (%s)\n", -_ctime, MON!=-1?cnt_name(MON):"MON Undefined")
+      else
+         printf("#T %g  (%s)\n", _ctime, cnt_name(sec))
+ 
+      _head_par G 0
+      _head_par U 1
+      _head_par M 2
+
+      printf("#Q %s\n", _hkl_val) 
+      {
+         local i j k
+         for (i = 0, k = MOTORS; i < k; i += 8) {
+            printf("#P%d ", i/8)
+	    _mo_loop .6g "A[mA[j]]"
+         }
+      }
+      
+      printf("#N %d\n", _nm + 1 + COUNTERS)
+      _label_string = sprintf("#L ")
+      for (i = 0; i < _nm; i++) {
+         _label_string = sprintf("%s %10s ", _label_string, motor_name(_m[i]))      
+      }
+      _label_string = sprintf("%s      Epoch %12s ", _label_string, cnt_name(sec))
+      for (i = 0; i < COUNTERS; i++) {
+         if (i != MON && i != sec && i != DET) {
+            _label_string = sprintf("%s %12s ", _label_string, cnt_name(i))
+         }
+      }
+      printf("%s%12s  %12s\n", _label_string, MON!=-1?sprintf("%s%s","  ",cnt_name(MON)):"", cnt_name(DET)) 
+      
+      ont; offd
+   }
+}
+'
+
+
+#%IU%
+#%MDESC% Writes the scan data of one point to the data file.  
+
+def _cscan_save_point '
+#~~~~~~~~~~~~~~~~~~~~
+global CSC_SAVE
+{
+   local _cscan_line 
+   if (CSC_SAVE) {
+      _cscan_line = "   "
+      for (i_mot = 0; i_mot < _nm; i_mot++) {
+         _cscan_line=sprintf("%s %10.5f ", _cscan_line, CSC_MOTDAT[i_mot])
+      }
+      _cscan_line=sprintf("%s %10.f", _cscan_line, CSC_EPOCH)
+      _cscan_line=sprintf("%s %12.5f ", _cscan_line, CSC_CNTDAT[0])
+      for (i_cnt = 1; i_cnt < COUNTERS; i_cnt++) {
+         _cscan_line=sprintf("%s %12d ", _cscan_line, CSC_CNTDAT[i_cnt])
+      }
+      fprintf(DATAFILE, "%s\n", _cscan_line)
+      close(DATAFILE)
+   }
+}  
+'
+
+
+def _reset_CSC_LAST_CNT '
+#~~~~~~~~~~~~~~~~~~~~~~
+global CSC_LAST_CNT
+{
+   local ii_cnt
+   
+   for (ii_cnt = 0; ii_cnt < COUNTERS; ii_cnt++) {
+      CSC_LAST_CNT[ii_cnt] = 0
+      CSC_LAST_PCNT[ii_cnt] = 0
+   }
+}   
+'
+#%ATTENTION% Before the first use of %B%cscan%B% or %B%cmesh%B%, you 
+#            have to execute the macros %B%plotconfig%B%, %B%plotselect%B%
+#            and %B%cscansetup%B%. 
+ 
+#%MACROS%
+#%IMACROS%
+#%AUTHOR%Elke Raabe, 12.9
+#%TOC%
+
+
+

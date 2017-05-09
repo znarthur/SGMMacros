@@ -1,0 +1,43 @@
+.TH "abscan" "macro" "08/01/12" "abscan.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBabscan\fP \- incident\-reflected angle scan
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)abscan.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "abscan" "macro" "08/01/12" "abscan.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBabscan alpha_start alpha_end beta_start beta_end interval time\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBabscan\fP is a macro designed to scan the incident and reflected angles from
+\fBalpha_start\fP and \fBbeta_start\fP to \fBalpha_end\fP
+and \fBbeta_end\fP, respectively, while counting for
+\fBtime\fP during each of the \fBintervals\fP.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBabscan 2 2 0 4 40 10\fP
+.sp
+(In this example, the incident angle \fBalpha\fP remains fixed).
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%rscan\fP
+\fI\%r2scan\fP
+\fI\%lscan\fP
+\fI\%hklscan\fP
+

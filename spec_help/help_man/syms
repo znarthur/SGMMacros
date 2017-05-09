@@ -1,0 +1,271 @@
+.TH "syms" "command" "08/01/12" "syms.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBsyms\fP \- list of known symbols
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)syms.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1994,1995,1998,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "syms" "command" "08/01/12" "syms.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBsyms [\-v] [+|\-BGLADNSIC] [name ...]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The command \fBsyms\fP lists \fBspec\fP\(aqs current variables.
+Without arguments, all the variables are listed,
+along with their memory consumption and type.
+With the \fB\-v\fP flag, the variables are listed along with their values in
+a format that can be saved to a file and read back as commands.
+If arguments are given as \fBname  ...\fP,
+only symbols matching the arguments are printed.
+Such arguments may contain the \fB*\fP and \fB?\fP metacharacters.
+.sp
+Note, the \fB\-v\fP flag does not display the values of the new data array types.
+Rather, a declaration suitable for creating the array is printed.
+Such a declaration does, in fact, clear the contents of an
+already existing array.
+.sp
+In addition, the type of symbols listed can be controlled using the
+flags in the following table where a
+\fB\-\fP flag prevents symbols with the given attribute from being listed and a
+\fB+\fP flag includes symbols with the given attribute in the list.
+.sp
+.RS 4m
+.TS
+;
+l l .
+B	Built\-In
+G	Global
+L	Local
+A	Associative array
+D	Data array
+N	Number type
+S	String type
+I	Immutable attribute
+C	Constant attribute
+.TE
+.RE
+.sp
+Symbol attributes are as follows:
+.RS 0m
+.HP 5m
+."
+\fBBuilt\-In\fP
+\- 
+Symbols that cannot be removed.
+.HP 5m
+."
+\fBGlobal\fP
+\- 
+Symbols that retain their value outside of statement blocks.
+All built\-in symbols are global.
+.HP 5m
+."
+\fBLocal\fP
+\- 
+Symbols that have scope only within the statement block in which they
+are used.
+.HP 5m
+."
+\fBImmutable\fP
+\- 
+Built\-in symbols that cannot have their value altered.
+.HP 5m
+."
+\fBConstant\fP
+\- 
+Global symbols that cannot have their value altered by ordinary assignment.
+They can only have their value altered using the
+\fBconstant\fP command.
+.RE
+.sp
+Symbols can be of string, number or array type.
+They may be of both string and number type simultaneously.
+There are two arrays types:  associative and data.
+.sp
+The \fBprint\fP command always prints the string representation of a symbol.
+The \fBprintf()\fP and
+\fBsprintf()\fP functions print the number or string representation, depending
+on the given format specifications.
+Arithmetic operators use the number value of a symbol.
+The relational operators
+\fB> <  <=  >=\fP use the number value if both operands are of number type,
+otherwise the string values are lexicographically compared.
+.sp
+If the string value of a symbol cannot be interpreted as a
+number, its number value is zero.
+.sp
+A nonglobal symbol is automatically brought into existence within a
+statement or statement block (\fB{ ... }\fP) simply by using its name.
+.sp
+A symbol assigned a value at the top level (outside of any curly brackets)
+is automatically made global.
+.sp
+The \fBlocal\fP command forces the scope of a symbol
+to be within the current statement
+block and allows reuse of global names within statement blocks.
+Names already used as macro names may be used as local symbols within
+a statement block, although that macro then becomes unavailable within
+that block.
+.SH "BUILT\-IN SYMBOLS"
+.rs
+.sp
+\fBspec\fP\(aqs built\-in symbols include the following:
+.RS 0m
+.HP 5m
+."
+\fBFRESH\fP
+\- 
+is nonzero if \fBspec\fP was started with the \fB\-f\fP (fresh) flag.
+.HP 5m
+."
+\fBVERSION\fP
+\- 
+a string containing the \fBspec\fP version as in \fB"4.03.12"\fP.
+.HP 5m
+."
+\fBPI\fP
+\- 
+the numeric constant 3.14159...
+.HP 5m
+."
+\fBUSER\fP
+\- 
+the user\(aqs name, from \fB/etc/passwd\fP.
+.HP 5m
+."
+\fBHOME\fP
+\- 
+the user\(aqs home directory, from the environment.
+.HP 5m
+."
+\fBTERM\fP
+\- 
+the user\(aqs terminal type, from the environment.
+.HP 5m
+."
+\fBGTERM\fP
+\- 
+the user\(aqs graphics terminal type, from the environment.
+May be changed while running.
+.HP 5m
+."
+\fBDISPLAY\fP
+\- 
+used by X Window clients to figure out on which host to run.
+On startup, the value is taken from the environment.
+If not set in the environment, the value saved in the user\(aqs state file
+is used.
+The value can be changed while running, and the current value will be
+exported to new \fBx11filt\fP processes as they are spawned.
+.HP 5m
+."
+\fBCOLS\fP
+\- 
+the number of columns on the screen.  Initially taken from the environment,
+may be changed by assignment, unless the
+\fBTIOCGWINSZ\fP \fBioctl()\fP is available, in which case the values
+via that call will be used.
+.HP 5m
+."
+\fBROWS\fP
+\- 
+the number of rows on the screen.  Obtained as above.
+.HP 5m
+."
+\fBCWD\fP
+\- 
+the current working directory.
+.HP 5m
+."
+\fBSPEC\fP
+\- 
+the name of the program.
+.HP 5m
+."
+\fBSPECD\fP
+\- 
+the auxiliary file directory.
+.HP 5m
+."
+\fBDEBUG\fP
+\- 
+the debugging level.
+.HP 5m
+."
+\fBMOTORS\fP
+\- 
+the number of motors from the \fBconfig\fP file.
+.HP 5m
+."
+\fBCOUNTERS\fP
+\- 
+the number of counters from the \fBconfig\fP file.
+.HP 5m
+."
+\fBA\fP
+\- 
+used to communicate motor positions.
+.HP 5m
+."
+\fBS\fP
+\- 
+holds counter values.
+.RE
+.sp
+Other built\-in symbols are installed by site\-dependent code.
+In particular, the symbols \fBG\fP, \fBQ\fP, \fBZ\fP and
+\fBUB\fP are used with most of the standard geometry modules.
+.SH "EXAMPLE"
+.rs
+.RS 3m
+.sp
+.nf
+.ft CB
+SPEC> syms T*
+
+   80 TEMP_CS    (G.NS.)    96 TITLE      (G..S.)
+   80 TEMP_SP    (G.NS.)    80 T_AV       (G.NS.)
+   96 TERAMP_MIN (G.N..)    80 T_HI_SP    (G.N..)
+   96 TERM       (B..S.)    80 T_L        (G.NS.)
+   80 TIME       (G.NS.)    80 T_LO_SP    (G.N..)
+   96 TIME_END   (G.NS.)
+
+
+SPEC> syms \-v T*
+
+TEMP_CS = 0
+TEMP_SP = 0
+TERAMP_MIN = 0.2
+TERM = "xterm"
+TIME = 0
+TIME_END = 0
+TITLE = "fourc"
+T_AV = 0
+T_HI_SP = 100
+T_L = 0
+T_LO_SP = \-100
+.ft P
+.fi
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%global\fP
+\fI\%constant\fP
+\fI\%lsdef\fP
+\fI\%lscmd\fP
+\fI\%whats\fP
+

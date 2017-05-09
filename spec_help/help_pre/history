@@ -1,0 +1,56 @@
+history                              command                             history
+
+NAME
+     hhiissttoorryy - command recall facility (basic)
+
+SYNOPSIS
+
+     hhiissttoorryy [[nn||--nn]]
+
+DESCRIPTION
+
+     The hhiissttoorryy command lists the 1000 most recently entered commands.  With
+     the option nn, only the nn most recent commands are listed.  A --nn lists the
+     commands in reverse order.
+
+     The history is saved when ssppeecc exits and restored when ssppeecc restarts with
+     the same state files.
+
+     The rest of this document describes the CSS-provided version of the history
+     syntax.  If your site administrator has chosen to include the optional GNU
+     rreeaaddlliinnee history code when ssppeecc was installed, refer to the rreeaaddlliinnee help
+     file, instead.
+
+     The history feature lets you recall previous commands.  The syntax is a
+     subset of that of the ccsshh history command.  Examples of the recognized
+     syntax are:
+
+         !!!!   - redo the previous command.
+         !!1144  - redo command number 14.
+         !!--22  - redo the second to previous command.
+         !!aasscc - redo the last command that began with aasscc.
+         !!aasscc --1100000000  - As above and append --1100000000 to the command.
+
+     The command number is prepended to the ssppeecc prompt as an aid in using the
+     history feature.  Only commands typed at the keyboard are remembered for
+     history, and no more than 1000 commands are retained.  The history feature
+     cannot be used in command files.
+
+     Command recall must occur at the beginning of a line.  Text may follow the
+     command-recall word to extend that command.
+
+     Appending ::ss//lleefftt//rriigghhtt// to a recalled command will modify the first
+     occurrence of the string lleefftt in the recalled command to the characters
+     rriigghhtt. The delimiter of the left and right strings may be any character.
+     The final delimiter is optional.  If lleefftt is empty, the last entered left
+     string is used as the pattern to match.
+
+     In addition, ^^lleefftt^^rriigghhtt^^ at the start of a line is shorthand for
+     !!--11::ss//lleefftt//rriigghhtt//.  In this case, the circumflex (^^) must be used as the
+     delimiter.  The final delimiter is optional.
+
+SEE ALSO
+
+     ccsshh in the UUNNIIXX UUsseerr''ss MMaannuuaall
+     _r_e_a_d_l_i_n_e
+

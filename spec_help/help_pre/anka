@@ -1,0 +1,120 @@
+anka                                hardware                                anka
+
+NAME
+     anka - RST Gamma interface as used at ANKA
+
+DESCRIPTION
+
+     The ANKA Synchrotron at the Forschungzentrum in Karlsruhe, Germany
+     sponsored the adaptation of industrial control software to beamline
+     control.  The software product is called Gamma and is provided by RST
+     Industrie Automation GmbH.  The Gamma software runs on an OS/9 operating
+     system in a VME crate and works using peer-to-peer connections.  ssppeecc uses
+     TCP/IP sockets over ethernet to communicate with the Gamma software and
+     supports motors and counter/timers over this interface.  ssppeecc also provides
+     general access to Gamma variables through the new built-in user-level
+     functions aannkkaa__ggeett(()), aannkkaa__ppuutt(()) and aannkkaa__ppaarr(()).
+
+CONFIGURATION
+
+     Several connection parameters need to be specified that describe the Gamma
+     peer-to-peer connection.  The most important are the remote-host name, the
+     remote-host Gamma node number and the local-host Gamma node number.  These
+     parameters are available to read or modify with the ssppeecc__ppaarr(()) facility
+     using the names aannkkaa__rreemmoottee__hhoosstt, aannkkaa__rreemmoottee__nnooddee and aannkkaa__llooccaall__nnooddee. The
+     parameters can also be read from the ccoonnffiigg file using the SSPPEECC__PPAARR::
+     directive, as in:
+
+        SSPPEECC__PPAARR:: aannkkaa__rreemmoottee__hhoosstt == tthhee..hhoosstt..nnaammee
+        SSPPEECC__PPAARR:: aannkkaa__rreemmoottee__nnooddee == 112233
+        SSPPEECC__PPAARR:: aannkkaa__llooccaall__nnooddee == 445566
+
+     Currently, SSPPEECC__PPAARR:: parameters must be manually added to the ccoonnffiigg file.
+
+     The special functions below will only be available when the ANKA hardware
+     is configured or the above parameters are set.
+
+     The default TCP/IP port for the Gamma peer-to-peer connections is port
+     3500, although the local and remote ports can be reconfigured with the
+     aannkkaa__ppaarr(()) function as described below.
+
+     Since only one process at a time can bind to a particular port number, ssppeecc
+     can only connect to one Gamma system at a time with the same port number.
+
+     If the connection parameters are changed, either a rreeccoonnffiigg or the command
+     aannkkaa__ppaarr((""rreeccoonnnneecctt"")) is needed to close the old connection and open a new
+     one.
+
+FUNCTIONS
+
+     aannkkaa__ggeett((nnooddee,, iinnddeexx11,, iinnddeexx22 [[,, ttyyppee]])) - Reads the data value described by
+          the Gamma parameters nnooddee, iinnddeexx11 and iinnddeexx22 (LNR in Gamma lingo).
+          The default data type is ""lloonngg"" (or SSIINNTT in Gamma lingo).  Other data
+          types can be retrieved as specified by the optional fourth argument,
+          which can be one of the strings ""bbyyttee"", ""uubbyyttee"", ""sshhoorrtt"", ""uusshhoorrtt"",
+          ""lloonngg"", ""uulloonngg"", ""ffllooaatt"", ""ddoouubbllee"" or ""ssttrriinngg"".
+
+     aannkkaa__ppuutt((nnooddee,, iinnddeexx11,, iinnddeexx22,, vvaalluuee [[,, ttyyppee]])) - Sets the data value
+          described by the Gamma parameters nnooddee, iinnddeexx11 and iinnddeexx22 (LNR in
+          Gamma lingo) to vvaalluuee. The default data type is ""lloonngg"". Other data
+          types can be sent as specified by the optional fourth argument, as
+          listed above.
+
+     aannkkaa__ppaarr((nnaammee [[,, vvaalluuee]])) - Controls selected operational parameters
+          according to the string nnaammee as follows:
+
+          ""llooccaall__ppoorrtt"" - Sets or retrieves the port number on which ssppeecc listens
+               for connections from the remote Gamma peer.  The default is 3500.
+          ""rreemmoottee__ppoorrtt"" - Sets or retrieves the port number on which ssppeecc uses
+               to connect to the remote Gamma peer.  The default is 3500.
+          ""nneeww__ddrriivveerr"" - If set, indicates a newer version of the Gamma software
+               is running.  The default is for the mode to be set.
+          ""rreeccoonnnneecctt"" - Closes the sockets associated with the current
+               connection to the Gamma software, and attempts to reconnect using
+               the current connection parameters.
+
+          The parameters are saved in the user's state file, so are retained
+          between invocations of ssppeecc, but must be reset when starting fresh.
+
+USING ANKA MOTORS
+
+     The ANKA RST Gamma motors are configured in the standard way.  Choose
+
+         AANNKKAA RRSSTT GGaammmmaa MMoottoorr CCoonnttrroolllleerr
+
+     as the motor controller type on the DDevices screen of the configuration
+     editor, and select controller type AANNKKAA for the individual motor channels.
+
+     With respect to homing, the Gamma interface provides six home commands,
+     which involve writing the values 0, 1, -10, -11, -20 or -21 to line number
+     30 of the Gamma data area for a particular motor.  The first four values
+     correspond to the standard ssppeecc search commands (as arguments to
+     cchhgg__ddiiaall(())) ""lliimm--"", ""lliimm++"", ""hhoommee++"" and ""hhoommee--"", respectively.  The -20
+     value corresponds to a sequence of 0 and -10, while -21 corresponds to 1
+     and -11.  To accommodate these sequence searches within the existing ssppeecc
+     structure, one can associate a particular Gamma home command with a
+     particular motor for use with the default ""hhoommee"" search argument to
+     cchhgg__ddiiaall(()). The association is done by entering the Gamma home value as
+     "Generic parameter 1" on the second optional motor parameter screen of the
+     configuration editor.  (Get there by typing mm twice from the standard motor
+     parameter screen.)
+
+     In addition, the setting for the home position that is written to line
+     number 29 of the Gamma data area can be saved as "Generic parameter 2" in
+     the ccoonnffiigg file.  The units are steps.  The parameter value is copied, as
+     is, to line number 29.  If the cchhgg__ddiiaall(()) function is invoked with a third
+     argument, the value of that argument will override the value for the home
+     position in the ccoonnffiigg file.  The units for cchhgg__ddiiaall(()), home-position
+     optional third argument are dial units.
+
+DEBUGGING
+
+     Debug level 128 (0x80) displays the internal aannkkaa__ggeett(()) and aannkkaa__ppuutt(())
+     commands generated by the built-in C code for the motor and counter
+     commands sent to the Gamma software.  Debug level 0x8000 displays
+     information about each packet sent and received between ssppeecc and the Gamma
+     software.  Debug level 64 (0x40) displays the raw contents of the messages
+     transmitted in the socket connections.  If the debug level includes bit
+     0x400000, the contents will be displayed in aligned hexadecimal columns,
+     rather than the default printable/escaped ASCII.
+

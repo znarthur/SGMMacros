@@ -1,0 +1,385 @@
+readline                    GNU command line editing                    readline
+
+NAME
+     readline - command line recall and editing
+
+DESCRIPTION
+
+     The GNU rreeaaddlliinnee library or the BSD lliibbeeddiitt library may be optionally
+     linked with ssppeecc during the ssppeecc installation.  When ssppeecc is linked with
+     either of these libraries, the following command completion, history
+     substitution and command line editing features become availble.
+
+COMMAND COMPLETION
+
+     The <<ttaabb>> key can be used to complete the current word being typed.  The
+     completion is context sensitive.  If completion is asked for on the first
+     word of a command, possible completions are all of ssppeecc's built-in keywords
+     and currently defined macros.
+
+     Possible completion on words following the commands llssddeeff, pprrddeeff and uunnddeeff
+     are the currently defined macros.  Possible completion on words following
+     the commands ssyymmss and uunngglloobbaall include all the current symbol names.
+     Completion on words following llssccmmdd are the built-in keywords.  Possible
+     completions to ssppeecc__ppaarr(( are the available ssppeecc__ppaarr(()) options.  In all
+     other cases, possible completions on words following the first word of a
+     command are all the file and directory names in the current directory.
+
+     If only one completion is possible, typing the <<ttaabb>> key will generate the
+     completion.  If a small number of completions are available, typing the
+     <<ttaabb>> key twice will list them, followed by a redisplay of the current
+     input line.  If a large number of completions are possible, typing the
+     <<ttaabb>> will generate a prompt asking if all should be displayed.
+
+TILDE EXPANSION
+
+     The sequences ~~// and ~~aannyy__uusseerr// will be replaced by the full path names for
+     the current user's and any user's home directory when those characters are
+     used in the arguments to the ooppeenn(()), cclloossee(()), oonn(()), ooffff(()), ddooffiillee(()),
+     qqddooffiillee(()), ffiillee__iinnffoo(()), cchhddiirr(()) and uunniixx(()) functions.  The same applies
+     when the tilde-containing arguments are passed to the functions through
+     macros, such as through the standard nneewwffiillee, ddoo, ccdd, uu, etc. macros.
+
+     Note, as of ssppeecc release 5.04.04, tilde expansion is available whether or
+     not ssppeecc is linked with the command-line editing libraries.
+
+HISTORY SUBSTITUTION - EVENT SPECIFIERS
+
+     All or part of a previous command can be recalled for the current command
+     using a string starting with the !! event specifier character.  The
+     following event specifiers may appear anywhere in the input line.
+
+         !!!!  - The previous command.
+
+         !!NN - Command number NN.
+
+         !!--NN - The NNth previous command.
+
+         !!ssttrriinngg - The most recent command starting with ssttrriinngg.
+
+         !!??ssttrriinngg[[??]]  - The most recent command containing ssttrriinngg. The trailing
+              ?? is optional at the end of a line.
+
+HISTORY SUBSTITUTION - WORD DESIGNATORS
+
+     Individual words from previous commands can be recalled by adding a word
+     designator to the event specifier.  A colon (::) separates the two
+     components and can be omitted if the word designator begins with the
+     characters ^^, $$, ** or %%.  Words are numbered from the beginning of the
+     line, starting with a 0 (zero).
+
+         00 - The 0th word.
+
+         NN - The NNth word.
+
+         ^^ - Word 1.  !!^^ refers to word 1 of the previous command.
+
+         $$ - The last word.  !!$$ refers to the last word of the previous command.
+
+         %% - The word most recently matched by a ??ssttrriinngg??.
+
+         NN--MM - A range of words; --NN Abbreviates 00--NN.
+
+         ** - All of the words, except the 0th.  This is the same as 11--$$. If
+              there is just one word (the 0th) in the event, an empty string is
+              substituted.
+
+         NN** - Same as NN--$$.
+
+         NN-- - Same as NN--$$, but doesn't include the last word.
+
+HISTORY SUBSTITUTION - MODIFIERS
+
+     One or more modifiers may follow the optional word designator, each
+     preceded by a ::, as follows:
+
+         ## - The entire command line typed so far.
+
+         hh - Remove a trailing path name component of the form //ppaatthhnnaammee.
+
+         rr - Remove a trailing suffix of the form ..ssuuffffiixx.
+
+         ee - Remove all but the suffix.
+
+         tt - Remove all leading path name components.
+
+         ss//lleefftt//rriigghhtt[[//]] - Substitute the first occurrence of the string lleefftt
+              with the string rriigghhtt. The pattern delimiter can be any character.
+              An && character in rriigghhtt is replaced by lleefftt, unless the && is
+              preceeded by a single backslash.  The trailing delimiter is
+              optional if rriigghhtt is at the end of the line.
+
+         gg - When used with ss, apply the substitution to each occurrence of the
+              string lleefftt.
+
+         pp - Print the new command but do not execute it.
+
+     The usage ^^lleefftt^^rriigghhtt^^ is shorthand for !!!!::ss//lleefftt//rriigghhtt//.
+
+COMMAND LINE EDITING
+
+     The following special keys can be used to recall previous command lines and
+     to modify the current command line.  In addition to the control keys
+     described below, the up and down arrow keys move through the history, while
+     the left and right arrow keys move the cursor within the currently
+     displayed line.
+
+     The command names listed for readline and libedit are the names you would
+     use in an optional key-bindings file.  See the documentation for readline
+     or libedit for information on setting up their respective key bindings
+     files.  ssppeecc will arrange for a key-bindings file named ..ssppeecc__kkeeyyss in the
+     ssppeecc user's home directory to be loaded, if it exists.
+
+     ^^AA - Move to the beginning of the current line.
+
+              readline: bbeeggiinnnniinngg--ooff--lliinnee
+              libedit: eedd--mmoovvee--ttoo--bbeegg
+
+     ^^EE - Move to the end of the current line.
+
+              readline: eenndd--ooff--lliinnee
+              libedit: eedd--mmoovvee--ttoo--eenndd
+
+     EESSCC ff - Move forward to the end of the next word.
+
+              readline: ffoorrwwaarrdd--wwoorrdd
+              libedit: eemm--nneexxtt--wwoorrdd
+
+     EESSCC bb - Move to the start of the current or previous word.
+
+              readline: bbaacckkwwaarrdd--wwoorrdd
+              libedit: eedd--pprreevv--wwoorrdd
+
+     ^^LL - Clear the screen and reprint the current line at the top.
+
+              readline: cclleeaarr--ssccrreeeenn
+              libedit: eedd--cclleeaarr--ssccrreeeenn
+
+     ^^KK - Kill from the cursor to the end of the line.
+
+              readline: kkiillll--lliinnee
+              libedit: eedd--kkiillll--lliinnee
+
+     EESSCC dd - Kill from the cursor to the end of the current word.  If between
+          words, kill to the end of the next word.
+
+              readline: kkiillll--wwoorrdd
+              libedit: eemm--ddeelleettee--nneexxtt--wwoorrdd
+
+     EESSCC DDEELL - Kill from the cursor the start of the previous word.  If between
+          words, kill to the start of the previous word.
+
+              readline: bbaacckkwwaarrdd--kkiillll--wwoorrdd
+              libedit: eedd--ddeelleettee--pprreevv--wwoorrdd
+
+     ^^WW - Kill from the cursor to the previous white space.
+
+              readline: uunniixx--wwoorrdd--rruubboouutt
+              libedit: eemm__kkiillll__rreeggiioonn
+
+     ^^YY - Insert the most recently killed text at the cursor.
+
+              readline: yyaannkk
+              libedit: eemm--yyaannkk
+
+     EESSCC yy - Rotate the kill-ring, and yank the new top.  You can only do this
+          if the previous command was ^^YY or EESSCC yy.
+
+              readline: yyaannkk--ppoopp
+              libedit: not available
+
+     ^^FF - Move forward a character.
+
+              readline: ffoorrwwaarrdd--cchhaarr
+              libedit: eedd--nneexxtt--cchhaarr
+
+     ^^BB - Move back a character.
+
+              readline: bbaacckkwwaarrdd--cchhaarr
+              libedit: eedd--pprreevv--cchhaarr
+
+     <<rreettuurrnn>> - Accept the line regardless of where the cursor is.  If
+          non-empty, add the line to the history list.
+
+              readline: aacccceepptt--lliinnee
+              libedit: eedd--nneewwlliinnee
+
+     ^^PP - Move up through the history list.
+
+              readline: pprreevviioouuss--hhiissttoorryy
+              libedit: eedd--pprreevv--hhiissttoorryy
+
+     ^^NN - Move down through the history list.
+
+              readline: nneexxtt--hhiissttoorryy
+              libedit: eedd--nneexxtt--hhiissttoorryy
+
+     EESSCC << - Move to the first line of the history.
+
+              readline: bbeeggiinnnniinngg--ooff--hhiissttoorryy
+              libedit: not available
+
+     EESSCC >> - Move to last line of the history.
+
+              readline: eenndd--ooff--hhiissttoorryy
+              libedit: not available
+
+     ^^RR - Search backward, incrementally, starting at the current line and
+          moving up through the history as necessary.
+
+              readline: rreevveerrssee--sseeaarrcchh--hhiissttoorryy
+              libedit: eemm--iinncc--sseeaarrcchh--pprreevv
+
+     ^^SS - Search forward starting at the current line and moving down through
+          the the history as necessary.
+
+              readline: ffoorrwwaarrdd--sseeaarrcchh--hhiissttoorryy
+              libedit: eemm--iinncc--sseeaarrcchh--nneexxtt
+
+     ^^DD - Delete the character under the cursor.
+
+              readline: ddeelleettee--cchhaarr
+              libedit: eemm--ddeelleettee--oorr--lliisstt
+
+     ^^HH, DDEELL - Delete the character behind the cursor.  A numeric argument means
+          kill the characters instead of deleting them.
+
+              readline: bbaacckkwwaarrdd--ddeelleettee--cchhaarr
+              libedit: eedd--ddeelleettee--pprreevv--cchhaarr
+
+     ^^QQ, ^^VV - Add the literal next character to the line.
+
+              readline: qquuootteedd--iinnsseerrtt
+              libedit: eedd--qquuootteedd--iinnsseerrtt
+
+     aa, bb, etc.  - Characters to be inserted as themselves.
+
+              readline: sseellff--iinnsseerrtt
+              libedit: eedd--iinnsseerrtt
+
+     ^^TT - Transpose the previous and current characters and move forward one
+          character.
+
+              readline: ttrraannssppoossee--cchhaarrss
+              libedit: eedd--ttrraannssppoossee--cchhaarrss
+
+     EESSCC tt - Transpose the previous and current words and move forward one word.
+
+              readline: ttrraannssppoossee--wwoorrddss
+              libedit: not available
+
+     EESSCC ^^__ - Insert a copy of the previous word
+
+              readline:  not available
+              libedit: eemm__ccooppyy__pprreevv--wwoorrdd
+
+     EESSCC uu - Capitalize the current word.
+
+              readline: uuppccaassee--wwoorrdd
+              libedit: eemm--uuppppeerr--ccaassee
+
+     EESSCC ll - Make the current word lower case.
+
+              readline: ddoowwnnccaassee--wwoorrdd
+              libedit: eemm--lloowweerr--ccaassee
+
+     EESSCC cc - Capitalize the current word.
+
+              readline: ccaappiittaalliizzee--wwoorrdd
+              libedit: eemm--ccaappiittooll--ccaassee
+
+     uunnbboouunndd - Kill backward to the beginning of the line.
+
+              readline: bbaacckkwwaarrdd--kkiillll--lliinnee
+              libedit: not available
+
+     ^^UU - Kill the current line.
+
+              readline: uunniixx--lliinnee--ddiissccaarrdd
+              libedit: eemm--kkiillll--lliinnee
+
+     EESSCC 00, EESSCC 11, ...  - Enter number arguments for commands that can operate
+          on more than one object.
+
+              readline: ddiiggiitt--aarrgguummeenntt
+              libedit: eedd--aarrgguummeenntt--ddiiggiitt
+
+     ^^GG, EESSCC ^^GG, ^^XX ^^GG - Stop.
+
+              readline: aabboorrtt
+              libedit: no binding, but ^^GG aborts incremental seaches
+
+     EESSCC - Use this character as a mmeettaa prefix for keyboards that lack a meta
+          key.
+
+              readline: pprreeffiixx--mmeettaa
+              libedit: eemm--mmeettaa--nneexxtt
+
+     ^^__, ^^XX ^^UU - Undo last change.
+
+              readline: uunnddoo, is incremental and remembered for each line
+              libedit: vvii--uunnddoo, only one level of undo
+
+     EESSCC rr, EESSCC ^^RR - Undo all changes made to this line.
+
+              readline: rreevveerrtt--lliinnee
+              libedit: vvii--uunnddoo--lliinnee
+
+     ^^XX (( - Save the key strokes that follow.
+
+              readline: ssttaarrtt--kkbbdd--mmaaccrroo
+              libedit: not available
+
+     ^^XX )) - Cease saving key strokes.
+
+              readline: eenndd--kkbbdd--mmaaccrroo
+              libedit: not available
+
+     ^^XX ee - Recall the previously saved key strokes.
+
+              readline: ccaallll--llaasstt--kkbbdd--mmaaccrroo
+              libedit: not available
+
+     uunnbboouunndd - Redraw the current line.
+
+              readline: rreeddrraaww--ccuurrrreenntt--lliinnee
+              libedit: eedd--rreeddiissppllaayy
+
+     EESSCC ^^YY - Insert nth previously killed text at the cursor.
+
+              readline: yyaannkk--nntthh--aarrgg
+              libedit: not available
+
+     uunnbboouunndd - List the current key bindings.
+
+              readline: dduummpp--ffuunnccttiioonnss
+              libedit:  not available
+
+     ^^XX ^^RR - Reread the $$HHOOMMEE//..ssppeecc__kkeeyyss key-bindings file, if it exists.
+
+              readline: rree--rreeaadd--iinniitt--ffiillee
+              libedit:  not available
+
+NOTES
+
+     With the optional history libraries, the !! character must be preceded by a
+     \\ when it is typed from the keyboard and is not intended to be part of a
+     history substitution.
+
+DISTRIBUTION
+
+     The readline library is included with most modern LLiinnuuxx distributions.  In
+     addition, sources can be retrieved from _f_t_p_:_/_/_f_t_p_._g_n_u_._o_r_g_/_g_n_u_/_r_e_a_d_l_i_n_e and
+     installed on any platform supported by ssppeecc.  ssppeecc should link with all
+     current and previous releases of readline.  ssppeecc is known to link with
+     readline versions 2.0, 2.1, 2.2, 2.2.1, 4.0, 4.1, 4.2, 4.2a and 4.3.
+
+     A prebuilt version of the NetBSD libedit library is included with the ssppeecc
+     distribution in the lliibbeeddiitt subdirectory.  The official source respository
+     for the NetBSD version is at
+     _h_t_t_p_:_/_/_c_v_s_w_e_b_._n_e_t_b_s_d_._o_r_g_/_b_s_d_w_e_b_._c_g_i_/_s_r_c_/_l_i_b_/_l_i_b_e_d_i_t.  Portable versions
+     configurable for other platforms are available from
+     _h_t_t_p_:_/_/_w_w_w_._t_h_r_y_s_o_e_e_._d_k_/_e_d_i_t_l_i_n_e, although that site doesn't always have the
+     most recent version.  The source for the prebuilt version included with the
+     ssppeecc distribution is available at _c_e_r_t_i_f_._c_o_m_/_d_o_w_n_l_o_a_d_s_/_e_x_t_r_a_s.
+

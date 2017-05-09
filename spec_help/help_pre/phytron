@@ -1,0 +1,125 @@
+phytron                             hardware                             phytron
+
+NAME
+     phytron - Phytron motor controllers
+
+DESCRIPTION
+
+     The Phytron motor controllers come in a wide variety of models and firmware
+     versions.  Some firmware versions known to work with ssppeecc include the
+     following:
+
+        IIXXEE--AA--TT AALLPPHHAA VVeerrssiioonn AA9944 VV 11..99 DD--EE
+        IIXXEE--CC--TT AALLPPHHAA vveerrssiioonn 9966 VV 44..3333 DD--EE
+        IIXXEE--AA--TT AALLPPHHAA VVeerrssiioonn AA9966 VV 11..1133 DD--EE ZZMMPP
+        IIXXEE--CC--RRSS 22 SSMMDD 110011
+        IIXXEE--CC--TT AALLPPHHAA VVeerrssiioonn 9977 VV 55..3377 DD--FF
+        IIXXEE--IIEEEEEE VVeerrssiioonn CCBB 88 VV 11..1111
+        OOMMCC//TTMMCC VV22..66__1122bb
+
+     ssppeecc supports GPIB and RS-232C interfaces on the Phytron controllers.
+     Select the appropriate interface on the DDeevviiccee screen of the configuration
+     editor along the following lines:
+
+        MMOOTTOORRSS        DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE  NNUUMM                           <<>>TTYYPPEE
+           YYEESS    //ddeevv//ttttyySS00           99660000    22             PPhhyyttrroonn IIXXEE ((SSeerriiaall))
+           YYEESS                    66            44               PPhhyyttrroonn IIXXEE ((GGPPIIBB))
+
+     The corresponding entries in the ccoonnffiigg file would be:
+
+         RRSS__IIXXEE  ==  ddeevviiccee__nnaammee  bbaauudd__rraattee  nnuummbbeerr__ooff__mmoottoorrss
+         GGPP__IIXXEE  ==  ggppiibb__aaddddrreessss  nnuummbbeerr__ooff__mmoottoorrss
+
+Finding the Reference Position
+
+     The Phytron's axis initialization command ""00"", which searches for the
+     negative limit switch, is sent to a specific motor when the cchhgg__ddiiaall(())
+     function is invoked with either the ""hhoommee++"" or ""hhoommee--"" arguments.  The
+     free-axis-displacement commands, ""LL++"" and ""LL--"", are sent with the ""lliimm++""
+     and ""lliimm--"" arguments, respectively.
+
+     There is no fixed hardware signal for a home switch on the Phytron
+     controller, but there are twelve digital inputs available on the input
+     connector. There is also a command which will perform a relative move at
+     the base rate until one of the inputs goes high or low or the magnitude of
+     the move is reached. There are four parameters in this command:  the
+     direction of the move, the magnitude of the move, the binary input number
+     and the sense of the input switch. All four parameters are set by entering
+     a string for the hhoommee mmeetthhoodd (or ""hhoommee__mmeetthhoodd"" via mmoottoorr__ppaarr(())) optional
+     motor parameter.  The hhoommee mmeetthhoodd can be entered on the first
+     optional-motor-parameter screen.  (Get there by typing mm once from the
+     standard motor parameter screen.)  The string you enter will be sent to the
+     motor when the ""hhoommee"" argument is used with the ""cchhgg__ddiiaall(())"" function.  The
+     string is the actual command sent to the Phytron, and is of the form
+
+         SSmmaaggvvEEnnnnDD
+
+     where SS is a ++ or a -- for the sign of the move, mmaagg is the magnitude of the
+     move (maximum of 65535 steps), nnnn is the input number (01 through 12) and DD
+     is the sense of the input where 0 means the motor stops if the input goes
+     off and 1 means the motor stops if the input goes on. For example,
+
+         ++220000vvEE007711
+
+     would command the motor to move no more than 200 steps in the plus
+     direction, or until input 7 goes ON.
+
+     For compatibility with older versions of ssppeecc, ggeenneerriicc ppaarraammeetteerr 11 (or
+     ""mmiisscc__ppaarr__11"") can instead be used to hold the home-method string for the
+     Phytron models.
+
+Special Commands
+
+     Some Phytron models apparently cannot keep up with commands sent by the
+     computer at full speed.  One can slow down the communication between ssppeecc
+     and the Phytron controllers with the following commands:
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""rrddeellaayy"" [[,,vvaalluuee]])) - If vvaalluuee is given, sets the delay
+          before reading a response from the Phytron to vvaalluuee seconds, otherwise
+          returns the current value.  The default value is 0.015.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""wwddeellaayy"" [[,,vvaalluuee]])) - If vvaalluuee is given, sets the delay
+          before sending a command to the Phytron to vvaalluuee seconds, otherwise
+          returns the current value.  The default value is 0.015.
+
+     Only one copy of the rrddeellaayy and wwddeellaayy parameters is kept for all the
+     Phytron controllers. The motor mnemonic motor can be associated with any of
+     the Phytron controllers. The values for the parameters are saved in the
+     state file, so should only need to be reset after starting fresh.
+
+     Command pass through is available using the following functions.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the Phytron channel
+          associated with mmoottoorr.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the Phytron channel
+          associated with mmoottoorr, as above, and returns a string containing the
+          response.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""uusseenndd"",, ccmmdd)) - Sends the string ccmmdd to the Phytron
+          controller associated with mmoottoorr.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""uurreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the Phytron
+          controller associated with mmoottoorr, as above, and returns a string
+          containing the response.
+
+     For example,
+
+        00..FFOOUURRCC>> pprriinntt mmoottoorr__ppaarr((tttthh,, ""rreeaadd"",, ""PP2200RR""))
+        224400000000
+
+        00..FFOOUURRCC>>
+
+     results in the string ""\\000022XXPP2200RR\\000033\\rr\\nn"" being sent to the controller.
+     Command pass through should be used with caution to avoid interfering with
+     the built-in programming commands ssppeecc sends to the Phytron controllers.
+
+     The following commands are also available to help with debugging:
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""cchhaann__iinniitt"")) - Sends the initialization strings to the
+          specified channel.  The sames commands are sent when doing hardware
+          configuration on start up or on rreeccoonnffiigg.
+
+     mmoottoorr__ppaarr((mmoottoorr,, ""dduummpp"")) - Displays the values of Phytron parameters P01
+          through P10 and P12 through P17 for the channel associated with motor.
+

@@ -1,0 +1,350 @@
+.TH "esrf" "hardware" "08/01/12" "esrf.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+taco/esrf \- TACO (ESRF) specific functions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)esrf.rst 6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1992,1993,1994,1995,1996,1997,1998,2008,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "esrf" "hardware" "08/01/12" "esrf.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP provides three specialized functions to communicate
+with the TACO system of distributed servers and drivers
+developed at the ESRF for hardware control.
+The function \fBtaco_io()\fP provides generalized access
+to any control hardware that is supported by an ESRF driver.  The function
+\fBtaco_dc()\fP provides access to the ESRF data collector facility.
+The function \fBtaco_db()\fP allows read/write access
+to the TACO static resource database.
+(The original function names \fBesrf_io()\fP, \fBesrf_dc()\fP
+and \fBesrf_db()\fP are now deprecated, but will continue to be recognized.)
+.sp
+Support for specific TACO motor controllers (MAXE, VPAP)
+and counters (VCT6, VDL, CAEN 462, CAEN V560, LeCroy 1151)
+is built in to \fBspec\fP.
+These devices are normally accessed through \fBspec\fP\(aqs basic
+commands for moving and counting.
+\fBspec\fP also provides support for the TACO MCA and CCD device servers
+through the standard \fBmca_xxx()\fP and \fBimage_xxx()\fP functions.
+.SH "HARDWARE ACCESS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBtaco_io(dev, cmd [, arg1_in [, arg2_in]] [, array_out]|[, grp, el])\fP
+\- 
+Allows general access to ESRF hardware device servers.  The argument
+\fBdev\fP is the (case\-insensitive) string name of the hardware device
+as specified in the corresponding device server documentation.
+The name might represent an entire VME module
+or it might represent an individual
+channel on a module.
+The argument \fBcmd\fP is the string name
+of a valid command for the device.
+Each command has associated specific input and output data types.
+At present, the following data types are supported.
+.sp
+.RS 5m
+.RS 4m
+.TS
+;
+l l .
+\fBD_VOID_TYPE\fP	void
+\fBD_BOOLEAN_TYPE\fP	Boolean
+\fBD_SHORT_TYPE\fP	short
+\fBD_USHORT_TYPE\fP	unsigned short
+\fBD_LONG_TYPE\fP	long
+\fBD_ULONG_TYPE\fP	unsigned long
+\fBD_FLOAT_TYPE\fP	float
+\fBD_DOUBLE_TYPE\fP	double
+\fBD_STRING_TYPE\fP	string
+\fBD_VAR_CHARARR\fP	char array
+\fBD_VAR_SHORTARR\fP	short array
+\fBD_VAR_LONGARR\fP	long array
+\fBD_VAR_ULONGARR\fP	unsigned\-long array
+\fBD_VAR_FLOATARR\fP	float array
+\fBD_VAR_DOUBLEARR\fP	double array
+\fBD_VAR_STRINGARR\fP	string array
+\fBD_INT_FLOAT_TYPE\fP	one long, one float
+\fBD_MOTOR_FLOAT\fP	one long, one float
+\fBD_ATTE_TYPE\fP	two shorts
+\fBD_LONG_READPOINT\fP	two longs
+\fBD_MOTOR_LONG\fP	two longs
+\fBD_FLOAT_READPOINT\fP	two floats
+\fBD_DOUBLE_READPOINT\fP	two doubles
+\fBD_STATE_FLOAT_READPOINT\fP	one short, two floats
+\fBD_VAR_GRPFPARR\fP	array of DevGrpFramePair objects
+.TE
+.RE
+.sp
+The \fBD_VOID_TYPE\fP data type means no data value is to be passed.
+For scalar values, \fBspec\fP treats all data types as a double \-
+the necessary conversions are automatic.
+The argument \fBarg1_in\fP is necessary
+if the command requires an input value.
+For the two\-element composite types, \fBarg2_in\fP must also be provided.
+For array input types, \fBarg1_in\fP is the name of the array.
+For the \fBD_VAR_\fP array types
+(except for \fBD_VAR_STRINGARR\fP), \fBarg1_in\fP can
+be an associative array or a data array type.
+For commands that produce an output array or composite values,
+\fBarray_out\fP is the name of an array to receive the values.
+Data arrays can only be used for
+\fBD_VAR_\fP array types (except for \fBD_VAR_STRINGARR\fP).
+For commands that produce an output
+array of numbers (not strings or composite data types),
+a data group and element can be specified as
+\fBgrp\fP and \fBel\fP, and the received data will be placed there.
+.RE
+.HP 5m
+."
+\fBtaco_io("?" [, filter])\fP
+\- 
+A single \fB"?"\fP lists all the devices available on the current
+\fBNETHOST\fP. The optional filter argument can be used to limit the contents
+of the returned list and is in the usual DOMAIN/FAMILY/MEMBER
+format, where the \fB*\fP character can be used
+to match patterns in any of the three fields.
+See the TACO \fBdb_getdevexp\fP man page for more information.
+.HP 5m
+."
+\fBtaco_io(dev, "?")\fP
+\- 
+Lists the valid commands for the named device, along with
+the data types of any input and/or output arguments.
+.HP 5m
+."
+\fBtaco_io(dev, "timeout", time)\fP
+\- 
+Sets the remote procedure call (RPC) timeout for the indicated device.
+The value of \fBtime\fP is in seconds.  If
+\fBtime\fP is zero, the timeout is set to its original value.
+The function returns the timeout value.
+.HP 5m
+."
+\fBtaco_io(dev, "udp"|"tcp")\fP
+\- 
+Sets the ethernet protocol for the named device.
+.RE
+.sp
+If there is an error in sending a command to the device,
+\fBtaco_io()\fP returns \-1.
+In addition, the variable \fBTACO_ERR\fP (and \fBESRF_ERR\fP, if it exists)
+will be assigned the device server error number (or zero if there is no error).
+If \fBTACO_ERR\fP (or \fBESRF_ERR\fP) has the value \-1 before the call of
+\fBtaco_io()\fP, no error message will be printed, but the error message will
+be assigned to the variable \fBTACO_ERR_MSG\fP
+(and \fBESRF_ERR_MSG\fP, if it exists).
+If no output argument is generated by the command, the function returns zero.
+If the output data type is an array or composite value, the
+number of elements in the array or composite value is returned.
+Otherwise the value generated by the command is returned.
+.sp
+The first time \fBtaco_io()\fP is called with a particular device name,
+the device is "imported" from the server.
+The connection remains open until \fBspec\fP exits or
+executes the \fBreconfig\fP command.
+(The \fBreconfig\fP command is called by the \fBconfig\fP macro.)
+The \fBreconfig\fP command frees all server connections, so the next time
+\fBtaco_io()\fP is called the device will be "imported" again.
+.sp
+The complex data type \fBD_VAR_GRPFPARR\fP is described as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+struct Frame {
+        double  value;
+        short   output, pause;
+};
+struct FramePair {
+        Frame   dead, live;
+};
+struct DevGrpFramePair {
+        u_int           nb_framepair;
+        FramePair       framepair;
+};
+struct DevGrpFramePairArray {
+        u_int           length;
+        DevGrpFramePair *sequence;
+};
+.ft P
+.fi
+.RE
+.sp
+with the \fBspec\fP array values assigned from the input array or to the output
+array in the order:
+.RS 3m
+.sp
+.nf
+.ft CB
+element[0] : sequence\->nm_framepair
+element[1] : sequence\->framepair.dead.value
+element[2] : sequence\->framepair.dead.output
+element[3] : sequence\->framepair.dead.pause
+element[4] : sequence\->framepair.live.value
+element[5] : sequence\->framepair.live.output
+element[6] : sequence\->framepair.live.pause
+.ft P
+.fi
+.RE
+.sp
+ESRF devices named in the \fBconfig\fP file that are imported for motor,
+timer or counter control or for GPIB access can be accessed using
+\fBtaco_io()\fP, although that is generally not recommended, as the user\-level
+commands might conflict with the internal code.
+.sp
+The string error message associated with any errors (either from
+\fBtaco_io()\fP or from the built\-in C code that accesses
+the device servers) will be assigned
+to the built\-in variable \fBTACO_ERR_MSG\fP (and \fBESRF_ERR_MSG\fP, if it exists).
+.SH "DATA COLLECTOR"
+.rs
+.sp
+The ESRF data collector system can be accessed using the following functions.
+All devices must reside on \fBNETHOST\fP.
+.RS 0m
+.HP 5m
+."
+\fBtaco_dc(dev, "create", cmd, data_type)\fP
+\- 
+Creates a new pseudodevice for the data collector named
+\fBdev\fP having data accessed using the command \fBcmd\fP having data type
+\fBdata_type\fP.  The parameters \fBdev\fP, \fBcmd\fP and
+\fBdata_type\fP are all strings.
+\fBspec\fP requires data collector devices it creates to have
+only one command.
+If the device already exists with a different command or with more than
+one command, the function fails.
+The \fBcmd\fP argument must be one
+of the commands recognized by the data collector.
+\fBspec\fP supports the following data types:
+.sp
+.RS 5m
+.RS 4m
+.nf
+\fBD_BOOLEAN_TYPE\fP
+\fBD_SHORT_TYPE\fP
+\fBD_LONG_TYPE\fP
+\fBD_FLOAT_TYPE\fP
+\fBD_DOUBLE_TYPE\fP
+\fBD_STRING_TYPE\fP
+\fBD_VAR_CHARARR\fP
+\fBD_VAR_SHORTARR\fP
+\fBD_VAR_LONGARR\fP
+\fBD_VAR_ULONGARR\fP
+\fBD_VAR_FLOATARR\fP
+\fBD_VAR_DOUBLEARR\fP
+\fBD_VAR_STRINGARR\fP
+.fi
+.sp
+.RE
+.sp
+\fBspec\fP treats all data as either a string or a double.
+The necessary type conversions will be made on the data passed
+through \fBtaco_dc()\fP.
+.RE
+.HP 5m
+."
+\fBtaco_dc(dev, "delete")\fP
+\- 
+Deletes the device \fBdev\fP from the data collector.
+.HP 5m
+."
+\fBtaco_dc(dev, "put", data)\fP
+\- 
+Writes data to the device \fBdev\fP.
+The device must exist in the data collector and must only have one
+command.
+The \fBdata\fP argument will be converted
+to the appropriate string or number data type,
+according to the data type required by the device\(aqs command.
+If the command uses an array data type,
+\fBdata\fP should be an array name.
+.HP 5m
+."
+\fBtaco_dc(dev, cmd)\fP
+\- 
+Returns the string or number value associated
+with the command \fBcmd\fP for device \fBdev\fP.
+.HP 5m
+."
+\fBtaco_dc(dev, cmd, array_name)\fP
+\- 
+If the command \fBcmd\fP for device \fBdev\fP returns an array data type,
+\fBarray_name\fP is the name of a \fBspec\fP array
+that will receive the string or number data.
+The function returns the number of elements in the array.
+.HP 5m
+."
+\fBtaco_dc(dev, cmd, grp, el)\fP
+\- 
+If the command \fBcmd\fP for device \fBdev\fP
+returns an array data type containing number values,
+the arguments \fBgrp\fP and
+\fBel\fP specify a \fBspec\fP data group
+and element number to receive the values.
+The function returns the number of elements in the array.
+.HP 5m
+."
+\fBtaco_dc(dev, "?")\fP
+\- 
+Lists the commands and data types available for the device \fBdev\fP.
+.HP 5m
+."
+\fBtaco_dc("?")\fP
+\- 
+Lists all the devices,
+commands and data types in the data collector for \fBNETHOST\fP.
+.RE
+.sp
+If there is an error while executing \fBtaco_dc()\fP, the function returns \-1.
+In addition, if the error is associated with the data collector server, the
+data collector server error number will be assigned to the built\-in variable
+\fBTACO_ERR\fP (and \fBESRF_ERR\fP, if it exists).
+If no output value is generated by the function, it returns zero.
+If the output argument is an array, the return value is the
+number of elements in the array.
+.SH "RESOURCE DATABASE"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBtaco_db(dev, res)\fP
+\- 
+Returns a string containing the value
+of the resource \fBres\fP for the database item
+\fBdev\fP. The string \fBdev\fP is of the form
+\fB//facility/domain/family/member\fP
+or \fBdomain/family/member\fP, with the default
+\fBfacility\fP taken from the \fBNETHOST\fP environment variable.
+If there are multiple elements in the resource value,
+they are returned in a comma\-separated list.
+.HP 5m
+."
+\fBtaco_db(dev, res, value)\fP
+\- 
+The first two arguments are as above,
+with the resource \fBres\fP associated with
+\fBdev\fP being set to \fBvalue\fP.
+If multiple elements are required, the argument
+\fBvalue\fP should be a string in a comma\-separated list.
+.RE
+.sp
+If there is an error while executing \fBtaco_db()\fP, the functions return \-1.
+In addition, the variable \fBTACO_ERR\fP (and \fBESRF_ERR\fP, if it exists),
+will be assigned the error number returned by the TACO library routines.
+

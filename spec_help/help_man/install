@@ -1,0 +1,122 @@
+.TH "install" "reference" "08/01/12" "install.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+install \- \fBspec\fP installation procedure
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)install.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1992,1993,1994,1995,1997,1998,2010,2012
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "install" "reference" "08/01/12" "install.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes describe how to download and install \fBspec\fP.
+.SH "PREPARATION"
+.rs
+.sp
+To helps keep the files associated with \fBspec\fP organized,
+CSS recommends creating a user account on your machine named
+\fBspecadm\fP that will own the \fBspec\fP files.
+We also recommend that the distribution files associated with
+each version of \fBspec\fP be placed in a subdirectory named after the
+release number in the home directory of \fBspecadm\fP.
+For example, if installing \fBspec\fP release 5.09.02\-2
+and if the home directory of \fBspecadm\fP is
+\fB/home/specadm\fP, then the \fBspec\fP distribution
+might be placed in a directory named
+\fB/home/specadm/spec5.09.02\fP. The downloaded distribution
+"tarball" files might be stored in a separate directory, such as
+\fB/home/specadm/dist/\fP.
+.SH "DOWNLOADING"
+.rs
+.sp
+\fBspec\fP is distributed as a \fBtar\fP format file,
+usually retrieved from the certif.com server
+using http.  One generally receives emailed instructions on the exact
+path name to access a particular \fBspec\fP distribution from the http server.
+Distributions can only be retrieved by name, as
+the contents of the distribution directory are hidden.
+.sp
+Assuming the recommended locations, the usual procedure
+for downloading the \fBspec\fP distribution is as follows:
+.sp
+.RS 4m
+.nf
+\fBcd /home/specadm/dist\fP
+\fBwget http://certif.com/css_dist/spec_distver.tar\fP
+.fi
+.sp
+.RE
+.sp
+The \fBdistver\fP part of the file name will be unique to each download and
+will include the release version number.
+If you don\(aqt have the \fBwget\fP utility, you can try to save the file
+from a web browser.
+.SH "EXTRACTING"
+.rs
+.sp
+Use commands along the following lines to extract the
+\fBspec\fP distribution from the
+\fBtar\fP file:
+.RS 3m
+.sp
+.nf
+.ft CB
+cd /home/specadm
+mkdir spec5.09.02             (for release 5.09.02)
+cd spec5.09.02
+tar xvf ../dist/spec_distver.tar
+.ft P
+.fi
+.RE
+.SH "INSTALLING"
+.rs
+.sp
+When updating a previous installation of \fBspec\fP,
+copy the \fBinstall_data\fP file from the previous distribution directory
+to the current distribution directory.
+That will save having to retype the same responses to the
+configuration questions.
+.sp
+On a PC, with a hardware configuration that uses ISA or PCI cards, the
+\fBInstall\fP program needs to be run as the super user (root).
+In other cases, it isn\(aqt necessary to run as root, but the user
+running the script needs to have permission to write files in the
+target directories.
+.sp
+Some of the following \fBInstall\fP options may be of interest.
+.sp
+.RS 4m
+.TS
+;
+l l .
+\fB\-d\fP	Use the default parameters from \fBinstall_data\fP
+\fB\-p\fP	Do a partial installation (geometry\-dependent stuff)
+\fB\-s\fP	Just compile the geometry target
+\fB\-S\fP	Do not require root access to install
+.TE
+.RE
+.sp
+To run the script, type \fBInstall [options]\fP (or
+\fB./Install [options]\fP if the current directory isn\(aqt in your path).
+.sp
+The \fI\%config_adm\fP help file explains how to setup up the site configuration.
+In particular, sections at the end of the help file describe
+how to set up special \fBlinked configurations\fP and
+\fBextra protection\fP features.
+.sp
+You should also check the \fBREADME\fP files
+in the \fBspec\fP distribution directory and the
+\fBaux\fP subdirectory for additional information.
+

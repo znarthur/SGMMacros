@@ -1,0 +1,229 @@
+.TH "c400" "hardware" "10/06/14" "c400.rst 6.3  10/06/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+c400 \- FMB Oxford C400
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)c400.rst 6.3  10/06/14  CSS
+.
+.\" Copyright (c) 2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "c400" "hardware" "10/06/14" "c400.rst 6.3  10/06/14 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The C400 Quad Pulse Counter/Detector Controller is four\-channel
+counter/timer made by Pyramid Technical Consultants and distributed
+by FMB Oxford.
+\fBspec\fP uses the ASCII communication protocol
+available currently only on the serial interface and
+requires the controller have recent firmware (0.7.27.84 or later).
+.sp
+The C400 can be used with \fBspec\fP as counters gated by an external master
+timer or as a master timer when counting to a time preset.
+The hardware does not currently support counting to a monitor preset.
+.sp
+In addition, \fBspec\fP allows programming of the C400 parameters
+for the high voltage output,
+the analog voltage output and the
+input discriminator levels
+associated with each of the four channels.
+.SH "CONFIGURATION"
+.rs
+.sp
+The C400 is configured on the \fBD\fPevices screen along the following lines.
+.RS 3m
+.sp
+.nf
+.ft CB
+SCALERS       DEVICE  ADDR  <>MODE  NUM                      <>TYPE
+    YES   /dev/ttyS0    <>  115200    5 C400 Counter/Timer (Serial)
+    YES /dev/ttyUSB0    <>  115200    5 C400 Counters Only (Serial)
+.ft P
+.fi
+.RE
+.sp
+The default baud rate for the C400 is 115200.  The number of channels
+is set to five, as in addition to the four counter channels, there is
+a channel allocated for the elapsed time.
+When selected as "Counters Only", the C400 should have the external
+gate enabled and be hardware gated by another timer.
+.sp
+On the \fBS\fPcaler screen, choose \fBC400\fP as the device type.
+.RS 3m
+.sp
+.nf
+.ft CB
+Scaler (Counter) Configuration
+
+Num      Name  Mne  <>Device Unit Chan  <>Use As  Scale Factor
+  0   Seconds  sec      C400    0    0  timebase             1
+  1     Chan1   c1      C400    0    1   counter             1
+  2     Chan2   c2      C400    0    2   counter             1
+  3     Chan3   c3      C400    0    3   counter             1
+  4     Chan4   c4      C400    0    4   counter             1
+.ft P
+.fi
+.RE
+.sp
+The timebase channel should be assigned channel number zero.
+The remaining channels are 1 through 4.
+The scale factor for the timebase is ignored, as it
+is fixed in the C code.
+.SH "FUNCTIONS"
+.rs
+.sp
+The following \fBcounter_par()\fP options are available.  The first group
+are associated with the entire controller.  The \fBmne\fP argument
+identifies the controller.
+.RS 0m
+.HP 5m
+."
+\fBcounter_par(mne, "send", message)\fP
+\- 
+Sends the string \fBmessage\fP to the C400 associated with the
+counter \fBmne\fP.  If the message generates a response, use
+the \fB"read"\fP option below.
+.HP 5m
+."
+\fBcounter_par(mne, "read", message)\fP
+\- 
+Sends the string \fBmessage\fP to the C400 associated with the
+counter \fBmne\fP and returns the response.
+.HP 5m
+."
+\fBcounter_par(mne, "dump")\fP
+\- 
+Displays the raw responses for all the queryable parameters
+for the C400 associated with \fBmne\fP
+in a format as follows:
+.RS 5m
+.RS 3m
+.sp
+.nf
+.ft CB
+      CONF:ACCUM = 1
+        CONF:DAC = 0.0000e+00 V,0.0000e+00 V,0.0000e+00 V,0.0000e+00 V
+       CONF:DEAD = 0
+        CONF:DHI = 2.0000e+00 V,2.0000e+00 V,5.0000e+00 V,2.0000e+00 V
+        CONF:DLO = 5.0000e\-02 V,5.0000e\-02 V,2.0000e+00 V,5.0000e\-02 V
+   CONF:HIVO:SUP = \-2000 V,\-2000 V,\-2000 V,\-2000 V
+   CONF:HIVO:VOL = \-1.0000e+00 V,\-2.0000e+00 V,\-3.0000e+00 V,\-4.0000e+00 V
+    CONF:HIVO:EN = 0,0,0,0
+        CONF:PER = 1.0000e\-04 S
+        CONF:POL = P,P,P,P
+       CONF:PULS = 100000 ns,30 ns
+        TRIG:BUF = 10000
+        TRIG:BUR = 0
+       TRIG:MODE = INTernal
+        TRIG:POL = 0
+ TRIG:SOUR:START = INTernal
+  TRIG:SOUR:STOP = INTernal
+ TRIG:SOUR:PAUSE = INTernal
+SYST:COMM:IPMODE = DHCP
+    SYST:COMM:IP = 192.168.100.20
+   SYST:COMM:NET = 255.255.255.0
+  SYST:COMM:GATE = 192.168.100.1
+   SYST:COMM:LOG = 0.0.0.0
+  SYST:ERR:COUNT = 2
+     SYST:SERIAL = 0000001773
+       SYST:VERS = 1999.0
+.ft P
+.fi
+.RE
+.sp
+Values for any of these parameters can be queried or set using the
+command pass through options \fB"read"\fP and \fB"send"\fP above.
+Changing the \fB"TRIG"\fP parameters or the \fB"CONF:ACCUM"\fP
+or \fB"CONF:PER"\fP parameters can interfere with \fBspec\fP\(aqs operation
+of the counter.  Other parameters of interest can be changed using
+the following commands.
+.RE
+.HP 5m
+."
+\fBcounter_par(mne, "deadtime" [, value])\fP
+\- 
+Sets or returns the deadtime correction to be applied to the
+incoming counts for all four channels on the C400 associated with the
+counter \fBmne\fP.  The units are nanoseconds.
+.HP 5m
+."
+\fBcounter_par(mne, "gate_enable" [, 1|0])\fP
+\- 
+Sets or returns whether or not to use an external gate for the C400
+associated with counter \fBmne\fP.  The external
+gate feature is only available when the controller is configured as
+"Counters Only" (as opposed to "Counter/Timer") in the configuration
+editor.  When enabled, \fBTRIG:MODE\fP is set to \fBEXTERNAL_START_STOP\fP.
+\fBTRIG:SOUR:START\fP and \fBTRIG:SOUR:STOP\fP are set to \fBBNC\fP.
+.HP 5m
+."
+\fBcounter_par(mne, "gate_polarity" [, 1|0])\fP
+\- 
+Sets or returns the gate polarity for the C400 associated with
+counter \fBmne\fP.  A value of 0 gates on the rising edge.  A
+value of 1 gates on the falling edge.  The setting is only meaningful
+when the external\-gate mode is enabled.
+.HP 5m
+."
+\fBcounter_par(mne, "dac" [, value])\fP
+\- 
+Sets or returns the value for the analog output associated with
+channel \fBmne\fP.  The units are volts.
+.HP 5m
+."
+\fBcounter_par(mne, "disc_high" [, value])\fP
+\- 
+Sets or returns the discriminator high level in volts for the channel
+associated with \fBmne\fP.  The sign is configured
+with \fB"disc_polarity"\fP below and ignored here.
+Note, the value set must be higher than
+the current \fB"disc_low"\fP setting.  The units are in volts.
+.HP 5m
+."
+\fBcounter_par(mne, "disc_low" [, value])\fP
+\- 
+Sets or returns the discriminator low level in volts for the channel
+associated with \fBmne\fP.  The sign is configured
+with \fB"disc_polarity"\fP below and ignored here.
+Note, the value set must be lower than
+the current \fB"disc_high"\fP setting.  The units are in volts.
+.HP 5m
+."
+\fBcounter_par(mne, "disc_polarity" [, value])\fP
+\- 
+Sets or returns the discriminator polarity for the channel associated
+with counter \fBmne\fP.  Return values are the strings \fBnegative\fP or
+\fBpositive\fP.
+.HP 5m
+."
+\fBcounter_par(mne, "HV_enable" [, 1|0])\fP
+\- 
+Sets or returns whether the high voltage output is enabled for the channel
+associated with counter \fBmne\fP.  Units are in volts.
+.HP 5m
+."
+\fBcounter_par(mne, "HV_max" [, value])\fP
+\- 
+Sets or returns the maximum high voltage value setting allowed by the
+C400 firmware.  Units are in volts.
+.HP 5m
+."
+\fBcounter_par(mne, "HV" [, value])\fP
+\- 
+Sets or returns the current high voltage setting.  Units are in volts.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%www.ptcusa.com\fP
+.sp
+\fI\%www.fmb\-oxford.com\fP
+

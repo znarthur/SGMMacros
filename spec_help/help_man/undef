@@ -1,0 +1,36 @@
+.TH "undef" "command" "08/01/12" "undef.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBundef\fP \- remove a macro definition
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)undef.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "undef" "command" "08/01/12" "undef.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBundef  macro_name ...\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBundef\fP command removes a macro definition.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBundef te teramp tscan dtscan\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%def\fP
+\fI\%lsdef\fP
+

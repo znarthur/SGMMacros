@@ -1,0 +1,693 @@
+.TH "epics" "hardware" "08/05/14" "epics.rst 6.4  08/05/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+epics \- EPICS specific functions
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)epics.rst        6.4  08/05/14  CSS
+.
+.\" Copyright (c) 1994,1995,1997,1999-2002,2008,2010,2012,2014
+.
+.\" by Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "epics" "hardware" "08/05/14" "epics.rst 6.4  08/05/14 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP can be used in
+the EPICS
+(Experimental Physics and Industrial Control System)
+environment when linked with the EPICS channel access libraries.
+When so linked,
+the
+three functions
+\fBepics_get()\fP,
+\fBepics_put()\fP
+and
+\fBepics_par()\fP
+provide generic
+\fBchannel access\fP
+to EPICS process variables.
+In addition, the
+built\-in support for the
+standard EPICS
+motor, scaler, MCA and generic\-serial records
+becomes available through
+\fBspec\fP\(aqs hardware\-independent functions and commands.
+.SH "CONFIGURATION"
+.rs
+.sp
+To link \fBspec\fP with the EPICS libraries, the path to the libraries
+must be specified for the \fBspec\fP
+\fBInstall\fP
+script.
+The path is stored
+as the parameter
+\fBepics_home\fP
+in \fBspec\fP\(aqs
+\fBinstall_data\fP
+file.
+The path can specify the location of a
+\fBbase\fP
+or
+\fBlib\fP
+directory or the complete path to the actual libraries.
+For example, on a 32\-bit Linux platform, \fBspec\fP will look for the libraries
+in the following locations:
+.RS 3m
+.sp
+.nf
+.ft CB
+$epics_home
+$epics_home/lib/linux\-x86
+$epics_home/base/lib/linux\-x86
+.ft P
+.fi
+.RE
+.sp
+\fBspec\fP supports both EPICS 3.13 and 3.14 releases.
+The EPICS source can be downloaded from the EPICS home page at
+\fI\%www.aps.anl.gov/epics\fP .
+.sp
+On Linux platforms, the default installation makes \fBspec\fP a set\-user\-id root program.
+With that permission setting,
+all shared libraries used by \fBspec\fP, such as the EPICS libraries, must be
+configured system wide.
+That can be accomplished by creating (or editing if it already exists) a
+file called, for example:
+.sp
+.RS 4m
+\fB/etc/ld.so.conf.d/local.conf\fP
+.RE
+.sp
+The file should contain a line with the complete path name of the EPICS libraries, such as:
+.sp
+.RS 4m
+\fB/opt/EPICS/base/lib/linux\-x86\fP
+.RE
+.sp
+Run the following command (as root) to update the shared library information on the system:
+.sp
+.RS 4m
+\fB/sbin/ldconfig\fP
+.RE
+.sp
+See the \fBLinux\fP man pages for \fI\%ldconfig\fP and \fI\%ld.so\fP for further information.
+.sp
+Note, the set\-user\-id root setting allows \fBspec\fP to access the I/O resources associated with PC cards
+and USB devices used in many \fBspec\fP configurations.
+If no such hardware is present, the set\-user\-id mode is not required.
+.SH "FUNCTIONS"
+.rs
+.sp
+In the
+\fBepics_get()\fP
+and
+\fBepics_put()\fP
+functions below, note the special considerations given when the
+process variable is a byte array (EPICS type
+\fBDBF_CHAR\fP).
+The special treatment is given as these arrays are often used
+to hold strings since the maximum length of the EPICS
+\fBDBF_STRING\fP
+type is only 40 bytes.
+Many EPICS records use arrays of
+\fBDBF_CHAR\fP
+where longer strings are needed.
+(The special treatment for
+\fBDBF_CHAR\fP
+arrays is as of \fBspec\fP release 5.08.06\-5.)
+.sp
+Note also that prior to EPICS 3.14, the maximum size of a data transfer
+was 16,384 bytes.
+With release 3.14 and later, one can set the
+\fBEPICS_CA_MAX_ARRAY_BYTES\fP
+environment variable to larger values to overcome that limit.
+.sp
+The following functions for generic EPICS access are available:
+.RS 0m
+.HP 5m
+."
+\fBepics_get(ca_name [, type] [, count])\fP
+\- 
+Returns the result of a channel\-access get
+of the process variable
+\fBca_name\fP,
+as in
+\fBprint epics_get("ioc:m1.VAL")\fP.
+By default, the native data type of the process variable will be
+retrieved over channel access.
+However, a different data type can be specified using the optional second
+argument.
+Possible types are
+\fB"char"\fP,
+\fB"short"\fP,
+\fB"long"\fP,
+\fB"float"\fP,
+\fB"double"\fP,
+\fB"enum"\fP
+and
+\fB"string"\fP.
+For
+\fBDBF_ENUM\fP
+data types, the string value of the process variable is returned, unless
+another type is specified.
+For array types, the entire array is
+retrieved and returned, unless
+the optional argument
+\fBcount\fP
+specifies fewer elements (as of \fBspec\fP release 5.00.04).
+When requesting
+\fB"string"\fP
+for types other than
+\fBDBF_CHAR\fP,
+arrays will be
+returned as a \fBspec\fP string data array consisting of
+40\-byte rows, with as many rows as elements in the EPICS array.
+Each row will contain an ASCII representation of the corresponding
+value, with the rest of the row padded with null bytes.
+For
+\fBDBF_CHAR\fP
+data, the return value will be converted to an ordinary string (as of release 5.10.01\-8).
+Note, any bytes following a null byte in the DBF_CHAR array will be lost.
+If a
+\fB"monitor"\fP
+has been set for the process variable using the
+\fB"monitor_set"\fP
+option below,
+the returned result will be the most recent value as set by the monitor
+call back.
+Otherwise (or if there has been no monitor call back), \fBspec\fP will
+access the process variable value using the
+standard channel access
+\fBca_array_get()\fP.
+.HP 5m
+."
+\fBepics_put(ca_name, value [, wait_time])\fP
+\- 
+Does a channel\-access put of
+\fBvalue\fP,
+which can be either a string or a number,
+to the process variable
+\fBca_name\fP.
+If the optional
+\fBwait_time\fP
+argument is set, \fBspec\fP will wait for a channel\-access
+\fB"callback"\fP
+to indicate the value has been sent.
+\fBspec\fP will
+wait up to the specified number of seconds
+for that response.
+Such a feature might come in handy if the channel\-access put
+is to start an acquisition device and one wants to insure
+the device is started before continuing.
+If the process variable is an array of a
+\fBDBF_CHAR\fP
+type, any non\-array
+\fBvalue\fP,
+whether number or string,
+will be sent via channel access as a string,
+filling as many elements of the array as the string is long.
+.HP 5m
+."
+\fBepics_par(ca_name, what)\fP
+\- 
+Returns parameters associated with the process variable
+\fBca_name\fP,
+according to the value of the string
+\fBwhat\fP,
+which may have the following values:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"connect"\fP
+\- 
+Queues the call to make the initial connection for the designated
+process variable, but doesn\(aqt force a network packet to be sent.
+If many process variables are to be accessed from user level,
+it will be more efficient in terms of network access to
+use this
+\fB"connect"\fP
+option for each, before the individual
+\fBepics_get()\fP
+and
+\fBepics_put()\fP
+calls.
+(Available as of \fBspec\fP release 5.08.01\-4.)
+.HP 5m
+."
+\fB"refresh"\fP
+\- 
+Closes then reopens the channel access connection.  If a monitor has
+been set, it will be restored.
+(Available as of \fBspec\fP release 6.00.02.)
+.HP 5m
+."
+\fB"count"\fP
+\- 
+Returns the element count associated with
+\fBca_name\fP.
+.HP 5m
+."
+\fB"host"\fP
+\- 
+Returns the host name for
+\fBca_name\fP
+(EPICS 3.12 and above).
+.HP 5m
+."
+\fB"monitor_set"\fP
+\- 
+Creates a "monitor"
+for the indicated process variable.
+.HP 5m
+."
+\fB"monitor_check"\fP
+\- 
+If the indicated process variable has a monitor, returns
+the value 1 if the value of the process variable has changed since last
+read with
+\fBepics_get()\fP.
+Returns \-1 if no monitor has been created and for other EPICS
+errors.
+Otherwise returns zero.
+.HP 5m
+."
+\fB"monitor_clear"\fP
+\- 
+Removes the monitor for the indicated process variable.
+.HP 5m
+."
+\fB"read_access"\fP
+\- 
+Returns nonzero if
+\fBca_name\fP
+has read access (EPICS 3.12 and above).
+.HP 5m
+."
+\fB"timeout"\fP
+\- 
+Returns the value \fBspec\fP uses for the
+\fBca_pend_io()\fP
+time\-out parameter.
+.HP 5m
+."
+\fB"timestamp"\fP
+\- 
+Returns the EPICS timestamp associated with the indicated
+process variable.
+The value is converted to the seconds since the UNIX epoch
+(00:00:00 Jan 1, 1970 UTC \- also the \fBspec\fP epoch \- the EPICS epoch
+is marked exactly twenty years later) and includes the fractional part to
+nanosecond resolution.
+The value returned here can be used as an argument to \fBspec\fP\(aqs
+\fBdate()\fP
+function to print the time of day associated with the timestamp value.
+Note, for array EPICS process variables, the timestamp associated with
+the first element of the array is returned.
+(Available as of \fBspec\fP release 5.10.02\-11.)
+.HP 5m
+."
+\fB"type"\fP
+\- 
+Returns a string (such as
+\fB"string"\fP,
+\fB"double"\fP,
+\fB"short"\fP,
+etc.) indicating the data type of
+\fBca_name\fP.
+.HP 5m
+."
+\fB"write_access"\fP
+\- 
+Returns nonzero if
+\fBca_name\fP
+has write access (EPICS 3.12 and above).
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBepics_par(ca_name, what, value)\fP
+\- 
+Sets parameters associated with the process variable
+\fBca_name\fP,
+according to the value of the string
+\fBwhat\fP,
+which may have the following values:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"timeout"\fP
+\- 
+Sets the value \fBspec\fP uses for the
+\fBca_pend_io()\fP
+time\-out parameter.
+.PD
+.RE
+.RE
+.RE
+.SH "ERRORS"
+.rs
+.sp
+When linked with the EPICS channel\-access libraries, \fBspec\fP
+creates two built\-in global variables,
+\fBEPICS_ERR\fP
+and
+\fBEPICS_ERR_MSG\fP
+(as of \fBspec\fP release 5.08.01\-1).
+If one of the above functions results in an error generated by
+the channel\-access calls, the value of the error will be assigned
+to
+\fBEPICS_ERR\fP
+and the corresponding message, as provided by
+the
+\fBca_message()\fP
+function, will be assigned to
+\fBEPICS_ERR_MSG\fP.
+In addition, for certain errors at the \fBspec\fP level, including
+errors associated with failure to connect to an EPICS server,
+will result in a \-1 assigned to
+\fBEPICS_ERR\fP
+and, in some cases, a message assigned to
+\fBEPICS_ERR_MSG\fP.
+.SH "MONITORS"
+.rs
+.sp
+To avoid excess network traffic, monitors can be created for selected
+process variables.
+With a monitor,
+\fBepics_get()\fP
+calls will return a cached value of the process variable, rather than calling
+out over the network to fetch a value.
+The EPICS database will update \fBspec\fP when the value of the process variable
+changes.
+The
+\fB"monitor_check"\fP
+option to
+\fBepics_par()\fP
+allows for testing whether the value has changed since the last time
+the process variable was read with
+\fBepics_get()\fP.
+.sp
+Note, a
+\fBreconfig\fP
+(or
+\fBconfig\fP)
+call reinitializes the hardware connections and clears all monitors.
+Use the
+\fBconfig_mac\fP
+feature to set up macros to have monitors automatically created when
+hardware is initialized or reinitialized.
+.SH "DEFAULT TIMEOUT"
+.rs
+.sp
+The default timeout for the channel access calls is 0.5 seconds.
+The timeout for individual process variables can be changed
+using the
+\fBepics_par()\fP
+function, as described above.
+It also possible to change the default timeout for all newly created
+connections using the
+\fBspec_par()\fP
+function with the
+\fB"epics_timeout"\fP
+option.
+(See the
+\fI\%spec_par\fP help file.)
+The parameters set with
+\fBspec_par()\fP
+are saved in the user\(aqs state file, so will be restored when \fBspec\fP
+is restarted, except, of course when starting fresh (with the
+\fB\-f\fP
+flag).
+.SH "USING EPICS SCALERS"
+.rs
+.sp
+\fBspec\fP supports counter/timers using the standard EPICS scaler record.
+In addition, \fBspec\fP allows configuration
+of arbitrary process variables
+as counters.
+For process\-variable counters, the value of the PV
+will be fetched as a
+\fBDBF_DOUBLE\fP
+and assigned to the corresponding
+element of the built\-in scaler array
+\fBS[]\fP
+when the \fBspec\fP
+\fBgetcounts\fP
+command is executed.
+.sp
+EPICS counter\-related controllers are configured on
+\fBD\fPevices
+screen of the configuration editor as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+SCALERS     DEVICE ADDR <>MODE NUM                         <>TYPE
+    YES   ioc1:sc1              12  EPICS Scaler as Counter/Timer
+    YES   ioc2:sc2              16   EPICS Scaler as Counter only
+    YES ioc:pv.VAL               1            EPICS PV as Counter
+    YES      ioc1:              10            EPICS PV as Counter
+    YES       ioc:              16               EPICS MIZAR 8310
+.ft P
+.fi
+.RE
+.sp
+The first entry selects a master timer with counter channels
+supported by
+the standard EPICS scaler record.
+The second entry selects the same record support, but used only
+as counters.
+(Prior to \fBspec\fP release 5.09.01\-1, only one master timer could be configured.)
+In each case,
+the DEVICE field contains the prefix of the process variables associated
+with the records.
+.sp
+The third and fourth entries configure arbitrary process variables
+to be used as counters.
+The first of these supplies the
+entire PV name in the DEVICE field.
+The second example is for multiple PV counters that share the prefix
+given in the DEVICE field.
+The reminder of the PV name is specified on the
+\fBS\fPcaler
+screen as described below.
+.sp
+The last line configures the legacy EPICS Mizar 8310
+counter/timer record.
+.sp
+Individual counter channels are configured on the
+\fBS\fPcaler
+screen of the configuration editor along the following lines:
+.RS 3m
+.sp
+.nf
+.ft CB
+Number      Name Mnemonic  <>Device Unit Chan  <>Use As  Scale Factor
+     0   Seconds      sec  EPICS_SC    0    0  timebase       1000000
+     1   Monitor      mon  EPICS_SC    0    1   monitor             1
+     2  Detector      det  EPICS_SC    1    0   counter             1
+     3       PV0      pv0  EPICS_PV    0    0   counter             1
+     4       PV1      pv1  EPICS_PV    1    0   counter             1
+     5       PV2      pv2  EPICS_PV    1    1   counter             1
+     6      Det2     det2  EPICS_MZ    0    1   counter             1
+.ft P
+.fi
+.RE
+.sp
+The device\-type
+\fBEPICS_SC\fP
+selects counter channels from the standard EPICS scaler record.
+The unit numbers start at zero and count off the
+\fB"EPICS Scaler"\fP
+entries on the
+\fBD\fPevices
+screen.
+.sp
+The process variable counters are selected with
+\fBEPICS_PV\fP.
+Again, unit numbers start at zero and correspond to the order of the
+\fB"EPICS PV"\fP
+entries on the
+\fBD\fPevices
+screen.
+The process variable name is formed from the name given in the
+DEVICE field on the
+\fBD\fPevices
+screen, optionally appended by the string set
+as miscellaneous parameter 1
+on the standard
+optional scaler parameter screen,
+accessed by typing the
+\fBs\fP
+command:
+.RS 3m
+.sp
+.nf
+.ft CB
+Number      Name Mnemonic     Misc 1   Misc 2   Misc 3   Misc 4
+     0   Seconds      sec
+     1   Monitor      mon
+     2  Detector      det
+     3       PV0      pv0
+     4       PV1      pv1   pv1.VAL
+     5       PV2      pv2   pv2.VAL
+     6      Det2     det2
+.ft P
+.fi
+.RE
+.sp
+The device\-type
+\fBEPICS_MZ\fP
+selects a channel from the legacy EPICS Mizar record.
+.SH "USING EPICS MOTORS"
+.rs
+.sp
+\fBspec\fP supports motors under EPICS using the standard EPICS
+motor record.
+\fBspec\fP provides two flavors of support.
+With the first (the
+\fBEPICS_M1\fP
+motors),
+\fBspec\fP takes all the motor parameters, such as step size,
+velocity, acceleration, etc., from \fBspec\fP\(aqs own configuration file.
+With the second (the
+\fBEPICS_M2\fP
+motors),
+the parameters are taken from the EPICS data base, and the parameters
+in the \fBspec\fP configuration file are ignored.
+Most sites configure the \fBspec\fP motors as
+\fBEPICS_M2\fP
+so that \fBspec\fP will not cause conflicts with other EPICS utilities.
+.sp
+Note,
+\fBEPICS_M1\fP
+motors write all the parameters configured in the \fBspec\fP configuration
+file to the EPICS data base when \fBspec\fP reads its configuration file,
+ignoring values currently set in the EPICS data base.
+However, \fBspec\fP will accept the position of the motor when first
+connecting to the data base, if the motor position is nonzero.
+If the motor position is zero and \fBspec\fP\(aqs settings file contains
+a nonzero position, \fBspec\fP will ask which position should be used.
+.sp
+For
+\fBEPICS_M2\fP
+motors, \fBspec\fP will only change motor parameters in the EPICS
+data base with the
+\fBmotor_par()\fP
+function.
+(See the
+\fI\%motors\fP help file.)
+.sp
+Each set of motors
+with the same EPICS prefix should be entered on a separate line
+on the
+\fBD\fPevices
+screen of the configuration editor:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS     DEVICE   ADDR  <>MODE  NUM                     <>TYPE
+   YES      ioc1:                  44     EPICS Motor Controller
+   YES      ioc2:                  12     EPICS Motor Controller
+.ft P
+.fi
+.RE
+.sp
+The
+\fBNUM\fP
+field should be set to the highest channel number expected.
+On the
+\fBm\fPotor
+screen of the configuration editor, motors are assigned
+by choosing
+\fBEPICS_M1\fP
+or
+\fBEPICS_M2\fP
+in the controller field, as in:
+.RS 3m
+.sp
+.nf
+.ft CB
+Number: <>Controller  0:EPICS_M2 1:EPICS_M2 2:EPICS_M2 3:EPICS_M2
+Unit/Channel                 0/1        0/2        0/3        0/4
+Name                   Two Theta      Theta        Chi        Phi
+Mnemonic                     tth         th        chi        phi
+.ft P
+.fi
+.RE
+.sp
+The optional unit/channel numbering
+is turned on for all EPICS motors by entering a unit/channel
+for any of the EPICS motors.
+The feature is disabled by typing
+\fB^D\fP
+when the unit/channel data is highlighted for any of the EPICS motors.
+When the feature is disabled, channel numbers are assigned consecutively.
+Unit numbers are assigned according to the order
+the EPICS motor controllers appear
+on the
+\fBD\fPevices
+screen, starting from zero.
+Note, though, channel numbers start at one, to match the
+APS EPICS motor record convention.
+.sp
+The APS EPICS motor naming convention
+appends
+\fBm1\fP,
+\fBm2\fP,
+etc., to the prefix defined on the motor controller
+\fBD\fPevices
+screen.
+.sp
+An alternative
+naming scheme can be selected by entering
+a string value for
+the optional
+\fB"Generic Parameter 1"\fP
+on the second optional motor parameter screen.
+That string value will be appended to the prefix string
+defined on the motor controller
+\fBD\fPevices
+screen.
+.sp
+With the following configuration:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS     DEVICE   ADDR  <>MODE  NUM                     <>TYPE
+   YES X04SA\-ES2\-                  44     EPICS Motor Controller
+
+
+Number: <>Controller  0:EPICS_M2 1:EPICS_M2 2:EPICS_M2 3:EPICS_M2
+Unit/Channel                 0/1        0/2        0/3        0/4
+Name                   Two Theta      Theta        Chi        Phi
+Mnemonic                     tth         th        chi        phi
+     ...
+Generic parameter 1      SAM:TTH     SAM:TH    SAM:CHI    SAM:PHI
+.ft P
+.fi
+.RE
+.sp
+The process variable prefixes would be
+\fBX04SA\-ES2\-SAM:TTH\fP,
+\fBX04SA\-ES2\-SAM:TH\fP,
+etc.
+

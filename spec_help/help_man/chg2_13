@@ -1,0 +1,640 @@
+.TH "changes" "spec 2.13 Release Notes" "08/01/12" "chg2_13.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.13
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_13.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1992,1995 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.13 Release Notes" "08/01/12" "chg2_13.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes summarize the modifications made for \fBspec\fP release 2.13,
+as finalized on March 3, 1990.
+.SH "USER INTERFACE"
+.rs
+.sp
+The commands
+\fBlscmd\fP,
+\fBsyms\fP,
+\fBlsdef\fP
+and
+\fBprdef\fP
+now allow arguments containing the
+metacharacters
+\fB?\fP
+and
+\fB*\fP,
+which have the conventional meanings.
+Thus, for example, typing
+\fBlsdef *scan\fP
+will list all the macros whose names end with the characters
+\fBscan\fP.
+.sp
+Commands recalled using the history feature can now be modified
+using a subset of the standard
+\fBcsh\fP
+history\-feature syntax.
+Appending
+\fB:s/left/right/\fP
+to a history recalled item will modify the first occurrence of
+the string
+\fBleft\fP
+in the recalled command to the characters
+\fBright\fP.
+The delimiter of the left and right strings may be any character.
+The final delimiter is optional.
+If
+\fBleft\fP
+is empty, the last entered left string is used as the pattern to match.
+In addition,
+\fB^left^right^\fP
+is short hand for
+\fB!\-1:s/left/right/\fP.
+In this case the circumflex
+(\fB^\fP)
+must be used as the delimiter.
+.sp
+The debugging messages printed with
+\fBDEBUG=1024\fP
+have been revised to show more clearly
+the input text after macro expansion.
+.sp
+The help files have been reformatted in the style of the standard
+UNIX manual pages, and many new help topics have been added.
+.SH "MACROS"
+.rs
+.sp
+The
+\fBstartup\fP
+macro has been expanded to ask for
+values for most of the variables and mode settings a user
+normally might change.
+Besides prompting for the title, printer device and data file, as before, the
+\fBstartup\fP
+macro
+now also invokes the
+\fBstarttemp\fP,
+\fBsetscans\fP,
+\fBsetplot\fP
+and
+\fBstartgeo\fP
+macros.
+It also prompts for values for the default count time
+(\fBCOUNT\fP),
+the user\(aqs command file directory
+(\fBDO_DIR\fP)
+and the frequency of screen updates during updated moving and counting
+(\fBUPDATE\fP).
+.sp
+The
+\fBstartup\fP
+and
+\fBnewfile\fP
+macros now test if the specified printer
+or data file can be opened, before assigning values to
+\fBPRINTER\fP
+and
+\fBDATAFILE\fP.
+Also, the
+\fBstartup\fP
+macro insists the printer name must begin
+with the characters
+\fB/dev/\fP.
+One can still assign an arbitrary file or device to the printer, though,
+by assigning a value to
+\fBPRINTER\fP.
+.sp
+The macros have been
+revised to place the geometry\-dependent parts in the
+specific geometry macro source files.
+In particular, the standard scan macros no longer have four\-circle
+motor names built in.
+.sp
+Most of the macros now explicitly declare local variables as
+\fBlocal\fP
+to minimize name conflicts when macros are nested or new
+variable names are used.
+.sp
+Most instances of
+\fBgetangles\fP
+in the standard macros are now preceded by a
+\fBwaitmove\fP.
+Previously, macros such as
+\fBhscan\fP,
+\fBkscan\fP,
+etc., would read the current angles, even if a motor was
+moving, when determining the starting reciprocal space
+coordinates of the scan.
+.sp
+An updated\-count macro
+\fBuct\fP
+has been added.
+It continuously displays scaler contents during the
+counting interval.
+.sp
+A new
+\fBsetscans\fP
+macro asks the user to configure scan options.
+A new scan option allows a user to eliminate the possibly time\-consuming
+prescan limit check performed for reciprocal space scans.
+Another option causes the motor positioning and counting during
+scans to use updated moving and counting in the style of the
+\fBumv\fP
+and
+\fBuct\fP
+macros.
+(On VENIX 286 systems with CAMAC, these updated moves
+appear to sometimes hang.
+VENIX 286 users
+are advised to not rely on updated moves during unattended operation.)
+.sp
+The
+\fBsetplot\fP
+macro has been substantially revised to reflect a number of new plotting
+options available, including updated plots during scans, a logarithmic
+\fBy\fP
+axis
+and pinning the minimum
+\fBy\fP
+value at zero.
+See the
+\fBplot\fP
+help file for details.
+.sp
+The information displayed above the screen plots can now be
+modified by the user by redefining the macros
+\fBrplot_res\fP
+and
+\fBsplot_res\fP.
+The first of these prints out information during the real\-time screen
+plotting, while the second is for the final screen plot.
+.sp
+A
+\fBmvd\fP
+macro moves a motor with the position argument
+specified in
+\fBdial\fP
+units.
+.sp
+There has been a difference in opinion among \fBspec\fP users as to whether the
+\fBca\fP
+macro should leave the calculated positions in
+\fBH\fP,
+\fBK\fP,
+\fBL\fP
+and
+\fBA[]\fP,
+or whether these variables should be restored to
+the current diffractometer position after printing the results
+of the calculation.
+To accommodate both classes of users, a new macro
+\fBcal\fP
+is provided that leaves the calculated positions in the appropriate
+variables.
+The
+\fBca\fP
+macro will restore the variables to the current spectrometer position.
+.sp
+A new
+\fBsavcmd\fP
+macro sends the output of any command to a file.
+The first argument to
+\fBsavcmd\fP
+is the command to save, the second argument is the file name.
+Multiple commands or multi\-word commands can be saved by enclosing
+them in quotes, as in
+\fBsavcmd "wm th tth" motor_file\fP.
+.sp
+The
+\fBdebug\fP
+macro now examines its argument or the prompted\-for value for an initial
+\fB+\fP
+or
+\fB\-\fP.
+A
+\fB+\fP
+adds the specified level to the current debugging variable, while a
+\fB\-\fP
+removes the specified level.
+.SH "FUNCTIONS"
+.rs
+.sp
+The built\-in commands
+\fBopen\fP,
+\fBclose\fP,
+\fBon\fP
+and
+\fBoff\fP
+have been replaced by the functions
+\fBopen()\fP,
+\fBclose()\fP,
+\fBon()\fP
+and
+\fBoff()\fP.
+Functions are more versatile than commands
+as their return values can be used in expressions.
+Macros that open files can now look at the return value
+of the
+\fBopen()\fP
+function and take appropriate action if the file can\(aqt
+be opened, rather than be reset to command level.
+See the
+\fBfiles\fP
+help file for details of the new usage.
+All standard macros have been adapted to the new usage.
+.sp
+The
+\fBsleep()\fP
+function now takes fractional\-valued arguments to specify
+sleep periods of sub\-second resolution.
+Periods
+greater than five seconds are rounded to the nearest second.
+The previous syntax that used negative integer arguments to specify
+sleeps in units
+of a sixtieth of a second will continue to be recognized for the time being.
+.sp
+The
+\fBtcount()\fP
+function now accepts nonintegral count times.
+.sp
+A new function,
+\fBmotor_par()\fP,
+returns configuration parameters for a particular motor.
+Presently, only the step\-size parameter is returned.
+See the
+\fBmotors\fP
+help file for usage.
+.sp
+A new function,
+\fBpl_dump()\fP,
+efficiently prints all or a portion of the built\-in plot array to output
+devices and files.
+See the
+\fBplot\fP
+help file for details.
+.sp
+The
+\fBpl_anal()\fP
+function now returns the sum of the squares of the
+\fBy\fP
+values when called with
+an argument of 12.
+The macro
+\fBpl_SUMSQ\fP
+is defined to be this quantity.
+.sp
+The
+\fBpl_anal()\fP
+function can now do a simple linear\-background subtraction
+before doing the standard analyses.
+The linear background is calculated from the scan endpoints.
+The new built\-in variable
+\fBBGPTS\fP
+can be set to the number of points from each end of the scan to average
+together before calculating the linear background.
+The macros,
+\fBpl_bgMAX\fP,
+\fBpl_bgUHMX\fP,
+\fBpl_bgLHMX\fP,
+\fBpl_bgSUM\fP,
+\fBpl_bgFWHM\fP,
+\fBpl_bgCFWHM\fP
+and
+\fBpl_bgxMAX\fP
+have been defined as appropriate calls of
+\fBpl_anal()\fP.
+The
+\fBsetplot\fP
+macro can be used to select the background subtraction mode.
+See the
+\fBplot\fP
+help file for more information.
+This is a trial feature, implemented in response to a specific user
+request and may be modified substantially in future releases.
+.SH "GEOMETRY CODE"
+.rs
+.sp
+The four\-circle
+\fBphi\-zero\fP
+geometry mode has been changed to a
+\fBphi\-fixed\fP
+mode.
+To recover the previous operation, use the
+\fBfreeze\fP
+macro to freeze the value of
+\fBphi\fP
+at zero.
+.sp
+The macros for the four\-circle lattice\-parameter\-refinement
+feature (or the fitting\-the\-orientation\-matrix feature)
+have been renamed from
+\fBbeg_reflex\fP,
+\fBadd_reflex\fP
+and
+\fBend_reflex\fP
+to
+\fBreflex_beg\fP,
+\fBreflex\fP
+and
+\fBreflex_end\fP.
+.sp
+Support for a new geometry configuration,
+\fBzaxis\fP
+(see J.M. Bloch,
+\fBJ. Appl. Cryst.\fP
+(1985)
+\fB18\fP,
+33\-36),
+is included.
+The source code is in the file
+\fBgeo_zaxis.c\fP.
+.sp
+The code for the
+\fBsurf\fP
+geometry configuration has been expanded to accommodate
+a similar spectrometer used at Saclay.
+.SH "HARDWARE"
+.rs
+.sp
+Support for the DSP TS\-201 counter/timer CAMAC module is included.
+Count intervals can only be specified to within 1.5 percent when counting
+to time and to a power of two when counting to monitor.
+When counting to monitor, gating requires software intervention, causing
+an unavoidable latency in disabling the counter, resulting
+in variable count intervals.
+.sp
+Code to support the LeCroy CAMAC Model 2301 interface for the QVT
+Multichannel Analyzer used with a wire linear detector is now included.
+The
+\fBgetmca()\fP
+command is used to read the MCA.
+See the
+\fBcounting\fP
+help file for more information.
+The
+\fBtcount()\fP
+and
+\fBmcount()\fP
+functions will clear, start and stop the MCA using the configured timing
+generator.
+The software gating will not interfere with hardware gating, if hardware
+gating is present.
+.sp
+The code for the Joerger SMC CAMAC motor controller has been expanded to
+support Model SMC\-LP, which has programmable velocity and
+acceleration registers.
+The
+\fBedconf\fP
+program now accepts these parameters for all SMC controllers,
+although the values entered are ignored for the other models.
+.sp
+Timing problems with the Kinetic Systems 3388
+GPIB CAMAC module on fast 386 computers have been fixed.
+.sp
+PC counting boards based on the Am9513 counter/timer chip,
+such as the MetraByte CTM\-05 and the Scientific Solutions
+Lab Master,
+may now be used with \fBspec\fP.
+Presently, the board is handled using user\-level busy\-wait
+loops.
+In the future, an interrupt\-driven driver will be provided.
+.sp
+The Advanced Control Systems Step Pak RS\-232C motor controllers
+are now supported.
+.sp
+Timeout errors on the National Instrument GPIB interface no
+longer cause a return to command level.
+On a timeout error, a
+\fBgpib_get()\fP
+will return an empty string, and a
+\fBgpib_put()\fP
+will return zero.
+Other errors, such as no GPIB listener, still reset to command level.
+.sp
+Trailing newlines and carriage returns are now stripped from
+the strings returned by
+\fBgpib_get()\fP
+when using the National Instruments GPIB board.
+Code for the other supported
+GPIB hardware has always done this.
+.sp
+The CAMAC driver for VENIX 286 can now be installed to support
+the modified DSP 6001/2 crate controllers by invoking the
+\fBinstall_dsp\fP
+script with the
+\fB\-M\fP
+flag.
+.SH "UTILITIES"
+.rs
+.sp
+A new utility command to be run from the shell called
+\fBshowscans\fP
+is included.
+The
+\fBshowscans\fP
+utility uses the \fBC\-PLOT\fP package and the
+\fBshow.awk\fP
+script (introduced in release 2.11) to produce summary plots of scans.
+When you install \fBspec\fP,
+\fBshowscans\fP
+(and also
+\fBcontents\fP)
+are now also installed automatically.
+A new file
+\fBaux/README\fP
+describes
+\fBshowscans\fP
+and the other auxiliary files included with the
+\fBspec\fP package.
+.SH "ADMINISTRATION"
+.rs
+.sp
+The distribution no longer comes with a prelinked version
+of the
+\fBfourc\fP
+executable.
+When you install the software for the first time, several
+source files will be compiled and all the object modules
+linked to produce the target executable.
+.sp
+The
+\fBedconf\fP
+program has been revised to accommodate the increasing number
+of hardware devices that \fBspec\fP supports.
+Most of these changes affect the format of the device screen.
+.sp
+Changes in the way
+\fBedconf\fP
+backs up the
+\fBconfig\fP
+and
+\fBsettings\fP
+files should lesson instances of accidental
+total loss of motor positions through user inattention.
+The files are now backed up only once when running
+\fBedconf\fP,
+and then only when you try to write out the files, not
+when starting up.
+.sp
+There is also a new undocumented security feature offered
+by
+\fBedconf\fP
+that implements an additional level of protection to prevent
+unauthorized users from changing the configuration of selected motors.
+\fBspec\fP administrators who require this additional security
+should contact CSS for instructions.
+.sp
+It is now possible to link versions of \fBspec\fP that contain only
+the hardware modules that will be used by a specific site.
+You must edit
+\fBMakefile\fP
+and
+\fBu_hdw.c\fP
+in the the distribution directory and relink the appropriate binaries.
+See the
+\fBsite_eg\fP
+target in
+\fBMakefile\fP
+for an example.
+.SH "MISCELLANEOUS"
+.rs
+.sp
+A newly revised and indexed manual is included in this release of
+\fBspec\fP.
+.sp
+When \fBspec\fP in invoked with the
+\fB\-s\fP
+flag, it is no longer possible to turn off simulate mode without
+restarting the program from the shell.
+This eliminates ambiguities about whether or not
+the configured hardware devices are opened and properly initialized
+when simulate mode is turned off.
+.sp
+When simulate mode is in effect, the
+\fBreconfig\fP
+command will read the
+\fBsettings\fP
+file, but will not
+read the
+\fBconfig\fP
+file or change the hardware configuration.
+.sp
+The names of the state files in the
+\fBuserfiles\fP
+subdirectories have been changed to use more characters from the user\(aqs
+login and terminal name.
+.sp
+When invoking \fBspec\fP from the shell the
+\fBtty\fP
+part of the
+.BI "\-t" " tty"
+option must now contain the complete name of the device, either as
+\fB/dev/tty12\fP
+or as
+\fBtty12\fP.
+.sp
+The memory arena routines have been rewritten to accommodate
+an arena twice as large on the VENIX LMC version of \fBspec\fP.
+Users can now include entire scans within single statement
+blocks without running out of memory.
+.sp
+The distributed version of \fBspec\fP is now compiled for 40 motors.
+.SH "BUG FIXES"
+.rs
+.sp
+A bug that caused unintended motor movement under a particular
+scenario has been fixed.
+If you had commanded a move involving several motors (with the
+\fBbr\fP
+macro, for example)
+and one of the motors
+was out of limits the move would be canceled.
+However, the next time you moved a motor, the motors that were
+not out of limits in the previous move would move to the previously
+commanded positions under some conditions.
+This rather serious bug has been fixed.
+.sp
+A bug where the next command typed in after hitting a hard motor limit
+was ignored has been fixed.
+Previously, any type ahead from the keyboard would be flushed
+after hitting a hard limit.
+Type ahead is no longer flushed, although command files are still closed
+after hitting a limit.
+.sp
+In previous versions, there were small intervals of time
+where keyboard interrupts
+(\fB^C\fP\(aqs)
+were ignored to prevent critical code from being disturbed.
+Ignoring interrupts is poor programming, as it makes the
+program response unpredictable to the user.
+In addition,
+on rare occasions, \fBspec\fP would enter
+a state where
+\fB^C\fP\(aqs
+were ignored while motors were moving or counters were counting.
+In this release,
+the critical code
+is protected in ways other than ignoring
+\fB^C\fP\(aqs.
+The method now used
+still has flaws due to fundamental
+limitations in the system calls being used.
+In the next release, the code will employ
+system calls available on systems other than
+VENIX for the 286 and PDP 11/73
+to enable much more robust interrupt handling.
+Users of VENIX will, unfortunately, not benefit
+from those changes.
+.sp
+A bug in the grammar where expressions using the Boolean operators
+\fB!\fP,
+\fB&&\fP
+and
+\fB||\fP
+reported syntax errors in a number of contexts
+has been fixed.
+.sp
+A bug, whereby number values obtained from strings (returned by
+\fBinput()\fP,
+for example)
+were not scanned for octal or hexadecimal prefixes has been fixed.
+.sp
+The implementation of the
+\fBlocal\fP
+command has been totally revised to fix numerous bugs,
+the most serious of which made a built\-in
+variable disappear if it was declared
+\fBlocal\fP.
+.sp
+Error messages are now printed if you use the
+\fBglobal\fP,
+\fBunglobal\fP
+or
+\fBconstant\fP
+commands with built\-in symbols.
+.sp
+A bug, whereby the code that calculated
+the values returned by
+\fBpl_anal()\fP
+for the FWHM and the center
+of the FWHM did poorly for
+certain unusual sets of data points, has been fixed.
+.sp
+A bug, where trying to print a very long string using
+\fBprint\fP,
+\fBprintf\fP
+or
+\fBsprintf\fP,
+would cause a core dump, has been fixed.
+

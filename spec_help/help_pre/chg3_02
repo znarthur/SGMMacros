@@ -1,0 +1,284 @@
+changes                      spec 3.02 Release Notes                     changes
+
+NAME
+     changes - highlights of modifications for ssppeecc release 3.02
+
+RELEASE 3.02.02
+
+     These notes summarize the cumulative changes made for ssppeecc release 3.02.02
+     as of April 4, 1995.
+
+New ggeetteennvv(()) Function
+     A new function ggeetteennvv((ss)) returns the string value of the environment
+     variable ss.
+
+eeddccoonnff Asks To Confirm Rereading After Edits
+     The hardware configuration editor eeddccoonnff now asks you to confirm whether
+     you want to reread the starting or backup configurations (with the rr or RR
+     commands) if you have made changes to the configuration before having saved
+     them.
+
+Help File Format Changes
+     The behavior of some of the formatting sequences used in the ssppeecc help
+     files has been changed and some new sequences added.  The changes allow
+     HTML versions of the files to be created using nnrrooffff or GNU ggrrooffff.  See the
+     comments in hheellpp//MMaakkeeffiillee for information on that.
+
+EEssccaann Macro Change
+     The EEssccaann macro, when used with the ffiixxQQ option, now takes extra measures
+     to ensure that the position in reciprocal space does not drift.
+
+nneewwffiillee Macro Revision
+     The nneewwffiillee macro now separates motor names by at least two spaces in the
+     data file header.
+
+New ccoouunntteerr__ppaarr(()) Options
+     The ccoouunntteerr__ppaarr(()) function now supports the following arguments for all
+     controllers:
+
+     ""uunniitt"" - returns the unit number of the indicated counter.
+
+     ""cchhaannnneell"" - returns the channel number of the indicated counter.
+
+     ""rreessppoonnssiivvee"" - returns nonzero if the hardware appears to be working for
+          the indicated counter.
+
+     ""ccoonnttrroolllleerr"" - returns a string that indicates the controller type of the
+          indicated counter.
+
+New mmoottoorr__ppaarr(()) Options
+     The mmoottoorr__ppaarr(()) function now supports the following arguments for all
+     controllers:
+
+     ""uunniitt"" - returns the unit number of the indicated motor.
+
+     ""cchhaannnneell"" - returns the channel number of the indicated motor.
+
+     ""rreessppoonnssiivvee"" - returns nonzero if the hardware appears to be working for
+          the indicated motor.
+
+     ""ccoonnttrroolllleerr"" - returns a string that indicates the controller type of the
+          indicated motor.
+
+     ""aaccttiivvee"" - returns nonzero if the indicated motor is currently moving.
+
+National Instruments GPIB Support for lliinnuuxx
+     ssppeecc now supports the lliinnuuxx GPIB driver for the National Instruments
+     AT-GPIB card.  That driver is available via anonymous ftp from
+     kkooaallaa..cchheemmiiee..ffuu--bbeerrlliinn..ddee.
+
+CAMAC E500 Channel Multiplexor Improvements
+     The code for the E500 multiplexor has been changed to insure that the
+     multiplexed motors are always restarted with consistent motor phases
+     relative to the last move of the particular motor.  In addition, if more
+     than one multiplexed motor is commanded to move, each such motor will
+     automatically be moved in sequence.  The sequence is the order in which the
+     motors are numbered in the ccoonnffiigg file.
+
+ccddeeff Bug fixed
+     A bug in the code that reads the portion of a user's state file that stores
+     the ccddeeff-type macros has been fixed.  The bug could produce buffer overruns
+     leading to unpredictable side affects.
+
+New D32 Surface Geometry
+     A new ssuurrff__dd3322 configuration, as used at ESRF beamline D32, has been added.
+
+RELEASE 3.02.01
+
+     These notes summarize the cumulative changes made for ssppeecc release 3.02.01
+     as of February 18, 1995.
+
+Expanded Syntax for ddaattaa__pplloott(()) and ddaattaa__dduummpp(())
+     The element arguments to the ddaattaa__pplloott(()) and ddaattaa__dduummpp(()) functions can now
+     be combined in a single space- or comma-delimited string.  This change will
+     make a task such as creation of plotting macros to plot a variable numbers
+     of curves in the same plot window easier.
+
+Stand Alone Help File Viewer Now Included
+     The ssppeecc distribution now includes the stand alone CSS help file previewer
+     cchheellpp.  This file will automatically be installed in the same directory as
+     the other executables.
+
+eeddccoonnff Treats Change In Step Size Differently
+     Previously, changing the step-size parameter in the configuration editor
+     caused the accumulator value to change to keep the motor positions fixed.
+     Users have requested that the behavior be altered so that the accumulator
+     would remain fixed, but the user and dial positions would scale with the
+     change in the step size parameter.  That change has been made.
+
+More Efficient Output-File Flushing
+     Previously, ssppeecc flushed file output after each print-type command to an
+     output file or device.  ssppeecc users have reported that on certain platforms
+     where the output was to an NFS-mounted file system, this frequent flushing
+     introduced considerable delays.  ssppeecc now performs flushing less
+     frequently.  A ""fflluusshh__iinntteerrvvaall"" parameter, that can be set by the
+     ssppeecc__ppaarr(()) function, specifies how many seconds to allow between output
+     buffer flushing.  The default ""fflluusshh__iinntteerrvvaall"" is 0.5 seconds.  If the
+     interval is set to zero, the previous frequent-flushing behavior will be
+     restored.  Output to the screen is still flushed immediately.  Output to
+     other devices is also flushed each time the main ssppeecc prompt is issued.
+
+Get Count Scale Factor
+     The function ccoouunntteerr__ppaarr((mmnnee,, ""ssccaallee"")) will return value of the scale
+     factor set in the ccoonnffiigg file for the indicated counter.
+
+New CAMAC ccaa__ccnnttll(()) Function
+     A new function ccaa__ccnnttll(()) allows users to perform CAMAC initialize, clear
+     and inhibit crate operations from within ssppeecc on all CAMAC controllers
+     supported by ssppeecc.  Both ccaa__ccnnttll((""ZZ"")) and ccaa__ccnnttll((""iinniitt"")) issue the CAMAC Z
+     (crate initialize) command.  Both ccaa__ccnnttll((""CC"")) and ccaa__ccnnttll((""cclleeaarr"")) issue
+     the CAMAC C (crate clear) command.  The usage ccaa__ccnnttll((""iinnhhiibbiitt"",, 11)) sets
+     crate inhibit, while ccaa__ccnnttll((""iinnhhiibbiitt"",, 00)) clears crate inhibit.  During
+     normal operation, users should not need to issue these commands.  Users
+     should probably issue a rreeccoonnffiigg after sending a crate initialize or clear.
+
+Increase In Number Of Devices That Can Be Configured
+     The configuration editor eeddccoonnff now allows entry of up to twenty rows each
+     of information for non-CAMAC motor controllers and timer/counter devices,
+     MCA-type data acquisition devices, generic serial devices and PC I/O port
+     addresses.  The commands ^^FF and ^^BB select display of additional rows.
+
+Optional Motor Configuration By Unit/Channel
+     The configuration editor now allows entering of unit/channel information
+     for motors as an alternative to the automatic consecutive unit/channel
+     assignment normally used.  Note:  at present, only selected motor
+     controllers (E500, ESRF MAXE) in ssppeecc recognize unit/channel information.
+     Unit/channel information, when used, must be enterned for all motors
+     associated with a particular type of motor controller.  Manual unit/channel
+     numbering is turned on simply by entering values in the form uunniitt//cchhaannnneell
+     in an otherwise blank cells.  Entering a single number changes just the
+     channel number.  Entering ^^DD turns off manual numbering.  No consistency
+     checking is done on the assignment in the configuration editor.  ssppeecc does
+     check for consistency when reading the ccoonnffiigg file, though.  The config
+     file uses the syntax
+
+        MMOOTT001122 == EE550000::00//33 ......
+
+     to store the unit/channel information.
+
+New Motor Position Discrepancy Message (For Some)
+     A new motor-position discrepancy message has been deployed (currently for
+     selected motor controls only).  The new message gives hints to the
+     appropriate course of action when motor position discrepancies arise.  The
+     new message is currently implemented for the following motor controllers:
+     Oriel 18092, NSLS MMC32, Huber 9000, MicroControle ITL09, Klinger MM2000,
+     NSK, PI, EPICS motors and ESRF motors.  The rest of the motor controllers
+     will be converted to the new message shortly.
+
+Fixed Recursion Bug With Undefined cclleeaannuupp Macro
+     A bug that under certain circumstances produced a continuous stream of
+     cclleeaannuupp:: uunnddeeffiinneedd messages has been fixed.
+
+Memory Leaks Fixed
+     A couple of small memory leaks in ssppeecc have been fixed.  Also, the mmeemmssttaatt
+     command now does a more complete job of memory accounting, including the
+     addition of new categories for memory allocated by ccddeeff(()) macros and memory
+     allocated for configured hardware.
+
+Macro Fix Involving ccaallccGG
+     To make it easier for users to work with a manually entered orientation
+     matrix, the ccaallccGG macro (which sets a flag to indicate the orientation
+     matrix should be recalculated using the current values of the lattice
+     constants, orientation reflections and X-ray wavelength) has been relocated
+     to the ssaavv__uubb macro.  ccaallccGG was formerly included in the ssaavveeggeeoo macro
+     (which is defined differently for each diffractometer geometry), which
+     calls ssaavv__uubb.  (The ssaavveeggeeoo macro is called by the ssaavvee macro, which saves
+     important parameters in a command file.)  For users who enter the
+     orientation matrix manually, the ssaavv__uubb macro should be redefined with a
+     macro that writes the contents of UUBB to the save file.
+
+Improvements in Internal Pseudomotor Code
+     Recent improvements in the internal code for pseudomotors have been
+     propagated to the ggeeoo__ssiixxcc..cc, ggeeoo__ssuurrff..cc, ggeeoo__ww2211hh..cc and ggeeoo__ww2211vv..cc source
+     code.  The changes require use of the new internal C-code functions
+     sseett__ppsseeuuddoo__ttaarrgg(()) and sseett__ppsseeuuddoo__ppooss(()).  Contact CSS for technical details
+     on adding pseudomotors to geometry code.
+
+Motor/Counter Disabling Implemented
+     The functions
+
+         mmoottoorr__ppaarr((mmnnee,, ""ddiissaabbllee"" [[,, 00||11]]))
+
+     and
+
+         ccoouunntteerr__ppaarr((mmnnee,, ""ddiissaabbllee"" [[,, 00||11]]))
+
+     now work for all motors and counters to disable hardware access of the
+     indicated motor or counter.  All usable motors and counters are reenabled
+     on startup and rreeccoonnffiigg.
+
+MCA-type Devices Can Be Disabled
+     Normally MCA-type devices are started and stopped the same as other
+     configured counters by the ttccoouunntt(()) and mmccoouunntt(()) functions.  The function
+
+         mmccaa__ppaarr((""ddiissaabbllee"" [[,, 00||11]]))
+
+     now allows that automatic starting and stopping to be disabled.  The
+     command works on the device currently selected with the mmccaa__sseell(()) function.
+     Such devices can still be started and stopped using mmccaa__ppaarr((""rruunn"")) and
+     mmccaa__ppaarr((""hhaalltt"")), and will also  be stopped by a ^^CC typed at the keyboard.
+
+New mmccaa__ppuutt(()) Function
+     A new function mmccaa__ppuutt((gg,, ee)) is available.  For certain MCA-type devices,
+     this function will send the data in data group gg element ee to the device.
+
+CAMAC Block Mode Transfers For Selected Controllers
+     CAMAC block mode transfers are now implemented for the Kinetic Systems 3929
+     SCSI-CAMAC controller on HP 700 platforms and for the Kinetic Systems 3988
+     GPIB-CAMAC controller.  Block modes transfers are used by some MCA-type
+     modules.
+
+More CAMAC Presence Tests
+     Simple CAMAC presence tests have been added for the Kinetic Systems 3512
+     and 3610, the DSP QS450, and the LeCroy 2301, 3512 and 3588 modules.  These
+     tests simply see if a module in the selected slot responds to a suitable
+     CAMAC command.  The test can't confirm whether the appropriate module is
+     present.  Presence tests for CAMAC modules such as the Kinetic Systems 3640
+     and the DSP E500, where the module can return a unique ID, continue to be
+     performed.
+
+Changes For the CAMAC E500
+     Several changes have been made in the code for the DSP E500 motor
+     controller.  The E500 will no longer make moves smaller than the backlash
+     at the base rate.  Rather, the normal acceleration profile will be used.
+     In addition, the E500 will no longer read all the configured motors with
+     each ggeettaanngglleess.  Rather, positions will be read during hardware
+     configuration, at the end of moves, on ssyynncc commands and while moving.
+     Also, the motor positions will not be checked for consistency with the
+     controller before each move, as was done historically.  Finally, the E500
+     code will recognize the new, optional unit/channel configuration
+     information that may be present in the ccoonnffiigg file.
+
+Changes For the CAMAC KS 3640
+     The Kinetic Systems 3640 no longer asserts and clears crate inhibit during
+     counting.
+
+Changes For the CAMAC LeCroy 2301
+     The LeCroy 2301 MCA buffer now implements the mmccaa__ppaarr((""cchhaann##"")) to read the
+     contents of channel ## and mmccaa__ppaarr((""cchhaann##"",, vvaalluuee)) to set the contents of
+     channel ##.  Also the module supports the new mmccaa__ppuutt(()) function.  In
+     addition, the LeCroy 2301 now uses CAMAC block-mode transfers on CAMAC
+     controllers where ssppeecc supports such transfers.
+
+Changes For the CAMAC DSP 2190/4101
+     The DSP 2190 MCS Averager/4101 Histogramming Memory now uses CAMAC
+     block-mode transfers on CAMAC controllers where ssppeecc supports such
+     transfers.
+
+Changes For ESRF MAXE Motor Controllers
+     There is now no longer a limit within ssppeecc on the number of MAXE
+     controllers that can be configured.  The MAXE controller supports the new
+     unit/channel motor configuration option.
+
+Bug With ACS MCB Motor Controller Fixed
+     A bug in the code in the ACS MCB motor controllers, where rate parameters
+     may not have been set correctly for certain motors, has been fixed.
+
+Better eeddccoonnff on HP700 Platforms
+     On the hp700 platforms, the configuration editor eeddccoonnff is now built with
+     the HP V.4 Curses Library (lliibbccuurr__ccoollrr..aa).  This library fixes bugs in the
+     less-than-optimal screen updating of the standard curses library.  The
+     version of eeddccoonnff shipped with ssppeecc will be statically linked with this
+     library, since it is not part of the standard HP-UX installation (although
+     it is included on the HP-UX distribution media).
+

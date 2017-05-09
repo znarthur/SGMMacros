@@ -1,0 +1,370 @@
+.TH "fourc" "reference" "01/29/14" "fourc.rst 6.2  01/29/14 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+fourc \- 4\-circle geometry modes
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)fourc.rst        6.2  01/29/14  CSS
+.
+.\" Copyright (c) 1990,1991,1992,1995,2012,2014 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "fourc" "reference" "01/29/14" "fourc.rst 6.2  01/29/14 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBfourc\fP version of \fBspec\fP operates a standard four\-circle diffractometer.
+These notes give a brief description of the features of \fBfourc\fP.
+Further details are given
+in the \fBFour\-Circle Reference\fP section of the \fBspec\fP manual.
+.SH "FOUR\-CIRCLE MODES"
+.rs
+.sp
+The four\-circle modes represent the various constraints that
+can be made on the transformation equations from reciprocal
+space to diffractometer angles.
+Use the \fBsetmode\fP macro to select a four\-circle mode.
+The different modes are numbered as follows:
+.sp
+.RS 4m
+.TS
+;
+l l .
+0	Omega Equals Zero
+1	Omega Fixed
+2	Zone (Chi and Phi Fixed)
+3	Phi Fixed
+4	Azimuthal
+5	Alpha Fixed
+6	Beta Fixed
+.TE
+.RE
+.SH "FROZEN ANGLES"
+.rs
+.sp
+Each of the four\-circle modes has associated an angle (or angles)
+that are fixed in that mode.
+As a convenience, there is a \fBfreeze\fP macro that turns on a \fBfrozen\fP mode.
+When in frozen mode, all moves that specify reciprocal space coordinates
+will use the frozen value(s) of the current mode\(aqs fixed angle(s).
+Thus you can move motors around for lining up, etc, but have the the
+fixed parameter automatically restored
+to the frozen value when doing reciprocal space
+scans, \fBbr\fP moves, etc.  The \fBunfreeze\fP macro turns frozen mode off.
+.sp
+The frozen values are stored in variables (actually macros) named
+\fBF_OMEGA\fP (omega\-fixed mode),
+\fBF_CHI_Z\fP and
+\fBF_PHI_Z\fP (zone mode),
+\fBF_PHI\fP (phi\-fixed mode),
+\fBF_AZIMUTH\fP (azimuthal mode),
+\fBF_ALPHA\fP (alpha\-fixed mode),
+and
+\fBF_BETA\fP (beta\-fixed mode).
+You can, of course, assign values to these variables by hand.
+.SH "FOUR\-CIRCLE SECTORS"
+.rs
+.sp
+The sector transformations are symmetry operations on the
+diffractometer angles that yield eight different
+positions of the diffractometer circles that correspond to the same
+\fBH\fP, \fBK\fP and \fBL\fP position. A ninth sector
+minimizes \fBabs(chi \- 90)\fP and \fBabs(phi)\fP.
+The \fBsectors H K L\fP
+macro prints the diffractometer angles that would be used for each
+of the possible sectors for a particular reciprocal space position.
+Use the \fBsetsector\fP macro to select a sector.
+.SH "CUT POINTS"
+.rs
+.sp
+Cut points affect the direction the diffractometer circles turn to get from
+one position to the next.  For example,
+if a cut point is at zero, the corresponding circle will only move through
+angles of 0 to 360 degrees.  Thus, to get from 355 (=\-5) to 5 degrees,
+the circle will turn 350 degrees.
+If a cut point is at \-180, the circle will move through angles from \-180 to 180.
+Thus the same motion from \-5 to 5 will require only 10 degrees of movement.
+Use the \fBcuts\fP macro to select cut points for \fBtheta\fP, \fBchi\fP and
+\fBphi\fP (and the \fBazimuth\fP).
+The \fBtwo\-theta\fP motor always uses \-180 as a cut point.
+(Only the sign of the \fBazimuth\fP cut point is used,
+and it determines the sign of the \fBazimuth\fP angle.)
+.SH "LATTICE PARAMETERS"
+.rs
+.sp
+The \fBsetlat\fP and \fBsetrlat\fP macros
+let you set the lattice parameters in direct space or reciprocal space,
+respectively.
+.SH "ORIENTATION MATRIX"
+.rs
+.sp
+With known lattice parameters, you need to find two
+(nonparallel) reflections in order to determine the orientation matrix.
+The macros \fBor0 H K L\fP and
+\fBor1 H K L\fP
+are used to associate the current diffractometer angles with the primary
+and secondary reflections.  Macros called \fBsetor0\fP and
+\fBsetor1\fP also let you set the orientation reflections, but
+don\(aqt require you to move the diffractometer to the correct position.
+Instead, you are prompted for each of the angles and values for
+\fBH\fP, \fBK\fP and \fBL\fP. The \fBor_swap\fP macro is available
+to exchange the primary and secondary reflections.
+.sp
+You can also fit an orientation matrix if you have three or more
+known reflections
+(not all in the same plane), but unknown lattice parameters.  Use
+\fBreflex_beg\fP to initialize a reflections data file.  Use
+\fBreflex H K L\fP
+to add the current reflection to the file.  Use \fBreflex_end\fP
+to complete the file.
+You then run the reflections file as a \fBspec\fP command file in order to
+fit the reflections to obtain a new orientation matrix.
+To calculate lattice parameters from the new orientation matrix, type
+\fBcalcL\fP. You can then display the lattice parameters with the \fBpa\fP macro.
+Naturally, you can edit the reflections data file to delete or modify
+any of the reflection data there.
+.SH "GLOBALS AND MACROS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBQ[]\fP
+\- 
+a built\-in array which holds the following four\-circle parameters:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fBdef H \(aqQ[0]\(aq\fP
+\- 
+Reciprocal space coordinate.
+.HP 5m
+."
+\fBdef K \(aqQ[1]\(aq\fP
+\- 
+Reciprocal space coordinate.
+.HP 5m
+."
+\fBdef L \(aqQ[2]\(aq\fP
+\- 
+Reciprocal space coordinate.
+.HP 5m
+."
+\fBdef LAMBDA \(aqQ[3]\(aq\fP
+\- 
+Wavelength of X rays.
+.HP 5m
+."
+\fBdef ALPHA \(aqQ[4]\(aq\fP
+\- 
+Incident angle, useful for surface diffraction.
+.HP 5m
+."
+\fBdef BETA \(aqQ[5]\(aq\fP
+\- 
+Exit angle, useful for surface diffraction.
+.HP 5m
+."
+\fBdef OMEGA \(aqQ[6]\(aq\fP
+\- 
+The \fBtheta\fP \- \fBtwo\-theta\fP / 2 parameter.
+.HP 5m
+."
+\fBdef AZIMUTH \(aqQ[7]\(aq\fP
+\- 
+Rotation angle of a reference vector about the scattering vector,
+useful for surface diffraction.
+.HP 5m
+."
+\fBdef F_ALPHA \(aqQ[8]\(aq\fP
+\- 
+Frozen value of \fBALPHA\fP for alpha\-fixed mode.
+.HP 5m
+."
+\fBdef F_BETA \(aqQ[9]\(aq\fP
+\- 
+Frozen value of \fBBETA\fP for beta\-fixed mode.
+.HP 5m
+."
+\fBdef F_OMEGA \(aqQ[10]\(aq\fP
+\- 
+Frozen value of \fBOMEGA\fP for omega\-fixed mode.
+.HP 5m
+."
+\fBdef F_AZIMUTH \(aqQ[11]\(aq\fP
+\- 
+Frozen value of \fBAZIMUTH\fP for azimuth\-fixed mode.
+.HP 5m
+."
+\fBdef F_PHI \(aqQ[12]\(aq\fP
+\- 
+Frozen value of \fBPHI\fP for phi\-fixed mode.
+.HP 5m
+."
+\fBdef F_CHI_Z \(aqQ[13]\(aq\fP
+\- 
+Frozen value of \fBCHI\fP for zone mode.
+.HP 5m
+."
+\fBdef F_PHI_Z \(aqQ[14]\(aq\fP
+\- 
+Frozen value of \fBPHI\fP for zone mode.
+.HP 5m
+."
+\fBdef CUT_TH \(aqQ[15]\(aq\fP
+\- 
+The \fBtheta\fP cut point.
+.HP 5m
+."
+\fBdef CUT_CHI \(aqQ[16]\(aq\fP
+\- 
+The \fBchi\fP cut point.
+.HP 5m
+."
+\fBdef CUT_PHI \(aqQ[17]\(aq\fP
+\- 
+The \fBphi\fP cut point.
+.HP 5m
+."
+\fBdef CUT_AZI \(aqQ[18]\(aq\fP
+\- 
+The \fBazimuth\fP cut point flag.
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBG[]\fP
+\- 
+a built\-in array which holds the following four\-circle parameters:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fBdef g_mode \(aqG[0]\(aq\fP
+\- 
+Holds current four\-circle mode.
+.HP 5m
+."
+\fBdef g_sect \(aqG[1]\(aq\fP
+\- 
+Holds current four\-circle sector.
+.HP 5m
+."
+\fBdef g_frz \(aqG[2]\(aq\fP
+\- 
+Nonzero when frozen mode is on.
+.HP 5m
+."
+\fBdef g_haz \(aqG[3]\(aq\fP
+\- 
+\fBH\fP of azimuthal reference vector.
+.HP 5m
+."
+\fBdef g_kaz \(aqG[4]\(aq\fP
+\- 
+\fBK\fP of azimuthal reference vector.
+.HP 5m
+."
+\fBdef g_laz \(aqG[5]\(aq\fP
+\- 
+\fBL\fP of azimuthal reference vector.
+.HP 5m
+."
+\fBdef g_zh0 \(aqG[6]\(aq\fP
+\- 
+\fBH\fP of first zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zk0 \(aqG[7]\(aq\fP
+\- 
+\fBK\fP of first zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zl0 \(aqG[8]\(aq\fP
+\- 
+\fBL\fP of first zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zh1 \(aqG[9]\(aq\fP
+\- 
+\fBH\fP of second zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zk1 \(aqG[10]\(aq\fP
+\- 
+\fBK\fP of second zone\-mode vector.
+.HP 5m
+."
+\fBdef g_zl1 \(aqG[11]\(aq\fP
+\- 
+\fBL\fP of second zone\-mode vector.
+.PD
+.RE
+.RE
+.HP 5m
+."
+\fBcalcHKL\fP
+\- 
+calculates \fBH\fP, \fBK\fP, \fBL\fP, \fBALPHA\fP, \fBBETA\fP, and
+\fBAZIMUTH\fP from the four\-circle angles in the motor array \fBA[]\fP.
+.HP 5m
+."
+\fBcalcA\fP
+\- 
+calculates \fBA[]\fP, \fBOMEGA\fP, \fBALPHA\fP, \fBBETA\fP
+and \fBAZIMUTH\fP from \fBH\fP, \fBK\fP and \fBL\fP.
+.HP 5m
+."
+\fBcalcZ\fP
+\- 
+calculates the \fBphi\fP and
+\fBchi\fP to put the two vectors specified by the six elements of the built\-in
+\fBZ[]\fP array in the scattering plane.
+.HP 5m
+."
+\fBcz\fP
+\- 
+"calculate zone", prints the \fBchi\fP and \fBphi\fP necessary to put the
+two vectors specified as arguments in the scattering plane.
+.HP 5m
+."
+\fBmz\fP
+\- 
+"move zone", moves to the \fBchi\fP and \fBphi\fP values that put the
+two vectors specified as arguments into the scattering plane.
+Also sets zone mode and turns on frozen mode using the calculated \fBchi\fP and
+\fBphi\fP values.
+.HP 5m
+."
+\fBsz\fP
+\- 
+"set zone", calculates the \fBchi\fP and \fBphi\fP values that put the
+two vectors specified as arguments into the scattering plane.
+Also sets zone mode and turns on frozen mode using the calculated
+\fBchi\fP and \fBphi\fP values.
+.RE
+.SH "SEE ALSO"
+.rs
+.nf
+
+.in +2
+\fBgeo_fourc.c\fP, C source file for the four\-circle geometry calculations.
+\fBfourc.src\fP, macro source file for the four\-circle macros.
+\fBhkl.mac\fP, macro source file for reciprocal space macros.
+\fBub.mac\fP, macro source file for orientation matrix macros.
+The \fBFour\-Circle Reference\fP in the \fBspec\fP manual.
+.in -2
+.fi
+.sp
+

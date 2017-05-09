@@ -1,0 +1,33 @@
+hklmesh                               macro                              hklmesh
+
+NAME
+     hhkkllmmeesshh - scan over a 2d grid in reciprocal space
+
+SYNOPSIS
+
+     hhkkllmmeesshh QQ11 ssttaarrtt11 eenndd11 iinntteerrvvaallss11 QQ22 ssttaarrtt22 eenndd22 iinntteerrvvaallss22 ttiimmee
+
+DESCRIPTION
+
+     The hhkkllmmeesshh macro scans over a grid in reciprocal space in the QQ11--QQ22 plane,
+     putting the results in one scan entry in the data file (as opposed to an
+     hhkkllssccaann inside a for-loop which creates many scans).  QQ11 and QQ22 are
+     literally HH, KK or LL. The grid runs from ssttaarrtt11 to eenndd11 for iinntteerrvvaallss11++11
+     points for the reciprocal space coordinate QQ11 and from ssttaarrtt22 to eenndd22 for
+     iinntteerrvvaallss22++11 points for the QQ22 coordinate.  Count time is given by ttiimmee,
+     which if positive, specifies seconds and if negative, specifies monitor
+     counts.
+
+     The scan over QQ11 is done at each point in the scan over QQ22. That is, the
+     scan of the first coordinate is nested within the scan of the second
+     coordinate.
+
+EXAMPLE
+
+     hhkkllmmeesshh HH 00 11 1100 KK 00 11 1100 6600
+
+SEE ALSO
+
+     _h_k_l_s_c_a_n _h_s_c_a_n _k_s_c_a_n _l_s_c_a_n _h_k_c_i_r_c_l_e _h_l_c_i_r_c_l_e _k_l_c_i_r_c_l_e _h_k_r_a_d_i_a_l _h_l_r_a_d_i_a_l
+     _k_l_r_a_d_i_a_l
+

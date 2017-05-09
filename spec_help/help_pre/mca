@@ -1,0 +1,307 @@
+mca                                 hardware                                 mca
+
+NAME
+     mca - Multichannel Analyzer Support
+
+INTRODUCTION
+
+     In ssppeecc, an MCA-type device is something that returns a one-dimensional
+     array of data.  Such devices include multichannel analyzers, multichannel
+     scalers, and digital correlators.  Operation of most of these devices is
+     through either manual commands to start and stop acquisition when
+     appropriate to the experiment or automatic operation with the standard
+     counting commands and macros.
+
+     A list of currently supported MCA-type devices is at the end of this
+     document.
+
+     All MCA-type devices (except CAMAC) are assigned a device number from 0 to
+     31 in the ccoonnffiigg file.  ssppeecc's MCA functions mmccaa__ggeett(()), mmccaa__ppuutt(()) and
+     mmccaa__ppaarr(()) operate on the MCA device last selected with the mmccaa__sseell(())
+     function.  The functions mmccaa__ssggeett(()), mmccaa__ssppuutt(()) and mmccaa__ssppaarr(()) take the
+     assigned device number as an additional initial parameter.
+
+     Currently, one cannot assign arbitrary device numbers to CAMAC MCA-type
+     devices.  Instead the numbers are automatically assigned starting with the
+     lowest available device number not otherwise taken when ssppeecc reads the
+     ccoonnffiigg file.  Use the mmccaa__sseell((""??"")) to see what device numbers have been
+     assigned.
+
+DATA ARRAYS AND DATA GROUPS
+
+     The mmccaa__ggeett(()) and mmccaa__ppuutt(()) functions, which transfer data between the
+     MCA-type hardware and ssppeecc, can use either data arrays or data groups.
+     (Data groups are an older method of handling arrays of numbers in ssppeecc and
+     are explained in the _d_a_t_a help file.)
+
+     The recommended method of handling MCA data is with data arrays.  The
+     _a_r_r_a_y_s help file explains general features of the array data type.  In
+     brief, the arrays are declared with a type and dimension.  For example,
+
+        SSPPEECC..11>> uulloonngg aarrrraayy mmccaa__ddaattaa[[88119922]]
+
+     declares an unsigned-long data array of 8,192 elements.  The mmccaa__ggeett(()) and
+     mmccaa__ppuutt(()) functions can be invoked with the array name as an argument.  If
+     the declared type of the array matches that of the hardware, the data will
+     be transferred directly to the array.  If the type doesn't match, ssppeecc will
+     create a temporary buffer of the correct type, read the data into that,
+     then copy the data to the user's array, all transparently to the user.
+     Either way will work, though there is a slight efficiency advantage in
+     declaring the array to match the native type of the hardware.  The command
+
+        SSPPEECC..22>> pprriinntt mmccaa__ppaarr((""nnaattiivvee__ttyyppee""))
+        lloonngg
+
+     shows the native type of the selected MCA device.
+
+FUNCTIONS
+
+     Not all functions or mmccaa__ppaarr(()) options are implemented for all MCA devices.
+     Some functions can't be implemented due to hardware limitations.  Others
+     just haven't been implemented yet.  If the hardware-specific documentation
+     doesn't yet exist, contact CSS to determine which features are implemented
+     for particular devices.
+
+     mmccaa__sseell((nn)) - Selects which MCA-type device to use for subsequent calls of
+          the mmccaa__ggeett(()), mmccaa__ppuutt(()) and mmccaa__ppaarr(()) functions.  The MCA device
+          numbering is set in the ccoonnffiigg file with the string @@mmccaa__NN, where NN is
+          the device number (from 0 to 31).  Returns -1 if not configured for
+          device nn, otherwise returns zero.  It is not necessary to use
+          mmccaa__sseell(()) if only one MCA-type device is configured and is configured
+          as device 0.
+
+     mmccaa__sseell((""??""))  - Lists the configured MCA devices and indicates which device
+          is currently selected for the mmccaa__ggeett(()), mmccaa__ppuutt(()) and mmccaa__ppaarr(())
+          functions with an asterisk.  Also displays the MCA device number for
+          use with the mmccaa__ssggeett(()), mmccaa__ssppuutt(()) and mmccaa__ssppaarr(()) functions and
+          displays whether the presence test found the unit unresponsive or if
+          the user has disabled the unit.  Returns the total number of MCA
+          devices recognized in the ccoonnffiigg file.  Note, the value of the
+          built-in global variable MMCCAASS is always set to the number of MCA
+          devices (as of ssppeecc release 5.02.02-7).
+
+     mmccaa__sseell((nn,, ""??""))  - Returns a string containing one line of information
+          about MCA device nn, or 0 if ssppeecc isn't configured for device nn.
+
+     mmccaa__ggeett((aarrrr [[,, rrooii__bbeegg [[,, rrooii__eenndd]]]])) - Gets data from the currently
+          selected MCA-type device, and transfers it to the array aarrrr.  If the
+          optional starting channel and ending channel are given, the data is
+          read from those hardware channels and placed starting at the beginning
+          of the array.  For example,
+
+             SSPPEECC..11>> uulloonngg aarrrraayy ddaattaa[[11002244]]
+             SSPPEECC..22>> mmccaa__ggeett((ddaattaa))
+             SSPPEECC..33>> mmccaa__ggeett((ddaattaa,, 3322,, 112288))
+             SSPPEECC..44>> mmccaa__ggeett((ddaattaa[[3322::112288]],, 3322,, 112288))
+
+          The last example uses subarray syntax to position the data in array
+          elements corresponding to the MCA channel positions.
+
+     mmccaa__ggeett((gg,, ee [[,, rrooii__bbeegg [[,, rrooii__eenndd]]]])) - As above, but transfers the data to
+          element ee of data group gg instead of an array.  Returns the number of
+          points transferred.
+
+     mmccaa__ssggeett((sseell,, ......))  - Like the above functions, but uses the MCA device
+          numbered sseell in the ccoonnffiigg file.
+
+     mmccaa__ppuutt((......)) and mmccaa__ssppuutt((sseell,, ......))  - These functions have the same syntax
+          as the above, but transfer data to the MCA device (for devices that
+          support transfer in that direction).
+
+     mmccaa__ppaarr((ccmmdd [[,, aarrgg]])) - A function to access various features and parameters
+          of the currently selected MCA device.  The string ccmmdd selects an
+          option.  The argument aarrgg contains an optional value.  Some values for
+          ccmmdd apply to all MCA devices, while some apply only to certain
+          devices.
+
+     mmccaa__ssppaarr((sseell,, ccmmdd [[,, aarrgg]])) - Like the above, but uses the MCA device
+          numbered sseell in the ccoonnffiigg file.
+
+     mmccaa__ppaarr((""iinnffoo"")) - Displays the native type, the currently configured number
+          of channels and the maximum number of hardware channels for the
+          selected MCA device.  Also displays the current settings for
+          auto-clear mode, auto-run mode and soft-preset mode (as of ssppeecc
+          release 6.00.06).
+
+     mmccaa__ppaarr((""cchhaannss"")) - Returns the currently configured number of channels.
+
+     mmccaa__ppaarr((""mmaaxx__cchhaannss"")) or mmccaa__ppaarr((""mmaaxx__cchhaannnneellss"")) - Returns the maximum
+          number of hardware channels.
+
+     mmccaa__ppaarr((""ddiissaabbllee"" [[,, aarrgg]])) - With no arguments, returns nonzero if the
+          selected MCA device has been disabled by the user, otherwise returns
+          zero.  If aarrgg is 1, disables the MCA.  If aarrgg is 0, turns off the
+          disabled mode.  When the device is disabled, ssppeecc will not access the
+          hardware.  On start up, and after the standard ccoonnffiigg macro or the
+          rreeccoonnffiigg command is run, disabled mode is off.
+
+     mmccaa__ppaarr((""aauuttoo__rruunn"" [[,, aarrgg]])) - With no arguments, returns nonzero if the
+          selected MCA device has auto-run mode set, otherwise returns zero.  If
+          aarrgg is 1, enables auto-run mode.  If aarrgg is 0, turns off auto-run
+          mode.  When auto-run mode is set the device is started and stopped
+          with the counting functions ttccoouunntt(()), mmccoouunntt(()), etc.  When not set,
+          the counting functions are ignored, but the device can be controlled
+          with the ""rruunn"" and ""hhaalltt"" options described below.  In addition, the
+          device can be halted with the ssttoopp(()) function and will be halted with
+          ^^CC.  Some devices default to auto-run mode on and some to auto-run
+          mode off on start up and after the standard ccoonnffiigg macro or the
+          rreeccoonnffiigg command is run.
+
+     mmccaa__ppaarr((""ssoofftt__pprreesseett"" [[,, aarrgg]])) - With no arguments, returns nonzero if the
+          selected MCA device has soft-preset mode set, otherwise returns zero.
+          If aarrgg is 1, enables soft-preset mode.  If aarrgg is 0, turns off
+          soft-preset mode.  When set, and if auto-run mode is enabled (see
+          above), the MCA device is set to count for the time preset given as an
+          argument to the ttccoouunntt(()) function.  The wwaaiitt(()) function will wait
+          until both the timer and the MCA device have counted to their
+          respective presets.  When soft-preset mode is not set, but auto-run
+          mode is, the device is programmed for continuous data acquisition and
+          will be stopped when the timer's preset is reached.  Currently, when
+          both soft-preset and auto-run modes are in effect, when counting to
+          monitor (using mmccoouunntt(())) rather than to time, the device is also
+          programmed for continuous data acquisition, as above.
+
+     mmccaa__ppaarr((""aauuttoo__cclleeaarr"" [[,, aarrgg]])) - With no arguments, returns nonzero if the
+          selected MCA device has auto-clear mode set, otherwise returns zero.
+          If aarrgg is 1, enables auto-clear mode.  If aarrgg is 0, turns off
+          auto-clear mode.  When set, ssppeecc automatically sends commands to clear
+          the MCA data before acquisition is started.  Note, for some MCA
+          devices, the clear operation takes time, so may affect the duration of
+          data acquisition when not in soft-preset mode.  Auto-clear mode is set
+          at start up and after each hardware reconfiguration.  Auto-clear mode
+          is currently implemented for the XIA DXP; Nucleus PCA II, PCA-3,
+          Multiport and Microfast; Ortec Trump MCA (ISA and PCI) and MCS (PCI);
+          Fast Comtec MCD; Seiko EG&G MCA 7700; MBraun PSD-50M; Silena 7328 and
+          7329; Roentec XFlash MAX; Amptek 8000 and 8000A; Labo 2400; the EPICS
+          MCA record and the TACO (ESRF) MCA device server.
+
+     mmccaa__ppaarr((""nnaattiivvee__ttyyppee"")) - Returns one of the strings bbyyttee, uubbyyttee, sshhoorrtt,
+          uusshhoorrtt, lloonngg, uulloonngg, ffllooaatt, ddoouubbllee or uunnkknnoowwnn to describe the native
+          data type of the MCA device.
+
+     mmccaa__ppaarr((""pprreesseett"" [[,, aarrgg]])) - With no arguments, returns the current preset
+          value.  Otherwise, sets the preset to aarrgg. The preset value is in
+          seconds for live-time and real-time modes or number of counts for
+          integral mode.  If the preset is zero, the device will programmed for
+          continuous run, except when the soft-preset mode is in effect, as
+          described above.
+
+     mmccaa__ppaarr((""lliivvee"")) - Sets the MCA device to live-time mode.
+
+     mmccaa__ppaarr((""rreeaall"")) - Sets the MCA device to real-time (or true-time) mode.
+
+     mmccaa__ppaarr((""iinntteeggrraall"")) - Sets the MCA device to a mode where it runs until the
+          counts in a region of interest reach the preset.
+
+     mmccaa__ppaarr((""eellaappsseedd__lliivvee"")) - Returns the elapsed live time in seconds.
+
+     mmccaa__ppaarr((""eellaappsseedd__rreeaall"")) - Returns the elapsed real time in seconds.
+
+     mmccaa__ppaarr((""ddeeaadd"")) - Returns the dead-time percentage, calculated as 100 *
+          (rreeaall__ttiimmee - lliivvee__ttiimmee) / rreeaall__ttiimmee.
+
+     mmccaa__ppaarr((""rruunn"")) - Programs the MCA device with the appropriate parameters
+          and starts acquisition.
+
+     mmccaa__ppaarr((""hhaalltt"")) - Halts the MCA device.
+
+     mmccaa__ppaarr((""cclleeaarr"")) - Clears the data in the current group.
+
+     mmccaa__ppaarr((""ggrroouupp__ssiizzee"")) - Returns the current group size.
+
+     mmccaa__ppaarr((""ggrroouupp__ssiizzee"",, ssiizzee)) - Sets the group size to ssiizzee.
+
+     mmccaa__ppaarr((""sseelleecctt__ggrroouupp"")) - Returns the currently active group.  Groups are
+          numbered starting at zero.
+
+     mmccaa__ppaarr((""sseelleecctt__ggrroouupp"",, ggrroouupp)) - Sets the active group to ggrroouupp.
+
+     mmccaa__ppaarr((""ggaaiinn"")) - Returns the current gain value used in pulse-height
+          analysis mode.
+
+     mmccaa__ppaarr((""ggaaiinn"",, vvaalluuee)) - Sets the gain parameter to vvaalluuee.
+
+     mmccaa__ppaarr((""sseenndd"",, mmssgg)) - For message-based devices, sends the string mmssgg to
+          the device.
+
+     mmccaa__ppaarr((""rreeaadd"",, mmssgg)) - For message-based devices, sends the string mmssgg to
+          the device, and returns the device's reply.
+
+     mmccaa__ppaarr((""cchhaann##"")) - Returns the contents of channel number ##.
+
+     mmccaa__ppaarr((""cchhaann##"",, vvaalluuee)) - Set the contents of channel number ## to vvaalluuee.
+
+     mmccaa__ppaarr((""sseett__hhddww__rrooii"",, bbeegg,, eenndd)) - Sets the hardware region of interest to
+          the channels from bbeegg to eenndd. Several calls may be made to select
+          noncontiguous regions.
+
+     mmccaa__ppaarr((""ccllrr__hhddww__rrooii"")) - Clears the hardware region of interest
+
+CURRENTLY SUPPORTED DEVICES
+
+     Currently supported MCA-type devices include:
+
+         _A_I _S_o_l_u_t_i_o_n_s _D_A_Q_-_A_T_D_C_/_N_D_A_Q (USB)
+         _A_m_p_t_e_k _D_P_5_/_P_X_5_/_M_C_A_8_0_0_0_D (FW6) (USB)
+         _A_m_p_t_e_k _P_X_4 _D_i_g_i_t_a_l _P_r_o_c_e_s_s_o_r (USB)
+         _C_a_n_b_e_r_r_a _M_u_l_t_i_p_o_r_t _I_I (USB)
+         _K_e_t_e_k _D_P_P_2 (USB)
+         _X_I_A _S_a_t_u_r_n _M_C_A (USB)
+
+         _A_m_p_t_e_k _D_P_5_/_P_X_5_/_M_C_A_8_0_0_0_D (FW6) (Ethernet)
+         Bruker Vantec-1 (Ethernet)
+         Canberra LYNX/DSA-3000 (Ethernet)
+         _C_a_n_b_e_r_r_a _M_u_l_t_i_p_o_r_t _I_I (Ethernet)
+         _D_e_c_t_r_i_s _M_y_t_h_e_n _1_K (Ethernet)
+         _L_a_b_o_r_a_t_o_r_y _E_q_u_i_p_m_e_n_t _C_o_r_p_o_r_a_t_i_o_n _N_T_-_2_4_0_0 (Ethernet)
+         Seiko/EG&G Orsim MCA 7700 (Ethernet)
+
+         ESRF MUSST MCA (GPIB)
+         Princeton Applied Research Model 283 (GPIB)
+         Princeton Instruments ST116 PDA (GPIB)
+         _O_x_f_o_r_d_/_T_e_n_n_e_l_e_c_/_N_u_c_l_e_u_s _P_C_A _M_u_l_t_i_p_o_r_t (GPIB)
+         Ortec 918A Multichannel Buffer (GPIB)
+         Silena 7328 MCA (8K) (GPIB)
+         Silena 7329 MCA (16K) (GPIB)
+
+         _A_m_p_t_e_k _D_P_5_/_P_X_5_/_M_C_A_8_0_0_0_D (FW6) (Serial)
+         _A_m_p_t_e_k _P_o_c_k_e_t _M_C_A _8_0_0_0_/_8_0_0_0_A (Serial)
+         _A_m_p_t_e_k _P_X_4 _D_i_g_i_t_a_l _P_r_o_c_e_s_s_o_r (Serial)
+         MBraun PSD-50M (Serial)
+         Bruker (Roentec) XFlash MAX MCA (Serial)
+
+         Ortec TRUMP PCI (PCI Board)
+         _O_r_t_e_c _M_C_S_-_P_C_I (PCI Board)
+
+         _X_I_A _X_1_0_P _M_C_A (parallel port)
+
+         EPICS MCA Record
+         TACO MCA Device Server
+
+         Hasylab Model 8701 MCA (VME)
+
+         FAST ComTec MCD/PC (ISA Board)
+         FAST ComTec MCDLAP (ISA Board)
+         _H_e_c_u_s _A_S_A_-_3_2 _M_C_A (ISA Board)
+         _O_x_f_o_r_d_/_T_e_n_n_e_l_e_c_/_N_u_c_l_e_u_s _M_i_c_r_o_F_a_s_t _M_C_A (ISA Board)
+         _O_x_f_o_r_d_/_T_e_n_n_e_l_e_c_/_N_u_c_l_e_u_s _P_C_A_-_3 _M_C_A (ISA Board)
+         _O_x_f_o_r_d_/_T_e_n_n_e_l_e_c_/_N_u_c_l_e_u_s _P_C_A _I_I _M_C_A (ISA Board)
+         Ortec TRUMP 8K/2K Multichannel Buffer (ISA Board)
+
+         DSP 2190 MCS Averager (CAMAC)
+         _L_e_C_r_o_y _2_3_0_1 _I_n_t_e_r_f_a_c_e _f_o_r _q_V_T _M_C_A (CAMAC)
+         LeCroy 3512 Spectroscopy ADC (CAMAC)
+         LeCroy 3521A Multichannel Scaler (CAMAC)
+         _L_e_C_r_o_y _3_5_8_8 _F_a_s_t _H_i_s_t_o_g_r_a_m _M_e_m_o_r_y (CAMAC)
+         _X_I_A _D_X_P (CAMAC)
+
+         Brookhaven Instruments BI-9000 Autocorrelator (ISA Board)
+         _N_i_c_o_m_p _T_C_-_1_0_0 _A_u_t_o_c_o_r_r_e_l_a_t_o_r (RS-232C)
+
+         Keithley 2001 Multimeter (GPIB)
+
+SEE ALSO
+
+     _a_m_p_t_e_k _d_p_5 _d_x_p _h_e_c_u_s _k_i_s_i_m _l_c_2_3_0_1 _l_c_3_5_8_8 _m_c_s_p_c_i _m_i_c_r_o_f_a_s_t _M_P_I_I _m_y_t_h_e_n
+     _n_i_c_o_m_p _n_t_2_4_0_0 _p_c_a _p_x_4
+

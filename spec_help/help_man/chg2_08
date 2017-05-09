@@ -1,0 +1,96 @@
+.TH "changes" "spec 2.8 Release Notes" "08/01/12" "chg2_08.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.8
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_08.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1995 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.8 Release Notes" "08/01/12" "chg2_08.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes summarize the modifications made for \fBspec\fP release 2.8,
+as finalized on August 6, 1988.
+.SH "CHANGES"
+.rs
+.sp
+The four\-circle motors are now consistently
+referred to in the order
+\fBtth th chi phi\fP
+throughout \fBspec\fP.
+(Previously, the order of
+\fBchi\fP
+and
+\fBphi\fP
+was reversed.)
+The macros with changed usage are
+\fBpl\fP,
+\fBupl\fP
+and
+\fBci\fP.
+All the macros that produce output
+(\fBwh\fP,
+the scans, etc.)
+use the new ordering convention.
+.sp
+The global variable referring to the data file has been
+changed from
+\fBFILENAME\fP
+to the more revealing
+\fBDATAFILE\fP.
+.sp
+The order of arguments in the built\-in functions
+\fBdial()\fP,
+\fBuser()\fP,
+\fBchg_dial()\fP
+and
+\fBchg_offset()\fP
+has been
+changed to make the motor number the first argument in each case.
+This change makes the argument ordering of these four functions
+consistent with the functions
+\fBget_lim()\fP
+and
+\fBset_lim()\fP.
+.sp
+A new function named
+\fBmotor_mne(i)\fP
+returns the mnemonic
+assigned to motor number
+\fBi\fP
+in the
+\fBconfig\fP
+file.
+The internal
+\fB_check0\fP
+macro, called by all standard macros
+that allow a motor number or mnemonic as an argument,
+now checks its argument against all valid mnemonics, rather than
+just that for motor 0, as it had previously.
+.sp
+Most scans macros now include prescan motor\-limit checks.
+.sp
+Previously, certain of the
+\fBcalc()\fP
+calls to the geometry code
+(\fBcalcA\fP
+and
+\fBcalcAB\fP,
+in particular)
+filled the
+\fBA[]\fP
+array with the current motor positions.
+That no longer happens.
+.sp
+The four\-circle geometry code has been made more robust (we like to think).
+

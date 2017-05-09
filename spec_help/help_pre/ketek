@@ -1,0 +1,168 @@
+mmc100                              hardware                              mmc100
+
+NAME
+     ketek - Ketek DPP2 MCA-type device
+
+DESCRIPTION
+
+     The Ketek DPP2 is a digital pulse processor used in instruments such as the
+     GE Measurement & Control Meteor0D energy dispersive X-ray detector.
+
+     The DPP2 connects to the computer via a USB interface but appears as a
+     serial device to ssppeecc.  On modern LLiinnuuxx distributions the serial-to-USB
+     driver will load automatically.  On Mac OSX, the VCP driver available at
+     _f_t_d_i_c_h_i_p_._c_o_m must be installed.
+
+     The controller is selected on the hardware configuration editor DDevices
+     screen along the lines of:
+
+        MMCCAA--lliikkee       DDEEVVIICCEE   AADDDDRR  <<>>MMOODDEE                 <<>>TTYYPPEE
+         00  YYEESS  //ddeevv//ttttyyUUSSBB00     <<>>   1199220000    KKeetteekk DDPPPP22 ((SSeerriiaall))
+
+FUNCTIONS
+
+     The standard MCA commands supported by ssppeecc are described in the _m_c_a help
+     file.  Of the standard functions, the Ketek DPP2 MCA supports mmccaa__ggeett(()),
+     but not mmccaa__ppuutt(()).  Of the standard mmccaa__ppaarr(()) options, ""iinnffoo"", ""cchhaannss"",
+     ""mmaaxx__cchhaannss"", ""mmaaxx__cchhaannnneellss"", ""ddiissaabbllee"", ""aauuttoo__rruunn"", ""ssoofftt__pprreesseett"",
+     ""aauuttoo__cclleeaarr"", ""nnaattiivvee__ttyyppee"", ""rruunn"", ""hhaalltt"" and ""cclleeaarr"" are included in
+     ssppeecc's support for the DPP2.
+
+     The ""aauuttoo__cclleeaarr"" mode is on by default.
+
+     Options specific to the DPP2 are described below.
+
+     mmccaa__ppaarr((""ggaaiinn__iinnddeexx"" [[,, vv]])) - With the optional argument, sets the gain to
+          the value associated with the gain index vv, as follows:
+
+              vv   Gain       vv   Gain       vv    Gain       vv    Gain
+              0   0          4   10.6       8    5.3        12   3.6
+              1   42.4       5   8.5        9    4.7        13   3.3
+              2   21.2       6   7.1        10   4.2        14   3.0
+              3   14.1       7   6.0        11   3.9        15   2.8
+
+          Returns the current index.  Note, zero gain switches the MCA off.
+
+          According to the DPP technical specifications, the digital gain
+          "determines the slope of the system transfer characteristic."  Larger
+          values shift "the spectrum lines right."  The "appropriate gain should
+          be chosen in accordance with the maximum energy measured and user
+          preferences."  The gain values in the above table are "the approximate
+          charge sensitivity (CS) in [eV/channel]."
+
+     mmccaa__ppaarr((""ggaaiinn"" [[,, vvaalluuee]])) - With the optional argument, sets the gain to
+          the closet value to the argument vvaalluuee.  With or without the argument,
+          returns the current setting.
+
+     mmccaa__ppaarr((""sshhaappiinngg"" [[,, vv]])) - Sets or returns the shaping parameter, a value
+          from 0 to 15, that selects shaping constants as given in the following
+          table:
+
+                   Peaking   Analog       Differential
+              vv    Time      Equivalent   Nonlinearity
+                   (usec)    (usec)       (%)
+              0    1.32      0.44         1.0
+              1    2.1       0.7          0.7
+              2    2.9       1            0.5
+              3    3.72      1.25         0.4
+              4    4.5       1.5          0.3
+              5    5.3       1.8          0.26
+              6    6.1       2            0.23
+              7    6.9       2.3          0.2
+              8    7.7       2.6          0.18
+              9    8.52      2.85         0.17
+              10   9.3       3.1          0.15
+              11   10.1      3.4          0.14
+              12   10.9      3.65         0.13
+              13   11.7      3.9          0.12
+              14   12.5      4.2          0.11
+              15   13.3      4.5          0.1
+
+          According to the DPP technical specifications, "the shaped pulse has
+          duration equal to half of the equivalent shaping time pulse duration
+          for semi-Gaussian analog shaper. Due to the shaping function chosen,
+          the peaking time equals the pulse duration.  Digitally shaped pulses
+          terminate in a single clock cycle."  In addition, "Due to the built in
+          sliding scale correction applied during each individual pulse shaping,
+          the [differential nonlinearity] depends on the number of clock cycles
+          needed to shape the pulse."
+
+     mmccaa__ppaarr((""tthhrreesshhoolldd"" [[,, vvaalluuee]])) - Sets or returns the threshold, which is a
+          value from 0 to 15.  The DPP technical specifications state:
+
+              The DPP detects pulses that have amplitude above certain value
+              settable by the threshold. There are 16 equidistant thresholds.
+              The threshold should be set just above the noise level. If set
+              lower, the dead time increases. If set higher than needed, the
+              energy resolution may decrease and lower energy pulses shall not
+              be detected.  The needed value should be chosen experimentally;
+              however in most cases threshold value of 4 - 6 is fine.
+
+     mmccaa__ppaarr((""pprreesseett"" [[,, vvaalluuee]])) - With the optional argument, sets the preset
+          time to vvaalluuee, in seconds.  The preset time resolution is 0.256
+          seconds.  With or without the argument, returns the rounded preset
+          time.
+
+     mmccaa__ppaarr((""pprreesseett__mmooddee"" [[,, vvaalluuee]])) - Sets or returns the current preset mode.
+          The argument can be given as a string or a number.  Valid strings are
+          ""rreeaall"" (or 0) and ""lliivvee"" (or 1).  The return value will be 0 or 1.
+
+     mmccaa__ppaarr((""lliivvee"")) - Sets lliivvee-time preset mode.
+
+     mmccaa__ppaarr((""rreeaall"")) - Sets rreeaall-time preset mode.
+
+     mmccaa__ppaarr((""iiccrr"")) - Returns the input count rate.
+
+     mmccaa__ppaarr((""eellaappsseedd__lliivvee"")) - Returns the elapsed live time.
+
+     mmccaa__ppaarr((""eellaappsseedd__rreeaall"")) - Returns the elapsed real time.`
+
+     mmccaa__ppaarr((""ddeeaadd"")) - Returns the calculated dead time, as
+
+              100 * (rreeaall__ttiimmee - lliivvee__ttiimmee) / rreeaall__ttiimmee
+
+     mmccaa__ppaarr((""ssccooppee"")) - Returns a data array of 1024 unsigned short values
+          containing the oscilloscope data.
+
+     mmccaa__ppaarr((""ppaarrss"")) - Returns an associative array containing parameters
+          indexed by keywords, with each element containing the appropriate
+          value, as shown below.  The ""bbuussyy"" keyword is nonzero when the device
+          is acquiring data:
+
+             112233..SSPPEECC>> ppaarrss == mmccaa__ppaarr((""ppaarrss""));; pp ppaarrss
+             ppaarrss[[""bbuussyy""]] == 11
+             ppaarrss[[""ddeeaadd""]] == 8844..1122
+             ppaarrss[[""eellaappsseedd__lliivvee""]] == 11..558855
+             ppaarrss[[""eellaappsseedd__rreeaall""]] == 99..998844
+             ppaarrss[[""ggaaiinn""]] == 88
+             ppaarrss[[""iiccrr""]] == 00
+             ppaarrss[[""pprreesseett""]] == 99..998844
+             ppaarrss[[""pprreesseett__mmooddee""]] == 00
+             ppaarrss[[""sshhaappiinngg""]] == 44
+             ppaarrss[[""tthhrreesshhoolldd""]] == 66
+
+     mmccaa__ppaarr((""ssttaattee"")) - Prints the current state of the device in the following
+          format:
+
+             AAccqquuiissiittiioonn nnoott ccoommpplleettee..
+             SSppeeccttrruumm nnoott cclleeaarreedd..
+             AAccqquuiissiittiioonn iiss ssttaarrtteedd..
+             RReeaall ttiimmee == 44..5577
+
+     mmccaa__ppaarr((""dduummpp"")) - Displays the current parameters formatted as follows:
+
+             PPrreesseett     == 99..998844 sseecc
+             CCoouunntt mmooddee == RReeaall
+             BBuussyy       == NNoo
+             GGaaiinn       == 88 ((55..33 eeVV//cchhaannnneell))
+             TThhrreesshhoolldd  == 66
+             SShhaappiinngg    == 44
+               PPeeaakkiinngg ttiimmee              == 44..55 uusseecc
+               AAnnaalloogg eeqquuiivvaalleenntt         == 11..55 uusseecc
+               DDiiffffeerreennttiiaall nnoonnlliinneeaarriittyy == 00..33%%
+
+             EEllaappsseedd lliivvee ttiimmee == 99..998844 sseecc
+             EEllaappsseedd rreeaall ttiimmee == 11..774488 sseecc
+             PPeerrcceenntt ddeeaadd ttiimmee == 8822..55%%
+             IInnppuutt ccoouunntt rraattee  == 11223344 ccttss//sseecc
+

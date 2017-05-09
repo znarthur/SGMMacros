@@ -1,0 +1,188 @@
+.TH "amptek" "hardware" "05/16/13" "amptek.rst 6.2  05/16/13 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+amptek \- Amptek Pocket MCA 8000/8000A
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)amptek.rst       6.2  05/16/13  CSS
+.
+.\" Copyright (c) 2003,2010,2012,2013 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "amptek" "hardware" "05/16/13" "amptek.rst 6.2  05/16/13 CSS"
+.
+.SH "INTRODUCTION"
+.rs
+.sp
+(See the \fI\%dp5\fP help file for information on the DP5, PX5, DP5G and MCA8000D
+Amptek MCA devices.  See the \fI\%px4\fP help file for information on the Amptek PX4 MCA.)
+.sp
+\fBspec\fP communicates with the Amptek MCA\-8000 and MCA\-8000A pocket MCA devices
+over an RS\-232C interface.  The serial communication is nonstandard and requires
+\fBspec\fP to set the DTR and RTS modem\-control outputs and read the
+DSR and CTS modem\-control inputs.
+Thus \fBspec\fP only supports this MCA on platforms
+with serial ports that respond to
+the standard modem\-control \fBioctl()\fP calls.
+.sp
+\fBspec\fP supports the newer (but still nonstandard) MCA\-8000A protocol
+included on models with serial number 3660 and higher.  The new protocol
+allows the MCA to be used over most USB\-to\-serial adapters,
+but currently only on
+\fBLinux\fP platforms.  Do not run the older protocol
+over a USB\-to\-serial adapter. If it works at all, there will be heavy CPU usage
+and much slower communications.
+Note, Amptek can update the firmware of older models.
+The MCA 8000A currently will not work on a Mac in native mode,
+although the MCA will work running
+spec on a \fBLinux\fP virtual machine on a Mac
+if one connects directly to the USB\-to\-serial
+adapter through the \fBLinux\fP virtual machine.
+The new protocol requires \fBspec\fP release 5.08.05\-6 or higher.
+.sp
+The MCA can be used with baud rates up to 115200, although
+maximum effective transfer rates seem to be about half that.
+.sp
+The MCA can collect data in up to 16,384 active channels
+and has memory for 32,768 channels.
+Memory group sizes can be configured from 256 to 16,384 channels
+in powers of two, and the number of groups is 32,768 divided by the group size.
+.sp
+The number of usable channels is reduced slightly, though, due to
+"the sliding scale linearization technique" employed by the MCA ADC.
+The number of channels in a group is reduced by 1/32 of the group size.
+For a 256\-channel group, the last 8 channels are not useful.
+For a 16,384\-channel group, the last 512 channels are not useful.
+\fBspec\fP fills those locations with zeroes.
+.sp
+The MCA can be powered by either batteries or an external power source.
+The power can be turned on remotely by sending a special sequence of signals
+over the DTR and RTS modem control lines.  When \fBspec\fP starts up or on a
+\fB"reconfig"\fP command, \fBspec\fP sends the signals
+that will turn on the MCA if had been turned off.
+When operating on battery, the MCA turns itself off
+after two minutes of inactivity.
+While the MCA is acquiring data,
+\fBspec\fP will normally poll the MCA to check its
+status, which will keep the MCA from shutting off.
+If the MCA does shut itself off,
+\fBspec\fP will send the signals to turn the MCA back on
+and then retry the command.
+.SH "FUNCTIONS"
+.rs
+.sp
+The standard MCA commands supported by \fBspec\fP are described in the
+\fI\%mca\fP help file.
+Of the standard functions, the Amptek MCA supports
+\fBmca_get()\fP (but not \fBmca_put()\fP). The standard
+\fBmca_par()\fP options
+\fB"info"\fP, \fB"chans"\fP, \fB"max_chans"\fP, \fB"max_channels"\fP,
+\fB"disable"\fP, \fB"auto_run"\fP, \fB"soft_preset"\fP,
+\fB"auto_clear"\fP, \fB"native_type"\fP,
+\fB"preset"\fP, \fB"live"\fP, \fB"real"\fP, \fB"elapsed_live"\fP,
+\fB"elapsed_real"\fP, \fB"dead"\fP, \fB"run"\fP, \fB"halt"\fP, \fB"clear"\fP,
+\fB"group_size"\fP, \fB"select_group"\fP, \fB"gain"\fP and \fB"chan#"\fP,
+are supported by the Amptek MCA.
+.sp
+The options, \fB"group_size"\fP and \fB"gain"\fP are synonyms as are
+\fB"max_chans"\fP and \fB"max_channels"\fP.
+.sp
+Legal values for the \fB"group_size"\fP argument
+are 256, 512, 1024, 2048, 4096, 8192 and 16384.
+Legal values for the \fB"select_group"\fP argument are from 0 to
+(32768/\fBgroup_size\fP) \- 1.
+.sp
+The native data type for the MCA is \fBulong\fP, i.e.,
+unsigned long (32\-bit) integers.
+.sp
+The \fB"auto_clear"\fP mode is on by default.
+Note, however, it takes time (proportional to the group size) to clear the data.
+Thus, count times not using a preset will be affected.
+.sp
+Additional \fBmca_par()\fP options are as follows:
+.RS 0m
+.HP 5m
+."
+\fBmca_par("show_status")\fP
+\- 
+Reads and displays the current parameters from the MCA status word.
+.HP 5m
+."
+\fBmca_par("time_stamp")\fP
+\- 
+Reads the time stamp of the current data group and returns a value in
+UNIX time format (the number of seconds since the start of Jan 1, 1970).
+The ASCII representation is available as: \fBdate(mca_par("time_stamp"))\fP.
+.HP 5m
+."
+\fBmca_par("time_stamp", value)\fP
+\- 
+Updates the time stamp to match the time passed in UNIX time format
+via \fBvalue\fP. If \fBvalue\fP is zero, the current system time is used.
+.HP 5m
+."
+\fBmca_par("threshold")\fP
+\- 
+Reads the MCA status and returns the current threshold value.
+.HP 5m
+."
+\fBmca_par("threshold", value)\fP
+\- 
+Sets the MCA threshold to \fBvalue\fP.
+The threshold is the channel number of the lowest channel to be used for
+data collection.  Channels below the threshold channel don\(aqt collect data.
+.HP 5m
+."
+\fBmca_par("battery_type")\fP
+\- 
+Returns the state of the battery\-type flag in the MCA.
+The battery type is used to calculate the remaining battery power.
+Battery type zero is 1.5 Volt alkaline cells.
+Battery type one is for 1.2 Volt NiCad cells.
+.HP 5m
+."
+\fBmca_par("battery_type", value)\fP
+\- 
+Sets the battery\-type flag in the MCA.
+A value of zero selects 1.5 Volt alkaline cells.
+A nonzero value selects 1.2 Volt NiCad cells.
+The battery type is only used for choosing which scale to use
+to calculate the remaining battery capacity.
+.HP 5m
+."
+\fBmca_par("battery")\fP
+\- 
+Returns the remaining battery capacity as a percentage based on the
+battery type and the battery value returned in the MCA status word.
+.RE
+.sp
+If the magnitude of the counts is known to be less
+than 65536 in each channel, the read\-out time can be cut in
+half by only reading the two low\-order bytes for each data point.
+\fBspec\fP implements a \fB"read_short"\fP mode to implement the faster read.
+Note, the native data type remains \fBulong\fP.
+.RS 0m
+.HP 5m
+."
+\fBmca_par("read_short")\fP
+\- 
+Returns nonzero if \fB"read_short"\fP mode is on, otherwise returns zero.
+.RE
+.HP 5m
+."
+\fBmca_par("read_short", value)\fP
+\- 
+Sets \fB"read_short"\fP mode to on or off according
+to whether \fBvalue\fP is nonzero or zero.
+.RE
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%mca\fP
+\fI\%www.amptek.com\fP
+

@@ -1,0 +1,20 @@
+lm                                    macro                                   lm
+
+NAME
+     llmm - list motor software limits
+
+SYNOPSIS
+
+     llmm [[mmoottoorr ...... ]]
+
+DESCRIPTION
+
+     The llmm macro lists the current software limits as well as the current motor
+     positions in both user and dial units for all motors.  You can limit the
+     printout to six or fewer motors by specifying motor numbers or mnemonics as
+     arguments.
+
+SEE ALSO
+
+     _m_o_t_o_r_s
+

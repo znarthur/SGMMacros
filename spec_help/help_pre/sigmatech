@@ -1,0 +1,94 @@
+sigmatech                           hardware                           sigmatech
+
+NAME
+     Sigmatech - Sigmatech FC-501A motor controller
+
+DESCRIPTION
+
+     ssppeecc supports the Sigmatech model FC-501A motor controller over GPIB and
+     RS-232C interfaces.  The FC-501A controller comes with one or two axes and
+     performs positioning to 10 nm resolution with optional closed-loop control.
+     Multiple units can be configured.
+
+DEVICE CONFIGURATION
+
+     Configure the motor controllers on the DDevices screen of the configuration
+     editor as follows, choosing the GPIB or serial entry, as appropriate.
+
+        MMoottoorr aanndd CCoouunntteerr DDeevviiccee CCoonnffiigguurraattiioonn ((NNoott CCAAMMAACC))
+
+         MMOOTTOORRSS     DDEEVVIICCEE   AADDDDRR <<>>MMOODDEE NNUUMM                          <<>>TTYYPPEE
+            YYEESS                 44          22        SSiiggmmaatteecchh FFCC--550011AA ((GGPPIIBB))
+            YYEESS //ddeevv//ttttyySS00     <<>>   99660000   22      SSiiggmmaatteecchh FFCC--550011AA ((SSeerriiaall))
+
+     Choose FFCC550011AA as the controller type on the MMotorscreen of the
+     configuration editor.
+
+PARAMETERS
+
+     A number of parameters associated with the Sigmatech motors can only be set
+     using the device front-panel controls.  There is no software access to
+     these parameters, either for reading or writing.  See the Sigmatech manual
+     for details.  Of the standard motor parameters available in the ssppeecc
+     configuration editor, the steady-state rate and acceleration are used, but
+     the base rate is not.
+
+     Home searches are available with the controller, and the standard optional
+     motor parameter ""hhoommee__ppoossiittiioonn"" will be used, if set.  See the home search
+     discussion below.
+
+     The standard optional parameter for read-back ""sslloopp"" is useful to set in
+     closed-loop mode.  Position discrepancies less than the slop value (in
+     steps) will be silently remedied in favor of the controller.
+
+     A non-standard optional motor parameter ""ccoonnttrrooll__mmooddee"" is recognized by
+     this controller to set open-loop or one of two possible closed-loop control
+     modes.  Type a <pp> from the main MMotor screen of the configuration editor
+     to reach the nonstandard optional parameter page.  Type a <HH> there for
+     instructions on entering such parameters.  See below for parameter values.
+
+     The following parameters are set using the mmoottoorr__ppaarr(()) function.
+
+     mmoottoorr__ppaarr((mmnnee,, ""iinnppuutt"")) - Returns a value representing the general-purpose
+          digital input port status.
+
+     mmoottoorr__ppaarr((mmnnee,, ""oouuttppuutt"",, vvaalluuee)) - Sets the general-purpose digital output
+          port to vvaalluuee.
+
+     mmoottoorr__ppaarr((mmnnee,, ""ccoonnttrrooll__mmooddee"" [[,, aarrgg]])) - Returns or sets the stage control
+          mode, which is described in the controller documentation as one of
+          open-loop, closed-loop mode 1 or closed-loop mode 2.  The argument aarrgg
+          can be one of the strings ""ooppeenn"", ""cclloosseedd__11"" or ""cclloosseedd__22"" or
+          corresponding numeric values of 0, 1 or 2.  The return value will be
+          0, 1 or 2.  If this parameter is set as a non-standard optional motor
+          parameter in the hardware ccoonnffiigg file, ssppeecc will send the value on
+          startup and on rreeccoonnffiigg.
+
+     mmoottoorr__ppaarr((mmnnee,, ""sseenndd"",, ccmmdd)) - Sends the string ccmmdd to the FC-501A
+          controller associated with mmnnee.
+
+     mmoottoorr__ppaarr((mmnnee,, ""rreeaadd"",, ccmmdd)) - Sends the string ccmmdd to the FC-501A
+          controller associated with mmnnee, and returns the reply.
+
+HOME SEARCH
+
+     Home search is implemented.  At the end of the search, the dial position
+     will be set to the value of the standard optional motor parameter
+     ""hhoommee__ppoossiittiioonn"", if that parameter is set.  Otherwise, the home position
+     will be set to zero.  In addition, a third argument to the cchhgg__ddiiaall(())
+     function or a second argument to the standard hhoommee macro can specify the
+     dial home position, overriding the value set for the ""hhoommee__ppoossiittiioonn""
+     parameter.
+
+     Home searches can be conducted (for a motor mm00) using:
+
+         hhoommee mm00;; uuwwmm mm00
+
+     To set the position at the end of the search, use:
+
+         hhoommee mm00 55
+
+SEE ALSO
+
+     _w_w_w_._s_i_g_m_a_-_t_e_c_h_._c_o_._j_p
+

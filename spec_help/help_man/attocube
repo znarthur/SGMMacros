@@ -1,0 +1,427 @@
+.TH "attocube" "hardware" "08/01/12" "attocube.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+Attocube \- Attocube ANC350 motor controller
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)attocube.rst     6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2009,2011,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "attocube" "hardware" "08/01/12" "attocube.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+\fBspec\fP supports the ANC350 piezo controller over an Ethernet connection.
+.sp
+The controller is selected on the hardware configuration
+editor \fBD\fPevices screen along the lines of:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS    DEVICE  ADDR <>MODE NUM                     <>TYPE
+   YES atto_host                8   Attocube ANC350 (Socket)
+.ft P
+.fi
+.RE
+.sp
+Here, \fBatto_host\fP is a resolvable host name or IP address.
+The default port number, 2101, is built into the code.
+If the controller is set up to use another port,
+enter the DEVICE as \fBatto_host:port\fP.
+On the Motors screen, choose \fBANC350\fP as the controller type.
+.sp
+The parameter descriptions below are brief.
+Consult Attocube and the ANC350 documentation for complete details
+on operation of the controller.
+The current support for the ANC350 (as of \fBspec\fP release 5.08.03\-4)
+does not support all the controller capabilities.
+Please contact CSS if support for additional functionality is needed.
+.SH "HOME SEARCH"
+.rs
+.sp
+The \fB"home+"\fP, \fB"home\-"\fP and \fB"home"\fP options
+to \fBchg_dial()\fP will all send the command to go
+to the reference position as defined by the \fB"refpos"\fP parameter.
+The \fB"lim+"\fP and \fB"lim\-"\fP options will send commands to move
+to the forward and backward limits, respectively
+(as of \fBspec\fP release 5.10.01\-12).
+The limit search should only be used when hump detection is enabled.
+.SH "PARAMETERS"
+.rs
+.sp
+The ANC350 controller has many configuration parameters for
+the individual axis channels. All the parameters names used
+in the "actor profile" (\fB.aps\fP) files supplied by Attocube
+for use with their software are recognized by \fBspec\fP.
+Note, \fBspec\fP can also read the \fB.aps\fP files directly
+with the \fB"load"\fP option described below.
+Additional parameters particular to the ANC350
+are also recognized by \fBspec\fP.
+.sp
+Values for the parameters can also be included in \fBspec\fP\(aqs
+hardware configuration file and maintained with the hardware
+configuration editor on the non\-standard optional parameter screen.
+(Type \fBp\fP from the \fBM\fPotor screen.)
+Values for each of the parameters may also be set
+or read via the \fBmotor_par()\fP function.
+.sp
+The device units (mm, deg, etc.) for many of the parameters
+are determined by the \fB"sensorunit"\fP parameter value as described below.
+.sp
+Note, setting either of the parameters \fB"humpenable"\fP
+and \fB"stickyhump"\fP to zero will interfere with \fBspec\fP\(aqs ability
+to detect limits. Setting the parameter \fB"relays"\fP to zero will disable
+the channel\(aqs output. \fBspec\fP will set each of these three parameters
+to one on hardware configuration.
+.sp
+The first set of \fBmotor_par()\fP examples below lists parameters
+with the same names used in the Attocube \fB.aps\fP files:
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "actordir" [, arg])\fP
+\- 
+Actuator direction, forward is 0, backward is 1.
+.HP 5m
+."
+\fBmotor_par(mne, "actorgain" [, arg])\fP
+\- 
+Loop gain in device units per Volt. The value is scaled by a factor of 1e6.
+.HP 5m
+."
+\fBmotor_par(mne, "actoroffset" [, arg])\fP
+\- 
+Loop offset in millivolts.
+.HP 5m
+."
+\fBmotor_par(mne, "adaptsetpctrl" [, arg])\fP
+\- 
+Enables (1) or disables (0) approach speed function.
+.HP 5m
+."
+\fBmotor_par(mne, "amplctrl" [, arg])\fP
+\- 
+Indicates the piezo drive control mode \- 0 is speed,
+1 is amplitude and 2 is step width.
+.sp
+In speed\-control mode, the controller maintains
+a constant travel speed in a closed\-loop mode.
+The speed is set by the \fB"frequency"\fP and \fB"amplitude"\fP parameters,
+and can be retrieved using the \fB"speed"\fP parameter.
+.sp
+In amplitude\-control mode, the speed and step width are varied
+in an open\-loop mode to maintain a constant amplitude level as
+set by the \fB"amplitude"\fP parameter.
+.sp
+In step\-width mode, the amplitude is controlled via a
+closed\-loop to maintain a constant step width.
+The speed may vary depending on the value set
+for the \fB"frequency"\fP parameter.
+The step width is set with the \fB"amplitude"\fP parameter
+and can be retrieved using the \fB"step_width"\fP parameter.
+.HP 5m
+."
+\fBmotor_par(mne, "amplctrlavg" [, arg])\fP
+\- 
+Average factor for speed feedback.
+.HP 5m
+."
+\fBmotor_par(mne, "amplctrlsensitivity" [, arg])\fP
+\- 
+Sensitivity for speed feedback. The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "humpenable" [, arg])\fP
+\- 
+Enables (1) or disables (0) hump detection.
+\fBspec\fP enables hump detection on hardware configuration
+in order to enable limit detection.
+.HP 5m
+."
+\fBmotor_par(mne, "maxampl" [, arg])\fP
+\- 
+Maximum amplitude in millivolts.
+.HP 5m
+."
+\fBmotor_par(mne, "maxfrequ" [, arg])\fP
+\- 
+Maximum frequency in Hz.
+.HP 5m
+."
+\fBmotor_par(mne, "period" [, arg])\fP
+\- 
+Number of periods per device unit for optical sensors.
+.HP 5m
+."
+\fBmotor_par(mne, "positionmin" [, arg])\fP
+\- 
+The minimum position of the sensor in device units.
+The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "positionmax" [, arg])\fP
+\- 
+The maximum position of the sensor in device units.
+The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "poslooprange" [, arg])\fP
+\- 
+The position loop range in device units.
+The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "refoffset" [, arg])\fP
+\- 
+The reference offset in device units.
+The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "rotary" [, arg])\fP
+\- 
+The value is 0 for linear and 1 for rotary stages.
+This parameter can be set as one of the standard optional parameters
+on the second optional motor parameter screen
+of the configuration editor.
+.HP 5m
+."
+\fBmotor_par(mne, "sensoravg" [, arg])\fP
+\- 
+The sensor\-average factor.
+.HP 5m
+."
+\fBmotor_par(mne, "sensordir" [, arg])\fP
+\- 
+Sensor direction, forward is 0, backward is 1.
+.HP 5m
+."
+\fBmotor_par(mne, "sensorres" [, arg])\fP
+\- 
+Value for internal signal averaging.
+.HP 5m
+."
+\fBmotor_par(mne, "sensorunit" [, arg])\fP
+\- 
+The code for the sensor device units, as given in the table below:
+.TS
+;
+l l .
+0	millimeter
+1	micrometer
+2	nanometer
+3	picometer
+20	degree
+21	millidegree
+22	microdegree
+.TE
+.HP 5m
+."
+\fBmotor_par(mne, "singlecircle" [, arg])\fP
+\- 
+Enables (1) or disables (0) the shortest way algorithm.
+.HP 5m
+."
+\fBmotor_par(mne, "slowspeed" [, arg])\fP
+\- 
+Target approach speed in device units per second.
+The value is scaled by a factor of 1e6.
+.HP 5m
+."
+\fBmotor_par(mne, "speedgain" [, arg])\fP
+\- 
+Approach speed gain in Hz. The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "targetctrlavg" [, arg])\fP
+\- 
+Averaging factor for position feedback.
+.HP 5m
+."
+\fBmotor_par(mne, "targetctrlsensitivity" [, arg])\fP
+\- 
+Sensitivity for position feedback. The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "targetrange" [, arg])\fP
+\- 
+Positioning accuracy in device units.
+The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "targettime" [, arg])\fP
+\- 
+Minimum time (in milliseconds) at position
+to consider approach to target a success.
+.HP 5m
+."
+\fBmotor_par(mne, "transfergain" [, arg])\fP
+\- 
+Gain for resistive transfer function in device units per Volt.
+The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "transferoffs" [, arg])\fP
+\- 
+This obsolete parameter appears in the \fB.aps\fP files,
+but is no longer supported by the controller firmware.
+\fBspec\fP recognizes but ignores the parameter.
+.HP 5m
+."
+\fBmotor_par(mne, "transfertype" [, arg])\fP
+\- 
+Type of sensor, 0 is optical, 1 is resistive.
+.RE
+.sp
+The following parameters do not appear in the \fB.aps\fP files,
+but are also available:
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "amplitude" [, arg])\fP
+\- 
+The amplitude of the drive voltage for the piezo drive in minivolts.
+Changing this value changes the step size.
+Allowed values are from 0 to 70 Volts.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "dclevel" [, arg])\fP
+\- 
+The DC level represents the applied DC voltage to the piezo.
+.HP 5m
+."
+\fBmotor_par(mne, "frequency" [, arg])\fP
+\- 
+The frequency is used to adjust the travel speed in speed
+and step\-width drive\-control modes. This parameter is used as
+and tracks the standard steady\-state rate parameter from the config file.
+.HP 5m
+."
+\fBmotor_par(mne, "refvolt" [, arg])\fP
+\- 
+Global controller reference voltage in millivolts.
+The value is applied to the controller associated with motor \fBmne\fP.
+.HP 5m
+."
+\fBmotor_par(mne, "relays" [, arg])\fP
+\- 
+Enables (1) or disables (0) the output relays.
+The relays must be enabled for the actuators to function.
+\fBspec\fP enables the relays during hardware configuration.
+.HP 5m
+."
+\fBmotor_par(mne, "stickyhump" [, arg])\fP
+\- 
+Enables (1) or disables (0) the "sticky"  hump bit.
+\fBspec\fP enables this bit during hardware configuration
+in order for limit detection to work properly.
+.HP 5m
+."
+\fBmotor_par(mne, "targetground" [, arg])\fP
+\- 
+When enabled (1),
+the output voltage is set to zero when the positioning
+loop is finished.
+A value of zero disables the mode.
+(Available as of \fBspec\fP release 5.10.02\-3.)
+.RE
+.sp
+The following parameters are read only:
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "capacitance")\fP
+\- 
+Returns the result of a capacitance measurement
+of the connected positioner.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "maxpos")\fP
+\- 
+Maximum position for actuator in device units.
+.HP 5m
+."
+\fBmotor_par(mne, "minpos")\fP
+\- 
+Minimum position for actuator in device units.
+.HP 5m
+."
+\fBmotor_par(mne, "position")\fP
+\- 
+Current position of actuator in device units.
+.HP 5m
+."
+\fBmotor_par(mne, "refpos")\fP
+\- 
+Reference position of actuator in device units.
+.HP 5m
+."
+\fBmotor_par(mne, "speed")\fP
+\- 
+The speed setting in device units per second.
+The value is scaled by a factor of 1000.
+.HP 5m
+."
+\fBmotor_par(mne, "step_width")\fP
+\- 
+The width per step in device units.
+The value is scaled by a factor of 1000.
+.RE
+.sp
+Finally, \fBspec\fP supports the following additional commands
+for the ANC350 controller:
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(mne, "load", filename)\fP
+\- 
+Reads the named file, which should be in the format
+of the Attocube \fB.aps\fP "actor profile" files,
+and sets the parameters to the values given in the file.
+The format of the files is the parameter name followed by
+a space and then a value, with one entry per line.
+.RE
+.HP 5m
+."
+\fBmotor_par(mne, "dump")\fP
+\- 
+Prints a formatted display of all the motor parameters
+for the given motor. The display includes the parameter description,
+the scaled value with units, the unscaled value in parenthesis
+and the parameter name in quotation marks.
+.HP 5m
+."
+\fBmotor_par(mne, "step", value)\fP
+\- 
+Single steps the given axis the number of steps given by \fBvalue\fP.
+Positive values step forward using the \fBID_ANC_SGL_FWD\fP command.
+Negative values step backward using the \fBID_ANC_SGL_BKWD\fP command.
+The change in position detected by the sensor may be greater than
+the number of steps given as an argument, depending on values of
+other parameters, such as the amplitude.
+If the change in position steps is greater than
+the motor read\-back \fB"slop"\fP parameter and
+the hardware \fB"read_mode"\fP parameter requires queries
+on position discrepancies greater than the read\-back slop parameter,
+\fBspec\fP will issue the standard position discrepancy message
+when motor positions are next requested.
+.HP 5m
+."
+\fBmotor_par(mne, "measure_capacitance")\fP
+\- 
+\fBspec\fP initiates a capacitance measurement, pauses 0.5 seconds
+for the measurement to complete, then returns the measured value.
+The \fB"capacitance"\fP option, above, returns the last measured value,
+but doesn\(aqt initiate a measurement.
+.RE
+

@@ -1,0 +1,208 @@
+x11                                 reference                                x11
+
+NAME
+     xx1111 - ssppeecc graphics under the X Window System
+
+DESCRIPTION
+
+     You can have ssppeecc draw high resolution graphics in X Window System windows
+     by selecting high resolution graphics (with the sseettpplloott macro) and setting
+     the GGTTEERRMM global variable to xx1111. You can set GGTTEERRMM either as an
+     environment variable in the shell or by assigning it the ""xx1111"" string while
+     running ssppeecc.  However, each time you start ssppeecc, the environment variable
+     will override a previously assigned value to GGTTEERRMM.
+
+     The process that ssppeecc creates (named xx1111ffiilltt) to do the plotting looks at
+     the DDIISSPPLLAAYY environment variable.  The value of ssppeecc's built-in variable
+     named DDIISSPPLLAAYY will be propagated to the xx1111ffiilltt process environment when it
+     is spawned.  Thus it is possible to change the host on which the plots are
+     drawn while running ssppeecc by assigning new values to DDIISSPPLLAAYY. For example,
+
+        DDIISSPPLLAAYY==""hhoosstt11::00"";; pplloott__ccnnttll((""ffiilltteerr11,,ooppeenn""))
+        DDIISSPPLLAAYY==""hhoosstt22::00"";; pplloott__ccnnttll((""ffiilltteerr22,,ooppeenn""))
+
+     will create plot windows on two different hosts.
+
+RESOURCE FILE ITEMS (..XXddeeffaauullttss)
+
+     Some parameters associated with the X windows plot can be set in an
+     ..XXddeeffaauullttss file in your home directory.  You can include some or all of the
+     following parameters:
+
+        ssppeecc..ggeeoommeettrryy::      ==664400xx338800--2200++1100
+        ssppeecc..FFoorreeggrroouunndd::    bbllaacckk
+        ssppeecc..BBaacckkggrroouunndd::    wwhhiittee
+        ssppeecc..BBaacckkssttoorree::     oonn
+        ssppeecc..RReettaaiinneedd::      ooffff
+        ssppeecc..BBoorrddeerrWWiiddtthh::   44
+        ssppeecc..BBoorrddeerr::        bbllaacckk
+        ssppeecc..FFoonntt::          --------rr--------------------**
+        ssppeecc..FFoonnttDDeebbuugg::     00
+        ssppeecc..CCoolloorrss::        oonn
+        ssppeecc..AAuuttooRRaaiissee::     oonn
+        ssppeecc..DDoottSSiizzee::       ssmmaallll
+
+     The values for the parameters given above are the defaults.
+
+     Up to five X graphics windows may be used with ssppeecc simultaneously.
+     Parameters specified in the ..XXddeeffaauullttss file with the keyword ssppeecc will
+     apply to all, unless overridden by the following.  Parameters specified
+     with the keyword ssppeecc__11, will apply to the window selected with the command
+     pplloott__ccnnttll((""ffiilltteerr11"")), parameters specified with the keyword ssppeecc__22 will
+     apply to the window selected with the command pplloott__ccnnttll((""ffiilltteerr22"")), etc.
+     An additional xx1111ffiilltt process is created for each window.
+
+     The ggeeoommeettrryy parameter uses the conventional notation to set the width and
+     height of the window and the offsets from the edges of the root window.
+     All the values are in pixels.
+
+     The BBaacckkggrroouunndd and FFoorreeggrroouunndd parameters set the colors associated with
+     color numbers zero and one, respectively.
+
+     The BBaacckkssttoorree and RReettaaiinneedd parameters select how the image in the window
+     will be saved when the window is covered up by another window.  The
+     backing-store method can be the most efficient way to preserve the window
+     contents if the graphics display supports it.  For the retained-pixmap
+     method, the xx1111ffiilltt process performs all the drawing operations on both the
+     active display and an in-memory copy of the window, and uses the in-memory
+     copy to redraw uncovered portions of the window on eexxppoossee events.  The
+     retained-pixmap method is generally not as efficient as using backing
+     store, but may be necessary if backing store is unavailable.  If backing
+     store is requested, but unsupported by the display, the retained-pixmap
+     method is automatically used.
+
+     The BBoorrddeerrWWiiddtthh and BBoorrddeerr parameters select the width and color of the
+     window border, but are generally ignored when a window manager (such as
+     mmwwmm) is running.
+
+     The FFoonntt parameter uses the standard notation for specifying application
+     fonts in X Windows.  The default font uses the ** to wild card all fields
+     except the fourth, which selects a rroommaann font.  The graphics program
+     selects among all the fonts that match the pattern the one that best fits
+     the height and width of the window when the program first starts and each
+     time the window is resized.  The font selected can be limited to a single
+     family in your ..XXddeeffaauullttss file with syntax as in following examples,
+
+        ssppeecc..FFoonntt:: ----lluucciiddaattyyppeewwrriitteerr--bboolldd--rr--------------------**
+        ssppeecc..FFoonntt:: ----ffiixxeedd--mmeeddiiuumm--rr--------------------**
+        ssppeecc..FFoonntt:: ----ccoouurriieerr--mmeeddiiuumm--rr--
+
+     Note, your choice of a font can be aided with the X utility xxllssffoonnttss which
+     lists all the available fonts, and the utility xxffoonnttsseell which can be used
+     to inspect the available fonts.
+
+     The xx1111ffiilltt program also supports ssccaallaabbllee fonts introduced in X11R5, when
+     such a font is selected using the ..XXddeeffaauullttss resources or the pplloott__ccnnttll(())
+     ""ffoonntt=="" option described below.  For scalable fonts, the server uses an
+     algorithm to fit the font to whatever size is requested.  Scalable fonts
+     can be identified by the zeros in the 7th, 8th and 12th fields of their
+     long name.  For example,
+
+        ssppeecc..FFoonntt:: --aaddoobbee--ccoouurriieerr--bboolldd--rr--nnoorrmmaall----00--00--00--00--mm--00--iissoo88885599--11
+        ssppeecc..FFoonntt:: --aaddoobbee--ccoouurriieerr--mmeeddiiuumm--rr--nnoorrmmaall----00--00--00--00--mm--00--iissoo88885599--11
+
+     are a couple of possible scalable fonts.
+
+     Please note that on some older systems, the ffoonnttss..ddiirr files in the
+     //uussrr//lliibb//XX1111//ffoonnttss directories aren't up to date, so the xx1111ffiilltt graphics
+     program will try to load a font that doesn't exist.  This problem can be
+     fixed by having the system administrator run the mmkkffoonnttddiirr command.
+
+     Setting the FFoonnttDDeebbuugg property to a nonzero value will cause the xx1111ffiilltt
+     filter process to display some font diagnostics on the terminal screen,
+     which may be useful if there are problems with the font appearance.
+     Debugging can be turned off either by setting the property value back to
+     zero or with the pplloott__ccnnttll(()) 9900 command described below.
+
+     The program will use color if it determines you are using a color display.
+     The CCoolloorrss parameter lets you turn use of colors off.
+
+     By default, the graphics window will be brought to the top of the stacking
+     order among its siblings each time its contents are changed.  To disable
+     this feature, set the AAuuttooRRaaiissee parameter to off.
+
+     The DDoottSSiizzee parameter controls the size of the smallest point drawn by
+     ssppeecc.  Possible values are
+
+         +o ssccaalleedd
+
+         +o ppiixxeell
+
+         +o ssmmaallll
+
+         +o mmeeddiiuumm
+
+         +o llaarrggee
+
+     The pixel patterns are as follows:
+
+                                            XX
+            XX               XX      XXXXXX     XXXXXX
+           XXXX       XX      XXXXXX     XXXXXX    XXXXXXXXXX
+                            XX      XXXXXX     XXXXXX
+                                            XX
+         ssccaalleedd   ppiixxeell   ssmmaallll   mmeeddiiuumm  llaarrggee
+        ((ttyyppiiccaall))
+
+     The ssccaalleedd points use the X library XXFFiillllAArrcc(()) routine to draw a filled
+     circle.  The result depends on the platform and is often nonsymmetric.
+     Before being a configurable option, the default dot size was ssccaalleedd. The
+     default is now ssmmaallll.
+
+pplloott__ccnnttll(()) COMMANDS
+
+     You can assign a title to the graphics window using the command
+
+         pplloott__ccnnttll((""ttiittllee==TThhiiss iiss aa ttiittllee""))
+
+     from ssppeecc.  The title can be changed at any time.
+
+     You can also change the size and position of the window at any time using
+     the pplloott__ccnnttll(()) function as in
+
+         pplloott__ccnnttll((""ggeeoommeettrryy==664400xx338800--2200++1100""))
+
+     Fonts can be selected using
+
+         pplloott__ccnnttll((""ffoonntt==--aaddoobbee--ccoouurriieerr--bboolldd--rr--nnoorrmmaall----2200--114400--110000--110000--mm--111100--iissoo88885599--11""))
+
+     for example.  If a non-scalable font is chosen this way, the font size will
+     no longer change to match the size of the window.  Any valid font name can
+     be used, including short alias names, as in,
+
+         pplloott__ccnnttll((""ffoonntt==88xx1166""))
+
+     Several special features can be accessed using
+
+         pplloott__ccnnttll((""ccmmdd==nnuummbb""))
+
+     (as of ssppeecc release 5.01.02-7) where the following values for nnuummbb are
+     recognized:
+
+         99110099   turns auto-raise mode on
+         99111100   turns auto-raise mode off
+         99112200   selects scaled dot size
+         99112211   selects single pixel dot size
+         99112222   selects small dot size
+         99112233   selects medium dot size
+         99112244   selects large dot size
+         99666666   creates a detached window (see below)
+         99990000   turns font debugging off
+         99990011   turns font debugging on
+
+     Also, the nnuummbb argument can be a space- or comma-separated list of numbers.
+
+DETACHING A WINDOW
+
+     You can make a detached copy of an active ssppeecc X11 plot window by pressing
+     the control key and any mouse button while the mouse cursor is over the
+     window (as of ssppeecc release 5.01.02-7).  A new X11 window will be created
+     that contains the contents of the original window.  The contents of the new
+     window will no longer change, and the window will remain on the screen,
+     even after ssppeecc exits.  Use the window manager close button or menu item to
+     delete the window.
+
+SEE ALSO
+
+     _c_o_l_o_r_s _s_e_t_p_l_o_t _s_p_l_o_t
+

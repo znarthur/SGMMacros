@@ -1,0 +1,53 @@
+.TH "u" "macro" "08/01/12" "u.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBu\fP \- create a UNIX subshell
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)u.rst    6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "u" "macro" "08/01/12" "u.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBu [shell_command]\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBu\fP macro is a general escape to a UNIX shell.
+If invoked with arguments, the arguments are executed as a command
+by the Bourne shell, \fB/bin/sh\fP.
+.sp
+Without an argument, an interactive subshell is spawned.
+The program used for the subshell is taken from
+the environment variable \fBSHELL\fP, if set.
+Otherwise, the Bourne shell is used.
+Exit the subshell to return to \fBspec\fP.
+Don\(aqt launch \fBspec\fP again from the subshell.
+.SH "DEFINITION"
+.rs
+.sp
+\fBdef u \(aqunix("$*")\(aq\fP
+.SH "EXAMPLE"
+.rs
+.sp
+\fBu contents 900110\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%cd\fP
+\fI\%pwd\fP
+\fI\%vi\fP
+\fI\%ned\fP
+\fI\%l\fP
+\fI\%ls\fP
+

@@ -1,0 +1,133 @@
+vme                                 hardware                                 vme
+
+NAME
+     vme - VME interface
+
+SUPPORTED CONTROLLER CARDS
+
+     ssppeecc supports the following VME controllers.  Note, SBS (formerly Bit 3) is
+     now GE Fanuc.
+
+         SSBBSS ((BBiitt 33)) MMooddeell 440033 IISSAA - Available on LLiinnuuxx and on HP-700 platforms
+              with E/ISA slots.  Only A16 access supported.  No kernel drivers
+              involved.
+
+         SSBBSS ((BBiitt 33)) MMooddeell 661166//661177//661188//662200 PPCCII wwiitthh SSBBSS DDrriivveerr - Available on
+              LLiinnuuxx with the SBS model 1003 v1.0 driver, on Solaris platforms
+              with the SBS model 945 driver and on HP platforms with the SBS
+              model 934 driver.  If the SBS controller is to be the master on
+              the VME crate, be sure to set the system controller jumpers on the
+              SBS VME module.
+
+         SSBBSS ((BBiitt 33)) MMooddeell 661166//661177//661188 PPCCII wwiitthh nnoo DDrriivveerr - ssppeecc provides
+              built-in user level support on LLiinnuuxx platforms, which may be
+              useful on platforms with kernel versions not supported by the SBS
+              driver.  This built-in support doesn't include support for DMA
+              transfers, though.  If the SBS controller is to be the master on
+              the VME crate, be sure to set the system controller jumpers on the
+              SBS VME module.
+
+         SSBBSS ((BBiitt 33)) MMooddeell 448877--11 EE//IISSAA - Requires SBS (Bit 3) Model 933 support
+              software.  DMA transfers supported.  Note, you must use the HP
+              eeiissaa__ccoonnffiigg utility to change the default board settings to
+              include "Memory Mapping Enabled" and "Privilege Checks Disabled".
+
+         SSBBSS ((BBiitt 33)) MMooddeell 446666--11 SSBBuuss - Requires SBS (Bit 3) Model 944 support
+              software.
+
+         SSBBSS ((BBiitt 33)) MMooddeell 446677--11 SSBBuuss - Same as Model 466-1 above, but DMA
+              transfers supported.
+
+         SSttrruucckk MMooddeell SSIISS11110000//33110000 PPCCII - Available on LLiinnuuxx using either ssppeecc's
+              built-in driverless support or using Struck's kernel driver.  The
+              built-in support doesn't include support for DMA transfers.
+
+         SSttrruucckk MMooddeell SSIISS33115500 UUSSBB - Available on LLiinnuuxx and Mac OS X platforms
+              using ssppeecc's built-in support.
+
+BUILT-IN FUNCTIONS
+
+     The type of data access and/or VME address modifier for the functions can
+     be selected with the optional argument ooppttss as follows (if more than one
+     option is needed, make a comma-separated list in the single string
+     argument):
+
+         ""DD88"" - byte access.
+
+         ""DD1166"" - short-word access.
+
+         ""DD3322"" - long-word access, but only available with vvmmee__ggeett3322(()) and
+              vvmmee__ppuutt3322(()).
+
+         ""AA1166"" - use A16 (amod=0x2D) addressing.
+
+         ""AA2244"" - use A24 (amod=0x3D) addressing, on adapters that support it.
+
+         ""AA3322"" - use A32 (amod=0x0D) addressing, on adapters that support it.
+
+         ""DDPPRRTT"" - use dual-port memory access (amod=0x1D), on adapters that
+              support it.
+
+         ""aammoodd==00xxXXXX"" - specify the hexadecimal value for the address modifier.
+
+     The vvmmee__mmoovvee(()) function recognizes the following additional strings in its
+     fourth argument:
+
+         ""nnoo__ddmmaa"" - Don't use the DMA interface for this transfer, even if it is
+              available.
+
+         ""nnoo__iinncc"" - Rather than increment the VME address for each item
+              transferred, write each item to the same VME address.
+
+     The default mode for the A16 access functions vvmmee__ggeett(()) and vvmmee__ppuutt(()) is
+     D8.  The default mode for the A32 access functions vvmmee__ggeett3322(()) and
+     vvmmee__ppuutt3322(()) is D32.  The defaults for all functions can be overridden by
+     options in the ooppttss string.
+
+     Not all VME adapters supported by ssppeecc support A32 access.
+
+     vvmmee__ggeett((aaddddrr [[,, ooppttss]])) - Returns the data at aaddddrr in the 64K A16 address
+          space.
+
+     vvmmee__ppuutt((aaddddrr,, ddaattaa [[,, ooppttss]])) - Writes ddaattaa to aaddddrr in the 64K A16 address
+          space.
+
+     vvmmee__ggeett3322((aaddddrr [[,, ooppttss]])) - Returns the data at aaddddrr in the A32 address
+          space.
+
+     vvmmee__ppuutt3322((aaddddrr,, ddaattaa [[,, ooppttss]])) - Writes ddaattaa to aaddddrr in the A32 address
+          space.
+
+     vvmmee__mmoovvee((ffrroomm,, ttoo [[,, ccnntt [[,, ooppttss]]]])) - Copies data between a ssppeecc data array
+          and VME address space.  One of the ffrroomm and ttoo arguments must be the
+          name of a ssppeecc data array while the other must be a VME address.  If
+          the optional argument ccnntt is present, it designates how many data
+          items (not bytes) to copy.  If missing or zero, the number of elements
+          in the array is copied.  A32 addressing is used by default.  The
+          default data size is determined by the data size of the array.  Both
+          can be overridden by ooppttss.
+
+MULTIPLE VME CONTROLLERS
+
+     ssppeecc allows up to four VME controllers to be configured by the same
+     instance of ssppeecc.  In the configuration editor, use the ^^FF and ^^BB command
+     on the VME controller line of the IInterfaces screen to configure each
+     controller.  To include a unit number in a VME address for a device, enter
+     the address using the notation uunniitt::aaddddrreessss. An absent uunniitt:: prefix implies
+     VME controller unit zero.
+
+     In the ccoonnffiigg file, the unit number associated with a VME controller is
+     specified with @@vvmmee__00, @@vvmmee__11, etc.
+
+     For the vvmmee__ggeett(()), vvmmee__ggeett3322(()), vvmmee__ppuutt(()), vvmmee__ppuutt3322(()) and vvmmee__mmoovvee(())
+     functions, the VME unit numbers are encoded using the same ""uunniitt::aaddddrreessss""
+     syntax as above. For the function calls, such an address argument must be
+     passed as a string by using quotes to make a constant string, or by passing
+     a string-valued variable.
+
+SEE ALSO
+
+     _w_w_w_._g_e_f_a_n_u_c_._c_o_m
+
+     _w_w_w_._s_t_r_u_c_k_._d_e
+

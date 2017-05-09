@@ -1,0 +1,67 @@
+.TH "changes" "spec 2.10 Release Notes" "08/01/12" "chg2_10.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.10
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_10.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.10 Release Notes" "08/01/12" "chg2_10.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes summarize the modifications made for \fBspec\fP release 2.10,
+as finalized on October 21, 1988.
+.SH "CHANGES"
+.rs
+.sp
+Typing
+\fBscan_on\fP
+continues a scan that was aborted.
+Presently,
+\fBmesh\fP
+scans cannot be restarted.
+Also restarted delta scans
+(\fBlup\fP
+\fBdscan\fP
+and
+\fBd2scan\fP)
+will not return the scanned motors to the center position
+after the restarted portion of the scan completes.
+.sp
+Four\-circle users may now assign cut points for angles
+set by the geometry calculation code.
+The macro
+\fBcuts\fP
+does the assignment.
+Presently, cut points are used with
+\fBth\fP,
+\fBphi\fP,
+\fBchi\fP
+and
+\fBomega\fP.
+The user specifies the lesser cut point in degrees
+(integers only), and the angles will
+be set between that point and that point plus 360 degrees.
+The
+\fBazimuth\fP
+has a pseudo\-cut point.
+If its value is less than zero, the
+calculated azimuth will be between \-180 and 0,
+otherwise the azimuth will be between 0 and +180.
+.sp
+This release supports the old VENIX operating system on PDP 11/73
+computers.
+See the
+\fBpdp\fP
+help file.
+

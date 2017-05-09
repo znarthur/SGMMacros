@@ -1,0 +1,44 @@
+.TH "ca" "macro" "08/01/12" "ca.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+\fBca\fP \- calculate motor settings for a given point in reciprocal space
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)ca.rst   6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1991,1995,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "ca" "macro" "08/01/12" "ca.rst 6.1  08/01/12 CSS"
+.
+.SH "SYNOPSIS"
+.rs
+.sp
+\fBca H K L\fP
+.SH "DESCRIPTION"
+.rs
+.sp
+The \fBca\fP macro prints out the calculated motor settings
+for the reciprocal space position given by the arguments
+\fBH\fP, \fBK\fP and \fBL\fP.
+After printing its information, the values in the
+\fBA[]\fP array and the values of the reciprocal space coordinates
+are restored to the current diffractometer position.
+.sp
+Use the \fBcal\fP macro to leave the calculated values in the
+\fBA[]\fP array and in \fBH\fP, \fBK\fP and \fBL\fP.
+.SH "EXAMPLE"
+.rs
+.sp
+\fBca 1 1 1\fP
+.SH "SEE ALSO"
+.rs
+.sp
+\fI\%cal\fP
+\fI\%mk\fP
+

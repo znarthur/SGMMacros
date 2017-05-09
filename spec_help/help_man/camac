@@ -1,0 +1,190 @@
+.TH "camac" "hardware" "08/01/12" "camac.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+camac \- CAMAC interface
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)camac.rst        6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1995,2005,2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "camac" "hardware" "08/01/12" "camac.rst 6.1  08/01/12 CSS"
+.
+.SH "INTRODUCTION"
+.rs
+.sp
+CAMAC was the first hardware interface supported by \fBspec\fP.
+.sp
+Supported CAMAC crate controllers include:
+.sp
+.RS 4m
+.nf
+DSP CC\-488 (GPIB)
+Kinetic Systems 3988 (GPIB)
+
+DSP 6001 with PC004 (ISA Board)
+Kinetic Systems 2926 with 3922 (ISA Board)
+
+Jorway 73A (SCSI, supported on Linux and HP)
+Kinetic Systems 3929 (SCSI, supported on Linux, HP and Sun)
+
+Kinetic Systems 3929 (SCSI, via KSC\(aqs kernel driver) (obsolete)
+DSP\-6001/DCC\-11/KS\-3912 (via CSS\(aqs kernel driver) (obsolete)
+
+Simulated Camac (for debugging)
+.fi
+.sp
+.RE
+.sp
+Supported CAMAC modules include:
+.sp
+.RS 4m
+.nf
+BiRa 5302 ADC as counters
+DSP 2190 MCS Averager
+DSP E250 12\-Bit D/A as Motor Controller
+DSP E500 Stepper Motor Controller
+DSP QS\-450 4\-Channel Counter
+DSP RTC\-018 Real Time Clock
+DSP TS\-201 Dual Timer/Scaler
+Generalized CAMAC I/O (any F=0/F=16 module)
+Joerger Single Motor Controller
+Kinetic Systems 3112 12\-Bit D/A as Motor Controller
+Kinetic Systems 3116 16\-Bit D/A as Motor Controller
+Kinetic Systems 3195 16\-Bit D/A as Motor Controller
+Kinetic Systems 3388 GPIB Interface
+Kinetic Systems 3512/14 ADC as counters
+Kinetic Systems 3610 6\-Channel 50 MHz Counter
+Kinetic Systems 3640 Counter used as Counter
+Kinetic Systems 3640 Counter used as Timer
+Kinetic Systems 3655 8\-Channel Timing Generator
+LeCroy 2301 interface for qVT MCA
+LeCroy 3512 Spectroscopy ADC
+LeCroy 3521A Multichannel Scaling
+LeCroy 3588 Fast Histogram Memory
+LeCroy 4434 32\-Channel Scaler
+Technoland 8 Channel 48\-bit Counter
+XIA DXP\-4C/4C2X MCA
+.fi
+.sp
+.RE
+.sp
+Support for additional controllers and modules can be added as needed.
+.SH "BUILT\-IN FUNCTIONS"
+.rs
+.RS 0m
+.HP 5m
+."
+\fBca_get(i, a)\fP
+\- 
+Returns the 24\-bit value read (using F = 0) from the
+\fBi\fP\-th (\fBi\fP = 0, 1, ... ) CAMAC I/O device (from the
+\fBconfig\fP file) using subaddress \fBa\fP.
+.HP 5m
+."
+\fBca_put(x, i, a)\fP
+\- 
+Writes the 24\-bit value \fBx\fP (using F = 16) to the
+\fBi\fP\-th (\fBi\fP = 0, 1, ... )
+CAMAC I/O device (from the \fBconfig\fP file) using subaddress
+\fBa\fP. Returns the value written.
+.HP 5m
+."
+\fBca_fna(f, n, a [, v])\fP
+\- 
+Sends the arbitrary FNA command to the module in slot
+\fBn\fP. If the dataway command given by
+\fBf\fP is a write function, the 24\-bit value to be written is contained
+in \fBv\fP. If the dataway command given by
+\fBf\fP is a read command, the function returns the 24\-bit value obtained
+from the module.
+The user should avoid issuing commands that would cause a LAM and
+should certainly avoid issuing commands to slots that are being
+used for motor or counter control by \fBspec\fP\(aqs internal hardware code.
+.HP 5m
+."
+\fBca_cntl(cmd [, arg\fP])
+\- 
+Performs the selected CAMAC crate command according to the parameter
+\fBcmd\fP, as follows:
+.RS 5m
+.sp
+.PD 0.2v
+.RS 0m
+.HP 5m
+."
+\fB"Z"\fP or \fB"init"\fP
+\- 
+performs a crate initialize (reset).
+.HP 5m
+."
+\fB"C"\fP or \fB"clear"\fP
+\- 
+performs a crate clear.
+.HP 5m
+."
+\fB"inhibit"\fP
+\- 
+set crate inhibit if \fBarg\fP is 1 and clears crate inhibit if
+\fBarg\fP is 0.
+.PD
+.RE
+.sp
+During normal operation, you should not need to issue these commands.
+You should probably issue a \fBreconfig\fP
+after sending a crate initialize or clear.
+.RE
+.RE
+.SH "MULTIPLE CRATE CONTROLLERS"
+.rs
+.sp
+As of \fBspec\fP release 5.06.02\-1, up to four CAMAC crate controllers
+can be configured at a time.
+Currently, use of more than one instance of a particular controller
+is supported only for the Jorway 73A, the KS\-3929 and the
+DSP 6001 controller models.  Otherwise, only
+only one instance of a particular type or model of
+a controller can be used at a time.
+.sp
+Also, the only CAMAC modules that currently can be installed in
+other than the first crate (crate 0) are the E250,
+KS\-3655, KS\-3610, KS\-3112, KS\-3116, KS\-3195, QS\-450,
+RTC\-018 and XIA DXP\-4C/4C2X MCA modules.
+.sp
+In addition, the user\-level functions \fBca_get()\fP, \fBca_put()\fP,
+\fBca_fna()\fP and
+\fBca_cntl()\fP currently only work with the first crate.
+.sp
+The multiple crate support will be extended for multiple identical
+controllers, additional modules and to the user\-level functions
+in the future as needed.
+.sp
+To configure additional controllers from the \fBedconf\fP configuration
+editor (invoked by the \fBconfig\fP macro),
+use \fB^F\fP or \fB^B\fP on the CAMAC entry of the
+\fBI\fPnterfaces screen.
+.sp
+To configure modules in the additional crates, type
+\fBC\fP from the CAMAC crate screen to cycle through
+the crates associated with each controller.
+.sp
+For scaler modules installed in other than the first CAMAC crate,
+the crate number must be entered in the same field as the unit number
+on the \fBS\fPcaler screen of the configuration editor using the
+crate/unit notation, as in 1/0 for crate 1, unit 0.
+.sp
+For motor modules installed in other than the first CAMAC crate,
+the crate number is entered as [crate/]unit/channel in the
+unit/[module/]channel field of the motor screen.
+.sp
+If only one crate is configured, the \fBconfig\fP file syntax is the same as before.
+When multiple crates are configured, additional information specifying
+crate number for each module and controller is added to the
+\fBconfig\fP file.
+

@@ -1,0 +1,171 @@
+.TH "mmc100" "hardware" "08/01/12" "mmc100.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+MMC\-100 \- Micos MMC\-100 piezo motion controller
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)mmc100.rst       6.1  08/01/12  CSS
+.
+.\" Copyright (c) 2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "mmc100" "hardware" "08/01/12" "mmc100.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The MMC\-100 connects to the computer via a USB interface but
+appears as a serial device to \fBspec\fP.
+On modern \fBLinux\fP distributions
+the serial\-to\-USB driver will load automatically.
+.sp
+The controller is selected on the
+hardware configuration editor
+\fBD\fPevices
+screen along the lines of:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS      DEVICE  ADDR <>MODE NUM                  <>TYPE
+   YES /dev/mmc100    <>  38400   8  Micos MMC\-100 (Serial)
+.ft P
+.fi
+.RE
+.sp
+The
+\fB/etc/udev/rules.d/10\-spec_usb.rules\fP file put in place by the \fBspec\fP
+\fBInstall\fP script will
+ensure that the special device
+\fB/dev/mmc100\fP is created with read/write permission for all users when
+an MMC\-100 is connected to a
+\fBLinux\fP system via USB.
+.SH "FEEDBACK MODE"
+.rs
+.sp
+The MMC\-100 piezo actuators can be operated in open\-loop or closed\-loop
+modes.
+Controller type
+\fBMMC100\fP on the
+\fBM\fPotor
+screen of the configuration editor selects open\-loop mode, while controller type
+\fBMMC100_E\fP selects closed\-loop mode.
+Alternatively, the non\-standard optional parameter
+\fB"feedback_mode"\fP can be used to select the mode.
+Values of 0 and 1 correspond to open loop.
+Values of 2 and 3 correspond to closed loop.
+The MMC\-100 manual provides details on the various feedback modes.
+Feedback modes 1 and 2 are reportedly quieter than modes 0 and 3.
+However, \fBspec\fP defaults are modes 0 and 3 for controller types MMC100
+and MMC100_E, respectively.
+Note, setting feedback mode 2 or 3 has the
+same effect as selecting MMC100_E.
+Of course, closed loop mode
+will only work when the motor device includes an encoder.
+.sp
+Since positions are sent and received between \fBspec\fP and the MMC\-100
+in naturals units (millimeters),
+it is not necessary to configure the encoder steps parameter.
+In addition, the motor steps parameter is only used to set the resolution
+to which motor positions are rounded by \fBspec\fP.
+If using an encoder that has 5 nanometer precision, the appropriate value
+for the motor steps parameter would be 200000 steps/mm.
+.SH "OPTIONAL PARAMETERS"
+.rs
+.sp
+\fBspec\fP has three types of motor parameters: standard, standard optional
+and non\-standard optional.
+The standard parameters include velocity (steady\-state rate) and
+acceleration (as acceleration time), which are configured on the main
+\fBM\fPotor
+screen of the configuration editor.
+Standard optional parameters are configured on the two additional
+motor parameter screens accessed by typing a lower case \fBm\fP
+from the main motor screen and include parameters such as deceleration
+and PID gain values.
+Finally, the non\-standard optional parameters are parameters that
+are controller specific.
+Both the parameter name and value need to be set using the
+configuration editor.
+Each motor has its own page for configuring the non\-standard optional
+parameters, accessed by typing lower case
+\fBp\fP
+from any of the motor screens.
+.sp
+There are a number of configurable parameters for the MMC\-100.
+Some may be set either in the config file or by using
+\fBmotor_par()\fP. If there is no configuration
+for a particular optional parameter,
+\fBspec\fP will leave the value unchanged in the controller.
+.sp
+For the MMC\-100, the command
+.sp
+.RS 4m
+\fBmca_par(mne, "dump")\fP
+.RE
+.sp
+displays parameter information as follows:
+.RS 3m
+.sp
+.nf
+.ft CB
+    Open/closed\-loop = 3 (0,1,2,3)              "feedback_mode"
+        Encoder type = 0 (0=digital, 1=analog)  "encoder_type"
+    Encoder polarity = 1 (0=normal, 1=reversed) "encoder_polarity"
+      Motor polarity = 0 (0=normal, 1=reversed) "motor_polarity"
+ Negative soft limit = \-18 mm                   "negative_soft_limit"
+ Positive soft limit = 18 mm                    "positive_soft_limit"
+    Jog acceleration = 250 mm/sec**2            "jog_acceleration"
+Maximum acceleration = 500 mm/sec**2            "max_acceleration"
+    Maximum velocity = 2.56 mm/sec              "max_velocity"
+          Resolution = 8000 DAC steps/um        "resolution"
+  Encoder resolution = 0.005 um                 "encoder_resolution"
+
+            Velocity = 2 mm/sec
+        Acceleration = 100 mm/sec**2 (20 msec)
+        Deceleration = 100 mm/sec**2 (20 msec)
+         DC deadband = 2 encoder counts
+      DC settle time = 0.1 sec
+DC proportional gain = 0.5 (KP)
+  DC derivative gain = 0 (KI)
+    DC integral gain = 0 (KD)
+
+            Motor on = 1 (0=off, 1=on)
+  Home configuration = 0 (0=neg, 1=pos)
+   Home position set = 1 (0=not, 1=set)
+Position theoretical = 2.00035 mm
+    Position encoder = 2.00035 mm
+    Encoder Velocity = 0.015 mm/sec
+         Status byte = 8
+.ft P
+.fi
+.RE
+.sp
+The names in quotation marks in the first group
+are the non\-standard optional parameters
+that can be set with
+\fBmotor_par()\fP or in the
+\fBconfig\fP file.
+The second group are parameters that correspond to either standard
+parameters or standard optional parameters.
+The third group are values that are either read\-only or set
+automatically.
+Refer to the MMC\-100 manual for details on what the
+parameters mean.
+.sp
+Note, the values for velocity, acceleration and deceleration will not be
+updated to the
+\fBconfig\fP file values until the motor is moved for the first time.
+.sp
+The additional command \fBmca_par(mne, "initialize")\fP
+will download and execute a program on the associated channel
+to locate the limits and home position.
+After sending the command, one can use \fBspec\fP\(aqs
+\fBwait()\fP
+function to wait until the sequence is complete.
+

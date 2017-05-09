@@ -1,0 +1,115 @@
+mmc100                              hardware                              mmc100
+
+NAME
+     MMC-100 - Micos MMC-100 piezo motion controller
+
+DESCRIPTION
+
+     The MMC-100 connects to the computer via a USB interface but appears as a
+     serial device to ssppeecc.  On modern LLiinnuuxx distributions the serial-to-USB
+     driver will load automatically.
+
+     The controller is selected on the hardware configuration editor DDevices
+     screen along the lines of:
+
+        MMOOTTOORRSS      DDEEVVIICCEE  AADDDDRR <<>>MMOODDEE NNUUMM                  <<>>TTYYPPEE
+           YYEESS //ddeevv//mmmmcc110000    <<>>  3388440000   88  MMiiccooss MMMMCC--110000 ((SSeerriiaall))
+
+     The //eettcc//uuddeevv//rruulleess..dd//1100--ssppeecc__uussbb..rruulleess file put in place by the ssppeecc
+     IInnssttaallll script will ensure that the special device //ddeevv//mmmmcc110000 is created
+     with read/write permission for all users when an MMC-100 is connected to a
+     LLiinnuuxx system via USB.
+
+FEEDBACK MODE
+
+     The MMC-100 piezo actuators can be operated in open-loop or closed-loop
+     modes.  Controller type MMMMCC110000 on the MMotor screen of the configuration
+     editor selects open-loop mode, while controller type MMMMCC110000__EE selects
+     closed-loop mode.  Alternatively, the non-standard optional parameter
+     ""ffeeeeddbbaacckk__mmooddee"" can be used to select the mode.  Values of 0 and 1
+     correspond to open loop.  Values of 2 and 3 correspond to closed loop.  The
+     MMC-100 manual provides details on the various feedback modes.  Feedback
+     modes 1 and 2 are reportedly quieter than modes 0 and 3.  However, ssppeecc
+     defaults are modes 0 and 3 for controller types MMC100 and MMC100_E,
+     respectively.  Note, setting feedback mode 2 or 3 has the same effect as
+     selecting MMC100_E.  Of course, closed loop mode will only work when the
+     motor device includes an encoder.
+
+     Since positions are sent and received between ssppeecc and the MMC-100 in
+     naturals units (millimeters), it is not necessary to configure the encoder
+     steps parameter.  In addition, the motor steps parameter is only used to
+     set the resolution to which motor positions are rounded by ssppeecc.  If using
+     an encoder that has 5 nanometer precision, the appropriate value for the
+     motor steps parameter would be 200000 steps/mm.
+
+OPTIONAL PARAMETERS
+
+     ssppeecc has three types of motor parameters: standard, standard optional and
+     non-standard optional.  The standard parameters include velocity
+     (steady-state rate) and acceleration (as acceleration time), which are
+     configured on the main MMotor screen of the configuration editor.  Standard
+     optional parameters are configured on the two additional motor parameter
+     screens accessed by typing a lower case mm from the main motor screen and
+     include parameters such as deceleration and PID gain values.  Finally, the
+     non-standard optional parameters are parameters that are controller
+     specific.  Both the parameter name and value need to be set using the
+     configuration editor.  Each motor has its own page for configuring the
+     non-standard optional parameters, accessed by typing lower case pp from any
+     of the motor screens.
+
+     There are a number of configurable parameters for the MMC-100.  Some may be
+     set either in the config file or by using mmoottoorr__ppaarr(()). If there is no
+     configuration for a particular optional parameter, ssppeecc will leave the
+     value unchanged in the controller.
+
+     For the MMC-100, the command
+
+         mmccaa__ppaarr((mmnnee,, ""dduummpp""))
+
+     displays parameter information as follows:
+
+            OOppeenn//cclloosseedd--lloooopp == 33 ((00,,11,,22,,33))              ""ffeeeeddbbaacckk__mmooddee""
+                EEnnccooddeerr ttyyppee == 00 ((00==ddiiggiittaall,, 11==aannaalloogg))  ""eennccooddeerr__ttyyppee""
+            EEnnccooddeerr ppoollaarriittyy == 11 ((00==nnoorrmmaall,, 11==rreevveerrsseedd)) ""eennccooddeerr__ppoollaarriittyy""
+              MMoottoorr ppoollaarriittyy == 00 ((00==nnoorrmmaall,, 11==rreevveerrsseedd)) ""mmoottoorr__ppoollaarriittyy""
+         NNeeggaattiivvee ssoofftt lliimmiitt == --1188 mmmm                   ""nneeggaattiivvee__ssoofftt__lliimmiitt""
+         PPoossiittiivvee ssoofftt lliimmiitt == 1188 mmmm                    ""ppoossiittiivvee__ssoofftt__lliimmiitt""
+            JJoogg aacccceelleerraattiioonn == 225500 mmmm//sseecc****22            ""jjoogg__aacccceelleerraattiioonn""
+        MMaaxxiimmuumm aacccceelleerraattiioonn == 550000 mmmm//sseecc****22            ""mmaaxx__aacccceelleerraattiioonn""
+            MMaaxxiimmuumm vveelloocciittyy == 22..5566 mmmm//sseecc              ""mmaaxx__vveelloocciittyy""
+                  RReessoolluuttiioonn == 88000000 DDAACC sstteeppss//uumm        ""rreessoolluuttiioonn""
+          EEnnccooddeerr rreessoolluuttiioonn == 00..000055 uumm                 ""eennccooddeerr__rreessoolluuttiioonn""
+
+                    VVeelloocciittyy == 22 mmmm//sseecc
+                AAcccceelleerraattiioonn == 110000 mmmm//sseecc****22 ((2200 mmsseecc))
+                DDeecceelleerraattiioonn == 110000 mmmm//sseecc****22 ((2200 mmsseecc))
+                 DDCC ddeeaaddbbaanndd == 22 eennccooddeerr ccoouunnttss
+              DDCC sseettttllee ttiimmee == 00..11 sseecc
+        DDCC pprrooppoorrttiioonnaall ggaaiinn == 00..55 ((KKPP))
+          DDCC ddeerriivvaattiivvee ggaaiinn == 00 ((KKII))
+            DDCC iinntteeggrraall ggaaiinn == 00 ((KKDD))
+
+                    MMoottoorr oonn == 11 ((00==ooffff,, 11==oonn))
+          HHoommee ccoonnffiigguurraattiioonn == 00 ((00==nneegg,, 11==ppooss))
+           HHoommee ppoossiittiioonn sseett == 11 ((00==nnoott,, 11==sseett))
+        PPoossiittiioonn tthheeoorreettiiccaall == 22..0000003355 mmmm
+            PPoossiittiioonn eennccooddeerr == 22..0000003355 mmmm
+            EEnnccooddeerr VVeelloocciittyy == 00..001155 mmmm//sseecc
+                 SSttaattuuss bbyyttee == 88
+
+     The names in quotation marks in the first group are the non-standard
+     optional parameters that can be set with mmoottoorr__ppaarr(()) or in the ccoonnffiigg file.
+     The second group are parameters that correspond to either standard
+     parameters or standard optional parameters.  The third group are values
+     that are either read-only or set automatically.  Refer to the MMC-100
+     manual for details on what the parameters mean.
+
+     Note, the values for velocity, acceleration and deceleration will not be
+     updated to the ccoonnffiigg file values until the motor is moved for the first
+     time.
+
+     The additional command mmccaa__ppaarr((mmnnee,, ""iinniittiiaalliizzee"")) will download and execute
+     a program on the associated channel to locate the limits and home position.
+     After sending the command, one can use ssppeecc's wwaaiitt(()) function to wait until
+     the sequence is complete.
+

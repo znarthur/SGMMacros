@@ -1,0 +1,66 @@
+.TH "cmAX" "hardware" "09/25/12" "cmAX.rst 6.1  09/25/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+cmAX \- Compumotor AX motor controller
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)cmAX.rst 6.1  09/25/12  CSS
+.
+.\" Copyright (c) 2012 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "cmAX" "hardware" "09/25/12" "cmAX.rst 6.1  09/25/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+The Compumotor Model AX is supported
+over an RS\-232C interface.
+From the configuration editor, switch to the
+\fBDevice\fP screen to select the following:
+.RS 3m
+.sp
+.nf
+.ft CB
+MOTORS        DEVICE   ADDR  <>MODE  NUM                           <>TYPE
+   YES    /dev/ttyS0     <>    9600    4          Compumotor AX  (Serial)
+.ft P
+.fi
+.RE
+.sp
+The corresponding entry in the \fBconfig\fP file is:
+.sp
+.RS 4m
+.nf
+\fBRS_CMAX  =  device_name  baud_rate  number_of_motors\fP
+.fi
+.sp
+.RE
+.SH "FUNCTIONS"
+.rs
+.sp
+Command pass through is available using the following functions.
+Note, use command pass through with caution to avoid interfering
+with the built\-in programming commands \fBspec\fP sends to the
+controllers.
+.RS 0m
+.HP 5m
+."
+\fBmotor_par(motor, "send", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the motor channel
+associated with \fBmotor\fP.
+.HP 5m
+."
+\fBmotor_par(motor, "read", cmd)\fP
+\- 
+Sends the string \fBcmd\fP to the motor channel
+associated with \fBmotor\fP, as above, and returns
+a string containing the response.
+.RE
+

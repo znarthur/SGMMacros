@@ -1,0 +1,244 @@
+.TH "changes" "spec 2.7 Release Notes" "08/01/12" "chg2_07.rst 6.1  08/01/12 CSS"
+.ds HF R
+.na
+.hy 0
+.SH NAME
+changes \- highlights of modifications for \fBspec\fP release 2.7
+.\" spec reStructuredText documentation
+.
+\fP
+.PP
+.\" @(#)chg2_07.rst      6.1  08/01/12  CSS
+.
+.\" Copyright (c) 1990,1995,2003 Certified Scientific Software
+.
+.\" 
+.
+.\" versioninfo: "changes" "**spec** 2.7 Release Notes" "08/01/12" "chg2_07.rst 6.1  08/01/12 CSS"
+.
+.SH "DESCRIPTION"
+.rs
+.sp
+These notes summarize the modifications made for \fBspec\fP release 2.7,
+as finalized on July 8, 1988.
+.SH "CHANGES"
+.rs
+.sp
+GPIB support for the Tecmar board in the AT is now included.
+The user must have read and write permission for
+\fB/dev/iomem\fP.
+The board must be installed at base address 300.
+If the
+\fBconfig\fP
+file assigns a slot to the Kinetic Systems
+3388 GPIB CAMAC module, the Tecmar
+board will be unavailable.
+.sp
+A presence test is performed when the E500 is first opened and
+when the user types
+\fBsync\fP
+or
+\fBreconfig\fP.
+(\fBreconfig\fP
+is called by the
+\fBconfig\fP
+macro.)
+If
+the presence test fails, all associated motors are marked
+\fBunusable\fP.
+Once marked unusable, the program must be restarted to make them
+usable.
+Trying to move an
+unusable
+motor produces an error
+message.
+.sp
+The E500
+\fB"remaining steps"\fP,
+usually resulting from aborting motion,
+are noted and cleared in the LAM routine.
+Thus
+\fB"clearing remaining steps"\fP
+messages seldom occur when
+initiating a move.
+.sp
+When there is a discrepancy between
+\fBprivileged\fP
+motor settings and
+the controller registers, the registers are now changed, rather than
+the settings.
+.sp
+When there is a discrepancy between
+\fBwritable\fP
+motors and controller
+settings, the user must type either
+\fBy\fP
+or
+\fBn\fP.
+No
+default is allowed.
+(\fBY\fP
+or
+\fB1\fP
+and
+\fBN\fP
+or
+\fBn\fP
+are also acceptable input.)
+.sp
+The
+\fBgetangles\fP
+and
+\fBgetdials\fP
+commands now read and
+return the current contents
+of the controller registers, not the program\(aqs idea of the
+motor positions.
+(However, at present, the program\(aqs idea of the motor position is not
+changed by these two commands\-that still occurs the same way as in
+previous versions.)
+.sp
+\fBSIMULATE\fP
+is no longer a built\-in variable.
+Instead, a new function,
+\fBset_sim()\fP
+is used to turn simulation mode on and off, where
+\fBset_sim(0)\fP
+turns
+the mode off and
+\fBset_sim(1)\fP
+turns the mode on.
+Both wait for moving and
+counting to finish before changing the mode, and both return the previous
+mode.
+\fBset_sim(\-1)\fP
+returns the current value of simulation mode without
+changing it.
+Whenever simulation mode is turned off, the motor
+settings file is reread to restore the motor positions.
+.sp
+Negative arguments to
+\fBsleep()\fP
+are allowed.
+They represent clock ticks, where a clock tick is
+1/60th of a second, e.g.,
+\fBsleep(\-10)\fP
+pauses for approximately a sixth of
+a second.
+.sp
+\fBmove\fP
+has been renamed
+\fBmove_all\fP
+to make it harder for a user
+to start motors moving by accident.
+.sp
+\fBedconf\fP
+has been revised, due to popular demand.
+Changes include the following:
+When invoked with the
+\fB\-s\fP
+option,
+\fBedconf\fP
+is put into simulation mode where nothing
+can be changed and files can\(aqt be written.
+Also, if the user doesn\(aqt have write permission to the
+\fBconfig\fP
+file, no
+configuration parameters can be changed, and only the settings and/or
+limits of the configured
+\fBwritable\fP
+motors can be changed.
+System error messages are now shown giving the reason for failures
+when opening, closing, reading and writing the files.
+Also, the motor settings can now be put outside the limits, although
+a warning message
+will be printed when the user writes out the files.
+The dial setting is now
+maintained when changing the number\-of\-steps parameter.
+Finally, there is always at least one motor.
+.sp
+The tweak macro
+\fBtw\fP
+has been changed to only output to the printer at
+the beginning and end of the tweaking process.
+.sp
+The
+\fBset_dial\fP
+macro no longer changes the limits.
+However the macro
+refuses to set the dial outside of the current limits.
+.sp
+The format of motor positions written to the data file by the scan
+macros has been compressed.
+The motor names are no longer printed.
+The motor positions are printed eight per line with the format
+.sp
+.RS 4m
+\fB#P0 (eight motors)\fP
+.sp
+\fB#P1 (another eight motors)\fP
+.RE
+.sp
+etc.
+.sp
+The
+\fBconfig\fP
+macro invokes
+\fBedconf\fP
+with the
+\fB\-s\fP
+flag if \fBspec\fP is in
+simulation mode.
+.sp
+New macros display motor positions while motors are moving.
+Their names are
+\fBuwm\fP,
+\fBumv\fP,
+\fBumvr\fP,
+\fBuan\fP,
+\fBupl\fP,
+\fBubr\fP
+and
+\fBumk\fP.
+Except for
+the update feature, they are identical to
+\fBwm\fP,
+\fBmv\fP,
+\fBmvr\fP,
+\fBan\fP,
+\fBpl\fP,
+\fBbr\fP
+and
+\fBmk\fP.
+The global variable
+\fBUPDATE\fP
+contains the sleep time between screen
+updates and can be changed by the user.
+.sp
+The Makefile for installing \fBspec\fP has a new variable
+\fBPERMS\fP
+that contains
+the permissions to assign to the
+\fBconfig\fP
+file.
+The default is to make
+the config file writable by everyone.
+(Typing
+\fBmake install_x20\fP
+will install the BNL X20
+\fBspec\fP
+automatically giving the
+\fBconfig\fP
+file restricted access.)
+.sp
+A bug whereby
+CAMAC interrupts that arrived during a
+\fBsleep()\fP
+sometimes caused the
+\fBsleep()\fP
+to not wake up is fixed.
+A bug whereby assigning string values to the motor position array,
+\fBA[]\fP,
+used to
+produce surprising results is fixed.
+

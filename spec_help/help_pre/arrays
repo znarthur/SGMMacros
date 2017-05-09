@@ -1,0 +1,594 @@
+array                               reference                              array
+
+NAME
+     aarrrraayy - declare a data array
+
+Description
+
+     Unlike the "associative" arrays that have always been part of ssppeecc, data
+     arrays (introduced in ssppeecc release 4) are more like those used in math and
+     in programming. While associative arrays are indexed by arbitrary strings
+     or numbers and can store either strings or numbers, data arrays are indexed
+     by consecutive integers (starting from zero, as is the C convention) and
+     hold a specific data type, such as short integer, float, double, etc.
+
+     Data arrays must be specifically declared and dimensioned using the aarrrraayy
+     keyword (unlike associative arrays, which can come into existence when used
+     in an expression).  The arrays can have one or two dimensions.  The
+     mmccaa__ggeett(()) and iimmaaggee__ggeett(()) functions can directly fill the arrays with data
+     from one- or two-dimensional detectors.
+
+     Data arrays can be used in expressions containing the standard arithmetic
+     operators to perform simultaneous operations on each element of the array.
+     In addition, a subarray syntax provides a method for performing
+     assignments, operations and functions on only portions of the array.
+
+     The functions aarrrraayy__dduummpp(()), aarrrraayy__ffiitt(()), aarrrraayy__oopp(()), aarrrraayy__ccooppyy(()),
+     aarrrraayy__pplloott(()), aarrrraayy__ppiippee(()) and aarrrraayy__rreeaadd(()) handle special array
+     operations.  The functions ffmmtt__rreeaadd(()) and ffmmtt__wwrriittee(()) provide a means to
+     transfer array data to and from binary-format data files.  Also, the
+     functions mmccaa__ggeett(()), mmccaa__ppuutt(()), iimmaaggee__ggeett(()) and iimmaaggee__ppuutt(()) accept array
+     arguments.  (See the _d_a_t_a help file for an explanation of data groups.)
+
+     The pprriinntt command will print data arrays in a concise format on the screen,
+     giving a count of repeated columns and rows, rather than printing each
+     array element.
+
+     Array data can be placed in shared memory, making the data accessible to
+     other processes, such as image-display or data-crunching programs.  The
+     shared arrays can both be read and written by the other processes.  The
+     implementation includes a number of special aids for making the processes
+     work smoothly with ssppeecc.
+
+Usage
+
+     Data arrays must be declared with the aarrrraayy key word.  One- and
+     two-dimensional arrays are declared as:
+
+        [[sshhaarreedd]] [[ttyyppee]] aarrrraayy vvaarr[[ccoollss]]
+        [[sshhaarreedd]] [[ttyyppee]] aarrrraayy vvaarr[[rroowwss]][[ccoollss]]
+
+     On platforms that support System V Interprocess Communication (IPC) calls,
+     the shared keyword causes ssppeecc to place the array in shared memory (see
+     below).  The type keyword specifies the storage type of the array and may
+     be one of bbyyttee, uubbyyttee, sshhoorrtt, uusshhoorrtt, lloonngg, uulloonngg, lloonngg6644, uulloonngg6644, ffllooaatt,
+     ddoouubbllee or ssttrriinngg.  An initial uu denotes the "unsigned" version of the data
+     type.  The sshhoorrtt and uusshhoorrtt types are 16-bit (two-byte) integers.  The lloonngg
+     and uulloonngg types are 32-bit (four-byte) integers.  The lloonngg6644 and uulloonngg6644
+     types are 64-bit (eight-byte) integers.  The ffllooaatt type uses four bytes per
+     element.  The ddoouubbllee type uses eight bytes per element.  The default data
+     type is ddoouubbllee.
+
+     The array name vvaarr is an ordinary ssppeecc variable name.  Arrays are global by
+     default, although they may also be declared local within statement blocks.
+
+     Unlike traditional ssppeecc associative arrays, which can store and be indexed
+     by arbitrary strings or numbers, a data array  is indexed by consecutive
+     integers (starting from zero), and can hold only numbers, or in the case of
+     ssttrriinngg arrays, only strings.
+
+     Operations on these arrays can be performed on all elements of the array at
+     once, or on one or more blocks of elements.  Consider the following
+     example:
+
+        aarrrraayy aa[[2200]]
+        aa == 22
+        aa[[33]] == 33
+        aa[[1100::1199]] == 44
+        aa[[22,,44,,66,,1100::1155]] == 55
+
+     The first expression assigns the value 2 to all twenty elements of the
+     array.  The second expressions assigns 3 to one element.  The third assign
+     the value 4 to the tenth through last element.  The final expression
+     assigns the value 5 to the elements listed.
+
+     A negative number as an array index counts elements from the end of the
+     array, with aa[[--11]] referring to the last element of aa.
+
+     As per the usual conventions, the first index is row and the second is
+     column.  Note, however, ssppeecc considers arrays declared with one dimension
+     to be a single row. For example,
+
+        aarrrraayy aa[[2200]]
+
+     is a one-row, twenty-column array. Use
+
+        aarrrraayy aa[[2200]][[11]]
+
+     to declare a 20-row, one-column array.
+
+     Also note well, all operations between two arrays are defined as
+     element-by-element operations, not matrix operations, which are currently
+     unimplemented in ssppeecc.  In the following example:
+
+        aarrrraayy aa[[55]][[55]],, bb[[55]][[55]],, cc[[55]][[55]]
+        cc == aa ** bb
+
+     cc[[ii]][[jj]] is the product aa[[ii]][[jj]] ** bb[[ii]][[jj]] for each ii and jj.
+
+     When two array operands have different dimensions the operations are
+     performed on the elements that have dimensions in common. In the case
+
+        aarrrraayy aa[[55]][[55]],, bb[[55]],, cc[[55]][[55]]
+        cc == aa ** bb
+
+     only the first row of cc will have values assigned, since bb only has one
+     row.  The remaining elements of cc are unchanged by the assignment.
+
+     Portions of the array can be accessed using the subarray syntax, which uses
+     colons and commas, as in the following examples:
+
+        aarrrraayy aa[[1100]][[1100]]
+        aa[[11]]                ## sseeccoonndd rrooww ooff aa
+        aa[[22::44]][[]]            ## rroowwss 22 ttoo 44
+        aa[[]][[22::]]             ## aallll rroowwss,, ccoollss 22 ttoo llaasstt
+        aa[[11,,33,,55,,77,,99]][[33::77]]   ## oodddd rroowwss aanndd ccoollss 33 ttoo 77
+
+     The elements of an array can be accessed in reverse order, as in:
+
+        aa == xx[[--11::00]]
+
+     which will assign to a the reversed elements of xx.  Note, though, that
+     presently, an assignment such as xx == xx[[--11::00]] will not work properly, as
+     ssppeecc will not make a temporary copy of the elements. However, xx == xx[[--11::00]]++00
+     will work.
+
+     The functions ffaabbss(()), iinntt(()), ccooss(()), aaccooss(()), ssiinn(()), aassiinn(()), ttaann(()), aattaann(()),
+     eexxpp(()), eexxpp1100(()), lloogg(()), lloogg1100(()), ppooww(()) and ssqqrrtt(()) can all take arrays as an
+     argument.  The functions perform the operation on each element of the array
+     argument and return the results in an array of the same dimension as the
+     argument array.
+
+     The operations <<, <<==, !!==, ====, >> and >>== can be used with array arguments.
+     The Boolean result (0 or 1) will be assigned to each element of an array
+     returned as the result of the operation, based on the element-by-element
+     comparison of the operands.
+
+     The bit-wise operators ~~, ||, &&, >>>> and <<<< can also be used with array
+     operands.
+
+     Note, ssppeecc generally uses double-precision floating point for storing
+     intermediate values and for mathematical operations.  Double-precision
+     floating point has only 52 bits for the significand (the remaining 12 bits
+     are for sign and exponent).  Thus, for most operations the 64-bit types
+     will only maintain 52 bits of significance.  (The 64-bit integer types were
+     added in ssppeecc release 6.01.)
+
+String Arrays
+
+     Arrays of type ssttrriinngg are identical to bbyyttee arrays in terms of storage
+     requirements and behavior in most operations.  However, when used as
+     described below, the string arrays do behave differently.
+
+     If a row of a string array represents a number and is used in a conditional
+     expression, then the value of the conditional expression will be the
+     number. For example, the strings ""00..0000"" or ""00xx000000"" will evaluate as zero or
+     false in a conditional expression.  In contrast, for number arrays, a
+     conditional evaluates as zero only if every element of the array is zero.
+
+     Functions that take string arguments, such as oonn(()), lleennggtthh(()), uunniixx(()), etc.,
+     will allow a row of a string array to be used as an argument.  Use of a
+     number array is invalid and produces an error.
+
+     The pprriinntt command will print string arrays as ASCII text, while byte arrays
+     display each byte as a number.
+
+     In assignments to a row of a string array, the right hand side is copied to
+     the byte elements of the string array as a string, even if the right hand
+     side is a number.  Any remaining elements of the string array row are set
+     to zero.  Thus, the results differ in the assignments below:
+
+        ssttrriinngg aarrrraayy aarrrr__ssttrriinngg[[2200]]
+        aarrrr__ssttrriinngg == 33..1144115599
+        pprriinntt aarrrr__ssttrriinngg
+        33..1144115599
+
+        bbyyttee aarrrraayy aarrrr__bbyyttee[[2200]]
+        aarrrr__bbyyttee == 33..1144115599
+        pprriinntt aarrrr__bbyyttee
+        {{33 <<2200 rreeppeeaattss>>}}
+
+     In the first example, the string representation of the number is copied to
+     the row of the string array, while in the second, each element of the array
+     is assigned the (truncated) value of the number.
+
+Row-wise and Column-wise Sense
+
+     For the functions aarrrraayy__dduummpp(()), aarrrraayy__ffiitt(()), aarrrraayy__ppiippee(()), aarrrraayy__pplloott(()) and
+     aarrrraayy__rreeaadd(()) it matters whether each row or each column of a
+     two-dimensional array corresponds to a data point.  By default, ssppeecc takes
+     the larger dimension to correspond to point number, and if both dimensions
+     are the same, to use the rows as data points.  The ""rrooww__wwiissee"" and
+     ""ccooll__wwiissee"" arguments to aarrrraayy__oopp(()), described below, can be used to force
+     the sense of an array one way or the other, regardless of the array
+     dimensions.  If an array has row-wise sense, the contents of each row
+     correspond to a data point, and one might then plot the contents of column
+     two of each row versus column one, for example.
+
+Shared Memory Arrays
+
+     When created with the sshhaarreedd keyword, the array data and a header structure
+     are stored in shared memory.  For each shared memory array, ssppeecc creates an
+     immutable global variable named SSHHMMIIDD__vvaarr whose value is the shared memory
+     ID associated with the shared memory segment and where where var is the
+     name of the array.  This ID is used by other programs that wish to access
+     the shared memory.
+
+     ssppeecc can connect to an existing shared memory array created by another
+     process running on the same platform, perhaps created by another instance
+     of ssppeecc. The syntax is
+
+        eexxtteerrnn sshhaarreedd aarrrraayy [[ssppeecc::[[ppiidd::]]]]aarrrr
+
+     where the optional parameter ssppeecc is the name of the ssppeecc version that
+     created the array, the optional parameter ppiidd is the process ID of the
+     version and aarrrr is the name of the array.  The first two arguments can be
+     used in case more than one instance of the shared array exists. Examples
+     include:
+
+        eexxtteerrnn sshhaarreedd aarrrraayy ddaattaa
+        eexxtteerrnn sshhaarreedd aarrrraayy ffoouurrcc::ddaattaa
+        eexxtteerrnn sshhaarreedd aarrrraayy ffoouurrcc::11223344::ddaattaa
+
+     The shared array segments include a header that describes the array.  Two
+     features of the header that are primarily associated with shared arrays
+     that can accessed from ssppeecc user level are tags and frames.  Shared arrays
+     tags can be manipulated with the aarrrraayy__oopp(()) ""ttaagg"" and ""uunnttaagg"" options, as
+     described in the next section.
+
+     Frame-size and latest-frame header elements allow a shared 2D array to be
+     described as a series of 1D or 2D acquisitions (or frames).  The frame size
+     is the number of rows in a single frame.  The latest frame is the most
+     recently updated frame number.  The latest frame value should allow an
+     auxiliary program that maintains a live display to update the display
+     efficiently.  The frame values are also accessed via aarrrraayy__oopp(()), below.
+     Currently, the frame values are unused by ssppeecc in array operations,
+     although specific hardware support may modify frames values.  (Frames were
+     added in ssppeecc release 5.08.06-1.)
+
+     The structure used for the shared memory data is given in the file
+     SSPPEECCDD//iinncclluuddee//ssppeecc__sshhmm..hh.  A C file containing an API for accessing the
+     ssppeecc shared memory arrays is included in the ssppeecc distribution and is named
+     sps.c.
+
+Built-in Functions
+
+     aarrrraayy__oopp((""ccmmdd"",, aa [[,, aarrggss ......]]))  - Performs the following operations on the
+          arguments as follows:
+
+          ""ffiillll"" - Fills the array aa with values. For a two-dimensional array,
+
+                   aarrrraayy__oopp((""ffiillll"",, aa,, uu,, vv))
+
+               produces
+
+                   aa[[ii]][[jj]] == uu ** ii ++  vv ** jj
+
+               With subarrays, ii and jj refer to the subarray index.  Also, ii and
+               jj always increase, even for reversed subarrays, so
+
+                   aarrrraayy__oopp((""ffiillll"",, aa[[--11::00]][[--11::00]],, 11,, 11))
+
+               fills aa in reverse order.
+          ""ccoonnttrraacctt"" - Returns a new array with dimensions contracted by a
+               factor of uu in rows and vv columns. Elements of the new array are
+               formed by averaging every uu elements of each row with every vv
+               elements of each column.  If there are leftover rows or columns,
+               they are averaged also.
+          ""mmiinn"" or ""ggmmiinn"" - Returns the minimum value contained in the array.
+          ""mmaaxx"" or ""ggmmaaxx"" - Returns the maximum value contained in the array.
+          ""ii__aatt__mmiinn"" or ""ii__aatt__ggmmiinn"" - Returns the iinnddeexx number of the minimum
+               value of the array.  For a two-dimensional array dimensioned as
+               DD[[NN]][[MM]], the index number of element DD[[ii]][[jj]] is ((ii ** MM)) ++ jj.
+          ""ii__aatt__mmaaxx"" oorr ""ii__aatt__ggmmaaxx"" - Returns the index number of the maximum
+               value of the array. See above.
+          ""rrooww__aatt__mmiinn"" oorr ""rrmmiinn"" - Returns the row number containing the minimum
+               value of the array.
+          ""rrooww__aatt__mmaaxx"" oorr ""rrmmaaxx"" - Returns the row number containing the maximum
+               value of the array.
+          ""ccooll__aatt__mmiinn"" oorr ""ccmmiinn"" - Returns the column number containing the
+               minimum value of the array.
+          ""ccooll__aatt__mmaaxx"" oorr ""ccmmaaxx"" - Returns the column number containing the
+               maximum value of the array.
+          ""ii__<<==__vvaalluuee"" - Returns the iinnddeexx number of the nearest element of the
+               array with a value at or less than uu.  For a two-dimensional
+               array dimensioned as DD[[NN]][[MM]], the index number of element DD[[ii]][[jj]]
+               is ((ii ** MM)) ++ jj.
+          ""ii__>>==__vvaalluuee"" - Returns the iinnddeexx number of the nearest element of the
+               array with a value at or greater than uu, starting from the last
+               element.  For a two-dimensional array dimensioned as DD[[NN]][[MM]], the
+               index number of element DD[[ii]][[jj]] is ((ii ** MM)) ++ jj.
+          ""ffwwhhmm"" - Requires two array arguments, each representing a single row
+               or single column. Returns the full-width in the first array at
+               half the maximum value of the second array.
+          ""ccffwwhhmm"" - Requires two array arguments, each representing a single row
+               or single column. Returns the center of the full-width in the
+               first array at half the maximum value of the second array.
+          ""uuhhmmxx"" - Requires two array arguments, each representing a single row
+               or single column. Returns the value in the first array
+               corresponding to half the maximum value in the second array and
+               at a higher index.
+          ""llhhmmxx"" - Requires two array arguments, each representing a single row
+               or single column. Returns the value in the first array
+               corresponding to half the maximum value in the second array and
+               at a lower index.
+          ""ccoomm"" - Requires two array arguments, each representing a single row
+               or single column. Returns the center of mass in the first array
+               with respect to the second array.  The value is the sum of the
+               products of each element of the first array and the corresponding
+               element of the second array, divided by the number of points.
+          ""xx__aatt__mmiinn"" - Requires two array arguments, each representing a single
+               row or single column. Returns the element in the first array that
+               has the corresponds to the minimum value in the second array.
+          ""xx__aatt__mmaaxx"" - Requires two array arguments, each representing a single
+               row or single column. Returns the element in the first array that
+               has the corresponds to the maximum value in the second array.
+          ""ssuumm"" or ""ggssuumm"" - Returns the sum of the elements of the array.  If
+               there is a third argument greater than zero, the array is
+               considered as a sequence of frames, with the third argument the
+               number of rows in each frame.  The return value is a new array
+               with that number of rows and the same number of columns as the
+               original array.  Each element of the returned array is the sum of
+               the corresponding elements of each frame.  For example, if the
+               original array is dimensioned as ddaattaa[[NN]][[MM]], the return value for
+
+                   aa == aarrrraayy__oopp((""ssuumm"",, ddaattaa,, RR))
+
+               is a new array of dimension aa[[NN//RR]][[MM]], where each element aa[[ii]][[jj]]
+               is the sum of kk from 00 to RR -- 11 of ddaattaa[[ii ++ kk ** NN // RR]][[jj]].
+          ""ssuummssqq"" - Returns the sum of the squares of the elements of the array.
+               If there is a third argument and it is greater than zero, the
+               interpretation is the same as above for ""ssuumm"", except the
+               elements in the returned array are sums of squares of the
+               elements in the original array.
+          ""ttrraannssppoossee"" - Returns a new array of the same type with the rows and
+               columns switched.
+          ""uuppddaatteedd??""  - Returns nonzero if the data in the array has been
+               accessed for writing since the last check, otherwise returns
+               zero.
+          ""rroowwss"" - Returns the number of rows in the array.
+          ""ccoollss"" - Returns the number of columns in the array.
+          ""rrooww__wwiissee"" - With a nonzero third argument, forces the aarrrraayy__dduummpp(()),
+               aarrrraayy__ffiitt(()), aarrrraayy__ppiippee(()), aarrrraayy__pplloott(()) and aarrrraayy__rreeaadd(())
+               functions to treat the array as row-wise, meaning each row
+               corresponds to a data point.  With only two arguments, returns
+               nonzero if the array is already set to row-wise mode.
+          ""ccooll__wwiissee"" - As above, but sets or indicates the column-wise sense of
+               the array.
+          ""ssoorrtt"" - Returns an ascending sort of the array.
+          ""sswwaapp"" - Swaps the bytes of the named array.  The command can change
+               big-endian short- or long-integer data to little-endian and vice
+               versa.  For most built-in data collection, ssppeecc automatically
+               swaps bytes as appropriate, but this function is available for
+               other cases that may come up.
+          ""ffrraammee__ssiizzee"" - The number of rows in a frame.  The frame size is part
+               of the shared array header and may be useful to auxiliary
+               programs, although the value is maintained for non-shared arrays.
+               Note, setting the frame size to zero will clear the ""ffrraammeess"" tag.
+               Setting the frame size to a non-zero value will set the ""ffrraammeess""
+               tag.
+          ""llaatteesstt__ffrraammee"" - The most recently updated frame.  The latest frame is
+               part of the shared array header and may be useful to auxiliary
+               programs, although the value is maintained for non-shared arrays.
+          ""ttaagg"" - Shared arrays can be tagged with a type that will be available
+               to other processes accessing the array.  Usage is aarrrraayy__oopp((""ttaagg"",,
+               aarrrr,, aarrgg)) where aarrrr is the array and aarrgg is ""mmccaa"", ""iimmaaggee"",
+               ""ffrraammeess"", ""ssccaann"" or ""iinnffoo"".
+          ""uunnttaagg"" - Removes tag information.
+          ""iinnffoo"" - Returns or sets the iinnffoo field of a shared array segment.
+               The field can be contain up to 512 bytes of arbitrary text.  When
+               setting the field, if the string argument is longer than 512
+               bytes, the first 512 bytes will be copied.  The function returns
+               the number of bytes copied, -1 if aa is not a shared array or 0 if
+               aa is a shared array that doesn't support the ""iinnffoo"" field.  The
+               ""iinnffoo"" field is included in SSHHMM__VVEERRSSIIOONN version 6 headers, added
+               in ssppeecc release 6.00.08.
+          ""mmeettaa"" - Returns or sets the mmeettaa area of a shared array segment.
+               With ssppeecc, the field can contain up to 8,192 bytes of arbitrary
+               text.  When setting the field, if the string argument is longer
+               than 8,192 bytes, the first 8,192 bytes will be copied.  The
+               function returns the number of bytes copied, -1 if aa is not a
+               shared array or 0 if aa is a shared array that doesn't support the
+               ""mmeettaa"" field.  The ""mmeettaa"" field is included in SSHHMM__VVEERRSSIIOONN
+               version 6 headers, added in ssppeecc release 6.00.08.
+
+     aarrrraayy__ccooppyy((aa,, bb [[,, cc,, ......]]))  - Fills consecutive bytes in the destination
+          array (or subarray) aa with bytes from the arrays or strings in the
+          subsequent arguments.  The arrays can be of different types, which
+          allows creating a binary data stream of mixed types.  If a source
+          argument is not a data array, the string value of the argument is
+          copied.
+
+          As an example of how aarrrraayy__ccooppyy(()) might be useful, consider a device
+          that sends and receives a binary stream consisting of four floats
+          followed by two integers then seven more floats.  Here is how to
+          prepare a byte array containing the mixed binary data types:
+
+             ffllooaatt aarrrraayy ffllooaatt__dd[[1111]]
+             uulloonngg aarrrraayy lloonngg__dd[[22]]
+             uubbyyttee aarrrraayy uubbyyttee__dd[[5522]]
+
+             ## ...... aassssiiggnn vvaalluueess ttoo ffllooaatt__dd aanndd lloonngg__dd,, tthheenn ......
+
+             aarrrraayy__ccooppyy((uubbyyttee__dd,, ffllooaatt__dd[[00::33]],, lloonngg__dd,, ffllooaatt__dd[[44::]]))
+             ssoocckk__ppuutt((""hhoosstt"",, uubbyyttee__dd))
+
+          The source array is not erased prior to the copy.  The above
+          assignment could also be carried out as follows:
+
+             aarrrraayy__ccooppyy((uubbyyttee__dd[[00::1155,,2244::]],, ffllooaatt__dd))
+             aarrrraayy__ccooppyy((uubbyyttee__dd[[1166::]],, lloonngg__dd))
+
+          Four floats consume sixteen bytes. Two integers consume eight bytes.
+          The subarray notation selects the first sixteen bytes of uubbyyttee__dd for
+          the first four floats, then skips eight bytes for where the integers
+          will go, then copies the remainder of the floats.  Since only as much
+          data will be copied as is contained in the source array and since the
+          source arrays are fixed size, it is not necessary to specify the final
+          byte position in the destinations.
+
+          If the returned data uses the same format, floats and integers can be
+          extracted using similar syntax:
+
+             ssoocckk__ggeett((""hhoosstt"",, uubbyyttee__dd))
+             aarrrraayy__ccooppyy((ffllooaatt__dd,, uubbyyttee__dd[[00::1155]],, uubbyyttee__dd[[2244::]]))
+             aarrrraayy__ccooppyy((lloonngg__dd,, uubbyyttee__dd[[1166::2233]]))
+
+          The function will only copy as many bytes as fit into the preallocated
+          space of the destination array.
+
+          If the source arguments are not data arrays, ssppeecc will take the string
+          value of the argument and copy the ASCII value of each byte to
+          corresponding bytes in the destination.  The terminating null byte is
+          not copied.  If the argument is a number, the string value of the
+          number is what one would see on the display with the pprriinntt command.
+
+          The function returns the updated array aa.  If aa is a subarray, the
+          full array is returned.  A -1 is returned if aa is not a data array.
+
+          Note, this function allows arbitrary bytes to be copied to the
+          elements of float and double arrays, which can result in undefined or
+          not a number (NaN) values for those elements.
+
+          The aarrrraayy__ccooppyy(()) function appeared in ssppeecc release 6.00.07.
+
+     aarrrraayy__ffiitt((ppaarrss,, aa [[,, bb,, ......]]))  - Performs a linear fit of the data in the
+          array aa.  The fitted parameters are returned in the array ppaarrss.  The
+          function returns the cchhii--ssqquuaarreedd value of the fit, if the fit was
+          successful.  A -1 is returned if the covariance matrix is singular.
+          The fit algorithm is along the same lines as the llffiitt(()) routine in
+          NNuummeerriiccaall RReecciippeess (W.H. Press, et al., Cambridge University Press,
+          1986, page 512).
+
+     aarrrraayy__dduummpp(([[ffiillee,, ]] aa [[,, bb,, ......]] [[,, ooppttiioonnss,, ......]]))  - Efficiently writes
+          the data in the array aa and optionally arrays bb, ..., etc.  If the
+          initial optional ffiillee argument is given, the output is just to the
+          named file or device.  Otherwise, output is to all "on" output
+          devices.  The additional ooppttiioonnss arguments are strings that each start
+          with a percent sign as follows:
+
+          An optional format argument can specify a pprriinnttff(())-style format for
+          the values. The default format is ""%%..99gg"", which prints nine digits of
+          precision using fixed point or exponential format, choosing whichever
+          is more appropriate to the value's magnitude.  Recognized alternate
+          format characters are ee or EE (exponential), ff (fixed point), gg or GG
+          (fixed or exponential based on magnitude), dd (decimal integer), uu
+          (unsigned integer), oo (octal integer), xx or XX (hexadecimal integer).
+          (The last two as of release 5.08.01-1, and d, u and o as of release
+          5.08.03-6.)  All formats accept standard options such as precision and
+          field width.  For example, ""%%1155..88ff"" uses fixed-point format with eight
+          digits after the decimal point and a fifteen-character-wide field.
+          For the integer formats, double values will be converted to integers.
+          Also, initial characters can be included in the format string, for
+          example, ""00xx%%0088xx"" is valid.
+
+          The option ""%%DD==cc"", specifies an alternate delimiter character cc to
+          replace the default space character delimiter that is placed between
+          each element in a row of output.  For example, one might use a comma,
+          a colon or the tab character with ""%%DD==,,"", ""%%DD==::"" or ""%%DD==\\tt"",
+          respectively.  Use ""%%DD=="" for no delimiter.
+
+          Also, by default, the output is one data row per line.  Thus, for
+          one-dimensional row-wise arrays, all elements will be printed on one
+          line, while one-dimensional column-wise array will have just one data
+          element per line.  For two-dimensional arrays, each line will contain
+          one row of data.  The number of elements per line can be controlled
+          with the option ""%%##[[CC||WW]]"".  For one-dimensional arrays, the number ##
+          is the number of elements to print per line.  For two-dimensional
+          arrays, ## is the number of rows to print per line.  If an optional WW
+          is added, the number becomes the number of elements to print per line,
+          which can split two-dimensional arrays at different points in the
+          rows.  If an optional CC is added to the option string, a backslash
+          will be added to each line where a row is split.  (The CC--PPLLOOTT ssccaannss..44
+          user function can properly interpret such "continued" lines for
+          one-dimensional MCA-type array data.)
+
+          Finally, the various options can be combined in a single string.  For
+          example,
+
+             aa == aarrrraayy__dduummpp((ddaattaa,, ""%%1155..44ff"",, ""%%DD==::"",, ""%%88WW""))
+
+          and
+
+             aa == aarrrraayy__dduummpp((ddaattaa,, ""%%1155..44ff%%DD==::%%88WW""))
+
+          work the same.
+
+     aarrrraayy__pplloott((aa [[,, bb,, ......]]))  - Plots the data in the array aa.  Depending on
+          whether aa is a row-wise or column-wise array, the first column or
+          first row elements are used for xx.  Subsequent elements (up to a
+          maximum of 64) are plotted along the yy axis.  If preceded by a call of
+          pplloott__ccnnttll((""aaddddppooiinntt"")) and the ranges have not changed, only the last
+          point in the array is drawn.  If preceded by a call of
+          pplloott__ccnnttll((""aaddddlliinnee"")) the current plot will not be erased, and the plot
+          ranges will not be changed.  The plotting area is not automatically
+          erased by a call of aarrrraayy__pplloott(()) - uussee pplloott__ccnnttll((""eerraassee"")) for that.
+          The axis ranges are set using the pplloott__rraannggee(()) function.  See
+          pplloott__ccnnttll(()) for other options that affect drawing the plot.
+
+     aarrrraayy__rreeaadd((ffiillee__nnaammee,, aa [[,, ooppttiioonnss]])) - Reads data from the ASCII file
+          ffiillee__nnaammee, and stuffs the data into the array aa.  For a row-wise
+          array, the values on each line of the file are assigned into
+          successive columns for each row of the array.  If there are more items
+          on a line in the file than columns in the array, or if there are more
+          points in the file than rows in the array, the extra values are
+          ignored.  For a column-wise array, each row of the data file is
+          assigned to successive columns of the array.  Lines beginning with the
+          ## character are ignored.  There is no limit on the length of the input
+          line.  Prior to ssppeecc release 6.03.05, the maximum length was 2,048
+          characters.
+
+          The only currently recognized option is a ""CC==##"", where ## is the
+          starting column number in the file to use when making assignments (as
+          of ssppeecc release 6.03.05).
+
+          Returns -1 if the file can't be opened, otherwise returns the number
+          of points read.
+
+     ffmmtt__rreeaadd((ffiillee,, ffoorrmmaatt,, aarrrraayy [[,, hheeaaddeerr [[,, ffllaaggss]]]])) - Reads data from ffiillee
+          using the indicated ffoorrmmaatt into aarrrraayy, possibly assigning elements to
+          hheeaaddeerr which can be an associative array or a string.  Possible values
+          for ffllaaggss are below.
+
+     ffmmtt__wwrriittee((ffiillee,, ffoorrmmaatt,, aarrrraayy [[,, hheeaaddeerr [[,, ffllaaggss]]]])) - Saves data from aarrrraayy
+          to ffiillee using the indicated ffoorrmmaatt, possibly also writing elements of
+          hheeaaddeerr, which can be an associative array or string.  Possible values
+          for ffllaaggss are below.
+
+          The standard ssppeecc distribution includes support for the following
+          binary formats:
+
+          ""rraaww"" - The array data is read or written as is.
+          ""ppggmm"" - Binary PPoorrttaabbllee PPiixxMMaapp output formatted for gray scale images
+               is read or created.  Only works with 8-bit or 16-bit array
+               elements.
+          ""ttiiffff"" - Creates a TIFF file with ffmmtt__wwrriittee(()).  Contains code for
+               reading TIFF files with ffmmtt__rreeaadd(()), but the ffmmtt__ttiiffff..cc file needs
+               to be recompiled with the code activated and ssppeecc needs to be
+               relinked to include the TIFF library.
+
+          The hheeaaddeerr argument is implementation dependent.  None of the above
+          format types use it.
+
+          The ffllaaggss argument is a string, currently recognizing the following
+          options.  Multiple options are separated by commas or spaces.
+
+               ""aappppeenndd"" - Append data to the file.
+               ""oovveerrwwrriittee"" - Overwrite the file with the data.
+               ""##nnuumm"" - The value of nnuumm is passed to the implementation's wwrriittee
+                    or rreeaadd function.
+
+          The default behavior for the above formats, ""rraaww"", ""ppggmm"" and ""ttiiffff"",
+          is to overwrite the file with the new data.  Note, a place-holder
+          argument is needed for hheeaaddeerr if using ffllaaggss.
+
+          Contact CSS directly for more information on the ffmmtt__rreeaadd(()) and
+          ffmmtt__wwrriittee(()) functions.  Also, examine the C files ffmmtt__**..cc included in
+          the ssppeecc distribution.  Besides the source files that implement the
+          above formats, files named ffmmtt__eessrrff..cc and ffmmtt__iimmmmccaatt..cc implement more
+          complicated formats used at particular sites.  The file ffmmtt__tteesstt..cc
+          contains some simple usage examples.
+
+     ffmmtt__cclloossee((ffiillee,, ffoorrmmaatt)) - Calls the file close routine associated with
+          ffoorrmmaatt for ffiillee.
+

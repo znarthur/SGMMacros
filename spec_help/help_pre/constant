@@ -1,0 +1,26 @@
+constant                             command                            constant
+
+NAME
+     ccoonnssttaanntt - define a constant global symbol
+
+SYNOPSIS
+
+     ccoonnssttaanntt ssyymmbbooll vvaalluuee
+
+DESCRIPTION
+
+     The ccoonnssttaanntt command creates (or modifies the value of an existing) global
+     variable.  The value of a ccoonnssttaanntt global variable cannot be changed by
+     ordinary assignment.  An attempt to so results in an error.
+
+     The purpose of the ccoonnssttaanntt variable type is to prevent accidental or
+     casual modification of important parameters.
+
+EXAMPLE
+
+     ccoonnssttaanntt EEPPOOCCHH ttiimmee(())
+
+SEE ALSO
+
+     _g_l_o_b_a_l _s_y_m_s
+
