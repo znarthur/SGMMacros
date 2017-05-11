@@ -600,9 +600,11 @@ def pump_down '{
 	sleep(10)
 	print "Opening leak valve."
 	leakvalve_open
-	while (epics_get("TCG1611-4-I10-13:pressure:fbk") > 25) {
-		print "Waiting for pump down."
+	pressure = epics_get("TCG1611-4-I10-13:pressure:fbk")
+	while (pressure > 25) {
+		printf("Waiting for pump down. Pressure: %s Torr \n", pressure) 
 		sleep (5)
+		pressure = epics_get("TCG1611-4-I10-13:pressure:fbk")
 	}
 	print "Starting roughing pumps."
 	rp_on
@@ -782,6 +784,9 @@ def status '{
 	check_stripe
 	ladder1
 	ladder2
+	printf("\n")
+	printf("Current User: %s\n", SPEC_USER)
+	printf("Current Sample: %s\n", SAMPLE_DESC)
 	
 }'	
 		
@@ -967,13 +972,19 @@ def ladder2 '{
 
 def user_prescan_head '{
 
-	comments 	### Fills the comments at the start of the scan
+	if(HDF5_ON){
+		UTCdate = sprintf("%s", date(+"%Y-%m-%dT%H_%M_%S%z"))
+        	HDF5_FILE = sprintf("/SpecData/%s/%s.nxs", SPEC_USER, UTCdate)
+		createhdf5
+		closehdf5 
+	}
+	else{
+	   	comments
+	}
 
 	print ("Turning chamber lights off.")
 	lights_off
-	print ("Turning beam on.")
 	beam_on
-
 }'
 
 def comments '{
@@ -1199,6 +1210,7 @@ def user_prect '{
 
 def user_ct '{
 	print("Closing fast shutter.")
+	sendData
 	beam_off
 }'
 
@@ -1350,13 +1362,31 @@ def cleanup1 '{
 def setuser '{
 	global SPEC_USER
 	global SYNC_STRING
-	SPEC_USER = "$1"
-	SYNC_STRING = sprintf("/home/sgm/Scripts/push_sync.sh %s", "$1")
-	print SYNC_STRING
+
+	cd /SpecData/
+	SPEC_USER = "$*"
+	is_dir = unix("[ -d $* ]")
+	if(is_dir != 0){
+	        print SPEC_USER
+		unix("mkdir $* ")
+	}
+	SYNC_STRING = sprintf("nohup /home/sgm/Scripts/push_sync.sh %s </dev/null >/dev/null 2>&1 &", "$1")
+	#print SYNC_STRING
 }'
 
 def push_data '{
+        printf("\n Sending incremental list for user: %s\n", SPEC_USER)
 	unix(SYNC_STRING)
+}'
+
+def autopush_on '{
+	print "Turning auto push on."
+	cdef("user_scan_tail", "push_data; ", "_push.output_")
+}'
+
+def autopush_off '{
+	print "Turning auto push off."
+        cdef("", "", "_push.output_", "delete")
 }'
 
 def bend_v '{
@@ -1421,4 +1451,16 @@ def current_file '{
 
         print HDF5_FILE
 
+}'
+def xps_transfer_position '{
+	mv xps_z 125
+	mv xps_x -5
+	mv xps_y -10
+	mv xps_r 0
+}'
+def xps_measure_position '{
+	mv xps_z 1.9
+	mv xps_y -10
+	mv xps_x -2.5
+	mv xps_r 90
 }'

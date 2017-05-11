@@ -191,12 +191,7 @@ def newhdf5'{
 		is_file = unix("[ -f $* ]")
 		unix("readlink -fn $*", HDF5_FILE)
 		if(is_file != 0) {
-			newfile /dev/null
-			core_shm[0] = sprintf("scan=1")
-			core_shm[1] = sprintf("filename=%s", HDF5_FILE)
-			printf("Creating newhdf5: %s \n", user_input)
 			createhdf5
-			sleep(0.01)
 			is_file = unix("[ -f $* ]")
 			if (is_file != 0){
 				print "ERROR: There was problem creating the file."
@@ -215,12 +210,8 @@ def newhdf5'{
 			prompt = sprintf("Did you want create a new file over-writing the data in file:\n%s", user_input)
 			over_write = yesno(prompt, 0)
 			if(over_write){
-				newfile /dev/null
-				core_shm[0] = sprintf("scan=1")
-				core_shm[1] = sprintf("filename=%s", HDF5_FILE)
 				printf("Old file will be deleted. Creating newhdf5: %s \n", user_input)
 				createhdf5
-				sleep(0.01)
 				is_file = unix("[ -f $* ]")
 				if (is_file != 0){
 					print "ERROR: There was problem creating the file"
@@ -305,7 +296,12 @@ def tailhdf5'{
 
 
 def createhdf5 '{
+        newfile /dev/null
+	core_shm[0] = sprintf("scan=1")
+	core_shm[1] = sprintf("filename=%s", HDF5_FILE)
+	printf("Creating newhdf5: %s \n", HDF5_FILE)
 	dr_stat(0)
+	sleep(0.01)
 }'
 
 def openhdf5 '{
@@ -321,10 +317,11 @@ def upd_entry '{
 }'
 
 def sample '{
-	global SAMPLE_DESC
+global SAMPLE_DESC
+        local UTCdate 
+	global GEN_FILE
 
 	SAMPLE_DESC = "$*"
-
 	string_shm[11] = SAMPLE_DESC
 }'
 
@@ -349,6 +346,8 @@ def check_recorder '{
 def current_sample'{
 	print SAMPLE_DESC
 }'
+
+
 
 def writehdf5_head '{
 	global HDF5_COUNT

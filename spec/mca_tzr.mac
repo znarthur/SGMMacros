@@ -342,7 +342,6 @@ def mcaread '{
 def socketData_on '{
 
 	cdef("user_scan_loop", "sendData", "_socketdata.output_")
-	
 }'
 
 def socketData_off '{
